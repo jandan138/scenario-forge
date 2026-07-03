@@ -4,12 +4,24 @@ from pathlib import Path
 
 import yaml
 
+from scenario_forge.assets.checksum import compute_sha256
+from scenario_forge.assets.lock import generate_asset_lock, write_asset_lock
+from scenario_forge.scene.usd_compiler import compile_usd_scene
+
 
 def scaffold_starter_package(out_dir: str | Path) -> Path:
     root = Path(out_dir)
     root.mkdir(parents=True, exist_ok=True)
 
     _write_text(root / "scene" / "main.usda", "#usda 1.0\n")
+    _write_text(
+        root / "assets" / "objects" / "starter_rigid_object" / "model.usd",
+        '#usda 1.0\n\ndef Xform "starter_rigid_object"\n{\n}\n',
+    )
+    _write_text(
+        root / "assets" / "markers" / "starter_target_marker" / "model.usd",
+        '#usda 1.0\n\ndef Xform "starter_target_marker"\n{\n}\n',
+    )
     _write_yaml(
         root / "manifest.yaml",
         {
@@ -155,18 +167,31 @@ def scaffold_starter_package(out_dir: str | Path) -> Path:
         root / "assets" / "asset_manifest.yaml",
         {
             "schema_version": "asset-manifest/v0.2",
-            "assets": [],
+            "assets": [
+                {
+                    "asset_id": "starter_rigid_object",
+                    "role": "manipulated_object",
+                    "asset_type": "rigid_object",
+                    "canonical_usd": "assets/objects/starter_rigid_object/model.usd",
+                    "license": "Apache-2.0",
+                    "sha256": compute_sha256(
+                        root / "assets" / "objects" / "starter_rigid_object" / "model.usd"
+                    ),
+                },
+                {
+                    "asset_id": "starter_target_marker",
+                    "role": "target_region",
+                    "asset_type": "marker",
+                    "canonical_usd": "assets/markers/starter_target_marker/model.usd",
+                    "license": "Apache-2.0",
+                    "sha256": compute_sha256(
+                        root / "assets" / "markers" / "starter_target_marker" / "model.usd"
+                    ),
+                },
+            ],
         },
     )
-    _write_yaml(
-        root / "locks" / "asset_lock.yaml",
-        {
-            "schema_version": "asset-lock/v0.2",
-            "lock_id": "tabletop_pick_place_starter_asset_lock",
-            "created_by": "scenario-forge",
-            "assets": {},
-        },
-    )
+    write_asset_lock(root, generate_asset_lock(root))
     _write_yaml(
         root / "locks" / "generator_lock.yaml",
         {
@@ -210,6 +235,12 @@ def scaffold_starter_package(out_dir: str | Path) -> Path:
     )
     _write_yaml(root / "provenance" / "source_refs.yaml", {"sources": []})
     _write_text(root / "provenance" / "generation_trace.jsonl", "")
+    compile_usd_scene(
+        package_root=root,
+        instances_path=root / "scene" / "instances.yaml",
+        asset_lock_path=root / "locks" / "asset_lock.yaml",
+        out_path=root / "scene" / "main.usda",
+    )
     return root
 
 

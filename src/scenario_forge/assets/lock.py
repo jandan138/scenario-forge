@@ -83,12 +83,17 @@ def write_asset_lock(root: str | Path, lock: AssetLock) -> Path:
 def load_asset_lock(root: str | Path) -> AssetLock:
     package_root = Path(root)
     path = package_root / "locks" / "asset_lock.yaml"
-    if not path.exists():
+    return load_asset_lock_file(path)
+
+
+def load_asset_lock_file(path: str | Path) -> AssetLock:
+    lock_path = Path(path)
+    if not lock_path.exists():
         raise AssetLockError("Missing asset lock: locks/asset_lock.yaml")
 
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = yaml.safe_load(lock_path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
-        raise AssetLockError(f"Asset lock must be a mapping: {path}")
+        raise AssetLockError(f"Asset lock must be a mapping: {lock_path}")
 
     schema_version = _require_string(data, "schema_version")
     if schema_version != ASSET_LOCK_SCHEMA_VERSION:

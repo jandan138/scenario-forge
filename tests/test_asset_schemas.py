@@ -28,3 +28,14 @@ def test_schema_package_v02_artifact_exists_and_parses() -> None:
     assert schema["properties"]["schema_version"]["const"] == "scenario-package/v0.2"
     assert "entrypoints" in schema["required"]
     assert "assets" in schema["required"]
+
+
+def test_scene_instances_v02_schema_artifact_exists_and_parses() -> None:
+    schema_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scene-instances-v0.2.schema.json"
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+    assert schema["type"] == "object"
+    assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+    assert schema["properties"]["schema_version"]["const"] == "scene-instances/v0.2"
+    assert "instances" in schema["required"]

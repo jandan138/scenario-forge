@@ -55,6 +55,56 @@ def make_asset_package_on_disk(root: Path) -> Path:
     return package_dir
 
 
+def make_scene_compile_package(root: Path) -> Path:
+    package_dir = root / "scene_pkg"
+    model = package_dir / "assets" / "objects" / "sample_bottle_50ml_v1" / "model.usd"
+    model.parent.mkdir(parents=True)
+    model.write_text("#usda 1.0\n", encoding="utf-8")
+    digest = sha256(model.read_bytes()).hexdigest()
+    (package_dir / "locks").mkdir(parents=True)
+    (package_dir / "locks" / "asset_lock.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "asset-lock/v0.2",
+                "lock_id": "scene_pkg_asset_lock",
+                "created_by": "scenario-forge",
+                "assets": {
+                    "sample_bottle_50ml_v1": {
+                        "source_kind": "package_local",
+                        "source_uri": "assets/objects/sample_bottle_50ml_v1/model.usd",
+                        "resolved_path": "assets/objects/sample_bottle_50ml_v1/model.usd",
+                        "content_sha256": f"sha256:{digest}",
+                        "license": "CC-BY-4.0",
+                        "resolver_version": "scenario-forge/test",
+                    }
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    (package_dir / "scene").mkdir()
+    (package_dir / "scene" / "instances.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "scene-instances/v0.2",
+                "instances": [
+                    {
+                        "id": "object_001",
+                        "asset_id": "sample_bottle_50ml_v1",
+                        "role": "manipulated_object",
+                        "pose": {"xyz": [0.45, 0.0, 0.92], "wxyz": [1.0, 0.0, 0.0, 0.0]},
+                        "semantic_tags": ["bottle", "pickable"],
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    return package_dir
+
+
 def add_v01_manifest_with_scene(package_dir: Path) -> None:
     (package_dir / "scene.usda").write_text("#usda 1.0\n", encoding="utf-8")
     (package_dir / "scene_instances.yaml").write_text("instances: []\n", encoding="utf-8")
@@ -161,7 +211,30 @@ def test_cli_scaffold_creates_checkable_starter_package(tmp_path: Path) -> None:
     assert manifest["schema_version"] == "scenario-package/v0.2"
     assert manifest["entrypoints"]["scene_usd"] == "scene/main.usda"
     assert (out_dir / "locks" / "asset_lock.yaml").exists()
+    assert "@../assets/" in (out_dir / "scene" / "main.usda").read_text(encoding="utf-8")
     assert "Package OK" in check.stdout
+
+
+def test_cli_scene_compile_writes_usda_for_locked_instances(tmp_path: Path) -> None:
+    package_dir = make_scene_compile_package(tmp_path)
+
+    result = run_cli(
+        "scene",
+        "compile",
+        "--instances",
+        str(package_dir / "scene" / "instances.yaml"),
+        "--asset-lock",
+        str(package_dir / "locks" / "asset_lock.yaml"),
+        "--out",
+        str(package_dir / "scene" / "main.usda"),
+        cwd=tmp_path,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Scene written:" in result.stdout
+    assert 'def Xform "object_001"' in (package_dir / "scene" / "main.usda").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_cli_check_returns_nonzero_for_invalid_package(tmp_path: Path) -> None:

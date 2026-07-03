@@ -1,7 +1,8 @@
 # USD Scene Compiler Design
 
-Status: Phase 0 product contract draft. This document is normative for the
-v0.2 USD compiler direction, not evidence that a compiler is implemented.
+Status: Phase 3 static compiler implemented. This document is normative for
+the v0.2 USD compiler contract and records the implemented pure-Python USDA
+reference-stage scope.
 
 The USD Scene Compiler turns structured scene instances and resolved assets into
 the standard USD scene entry point for a package: `scene/main.usda`.
@@ -18,16 +19,15 @@ transport format, not the only truth source.
 
 ## Inputs
 
-Required inputs:
+Required compiler inputs:
 
 - `scene/instances.yaml`;
 - `locks/asset_lock.yaml`;
-- `assets/asset_manifest.yaml`;
-- `robot/robot.yaml`;
 - package root and output path.
 
 Optional inputs:
 
+- `robot/robot.yaml`;
 - `scene/layout.yaml`;
 - task predicates for binding checks;
 - metrics for success binding checks;
@@ -63,7 +63,7 @@ instance IDs, not asset IDs.
 
 ## Output
 
-`scene/main.usda` should include:
+The implemented `scene/main.usda` includes:
 
 - root Xform;
 - meters and up-axis metadata;
@@ -71,14 +71,26 @@ instance IDs, not asset IDs.
 - references to locked asset USD files;
 - pose transforms;
 - custom metadata for instance ID, asset ID, role, and semantic tags;
-- robot spawn metadata or prim reference;
+- robot spawn metadata;
 - basic lights;
-- optional cameras;
-- optional physics scene metadata.
+- a basic camera.
 
-The first compiler implementation may write a conservative USDA reference stage.
-It must not depend on Isaac, Omniverse, CUDA, Habitat, ManiSkill, OmniGibson, or
-other simulator SDK imports in pure package layers.
+The compiler writes a conservative USDA reference stage. It does not depend on
+Isaac, Omniverse, CUDA, Habitat, ManiSkill, OmniGibson, or other simulator SDK
+imports in pure package layers.
+
+## Command
+
+```bash
+scenario-forge scene compile \
+  --instances ./pkg/scene/instances.yaml \
+  --asset-lock ./pkg/locks/asset_lock.yaml \
+  --out ./pkg/scene/main.usda
+```
+
+The command infers the package root from `locks/asset_lock.yaml`, writes the
+USDA stage, then runs static USD checks. If `task/predicates.yaml` exists, the
+static check also verifies predicate references against scene instance IDs.
 
 ## Validation
 
@@ -89,14 +101,13 @@ The compiler must report structured blockers for:
 - USD reference outside package root without a lock entry;
 - duplicate instance ID;
 - predicate reference to missing instance;
-- pickable object without collision metadata;
-- manipulated object without physics profile;
-- robot spawn missing or outside declared workspace;
-- layout constraints that cannot be satisfied by the generated instance poses.
 
 Static USD validation should confirm that `scene/main.usda` exists and that all
 declared asset references are resolver-managed. Runtime load, reset, and physics
 smoke tests belong to adapter or downstream runtime checks.
+
+Deferred semantic validation includes collision metadata requirements, physics
+profile requirements, robot workspace checks, and layout constraint satisfaction.
 
 ## Boundaries
 
@@ -112,19 +123,19 @@ ConvertAsset remains responsible for USD/MDL/mesh/GLB conversion and normalized
 asset packages. Simulator-specific scene exports remain under
 `adapters/<simulator>/`.
 
-## Phase 0 Decisions
+## Implemented Scope
 
 - `scene/main.usda` is the v0.2 scene entry point.
 - `scene/instances.yaml` is the portable scene instance source.
 - USD references must be generated from asset resolver results.
 - Task predicates bind to scene instance IDs.
 - USD existence is not proof of runtime executability.
+- `scenario-forge package scaffold` now writes lockable placeholder USD assets
+  and a compiled starter `scene/main.usda`.
 
 ## Future Work
 
-- `scene/instances.yaml` JSON Schema.
-- Static USDA writer for reference stages.
-- USD reference validation without simulator SDK imports.
-- Predicate-to-instance binding checks.
 - Optional parser checks isolated from pure package layers.
 - Runtime smoke validation through adapters or downstream runtimes.
+- richer physics/collision/profile validation;
+- layout constraint solving before compilation.

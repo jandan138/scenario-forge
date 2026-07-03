@@ -2290,6 +2290,15 @@ query:
 
 ## 27. Phase 3：USD Scene Compiler
 
+Status: implemented for static USDA reference-stage scope. Phase 3 now provides
+`scene/instances.yaml` loading, asset-lock-backed `asset_id` resolution, pure
+Python USDA stage writing, instance customData metadata, robot spawn metadata,
+basic light/camera prims, static locked-reference checks, predicate-to-instance
+binding checks, a `scene-instances/v0.2` JSON Schema artifact, and
+`scenario-forge scene compile`. Runtime USD loading, physics smoke checks,
+layout solving, and richer semantic physics validation remain later adapter or
+layout phases.
+
 ### 27.1 目标
 
 从 scene instances 和 asset resolver 编译出 `scene/main.usda`。
@@ -2301,7 +2310,7 @@ src/scenario_forge/scene/usd_compiler.py
 src/scenario_forge/scene/instance_binding.py
 src/scenario_forge/scene/usd_paths.py
 src/scenario_forge/validation/usd_checks.py
-schemas/scene-instances/v0.2.json
+src/scenario_forge/schemas/jsonschema/scene-instances-v0.2.schema.json
 ```
 
 ### 27.3 功能

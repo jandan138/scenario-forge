@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/scene-instances-v0.2.schema.json",
+  "title": "Scenario Forge Scene Instances v0.2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "instances"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "scene-instances/v0.2"
+    },
+    "coordinate_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "units": {
+          "type": "string",
+          "enum": ["meters"]
+        },
+        "up_axis": {
+          "type": "string",
+          "enum": ["Z", "Y"]
+        }
+      }
+    },
+    "instances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "asset_id",
+          "pose"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asset_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pose": {
+            "type": "object",
+            "required": [
+              "xyz",
+              "wxyz"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "xyz": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "wxyz": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "semantic_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "initial_state": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
