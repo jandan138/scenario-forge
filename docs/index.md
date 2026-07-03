@@ -16,6 +16,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Asset Lock Design](design/asset-lock.md)
 - [USD Scene Compiler Design](design/usd-scene-compiler.md)
 - [EBench Adapter Design](design/ebench-adapter.md)
+- [Workflow, Layout, Real2Sim, Suite Factory Design](design/workflow-layout-suite-factory.md)
 
 ## Operations
 

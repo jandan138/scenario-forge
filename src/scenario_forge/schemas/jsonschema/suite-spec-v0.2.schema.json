@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/suite-spec-v0.2.schema.json",
+  "title": "Scenario Forge Suite Spec",
+  "type": "object",
+  "required": ["schema_version", "suite_id", "domain", "target", "num_tasks", "task_families", "difficulties", "splits"],
+  "properties": {
+    "schema_version": { "const": "suite-spec/v0.2" },
+    "suite_id": { "type": "string" },
+    "domain": { "type": "string" },
+    "target": { "type": "string" },
+    "num_tasks": { "type": "integer", "minimum": 1 },
+    "task_families": { "type": "object" },
+    "difficulties": { "type": "object" },
+    "splits": { "type": "object" }
+  }
+}

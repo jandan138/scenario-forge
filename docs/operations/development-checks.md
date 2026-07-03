@@ -16,8 +16,8 @@ The default check runs:
 
 - unit and contract tests;
 - Ruff linting;
-- v0.2 starter package scaffold, task compile, scene compile, EBench export,
-  and package check smoke;
+- v0.2 starter package scaffold, workflow compose, layout plan, task compile,
+  scene compile, EBench export, package check, suite generate, and suite quality smoke;
 - `git diff --check`.
 
 Phase 1 asset lock smoke commands:
@@ -48,6 +48,36 @@ Phase 5 EBench adapter smoke commands:
 ```bash
 scenario-forge export ebench --package ./pkg
 scenario-forge export ebench --suite ./suite
+```
+
+Phase 6 workflow generator smoke command:
+
+```bash
+scenario-forge workflow compose \
+  --package ./pkg \
+  --family pick_place \
+  --binding object=object_001 \
+  --binding target_zone=target_zone
+```
+
+Phase 7 layout generator smoke command:
+
+```bash
+scenario-forge layout plan --package ./pkg --difficulty easy
+```
+
+Phase 8 real2sim importer smoke commands:
+
+```bash
+scenario-forge real2sim import --result ./real2sim_result.yaml --out ./pkg
+scenario-forge real2sim cousins --package ./pkg --plan ./cousin_plan.yaml --out ./suite
+```
+
+Phase 9/10 suite factory smoke commands:
+
+```bash
+scenario-forge suite generate --spec examples/suite_spec_smoke.yaml --out ./suite
+scenario-forge suite quality --suite ./suite
 ```
 
 Heavy simulator checks are not part of the bootstrap lane. Future simulator checks should be

@@ -1,0 +1,46 @@
+schema_version: atomic-skills/v0.1
+domain: scientific_workbench
+robot_profiles:
+  franka_panda_tabletop_v1:
+    capabilities:
+      - reach
+      - grasp
+      - release
+      - place
+      - liquid_handling
+      - button_press
+      - container_manipulation
+      - settle
+  simple_gripper_tabletop_v1:
+    capabilities:
+      - reach
+      - grasp
+      - release
+      - place
+skills:
+  move_to_object:
+    required_capabilities: [reach]
+  grasp:
+    required_capabilities: [grasp]
+  release:
+    required_capabilities: [release]
+  move_to_zone:
+    required_capabilities: [reach]
+  place_on_surface:
+    required_capabilities: [place, release]
+  open_container:
+    required_capabilities: [container_manipulation]
+  close_container:
+    required_capabilities: [container_manipulation]
+  press_button:
+    required_capabilities: [button_press]
+  aspirate:
+    required_capabilities: [liquid_handling]
+  dispense:
+    required_capabilities: [liquid_handling]
+  insert_tip:
+    required_capabilities: [liquid_handling]
+  dispose_tip:
+    required_capabilities: [liquid_handling]
+  wait_for_settle:
+    required_capabilities: [settle]

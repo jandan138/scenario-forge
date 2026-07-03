@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/workflow-v0.1.schema.json",
+  "title": "Scenario Forge Workflow",
+  "type": "object",
+  "required": ["schema_version", "template", "skill_sequence"],
+  "properties": {
+    "schema_version": { "const": "workflow/v0.1" },
+    "template": { "type": "string" },
+    "skill_sequence": { "type": "array", "items": { "type": "string" } },
+    "required_capabilities": { "type": "array", "items": { "type": "string" } }
+  }
+}

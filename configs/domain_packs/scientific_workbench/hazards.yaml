@@ -1,0 +1,4 @@
+schema_version: hazards/v0.1
+minimum_spacing_m:
+  default: 0.05
+  liquid_container: 0.08

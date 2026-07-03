@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/suite-quality-evidence-v0.1.schema.json",
+  "title": "Scenario Forge Suite Quality Evidence",
+  "type": "object",
+  "required": ["schema_version", "suite_id", "overall_status", "coverage", "difficulty", "leakage", "assets", "quality_findings"],
+  "properties": {
+    "schema_version": { "const": "suite-quality-evidence/v0.1" },
+    "suite_id": { "type": "string" },
+    "overall_status": { "enum": ["passed", "warning", "failed"] },
+    "coverage": { "type": "object" },
+    "difficulty": { "type": "object" },
+    "leakage": { "type": "object" },
+    "assets": { "type": "object" },
+    "quality_findings": { "type": "array", "items": { "type": "object" } }
+  }
+}

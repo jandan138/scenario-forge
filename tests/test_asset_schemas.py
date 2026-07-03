@@ -68,3 +68,23 @@ def test_ebench_export_v01_schema_artifact_exists_and_parses() -> None:
     assert schema["properties"]["schema_version"]["const"] == "ebench-scenario-export/v0.1"
     assert "entrypoints" in schema["required"]
     assert "runtime_hints" in schema["required"]
+
+
+def test_phase6_to_phase10_schema_artifacts_exist_and_parse() -> None:
+    expected = {
+        "workflow-v0.1.schema.json": "workflow/v0.1",
+        "layout-checks-v0.2.schema.json": "layout-checks/v0.2",
+        "real2sim-result-v0.1.schema.json": "real2sim-result/v0.1",
+        "cousin-plan-v0.1.schema.json": "cousin-plan/v0.1",
+        "suite-spec-v0.2.schema.json": "suite-spec/v0.2",
+        "scenario-suite-v0.2.schema.json": "scenario-suite/v0.2",
+        "suite-quality-evidence-v0.1.schema.json": "suite-quality-evidence/v0.1",
+    }
+    for filename, schema_version in expected.items():
+        schema_path = REPO_ROOT / "src" / "scenario_forge" / "schemas" / "jsonschema" / filename
+
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+        assert schema["type"] == "object"
+        assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+        assert schema["properties"]["schema_version"]["const"] == schema_version

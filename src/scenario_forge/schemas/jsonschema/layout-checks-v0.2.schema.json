@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/layout-checks-v0.2.schema.json",
+  "title": "Scenario Forge Layout Checks",
+  "type": "object",
+  "required": ["schema_version", "status", "checks"],
+  "properties": {
+    "schema_version": { "const": "layout-checks/v0.2" },
+    "status": { "enum": ["passed", "failed"] },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status"],
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "enum": ["passed", "failed"] },
+          "reason": { "type": "string" }
+        }
+      }
+    }
+  }
+}

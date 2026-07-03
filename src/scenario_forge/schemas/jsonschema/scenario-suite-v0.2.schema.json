@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/scenario-suite-v0.2.schema.json",
+  "title": "Scenario Forge Suite Manifest",
+  "type": "object",
+  "required": ["schema_version", "suite_id", "packages"],
+  "properties": {
+    "schema_version": { "const": "scenario-suite/v0.2" },
+    "suite_id": { "type": "string" },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["package_id", "path", "split", "difficulty", "task_family"],
+        "properties": {
+          "package_id": { "type": "string" },
+          "path": { "type": "string" },
+          "split": { "type": "string" },
+          "difficulty": { "type": "string" },
+          "task_family": { "type": "string" }
+        }
+      }
+    }
+  }
+}

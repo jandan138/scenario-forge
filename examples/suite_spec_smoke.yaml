@@ -1,0 +1,23 @@
+schema_version: suite-spec/v0.2
+suite_id: smoke_workbench_suite
+domain: scientific_workbench
+target: ebench
+package_mode: fat
+robot_profiles:
+  - franka_panda_tabletop_v1
+num_tasks: 2
+task_families:
+  pick_place: 1
+  pipette_transfer_light: 1
+difficulties:
+  easy: 1
+  hard: 1
+splits:
+  dev: 1
+  test: 1
+variation_axes:
+  - layout
+validation:
+  minimum_package_level: adapter_static_validated
+  require_asset_lock: true
+  require_suite_coverage_report: true

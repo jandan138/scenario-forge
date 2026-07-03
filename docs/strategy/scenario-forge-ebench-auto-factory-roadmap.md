@@ -2454,6 +2454,10 @@ scenario-forge export ebench --suite ./suite
 
 ## 30. Phase 6：RoboGenesis-style Workflow Generator
 
+Status: implemented for deterministic domain-pack workflow composition scope. Phase 6 now loads
+scientific workbench atomic skills and workflow templates, writes task graphs, predicates,
+safety rules, metrics, required assets, and rejects robot profiles missing required capabilities.
+
 ### 30.1 目标
 
 把实验 workflow 生成任务图，不再只做单步 pick-place scaffold。
@@ -2510,6 +2514,11 @@ open_place_close
 ---
 
 ## 31. Phase 7：LabBuilder-style Layout Generator
+
+Status: implemented for deterministic baseline layout scope. Phase 7 now maps required assets
+and workflow bindings into `scene/layout.yaml`, `scene/instances.yaml`, layout checks,
+package-local placeholder assets where needed, and refreshed asset locks. This is the baseline
+for future LabBuilder-style adapter comparison, not a vendored LabBuilder pipeline.
 
 ### 31.1 目标
 
@@ -2580,6 +2589,11 @@ difficulty_profiles:
 ---
 
 ## 32. Phase 8：SimFoundry-style Real2Sim / Cousin Ingestion
+
+Status: implemented for importer-first static package scope. Phase 8 now imports
+`real2sim-result/v0.1` YAML into v0.2 packages, materializes reconstructed USD assets into
+asset manifests/locks, records provenance/evidence, compiles USD, and generates digital cousin
+packages while preserving task predicates. It does not import or run SimFoundry code.
 
 ### 32.1 目标
 
@@ -2659,6 +2673,11 @@ constraints:
 
 ## 33. Phase 9：Suite Generator / Benchmark Factory
 
+Status: implemented for static suite factory scope. Phase 9 now reads `suite-spec/v0.2`,
+generates multiple packages through the workflow/layout/USD/EBench export chain, assigns
+task-family, difficulty, and split distributions, and writes suite manifests, coverage,
+validation, suite asset-lock summaries, and EBench suite indexes.
+
 ### 33.1 目标
 
 从单任务生成进入 benchmark suite 自动生成。
@@ -2734,6 +2753,11 @@ validation:
 ---
 
 ## 34. Phase 10：Suite Quality Evidence
+
+Status: implemented for construction-quality evidence scope. Phase 10 now writes
+`suite_quality_evidence.yaml` with family/split/difficulty distributions, duplicate scene and
+instruction rates, split leakage findings, and asset license/checksum completeness. It does not
+report model performance or leaderboard metrics.
 
 ### 34.1 目标
 

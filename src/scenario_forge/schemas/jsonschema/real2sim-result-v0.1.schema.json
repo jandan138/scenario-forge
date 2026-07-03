@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/real2sim-result-v0.1.schema.json",
+  "title": "Scenario Forge Real2Sim Result",
+  "type": "object",
+  "required": ["schema_version", "result_id", "source", "package", "assets", "instances"],
+  "properties": {
+    "schema_version": { "const": "real2sim-result/v0.1" },
+    "result_id": { "type": "string" },
+    "source": { "type": "object" },
+    "package": { "type": "object" },
+    "assets": { "type": "array", "items": { "type": "object" } },
+    "instances": { "type": "array", "items": { "type": "object" } }
+  }
+}

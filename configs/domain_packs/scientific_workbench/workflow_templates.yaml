@@ -1,0 +1,226 @@
+schema_version: workflow-templates/v0.1
+domain: scientific_workbench
+templates:
+  pick_place:
+    instruction: Move the object onto the target zone.
+    required_assets:
+      - role: object
+        asset_type: rigid_object
+        affordances: [pickable]
+      - role: target_zone
+        asset_type: marker
+        affordances: [target_region]
+    nodes:
+      - id: move_to_object
+        skill: move_to_object
+        target: $object
+      - id: grasp_object
+        skill: grasp
+        target: $object
+      - id: move_to_target
+        skill: move_to_zone
+        target: $target_zone
+      - id: place_object
+        skill: place_on_surface
+        object: $object
+        zone: $target_zone
+    edges:
+      - from: move_to_object
+        to: grasp_object
+      - from: grasp_object
+        to: move_to_target
+      - from: move_to_target
+        to: place_object
+    success_predicates:
+      - type: object_in_zone
+        object: $object
+        zone: $target_zone
+    safety_rules:
+      - type: no_drop
+        object: $object
+  container_sorting:
+    instruction: Sort the source container into the target zone.
+    required_assets:
+      - role: source_container
+        asset_type: container
+        affordances: [graspable]
+      - role: target_zone
+        asset_type: marker
+        affordances: [target_region]
+    nodes:
+      - id: move_to_container
+        skill: move_to_object
+        target: $source_container
+      - id: grasp_container
+        skill: grasp
+        target: $source_container
+      - id: move_to_target
+        skill: move_to_zone
+        target: $target_zone
+      - id: place_container
+        skill: place_on_surface
+        object: $source_container
+        zone: $target_zone
+    edges:
+      - from: move_to_container
+        to: grasp_container
+      - from: grasp_container
+        to: move_to_target
+      - from: move_to_target
+        to: place_container
+    success_predicates:
+      - type: object_in_zone
+        object: $source_container
+        zone: $target_zone
+    safety_rules:
+      - type: keep_containers_upright
+        object: $source_container
+  sample_staging:
+    instruction: Stage the sample container in the preparation zone.
+    required_assets:
+      - role: sample_container
+        asset_type: sample_tube
+        affordances: [graspable, container]
+      - role: prep_zone
+        asset_type: marker
+        affordances: [target_region]
+    nodes:
+      - id: move_to_sample
+        skill: move_to_object
+        target: $sample_container
+      - id: grasp_sample
+        skill: grasp
+        target: $sample_container
+      - id: move_to_prep_zone
+        skill: move_to_zone
+        target: $prep_zone
+      - id: place_sample
+        skill: place_on_surface
+        object: $sample_container
+        zone: $prep_zone
+    edges:
+      - from: move_to_sample
+        to: grasp_sample
+      - from: grasp_sample
+        to: move_to_prep_zone
+      - from: move_to_prep_zone
+        to: place_sample
+    success_predicates:
+      - type: object_in_zone
+        object: $sample_container
+        zone: $prep_zone
+    safety_rules:
+      - type: keep_containers_upright
+        object: $sample_container
+  pipette_transfer_light:
+    instruction: Transfer liquid from the source container to the target container with a pipette.
+    required_assets:
+      - role: pipette
+        asset_type: pipette
+        affordances: [graspable, liquid_transfer]
+      - role: source_container
+        asset_type: sample_tube
+        affordances: [container]
+      - role: target_container
+        asset_type: vial
+        affordances: [container]
+    nodes:
+      - id: move_to_pipette
+        skill: move_to_object
+        target: $pipette
+      - id: grasp_pipette
+        skill: grasp
+        target: $pipette
+      - id: aspirate_source
+        skill: aspirate
+        tool: $pipette
+        source: $source_container
+        amount_ml: 1.0
+      - id: dispense_target
+        skill: dispense
+        tool: $pipette
+        target: $target_container
+        amount_ml: 1.0
+    edges:
+      - from: move_to_pipette
+        to: grasp_pipette
+      - from: grasp_pipette
+        to: aspirate_source
+      - from: aspirate_source
+        to: dispense_target
+    success_predicates:
+      - type: liquid_transferred
+        source: $source_container
+        target: $target_container
+        amount_ml_min: 0.9
+    safety_rules:
+      - type: no_spill
+      - type: keep_containers_upright
+        object: $source_container
+      - type: keep_containers_upright
+        object: $target_container
+  button_press_instrument:
+    instruction: Press the instrument button.
+    required_assets:
+      - role: instrument_button
+        asset_type: button
+        affordances: [pressable]
+    nodes:
+      - id: move_to_button
+        skill: move_to_object
+        target: $instrument_button
+      - id: press_button
+        skill: press_button
+        target: $instrument_button
+    edges:
+      - from: move_to_button
+        to: press_button
+    success_predicates:
+      - type: button_pressed
+        target: $instrument_button
+    safety_rules:
+      - type: press_force_limit
+        target: $instrument_button
+  open_place_close:
+    instruction: Open the container, place the object inside, and close it.
+    required_assets:
+      - role: object
+        asset_type: rigid_object
+        affordances: [pickable]
+      - role: container
+        asset_type: container
+        affordances: [openable]
+    nodes:
+      - id: open_container
+        skill: open_container
+        target: $container
+      - id: move_to_object
+        skill: move_to_object
+        target: $object
+      - id: grasp_object
+        skill: grasp
+        target: $object
+      - id: place_inside
+        skill: place_on_surface
+        object: $object
+        zone: $container
+      - id: close_container
+        skill: close_container
+        target: $container
+    edges:
+      - from: open_container
+        to: move_to_object
+      - from: move_to_object
+        to: grasp_object
+      - from: grasp_object
+        to: place_inside
+      - from: place_inside
+        to: close_container
+    success_predicates:
+      - type: object_in_container
+        object: $object
+        container: $container
+    safety_rules:
+      - type: no_collision_with_container
+        object: $object
+        container: $container

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/cousin-plan-v0.1.schema.json",
+  "title": "Scenario Forge Cousin Plan",
+  "type": "object",
+  "required": ["schema_version", "base_package", "cousins", "variation_axes"],
+  "properties": {
+    "schema_version": { "const": "cousin-plan/v0.1" },
+    "base_package": { "type": "string" },
+    "cousins": { "type": "object" },
+    "variation_axes": { "type": "array", "items": { "type": "object" } },
+    "constraints": { "type": "array", "items": { "type": "object" } }
+  }
+}

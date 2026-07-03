@@ -66,12 +66,19 @@ Design documents:
 - [Asset Lock Design](docs/design/asset-lock.md)
 - [USD Scene Compiler Design](docs/design/usd-scene-compiler.md)
 - [EBench Adapter Design](docs/design/ebench-adapter.md)
+- [Workflow, Layout, Real2Sim, Suite Factory Design](docs/design/workflow-layout-suite-factory.md)
 
 ## Quick Start
 
 ```bash
 python -m pip install -e ".[dev]"
 scenario-forge package scaffold --out /tmp/scenario-forge-starter
+scenario-forge workflow compose \
+  --package /tmp/scenario-forge-starter \
+  --family pick_place \
+  --binding object=object_001 \
+  --binding target_zone=target_zone
+scenario-forge layout plan --package /tmp/scenario-forge-starter --difficulty easy
 scenario-forge scene compile \
   --instances /tmp/scenario-forge-starter/scene/instances.yaml \
   --asset-lock /tmp/scenario-forge-starter/locks/asset_lock.yaml \
@@ -79,6 +86,16 @@ scenario-forge scene compile \
 scenario-forge task compile --package /tmp/scenario-forge-starter --family pick_place
 scenario-forge export ebench --package /tmp/scenario-forge-starter
 scenario-forge package check /tmp/scenario-forge-starter
+```
+
+Suite smoke:
+
+```bash
+scenario-forge suite generate \
+  --spec examples/suite_spec_smoke.yaml \
+  --out /tmp/scenario-forge-suite
+scenario-forge suite quality --suite /tmp/scenario-forge-suite
+scenario-forge export ebench --suite /tmp/scenario-forge-suite
 ```
 
 Developer checks:
@@ -121,9 +138,8 @@ tests/           unit and contract tests
 ## Current Status
 
 This repo is a narrow, testable foundation. It supports v0.1 package loading, v0.2
-package scaffold/load/check behavior, v0.2 package JSON Schema artifacts, Phase 1
-asset manifest / asset lock helpers with checksum, license, local file, and USD
-reference checks, and Phase 3 static USDA scene compilation from locked scene
-instances. It also supports Phase 4 `pick_place` task/predicate/metric compilation
-and Phase 5 static EBench package/suite-index export. It does not run embodied
-evaluations.
+package scaffold/load/check behavior, asset manifests and locks, static USDA scene
+compilation, workflow-grounded task artifacts, deterministic layout planning,
+real2sim import/cousin packaging, suite generation, suite quality evidence, and
+static EBench package/suite-index export. It does not run embodied evaluations or
+produce model-performance benchmark reports.

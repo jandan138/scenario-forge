@@ -7,11 +7,29 @@ from pathlib import Path
 from scenario_forge.assets.lock import AssetLockError, check_asset_lock, generate_asset_lock, write_asset_lock
 from scenario_forge.assets.manifest import AssetManifestError
 from scenario_forge.adapters.ebench import EBenchExportError, export_ebench_package, export_ebench_suite
+from scenario_forge.adapters.real2sim import Real2SimImportError, import_real2sim_result
+from scenario_forge.generation.layout.layout_planner import LayoutPlanError, plan_layout_artifacts
+from scenario_forge.generation.cousins.cousin_generator import (
+    CousinGenerationError,
+    generate_cousin_packages,
+)
+from scenario_forge.generation.suite.suite_generator import (
+    SuiteGenerationError,
+    generate_suite_from_spec,
+)
+from scenario_forge.evaluation.suite_quality_evidence import (
+    SuiteQualityEvidenceError,
+    generate_suite_quality_evidence,
+)
 from scenario_forge.package import PackageError, load_package_manifest, validate_package
 from scenario_forge.scaffold import scaffold_starter_package
 from scenario_forge.scene.usd_compiler import USDSceneCompilerError, compile_usd_scene
 from scenario_forge.task.task_compiler import TaskCompileError, compile_task_artifacts
 from scenario_forge.validation.usd_checks import check_usd_scene
+from scenario_forge.generation.workflows.workflow_composer import (
+    WorkflowComposeError,
+    compose_workflow_artifacts,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -62,6 +80,63 @@ def build_parser() -> argparse.ArgumentParser:
     )
     task_compile_parser.add_argument("--package", required=True, help="Package directory")
     task_compile_parser.add_argument("--family", default="pick_place", help="Task family")
+
+    workflow_parser = subparsers.add_parser("workflow", help="Workflow generation commands")
+    workflow_subparsers = workflow_parser.add_subparsers(dest="workflow_command", required=True)
+
+    workflow_compose_parser = workflow_subparsers.add_parser(
+        "compose", help="Compose workflow task artifacts from a domain template"
+    )
+    workflow_compose_parser.add_argument("--package", required=True, help="Package directory")
+    workflow_compose_parser.add_argument("--family", required=True, help="Workflow task family")
+    workflow_compose_parser.add_argument(
+        "--robot-profile", default="franka_panda_tabletop_v1", help="Robot profile id"
+    )
+    workflow_compose_parser.add_argument(
+        "--binding",
+        action="append",
+        default=[],
+        help="Workflow role binding in role=instance_id form; may be repeated",
+    )
+
+    layout_parser = subparsers.add_parser("layout", help="Layout generation commands")
+    layout_subparsers = layout_parser.add_subparsers(dest="layout_command", required=True)
+
+    layout_plan_parser = layout_subparsers.add_parser(
+        "plan", help="Plan deterministic scene layout from required assets"
+    )
+    layout_plan_parser.add_argument("--package", required=True, help="Package directory")
+    layout_plan_parser.add_argument("--difficulty", default="easy", help="Difficulty profile")
+
+    real2sim_parser = subparsers.add_parser("real2sim", help="Real-to-sim import commands")
+    real2sim_subparsers = real2sim_parser.add_subparsers(dest="real2sim_command", required=True)
+
+    real2sim_import_parser = real2sim_subparsers.add_parser(
+        "import", help="Import a real2sim-result/v0.1 YAML into a package"
+    )
+    real2sim_import_parser.add_argument("--result", required=True, help="real2sim result YAML")
+    real2sim_import_parser.add_argument("--out", required=True, help="Output package directory")
+
+    real2sim_cousins_parser = real2sim_subparsers.add_parser(
+        "cousins", help="Generate digital cousin packages from a cousin plan"
+    )
+    real2sim_cousins_parser.add_argument("--package", required=True, help="Base package")
+    real2sim_cousins_parser.add_argument("--plan", required=True, help="cousin-plan/v0.1 YAML")
+    real2sim_cousins_parser.add_argument("--out", required=True, help="Output suite directory")
+
+    suite_parser = subparsers.add_parser("suite", help="Benchmark suite generation commands")
+    suite_subparsers = suite_parser.add_subparsers(dest="suite_command", required=True)
+
+    suite_generate_parser = suite_subparsers.add_parser(
+        "generate", help="Generate a benchmark suite from suite-spec/v0.2"
+    )
+    suite_generate_parser.add_argument("--spec", required=True, help="suite-spec/v0.2 YAML")
+    suite_generate_parser.add_argument("--out", required=True, help="Output suite directory")
+
+    suite_quality_parser = suite_subparsers.add_parser(
+        "quality", help="Generate suite quality evidence"
+    )
+    suite_quality_parser.add_argument("--suite", required=True, help="Suite directory")
 
     export_parser = subparsers.add_parser("export", help="Adapter export commands")
     export_subparsers = export_parser.add_subparsers(dest="export_command", required=True)
@@ -159,6 +234,75 @@ def main(argv: list[str] | None = None) -> int:
             print(artifact)
         return 0
 
+    if args.command == "workflow" and args.workflow_command == "compose":
+        try:
+            result = compose_workflow_artifacts(
+                Path(args.package),
+                task_family=args.family,
+                robot_profile=args.robot_profile,
+                bindings=_parse_bindings(args.binding),
+            )
+        except WorkflowComposeError as exc:
+            print(exc)
+            return 1
+        print(f"Workflow artifacts written: {result.package_root}")
+        for artifact in result.artifacts:
+            print(artifact)
+        return 0
+
+    if args.command == "layout" and args.layout_command == "plan":
+        try:
+            result = plan_layout_artifacts(Path(args.package), difficulty=args.difficulty)
+        except LayoutPlanError as exc:
+            print(exc)
+            return 1
+        print(f"Layout artifacts written: {result.package_root}")
+        for artifact in result.artifacts:
+            print(artifact)
+        return 0
+
+    if args.command == "real2sim" and args.real2sim_command == "import":
+        try:
+            result = import_real2sim_result(Path(args.result), Path(args.out))
+        except Real2SimImportError as exc:
+            print(exc)
+            return 1
+        print(f"Real2Sim package imported: {result.package_root}")
+        for artifact in result.artifacts:
+            print(artifact)
+        return 0
+
+    if args.command == "real2sim" and args.real2sim_command == "cousins":
+        try:
+            result = generate_cousin_packages(Path(args.package), Path(args.plan), Path(args.out))
+        except CousinGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Real2Sim cousin suite written: {result.suite_root}")
+        for package in result.packages:
+            print(package)
+        return 0
+
+    if args.command == "suite" and args.suite_command == "generate":
+        try:
+            result = generate_suite_from_spec(Path(args.spec), Path(args.out))
+        except SuiteGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Suite generated: {result.suite_root}")
+        for package in result.packages:
+            print(package)
+        return 0
+
+    if args.command == "suite" and args.suite_command == "quality":
+        try:
+            result = generate_suite_quality_evidence(Path(args.suite))
+        except SuiteQualityEvidenceError as exc:
+            print(exc)
+            return 1
+        print(f"Suite quality evidence written: {result.evidence_path}")
+        return 0
+
     if args.command == "export" and args.export_command == "ebench":
         if args.package:
             try:
@@ -193,6 +337,20 @@ def _package_root_from_asset_lock(asset_lock_path: Path) -> Path:
     if asset_lock_path.parent.name == "locks":
         return asset_lock_path.parent.parent
     return asset_lock_path.parent
+
+
+def _parse_bindings(raw_bindings: list[str]) -> dict[str, str] | None:
+    if not raw_bindings:
+        return None
+    bindings: dict[str, str] = {}
+    for raw_binding in raw_bindings:
+        if "=" not in raw_binding:
+            raise WorkflowComposeError(f"Invalid binding {raw_binding!r}; expected role=instance_id")
+        key, value = raw_binding.split("=", 1)
+        if not key or not value:
+            raise WorkflowComposeError(f"Invalid binding {raw_binding!r}; expected role=instance_id")
+        bindings[key] = value
+    return bindings
 
 
 if __name__ == "__main__":
