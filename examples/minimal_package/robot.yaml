@@ -1,0 +1,6 @@
+robot_id: tabletop_manipulator
+embodiment: franka_panda
+action_space: end_effector_delta_pose
+sensors:
+  - id: front_rgb
+    type: rgb

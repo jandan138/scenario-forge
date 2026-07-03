@@ -1,0 +1,15 @@
+instances:
+  - id: object_001
+    asset_id: starter_rigid_object
+    pose:
+      xyz: [0.45, 0.0, 0.92]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    semantic_tags: [rigid, pickable]
+    initial_state: {}
+  - id: target_zone
+    asset_id: starter_target_marker
+    pose:
+      xyz: [0.65, 0.0, 0.91]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    semantic_tags: [zone, target]
+    initial_state: {}

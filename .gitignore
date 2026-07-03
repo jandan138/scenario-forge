@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+build/
+dist/
+
+# Generated simulator or scenario artifacts.
+outputs/
+reports/
+external_artifacts/*
+!external_artifacts/README.md
+
+# Large local asset caches should be referenced by manifest, not committed.
+asset_cache/
+*.usd
+*.usda
+*.usdc
+*.usdz
+*.glb
+*.mp4
+*.mov
+*.png
+*.jpg
+*.jpeg
+!examples/**/scene.usda

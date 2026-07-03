@@ -1,0 +1,9 @@
+task_id: place_object_on_target
+instruction: Move the object onto the target zone.
+success_predicates:
+  - type: object_in_zone
+    object: object_001
+    zone: target_zone
+safety_rules:
+  - type: no_drop
+    object: object_001

@@ -1,0 +1,15 @@
+schema_version: scenario-package/v0.1
+scenario_id: minimal_pick_place
+scenario_domain: scientific_workbench
+exports:
+  - ebench
+  - embodied-eval-os
+files:
+  scene: scene.usda
+  instances: scene_instances.yaml
+  task: task.yaml
+  robot: robot.yaml
+  validation_report: validation_report.yaml
+provenance:
+  generator: scenario-forge
+  source: checked-in-example

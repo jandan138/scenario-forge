@@ -1,0 +1,12 @@
+adapter: isaac
+status: planned
+boundary:
+  portable_package_input: true
+  mutates_portable_manifest: false
+  requires_isaac_runtime: true
+outputs:
+  - adapters/isaac/scene.usd
+  - adapters/isaac/run_config.yaml
+blocked_until:
+  - asset registry includes normalized USD package refs
+  - package validator records simulator load evidence separately from structural checks

@@ -1,0 +1,10 @@
+status: draft
+checks:
+  - name: files_present
+    status: passed
+  - name: sim_load
+    status: not_run
+  - name: physics_stability
+    status: not_run
+  - name: evaluator_predicates
+    status: not_run
