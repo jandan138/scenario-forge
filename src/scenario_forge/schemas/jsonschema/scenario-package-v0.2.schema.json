@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/scenario-package-v0.2.schema.json",
+  "title": "Scenario Forge Package Manifest v0.2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "package_id",
+    "scenario_domain",
+    "package_mode",
+    "targets",
+    "entrypoints",
+    "assets",
+    "validation",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "scenario-package/v0.2"
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_mode": {
+      "enum": ["fat", "locked"]
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": ["ebench", "embodied-eval-os"]
+      }
+    },
+    "entrypoints": {
+      "type": "object",
+      "required": [
+        "generation_plan",
+        "scene_usd",
+        "scene_instances",
+        "task",
+        "robot",
+        "metrics"
+      ],
+      "properties": {
+        "generation_plan": {"type": "string", "minLength": 1},
+        "scene_usd": {"type": "string", "minLength": 1},
+        "scene_layout": {"type": "string", "minLength": 1},
+        "scene_instances": {"type": "string", "minLength": 1},
+        "task": {"type": "string", "minLength": 1},
+        "task_graph": {"type": "string", "minLength": 1},
+        "predicates": {"type": "string", "minLength": 1},
+        "safety_rules": {"type": "string", "minLength": 1},
+        "robot": {"type": "string", "minLength": 1},
+        "robot_profile": {"type": "string", "minLength": 1},
+        "metrics": {"type": "string", "minLength": 1},
+        "splits": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "assets": {
+      "type": "object",
+      "required": ["manifest", "lock"],
+      "properties": {
+        "manifest": {"type": "string", "minLength": 1},
+        "lock": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "validation": {
+      "type": "object",
+      "required": ["report", "minimum_required_level"],
+      "properties": {
+        "report": {"type": "string", "minLength": 1},
+        "minimum_required_level": {
+          "enum": [
+            "generated",
+            "package_schema_validated",
+            "asset_locked",
+            "usd_static_validated",
+            "semantic_validated",
+            "layout_static_validated",
+            "adapter_static_validated",
+            "simulator_smoke_validated",
+            "runtime_evidence_validated",
+            "benchmark_quality_validated"
+          ]
+        }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["summary"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1},
+        "source_refs": {"type": "string", "minLength": 1},
+        "generation_trace": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -91,7 +91,7 @@ def _package_scene_paths(package_dir: Path) -> tuple[str, ...]:
         manifest = load_package_manifest(package_dir)
     except PackageError:
         return ()
-    scene_path = manifest.files.get("scene")
+    scene_path = manifest.scene_path
     return (scene_path,) if scene_path is not None else ()
 
 

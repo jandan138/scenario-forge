@@ -81,15 +81,86 @@ def add_v01_manifest_with_scene(package_dir: Path) -> None:
     )
 
 
+def add_v02_manifest_with_scene(package_dir: Path) -> None:
+    (package_dir / "scene").mkdir(parents=True, exist_ok=True)
+    (package_dir / "task").mkdir(exist_ok=True)
+    (package_dir / "robot").mkdir(exist_ok=True)
+    (package_dir / "metrics").mkdir(exist_ok=True)
+    (package_dir / "evidence").mkdir(exist_ok=True)
+    (package_dir / "provenance").mkdir(exist_ok=True)
+    (package_dir / "scene" / "main.usda").write_text("#usda 1.0\n", encoding="utf-8")
+    (package_dir / "generation_plan.yaml").write_text(
+        "schema_version: scenario-generation-plan/v0.2\n",
+        encoding="utf-8",
+    )
+    (package_dir / "scene" / "instances.yaml").write_text(
+        "schema_version: scene-instances/v0.2\n",
+        encoding="utf-8",
+    )
+    (package_dir / "task" / "task.yaml").write_text("schema_version: task/v0.2\n", encoding="utf-8")
+    (package_dir / "robot" / "robot.yaml").write_text(
+        "schema_version: robot/v0.2\n",
+        encoding="utf-8",
+    )
+    (package_dir / "metrics" / "metrics.yaml").write_text(
+        "schema_version: metrics/v0.2\n",
+        encoding="utf-8",
+    )
+    (package_dir / "evidence" / "validation_report.yaml").write_text(
+        "schema_version: validation-report/v0.2\n",
+        encoding="utf-8",
+    )
+    (package_dir / "provenance" / "provenance.yaml").write_text(
+        "schema_version: provenance/v0.2\n",
+        encoding="utf-8",
+    )
+    (package_dir / "manifest.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "scenario-package/v0.2",
+                "package_id": "asset_lock_smoke",
+                "scenario_domain": "scientific_workbench",
+                "package_mode": "fat",
+                "targets": ["ebench"],
+                "entrypoints": {
+                    "generation_plan": "generation_plan.yaml",
+                    "scene_usd": "scene/main.usda",
+                    "scene_instances": "scene/instances.yaml",
+                    "task": "task/task.yaml",
+                    "robot": "robot/robot.yaml",
+                    "metrics": "metrics/metrics.yaml",
+                },
+                "assets": {
+                    "manifest": "assets/asset_manifest.yaml",
+                    "lock": "locks/asset_lock.yaml",
+                },
+                "validation": {
+                    "report": "evidence/validation_report.yaml",
+                    "minimum_required_level": "adapter_static_validated",
+                },
+                "provenance": {
+                    "summary": "provenance/provenance.yaml",
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_cli_scaffold_creates_checkable_starter_package(tmp_path: Path) -> None:
     out_dir = tmp_path / "starter"
 
     scaffold = run_cli("package", "scaffold", "--out", str(out_dir), cwd=tmp_path)
     check = run_cli("package", "check", str(out_dir), cwd=tmp_path)
+    manifest = yaml.safe_load((out_dir / "manifest.yaml").read_text(encoding="utf-8"))
 
     assert scaffold.returncode == 0, scaffold.stderr
-    assert check.returncode == 0, check.stderr
+    assert check.returncode == 0, check.stdout + check.stderr
     assert (out_dir / "manifest.yaml").exists()
+    assert manifest["schema_version"] == "scenario-package/v0.2"
+    assert manifest["entrypoints"]["scene_usd"] == "scene/main.usda"
+    assert (out_dir / "locks" / "asset_lock.yaml").exists()
     assert "Package OK" in check.stdout
 
 
@@ -118,11 +189,11 @@ def test_cli_package_check_require_asset_lock_returns_nonzero_when_missing(
     tmp_path: Path,
 ) -> None:
     package_dir = tmp_path / "starter"
-    scaffold = run_cli("package", "scaffold", "--out", str(package_dir), cwd=tmp_path)
+    package_dir.mkdir()
+    add_v01_manifest_with_scene(package_dir)
 
     result = run_cli("package", "check", str(package_dir), "--require-asset-lock", cwd=tmp_path)
 
-    assert scaffold.returncode == 0, scaffold.stderr
     assert result.returncode == 1
     assert "Missing asset lock: locks/asset_lock.yaml" in result.stdout
 
@@ -178,6 +249,25 @@ def test_cli_assets_check_uses_manifest_scene_for_usd_reference_check(tmp_path: 
     extra.write_text("#usda 1.0\n", encoding="utf-8")
     (package_dir / "scene.usda").write_text(
         '#usda 1.0\nrel references = @assets/objects/extra/model.usd@\n',
+        encoding="utf-8",
+    )
+    lock = run_cli("assets", "lock", str(package_dir), cwd=tmp_path)
+
+    result = run_cli("assets", "check", str(package_dir), cwd=tmp_path)
+
+    assert lock.returncode == 0, lock.stderr
+    assert result.returncode == 1
+    assert "USD reference is not locked: assets/objects/extra/model.usd" in result.stdout
+
+
+def test_cli_assets_check_uses_v02_manifest_scene_for_usd_reference_check(tmp_path: Path) -> None:
+    package_dir = make_asset_package_on_disk(tmp_path)
+    add_v02_manifest_with_scene(package_dir)
+    extra = package_dir / "assets" / "objects" / "extra" / "model.usd"
+    extra.parent.mkdir(parents=True)
+    extra.write_text("#usda 1.0\n", encoding="utf-8")
+    (package_dir / "scene" / "main.usda").write_text(
+        '#usda 1.0\nrel references = @../assets/objects/extra/model.usd@\n',
         encoding="utf-8",
     )
     lock = run_cli("assets", "lock", str(package_dir), cwd=tmp_path)

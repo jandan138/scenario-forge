@@ -32,28 +32,34 @@ ConvertAsset
 
 ## Package Shape
 
-Starter packages use a small, portable layout:
+Starter packages now use the v0.2 product layout:
 
 ```text
 scenario_package/
   manifest.yaml
-  scene.usda
-  scene_instances.yaml
-  task.yaml
-  robot.yaml
-  validation_report.yaml
+  generation_plan.yaml
+  scene/main.usda
+  scene/instances.yaml
+  task/task.yaml
+  robot/robot.yaml
+  metrics/metrics.yaml
+  assets/asset_manifest.yaml
+  locks/asset_lock.yaml
+  evidence/validation_report.yaml
+  provenance/provenance.yaml
 ```
 
-Future simulator-specific exports live under `adapters/<simulator>/` and must not mutate the
+Simulator-specific exports live under `adapters/<target>/` and must not mutate the
 portable manifest in place.
 
 ## Roadmap
 
-The v0.1 package format is the bootstrap format. The v0.2 product direction is an
-EBench-compatible task package factory built around generation plans, asset locks, USD scene
-compilation, explicit task predicates and metrics, validation evidence, and adapter exports.
+The v0.1 package format remains readable as a bootstrap format. The v0.2 package
+format is the active product contract for EBench-compatible task package generation.
+It is built around generation plans, asset locks, USD scene entry points, explicit
+task predicates and metrics, validation evidence, and adapter exports.
 
-Phase 0 design documents:
+Design documents:
 
 - [EBench Auto Factory Roadmap](docs/strategy/scenario-forge-ebench-auto-factory-roadmap.md)
 - [Scenario Package v0.2](docs/design/package-v0.2.md)
@@ -108,7 +114,8 @@ tests/           unit and contract tests
 
 ## Current Status
 
-This repo is bootstrapped as a narrow, testable foundation. It validates portable package
-structure, scaffolds a starter package, records architecture constraints, and provides Phase 1
+This repo is a narrow, testable foundation. It supports v0.1 package loading, v0.2
+package scaffold/load/check behavior, v0.2 package JSON Schema artifacts, and Phase 1
 asset manifest / asset lock helpers with checksum, license, local file, and USD reference checks.
-It does not yet generate full Isaac Sim USD scenes or run embodied evaluations.
+It does not yet compile full USD scenes, export EBench adapter packages, or run embodied
+evaluations.

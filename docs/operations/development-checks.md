@@ -16,7 +16,7 @@ The default check runs:
 
 - unit and contract tests;
 - Ruff linting;
-- starter package scaffold/check smoke;
+- v0.2 starter package scaffold/check smoke;
 - `git diff --check`.
 
 Phase 1 asset lock smoke commands:

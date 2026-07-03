@@ -1,7 +1,9 @@
 # Scenario Package v0.2
 
-Status: Phase 0 product contract draft. This document is normative for the
-v0.2 design direction, not evidence that v0.2 is implemented.
+Status: Phase 2 package-format contract implemented for scaffold, manifest
+loading, package validation, asset-lock validation, and JSON Schema artifact
+scope. USD compilation, adapter export generation, and nested task/scene schema
+validation remain future work.
 
 `scenario-package/v0.1` is the bootstrap format. `scenario-package/v0.2` is the
 product format for EBench-compatible task package generation. It is allowed to
@@ -120,6 +122,11 @@ Rules:
 - `package_id` must be stable within a suite.
 - `package_mode` must be `fat` or `locked`.
 - `targets` must name downstream export targets, not simulator runtimes.
+- `entrypoints.generation_plan`, `entrypoints.scene_usd`,
+  `entrypoints.scene_instances`, `entrypoints.task`, `entrypoints.robot`, and
+  `entrypoints.metrics` are required.
+- `assets.manifest`, `assets.lock`, `validation.report`,
+  `validation.minimum_required_level`, and `provenance.summary` are required.
 - EBench-targeted packages must include `assets.lock`, `scene_usd`, `task`, `robot`,
   `metrics`, and `validation.report`.
 - Adapter outputs must live under `adapters/<target>/` and must not mutate the
@@ -135,6 +142,31 @@ and provenance.
 Allowed producers include hand-authored plans, CLI commands, LLM planners,
 protocol grounders, workflow composers, and real-to-sim ingestors. Scenario Forge
 core only requires the plan to validate against schema before compilation.
+
+## External Producer Contract
+
+External systems may help produce package inputs, but the package contract stays
+Scenario Forge-owned.
+
+LabBuilder-style producers may contribute protocol steps, required assets,
+layout constraints, safety rules, and layout validation evidence. SimFoundry-style
+producers may contribute reconstructed assets, scene/object poses, physics
+metadata, task-cousin proposals, source media references, and reconstruction
+evidence.
+
+Rules:
+
+- External producers write Scenario Forge schemas. They do not place upstream
+  pipeline schemas directly into the portable manifest.
+- Producer name, version, prompts, source media, model/tool versions, and
+  confidence reports are provenance/evidence, not package identity.
+- Assets from external producers must be represented in `assets/asset_manifest.yaml`
+  and `locks/asset_lock.yaml` before they can be referenced by `scene/main.usda`.
+- External validation may raise confidence, but it must be recorded as evidence
+  and must not claim runtime execution unless produced by an adapter or downstream
+  runtime.
+- The core package remains simulator-neutral even when an upstream producer used
+  simulator-specific tools internally.
 
 ## Validation Ladder
 
@@ -161,6 +193,23 @@ Minimum delivery targets:
 
 `not_run` is not equivalent to `passed`. A package may report lower validation
 levels honestly, but it must not claim release readiness without evidence.
+
+## Implemented Scope
+
+The Phase 2 implementation provides:
+
+- default `scenario-forge package scaffold` output using the v0.2 layout;
+- `load_package_manifest()` support for both `scenario-package/v0.1` and
+  `scenario-package/v0.2`;
+- v0.2 manifest validation for package ID, package mode, targets, entrypoints,
+  asset manifest/lock references, validation level, and provenance summary;
+- `package check` validation of v0.2 referenced files and `locks/asset_lock.yaml`;
+- v0.2 scene entrypoint discovery for asset-lock USD reference checks;
+- `src/scenario_forge/schemas/jsonschema/scenario-package-v0.2.schema.json`.
+
+This scope fixes the package contract. It does not compile `scene/main.usda`,
+generate EBench adapter outputs, migrate v0.1 packages, or validate nested
+task/scene/robot/metric schemas beyond referenced-file presence.
 
 ## Migration
 
@@ -189,10 +238,7 @@ scenario-forge package migrate \
 
 ## Future Work
 
-- JSON Schema files for all v0.2 contracts.
-- v0.2 JSON Schema artifacts under `src/scenario_forge/schemas/jsonschema`
-  unless a later repo-structure decision moves schema artifacts.
+- JSON Schema files for nested v0.2 contracts.
 - v0.1 to v0.2 migration command.
-- v0.2 scaffold and package writer.
-- Package validator support for v0.2 entry points and validation levels.
+- Package writer helpers for emitting full v0.2 packages from generation plans.
 - Concrete EBench format mapping once the downstream schema is pinned.

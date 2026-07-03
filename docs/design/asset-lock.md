@@ -102,6 +102,28 @@ A fat package must satisfy:
 - pickable objects have collision metadata;
 - simulator-specific asset exports remain under `adapters/<target>/`.
 
+## Reconstructed And External Pipeline Assets
+
+SimFoundry-style real-to-sim outputs and LabBuilder-style asset selections are
+external inputs until Scenario Forge locks them.
+
+Rules:
+
+- Raw videos, scans, depth maps, Gaussian splats, reconstruction intermediates,
+  and generated mesh dumps stay outside git and outside the portable package
+  unless a tiny fixture is explicitly needed for tests.
+- Reconstructed assets must record source media or dataset reference, upstream
+  pipeline name/version, reconstruction method, normalization status, license or
+  use restriction, checksum, and physics/collision readiness.
+- Non-redistributable or research-only assets can be referenced only through a
+  locked external source with explicit provenance; they must not be silently
+  bundled into public fat packages.
+- ConvertAsset remains the normalization boundary for USD/MDL/mesh/GLB closure.
+  Scenario Forge may record command plans and outputs but must not reimplement
+  conversion internals.
+- Asset checks must fail closed when license, checksum, source URI, or package
+  path evidence is missing.
+
 ## Resolver Boundary
 
 Asset resolution belongs in `scenario_forge/assets`. The resolver may create

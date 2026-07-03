@@ -7,6 +7,9 @@ Scenario Forge is a portable scenario package compiler. Keep the repo narrow.
 - Do not add episode runners, model adapters, leaderboards, or benchmark reporting here.
 - Do not import simulator SDKs in pure package layers.
 - Do not reimplement ConvertAsset USD/MDL/mesh conversion logic.
+- Do not vendor, import, or expose LabBuilder/SimFoundry pipelines as core package
+  layers; map their capabilities into Scenario Forge-owned contracts through
+  adapters or generation-plan producers.
 - Do not use `lab` in top-level repo naming or public package identity.
 
 ## Expected Workflow

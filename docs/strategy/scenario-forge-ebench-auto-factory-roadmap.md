@@ -226,6 +226,41 @@ Scenario Forge → package schema, asset locking, USD compilation, validation, p
 
 我们要吸的是能力模型，不是项目形态。
 
+### 4.1 2026-07-03 外部能力采用政策
+
+多视角调研结论：
+
+```text
+不要闭门重写大而全的 layout / real-to-sim 系统。
+也不要把 LabBuilder 或 SimFoundry fork 成 Scenario Forge core。
+Scenario Forge 采用 contract-first + adapter/importer + A/B gate。
+```
+
+原因：
+
+1. Scenario Forge 的核心价值是 portable package contract、asset lock、USD entrypoint、
+   validation ladder、provenance 和 EBench export，而不是外部 pipeline 的内部实现。
+2. LabBuilder-style 能力最适合作为 protocol/layout/safety producer，输出必须落到
+   `generation_plan.yaml`、`scene/layout.yaml`、`scene/instances.yaml` 和 `evidence/*`。
+3. SimFoundry-style 能力最适合作为 real-to-sim ingestion adapter，输出必须落到
+   `assets/asset_manifest.yaml`、`locks/asset_lock.yaml`、`scene/instances.yaml`、
+   `provenance/*` 和 `evidence/*`。
+4. 外部 pipeline 可以比我们的 baseline 更强，但只有在 license、artifact contract、
+   dependency boundary、validation evidence 都清楚之后，才能升级为 supported adapter。
+5. 任何外部系统都不能绕过 Scenario Forge 的 manifest、asset lock、schema validation
+   和 adapter boundary。
+
+采用门槛：
+
+```text
+1. 先实现 Scenario Forge deterministic baseline。
+2. 外部系统先作为 importer/adapter 接入，不进入 core。
+3. 用 golden tasks 做 A/B：baseline vs external pipeline vs hand-authored reference。
+4. 对比 package validity、asset-lock coverage、predicate binding、reachability、
+   collision/safety checks、EBench adapter readiness。
+5. 只有外部 pipeline 在这些指标上稳定更好，且不破坏 portability，才扩大使用。
+```
+
 ---
 
 ## 5. LabBuilder-style 能力映射
@@ -340,6 +375,32 @@ Scenario Forge 应该能回答：
 - 机器人是否够得到？
 - 任务区域是否有操作空间？
 - 场景是否满足安全约束？
+
+### 5.5 复用性判断
+
+截至 2026-07-03，公开 LabBuilder 仓库显示：
+
+- `LabForge` protocol synthesis 已发布；
+- `LabGen` layout generation 与 `LabTouchstone` evaluation 标记为 coming soon；
+- 代码 license 与 data/assets license 分离，data/assets 包含非商业限制；
+- USD asset payload 仍需单独下载或尚未完全公开。
+
+因此当前策略不是 fork LabBuilder，也不是把 LabBuilder 数据集直接放进 Scenario Forge。
+
+采用方式：
+
+```text
+LabForge-style protocol output
+  -> generation_plan.yaml
+  -> required_assets
+  -> layout_constraints
+  -> safety_rules
+  -> evidence/layout_checks.yaml
+  -> provenance/source_refs.yaml
+```
+
+后续只有在完整 LabGen / LabTouchstone 代码和可再分发资产条款明确后，才重新评估
+是否增加 optional LabBuilder adapter。
 
 ---
 
@@ -592,6 +653,37 @@ Scenario Forge 应该能回答：
 - 如何让 benchmark 覆盖真实世界变体？
 - 如何把重建资产锁定、校验、追溯？
 - 如何把 real-to-sim pipeline 的结果纳入统一 package contract？
+
+### 7.5 复用性判断
+
+截至 2026-07-03，公开 SimFoundry 信息主要是论文、项目页、交互 demo 和 pipeline 描述；
+没有稳定、可直接依赖的公开实现和 artifact contract 可作为 Scenario Forge core 依赖。
+
+SimFoundry-style 能力仍然非常重要，但采用方式是 real-to-sim adapter：
+
+```text
+SimFoundry-like output
+  -> adapters/real2sim/importer
+  -> assets/asset_manifest.yaml
+  -> locks/asset_lock.yaml
+  -> scene/instances.yaml
+  -> scene/layout.yaml
+  -> provenance/source_refs.yaml
+  -> evidence/asset_checks.yaml
+  -> evidence/layout_checks.yaml
+```
+
+不进入 core 的内容：
+
+```text
+video reconstruction pipeline
+foundation model calls
+segmentation/depth/intermediate tensors
+Gaussian splat training
+simulator settling and rollout code
+policy training/evaluation
+benchmark reports
+```
 
 ---
 
@@ -1982,7 +2074,7 @@ AdapterExport
 ```text
 Phase 0：愿景锁定与 v0.2 contract 草案
 Phase 1：Fat Package / Asset Lock 基础
-Phase 2：Asset Registry / Resolver / ConvertAsset Boundary
+Phase 2：Package v0.2 包格式固化
 Phase 3：USD Scene Compiler
 Phase 4：Task Graph / Predicate / Metric Compiler
 Phase 5：EBench Adapter v0
@@ -2041,7 +2133,7 @@ docs/design/ebench-adapter.md
 Status: implemented for local package scope. Phase 1 now provides asset manifest reading, asset lock generation,
 sha256 calculation, license and local file checks, USD reference lock checks, `assets lock`,
 `assets check`, and `package check --require-asset-lock`. Registry/resolver infrastructure remains
-Phase 2 work.
+later asset-infrastructure work.
 
 ### 25.1 目标
 
@@ -2091,13 +2183,61 @@ scenario-forge package check ./pkg --require-asset-lock
 
 ---
 
-## 26. Phase 2：Asset Registry / Resolver / ConvertAsset Boundary
+## 26. Phase 2：Package v0.2 包格式固化
+
+Status: implemented for scaffold/load/check scope. Phase 2 now fixes the
+`scenario-package/v0.2` manifest contract, default v0.2 scaffold layout,
+v0.2 JSON Schema artifact, v0.2 package validation, and v0.2 scene entrypoint
+discovery for asset-lock USD reference checks. USD compilation, adapter export,
+nested schema validation, and migration remain later work.
 
 ### 26.1 目标
 
-把资产来源标准化，让 task generator 面对 asset_id，而不是文件路径。
+把 package contract 从 v0.1 bootstrap 升级到 v0.2 product format，让后续 USD compiler
+和 EBench adapter 都围绕稳定 manifest 工作。
 
 ### 26.2 产出
+
+```text
+src/scenario_forge/package.py
+src/scenario_forge/scaffold.py
+src/scenario_forge/schemas/jsonschema/scenario-package-v0.2.schema.json
+src/scenario_forge/schemas/v2/
+tests/test_package_validator.py
+tests/test_cli.py
+tests/test_asset_schemas.py
+```
+
+### 26.3 功能
+
+```text
+1. package scaffold 默认生成 v0.2 目录结构。
+2. load_package_manifest 支持 v0.1 和 v0.2。
+3. v0.2 manifest 校验 package_id、package_mode、targets、entrypoints、assets、validation、provenance。
+4. package check 校验 v0.2 引用文件存在。
+5. v0.2 package 默认要求并检查 locks/asset_lock.yaml。
+6. assets check 可以从 v0.2 entrypoints.scene_usd 找到 USD 场景。
+```
+
+### 26.4 验收标准
+
+```text
+1. scenario-forge package scaffold --out ./pkg 生成 scenario-package/v0.2。
+2. scenario-forge package check ./pkg 通过 v0.2 starter package。
+3. 缺失 metrics/metrics.yaml 等 v0.2 引用文件时 package check 失败。
+4. validation.minimum_required_level 只能使用 validation ladder 的命名等级，not_run 不允许伪装成等级。
+5. scenario-package-v0.2.schema.json 存在并可解析。
+```
+
+---
+
+## 26A. Later Work：Asset Registry / Resolver / ConvertAsset Boundary
+
+### 26A.1 目标
+
+把资产来源标准化，让 task generator 面对 asset_id，而不是文件路径。
+
+### 26A.2 产出
 
 ```text
 src/scenario_forge/assets/registry.py
@@ -2109,7 +2249,7 @@ configs/assets/curated_registry.yaml
 examples/assets/minimal_workbench_assets/
 ```
 
-### 26.3 功能
+### 26A.3 功能
 
 ```text
 1. 根据 asset_id resolve USD 文件。
@@ -2120,7 +2260,7 @@ examples/assets/minimal_workbench_assets/
 6. 写入 asset_manifest 和 asset_lock。
 ```
 
-### 26.4 资产查询示例
+### 26A.4 资产查询示例
 
 ```yaml
 query:
@@ -2136,7 +2276,7 @@ query:
     - Apache-2.0
 ```
 
-### 26.5 验收标准
+### 26A.5 验收标准
 
 ```text
 1. 给定 asset_id 可以 resolve 到本地 USD。
@@ -2349,6 +2489,14 @@ open_place_close
 
 让任务不是随机摆物体，而是 protocol-grounded、安全、可达、可执行的布局。
 
+Phase 7 的工程策略是 baseline-first：
+
+```text
+1. 先做 Scenario Forge deterministic layout baseline。
+2. 再接 LabBuilder-style protocol/layout outputs。
+3. 最后用 golden tasks 做 A/B，决定是否把外部 pipeline 升级为 supported adapter。
+```
+
 ### 31.2 产出
 
 ```text
@@ -2400,6 +2548,7 @@ difficulty_profiles:
 3. safety constraints 可检查。
 4. difficulty profiles 对布局产生可解释变化。
 5. layout check 报告具体失败原因。
+6. golden tasks 能比较 baseline、LabBuilder-style output 和 hand-authored reference。
 ```
 
 ---
@@ -2409,6 +2558,16 @@ difficulty_profiles:
 ### 32.1 目标
 
 接收外部 real-to-sim pipeline 的输出，并把它们标准化成 Scenario Forge package。
+
+Phase 8 的工程策略是 importer-first：
+
+```text
+1. 先定义 real2sim-result/v0.1 import contract。
+2. 再写 adapters/real2sim/importer.py。
+3. SimFoundry-style pipeline 只作为 upstream producer，不进入 core。
+4. 所有 reconstructed assets 必须进 asset_manifest + asset_lock。
+5. source media、model versions、reconstruction steps 只能进 provenance/evidence。
+```
 
 ### 32.2 产出
 
@@ -2432,6 +2591,7 @@ schemas/cousin-plan/v0.1.json
 6. 生成 digital cousin variants。
 7. 保持 task semantics 不变。
 8. 记录 real2sim provenance。
+9. 记录 upstream pipeline license / artifact contract / dependency boundary。
 ```
 
 ### 32.4 cousin_plan.yaml 示例
@@ -2746,7 +2906,7 @@ scenario-forge/
       robot_profiles.yaml
   schemas/
     jsonschema/
-      scenario-package-v0.2.json
+      scenario-package-v0.2.schema.json
       generation-plan-v0.2.json
       asset-lock-v0.2.json
       scene-instances-v0.2.json
@@ -2870,8 +3030,29 @@ Scenario Forge 的 portable contract 保持稳定。
 默认决策：
 
 ```text
-不依赖复用代码。
+不把外部项目作为 core code source。
+先实现 Scenario Forge deterministic baseline。
+外部 pipeline 通过 importer / adapter 接入。
+用 A/B gate 决定是否扩大采用。
 我们吸收能力模型：protocol grounding、layout constraints、real2sim ingestion、cousin generation、workflow composition、rollout filtering。
+```
+
+当前事实：
+
+```text
+LabBuilder：LabForge 已公开；LabGen / LabTouchstone 仍未完整公开；data/assets 有非商业约束。
+SimFoundry：公开论文和项目页显示 real-to-sim 能力很强；稳定可依赖代码和 artifact contract 尚未成为 Scenario Forge 可用前提。
+```
+
+进入 Scenario Forge 的唯一方式：
+
+```text
+External capability
+  -> Scenario Forge importer / adapter
+  -> Scenario Forge-owned schemas
+  -> asset_manifest + asset_lock
+  -> provenance + evidence
+  -> package check / adapter check
 ```
 
 ### 39.6 风险：早期 schema 频繁变化
@@ -2901,7 +3082,8 @@ v0.2 直接面向产品目标设计。
 
 ### 40.2 立即更新 package scaffold
 
-当前 scaffold 太薄。下一版 scaffold 应直接生成 v0.2 风格目录：
+Status: implemented in Phase 2 scaffold/load/check scope. `scenario-forge package scaffold`
+now generates the v0.2 product layout:
 
 ```text
 manifest.yaml
@@ -2918,6 +3100,9 @@ evidence/validation_report.yaml
 provenance/provenance.yaml
 adapters/ebench/package.yaml
 ```
+
+Adapter files remain future generated artifacts; the current starter focuses on
+the portable manifest, package entrypoints, assets, locks, evidence, and provenance.
 
 ### 40.3 立即新增测试
 
@@ -3120,8 +3305,17 @@ Cousin Generator
 1. Scenario Forge 当前仓库 README 与架构文档：`https://github.com/jandan138/scenario-forge`
 2. LabVLA / RoboGenesis：`https://arxiv.org/abs/2606.13578`
 3. LabBuilder：`https://arxiv.org/abs/2605.02288`
-4. NVIDIA SimFoundry 项目页：`https://research.nvidia.com/labs/gear/simfoundry/`
-5. SimFoundry paper：`https://arxiv.org/abs/2606.28276`
+4. LabBuilder 项目页：`https://che-0212.github.io/LabBuilder-site/`
+5. LabBuilder public repo：`https://github.com/che-0212/LabBuilder`
+6. NVIDIA SimFoundry 项目页：`https://research.nvidia.com/labs/gear/simfoundry/`
+7. SimFoundry paper：`https://arxiv.org/abs/2606.28276`
+
+2026-07-03 外部能力采用判断还参考了公开 release 状态：
+
+- LabBuilder public repo 当前显示 `LabForge` released，`LabGen` / `LabTouchstone`
+  coming soon，且 code / data-assets license 分离。
+- SimFoundry public page and paper 展示 real-to-sim / digital-cousin 能力，但没有稳定、
+  可直接作为 Scenario Forge core dependency 的 artifact contract。
 
 ---
 
