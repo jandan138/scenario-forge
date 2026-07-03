@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/asset-manifest-v0.2.schema.json",
+  "title": "Scenario Forge Asset Manifest",
+  "type": "object",
+  "required": ["schema_version", "assets"],
+  "properties": {
+    "schema_version": {
+      "const": "asset-manifest/v0.2"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "role", "asset_type", "canonical_usd", "license", "sha256"],
+        "properties": {
+          "asset_id": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "minLength": 1},
+          "asset_type": {"type": "string", "minLength": 1},
+          "canonical_usd": {"type": "string", "minLength": 1},
+          "license": {"type": "string", "minLength": 1},
+          "sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-fA-F]{64}$"
+          },
+          "source_kind": {"type": "string"},
+          "source_uri": {"type": "string"},
+          "resolver_version": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

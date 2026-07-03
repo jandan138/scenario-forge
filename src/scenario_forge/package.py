@@ -6,6 +6,8 @@ from typing import Any
 
 import yaml
 
+from scenario_forge.assets.lock import check_asset_lock
+
 SUPPORTED_SCHEMA_VERSION = "scenario-package/v0.1"
 SUPPORTED_EXPORTS = frozenset({"ebench", "embodied-eval-os"})
 REQUIRED_FILE_KEYS = ("scene", "instances", "task", "robot", "validation_report")
@@ -76,7 +78,7 @@ def load_package_manifest(root: str | Path) -> PackageManifest:
     )
 
 
-def validate_package(root: str | Path) -> PackageValidationReport:
+def validate_package(root: str | Path, require_asset_lock: bool = False) -> PackageValidationReport:
     package_root = Path(root)
     try:
         manifest = load_package_manifest(package_root)
@@ -99,6 +101,12 @@ def validate_package(root: str | Path) -> PackageValidationReport:
         required_paths.append(required_path)
         if not required_path.exists():
             messages.append(f"Missing referenced file: {relative_path}")
+
+    if require_asset_lock:
+        scene_path = manifest.files.get("scene")
+        scene_paths = (scene_path,) if scene_path is not None else ()
+        asset_report = check_asset_lock(package_root, scene_paths=scene_paths)
+        messages.extend(asset_report.messages)
 
     return PackageValidationReport(
         ok=not messages,

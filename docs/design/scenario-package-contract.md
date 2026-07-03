@@ -44,3 +44,7 @@ Planned fields:
 - metric specs;
 - provenance and source dataset references;
 - adapter export manifests under `adapters/<simulator>/`.
+
+The v0.2 product contract draft is tracked in
+[Scenario Package v0.2](package-v0.2.md). The current implementation still
+supports the v0.1 bootstrap contract.

@@ -47,6 +47,20 @@ scenario_package/
 Future simulator-specific exports live under `adapters/<simulator>/` and must not mutate the
 portable manifest in place.
 
+## Roadmap
+
+The v0.1 package format is the bootstrap format. The v0.2 product direction is an
+EBench-compatible task package factory built around generation plans, asset locks, USD scene
+compilation, explicit task predicates and metrics, validation evidence, and adapter exports.
+
+Phase 0 design documents:
+
+- [EBench Auto Factory Roadmap](docs/strategy/scenario-forge-ebench-auto-factory-roadmap.md)
+- [Scenario Package v0.2](docs/design/package-v0.2.md)
+- [Asset Lock Design](docs/design/asset-lock.md)
+- [USD Scene Compiler Design](docs/design/usd-scene-compiler.md)
+- [EBench Adapter Design](docs/design/ebench-adapter.md)
+
 ## Quick Start
 
 ```bash
@@ -95,5 +109,6 @@ tests/           unit and contract tests
 ## Current Status
 
 This repo is bootstrapped as a narrow, testable foundation. It validates portable package
-structure, scaffolds a starter package, and records architecture constraints. It does not yet
-generate full Isaac Sim USD scenes or run embodied evaluations.
+structure, scaffolds a starter package, records architecture constraints, and provides Phase 1
+asset manifest / asset lock helpers with checksum, license, local file, and USD reference checks.
+It does not yet generate full Isaac Sim USD scenes or run embodied evaluations.

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/asset-lock-v0.2.schema.json",
+  "title": "Scenario Forge Asset Lock",
+  "type": "object",
+  "required": ["schema_version", "lock_id", "created_by", "assets"],
+  "properties": {
+    "schema_version": {
+      "const": "asset-lock/v0.2"
+    },
+    "lock_id": {"type": "string", "minLength": 1},
+    "created_by": {"type": "string", "minLength": 1},
+    "assets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "source_kind",
+          "source_uri",
+          "resolved_path",
+          "content_sha256",
+          "license",
+          "resolver_version"
+        ],
+        "properties": {
+          "source_kind": {"type": "string", "minLength": 1},
+          "source_uri": {"type": "string", "minLength": 1},
+          "resolved_path": {"type": "string", "minLength": 1},
+          "content_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-fA-F]{64}$"
+          },
+          "license": {"type": "string", "minLength": 1},
+          "resolver_version": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

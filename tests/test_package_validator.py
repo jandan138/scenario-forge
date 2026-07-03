@@ -103,6 +103,15 @@ def test_validate_package_rejects_missing_referenced_file(tmp_path: Path) -> Non
     assert "Missing referenced file: task.yaml" in report.messages
 
 
+def test_package_check_requires_asset_lock_for_ebench_package(tmp_path: Path) -> None:
+    make_minimal_package(tmp_path)
+
+    report = validate_package(tmp_path, require_asset_lock=True)
+
+    assert not report.ok
+    assert "Missing asset lock: locks/asset_lock.yaml" in report.messages
+
+
 def test_manifest_rejects_unknown_export_target(tmp_path: Path) -> None:
     make_minimal_package(tmp_path)
     manifest = yaml.safe_load((tmp_path / "manifest.yaml").read_text(encoding="utf-8"))
