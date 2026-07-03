@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/metrics-v0.2.schema.json",
+  "title": "Scenario Forge Metrics v0.2",
+  "type": "object",
+  "required": ["schema_version", "metrics"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "metrics/v0.2"},
+    "metrics": {"type": "array", "items": {"type": "object"}}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/predicates-v0.2.schema.json",
+  "title": "Scenario Forge Predicates v0.2",
+  "type": "object",
+  "required": ["schema_version", "success_predicates"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "predicates/v0.2"},
+    "success_predicates": {"type": "array", "items": {"type": "object"}}
+  }
+}

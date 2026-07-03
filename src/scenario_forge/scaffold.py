@@ -7,6 +7,7 @@ import yaml
 from scenario_forge.assets.checksum import compute_sha256
 from scenario_forge.assets.lock import generate_asset_lock, write_asset_lock
 from scenario_forge.scene.usd_compiler import compile_usd_scene
+from scenario_forge.task.task_compiler import compile_task_artifacts
 
 
 def scaffold_starter_package(out_dir: str | Path) -> Path:
@@ -100,38 +101,6 @@ def scaffold_starter_package(out_dir: str | Path) -> Path:
         },
     )
     _write_yaml(
-        root / "task" / "task.yaml",
-        {
-            "schema_version": "task/v0.2",
-            "task_id": "place_object_on_target",
-            "instruction": "Move the object onto the target zone.",
-        },
-    )
-    _write_yaml(
-        root / "task" / "task_graph.yaml",
-        {
-            "schema_version": "task-graph/v0.2",
-            "nodes": [{"id": "place_object", "type": "atomic_skill"}],
-            "edges": [],
-        },
-    )
-    _write_yaml(
-        root / "task" / "predicates.yaml",
-        {
-            "schema_version": "predicates/v0.2",
-            "success_predicates": [
-                {"type": "object_in_zone", "object": "object_001", "zone": "target_zone"}
-            ],
-        },
-    )
-    _write_yaml(
-        root / "task" / "safety_rules.yaml",
-        {
-            "schema_version": "safety-rules/v0.2",
-            "safety_rules": [{"type": "no_drop", "object": "object_001"}],
-        },
-    )
-    _write_yaml(
         root / "robot" / "robot.yaml",
         {
             "schema_version": "robot/v0.2",
@@ -147,13 +116,6 @@ def scaffold_starter_package(out_dir: str | Path) -> Path:
             "schema_version": "robot-profile/v0.2",
             "robot_id": "tabletop_manipulator",
             "workspace": {"frame": "world"},
-        },
-    )
-    _write_yaml(
-        root / "metrics" / "metrics.yaml",
-        {
-            "schema_version": "metrics/v0.2",
-            "metrics": [{"id": "success", "type": "predicate_satisfaction"}],
         },
     )
     _write_yaml(
@@ -241,6 +203,7 @@ def scaffold_starter_package(out_dir: str | Path) -> Path:
         asset_lock_path=root / "locks" / "asset_lock.yaml",
         out_path=root / "scene" / "main.usda",
     )
+    compile_task_artifacts(root, task_family="pick_place")
     return root
 
 

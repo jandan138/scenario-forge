@@ -1,0 +1,22 @@
+schema_version: ebench-scenario-export/v0.1
+source_package:
+  package_id: tabletop_pick_place_starter
+  schema_version: scenario-package/v0.2
+  targets:
+    - ebench
+entrypoints:
+  scene_usd: ../../scene/main.usda
+  task: ../../task/task.yaml
+  robot: ../../robot/robot.yaml
+  metrics: ../../metrics/metrics.yaml
+assets:
+  asset_lock: ../../locks/asset_lock.yaml
+runtime_hints:
+  simulator: usd_capable
+  reset_policy: deterministic
+  max_episode_steps: 300
+  success_metric: task_success
+  success_predicate: object_in_zone
+adapter_validation:
+  status: passed
+  report: adapter_report.yaml

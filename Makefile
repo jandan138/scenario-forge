@@ -16,7 +16,9 @@ type:
 package-smoke:
 	rm -rf "$(SMOKE_OUT)"
 	PYTHONPATH=src $(CHECK_PYTHON) -m scenario_forge.cli package scaffold --out "$(SMOKE_OUT)"
+	PYTHONPATH=src $(CHECK_PYTHON) -m scenario_forge.cli task compile --package "$(SMOKE_OUT)" --family pick_place
 	PYTHONPATH=src $(CHECK_PYTHON) -m scenario_forge.cli scene compile --instances "$(SMOKE_OUT)/scene/instances.yaml" --asset-lock "$(SMOKE_OUT)/locks/asset_lock.yaml" --out "$(SMOKE_OUT)/scene/main.usda"
+	PYTHONPATH=src $(CHECK_PYTHON) -m scenario_forge.cli export ebench --package "$(SMOKE_OUT)"
 	PYTHONPATH=src $(CHECK_PYTHON) -m scenario_forge.cli package check "$(SMOKE_OUT)"
 
 diff-check:

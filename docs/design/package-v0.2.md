@@ -1,9 +1,10 @@
 # Scenario Package v0.2
 
-Status: Phase 2 package-format contract implemented for scaffold, manifest
-loading, package validation, asset-lock validation, and JSON Schema artifact
-scope. USD compilation, adapter export generation, and nested task/scene schema
-validation remain future work.
+Status: Phase 5 package contract implemented for scaffold, manifest loading,
+package validation, asset-lock validation, static USD compilation, `pick_place`
+task/predicate/metric compilation, EBench static export, and JSON Schema
+artifact scope. Broader nested semantic validation and runtime checks remain
+future work.
 
 `scenario-package/v0.1` is the bootstrap format. `scenario-package/v0.2` is the
 product format for EBench-compatible task package generation. It is allowed to

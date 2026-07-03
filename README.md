@@ -76,6 +76,8 @@ scenario-forge scene compile \
   --instances /tmp/scenario-forge-starter/scene/instances.yaml \
   --asset-lock /tmp/scenario-forge-starter/locks/asset_lock.yaml \
   --out /tmp/scenario-forge-starter/scene/main.usda
+scenario-forge task compile --package /tmp/scenario-forge-starter --family pick_place
+scenario-forge export ebench --package /tmp/scenario-forge-starter
 scenario-forge package check /tmp/scenario-forge-starter
 ```
 
@@ -122,4 +124,6 @@ This repo is a narrow, testable foundation. It supports v0.1 package loading, v0
 package scaffold/load/check behavior, v0.2 package JSON Schema artifacts, Phase 1
 asset manifest / asset lock helpers with checksum, license, local file, and USD
 reference checks, and Phase 3 static USDA scene compilation from locked scene
-instances. It does not yet export EBench adapter packages or run embodied evaluations.
+instances. It also supports Phase 4 `pick_place` task/predicate/metric compilation
+and Phase 5 static EBench package/suite-index export. It does not run embodied
+evaluations.

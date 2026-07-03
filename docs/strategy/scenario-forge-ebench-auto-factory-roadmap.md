@@ -2349,6 +2349,15 @@ scenario-forge scene compile \
 
 ## 28. Phase 4：Task Graph / Predicate / Metric Compiler
 
+Status: implemented for `pick_place` static compiler scope. Phase 4 now maps
+`task_family=pick_place` to required scene roles, binds the manipulated object
+and target zone from `scene/instances.yaml`, writes `task/task.yaml`,
+`task/task_graph.yaml`, `task/predicates.yaml`, `task/safety_rules.yaml`, and
+`metrics/metrics.yaml`, emits an EBench-readable primary success metric hint,
+and exposes `scenario-forge task compile`. Broader task families, natural
+language task-intent parsing, and richer semantic validation remain future
+generator work.
+
 ### 28.1 目标
 
 从 task intent 或 task graph 编译出任务定义、成功条件、安全规则和 metrics。
@@ -2360,10 +2369,10 @@ src/scenario_forge/task/task_compiler.py
 src/scenario_forge/task/predicates.py
 src/scenario_forge/task/metrics.py
 src/scenario_forge/generation/workflows/task_graph.py
-schemas/task/v0.2.json
-schemas/task-graph/v0.2.json
-schemas/predicates/v0.2.json
-schemas/metrics/v0.2.json
+src/scenario_forge/schemas/jsonschema/task-v0.2.schema.json
+src/scenario_forge/schemas/jsonschema/task-graph-v0.2.schema.json
+src/scenario_forge/schemas/jsonschema/predicates-v0.2.schema.json
+src/scenario_forge/schemas/jsonschema/metrics-v0.2.schema.json
 ```
 
 ### 28.3 功能
@@ -2390,6 +2399,14 @@ schemas/metrics/v0.2.json
 ---
 
 ## 29. Phase 5：EBench Adapter v0
+
+Status: implemented for static package and suite-index export scope. Phase 5
+now reads the v0.2 manifest, checks the `ebench` target, validates required
+scene/task/robot/metrics/asset-lock files, requires a primary success metric,
+writes `adapters/ebench/package.yaml`, `task_entrypoint.yaml`, and
+`adapter_report.yaml`, and exports suite-level `task_index.yaml` from
+`suite_manifest.yaml`. Runtime execution, trace capture, model adapters, and
+leaderboard/reporting remain outside this repo.
 
 ### 29.1 目标
 

@@ -1,8 +1,9 @@
 # EBench Adapter Design
 
-Status: Phase 0 product contract draft. This document is normative for the
-v0.2 EBench export direction, not evidence that EBench export is implemented.
-The exact EBench wire format is provisional until the downstream schema is pinned.
+Status: Phase 5 static EBench adapter v0 implemented. This document is
+normative for the v0.2 EBench export contract and records the implemented
+single-package and suite-index export scope. The exact downstream EBench wire
+format remains provisional until a downstream schema is pinned.
 
 The EBench adapter exports portable Scenario Forge packages into
 EBench-compatible adapter artifacts. It is a downstream export adapter, not an
@@ -61,13 +62,20 @@ entrypoints:
 assets:
   asset_lock: ../../locks/asset_lock.yaml
 runtime_hints:
-  simulator: isaac_or_usd_capable
+  simulator: usd_capable
   reset_policy: deterministic
   max_episode_steps: 300
   success_metric: task_success
+  success_predicate: object_in_zone
 adapter_validation:
   status: passed
   report: adapter_report.yaml
+```
+
+Implemented command:
+
+```bash
+scenario-forge export ebench --package ./pkg
 ```
 
 ## Export Gates
@@ -82,12 +90,10 @@ A package export should fail with structured blockers when:
 - `metrics/metrics.yaml` is missing;
 - `locks/asset_lock.yaml` is missing for a formal EBench package;
 - no primary success metric is declared;
-- success predicates do not bind to scene instances;
-- required validation level is not met.
+- Scenario Forge package validation reports blockers.
 
-The default single-package target is `L6 adapter_static_validated`. Runtime smoke
-evidence can raise the package to `L7`, but the EBench adapter should not fake
-runtime evidence.
+The package exporter is static adapter validation. It does not claim runtime
+load, reset, physics, or model-evaluation evidence.
 
 ## Suite Export
 
@@ -105,6 +111,12 @@ suite/
 Suite export must preserve package-level entry points, split labels, difficulty
 labels, task family labels, and asset lock references. It must not merge packages
 in a way that hides package-level validation results.
+
+Implemented command:
+
+```bash
+scenario-forge export ebench --suite ./suite
+```
 
 ## Format Volatility
 
@@ -124,9 +136,6 @@ the source of truth.
 
 ## Future Work
 
-- Concrete `ebench-scenario-export/v0.1` JSON Schema.
-- Single-package exporter implementation.
-- Suite export task index implementation.
-- Adapter report data model and blocker taxonomy.
-- Validation integration for `L6 adapter_static_validated`.
 - Updates when the downstream EBench wire format changes.
+- richer adapter blocker taxonomy once EBench publishes a pinned schema;
+- runtime smoke integration in downstream runtimes.

@@ -39,3 +39,32 @@ def test_scene_instances_v02_schema_artifact_exists_and_parses() -> None:
     assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
     assert schema["properties"]["schema_version"]["const"] == "scene-instances/v0.2"
     assert "instances" in schema["required"]
+
+
+def test_task_phase4_schema_artifacts_exist_and_parse() -> None:
+    expected = {
+        "task-v0.2.schema.json": "task/v0.2",
+        "task-graph-v0.2.schema.json": "task-graph/v0.2",
+        "predicates-v0.2.schema.json": "predicates/v0.2",
+        "metrics-v0.2.schema.json": "metrics/v0.2",
+    }
+    for filename, schema_version in expected.items():
+        schema_path = REPO_ROOT / "src" / "scenario_forge" / "schemas" / "jsonschema" / filename
+
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+        assert schema["type"] == "object"
+        assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+        assert schema["properties"]["schema_version"]["const"] == schema_version
+
+
+def test_ebench_export_v01_schema_artifact_exists_and_parses() -> None:
+    schema_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/ebench-export-v0.1.schema.json"
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+    assert schema["type"] == "object"
+    assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+    assert schema["properties"]["schema_version"]["const"] == "ebench-scenario-export/v0.1"
+    assert "entrypoints" in schema["required"]
+    assert "runtime_hints" in schema["required"]

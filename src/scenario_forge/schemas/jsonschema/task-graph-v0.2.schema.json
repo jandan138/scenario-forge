@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/task-graph-v0.2.schema.json",
+  "title": "Scenario Forge Task Graph v0.2",
+  "type": "object",
+  "required": ["schema_version", "nodes", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "task-graph/v0.2"},
+    "nodes": {"type": "array", "items": {"type": "object"}},
+    "edges": {"type": "array", "items": {"type": "object"}}
+  }
+}

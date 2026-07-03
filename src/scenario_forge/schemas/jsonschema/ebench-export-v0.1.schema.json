@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/ebench-export-v0.1.schema.json",
+  "title": "Scenario Forge EBench Export v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_package",
+    "entrypoints",
+    "assets",
+    "runtime_hints",
+    "adapter_validation"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "ebench-scenario-export/v0.1"
+    },
+    "source_package": {
+      "type": "object"
+    },
+    "entrypoints": {
+      "type": "object",
+      "required": ["scene_usd", "task", "robot", "metrics"],
+      "properties": {
+        "scene_usd": {"type": "string"},
+        "task": {"type": "string"},
+        "robot": {"type": "string"},
+        "metrics": {"type": "string"}
+      }
+    },
+    "assets": {
+      "type": "object",
+      "required": ["asset_lock"],
+      "properties": {
+        "asset_lock": {"type": "string"}
+      }
+    },
+    "runtime_hints": {
+      "type": "object",
+      "required": ["success_metric"],
+      "properties": {
+        "simulator": {"type": "string"},
+        "reset_policy": {"type": "string"},
+        "max_episode_steps": {"type": "integer"},
+        "success_metric": {"type": "string"},
+        "success_predicate": {"type": "string"}
+      }
+    },
+    "adapter_validation": {
+      "type": "object"
+    }
+  }
+}

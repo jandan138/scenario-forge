@@ -1,0 +1,10 @@
+schema_version: ebench-task-entrypoint/v0.1
+package_id: tabletop_pick_place_starter
+task_id: place_object_on_target
+task_family: pick_place
+instruction: Move the object onto the target zone.
+success_metric: task_success
+metric_role: primary_success
+bindings:
+  object: object_001
+  target_zone: target_zone

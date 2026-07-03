@@ -237,6 +237,80 @@ def test_cli_scene_compile_writes_usda_for_locked_instances(tmp_path: Path) -> N
     )
 
 
+def test_cli_task_compile_writes_pick_place_artifacts(tmp_path: Path) -> None:
+    package_dir = tmp_path / "starter"
+    scaffold = run_cli("package", "scaffold", "--out", str(package_dir), cwd=tmp_path)
+
+    result = run_cli(
+        "task",
+        "compile",
+        "--package",
+        str(package_dir),
+        "--family",
+        "pick_place",
+        cwd=tmp_path,
+    )
+    metrics = yaml.safe_load((package_dir / "metrics" / "metrics.yaml").read_text(encoding="utf-8"))
+
+    assert scaffold.returncode == 0, scaffold.stderr
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Task artifacts written:" in result.stdout
+    assert metrics["metrics"][0]["role"] == "primary_success"
+    assert metrics["metrics"][0]["adapter_hints"]["ebench"]["success_metric"] == "task_success"
+
+
+def test_cli_export_ebench_writes_package_adapter_artifacts(tmp_path: Path) -> None:
+    package_dir = tmp_path / "starter"
+    scaffold = run_cli("package", "scaffold", "--out", str(package_dir), cwd=tmp_path)
+
+    result = run_cli("export", "ebench", "--package", str(package_dir), cwd=tmp_path)
+
+    assert scaffold.returncode == 0, scaffold.stderr
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "EBench package export written:" in result.stdout
+    assert (package_dir / "adapters" / "ebench" / "package.yaml").exists()
+    assert (package_dir / "adapters" / "ebench" / "adapter_report.yaml").exists()
+
+
+def test_cli_export_ebench_writes_suite_task_index(tmp_path: Path) -> None:
+    package_dir = tmp_path / "starter"
+    suite_dir = tmp_path / "suite"
+    suite_dir.mkdir()
+    scaffold = run_cli("package", "scaffold", "--out", str(package_dir), cwd=tmp_path)
+    package_export = run_cli("export", "ebench", "--package", str(package_dir), cwd=tmp_path)
+    (suite_dir / "suite_manifest.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "scenario-suite/v0.1",
+                "suite_id": "starter_suite",
+                "packages": [
+                    {
+                        "package_id": "tabletop_pick_place_starter",
+                        "path": str(package_dir),
+                        "split": "smoke",
+                        "difficulty": "easy",
+                        "task_family": "pick_place",
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_cli("export", "ebench", "--suite", str(suite_dir), cwd=tmp_path)
+    task_index = yaml.safe_load(
+        (suite_dir / "adapters" / "ebench" / "task_index.yaml").read_text(encoding="utf-8")
+    )
+
+    assert scaffold.returncode == 0, scaffold.stderr
+    assert package_export.returncode == 0, package_export.stdout + package_export.stderr
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "EBench suite export written:" in result.stdout
+    assert task_index["tasks"][0]["package_id"] == "tabletop_pick_place_starter"
+    assert task_index["tasks"][0]["split"] == "smoke"
+
+
 def test_cli_check_returns_nonzero_for_invalid_package(tmp_path: Path) -> None:
     package_dir = tmp_path / "broken"
     package_dir.mkdir()

@@ -6,9 +6,11 @@ from pathlib import Path
 
 from scenario_forge.assets.lock import AssetLockError, check_asset_lock, generate_asset_lock, write_asset_lock
 from scenario_forge.assets.manifest import AssetManifestError
+from scenario_forge.adapters.ebench import EBenchExportError, export_ebench_package, export_ebench_suite
 from scenario_forge.package import PackageError, load_package_manifest, validate_package
 from scenario_forge.scaffold import scaffold_starter_package
 from scenario_forge.scene.usd_compiler import USDSceneCompilerError, compile_usd_scene
+from scenario_forge.task.task_compiler import TaskCompileError, compile_task_artifacts
 from scenario_forge.validation.usd_checks import check_usd_scene
 
 
@@ -51,6 +53,25 @@ def build_parser() -> argparse.ArgumentParser:
     scene_compile_parser.add_argument("--instances", required=True, help="scene/instances.yaml")
     scene_compile_parser.add_argument("--asset-lock", required=True, help="locks/asset_lock.yaml")
     scene_compile_parser.add_argument("--out", required=True, help="Output USDA scene path")
+
+    task_parser = subparsers.add_parser("task", help="Task graph and metric compiler commands")
+    task_subparsers = task_parser.add_subparsers(dest="task_command", required=True)
+
+    task_compile_parser = task_subparsers.add_parser(
+        "compile", help="Compile task graph, predicates, safety rules, and metrics"
+    )
+    task_compile_parser.add_argument("--package", required=True, help="Package directory")
+    task_compile_parser.add_argument("--family", default="pick_place", help="Task family")
+
+    export_parser = subparsers.add_parser("export", help="Adapter export commands")
+    export_subparsers = export_parser.add_subparsers(dest="export_command", required=True)
+
+    ebench_export_parser = export_subparsers.add_parser(
+        "ebench", help="Export EBench-compatible adapter artifacts"
+    )
+    ebench_group = ebench_export_parser.add_mutually_exclusive_group(required=True)
+    ebench_group.add_argument("--package", help="Single package directory")
+    ebench_group.add_argument("--suite", help="Suite directory containing suite_manifest.yaml")
 
     return parser
 
@@ -125,6 +146,34 @@ def main(argv: list[str] | None = None) -> int:
 
         print(f"Scene written: {result.path}")
         print("USD static check OK")
+        return 0
+
+    if args.command == "task" and args.task_command == "compile":
+        try:
+            result = compile_task_artifacts(Path(args.package), task_family=args.family)
+        except TaskCompileError as exc:
+            print(exc)
+            return 1
+        print(f"Task artifacts written: {result.package_root}")
+        for artifact in result.artifacts:
+            print(artifact)
+        return 0
+
+    if args.command == "export" and args.export_command == "ebench":
+        if args.package:
+            try:
+                result = export_ebench_package(Path(args.package))
+            except EBenchExportError as exc:
+                print(exc)
+                return 1
+            print(f"EBench package export written: {result.output_dir}")
+            return 0
+        result = export_ebench_suite(Path(args.suite))
+        for blocker in result.blockers:
+            print(blocker)
+        if not result.ok:
+            return 1
+        print(f"EBench suite export written: {result.output_dir}")
         return 0
 
     parser.error("unreachable command")
