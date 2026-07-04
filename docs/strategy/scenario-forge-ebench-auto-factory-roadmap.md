@@ -2083,6 +2083,7 @@ Phase 7：LabBuilder-style Layout Generator
 Phase 8：SimFoundry-style Real2Sim / Cousin Ingestion
 Phase 9：Suite Generator / Benchmark Factory
 Phase 10：Suite Quality Evidence
+Phase 10.1-10.5：Pre-Phase-11 Golden Pack / EOS Import / Runtime Smoke Gates
 Phase 11：Workbench UI / Human Review / Dataset Release Flow
 Phase 12：Ecosystem Integration / Registry / Multi-simulator Adapters
 ```
@@ -2819,6 +2820,81 @@ quality_findings:
 3. split leakage 被识别。
 4. difficulty distribution 可解释。
 5. asset/license/checksum 完整率可报告。
+```
+
+### 34.5 Phase 10.x：进入 Phase 11 前的收口阶段
+
+Phase 10 已经回答“Scenario Forge 能不能批量生成 suite quality evidence”。进入 Phase 11
+之前，还需要回答一个更产品化的问题：能不能把一组小而完整的 USD task package 交给
+EOS / EBench 接住，并留下可复查证据。
+
+Phase 10.x 不做 UI，不做 leaderboard，不接管模型评测。它只把“静态包工厂”收口成
+“可交付给 downstream runtime 的 release candidate”。
+
+```text
+Phase 10.1：Golden USD Task Pack Freeze
+  冻结 10-20 个黄金任务，覆盖核心 task families、split、difficulty、asset locks、USD entrypoints。
+  目标是得到一个可反复生成、可 debug、可作为所有 downstream gate 输入的小套件。
+
+Phase 10.2：Asset / External Input Hardening
+  对内部 layout、LabBuilder-style layout import、SimFoundry-style real2sim/cousin import 做 A/B 证据对齐。
+  不判断哪条路线“理念更好”，只看 package validity、asset lock coverage、predicate binding、
+  reachability/layout_checks、license/checksum completeness 和 EBench export 是否更稳。
+
+Phase 10.3：EOS Static Import Contract Gate
+  用 EOS 的普通项目环境读取 Scenario Forge suite/package 输出，验证 suite_manifest、adapters/ebench、
+  task_entrypoint、scene/main.usda、locks/asset_lock.yaml 和 evidence 索引能被 downstream 静态导入。
+  这一阶段不启动 simulator，不加载模型，不声称 runtime pass。
+
+Phase 10.4：Runtime Smoke Evidence Gate
+  在 EOS 的 backend-specific runtime lane 中挑 1-3 个黄金任务做最小 smoke。
+  目标是证明“USD package 能被某个真实 runtime lane 接住并产生 evidence”，不是证明模型分数。
+
+Phase 10.5：Release Candidate Gate
+  扩到 50-100 个任务的 RC suite，汇总 package validation、suite_quality_evidence、
+  EOS static import evidence、runtime smoke evidence 和已知 blockers，作为进入 Phase 11 的 go/no-go。
+```
+
+### 34.6 EOS conda 环境边界
+
+2026-07-04 对 `/cpfs/user/zhuzihou/dev/embodied-eval-os` 的只读检查结论：
+
+```bash
+# EOS 普通开发 / 静态导入 / 全局检查环境
+export EEOS_ENV_ROOT=/cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-py310
+export EEOS_PYTHON="$EEOS_ENV_ROOT/bin/python"
+```
+
+该环境当前可执行，Python 版本为 3.10.20。Phase 10.3 的 EOS static import gate
+默认使用这个环境。不要使用 DSW 默认 `python`，因为它可能解析到 Isaac Sim 镜像里的
+`/usr/bin/python3`。
+
+Runtime smoke 不能复用一个通用解释器糊过去，必须按 lane 选择：
+
+```text
+IsaacSim41 local runtime:
+  /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-isaacsim41-py310/bin/python
+
+Newton / EBench experimental runtime:
+  /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-newton-ebench-experimental-py310/bin/python
+
+OpenPI EBench model sidecar:
+  /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-sidecar-openpi-ebench-py311/bin/python
+```
+
+OpenPI sidecar 是模型 lane，不替代 `EEOS_PYTHON`。IsaacSim / Newton runtime gate
+通过时，只能声明对应 lane 的 smoke evidence；不能把它扩大解释成完整 benchmark 或
+leaderboard ready。
+
+### 34.7 进入 Phase 11 的门槛
+
+```text
+1. Phase 10.1 黄金任务包可 deterministic regenerate。
+2. Phase 10.2 给出 internal layout vs external pipeline 的证据结论和采用策略。
+3. Phase 10.3 EOS static import gate 通过，且证据文件被纳入 suite evidence 索引。
+4. Phase 10.4 至少一个 backend runtime smoke 产出非 not_run 证据，并清楚标注 lane。
+5. Phase 10.5 RC suite 有完整 quality evidence、asset/license/checksum evidence、known blockers。
+6. 仍然不在 Scenario Forge 中新增 episode runner、model adapter、leaderboard 或 simulator SDK import。
 ```
 
 ---

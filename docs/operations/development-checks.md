@@ -80,5 +80,31 @@ scenario-forge suite generate --spec examples/suite_spec_smoke.yaml --out ./suit
 scenario-forge suite quality --suite ./suite
 ```
 
+Phase 10.x EOS handoff environment:
+
+```bash
+export EEOS_ENV_ROOT=/cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-py310
+export EEOS_PYTHON="$EEOS_ENV_ROOT/bin/python"
+"$EEOS_PYTHON" --version
+```
+
+Use `EEOS_PYTHON` for EOS static import checks of Scenario Forge package and
+suite artifacts. On 2026-07-04 this environment existed locally and reported
+Python 3.10.20.
+
+Runtime smoke checks are lane-specific and must not replace the global EOS
+project environment:
+
+```text
+IsaacSim41 local runtime:
+  /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-isaacsim41-py310/bin/python
+
+Newton / EBench experimental runtime:
+  /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-newton-ebench-experimental-py310/bin/python
+
+OpenPI EBench model sidecar:
+  /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-sidecar-openpi-ebench-py311/bin/python
+```
+
 Heavy simulator checks are not part of the bootstrap lane. Future simulator checks should be
 separate targets and marked so pure package validation remains fast.

@@ -24,6 +24,18 @@ This lane does not run episodes, import simulator SDKs, evaluate models, or crea
 
 All outputs are ordinary package or suite artifacts: YAML manifests, scene instances, USD entrypoints, asset manifests/locks, provenance, evidence, and EBench adapter descriptors. External systems can produce real2sim results or alternative layout plans, but they must enter through importer/adapter contracts and cannot bypass package validation.
 
+## Phase 10.x Pre-Phase-11 Gates
+
+Phases 6-10 produce static packages and suite construction evidence. Before Phase 11 adds UI and human review flows, the factory needs a downstream handoff gate:
+
+- `10.1 Golden USD Task Pack Freeze`: freeze a small 10-20 task suite that covers the main scientific-workbench families, split labels, difficulty labels, USD entrypoints, package-local asset locks, and EBench adapter descriptors.
+- `10.2 Asset / External Input Hardening`: compare Scenario Forge's deterministic layout output with LabBuilder-style layout imports and SimFoundry-style real2sim/cousin imports using package validity, asset-lock coverage, predicate binding, layout checks, and EBench export readiness.
+- `10.3 EOS Static Import Contract Gate`: in EOS's normal project environment, statically load the Scenario Forge suite/package outputs and verify that downstream code can resolve `suite_manifest.yaml`, `adapters/ebench/package.yaml`, `task_entrypoint.yaml`, `scene/main.usda`, and `locks/asset_lock.yaml`.
+- `10.4 Runtime Smoke Evidence Gate`: in a backend-specific EOS runtime lane, run the smallest non-model smoke needed to prove that selected USD packages can be accepted by a real runtime and produce evidence.
+- `10.5 Release Candidate Gate`: scale to a 50-100 task RC suite and attach quality evidence, EOS static import evidence, runtime smoke evidence, and known blockers before Phase 11 starts.
+
+These gates are evidence handoff steps, not new ownership. Scenario Forge remains responsible for portable package construction and validation; EOS / EBench remain responsible for episode execution, model-facing traces, and benchmark reports.
+
 ## Commands
 
 ```bash
