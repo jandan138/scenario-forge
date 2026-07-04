@@ -1,0 +1,24 @@
+schema_version: ebench-official-asset-sources/v0.1
+task_id: mobile_manip/apple_to_fruit_bowl
+instruction: Pick up the apple from the dining table and place it into the fruit bowl.
+assets:
+  scene:
+    role: environment
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task4/scene.usd
+    license: research-use
+  robot:
+    role: robot
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+    license: research-use
+  apple:
+    role: manipulated_object
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/apple/ready/5948de6770a5491ea158cd9e921ebce9/5948de6770a5491ea158cd9e921ebce9.usd
+    license: research-use
+  bowl:
+    role: target_container
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/bowl/ready/307689f1c6884e1bb85bb20f00fef294/307689f1c6884e1bb85bb20f00fef294.usd
+    license: research-use
+  camera_yaml:
+    role: camera_config
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml
+    license: research-use

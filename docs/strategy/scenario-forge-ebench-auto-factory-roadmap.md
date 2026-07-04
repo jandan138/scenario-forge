@@ -2947,6 +2947,120 @@ leaderboard ready。
 6. 仍然不在 Scenario Forge 中新增 episode runner、model adapter、leaderboard 或 simulator SDK import。
 ```
 
+### 34.8 Phase 10.6-10.10：真实 EBench 单任务 USD Canary
+
+Phase 10.1-10.5 已经证明了 package handoff：Scenario Forge 能生成带 USD entrypoint
+和 asset lock 的包，EOS 能读取 package descriptor 并打开 USD stage。但这里的 USD 仍然是
+package-compiler 级别的可加载 stage，不等于某个真实 EBench 任务的官方物体资产 stage。
+
+进入 Phase 11 UI 之前，应该追加一条很窄的 pre-Phase-11 canary：只做
+`mobile_manip/apple_to_fruit_bowl`，目标是尽快产出一个真正引用官方 EBench apple、bowl、
+scene、Lift2 robot USD 资产的 Scenario Forge package。
+
+已知事实：
+
+```text
+EOS retained evidence 已经解析出 apple_to_fruit_bowl 的官方资产：
+  task: mobile_manip/apple_to_fruit_bowl
+  instruction: Pick up the apple from the dining table and place it into the fruit bowl.
+  scene: official EBench simple_pnp/task4 scene USD
+  object assets: official EBench apple USD and bowl USD
+  robot: official Lift2 robot USD
+  camera: GenManip fixed_camera_lift2_simbox.yml
+
+这些源资产位于本地 CPFS EBench-Assets mount，并带有 sha256 / source_path evidence。
+这意味着第一版真实资产 USD 不需要等待资产制作，主要工作是 asset intake、package-local
+materialization、asset lock、USD composition 和 EOS smoke。
+```
+
+推荐拆分：
+
+```text
+Phase 10.6：Official EBench Asset Intake Freeze
+  固化 apple、bowl、scene、robot、camera 的 source_path、sha256、license/use restriction、
+  bundle files 和 provenance。输出只提交小型 YAML/JSON manifest，不提交大 USD asset payload。
+
+Phase 10.7：Single-Task Real-Asset USD Package
+  生成一个 `ebench_apple_to_fruit_bowl_canary` package。它的 `scene/main.usda` 必须引用
+  package-local materialized copies of official EBench USD assets，而不是 placeholder Xform。
+  package 内必须包含 `assets/asset_manifest.yaml`、`locks/asset_lock.yaml`、`scene/instances.yaml`、
+  `task/task.yaml`、`metrics/metrics.yaml`、`adapters/ebench/package.yaml`。
+
+Phase 10.8：EOS Package-Linked Real-Asset USD Smoke
+  用 EOS bridge 读取该 package，执行 `pxr.Usd.Stage.Open(scene/main.usda)`，并验证 trace 中
+  包含 package id、official asset hashes、apple/bowl/scene/robot references。仍然不跑模型。
+
+Phase 10.9：Newton / EBench Visual Canary
+  在 EOS runtime lane 中打开同一个 Scenario Forge package，产出至少一帧非空渲染或可检查的
+  scene inspection evidence。该阶段可以声明“真实资产 geometry 被 runtime lane 看到”，仍然
+  不能声明 task success、official camera parity、material parity 或 leaderboard readiness。
+  验收优先使用引擎原生 camera / sensor API 放置一个 `tabletop_overview` 相机，而不是用
+  离线拼图或代码里假造截图。相机目标是拍到完整桌面工作面，并让 apple、bowl、scene
+  context 和 robot / robot spawn 一起可见。渲染 PNG 必须和 camera pose、engine/runtime、
+  package id、scene USD、asset hashes 一起保留，然后用 clean-room visual review 审核：
+  图片是否非空、桌面是否完整可见、苹果和碗是否可识别、是否存在严重遮挡/裁切/黑材质/
+  贴图丢失/几何破损/placeholder 资产。Phase 10.9 strict pass 需要视觉 review 给出 PASS；
+  WARN 只能作为调参依据，不能作为产品展示闭环。
+
+Phase 10.10：EBench Task Contract Canary
+  把 `apple_to_fruit_bowl` 的 task semantics、success predicate、robot/camera hints 和 adapter
+  contract 固化为一个可复查的 single-task EBench-compatible package。它是进入 Phase 11 human
+  review / release flow 的第一个真实任务包样本。
+```
+
+时间判断（从 2026-07-04 继续推进的保守口径）：
+
+```text
+最快能看到“真的用了官方 apple/bowl/scene/robot USD 的 scene/main.usda”：
+  Phase 10.7 结束；如果 CPFS asset mount 继续可用，目标是 2026-07-04 当天或
+  2026-07-05 产出第一个本地 canary package。
+
+能比较稳地对外展示“下游 EOS 能打开这个真实资产 USD package”：
+  Phase 10.8 结束；目标是 2026-07-05 到 2026-07-06。
+
+能给产品看“一张由引擎原生相机拍到的真实资产桌面渲染图”：
+  Phase 10.9 结束；目标是 2026-07-06 左右。该图必须通过视觉 review skill 的
+  clean-room QA，不能只靠代码日志或 Stage.Open 通过。
+
+能说“这是一个真实 EBench apple-to-bowl 单任务包 canary，不只是 USD 文件”：
+  Phase 10.10 结束；目标是 2026-07-06 到 2026-07-07，前提是 license/use restriction
+  允许以 locked 或 fat package 形式交付，并且 EOS runtime 依赖环境可用。
+```
+
+边界：
+
+- Phase 10.7 的真实 USD 是 packaging / composition milestone，不代表模型会成功把苹果放进碗。
+- 大资产不进入 git；git 里只放 manifest、lock、source index、checks 和 retained evidence。
+- 如果官方资产 license 不允许复制到公开 fat package，则先交付 locked package；fat package
+  只在受控 artifact storage 中保留。
+- Scenario Forge 继续不导入 Newton、Isaac、GenManip、OpenPI 或 EBench runner SDK；真实 runtime
+  smoke 和 render evidence 保持在 EOS adapter lane。
+- Phase 10.9 的渲染图是 visual canary evidence，不代表 official material/camera parity。
+  它只能证明“真实资产在某个 runtime lane 中以可检查的方式被看到”。
+
+2026-07-04 执行状态：
+
+```text
+Phase 10.6：已完成。
+  已新增 official EBench apple-to-bowl asset source manifest 和 asset intake 代码。
+
+Phase 10.7：已完成。
+  已生成 /tmp/ebench-apple-to-bowl-canary；scene/main.usda 引用 package-local
+  official EBench scene、Lift2 robot、apple、bowl USD assets；package check 和
+  asset lock check 通过。
+
+Phase 10.8：已完成。
+  EOS bridge 已对 /tmp/ebench-apple-to-bowl-canary 执行 package-linked
+  Usd.Stage.Open smoke，runtime_status=executed，stage_open_status=passed。
+
+Retained evidence:
+  docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/
+
+仍未完成：
+  Phase 10.9 engine-native tabletop render + clean-room visual review。
+  Phase 10.10 task contract canary hardening。
+```
+
 ---
 
 ## 35. Phase 11：Workbench UI / Human Review / Dataset Release Flow

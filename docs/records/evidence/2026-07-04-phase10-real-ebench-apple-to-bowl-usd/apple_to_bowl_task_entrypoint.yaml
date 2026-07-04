@@ -1,0 +1,10 @@
+schema_version: ebench-task-entrypoint/v0.1
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+task_family: pick_place
+instruction: Pick up the apple from the dining table and place it into the fruit bowl.
+success_metric: apple_in_bowl
+metric_role: primary_success
+bindings:
+  object: apple_001
+  target_container: bowl_001

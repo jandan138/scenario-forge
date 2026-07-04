@@ -1,0 +1,23 @@
+{
+  "adapter_descriptor": "/tmp/ebench-apple-to-bowl-canary/adapters/ebench/package.yaml",
+  "asset_lock": "/tmp/ebench-apple-to-bowl-canary/locks/asset_lock.yaml",
+  "claim_boundary": "Package-linked USD load smoke only. This is not official EBench reproduction, not leaderboard comparable, not model evaluation, not task success, and not physics-fidelity evidence.",
+  "lane": "eos_usd_stage_open_smoke",
+  "package_id": "ebench_apple_to_bowl_canary",
+  "package_ids": [
+    "ebench_apple_to_bowl_canary"
+  ],
+  "runtime_status": "executed",
+  "scene_usd": "/tmp/ebench-apple-to-bowl-canary/scene/main.usda",
+  "schema": "phase10x_scenario_forge_usd_smoke_trace.v0",
+  "stage_open_status": "passed",
+  "stage_reports": [
+    {
+      "package_id": "ebench_apple_to_bowl_canary",
+      "reason": null,
+      "scene_usd": "/tmp/ebench-apple-to-bowl-canary/scene/main.usda",
+      "stage_open_status": "passed"
+    }
+  ],
+  "task_entrypoint": "/tmp/ebench-apple-to-bowl-canary/adapters/ebench/task_entrypoint.yaml"
+}

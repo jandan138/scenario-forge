@@ -1,0 +1,14 @@
+schema_version: phase10x-runtime-smoke-evidence/v0.1
+lane: eos_usd_stage_open_smoke
+status: passed
+packages_tested:
+- ebench_apple_to_bowl_canary
+package_artifacts:
+- package_id: ebench_apple_to_bowl_canary
+  usd_entrypoint: ebench-apple-to-bowl-canary/scene/main.usda
+  asset_lock: ebench-apple-to-bowl-canary/locks/asset_lock.yaml
+  adapter_descriptor: ebench-apple-to-bowl-canary/adapters/ebench/package.yaml
+  task_entrypoint: ebench-apple-to-bowl-canary/adapters/ebench/task_entrypoint.yaml
+  trace_uri: file:///cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_usd_smoke_trace.json
+evidence_uri: file:///cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_runtime_smoke.yaml
+summary: EOS runtime lane loaded Scenario Forge USD.

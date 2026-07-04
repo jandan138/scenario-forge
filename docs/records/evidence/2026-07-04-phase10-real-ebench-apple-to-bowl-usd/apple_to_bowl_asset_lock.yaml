@@ -1,0 +1,32 @@
+schema_version: asset-lock/v0.2
+lock_id: ebench-apple-to-bowl-canary_asset_lock
+created_by: scenario-forge
+assets:
+  official_ebench_scene:
+    source_kind: official_ebench_asset
+    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task4/scene.usd
+    resolved_path: assets/official_ebench_scene/scene.usd
+    content_sha256: sha256:56d11834ef12d47b66ac1c0114b328893f80a9ae70dd82d1e1f44102f01079a0
+    license: research-use
+    resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  official_ebench_robot:
+    source_kind: official_ebench_asset
+    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+    resolved_path: assets/official_ebench_robot/robot.usd
+    content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+    license: research-use
+    resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  official_ebench_apple:
+    source_kind: official_ebench_asset
+    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/apple/ready/5948de6770a5491ea158cd9e921ebce9/5948de6770a5491ea158cd9e921ebce9.usd
+    resolved_path: assets/official_ebench_apple/5948de6770a5491ea158cd9e921ebce9.usd
+    content_sha256: sha256:3cea327ec9c4d602f8400f8bbfe555742bc77743070a8f2636d92e651c4fd828
+    license: research-use
+    resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  official_ebench_bowl:
+    source_kind: official_ebench_asset
+    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/bowl/ready/307689f1c6884e1bb85bb20f00fef294/307689f1c6884e1bb85bb20f00fef294.usd
+    resolved_path: assets/official_ebench_bowl/307689f1c6884e1bb85bb20f00fef294.usd
+    content_sha256: sha256:28025950c6163ab1b26ffdd37f6cd4ab4f177a6eb6cc55c3832c2eec307e3d28
+    license: research-use
+    resolver_version: scenario-forge-ebench-official-asset-intake/v0.1

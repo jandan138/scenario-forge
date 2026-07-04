@@ -1,0 +1,22 @@
+schema_version: scenario-package/v0.2
+package_id: ebench_apple_to_bowl_canary
+scenario_domain: home_manipulation
+package_mode: fat
+targets:
+- ebench
+- embodied-eval-os
+entrypoints:
+  generation_plan: generation_plan.yaml
+  scene_usd: scene/main.usda
+  scene_instances: scene/instances.yaml
+  task: task/task.yaml
+  robot: robot/robot.yaml
+  metrics: metrics/metrics.yaml
+assets:
+  manifest: assets/asset_manifest.yaml
+  lock: locks/asset_lock.yaml
+validation:
+  report: evidence/validation_report.yaml
+  minimum_required_level: asset_locked
+provenance:
+  summary: provenance/summary.yaml

@@ -25,6 +25,7 @@ from scenario_forge.evaluation.phase10x_gates import (
     Phase10xEvidenceError,
     generate_phase10x_evidence,
 )
+from scenario_forge.generation.ebench_canary.apple_to_bowl import generate_apple_to_bowl_canary
 from scenario_forge.package import PackageError, load_package_manifest, validate_package
 from scenario_forge.scaffold import scaffold_starter_package
 from scenario_forge.scene.usd_compiler import USDSceneCompilerError, compile_usd_scene
@@ -179,6 +180,19 @@ def build_parser() -> argparse.ArgumentParser:
     ebench_group = ebench_export_parser.add_mutually_exclusive_group(required=True)
     ebench_group.add_argument("--package", help="Single package directory")
     ebench_group.add_argument("--suite", help="Suite directory containing suite_manifest.yaml")
+
+    ebench_parser = subparsers.add_parser("ebench", help="EBench-specific canary commands")
+    ebench_subparsers = ebench_parser.add_subparsers(dest="ebench_command", required=True)
+    ebench_canary_parser = ebench_subparsers.add_parser("canary", help="Generate EBench canary packages")
+    ebench_canary_subparsers = ebench_canary_parser.add_subparsers(
+        dest="ebench_canary_command", required=True
+    )
+    apple_to_bowl_parser = ebench_canary_subparsers.add_parser(
+        "apple-to-bowl",
+        help="Generate a real-asset apple-to-bowl canary package",
+    )
+    apple_to_bowl_parser.add_argument("--asset-sources", required=True, help="Official asset source YAML")
+    apple_to_bowl_parser.add_argument("--out", required=True, help="Output package directory")
 
     return parser
 
@@ -376,6 +390,17 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"EBench suite export written: {result.output_dir}")
         return 0
+
+    if args.command == "ebench" and args.ebench_command == "canary":
+        if args.ebench_canary_command == "apple-to-bowl":
+            try:
+                result = generate_apple_to_bowl_canary(Path(args.asset_sources), Path(args.out))
+            except ValueError as exc:
+                print(exc)
+                return 1
+            print(f"Package written: {result.package_root}")
+            print(f"USD entrypoint: {result.scene_usd}")
+            return 0
 
     parser.error("unreachable command")
     return 2
