@@ -244,6 +244,19 @@ def _runtime_smoke_evidence(
 
     source_status = str(source.get("status", "failed"))
     blockers = list(package_blockers)
+    package_artifacts, artifact_blockers = _runtime_package_artifacts(source, package_ids)
+    blockers.extend(artifact_blockers)
+    artifact_package_ids = {
+        str(item["package_id"])
+        for item in package_artifacts
+        if isinstance(item, dict) and isinstance(item.get("package_id"), str)
+    }
+    uncovered = sorted(set(packages_tested) - artifact_package_ids)
+    if uncovered:
+        blockers.append(
+            "runtime smoke package-linked artifacts missing for tested package ids: "
+            + ", ".join(uncovered)
+        )
     if source_status != "passed":
         blockers.append(f"runtime smoke status is {source_status!r}, expected 'passed'")
     if not packages_tested:
@@ -256,10 +269,51 @@ def _runtime_smoke_evidence(
         "evidence_source": str(runtime_smoke_path),
         "lane": source.get("lane"),
         "packages_tested": packages_tested,
+        "package_artifacts": package_artifacts,
         "evidence_uri": source.get("evidence_uri"),
         "summary": source.get("summary"),
         "blockers": blockers,
     }
+
+
+def _runtime_package_artifacts(
+    source: dict[str, Any],
+    package_ids: set[str],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    raw_artifacts = source.get("package_artifacts")
+    if raw_artifacts is None:
+        return [], ["runtime smoke must include package-linked artifacts"]
+    if not isinstance(raw_artifacts, list):
+        return [], ["runtime smoke field 'package_artifacts' must be a list"]
+
+    artifacts: list[dict[str, Any]] = []
+    blockers: list[str] = []
+    required_fields = ("package_id", "usd_entrypoint", "asset_lock", "adapter_descriptor", "trace_uri")
+    for index, raw_artifact in enumerate(raw_artifacts):
+        if not isinstance(raw_artifact, dict):
+            blockers.append(f"runtime smoke package_artifacts[{index}] must be a mapping")
+            continue
+        artifact = dict(raw_artifact)
+        missing_fields = [
+            field
+            for field in required_fields
+            if not isinstance(artifact.get(field), str) or not str(artifact[field]).strip()
+        ]
+        if missing_fields:
+            blockers.append(
+                f"runtime smoke package_artifacts[{index}] missing "
+                + ", ".join(missing_fields)
+            )
+        package_id = artifact.get("package_id")
+        if isinstance(package_id, str) and package_id not in package_ids:
+            blockers.append(
+                f"runtime smoke package_artifacts[{index}] references unknown package id: "
+                f"{package_id}"
+            )
+        artifacts.append(artifact)
+    if not artifacts:
+        blockers.append("runtime smoke must include at least one package-linked artifact")
+    return artifacts, blockers
 
 
 def _release_candidate_evidence(

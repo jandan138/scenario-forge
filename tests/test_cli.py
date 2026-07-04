@@ -726,6 +726,16 @@ def write_phase10x_external_evidence(path: Path) -> Path:
 
 
 def write_phase10x_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
+    package_artifacts = [
+        {
+            "package_id": package_id,
+            "usd_entrypoint": f"packages/{package_id}/scene/main.usda",
+            "asset_lock": f"packages/{package_id}/locks/asset_lock.yaml",
+            "adapter_descriptor": f"packages/{package_id}/adapters/ebench/package.yaml",
+            "trace_uri": f"eos://records/phase10x/cli-smoke/{package_id}",
+        }
+        for package_id in package_ids
+    ]
     path.write_text(
         yaml.safe_dump(
             {
@@ -733,6 +743,7 @@ def write_phase10x_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
                 "lane": "eos_newton_smoke",
                 "status": "passed",
                 "packages_tested": package_ids,
+                "package_artifacts": package_artifacts,
                 "evidence_uri": "eos://records/phase10x/cli-smoke",
             },
             sort_keys=False,

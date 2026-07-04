@@ -77,6 +77,37 @@ def test_phase10x_warns_when_runtime_smoke_is_missing(tmp_path: Path) -> None:
     assert any("runtime smoke" in blocker for blocker in rc_gate["blockers"])
 
 
+def test_phase10x_runtime_smoke_requires_package_linked_artifacts(tmp_path: Path) -> None:
+    suite_dir = generate_golden_suite(tmp_path)
+    external_path = write_external_evidence(tmp_path / "external.yaml")
+    runtime_path = tmp_path / "runtime.yaml"
+    write_yaml(
+        runtime_path,
+        {
+            "schema_version": "phase10x-runtime-smoke-evidence/v0.1",
+            "lane": "eos_genmanip_native_smoke",
+            "status": "passed",
+            "packages_tested": ["phase10x_test_suite_000"],
+            "evidence_uri": "file:///tmp/native-genmanip-trace.json",
+            "summary": "Native GenManip task executed, but no Scenario Forge package artifacts were linked.",
+        },
+    )
+
+    result = generate_phase10x_evidence(
+        suite_dir,
+        eos_python=Path(sys.executable),
+        external_evidence_path=external_path,
+        runtime_smoke_path=runtime_path,
+        rc_min_packages=10,
+        rc_max_packages=20,
+    )
+    runtime = load_yaml(suite_dir / "evidence" / "runtime_smoke.yaml")
+
+    assert result.gate_statuses["phase_10_4_runtime_smoke"] == "failed"
+    assert runtime["status"] == "failed"
+    assert any("package-linked" in blocker for blocker in runtime["blockers"])
+
+
 def test_phase10x_static_import_fails_when_required_artifact_is_missing(
     tmp_path: Path,
 ) -> None:
@@ -169,6 +200,16 @@ def write_external_evidence(path: Path) -> Path:
 
 
 def write_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
+    package_artifacts = [
+        {
+            "package_id": package_id,
+            "usd_entrypoint": f"packages/{package_id}/scene/main.usda",
+            "asset_lock": f"packages/{package_id}/locks/asset_lock.yaml",
+            "adapter_descriptor": f"packages/{package_id}/adapters/ebench/package.yaml",
+            "trace_uri": f"eos://records/phase10x/newton-smoke/{package_id}",
+        }
+        for package_id in package_ids
+    ]
     write_yaml(
         path,
         {
@@ -176,6 +217,7 @@ def write_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
             "lane": "eos_newton_smoke",
             "status": "passed",
             "packages_tested": package_ids,
+            "package_artifacts": package_artifacts,
             "evidence_uri": "eos://records/phase10x/newton-smoke",
             "summary": "Downstream EOS runtime smoke accepted generated USD packages.",
         },

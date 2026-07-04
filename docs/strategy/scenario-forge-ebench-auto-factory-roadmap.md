@@ -2863,11 +2863,30 @@ Phase 10.3：EOS Static Import Contract Gate
 
 Phase 10.4：Runtime Smoke Evidence Gate
   在 EOS 的 backend-specific runtime lane 中挑 1-3 个黄金任务做最小 smoke。
-  目标是证明“USD package 能被某个真实 runtime lane 接住并产生 evidence”，不是证明模型分数。
+  目标是证明“Scenario Forge 生成的 USD package 能被某个真实 runtime lane 接住并产生 evidence”，
+  不是证明模型分数。只跑 GenManip native task 可以证明后端 lane 可用，但不能替代
+  Scenario Forge package-linked runtime evidence。
 
 Phase 10.5：Release Candidate Gate
   扩到 50-100 个任务的 RC suite，汇总 package validation、suite_quality_evidence、
-  EOS static import evidence、runtime smoke evidence 和已知 blockers，作为进入 Phase 11 的 go/no-go。
+  EOS static import evidence、package-linked runtime smoke evidence 和已知 blockers，
+  作为进入 Phase 11 的 go/no-go。
+```
+
+2026-07-04 runtime audit update:
+
+```text
+EOS / GenManip native smoke:
+  status: executed
+  retained trace:
+    docs/records/evidence/2026-07-04-phase10x-eos-native-smoke/eos_genmanip_native_smoke_trace.json
+  evidence boundary:
+    backend lane readiness only; trace asset_provenance is genmanip_runtime
+
+Remaining Phase 10.4 blocker:
+  EOS runtime evidence must consume Scenario Forge package output and record the
+  package id, USD entrypoint, adapter descriptor, and asset lock. Native
+  GenManip task execution is not enough to close the package handoff gate.
 ```
 
 ### 34.6 EOS conda 环境边界
@@ -2907,8 +2926,10 @@ leaderboard ready。
 1. Phase 10.1 黄金任务包可 deterministic regenerate。
 2. Phase 10.2 给出 internal layout vs external pipeline 的证据结论和采用策略。
 3. Phase 10.3 EOS static import gate 通过，且证据文件被纳入 suite evidence 索引。
-4. Phase 10.4 至少一个 backend runtime smoke 产出非 not_run 证据，并清楚标注 lane。
-5. Phase 10.5 RC suite 有完整 quality evidence、asset/license/checksum evidence、known blockers。
+4. Phase 10.4 至少一个 backend runtime smoke 产出 package-linked executed evidence，
+   并清楚标注 lane、Scenario Forge package id、USD entrypoint 和 trace URI。
+5. Phase 10.5 RC suite 有完整 quality evidence、asset/license/checksum evidence、
+   package-linked runtime evidence 和 known blockers。
 6. 仍然不在 Scenario Forge 中新增 episode runner、model adapter、leaderboard 或 simulator SDK import。
 ```
 

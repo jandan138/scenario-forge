@@ -4,5 +4,16 @@ status: passed
 packages_tested:
   - phase10x_golden_suite_000
   - phase10x_golden_suite_001
+package_artifacts:
+  - package_id: phase10x_golden_suite_000
+    usd_entrypoint: packages/phase10x_golden_suite_000/scene/main.usda
+    asset_lock: packages/phase10x_golden_suite_000/locks/asset_lock.yaml
+    adapter_descriptor: packages/phase10x_golden_suite_000/adapters/ebench/package.yaml
+    trace_uri: eos://records/phase10x/newton-smoke/phase10x_golden_suite_000
+  - package_id: phase10x_golden_suite_001
+    usd_entrypoint: packages/phase10x_golden_suite_001/scene/main.usda
+    asset_lock: packages/phase10x_golden_suite_001/locks/asset_lock.yaml
+    adapter_descriptor: packages/phase10x_golden_suite_001/adapters/ebench/package.yaml
+    trace_uri: eos://records/phase10x/newton-smoke/phase10x_golden_suite_001
 evidence_uri: eos://records/phase10x/newton-smoke
 summary: Downstream EOS runtime smoke accepted selected generated USD packages.

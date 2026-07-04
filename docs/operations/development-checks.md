@@ -127,5 +127,21 @@ quickly in development. A formal Phase 10.5 release-candidate gate keeps the
 default 50-100 task range by omitting the `--rc-min-packages` and
 `--rc-max-packages` overrides.
 
+EOS / GenManip live smoke notes from the 2026-07-04 Phase 10.x audit:
+
+- `adapters.ebench.smoke_run` needs a GenManip job to exist before `/reset`.
+  Calling `/reset` before `/start_new_job` returns HTTP 500 from the GenManip
+  worker pool.
+- Cold IsaacSim / GenManip reset can exceed the adapter's fixed 30 second
+  reset-result polling window. EOS live-runner lanes that exercise this path
+  use a longer 900 second timeout.
+- A native GenManip task trace with `runtime_status=executed` proves backend
+  lane readiness, not Scenario Forge package handoff. Phase 10.4 requires
+  evidence that names the Scenario Forge package id, USD entrypoint, adapter
+  descriptor, asset lock, and downstream trace.
+- The imported runtime evidence must include `package_artifacts` entries with
+  `package_id`, `usd_entrypoint`, `asset_lock`, `adapter_descriptor`, and
+  `trace_uri` for every id listed in `packages_tested`.
+
 Heavy simulator checks are not part of the bootstrap lane. Future simulator checks should be
 separate targets and marked so pure package validation remains fast.
