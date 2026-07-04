@@ -43,7 +43,9 @@ def generate_phase10x_evidence(
     suite_root = Path(suite_dir)
     manifest = _load_yaml(suite_root / "suite_manifest.yaml")
     packages = _packages(manifest)
-    package_ids = {str(item["package_id"]) for item in packages}
+    package_roots = {
+        str(item["package_id"]): _suite_relative_path(suite_root, item["path"]) for item in packages
+    }
 
     generate_suite_quality_evidence(suite_root)
 
@@ -59,7 +61,8 @@ def generate_phase10x_evidence(
     )
     runtime = _runtime_smoke_evidence(
         Path(runtime_smoke_path) if runtime_smoke_path is not None else None,
-        package_ids,
+        suite_root,
+        package_roots,
     )
     gate_statuses = {
         "phase_10_1_golden_task_pack": str(golden["status"]),
@@ -218,7 +221,8 @@ def _eos_static_import_evidence(
 
 def _runtime_smoke_evidence(
     runtime_smoke_path: Path | None,
-    package_ids: set[str],
+    suite_root: Path,
+    package_roots: dict[str, Path],
 ) -> dict[str, Any]:
     if runtime_smoke_path is None:
         return {
@@ -239,12 +243,17 @@ def _runtime_smoke_evidence(
         packages_tested = []
         package_blockers = ["runtime smoke field 'packages_tested' must be a list of strings"]
     else:
+        package_ids = set(package_roots)
         unknown = sorted(set(packages_tested) - package_ids)
         package_blockers = [f"runtime smoke references unknown package ids: {', '.join(unknown)}"] if unknown else []
 
     source_status = str(source.get("status", "failed"))
     blockers = list(package_blockers)
-    package_artifacts, artifact_blockers = _runtime_package_artifacts(source, package_ids)
+    package_artifacts, artifact_blockers = _runtime_package_artifacts(
+        source,
+        suite_root,
+        package_roots,
+    )
     blockers.extend(artifact_blockers)
     artifact_package_ids = {
         str(item["package_id"])
@@ -278,7 +287,8 @@ def _runtime_smoke_evidence(
 
 def _runtime_package_artifacts(
     source: dict[str, Any],
-    package_ids: set[str],
+    suite_root: Path,
+    package_roots: dict[str, Path],
 ) -> tuple[list[dict[str, Any]], list[str]]:
     raw_artifacts = source.get("package_artifacts")
     if raw_artifacts is None:
@@ -288,7 +298,20 @@ def _runtime_package_artifacts(
 
     artifacts: list[dict[str, Any]] = []
     blockers: list[str] = []
-    required_fields = ("package_id", "usd_entrypoint", "asset_lock", "adapter_descriptor", "trace_uri")
+    required_fields = (
+        "package_id",
+        "usd_entrypoint",
+        "asset_lock",
+        "adapter_descriptor",
+        "task_entrypoint",
+        "trace_uri",
+    )
+    expected_paths = {
+        "usd_entrypoint": Path("scene/main.usda"),
+        "asset_lock": Path("locks/asset_lock.yaml"),
+        "adapter_descriptor": Path("adapters/ebench/package.yaml"),
+        "task_entrypoint": Path("adapters/ebench/task_entrypoint.yaml"),
+    }
     for index, raw_artifact in enumerate(raw_artifacts):
         if not isinstance(raw_artifact, dict):
             blockers.append(f"runtime smoke package_artifacts[{index}] must be a mapping")
@@ -305,15 +328,74 @@ def _runtime_package_artifacts(
                 + ", ".join(missing_fields)
             )
         package_id = artifact.get("package_id")
-        if isinstance(package_id, str) and package_id not in package_ids:
+        package_root = package_roots.get(package_id) if isinstance(package_id, str) else None
+        if isinstance(package_id, str) and package_root is None:
             blockers.append(
                 f"runtime smoke package_artifacts[{index}] references unknown package id: "
                 f"{package_id}"
+            )
+        elif package_root is not None:
+            blockers.extend(
+                _runtime_artifact_path_blockers(
+                    artifact,
+                    index=index,
+                    suite_root=suite_root,
+                    package_root=package_root,
+                    expected_paths=expected_paths,
+                )
             )
         artifacts.append(artifact)
     if not artifacts:
         blockers.append("runtime smoke must include at least one package-linked artifact")
     return artifacts, blockers
+
+
+def _runtime_artifact_path_blockers(
+    artifact: dict[str, Any],
+    *,
+    index: int,
+    suite_root: Path,
+    package_root: Path,
+    expected_paths: dict[str, Path],
+) -> list[str]:
+    blockers: list[str] = []
+    suite_root_resolved = suite_root.resolve(strict=False)
+    package_root_resolved = package_root.resolve(strict=False)
+    for field, expected_relative in expected_paths.items():
+        raw_path = artifact.get(field)
+        if not isinstance(raw_path, str) or not raw_path.strip():
+            continue
+        artifact_path = Path(raw_path)
+        if artifact_path.is_absolute():
+            blockers.append(
+                f"runtime smoke package_artifacts[{index}].{field} must be suite-relative"
+            )
+            continue
+        resolved = (suite_root_resolved / artifact_path).resolve(strict=False)
+        expected = (package_root_resolved / expected_relative).resolve(strict=False)
+        if not resolved.exists():
+            blockers.append(
+                f"runtime smoke package_artifacts[{index}].{field} does not exist: "
+                f"{raw_path}"
+            )
+        if resolved != expected:
+            try:
+                expected_display = expected.relative_to(suite_root_resolved).as_posix()
+            except ValueError:
+                expected_display = str(expected)
+            blockers.append(
+                f"runtime smoke package_artifacts[{index}].{field} must reference "
+                f"{expected_display}"
+            )
+            continue
+    return blockers
+
+
+def _suite_relative_path(suite_root: Path, raw_path: Any) -> Path:
+    path = Path(str(raw_path))
+    if path.is_absolute():
+        return path
+    return suite_root / path
 
 
 def _release_candidate_evidence(

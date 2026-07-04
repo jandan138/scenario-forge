@@ -108,6 +108,51 @@ def test_phase10x_runtime_smoke_requires_package_linked_artifacts(tmp_path: Path
     assert any("package-linked" in blocker for blocker in runtime["blockers"])
 
 
+def test_phase10x_runtime_smoke_requires_existing_suite_relative_package_artifacts(
+    tmp_path: Path,
+) -> None:
+    suite_dir = generate_golden_suite(tmp_path)
+    external_path = write_external_evidence(tmp_path / "external.yaml")
+    runtime_path = tmp_path / "runtime.yaml"
+    write_yaml(
+        runtime_path,
+        {
+            "schema_version": "phase10x-runtime-smoke-evidence/v0.1",
+            "lane": "eos_newton_usd_load_smoke",
+            "status": "passed",
+            "packages_tested": ["phase10x_test_suite_000"],
+            "package_artifacts": [
+                {
+                    "package_id": "phase10x_test_suite_000",
+                    "usd_entrypoint": "packages/phase10x_test_suite_000/scene/missing.usda",
+                    "asset_lock": "packages/phase10x_test_suite_000/locks/asset_lock.yaml",
+                    "adapter_descriptor": (
+                        "packages/phase10x_test_suite_000/adapters/ebench/package.yaml"
+                    ),
+                    "trace_uri": "file:///tmp/phase10x-trace.json",
+                }
+            ],
+            "evidence_uri": "file:///tmp/phase10x-runtime-evidence.json",
+            "summary": "EOS runtime lane loaded Scenario Forge USD.",
+        },
+    )
+
+    result = generate_phase10x_evidence(
+        suite_dir,
+        eos_python=Path(sys.executable),
+        external_evidence_path=external_path,
+        runtime_smoke_path=runtime_path,
+        rc_min_packages=10,
+        rc_max_packages=20,
+    )
+    runtime = load_yaml(suite_dir / "evidence" / "runtime_smoke.yaml")
+
+    assert result.gate_statuses["phase_10_4_runtime_smoke"] == "failed"
+    assert runtime["status"] == "failed"
+    assert any("task_entrypoint" in blocker for blocker in runtime["blockers"])
+    assert any("does not exist" in blocker for blocker in runtime["blockers"])
+
+
 def test_phase10x_static_import_fails_when_required_artifact_is_missing(
     tmp_path: Path,
 ) -> None:
@@ -206,6 +251,7 @@ def write_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
             "usd_entrypoint": f"packages/{package_id}/scene/main.usda",
             "asset_lock": f"packages/{package_id}/locks/asset_lock.yaml",
             "adapter_descriptor": f"packages/{package_id}/adapters/ebench/package.yaml",
+            "task_entrypoint": f"packages/{package_id}/adapters/ebench/task_entrypoint.yaml",
             "trace_uri": f"eos://records/phase10x/newton-smoke/{package_id}",
         }
         for package_id in package_ids

@@ -138,10 +138,12 @@ EOS / GenManip live smoke notes from the 2026-07-04 Phase 10.x audit:
 - A native GenManip task trace with `runtime_status=executed` proves backend
   lane readiness, not Scenario Forge package handoff. Phase 10.4 requires
   evidence that names the Scenario Forge package id, USD entrypoint, adapter
-  descriptor, asset lock, and downstream trace.
+  descriptor, task entrypoint, asset lock, and downstream trace.
 - The imported runtime evidence must include `package_artifacts` entries with
-  `package_id`, `usd_entrypoint`, `asset_lock`, `adapter_descriptor`, and
-  `trace_uri` for every id listed in `packages_tested`.
+  `package_id`, `usd_entrypoint`, `asset_lock`, `adapter_descriptor`,
+  `task_entrypoint`, and `trace_uri` for every id listed in `packages_tested`.
+  The package artifact paths must be suite-relative and resolve to the expected
+  files inside that package.
 
 Heavy simulator checks are not part of the bootstrap lane. Future simulator checks should be
 separate targets and marked so pure package validation remains fast.

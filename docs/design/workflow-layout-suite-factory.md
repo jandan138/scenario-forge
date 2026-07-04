@@ -31,7 +31,7 @@ Phases 6-10 produce static packages and suite construction evidence. Before Phas
 - `10.1 Golden USD Task Pack Freeze`: freeze a small 10-20 task suite that covers the main scientific-workbench families, split labels, difficulty labels, USD entrypoints, package-local asset locks, and EBench adapter descriptors.
 - `10.2 Asset / External Input Hardening`: compare Scenario Forge's deterministic layout output with LabBuilder-style layout imports and SimFoundry-style real2sim/cousin imports using package validity, asset-lock coverage, predicate binding, layout checks, and EBench export readiness.
 - `10.3 EOS Static Import Contract Gate`: in EOS's normal project environment, statically load the Scenario Forge suite/package outputs and verify that downstream code can resolve `suite_manifest.yaml`, `adapters/ebench/package.yaml`, `task_entrypoint.yaml`, `scene/main.usda`, and `locks/asset_lock.yaml`.
-- `10.4 Runtime Smoke Evidence Gate`: in a backend-specific EOS runtime lane, run the smallest non-model smoke needed to prove that selected Scenario Forge USD packages can be accepted by a real runtime and produce evidence. Native GenManip task smoke is useful backend-readiness evidence, but it is not sufficient unless the trace links back to Scenario Forge package ids, USD entrypoints, adapter descriptors, and asset locks.
+- `10.4 Runtime Smoke Evidence Gate`: in a backend-specific EOS runtime lane, run the smallest non-model smoke needed to prove that selected Scenario Forge USD packages can be accepted by a real runtime and produce evidence. Native GenManip task smoke is useful backend-readiness evidence, but it is not sufficient unless the trace links back to Scenario Forge package ids, USD entrypoints, task entrypoints, adapter descriptors, and asset locks.
 - `10.5 Release Candidate Gate`: scale to a 50-100 task RC suite and attach quality evidence, EOS static import evidence, package-linked runtime smoke evidence, and known blockers before Phase 11 starts.
 
 These gates are evidence handoff steps, not new ownership. Scenario Forge remains responsible for portable package construction and validation; EOS / EBench remain responsible for episode execution, model-facing traces, and benchmark reports.
@@ -57,8 +57,10 @@ accepted by the downstream runtime.
 
 Runtime evidence uses `packages_tested` for the covered package ids and
 `package_artifacts` for package-linked proof. Each `package_artifacts` item must
-include `package_id`, `usd_entrypoint`, `asset_lock`, `adapter_descriptor`, and
-`trace_uri`.
+include `package_id`, `usd_entrypoint`, `asset_lock`, `adapter_descriptor`,
+`task_entrypoint`, and `trace_uri`. The package artifact paths are
+suite-relative and must resolve to the expected files inside the referenced
+package.
 
 ## Commands
 

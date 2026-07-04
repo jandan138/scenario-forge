@@ -2885,8 +2885,10 @@ EOS / GenManip native smoke:
 
 Remaining Phase 10.4 blocker:
   EOS runtime evidence must consume Scenario Forge package output and record the
-  package id, USD entrypoint, adapter descriptor, and asset lock. Native
-  GenManip task execution is not enough to close the package handoff gate.
+  package id, USD entrypoint, adapter descriptor, task entrypoint, asset lock,
+  and downstream trace. These artifact paths must be suite-relative and resolve
+  to the expected files inside the package. Native GenManip task execution is
+  not enough to close the package handoff gate.
 ```
 
 ### 34.6 EOS conda 环境边界
@@ -2927,7 +2929,8 @@ leaderboard ready。
 2. Phase 10.2 给出 internal layout vs external pipeline 的证据结论和采用策略。
 3. Phase 10.3 EOS static import gate 通过，且证据文件被纳入 suite evidence 索引。
 4. Phase 10.4 至少一个 backend runtime smoke 产出 package-linked executed evidence，
-   并清楚标注 lane、Scenario Forge package id、USD entrypoint 和 trace URI。
+   并清楚标注 lane、Scenario Forge package id、USD entrypoint、task entrypoint、
+   asset lock、adapter descriptor 和 trace URI。
 5. Phase 10.5 RC suite 有完整 quality evidence、asset/license/checksum evidence、
    package-linked runtime evidence 和 known blockers。
 6. 仍然不在 Scenario Forge 中新增 episode runner、model adapter、leaderboard 或 simulator SDK import。

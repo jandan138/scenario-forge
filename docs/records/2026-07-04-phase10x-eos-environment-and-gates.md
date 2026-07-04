@@ -142,6 +142,7 @@ config, not from a Scenario Forge-generated USD task package.
 
 Phase 10.4 can close only when the runtime evidence explicitly links the live
 trace to Scenario Forge package ids, USD entrypoints, asset locks, and adapter
-descriptors. Phase 10.5 can close only after that evidence is attached to a
-50-100 task RC suite, or the RC gate records the missing runtime package bridge
-as a blocker.
+descriptors. The package-linked evidence must also name the package
+`task_entrypoint.yaml`, and package artifact paths must resolve inside the suite.
+Phase 10.5 can close only after that evidence is attached to a 50-100 task RC
+suite, or the RC gate records the missing runtime package bridge as a blocker.

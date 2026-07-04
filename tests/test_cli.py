@@ -732,6 +732,7 @@ def write_phase10x_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
             "usd_entrypoint": f"packages/{package_id}/scene/main.usda",
             "asset_lock": f"packages/{package_id}/locks/asset_lock.yaml",
             "adapter_descriptor": f"packages/{package_id}/adapters/ebench/package.yaml",
+            "task_entrypoint": f"packages/{package_id}/adapters/ebench/task_entrypoint.yaml",
             "trace_uri": f"eos://records/phase10x/cli-smoke/{package_id}",
         }
         for package_id in package_ids
