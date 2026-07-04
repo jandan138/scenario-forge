@@ -38,6 +38,28 @@ def test_plan_layout_writes_reachable_instances_and_layout_report(tmp_path: Path
     assert report["checks"][0]["name"] == "robot_workspace_reachability"
 
 
+def test_plan_layout_generated_assets_define_default_prims(tmp_path: Path) -> None:
+    package_dir = scaffold_starter_package(tmp_path / "starter")
+    compose_workflow_artifacts(
+        package_dir,
+        task_family="pick_place",
+        bindings={"object": "generated_object", "target_zone": "generated_target"},
+    )
+    (package_dir / "assets" / "asset_manifest.yaml").unlink()
+    (package_dir / "locks" / "asset_lock.yaml").unlink()
+
+    plan_layout_artifacts(package_dir, difficulty="easy")
+
+    object_usd = (
+        package_dir / "assets" / "generated" / "object_asset" / "model.usd"
+    ).read_text(encoding="utf-8")
+    target_usd = (
+        package_dir / "assets" / "generated" / "target_zone_asset" / "model.usd"
+    ).read_text(encoding="utf-8")
+    assert 'defaultPrim = "object_asset"' in object_usd
+    assert 'defaultPrim = "target_zone_asset"' in target_usd
+
+
 def test_plan_layout_reports_unreachable_workspace_with_reason(tmp_path: Path) -> None:
     package_dir = scaffold_starter_package(tmp_path / "starter")
     compose_workflow_artifacts(

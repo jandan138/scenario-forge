@@ -155,6 +155,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="External input A/B evidence YAML for LabBuilder / SimFoundry-style lanes",
     )
     suite_phase10x_parser.add_argument(
+        "--golden-evidence",
+        help="Previously generated Phase 10.1 golden task pack evidence YAML for RC suites",
+    )
+    suite_phase10x_parser.add_argument(
         "--runtime-smoke",
         help="Downstream EOS / EBench runtime-smoke evidence YAML",
     )
@@ -336,6 +340,9 @@ def main(argv: list[str] | None = None) -> int:
             result = generate_phase10x_evidence(
                 Path(args.suite),
                 eos_python=Path(args.eos_python) if args.eos_python else None,
+                golden_evidence_path=Path(args.golden_evidence)
+                if args.golden_evidence
+                else None,
                 external_evidence_path=Path(args.external_evidence)
                 if args.external_evidence
                 else None,

@@ -1,0 +1,14 @@
+schema_version: phase10x-runtime-smoke-evidence/v0.1
+lane: eos_usd_stage_open_smoke
+status: passed
+packages_tested:
+- phase10x_rc_suite_000
+package_artifacts:
+- package_id: phase10x_rc_suite_000
+  usd_entrypoint: packages/phase10x_rc_suite_000/scene/main.usda
+  asset_lock: packages/phase10x_rc_suite_000/locks/asset_lock.yaml
+  adapter_descriptor: packages/phase10x_rc_suite_000/adapters/ebench/package.yaml
+  task_entrypoint: packages/phase10x_rc_suite_000/adapters/ebench/task_entrypoint.yaml
+  trace_uri: file:///cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10x-package-linked-runtime-smoke/phase10x_rc_usd_smoke_trace.json
+evidence_uri: file:///cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10x-package-linked-runtime-smoke/phase10x_rc_runtime_smoke.yaml
+summary: EOS runtime lane loaded Scenario Forge USD.

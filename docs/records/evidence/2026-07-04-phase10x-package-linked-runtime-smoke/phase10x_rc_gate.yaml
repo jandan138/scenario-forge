@@ -1,0 +1,14 @@
+schema_version: phase10x-release-candidate-gate/v0.1
+phase: '10.5'
+suite_id: phase10x_rc_suite
+overall_status: passed
+package_count: 50
+expected_package_count:
+  min: 50
+  max: 100
+gate_statuses:
+  phase_10_1_golden_task_pack: passed
+  phase_10_2_external_input_hardening: passed
+  phase_10_3_eos_static_import: passed
+  phase_10_4_runtime_smoke: passed
+blockers: []

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import yaml
 
@@ -35,6 +37,7 @@ def generate_phase10x_evidence(
     suite_dir: str | Path,
     *,
     eos_python: str | Path | None = None,
+    golden_evidence_path: str | Path | None = None,
     external_evidence_path: str | Path | None = None,
     runtime_smoke_path: str | Path | None = None,
     rc_min_packages: int = 50,
@@ -49,7 +52,13 @@ def generate_phase10x_evidence(
 
     generate_suite_quality_evidence(suite_root)
 
-    golden = _golden_task_pack_evidence(manifest, packages)
+    golden = _golden_task_pack_evidence(
+        manifest,
+        packages,
+        imported_golden_path=Path(golden_evidence_path)
+        if golden_evidence_path is not None
+        else None,
+    )
     external = _external_input_hardening_evidence(
         suite_root,
         packages,
@@ -70,12 +79,13 @@ def generate_phase10x_evidence(
         "phase_10_3_eos_static_import": str(eos_import["status"]),
         "phase_10_4_runtime_smoke": str(runtime["status"]),
     }
+    prerequisite_gate_statuses = dict(gate_statuses)
     rc_gate = _release_candidate_evidence(
         manifest=manifest,
         packages=packages,
         rc_min_packages=rc_min_packages,
         rc_max_packages=rc_max_packages,
-        gate_statuses=gate_statuses,
+        gate_statuses=prerequisite_gate_statuses,
     )
     gate_statuses["phase_10_5_release_candidate"] = str(rc_gate["overall_status"])
 
@@ -97,14 +107,23 @@ def generate_phase10x_evidence(
 def _golden_task_pack_evidence(
     manifest: dict[str, Any],
     packages: list[dict[str, Any]],
+    *,
+    imported_golden_path: Path | None,
 ) -> dict[str, Any]:
     package_count = len(packages)
-    in_range = 10 <= package_count <= 20
+    in_golden_range = 10 <= package_count <= 20
+    if not in_golden_range and imported_golden_path is not None:
+        return _imported_golden_task_pack_evidence(
+            manifest=manifest,
+            packages=packages,
+            imported_golden_path=imported_golden_path,
+        )
     return {
         "schema_version": "phase10x-golden-task-pack/v0.1",
         "phase": "10.1",
         "suite_id": manifest.get("suite_id"),
-        "status": "passed" if in_range else "warning",
+        "status": "passed" if in_golden_range else "warning",
+        "evidence_mode": "golden_task_pack" if in_golden_range else "missing_golden_task_pack",
         "package_count": package_count,
         "expected_package_count": {"min": 10, "max": 20},
         "package_ids": [str(item["package_id"]) for item in packages],
@@ -112,7 +131,40 @@ def _golden_task_pack_evidence(
         "splits": _count_by_key(packages, "split"),
         "difficulties": _count_by_key(packages, "difficulty"),
         "deterministic_regeneration": "package ids and suite manifest are deterministic inputs",
-        "blockers": [] if in_range else ["golden task pack should contain 10-20 packages"],
+        "blockers": []
+        if in_golden_range
+        else ["Phase 10.1 requires a frozen 10-20 package golden task pack"],
+    }
+
+
+def _imported_golden_task_pack_evidence(
+    *,
+    manifest: dict[str, Any],
+    packages: list[dict[str, Any]],
+    imported_golden_path: Path,
+) -> dict[str, Any]:
+    source = _load_yaml(imported_golden_path)
+    source_status = str(source.get("status", "failed"))
+    source_package_count = source.get("package_count")
+    blockers: list[str] = []
+    if source_status != "passed":
+        blockers.append("imported Phase 10.1 golden evidence is not passed")
+    if not isinstance(source_package_count, int) or not 10 <= source_package_count <= 20:
+        blockers.append("imported Phase 10.1 golden evidence must contain 10-20 packages")
+    return {
+        "schema_version": "phase10x-golden-task-pack/v0.1",
+        "phase": "10.1",
+        "suite_id": manifest.get("suite_id"),
+        "status": "passed" if not blockers else "warning",
+        "evidence_mode": "imported_golden_task_pack",
+        "package_count": len(packages),
+        "expected_package_count": {"min": 10, "max": 20},
+        "package_ids": [str(item["package_id"]) for item in packages],
+        "imported_golden_evidence": str(imported_golden_path),
+        "imported_golden_suite_id": source.get("suite_id"),
+        "imported_golden_package_count": source_package_count,
+        "imported_golden_status": source_status,
+        "blockers": blockers,
     }
 
 
@@ -344,6 +396,13 @@ def _runtime_package_artifacts(
                     expected_paths=expected_paths,
                 )
             )
+            blockers.extend(
+                _runtime_trace_uri_blockers(
+                    artifact,
+                    index=index,
+                    require_executed=str(source.get("status", "failed")) == "passed",
+                )
+            )
         artifacts.append(artifact)
     if not artifacts:
         blockers.append("runtime smoke must include at least one package-linked artifact")
@@ -391,6 +450,47 @@ def _runtime_artifact_path_blockers(
     return blockers
 
 
+def _runtime_trace_uri_blockers(
+    artifact: dict[str, Any],
+    *,
+    index: int,
+    require_executed: bool,
+) -> list[str]:
+    trace_uri = artifact.get("trace_uri")
+    if not isinstance(trace_uri, str) or not trace_uri.startswith("file://"):
+        return []
+    parsed = urlparse(trace_uri)
+    trace_path = Path(parsed.path)
+    if not trace_path.exists():
+        return [f"runtime smoke package_artifacts[{index}].trace_uri does not exist: {trace_uri}"]
+    try:
+        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [
+            f"runtime smoke package_artifacts[{index}].trace_uri is not readable JSON: "
+            f"{type(exc).__name__}: {exc}"
+        ]
+
+    blockers: list[str] = []
+    package_id = artifact.get("package_id")
+    if isinstance(package_id, str) and trace.get("package_id") != package_id:
+        blockers.append(
+            f"runtime smoke package_artifacts[{index}].trace_uri package_id mismatch: "
+            f"{trace.get('package_id')}"
+        )
+    if require_executed and trace.get("runtime_status") != "executed":
+        blockers.append(
+            f"runtime smoke package_artifacts[{index}].trace_uri must report "
+            "runtime_status=executed"
+        )
+    if require_executed and trace.get("stage_open_status") not in {None, "passed"}:
+        blockers.append(
+            f"runtime smoke package_artifacts[{index}].trace_uri must report "
+            "stage_open_status=passed"
+        )
+    return blockers
+
+
 def _suite_relative_path(suite_root: Path, raw_path: Any) -> Path:
     path = Path(str(raw_path))
     if path.is_absolute():
@@ -426,7 +526,7 @@ def _release_candidate_evidence(
         "overall_status": overall_status,
         "package_count": package_count,
         "expected_package_count": {"min": rc_min_packages, "max": rc_max_packages},
-        "gate_statuses": gate_statuses,
+        "gate_statuses": dict(gate_statuses),
         "blockers": blockers,
     }
 

@@ -2883,12 +2883,23 @@ EOS / GenManip native smoke:
   evidence boundary:
     backend lane readiness only; trace asset_provenance is genmanip_runtime
 
-Remaining Phase 10.4 blocker:
-  EOS runtime evidence must consume Scenario Forge package output and record the
-  package id, USD entrypoint, adapter descriptor, task entrypoint, asset lock,
-  and downstream trace. These artifact paths must be suite-relative and resolve
-  to the expected files inside the package. Native GenManip task execution is
-  not enough to close the package handoff gate.
+Package-linked Phase 10.4 / 10.5 closure:
+  EOS runtime evidence now consumes Scenario Forge package output and records
+  the package id, USD entrypoint, adapter descriptor, task entrypoint, asset
+  lock, and downstream trace. These artifact paths are suite-relative and
+  resolve to the expected files inside the package.
+
+  Retained evidence:
+    docs/records/evidence/2026-07-04-phase10x-package-linked-runtime-smoke/
+
+  Result:
+    Phase 10.x strict gate passed on a 50-task RC suite with
+    phase10x_rc_suite_000 loaded by the eos_usd_stage_open_smoke lane.
+
+  Boundary:
+    This is package handoff / USD Stage.Open evidence only. It does not claim
+    model score, task success, physics fidelity, official EBench reproduction,
+    or leaderboard comparability.
 ```
 
 ### 34.6 EOS conda 环境边界

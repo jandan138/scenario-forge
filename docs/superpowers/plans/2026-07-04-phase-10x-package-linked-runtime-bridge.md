@@ -33,13 +33,30 @@ asset_provenance: genmanip_runtime
 This proves EOS / GenManip backend readiness only. It does not close Phase 10.4
 because the trace does not consume a Scenario Forge package.
 
+2026-07-04 execution update:
+
+```text
+EOS bridge branch:
+  phase10x-scenario-forge-bridge
+
+Retained package-linked evidence:
+  docs/records/evidence/2026-07-04-phase10x-package-linked-runtime-smoke/
+
+Phase 10.x strict result:
+  passed on phase10x_rc_suite, package_count=50
+
+Claim boundary:
+  package handoff / USD Stage.Open only; no model score, task success,
+  physics fidelity, official EBench reproduction, or leaderboard comparability.
+```
+
 ## Target Runtime Evidence Shape
 
 EOS must produce a YAML file like this:
 
 ```yaml
 schema_version: phase10x-runtime-smoke-evidence/v0.1
-lane: eos_newton_usd_load_smoke
+lane: eos_usd_stage_open_smoke
 status: passed
 packages_tested:
   - phase10x_golden_suite_000
@@ -50,7 +67,7 @@ package_artifacts:
     adapter_descriptor: packages/phase10x_golden_suite_000/adapters/ebench/package.yaml
     task_entrypoint: packages/phase10x_golden_suite_000/adapters/ebench/task_entrypoint.yaml
     trace_uri: file:///absolute/path/to/eos_trace_or_report.json
-evidence_uri: file:///absolute/path/to/phase10x_runtime_evidence.json
+evidence_uri: file:///absolute/path/to/phase10x_runtime_evidence.yaml
 summary: EOS runtime lane loaded the Scenario Forge package USD entrypoint and retained trace evidence.
 ```
 
@@ -242,8 +259,9 @@ def test_builds_phase10x_package_linked_runtime_evidence(tmp_path: Path) -> None
     evidence = build_package_linked_runtime_evidence(
         package_dirs=[package],
         suite_root=tmp_path,
-        lane="eos_newton_usd_load_smoke",
+        lane="eos_usd_stage_open_smoke",
         trace_uri=trace.as_uri(),
+        evidence_uri=(tmp_path / "runtime_smoke.yaml").as_uri(),
         status="passed",
         summary="EOS runtime lane loaded Scenario Forge USD.",
     )
@@ -278,8 +296,9 @@ def build_package_linked_runtime_evidence(
     *,
     package_dirs: list[str | Path],
     suite_root: str | Path | None = None,
-    lane: str,
-    trace_uri: str,
+        lane: str,
+        trace_uri: str,
+        evidence_uri: str,
     status: str,
     summary: str,
 ) -> dict[str, Any]:
@@ -301,7 +320,7 @@ def build_package_linked_runtime_evidence(
             }
             for item in loaded
         ],
-        "evidence_uri": trace_uri,
+        "evidence_uri": evidence_uri,
         "summary": summary,
     }
 

@@ -140,9 +140,61 @@ completion evidence for Scenario Forge, because the retained trace says
 `asset_provenance=genmanip_runtime` and the task came from a GenManip native
 config, not from a Scenario Forge-generated USD task package.
 
-Phase 10.4 can close only when the runtime evidence explicitly links the live
-trace to Scenario Forge package ids, USD entrypoints, asset locks, and adapter
-descriptors. The package-linked evidence must also name the package
-`task_entrypoint.yaml`, and package artifact paths must resolve inside the suite.
-Phase 10.5 can close only after that evidence is attached to a 50-100 task RC
-suite, or the RC gate records the missing runtime package bridge as a blocker.
+## Package-Linked RC Evidence
+
+The package-linked bridge was then implemented in EOS under
+`adapters/ebench/`, keeping runtime/package consumption outside Scenario Forge.
+The retained Scenario Forge evidence is:
+
+```text
+docs/records/evidence/2026-07-04-phase10x-package-linked-runtime-smoke/
+  phase10x_source_golden_task_pack.yaml
+  phase10x_rc_imported_golden_task_pack.yaml
+  phase10x_rc_external_input_hardening.yaml
+  phase10x_rc_eos_static_import.yaml
+  phase10x_rc_runtime_smoke.yaml
+  phase10x_rc_imported_runtime_smoke.yaml
+  phase10x_rc_usd_smoke_trace.json
+  phase10x_rc_gate.yaml
+```
+
+Observed result:
+
+```text
+suite_id:
+  phase10x_rc_suite
+
+package_count:
+  50
+
+source golden evidence:
+  phase10x_golden_suite, package_count=10, status=passed
+
+runtime lane:
+  eos_usd_stage_open_smoke
+
+package consumed by EOS:
+  phase10x_rc_suite_000
+
+runtime_status:
+  executed
+
+stage_open_status:
+  passed
+
+Phase 10.x strict result:
+  passed
+```
+
+Boundary:
+
+This closes the Phase 10.4 / 10.5 package-handoff gate for a package-linked USD
+load smoke. It proves that EOS can read a Scenario Forge package descriptor,
+resolve the package's `scene/main.usda`, `locks/asset_lock.yaml`,
+`adapters/ebench/package.yaml`, and `adapters/ebench/task_entrypoint.yaml`,
+open the USD stage, and feed the resulting package-linked evidence back into a
+50-task Phase 10.5 RC gate.
+
+It still does not prove model quality, task success, physics fidelity, official
+EBench reproduction, leaderboard comparability, or runtime-grade robot/control
+bindings.

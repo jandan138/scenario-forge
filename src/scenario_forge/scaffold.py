@@ -17,11 +17,11 @@ def scaffold_starter_package(out_dir: str | Path) -> Path:
     _write_text(root / "scene" / "main.usda", "#usda 1.0\n")
     _write_text(
         root / "assets" / "objects" / "starter_rigid_object" / "model.usd",
-        '#usda 1.0\n\ndef Xform "starter_rigid_object"\n{\n}\n',
+        _placeholder_usd("starter_rigid_object"),
     )
     _write_text(
         root / "assets" / "markers" / "starter_target_marker" / "model.usd",
-        '#usda 1.0\n\ndef Xform "starter_target_marker"\n{\n}\n',
+        _placeholder_usd("starter_target_marker"),
     )
     _write_yaml(
         root / "manifest.yaml",
@@ -215,3 +215,16 @@ def _write_yaml(path: Path, data: dict) -> None:
 def _write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def _placeholder_usd(default_prim: str) -> str:
+    return (
+        "#usda 1.0\n"
+        "(\n"
+        f'    defaultPrim = "{default_prim}"\n'
+        ")\n"
+        "\n"
+        f'def Xform "{default_prim}"\n'
+        "{\n"
+        "}\n"
+    )

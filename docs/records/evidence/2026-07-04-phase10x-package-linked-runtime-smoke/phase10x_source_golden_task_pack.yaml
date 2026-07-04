@@ -1,0 +1,33 @@
+schema_version: phase10x-golden-task-pack/v0.1
+phase: '10.1'
+suite_id: phase10x_golden_suite
+status: passed
+evidence_mode: golden_task_pack
+package_count: 10
+expected_package_count:
+  min: 10
+  max: 20
+package_ids:
+- phase10x_golden_suite_000
+- phase10x_golden_suite_001
+- phase10x_golden_suite_002
+- phase10x_golden_suite_003
+- phase10x_golden_suite_004
+- phase10x_golden_suite_005
+- phase10x_golden_suite_006
+- phase10x_golden_suite_007
+- phase10x_golden_suite_008
+- phase10x_golden_suite_009
+task_families:
+  pick_place: 5
+  pipette_transfer_light: 5
+splits:
+  dev: 4
+  validation: 3
+  test: 3
+difficulties:
+  easy: 4
+  medium: 3
+  hard: 3
+deterministic_regeneration: package ids and suite manifest are deterministic inputs
+blockers: []

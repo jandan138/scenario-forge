@@ -55,6 +55,60 @@ def test_phase10x_generates_passed_gate_evidence_for_golden_suite(tmp_path: Path
     assert (suite_dir / "evidence" / "suite_quality_evidence.yaml").exists()
 
 
+def test_phase10x_default_release_candidate_allows_50_task_suite(tmp_path: Path) -> None:
+    suite_dir = generate_release_candidate_suite(tmp_path)
+    golden_path = write_golden_task_pack_evidence(tmp_path / "golden.yaml")
+    external_path = write_external_evidence(tmp_path / "external.yaml")
+    runtime_path = write_runtime_smoke(
+        tmp_path / "runtime.yaml",
+        package_ids=["phase10x_rc_test_suite_000"],
+    )
+
+    result = generate_phase10x_evidence(
+        suite_dir,
+        eos_python=Path(sys.executable),
+        golden_evidence_path=golden_path,
+        external_evidence_path=external_path,
+        runtime_smoke_path=runtime_path,
+    )
+
+    golden = load_yaml(suite_dir / "evidence" / "golden_task_pack.yaml")
+    rc_gate = load_yaml(suite_dir / "evidence" / "phase10x_rc_gate.yaml")
+
+    assert result.overall_status == "passed"
+    assert result.gate_statuses["phase_10_1_golden_task_pack"] == "passed"
+    assert result.gate_statuses["phase_10_5_release_candidate"] == "passed"
+    assert golden["status"] == "passed"
+    assert golden["evidence_mode"] == "imported_golden_task_pack"
+    assert golden["imported_golden_package_count"] == 10
+    assert golden["package_count"] == 50
+    assert rc_gate["overall_status"] == "passed"
+    assert rc_gate["package_count"] == 50
+    assert "phase_10_5_release_candidate" not in rc_gate["gate_statuses"]
+
+
+def test_phase10x_default_release_candidate_requires_golden_evidence(tmp_path: Path) -> None:
+    suite_dir = generate_release_candidate_suite(tmp_path)
+    external_path = write_external_evidence(tmp_path / "external.yaml")
+    runtime_path = write_runtime_smoke(
+        tmp_path / "runtime.yaml",
+        package_ids=["phase10x_rc_test_suite_000"],
+    )
+
+    result = generate_phase10x_evidence(
+        suite_dir,
+        eos_python=Path(sys.executable),
+        external_evidence_path=external_path,
+        runtime_smoke_path=runtime_path,
+    )
+    golden = load_yaml(suite_dir / "evidence" / "golden_task_pack.yaml")
+
+    assert result.overall_status == "warning"
+    assert result.gate_statuses["phase_10_1_golden_task_pack"] == "warning"
+    assert golden["evidence_mode"] == "missing_golden_task_pack"
+    assert any("10-20 package golden" in blocker for blocker in golden["blockers"])
+
+
 def test_phase10x_warns_when_runtime_smoke_is_missing(tmp_path: Path) -> None:
     suite_dir = generate_golden_suite(tmp_path)
     external_path = write_external_evidence(tmp_path / "external.yaml")
@@ -118,7 +172,7 @@ def test_phase10x_runtime_smoke_requires_existing_suite_relative_package_artifac
         runtime_path,
         {
             "schema_version": "phase10x-runtime-smoke-evidence/v0.1",
-            "lane": "eos_newton_usd_load_smoke",
+            "lane": "eos_usd_stage_open_smoke",
             "status": "passed",
             "packages_tested": ["phase10x_test_suite_000"],
             "package_artifacts": [
@@ -151,6 +205,35 @@ def test_phase10x_runtime_smoke_requires_existing_suite_relative_package_artifac
     assert runtime["status"] == "failed"
     assert any("task_entrypoint" in blocker for blocker in runtime["blockers"])
     assert any("does not exist" in blocker for blocker in runtime["blockers"])
+
+
+def test_phase10x_runtime_smoke_validates_local_file_trace_content(tmp_path: Path) -> None:
+    suite_dir = generate_golden_suite(tmp_path)
+    external_path = write_external_evidence(tmp_path / "external.yaml")
+    trace_path = tmp_path / "trace.json"
+    trace_path.write_text(
+        '{"package_id":"wrong_package","runtime_status":"skipped","stage_open_status":"skipped"}',
+        encoding="utf-8",
+    )
+    runtime_path = write_runtime_smoke(
+        tmp_path / "runtime.yaml",
+        package_ids=["phase10x_test_suite_000"],
+        trace_uri=trace_path.as_uri(),
+    )
+
+    result = generate_phase10x_evidence(
+        suite_dir,
+        eos_python=Path(sys.executable),
+        external_evidence_path=external_path,
+        runtime_smoke_path=runtime_path,
+        rc_min_packages=10,
+        rc_max_packages=20,
+    )
+    runtime = load_yaml(suite_dir / "evidence" / "runtime_smoke.yaml")
+
+    assert result.gate_statuses["phase_10_4_runtime_smoke"] == "failed"
+    assert any("package_id mismatch" in blocker for blocker in runtime["blockers"])
+    assert any("runtime_status=executed" in blocker for blocker in runtime["blockers"])
 
 
 def test_phase10x_static_import_fails_when_required_artifact_is_missing(
@@ -205,6 +288,30 @@ def generate_golden_suite(tmp_path: Path) -> Path:
     return suite_dir
 
 
+def generate_release_candidate_suite(tmp_path: Path) -> Path:
+    spec_path = tmp_path / "suite_spec_rc.yaml"
+    write_yaml(
+        spec_path,
+        {
+            "schema_version": "suite-spec/v0.2",
+            "suite_id": "phase10x_rc_test_suite",
+            "domain": "scientific_workbench",
+            "target": "ebench",
+            "package_mode": "fat",
+            "robot_profiles": ["franka_panda_tabletop_v1"],
+            "num_tasks": 50,
+            "task_families": {"pick_place": 25, "pipette_transfer_light": 25},
+            "difficulties": {"easy": 17, "medium": 17, "hard": 16},
+            "splits": {"dev": 15, "validation": 15, "test": 20},
+            "variation_axes": ["layout", "instruction_language"],
+            "validation": {"require_asset_lock": True},
+        },
+    )
+    suite_dir = tmp_path / "rc_suite"
+    generate_suite_from_spec(spec_path, suite_dir)
+    return suite_dir
+
+
 def write_external_evidence(path: Path) -> Path:
     write_yaml(
         path,
@@ -244,7 +351,30 @@ def write_external_evidence(path: Path) -> Path:
     return path
 
 
-def write_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
+def write_golden_task_pack_evidence(path: Path) -> Path:
+    write_yaml(
+        path,
+        {
+            "schema_version": "phase10x-golden-task-pack/v0.1",
+            "phase": "10.1",
+            "suite_id": "phase10x_test_suite",
+            "status": "passed",
+            "evidence_mode": "golden_task_pack",
+            "package_count": 10,
+            "expected_package_count": {"min": 10, "max": 20},
+            "package_ids": [f"phase10x_test_suite_{index:03d}" for index in range(10)],
+            "blockers": [],
+        },
+    )
+    return path
+
+
+def write_runtime_smoke(
+    path: Path,
+    *,
+    package_ids: list[str],
+    trace_uri: str | None = None,
+) -> Path:
     package_artifacts = [
         {
             "package_id": package_id,
@@ -252,7 +382,7 @@ def write_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
             "asset_lock": f"packages/{package_id}/locks/asset_lock.yaml",
             "adapter_descriptor": f"packages/{package_id}/adapters/ebench/package.yaml",
             "task_entrypoint": f"packages/{package_id}/adapters/ebench/task_entrypoint.yaml",
-            "trace_uri": f"eos://records/phase10x/newton-smoke/{package_id}",
+            "trace_uri": trace_uri or f"eos://records/phase10x/newton-smoke/{package_id}",
         }
         for package_id in package_ids
     ]

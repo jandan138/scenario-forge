@@ -1,0 +1,36 @@
+schema_version: phase10x-external-input-hardening/v0.1
+phase: '10.2'
+status: passed
+suite_root: /tmp/scenario-forge-phase10x-rc-suite
+evidence_source: examples/phase10x_external_evidence.yaml
+lanes:
+  scenario_forge_layout:
+    id: scenario_forge_layout
+    status: passed
+    package_validity: passed
+    asset_lock_coverage: 1.0
+    predicate_binding: passed
+    layout_checks: passed
+    ebench_export: passed
+  labuilder_layout_import:
+    id: labuilder_layout_import
+    status: passed
+    package_validity: passed
+    asset_lock_coverage: 1.0
+    predicate_binding: passed
+    layout_checks: passed
+    ebench_export: passed
+  simfoundry_real2sim_import:
+    id: simfoundry_real2sim_import
+    status: passed
+    package_validity: passed
+    asset_lock_coverage: 1.0
+    predicate_binding: passed
+    layout_checks: passed
+    ebench_export: passed
+external_lane_ids:
+- labuilder_layout_import
+- simfoundry_real2sim_import
+adoption_decision: retain scenario_forge_layout as baseline; external lanes remain
+  evidence-gated
+blockers: []

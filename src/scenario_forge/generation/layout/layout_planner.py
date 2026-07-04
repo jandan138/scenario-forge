@@ -208,7 +208,7 @@ def _ensure_asset_manifest_and_lock(
         asset = required_by_role.get(role, {"asset_type": role})
         usd_path = root / "assets" / "generated" / asset_id / "model.usd"
         usd_path.parent.mkdir(parents=True, exist_ok=True)
-        usd_path.write_text(f'#usda 1.0\n\ndef Xform "{asset_id}"\n{{\n}}\n', encoding="utf-8")
+        usd_path.write_text(_placeholder_usd(asset_id), encoding="utf-8")
         relative_usd = usd_path.relative_to(root).as_posix()
         existing_assets[asset_id] = {
             "asset_id": asset_id,
@@ -276,6 +276,19 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise LayoutPlanError(f"YAML artifact must be a mapping: {path}")
     return data
+
+
+def _placeholder_usd(default_prim: str) -> str:
+    return (
+        "#usda 1.0\n"
+        "(\n"
+        f'    defaultPrim = "{default_prim}"\n'
+        ")\n"
+        "\n"
+        f'def Xform "{default_prim}"\n'
+        "{\n"
+        "}\n"
+    )
 
 
 def _string_mapping(value: Any, field: str) -> dict[str, str]:
