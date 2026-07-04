@@ -253,6 +253,143 @@ Planned gates:
   visual review over only the image and visual expectation. Phase 10.9 strict
   pass requires the visual review verdict to be PASS.
 
+  Phase 10.9 camera placement should be decided by a recorded selection policy,
+  not by an untracked manual pose. The policy starts from the official GenManip
+  `fixed_camera_lift2_simbox.yml` camera hints, then lets the EOS runtime place
+  an engine-native `tabletop_overview` camera if those hints do not directly
+  provide a useful product overview.
+
+  Local research on 2026-07-04 found these constraints:
+  - `fixed_camera_lift2_simbox.yml` contains an external `camera1`
+    (`exists: false`, 1280x720, position approximately
+    `[0.2807, -0.0233, 1.6858]`) plus robot-mounted `left_camera`,
+    `right_camera`, `top_camera`, and `overlook_camera` entries
+    (`exists: true`). `overlook_camera` is a useful named candidate, but it is
+    attached to the Lift2 robot prim path, so EOS must only reuse it when that
+    prim exists in the runtime stage.
+  - GenManip creates `exists: true` cameras under `/World/<uuid><prim_path>` and
+    `exists: false` cameras as external fixed cameras. Therefore Scenario Forge
+    should preserve the YAML as a camera hint, while EOS owns the runtime camera
+    creation and final pose.
+  - The apple-to-bowl task config uses the same camera YAML, robot base
+    `[-0.9, 0.1, -0.5]`, and task layout ranges around the table. Earlier
+    provisional Scenario Forge canary instances used hand-entered object
+    heights, but the current canary derives the object poses from official USD
+    bboxes and the GenManip tabletop convention: apple center
+    `[-0.35, -0.22, 0.046444]`, bowl center `[-0.35, 0.24, 0.050375]`,
+    object orientation `[0.5, 0.5, 0.5, 0.5]`, and relative scale `0.8`.
+  - A USD BBoxCache pass over `/tmp/ebench-apple-to-bowl-canary/scene/main.usda`
+    showed that whole-stage bounds are not suitable for camera placement: the
+    environment scene expands `/World` to roughly a 516 m cube, while the task
+    table prim `/World/Instances/environment_scene/obj_table` is roughly
+    0.9 m by 1.6 m. Object bounds can also be misleading if an asset has unusual
+    origin or scale metadata, so object instance translations are safer semantic
+    anchors than raw object extents.
+
+  The Phase 10.9 render CLI should therefore use this order:
+  1. Record all official camera candidates from `fixed_camera_lift2_simbox.yml`
+     and mark whether each candidate was selected, skipped, or rejected.
+  2. Prefer `overlook_camera` only when the runtime stage contains its robot
+     camera prim and it can see apple, bowl, table, and robot/spawn.
+  3. Otherwise create an EOS-native `tabletop_overview` camera, reusing the
+     official 1280x720 overview-style resolution and camera intrinsics when
+     possible, but using a new engine-native pose.
+  4. Build the camera target from filtered task anchors: table top/table prim if
+     present, apple center, bowl center, and robot spawn. Exclude whole-stage
+     background bounds and reject any candidate workspace bound with implausible
+     size, invalid range, or no task anchors.
+  5. Use the runtime's native look-at camera helper, or equivalent sensor API, to
+     place the camera at an oblique 45 to 60 degree tabletop overview with enough
+     distance and field-of-view margin to keep the full task-relevant work
+     surface visible. The exact pose is evidence, not a hidden constant.
+  6. If visual review reports WARN or FAIL for clipping, missing apple/bowl,
+     missing table, severe occlusion, or placeholder assets, retake with a
+     revised engine-native pose and keep Phase 10.9 open until the review passes.
+
+  The render metadata must include camera name, source YAML, selected candidate,
+  skipped/rejected candidate reasons, target anchors, final pose, FOV or
+  intrinsics, resolution, engine/runtime, package id, scene USD, asset hashes, and
+  the boundary that this is a visual canary only. It must not claim official
+  EBench camera parity.
+
+  Phase 10.9 must also include a material / MDL runtime preflight before the
+  visual review. ConvertAsset's AAN experience shows that USD composition
+  success is not enough for Isaac Sim rendering: `Usd.Stage.Open` can pass while
+  MDL helper modules, texture literals, or shader compiler paths still fail at
+  render time and produce fallback red/pink materials.
+
+  The 2026-07-04 ConvertAsset research relevant to this gate:
+  - AAN-03 treats USD, MDL, texture, reference, payload, sublayer, variant, clip,
+    and property asset dependencies as a closure problem, with missing local
+    files and remote/package-escape references recorded as blockers.
+  - AAN-04 records material closure at the `UsdShade` level, including bound
+    material prims, source MDL assets, texture paths, channel extraction, fallback
+    modes, and residual MDL evidence.
+  - AAN-11 parses MDL `import`, `using ... import`, and `texture_2d(...)`
+    literals. Missing helper MDL modules, package-escaping texture paths, missing
+    textures, and second-order MDL dependencies are blocking unless mirrored,
+    classified as approved runtime modules, or explicitly waived.
+  - ConvertAsset runtime log parsing records `MDLC`, `rtx.mdltranslator`,
+    `usd_mdl`, `Failed to create MDL shade node`, `missing texture`,
+    `could not find texture`, and `could not find module` signals. For Phase
+    10.9, plain `MDLC` compiler warnings such as `C183 unused parameter` are
+    warning evidence rather than automatic blockers; MDL compiler errors,
+    missing textures/modules, failed shader-node creation, or visible fallback
+    red/pink materials are blockers. Prior `KooPbr` repair work shows that even
+    MDL import style can break module lookup in Isaac runtimes.
+  - ConvertAsset's render helpers configure MDL search paths from CLI arguments
+    and `MDL_SYSTEM_PATH`, so the effective renderer environment is evidence,
+    not an implicit assumption.
+
+  A local dependency probe of the current canary found all ordinary PNG texture
+  assets package-local, but `UsdUtils.ComputeAllDependencies` still reports
+  unresolved `OmniPBR.mdl` and `gltf/pbr.mdl`. These are available in the Isaac
+  Sim runtime (`/isaac-sim/kit/mdl/core/Base/OmniPBR.mdl` and
+  `/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl`)
+  rather than in the package. This matches the official GenManip task pattern,
+  which sets `MDL_SYSTEM_PATH` with `/isaac-sim/materials/`,
+  `{ASSETS_DIR}/miscs/mdl/ebench/mdl`, and the task scene's
+  `SubUSDs/materials` directory.
+
+  Therefore Phase 10.9 should treat `OmniPBR.mdl` and `gltf/pbr.mdl` as approved
+  runtime MDL dependencies only when the EOS render lane records the concrete
+  search roots that resolve them. Missing helper MDL modules, missing textures,
+  package-escape texture literals, MDL compiler errors, or visible fallback
+  red/pink materials keep Phase 10.9 open. This is still not an instruction to
+  run ConvertAsset no-MDL conversion inside Scenario Forge; no-MDL is a separate
+  debug/fallback path and cannot be used to claim official material parity.
+  The resulting ownership rule is: Scenario Forge fixes package/evidence
+  defects, EOS fixes runtime search-path configuration defects, and ConvertAsset
+  or an external conversion lane fixes asset conversion / MDL authoring defects.
+  A ConvertAsset handoff should include the failing package, dependency closure
+  report, runtime material log, render image, source provenance, and asset
+  hashes. Scenario Forge then consumes the repaired asset output, updates
+  hashes/locks/provenance, and reruns the Phase 10.9 preflight/render/review
+  rather than copying conversion logic into this repo.
+
+  Phase 10.9 execution evidence retained on 2026-07-04:
+  - EOS render CLI:
+    `/root/.config/superpowers/worktrees/embodied-eval-os/phase10x-scenario-forge-bridge/scripts/run_phase10x_scenario_forge_tabletop_render.py`
+  - EOS CLI tests:
+    `/root/.config/superpowers/worktrees/embodied-eval-os/phase10x-scenario-forge-bridge/tests/test_phase10x_scenario_forge_tabletop_render_cli.py`
+  - Final render:
+    `docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview.png`
+  - Render metadata:
+    `docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json`
+  - Runtime material log:
+    `docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_runtime.log`
+  - Clean-room visual review:
+    `docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_visual_review.md`
+
+  The retained metadata records `render_status=pass`,
+  `camera.engine_native=true`, `camera.pose_source=eos_native_tabletop_look_at`,
+  `material_runtime_preflight.status=pass`, approved runtime MDL dependencies
+  for `OmniPBR.mdl` and `gltf/pbr.mdl`, `blocked_dependency_count=0`, no runtime
+  material blockers, and `MDLC` warning evidence only. The final PNG sha256 is
+  `aa5f6e493d41b1884b8c1ded092f9ab067ca1f13a05ac291f774033838b3ba60`. The
+  clean-room review verdict is PASS with apple, bowl, tabletop, scene context,
+  and robot/spawn visible.
+
 10.10 EBench task contract canary:
   bind the package to the apple-to-bowl task semantics, success predicate, robot
   and camera hints, and adapter contract so it can serve as the first real task
@@ -352,6 +489,10 @@ docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/
   apple_to_bowl_task_entrypoint.yaml
   apple_to_bowl_usd_smoke_trace.json
   apple_to_bowl_runtime_smoke.yaml
+  tabletop_overview.png
+  tabletop_overview_render_metadata.json
+  tabletop_overview_runtime.log
+  tabletop_overview_visual_review.md
 ```
 
 Verification:
@@ -374,10 +515,11 @@ EOS bridge Stage.Open smoke:
 
 Boundary:
 
-This closes Phase 10.6-10.8 for a real-asset apple-to-bowl canary package. It
+This closes Phase 10.6-10.9 for a real-asset apple-to-bowl canary package. It
 proves official EBench asset intake, Scenario Forge package composition, asset
-locking, EBench adapter export, package validation, asset validation, and EOS
-USD Stage.Open smoke. It still does not close Phase 10.9 visual canary, Phase
-10.10 task-contract hardening, model inference, task success, official EBench
+locking, EBench adapter export, package validation, asset validation, EOS USD
+Stage.Open smoke, and one EOS/IsaacSim41 engine-native tabletop visual canary
+with clean-room visual review PASS. It still does not close Phase 10.10
+task-contract hardening, model inference, task success, official EBench
 reproduction, physics fidelity, official material/camera parity, score release,
 or leaderboard comparability.

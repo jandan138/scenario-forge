@@ -55,7 +55,11 @@ def make_scene_package(root: Path) -> Path:
                     "id": "object_001",
                     "asset_id": "sample_bottle_50ml_v1",
                     "role": "manipulated_object",
-                    "pose": {"xyz": [0.45, 0.0, 0.92], "wxyz": [1.0, 0.0, 0.0, 0.0]},
+                    "pose": {
+                        "xyz": [0.45, 0.0, 0.92],
+                        "wxyz": [1.0, 0.0, 0.0, 0.0],
+                        "scale_xyz": [0.8, 0.8, 0.8],
+                    },
                     "semantic_tags": ["bottle", "pickable"],
                     "initial_state": {"upright": True},
                 }
@@ -93,6 +97,7 @@ def test_load_scene_instances_reads_pose_and_tags(tmp_path: Path) -> None:
     assert instances[0].role == "manipulated_object"
     assert instances[0].xyz == (0.45, 0.0, 0.92)
     assert instances[0].wxyz == (1.0, 0.0, 0.0, 0.0)
+    assert instances[0].scale_xyz == (0.8, 0.8, 0.8)
     assert instances[0].semantic_tags == ("bottle", "pickable")
 
 
@@ -158,10 +163,61 @@ def test_compile_usd_scene_writes_locked_references_and_custom_data(tmp_path: Pa
     assert "asset_id = \"sample_bottle_50ml_v1\"" in source
     assert "role = \"manipulated_object\"" in source
     assert 'semantic_tags = ["bottle", "pickable"]' in source
+    assert "xformOp:scale = (0.8, 0.8, 0.8)" in source
+    assert (
+        'uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", '
+        '"xformOp:scale"]'
+    ) in source
     assert "@../assets/objects/sample_bottle_50ml_v1/model.usd@" in source
     assert 'def Xform "RobotSpawn"' in source
     assert 'def DistantLight "KeyLight"' in source
     assert 'def Camera "Camera"' in source
+
+
+def test_compile_usd_scene_combines_referenced_root_scale_with_instance_scale(
+    tmp_path: Path,
+) -> None:
+    package_dir = make_scene_package(tmp_path)
+    model = package_dir / "assets" / "objects" / "sample_bottle_50ml_v1" / "model.usd"
+    digest = write_asset(
+        model,
+        """#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    float3 xformOp:scale = (0.1, 0.1, 0.1)
+    uniform token[] xformOpOrder = ["xformOp:scale"]
+
+    def Cube "Cube"
+    {
+        double size = 2
+    }
+}
+""",
+    )
+    lock = yaml.safe_load((package_dir / "locks" / "asset_lock.yaml").read_text(encoding="utf-8"))
+    lock["assets"]["sample_bottle_50ml_v1"]["content_sha256"] = digest
+    write_yaml(package_dir / "locks" / "asset_lock.yaml", lock)
+
+    result = compile_usd_scene(
+        package_root=package_dir,
+        instances_path=package_dir / "scene" / "instances.yaml",
+        asset_lock_path=package_dir / "locks" / "asset_lock.yaml",
+        out_path=package_dir / "scene" / "main.usda",
+    )
+
+    Usd = pytest.importorskip("pxr.Usd")
+    UsdGeom = pytest.importorskip("pxr.UsdGeom")
+    stage = Usd.Stage.Open(str(result.path))
+    cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), [UsdGeom.Tokens.default_])
+    box = cache.ComputeWorldBound(stage.GetPrimAtPath("/World/Instances/object_001")).ComputeAlignedBox()
+
+    assert max(box.GetSize()) == pytest.approx(0.16)
 
 
 def test_compile_usd_scene_rejects_unresolved_asset_id(tmp_path: Path) -> None:

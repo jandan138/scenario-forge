@@ -49,6 +49,7 @@ instances:
     pose:
       xyz: [0.45, 0.0, 0.92]
       wxyz: [1.0, 0.0, 0.0, 0.0]
+      scale_xyz: [1.0, 1.0, 1.0]
     semantic_tags:
       - bottle
       - pickable
@@ -69,7 +70,8 @@ The implemented `scene/main.usda` includes:
 - meters and up-axis metadata;
 - one prim per scene instance;
 - references to locked asset USD files;
-- pose transforms;
+- pose transforms, including optional instance-level `scale_xyz` for source
+  layouts that specify relative object scale;
 - custom metadata for instance ID, asset ID, role, and semantic tags;
 - robot spawn metadata;
 - basic lights;

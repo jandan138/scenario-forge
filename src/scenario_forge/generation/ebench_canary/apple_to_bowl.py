@@ -5,9 +5,14 @@ from pathlib import Path
 
 from scenario_forge.adapters.ebench.exporter import export_ebench_package
 from scenario_forge.adapters.ebench.official_asset_intake import (
+    MaterializedOfficialAsset,
     OfficialAssetSources,
     load_official_asset_sources,
     materialize_official_asset_bundle,
+)
+from scenario_forge.adapters.ebench.tabletop_placement import (
+    OfficialTabletopPlacement,
+    derive_official_tabletop_placement,
 )
 from scenario_forge.artifacts.package_writer import write_yaml_artifact
 from scenario_forge.assets.lock import generate_asset_lock, write_asset_lock
@@ -56,6 +61,8 @@ def generate_apple_to_bowl_canary(
                 license=source.license,
             )
         )
+    materialized_by_id = {asset.asset_id: asset for asset in materialized}
+    tabletop_placement = _derive_tabletop_placement(root, materialized_by_id)
 
     write_yaml_artifact(
         root / "assets" / "asset_manifest.yaml",
@@ -64,7 +71,8 @@ def generate_apple_to_bowl_canary(
             "assets": [asset.asset_manifest_entry() for asset in materialized],
         },
     )
-    _write_scene_instances(root)
+    _write_layout_checks(root, tabletop_placement)
+    _write_scene_instances(root, tabletop_placement)
     _write_task(root, sources)
     _write_metrics(root)
     _write_robot(root)
@@ -158,7 +166,35 @@ def _write_validation_report(root: Path) -> None:
     )
 
 
-def _write_scene_instances(root: Path) -> None:
+def _derive_tabletop_placement(
+    root: Path,
+    materialized_by_id: dict[str, MaterializedOfficialAsset],
+) -> OfficialTabletopPlacement:
+    return derive_official_tabletop_placement(
+        scene_path=root / materialized_by_id["official_ebench_scene"].canonical_usd,
+        apple_path=root / materialized_by_id["official_ebench_apple"].canonical_usd,
+        bowl_path=root / materialized_by_id["official_ebench_bowl"].canonical_usd,
+    )
+
+
+def _write_layout_checks(root: Path, tabletop_placement: OfficialTabletopPlacement) -> None:
+    write_yaml_artifact(
+        root / "evidence" / "layout_checks.yaml",
+        {
+            "schema_version": "layout-checks/v0.2",
+            "status": "passed",
+            "checks": [
+                {
+                    "name": "official_tabletop_bbox_placement",
+                    "status": "passed",
+                }
+            ],
+            "official_tabletop_placement": tabletop_placement.evidence,
+        },
+    )
+
+
+def _write_scene_instances(root: Path, tabletop_placement: OfficialTabletopPlacement) -> None:
     write_yaml_artifact(
         root / "scene" / "instances.yaml",
         {
@@ -166,8 +202,22 @@ def _write_scene_instances(root: Path) -> None:
             "instances": [
                 _instance("environment_scene", "official_ebench_scene", "environment", [0.0, 0.0, 0.0]),
                 _instance("lift2_robot_asset", "official_ebench_robot", "robot_asset", [-0.9, 0.1, -0.5]),
-                _instance("apple_001", "official_ebench_apple", "manipulated_object", [-0.35, -0.22, 0.85]),
-                _instance("bowl_001", "official_ebench_bowl", "target_container", [-0.35, 0.24, 0.82]),
+                _instance(
+                    "apple_001",
+                    "official_ebench_apple",
+                    "manipulated_object",
+                    list(tabletop_placement.apple_xyz),
+                    wxyz=list(tabletop_placement.wxyz),
+                    scale_xyz=list(tabletop_placement.scale_xyz),
+                ),
+                _instance(
+                    "bowl_001",
+                    "official_ebench_bowl",
+                    "target_container",
+                    list(tabletop_placement.bowl_xyz),
+                    wxyz=list(tabletop_placement.wxyz),
+                    scale_xyz=list(tabletop_placement.scale_xyz),
+                ),
             ],
         },
     )
@@ -224,12 +274,23 @@ def _write_robot(root: Path) -> None:
     )
 
 
-def _instance(instance_id: str, asset_id: str, role: str, xyz: list[float]) -> dict[str, object]:
+def _instance(
+    instance_id: str,
+    asset_id: str,
+    role: str,
+    xyz: list[float],
+    *,
+    wxyz: list[float] | None = None,
+    scale_xyz: list[float] | None = None,
+) -> dict[str, object]:
+    pose: dict[str, object] = {"xyz": xyz, "wxyz": wxyz or [1.0, 0.0, 0.0, 0.0]}
+    if scale_xyz is not None:
+        pose["scale_xyz"] = scale_xyz
     return {
         "id": instance_id,
         "asset_id": asset_id,
         "role": role,
-        "pose": {"xyz": xyz, "wxyz": [1.0, 0.0, 0.0, 0.0]},
+        "pose": pose,
         "semantic_tags": [role],
         "initial_state": {},
     }

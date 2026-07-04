@@ -3002,6 +3002,79 @@ Phase 10.9：Newton / EBench Visual Canary
   贴图丢失/几何破损/placeholder 资产。Phase 10.9 strict pass 需要视觉 review 给出 PASS；
   WARN 只能作为调参依据，不能作为产品展示闭环。
 
+  相机位置决策不能靠临时手调坐标，要作为 Phase 10.9 evidence 的一部分记录下来。2026-07-04
+  调研 GenManip `fixed_camera_lift2_simbox.yml` 后，结论是它应该作为官方 camera hint，
+  但 Phase 10.9 不能直接声明 official camera parity。该 YAML 里有一个外部 `camera1`
+  (`exists: false`, 1280x720, position 约 `[0.2807, -0.0233, 1.6858]`)，也有挂在
+  Lift2 robot prim 下的 `left_camera`、`right_camera`、`top_camera` 和 `overlook_camera`
+  (`exists: true`)。`overlook_camera` 是优先候选，但只有当 EOS runtime stage 里真实存在
+  对应 robot camera prim，并且画面覆盖 apple、bowl、桌面和 robot/spawn 时才能选用。
+
+  更稳妥的 Phase 10.9 策略是：
+  1. Scenario Forge package 保留 `fixed_camera_lift2_simbox.yml` 的 source path、hash、
+     license/use restriction，把它作为 camera hint。
+  2. EOS render CLI 先读取官方 YAML，列出 `camera1`、`overlook_camera` 等候选，并在
+     metadata 里记录 selected/skipped/rejected reason。
+  3. 如果官方候选不能稳定拍到完整桌面，则 EOS 用引擎原生 camera/sensor API 创建
+     `tabletop_overview`，优先复用官方 1280x720/intrinsics，pose 由 runtime 决定。
+  4. pose 目标点来自 task anchors，而不是整场景 bbox：table/table_top prim、apple center、
+     bowl center、robot spawn。调研当前 canary 时发现 `/World` bbox 会被 environment 背景
+     扩到约 516m，不能用于放相机；`/World/Instances/environment_scene/obj_table` 才是
+     task-relevant table anchor。object bbox 也可能因为资产 origin/scale 过大，所以 object
+     instance translation 比 raw mesh extent 更可靠。
+  5. EOS 用 runtime 的 look-at helper 或等价 sensor API，从桌面斜上方 45-60 度视角放置
+     camera，距离由过滤后的 workspace anchors/FOV/margin 计算，保留 10-20% 画面余量。
+  6. metadata 必须记录 camera source YAML、候选相机、target anchors、最终 pose、FOV 或
+     intrinsics、resolution、engine/runtime、scene USD、asset hashes，以及“visual canary only”
+     边界。视觉 review 如果给 WARN/FAIL，就调整 pose 重拍，Phase 10.9 不能关闭。
+
+  Phase 10.9 还必须把 Isaac Sim 的 material / MDL runtime closure 纳入验收。调研
+  ConvertAsset 的 AAN 经验后，结论是 `Usd.Stage.Open` 成功不等于渲染材质闭合；缺 helper
+  MDL、缺 texture、MDL import 写法不兼容、runtime search path 没配好，都可能在 Isaac Sim
+  里出现异常红色/粉色 fallback 材质。ConvertAsset 的 AAN-03/AAN-04/AAN-11 分别处理
+  USD dependency closure、UsdShade material closure、MDL runtime dependency closure，并会
+  记录 `MDLC`、`rtx.mdltranslator`、`usd_mdl`、`Failed to create MDL shade node`、
+  `missing texture`、`could not find texture/module` 等日志信号。Phase 10.9 的
+  门禁把普通 `MDLC` warning（例如 `C183 unused parameter`）作为 warning evidence，
+  不是自动 blocker；MDL compiler error、缺 texture/module、shader node 失败或视觉上出现
+  异常红/粉 fallback material 才是 blocker。
+
+  当前 apple-to-bowl canary 也已经出现这个信号：`UsdUtils.ComputeAllDependencies` 能打开
+  `scene/main.usda`，大多数 PNG/MDL sidecar 已是 package-local，但仍报告 `OmniPBR.mdl`
+  和 `gltf/pbr.mdl` unresolved。它们在 Isaac Sim runtime 中存在：
+  `/isaac-sim/kit/mdl/core/Base/OmniPBR.mdl` 和
+  `/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl`。
+  同时 GenManip 官方 task 会设置 `MDL_SYSTEM_PATH=/isaac-sim/materials/:{ASSETS_DIR}/miscs/mdl/ebench/mdl:{ASSETS_DIR}/scene_usds/.../SubUSDs/materials`。
+  所以 10.9 strict pass 应记录实际 MDL search roots，并把 `OmniPBR.mdl`、`gltf/pbr.mdl`
+  归类为 approved runtime dependencies；如果出现缺 helper MDL、缺 texture、package-escape
+  texture literal、MDL compiler error，或视觉 review 看到异常红/粉 fallback material，则
+  Phase 10.9 保持 open。这里不能把 ConvertAsset no-MDL 转换逻辑搬进 Scenario Forge；
+  no-MDL 只能作为调试/救援路径，不能用于声明 official material parity。
+
+  材质问题的处置边界也要写进 10.9 的工作流：Scenario Forge 负责发现、分类、门禁和证据，
+  ConvertAsset 负责 USD/MDL/mesh/texture 转换与修复。若问题是 Scenario Forge package
+  自己造成的，例如 lock/provenance 漏资产、贴图路径没有打进 package、adapter 没记录实际
+  search root，则在 Scenario Forge 内修复。若问题是 EOS/Isaac Sim runtime search path
+  配置，例如 runtime 自带的 `OmniPBR.mdl` 或 `gltf/pbr.mdl` 找不到，则在 EOS adapter/render
+  lane 修复并补 evidence。若问题落在资产转换产物本身，例如 MDL import 写法不兼容、
+  helper MDL 缺失、texture literal 逃出 package、mesh/USD 转换异常、Isaac Sim 出现红/粉
+  fallback，则 Phase 10.9 开 ConvertAsset handoff：交付 failing USD package、dependency
+  closure 报告、runtime log、render PNG、资产 source/provenance/hash。ConvertAsset 或外部
+  conversion lane 产出修复资产后，Scenario Forge 只重新 ingest、hash、lock、记录 provenance，
+  然后重跑 10.9 preflight/render/review；不能在本 repo 里复制 ConvertAsset 的转换逻辑。
+
+  2026-07-04 执行结果：Phase 10.9 已通过一次 EOS/IsaacSim41 engine-native
+  `tabletop_overview` visual canary。正式 evidence 保存在
+  `docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/`：
+  `tabletop_overview.png`、`tabletop_overview_render_metadata.json`、
+  `tabletop_overview_runtime.log`、`tabletop_overview_visual_review.md`。
+  metadata 记录 `render_status=pass`、`camera.engine_native=true`、
+  `material_runtime_preflight.status=pass`、`blocked_dependency_count=0`，
+  `MDLC` 仅为 warning evidence；clean-room visual review verdict 为 PASS，
+  apple、bowl、桌面、scene context 和 robot/spawn 可见。该证据仍只表示 visual
+  canary pass，不表示 task success、official camera/material parity、physics fidelity 或
+  leaderboard readiness。
+
 Phase 10.10：EBench Task Contract Canary
   把 `apple_to_fruit_bowl` 的 task semantics、success predicate、robot/camera hints 和 adapter
   contract 固化为一个可复查的 single-task EBench-compatible package。它是进入 Phase 11 human
@@ -3019,8 +3092,8 @@ Phase 10.10：EBench Task Contract Canary
   Phase 10.8 结束；目标是 2026-07-05 到 2026-07-06。
 
 能给产品看“一张由引擎原生相机拍到的真实资产桌面渲染图”：
-  Phase 10.9 结束；目标是 2026-07-06 左右。该图必须通过视觉 review skill 的
-  clean-room QA，不能只靠代码日志或 Stage.Open 通过。
+  Phase 10.9 已在 2026-07-04 得到第一张 PASS evidence。该图通过视觉 review skill 的
+  clean-room QA，不能被解释为 task success 或 official parity。
 
 能说“这是一个真实 EBench apple-to-bowl 单任务包 canary，不只是 USD 文件”：
   Phase 10.10 结束；目标是 2026-07-06 到 2026-07-07，前提是 license/use restriction
@@ -3053,11 +3126,15 @@ Phase 10.8：已完成。
   EOS bridge 已对 /tmp/ebench-apple-to-bowl-canary 执行 package-linked
   Usd.Stage.Open smoke，runtime_status=executed，stage_open_status=passed。
 
+Phase 10.9：已完成第一版 visual canary。
+  EOS render CLI 已在 IsaacSim41 runtime 中打开同一个 package，产出
+  tabletop_overview.png；metadata 记录 engine-native camera、MDL runtime roots、
+  material preflight pass 和 image sha256；clean-room visual review verdict=PASS。
+
 Retained evidence:
   docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/
 
 仍未完成：
-  Phase 10.9 engine-native tabletop render + clean-room visual review。
   Phase 10.10 task contract canary hardening。
 ```
 

@@ -781,7 +781,7 @@ official material/camera parity, or leaderboard evidence.
 - Retain small metadata in git: `docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json`
 - Retain review summary in git: `docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_visual_review.md`
 
-- [ ] **Step 1: Add EOS render CLI contract test**
+- [x] **Step 1: Add EOS render CLI contract test**
 
 In EOS, write `tests/test_phase10x_scenario_forge_tabletop_render_cli.py` so a tiny package fixture can be passed to the CLI with `--dry-run`. The dry run must write metadata without importing Newton/Isaac:
 
@@ -820,13 +820,23 @@ def test_tabletop_render_cli_dry_run_writes_camera_metadata(tmp_path: Path) -> N
     assert metadata["package_id"] == "ebench_apple_to_bowl_canary"
     assert metadata["camera"]["name"] == "tabletop_overview"
     assert metadata["camera"]["intent"] == "full_tabletop_overview"
+    assert metadata["camera"]["pose_selection_policy"] == "official_hint_then_filtered_workspace_look_at"
+    assert metadata["camera"]["source_candidates"] == []
+    assert metadata["camera"]["target_anchors"] == []
+    assert metadata["material_runtime_preflight"] == {
+        "status": "not_run",
+        "claim_level": "not_claimed",
+        "approved_runtime_mdl_dependencies": [],
+        "blocked_dependency_count": 0,
+        "runtime_log_scan": {"status": "not_run"},
+    }
     assert metadata["claim_boundary"] == (
         "Engine-native visual canary only. Not task success, not official camera parity, "
         "not official material parity, and not leaderboard evidence."
     )
 ```
 
-- [ ] **Step 2: Implement EOS render CLI**
+- [x] **Step 2: Implement EOS render CLI**
 
 Create `/root/.config/superpowers/worktrees/embodied-eval-os/phase10x-scenario-forge-bridge/scripts/run_phase10x_scenario_forge_tabletop_render.py`.
 
@@ -836,8 +846,69 @@ The CLI must:
 - read the Scenario Forge package through `adapters.ebench.scenario_forge_package.load_scenario_forge_package`;
 - in dry run, write metadata only;
 - in real run, use the selected EOS runtime lane's native camera/sensor API to render the package scene, not a synthetic image, collage, or file copy;
-- place a camera intended to see the full tabletop work surface, apple, bowl, scene context, and robot or robot spawn;
+- preserve `fixed_camera_lift2_simbox.yml` as an official camera hint, not as proof of official EBench camera parity;
+- evaluate official camera candidates from the YAML, especially the external `camera1` and robot-mounted `overlook_camera`;
+- select `overlook_camera` only if the runtime stage contains the corresponding robot camera prim and the rendered view covers apple, bowl, table, and robot/spawn;
+- otherwise create an engine-native `tabletop_overview` camera, preferably reusing official 1280x720/intrinsics while choosing a runtime pose;
+- place the camera from filtered task anchors: table/table_top prim, apple center, bowl center, and robot spawn;
+- reject whole-stage bounds for placement when they are dominated by environment/background extents, and record that rejection in metadata;
+- use the runtime's look-at helper or equivalent sensor API for an oblique 45 to 60 degree tabletop overview with enough FOV margin to show the full task-relevant work surface;
+- run a material / MDL runtime preflight before claiming the render is useful;
+- treat `OmniPBR.mdl` and `gltf/pbr.mdl` as approved runtime MDL dependencies only if the runtime records concrete search roots that resolve them;
+- record `MDL_SYSTEM_PATH`, Kit additional MDL search paths, approved runtime MDL roots, unresolved MDL modules, unresolved textures, and package-escape texture literals;
+- scan render stdout/stderr for material compiler signals: `MDLC`, `rtx.mdltranslator`, `usd_mdl`, `Failed to create MDL shade node`, `missing texture`, `could not find texture`, and `could not find module`;
 - write PNG output, metadata JSON, and no model/task score.
+
+The camera decision is evidence and must be reproducible. It should follow this
+policy:
+
+```text
+1. Load official camera YAML from the package source manifest/provenance when available.
+2. Record each candidate camera with name, exists flag, prim path, resolution, and selected/skipped/rejected reason.
+3. Probe runtime stage anchors:
+   - table/table_top prim, preferring /World/Instances/environment_scene/obj_table when present;
+   - apple_001 instance translation;
+   - bowl_001 instance translation;
+   - RobotSpawn or lift2_robot_asset translation.
+4. Build a filtered workspace bound from these task anchors.
+5. Reject /World or full environment bounds when their size is implausibly large for a tabletop scene.
+6. Create or move tabletop_overview with runtime-native camera APIs.
+7. Save the final camera pose and the complete decision trace.
+```
+
+The material / MDL runtime preflight is required because ConvertAsset's AAN
+experience showed that `Usd.Stage.Open` success does not guarantee Isaac Sim
+material rendering success. The EOS render CLI must not reimplement ConvertAsset
+no-MDL conversion. Instead, it should borrow the closure checks:
+
+```text
+1. Run a USD dependency closure scan over scene/main.usda.
+2. Classify dependencies into package-local USD, package-local MDL, package-local texture, approved runtime MDL, unresolved, and package escape.
+3. For MDL files that are package-local, parse import / using-import / texture_2d literals when feasible.
+4. Classify Isaac-native modules such as OmniPBR.mdl and gltf/pbr.mdl as approved runtime dependencies only when runtime search roots resolve them.
+5. Preserve official GenManip MDL_SYSTEM_PATH hints, but record the concrete expanded paths used by EOS.
+6. Fail Phase 10.9 strict acceptance if any required helper MDL, texture, or package-local sidecar is missing.
+7. Fail Phase 10.9 strict acceptance if runtime logs contain material compiler failures or missing texture/module signals.
+8. Keep no-MDL conversion as a separate debug/fallback option; do not use it to claim official material parity.
+```
+
+Issue routing is part of the Phase 10.9 evidence trail:
+
+```text
+1. Scenario Forge package defect:
+   - Examples: missing lock/provenance entry, texture not included in the package, package-local reference escaping the artifact, adapter failed to record search roots.
+   - Owner: Scenario Forge.
+   - Action: fix the package, lock, manifest, provenance, or adapter evidence and rerun Phase 10.9.
+2. EOS / Isaac Sim runtime configuration defect:
+   - Examples: Isaac-native OmniPBR.mdl or gltf/pbr.mdl exists in runtime but the render lane did not expose the required MDL search root.
+   - Owner: EOS adapter/render lane.
+   - Action: fix runtime configuration, record concrete search roots, and rerun Phase 10.9.
+3. Asset conversion or material authoring defect:
+   - Examples: incompatible MDL import style, missing helper MDL, missing texture sidecar, package-escaping texture literal, malformed converted USD/mesh, visible red/pink material fallback.
+   - Owner: ConvertAsset or external conversion lane.
+   - Action: open a ConvertAsset handoff with the failing package, dependency closure report, runtime log, render image, source asset provenance, and hashes. After repair, Scenario Forge ingests the repaired assets, updates hashes/locks/provenance, and reruns Phase 10.9.
+4. Scenario Forge must not vendor or copy ConvertAsset conversion logic to close the issue locally.
+```
 
 Use this metadata shape:
 
@@ -851,7 +922,85 @@ Use this metadata shape:
     "intent": "full_tabletop_overview",
     "engine_native": true,
     "pose_source": "eos_runtime_tabletop_overview_camera",
-    "resolution": [1280, 720]
+    "pose_selection_policy": "official_hint_then_filtered_workspace_look_at",
+    "source_yaml": "configs/cameras/fixed_camera_lift2_simbox.yml",
+    "selected_candidate": "runtime_tabletop_overview",
+    "source_candidates": [
+      {
+        "name": "camera1",
+        "exists": false,
+        "resolution": [1280, 720],
+        "decision": "hint_only",
+        "reason": "external GenManip fixed camera is preserved as hint; EOS still owns runtime pose"
+      },
+      {
+        "name": "overlook_camera",
+        "exists": true,
+        "prim_path": "/lift2/lift2/lift2/base_link/Camera_overlook",
+        "resolution": [1280, 720],
+        "decision": "probe_in_runtime",
+        "reason": "usable only if the robot-mounted prim exists and passes visual coverage"
+      }
+    ],
+    "target_anchors": [
+      {"name": "table", "prim_path": "/World/Instances/environment_scene/obj_table"},
+      {"name": "apple", "instance_id": "apple_001"},
+      {"name": "bowl", "instance_id": "bowl_001"},
+      {"name": "robot_spawn", "prim_path": "/World/RobotSpawn"}
+    ],
+    "rejected_bounds": [
+      {
+        "prim_path": "/World",
+        "reason": "whole-stage bounds include environment/background and are not task workspace bounds"
+      }
+    ],
+    "pose": {
+      "position": [0.0, 0.0, 0.0],
+      "orientation_wxyz": [1.0, 0.0, 0.0, 0.0],
+      "look_at": [0.0, 0.0, 0.0]
+    },
+    "resolution": [1280, 720],
+    "fov_or_intrinsics_source": "official_camera_hint_when_available"
+  },
+  "material_runtime_preflight": {
+    "status": "pass",
+    "claim_level": "required_visual_canary_material_runtime_closure",
+    "source_policy": "convertasset_aan03_aan04_aan11_inspired_preflight",
+    "full_material_parity_claimed": false,
+    "package_local_dependency_counts": {
+      "usd": 0,
+      "mdl": 0,
+      "texture": 0
+    },
+    "approved_runtime_mdl_dependencies": [
+      {
+        "module": "OmniPBR.mdl",
+        "runtime_path": "/isaac-sim/kit/mdl/core/Base/OmniPBR.mdl",
+        "resolution": "approved_runtime_module"
+      },
+      {
+        "module": "gltf/pbr.mdl",
+        "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
+        "resolution": "approved_runtime_module"
+      }
+    ],
+    "mdl_search_paths": [
+      "/isaac-sim/materials/",
+      "/isaac-sim/kit/mdl/core/Base",
+      "/isaac-sim/kit/mdl/core/mdl"
+    ],
+    "genmanip_mdl_system_path_hint": "/isaac-sim/materials/:{ASSETS_DIR}/miscs/mdl/ebench/mdl:{ASSETS_DIR}/scene_usds/ebench/simple_pnp/task3/SubUSDs/materials",
+    "blocked_dependency_count": 0,
+    "blocked_dependencies": [],
+    "runtime_log_scan": {
+      "status": "pass",
+      "blocked_signals": [],
+      "counters": {
+        "mdlc_count": 0,
+        "failed_shader_node_count": 0,
+        "missing_texture_count": 0
+      }
+    }
   },
   "visible_targets_expected": ["tabletop", "apple", "bowl", "scene_context", "robot_or_spawn"],
   "image_path": "tabletop_overview.png",
@@ -859,30 +1008,54 @@ Use this metadata shape:
 }
 ```
 
-- [ ] **Step 3: Run the real engine-native render**
+- [x] **Step 3: Run the real engine-native render**
 
-Use the EOS Newton / EBench runtime environment selected for visual canaries:
+Use the EOS IsaacSim41 / GenManip runtime environment selected for visual
+canaries:
 
 ```bash
-PYTHONPATH=/root/.config/superpowers/worktrees/embodied-eval-os/phase10x-scenario-forge-bridge/src:/root/.config/superpowers/worktrees/embodied-eval-os/phase10x-scenario-forge-bridge \
-  /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-newton-ebench-experimental-py310/bin/python \
-  /root/.config/superpowers/worktrees/embodied-eval-os/phase10x-scenario-forge-bridge/scripts/run_phase10x_scenario_forge_tabletop_render.py \
+cd /root/.config/superpowers/worktrees/embodied-eval-os/phase10x-scenario-forge-bridge
+
+EEOS_ISAACSIM41_PYTHON=/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python \
+  python scripts/run_phase10x_scenario_forge_tabletop_render.py \
   --package /tmp/ebench-apple-to-bowl-canary \
   --image-out docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview.png \
   --metadata-out docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json \
-  --camera-name tabletop_overview
+  --runtime-log-out docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_runtime.log \
+  --camera-name tabletop_overview \
+  --isaac-python /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python \
+  --mdl-search-path /isaac-sim/kit/mdl/core/Base \
+  --mdl-search-path /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl \
+  --mdl-search-path /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl \
+  --mdl-search-path /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/converted_from_partnet_mobility/d9d75b41ebf2430bb98ce42c3ca59503/SubUSDs/materials \
+  --genmanip-mdl-system-path-hint '/isaac-sim/materials/:{ASSETS_DIR}/miscs/mdl/ebench/mdl:{ASSETS_DIR}/scene_usds/.../SubUSDs/materials'
 ```
 
 Expected:
 
 ```text
-render_status: executed
+render_status: pass
 image_path: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview.png
 camera.name: tabletop_overview
 camera.engine_native: true
+material_runtime_preflight.status: pass
+runtime_log_scan.status: pass
 ```
 
-- [ ] **Step 4: Run clean-room visual review**
+Actual retained result:
+
+```text
+render_status: pass
+camera.engine_native: true
+camera.pose_source: eos_native_tabletop_look_at
+material_runtime_preflight.status: pass
+blocked_dependency_count: 0
+runtime_log_scan.status: pass
+runtime_log_scan.warning_signals: [MDLC]
+image.sha256: aa5f6e493d41b1884b8c1ded092f9ab067ca1f13a05ac291f774033838b3ba60
+```
+
+- [x] **Step 4: Run clean-room visual review**
 
 Use `render-visual-reviewer` with a fresh clean-room reviewer. Provide only the image path and this visual expectation, not code, manifests, diffs, or suspected issues:
 
@@ -897,7 +1070,7 @@ Check:
 - Are apple and bowl visible and identifiable?
 - Is scene context visible enough to understand this is a tabletop manipulation scene?
 - Is a robot or robot spawn visible, or at least not contradicted by the image?
-- Are there obvious blocking artifacts: camera clipping, severe occlusion, missing textures, black fallback materials, broken mesh, floating parts, z-fighting, or placeholder/starter assets?
+- Are there obvious blocking artifacts: camera clipping, severe occlusion, missing textures, black fallback materials, abnormal red/pink fallback materials, broken mesh, floating parts, z-fighting, or placeholder/starter assets?
 Output: PASS/WARN/FAIL with concise visible evidence and a retake recommendation for WARN or FAIL.
 Constraints: Do not inspect code, manifests, repo files, or implementation details.
 ```
@@ -908,19 +1081,36 @@ Write the returned verdict to:
 docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_visual_review.md
 ```
 
-- [ ] **Step 5: Enforce Phase 10.9 acceptance**
+- [x] **Step 5: Enforce Phase 10.9 acceptance**
 
 Phase 10.9 can close only if:
 
 ```text
 1. tabletop_overview.png exists and is produced by the engine-native render CLI.
 2. tabletop_overview_render_metadata.json records camera.engine_native=true.
-3. The visual review verdict is PASS.
-4. The review says apple and bowl are visible and identifiable.
-5. The review does not report blank image, camera clipping, missing table, or placeholder/starter assets.
+3. tabletop_overview_render_metadata.json records material_runtime_preflight.status=pass.
+4. The runtime material log scan is pass and records no MDLC, failed shader node, missing texture, or missing module blockers.
+5. Approved runtime MDL dependencies such as OmniPBR.mdl and gltf/pbr.mdl include concrete runtime paths or hashes.
+6. The visual review verdict is PASS.
+7. The review says apple and bowl are visible and identifiable.
+8. The review does not report blank image, camera clipping, missing table, abnormal red/pink fallback material, missing texture, or placeholder/starter assets.
 ```
 
 If the review returns WARN, retake the render with a revised engine-native camera pose and repeat Step 4. If the review returns FAIL, keep Phase 10.9 open.
+
+2026-07-04 enforcement result:
+
+```text
+1. tabletop_overview.png exists and was produced by the EOS engine-native render CLI.
+2. camera.engine_native=true.
+3. material_runtime_preflight.status=pass.
+4. Runtime material log scan is pass; MDLC appears only as warning evidence.
+5. OmniPBR.mdl and gltf/pbr.mdl resolve to concrete Isaac runtime paths.
+6. Clean-room visual review verdict is PASS.
+7. The review says apple and bowl are visible and identifiable.
+8. The review reports no blank image, task-breaking clipping, missing table,
+   abnormal red/pink fallback material, missing texture, or placeholder asset.
+```
 
 ## Task 7: Verification And Commit
 
@@ -930,7 +1120,7 @@ If the review returns WARN, retake the render with a revised engine-native camer
 - EOS branch commit should include the engine-native render CLI and its tests.
 - Do not commit `tabletop_overview.png` unless it is explicitly small enough and allowed by artifact policy; otherwise retain it in artifact storage and commit only its path, size, and sha256 in metadata.
 
-- [ ] **Step 1: Run focused tests**
+- [x] **Step 1: Run focused tests**
 
 Run:
 
@@ -940,13 +1130,35 @@ PYTHONPATH=src python -m pytest tests/test_ebench_official_asset_intake.py tests
 
 Expected: PASS.
 
-- [ ] **Step 2: Run full Scenario Forge check**
+Actual:
+
+```text
+PYTHONPATH=src python -m pytest tests/test_scene_compiler.py tests/test_ebench_apple_to_bowl_canary.py -q
+  12 passed
+
+PYTHONPATH=src python -m scenario_forge.cli package check /tmp/ebench-apple-to-bowl-canary --require-asset-lock
+  Package OK
+
+PYTHONPATH=src python -m scenario_forge.cli assets check /tmp/ebench-apple-to-bowl-canary
+  Asset lock OK
+```
+
+- [x] **Step 2: Run full Scenario Forge check**
 
 Run: `make check`
 
 Expected: PASS.
 
-- [ ] **Step 3: Check git diff**
+Actual:
+
+```text
+make check
+  89 passed
+  ruff: All checks passed
+  Phase 10.x overall status: passed
+```
+
+- [x] **Step 3: Check git diff**
 
 Run:
 
@@ -956,6 +1168,34 @@ git status --short
 ```
 
 Expected: no whitespace errors; only intended implementation, tests, examples, docs, and retained evidence are changed.
+
+Actual:
+
+```text
+git diff --check
+  passed
+```
+
+EOS verification run:
+
+```text
+python -m pytest tests/test_phase10x_scenario_forge_tabletop_render_cli.py -q
+  4 passed
+
+python scripts/check_core_leakage.py
+  OK: no forbidden benchmark/scenario leakage in core
+
+python examples/run_smoke.py
+  emitted a 3-step smoke episode with task_success=True
+
+python -m pytest -q
+  1228 passed, 38 skipped, 9 failed
+```
+
+The EOS full-suite failures were environment/evidence availability failures
+outside the Phase 10.9 render CLI path: missing `playwright`, missing
+`pybullet`, and one missing historical Taskbook02 evidence attempt directory.
+The targeted render CLI test and core leakage check passed.
 
 - [ ] **Step 4: Commit**
 

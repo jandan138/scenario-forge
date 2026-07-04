@@ -72,6 +72,14 @@
                 "items": {
                   "type": "number"
                 }
+              },
+              "scale_xyz": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
               }
             }
           },

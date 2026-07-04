@@ -126,7 +126,6 @@ def _instance_prim_lines(instance: SceneInstance, reference: str) -> list[str]:
     prim_name = to_usd_identifier(instance.instance_id)
     return [
         f'        def Xform "{prim_name}" (',
-        f"            references = @{reference}@",
         "            customData = {",
         f"                string instance_id = {quote_usda_string(instance.instance_id)}",
         f"                string asset_id = {quote_usda_string(instance.asset_id)}",
@@ -137,7 +136,14 @@ def _instance_prim_lines(instance: SceneInstance, reference: str) -> list[str]:
         "        {",
         f"            double3 xformOp:translate = {format_usda_float_tuple(instance.xyz)}",
         f"            quatd xformOp:orient = {format_usda_float_tuple(instance.wxyz)}",
-        '            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]',
+        f"            double3 xformOp:scale = {format_usda_float_tuple(instance.scale_xyz)}",
+        '            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]',
+        "",
+        '            def Xform "Asset" (',
+        f"                references = @{reference}@",
+        "            )",
+        "            {",
+        "            }",
         "        }",
         "",
     ]

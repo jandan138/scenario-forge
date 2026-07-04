@@ -20,6 +20,7 @@ class SceneInstance:
     role: str
     xyz: tuple[float, float, float]
     wxyz: tuple[float, float, float, float]
+    scale_xyz: tuple[float, float, float]
     semantic_tags: tuple[str, ...]
     initial_state: dict[str, Any]
 
@@ -81,6 +82,13 @@ def load_scene_instances(path: str | Path) -> tuple[SceneInstance, ...]:
                 role=_optional_string(raw_instance, "role", default="scene_object"),
                 xyz=_require_float_tuple(pose, "xyz", 3, instance_id),
                 wxyz=_require_float_tuple(pose, "wxyz", 4, instance_id),
+                scale_xyz=_optional_float_tuple(
+                    pose,
+                    "scale_xyz",
+                    3,
+                    instance_id,
+                    default=(1.0, 1.0, 1.0),
+                ),
                 semantic_tags=tuple(semantic_tags),
                 initial_state=initial_state,
             )
@@ -115,3 +123,16 @@ def _require_float_tuple(
     if not all(isinstance(item, int | float) for item in value):
         raise SceneInstanceError(f"Scene instance {instance_id} field 'pose.{key}' must be numeric")
     return tuple(float(item) for item in value)
+
+
+def _optional_float_tuple(
+    data: dict[str, Any],
+    key: str,
+    expected_length: int,
+    instance_id: str,
+    *,
+    default: tuple[float, ...],
+) -> tuple[float, ...]:
+    if key not in data:
+        return default
+    return _require_float_tuple(data, key, expected_length, instance_id)
