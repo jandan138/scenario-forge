@@ -212,6 +212,83 @@ def test_apple_to_bowl_canary_uses_official_tabletop_bbox_pose(tmp_path: Path) -
     assert "xformOp:scale = (0.8, 0.8, 0.8)" in scene
 
 
+def test_apple_to_bowl_canary_writes_phase1010_task_contract(tmp_path: Path) -> None:
+    source_manifest = _write_tiny_official_bbox_source_manifest(tmp_path)
+    package_dir = tmp_path / "out" / "ebench_apple_to_bowl_canary"
+
+    generate_apple_to_bowl_canary(source_manifest, package_dir)
+
+    manifest = yaml.safe_load((package_dir / "manifest.yaml").read_text(encoding="utf-8"))
+    adapter = yaml.safe_load((package_dir / "adapters/ebench/package.yaml").read_text(encoding="utf-8"))
+    adapter_report = yaml.safe_load(
+        (package_dir / "adapters/ebench/adapter_report.yaml").read_text(encoding="utf-8")
+    )
+    contract = yaml.safe_load((package_dir / "task/task_contract.yaml").read_text(encoding="utf-8"))
+
+    assert manifest["entrypoints"]["task_contract"] == "task/task_contract.yaml"
+    assert adapter["entrypoints"]["task_contract"] == "../../task/task_contract.yaml"
+    assert adapter_report["entrypoints"]["task_contract"] == "task/task_contract.yaml"
+
+    assert contract["schema_version"] == "ebench-task-contract/v0.1"
+    assert contract["phase_gate"] == "10.10"
+    assert contract["package_id"] == "ebench_apple_to_bowl_canary"
+    assert contract["task"]["task_id"] == "mobile_manip/apple_to_fruit_bowl"
+    assert contract["task"]["instruction"] == (
+        "Pick up the apple from the dining table and place it into the fruit bowl."
+    )
+    assert contract["task_semantics"]["manipulated_object"] == {
+        "instance_id": "apple_001",
+        "asset_id": "official_ebench_apple",
+        "role": "manipulated_object",
+    }
+    assert contract["task_semantics"]["target_container"] == {
+        "instance_id": "bowl_001",
+        "asset_id": "official_ebench_bowl",
+        "role": "target_container",
+    }
+    assert contract["success_predicate"] == {
+        "metric_id": "apple_in_bowl",
+        "role": "primary_success",
+        "predicate": "object_in_container",
+        "object": "apple_001",
+        "container": "bowl_001",
+        "evaluator_owner": "embodied-eval-os-ebench-adapter",
+        "claim_boundary": "portable predicate binding only; not an executed task success result",
+    }
+    assert contract["robot_hints"]["robot_id"] == "manip/lift2/R5a"
+    assert contract["robot_hints"]["robot_instance"] == "lift2_robot_asset"
+    assert contract["robot_hints"]["spawn"] == {
+        "xyz": [-0.9, 0.1, -0.5],
+        "wxyz": [1.0, 0.0, 0.0, 0.0],
+    }
+    assert contract["camera_hints"]["source_asset_key"] == "camera_yaml"
+    assert contract["camera_hints"]["source_file"] == "fixed_camera_lift2_simbox.yml"
+    assert contract["camera_hints"]["source_uri"].endswith("fixed_camera_lift2_simbox.yml")
+    assert contract["camera_hints"]["role"] == "camera_config"
+    assert contract["camera_hints"]["usage"] == "hint_only"
+    assert contract["camera_hints"]["claim_boundary"] == (
+        "official camera config preserved as hint; no official camera parity claim"
+    )
+    assert contract["adapter_contract"]["runtime_owner"] == "embodied-eval-os"
+    assert contract["adapter_contract"]["scenario_forge_scope"] == "package_artifacts_and_contracts_only"
+    assert contract["adapter_contract"]["scenario_forge_excludes"] == [
+        "episode_runner",
+        "model_adapter",
+        "leaderboard_reporting",
+        "simulator_runtime_execution",
+        "convertasset_usd_mdl_mesh_conversion",
+    ]
+    assert contract["phase_11_readiness"]["required_review_artifacts"] == [
+        "scene/main.usda",
+        "locks/asset_lock.yaml",
+        "adapters/ebench/package.yaml",
+        "adapters/ebench/task_entrypoint.yaml",
+        "task/task_contract.yaml",
+        "docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview.png",
+        "docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_visual_review.md",
+    ]
+
+
 def test_cli_generates_apple_to_bowl_canary(tmp_path: Path) -> None:
     source_manifest = _write_tiny_official_bbox_source_manifest(tmp_path)
     out_dir = tmp_path / "generated"

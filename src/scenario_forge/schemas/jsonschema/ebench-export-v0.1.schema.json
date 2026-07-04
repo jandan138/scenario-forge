@@ -25,6 +25,7 @@
       "properties": {
         "scene_usd": {"type": "string"},
         "task": {"type": "string"},
+        "task_contract": {"type": "string"},
         "robot": {"type": "string"},
         "metrics": {"type": "string"}
       }

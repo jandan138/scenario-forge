@@ -1,0 +1,7 @@
+schema_version: task/v0.2
+task_id: mobile_manip/apple_to_fruit_bowl
+task_family: pick_place
+instruction: Pick up the apple from the dining table and place it into the fruit bowl.
+bindings:
+  object: apple_001
+  target_container: bowl_001

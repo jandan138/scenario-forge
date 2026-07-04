@@ -150,6 +150,9 @@ def _package_export_blockers(root: Path) -> tuple[str, ...]:
         "metrics": manifest.entrypoints.get("metrics"),
         "asset_lock": manifest.assets.get("lock"),
     }
+    task_contract = manifest.entrypoints.get("task_contract")
+    if task_contract is not None:
+        required_paths["task_contract"] = task_contract
     for relative_path in required_paths.values():
         if relative_path is not None and not (root / relative_path).exists():
             blockers.append(f"Missing required EBench file: {relative_path}")
@@ -177,7 +180,7 @@ def _write_failed_package_report(root: Path, output_dir: Path, blockers: tuple[s
 
 
 def _adapter_entrypoints(manifest: Any) -> dict[str, str]:
-    return {
+    entrypoints = {
         "scene_usd": manifest.entrypoints["scene_usd"],
         "task": manifest.entrypoints["task"],
         "robot": manifest.entrypoints["robot"],
@@ -185,6 +188,10 @@ def _adapter_entrypoints(manifest: Any) -> dict[str, str]:
         "asset_lock": manifest.assets["lock"],
         "validation_report": manifest.validation["report"],
     }
+    task_contract = manifest.entrypoints.get("task_contract")
+    if task_contract is not None:
+        entrypoints["task_contract"] = task_contract
+    return entrypoints
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:

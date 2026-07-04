@@ -1,0 +1,73 @@
+schema_version: ebench-task-contract/v0.1
+phase_gate: '10.10'
+package_id: ebench_apple_to_bowl_canary
+task:
+  task_id: mobile_manip/apple_to_fruit_bowl
+  task_family: pick_place
+  instruction: Pick up the apple from the dining table and place it into the fruit
+    bowl.
+task_semantics:
+  action: pick_place
+  manipulated_object:
+    instance_id: apple_001
+    asset_id: official_ebench_apple
+    role: manipulated_object
+  target_container:
+    instance_id: bowl_001
+    asset_id: official_ebench_bowl
+    role: target_container
+success_predicate:
+  metric_id: apple_in_bowl
+  role: primary_success
+  predicate: object_in_container
+  object: apple_001
+  container: bowl_001
+  evaluator_owner: embodied-eval-os-ebench-adapter
+  claim_boundary: portable predicate binding only; not an executed task success result
+robot_hints:
+  robot_id: manip/lift2/R5a
+  robot_instance: lift2_robot_asset
+  spawn:
+    xyz:
+    - -0.9
+    - 0.1
+    - -0.5
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  usage: hint_only
+camera_hints:
+  source_asset_key: camera_yaml
+  source_file: fixed_camera_lift2_simbox.yml
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml
+  license: research-use
+  role: camera_config
+  usage: hint_only
+  claim_boundary: official camera config preserved as hint; no official camera parity
+    claim
+adapter_contract:
+  adapter: ebench
+  package_descriptor: adapters/ebench/package.yaml
+  task_entrypoint: adapters/ebench/task_entrypoint.yaml
+  runtime_owner: embodied-eval-os
+  scenario_forge_scope: package_artifacts_and_contracts_only
+  scenario_forge_excludes:
+  - episode_runner
+  - model_adapter
+  - leaderboard_reporting
+  - simulator_runtime_execution
+  - convertasset_usd_mdl_mesh_conversion
+phase_11_readiness:
+  status: ready_for_human_review
+  required_review_artifacts:
+  - scene/main.usda
+  - locks/asset_lock.yaml
+  - adapters/ebench/package.yaml
+  - adapters/ebench/task_entrypoint.yaml
+  - task/task_contract.yaml
+  - docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview.png
+  - docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_visual_review.md
+claim_boundary: real EBench single-task package contract only; not task success, not
+  official camera/material parity, not leaderboard evidence

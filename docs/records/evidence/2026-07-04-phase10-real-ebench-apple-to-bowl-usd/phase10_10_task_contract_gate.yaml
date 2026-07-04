@@ -1,0 +1,79 @@
+schema_version: phase10-task-contract-gate/v0.1
+phase: '10.10'
+status: passed
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+generated_package_root: /tmp/ebench-apple-to-bowl-canary
+contract_artifact: apple_to_bowl_task_contract.yaml
+checks:
+- name: task_semantics_bound
+  status: passed
+  evidence:
+    task_contract: apple_to_bowl_task_contract.yaml
+    task_entrypoint: apple_to_bowl_task_entrypoint.yaml
+  details:
+    task_family: pick_place
+    manipulated_object: apple_001
+    target_container: bowl_001
+- name: success_predicate_bound
+  status: passed
+  evidence:
+    metrics: apple_to_bowl_metrics.yaml
+    task_contract: apple_to_bowl_task_contract.yaml
+  details:
+    metric_id: apple_in_bowl
+    predicate: object_in_container
+    object: apple_001
+    container: bowl_001
+    evaluator_owner: embodied-eval-os-ebench-adapter
+- name: robot_hint_bound
+  status: passed
+  evidence:
+    robot: apple_to_bowl_task_contract.yaml
+  details:
+    robot_id: manip/lift2/R5a
+    robot_instance: lift2_robot_asset
+    spawn_xyz:
+    - -0.9
+    - 0.1
+    - -0.5
+- name: camera_hint_bound
+  status: passed
+  evidence:
+    task_contract: apple_to_bowl_task_contract.yaml
+    phase10_9_render_metadata: tabletop_overview_render_metadata.json
+  details:
+    source_asset_key: camera_yaml
+    source_file: fixed_camera_lift2_simbox.yml
+    usage: hint_only
+    claim_boundary: official camera config preserved as hint; no official camera
+      parity claim
+- name: adapter_contract_bound
+  status: passed
+  evidence:
+    manifest: apple_to_bowl_package_manifest.yaml
+    adapter_descriptor: apple_to_bowl_ebench_package.yaml
+    adapter_report: apple_to_bowl_adapter_report.yaml
+  details:
+    adapter_entrypoint: ../../task/task_contract.yaml
+    runtime_owner: embodied-eval-os
+    scenario_forge_scope: package_artifacts_and_contracts_only
+- name: package_checks
+  status: passed
+  evidence:
+    package_check: PYTHONPATH=src python -m scenario_forge.cli package check /tmp/ebench-apple-to-bowl-canary
+    asset_check: PYTHONPATH=src python -m scenario_forge.cli assets check /tmp/ebench-apple-to-bowl-canary
+claim_boundary: Phase 10.10 validates a real EBench single-task package contract.
+  It is not task success, official camera parity, official material parity,
+  physics fidelity, model quality, or leaderboard evidence.
+phase_11_review_inputs:
+- apple_to_bowl_package_manifest.yaml
+- apple_to_bowl_asset_manifest.yaml
+- apple_to_bowl_asset_lock.yaml
+- apple_to_bowl_ebench_package.yaml
+- apple_to_bowl_task_entrypoint.yaml
+- apple_to_bowl_task_contract.yaml
+- apple_to_bowl_adapter_report.yaml
+- tabletop_overview.png
+- tabletop_overview_render_metadata.json
+- tabletop_overview_visual_review.md

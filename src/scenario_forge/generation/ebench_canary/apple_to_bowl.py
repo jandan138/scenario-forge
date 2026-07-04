@@ -22,6 +22,8 @@ from scenario_forge.scene.usd_compiler import compile_usd_scene
 
 PACKAGE_ID = "ebench_apple_to_bowl_canary"
 ROBOT_ID = "manip/lift2/R5a"
+ROBOT_INSTANCE_ID = "lift2_robot_asset"
+ROBOT_SPAWN = {"xyz": [-0.9, 0.1, -0.5], "wxyz": [1.0, 0.0, 0.0, 0.0]}
 
 
 @dataclass(frozen=True)
@@ -76,6 +78,7 @@ def generate_apple_to_bowl_canary(
     _write_task(root, sources)
     _write_metrics(root)
     _write_robot(root)
+    _write_task_contract(root, sources)
 
     write_asset_lock(root, generate_asset_lock(root))
     scene_usd = root / "scene" / "main.usda"
@@ -104,6 +107,7 @@ def _write_manifest(root: Path) -> None:
                 "scene_usd": "scene/main.usda",
                 "scene_instances": "scene/instances.yaml",
                 "task": "task/task.yaml",
+                "task_contract": "task/task_contract.yaml",
                 "robot": "robot/robot.yaml",
                 "metrics": "metrics/metrics.yaml",
             },
@@ -269,7 +273,97 @@ def _write_robot(root: Path) -> None:
         {
             "schema_version": "robot/v0.2",
             "robot_id": ROBOT_ID,
-            "spawn": {"xyz": [-0.9, 0.1, -0.5], "wxyz": [1.0, 0.0, 0.0, 0.0]},
+            "spawn": ROBOT_SPAWN,
+        },
+    )
+
+
+def _write_task_contract(root: Path, sources: OfficialAssetSources) -> None:
+    camera_source = sources.assets["camera_yaml"]
+    write_yaml_artifact(
+        root / "task" / "task_contract.yaml",
+        {
+            "schema_version": "ebench-task-contract/v0.1",
+            "phase_gate": "10.10",
+            "package_id": PACKAGE_ID,
+            "task": {
+                "task_id": sources.task_id,
+                "task_family": "pick_place",
+                "instruction": sources.instruction,
+            },
+            "task_semantics": {
+                "action": "pick_place",
+                "manipulated_object": {
+                    "instance_id": "apple_001",
+                    "asset_id": "official_ebench_apple",
+                    "role": "manipulated_object",
+                },
+                "target_container": {
+                    "instance_id": "bowl_001",
+                    "asset_id": "official_ebench_bowl",
+                    "role": "target_container",
+                },
+            },
+            "success_predicate": {
+                "metric_id": "apple_in_bowl",
+                "role": "primary_success",
+                "predicate": "object_in_container",
+                "object": "apple_001",
+                "container": "bowl_001",
+                "evaluator_owner": "embodied-eval-os-ebench-adapter",
+                "claim_boundary": "portable predicate binding only; not an executed task success result",
+            },
+            "robot_hints": {
+                "robot_id": ROBOT_ID,
+                "robot_instance": ROBOT_INSTANCE_ID,
+                "spawn": ROBOT_SPAWN,
+                "usage": "hint_only",
+            },
+            "camera_hints": {
+                "source_asset_key": "camera_yaml",
+                "source_file": camera_source.source_path.name,
+                "source_uri": str(camera_source.source_path),
+                "license": camera_source.license,
+                "role": camera_source.role,
+                "usage": "hint_only",
+                "claim_boundary": "official camera config preserved as hint; no official camera parity claim",
+            },
+            "adapter_contract": {
+                "adapter": "ebench",
+                "package_descriptor": "adapters/ebench/package.yaml",
+                "task_entrypoint": "adapters/ebench/task_entrypoint.yaml",
+                "runtime_owner": "embodied-eval-os",
+                "scenario_forge_scope": "package_artifacts_and_contracts_only",
+                "scenario_forge_excludes": [
+                    "episode_runner",
+                    "model_adapter",
+                    "leaderboard_reporting",
+                    "simulator_runtime_execution",
+                    "convertasset_usd_mdl_mesh_conversion",
+                ],
+            },
+            "phase_11_readiness": {
+                "status": "ready_for_human_review",
+                "required_review_artifacts": [
+                    "scene/main.usda",
+                    "locks/asset_lock.yaml",
+                    "adapters/ebench/package.yaml",
+                    "adapters/ebench/task_entrypoint.yaml",
+                    "task/task_contract.yaml",
+                    (
+                        "docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/"
+                        "tabletop_overview.png"
+                    ),
+                    (
+                        "docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/"
+                        "tabletop_overview_visual_review.md"
+                    ),
+                ],
+            },
+            "claim_boundary": (
+                "real EBench single-task package contract only; not task success, "
+                "not official camera/material parity, not leaderboard evidence"
+            ),
         },
     )
 

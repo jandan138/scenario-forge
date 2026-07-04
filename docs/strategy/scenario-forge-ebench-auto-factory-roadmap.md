@@ -3131,16 +3131,45 @@ Phase 10.9：已完成第一版 visual canary。
   tabletop_overview.png；metadata 记录 engine-native camera、MDL runtime roots、
   material preflight pass 和 image sha256；clean-room visual review verdict=PASS。
 
+Phase 10.10：已完成第一版 task contract canary。
+  Scenario Forge package 现在包含 `task/task_contract.yaml`，并在 manifest 和
+  `adapters/ebench/package.yaml` 中暴露 `task_contract` entrypoint。该 contract 把
+  `mobile_manip/apple_to_fruit_bowl` 绑定到官方 instruction、`apple_001`、
+  `bowl_001`、`apple_in_bowl` / `object_in_container`、Lift2 robot hint、
+  `fixed_camera_lift2_simbox.yml` camera hint，以及 EOS/EBench adapter 边界。
+  证据文件包括 `apple_to_bowl_task_contract.yaml`、`apple_to_bowl_adapter_report.yaml`
+  和 `phase10_10_task_contract_gate.yaml`。
+
 Retained evidence:
   docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/
 
 仍未完成：
-  Phase 10.10 task contract canary hardening。
+  Phase 11 human review / release flow；模型运行、task success、physics fidelity、
+  official camera/material parity、score release 和 leaderboard comparability 仍不在
+  Scenario Forge 10.10 的声明范围内。
 ```
 
 ---
 
 ## 35. Phase 11：Workbench UI / Human Review / Dataset Release Flow
+
+### 35.0 Apple-To-Bowl Canary Human Review
+
+2026-07-04 状态：第一版真实 `mobile_manip/apple_to_fruit_bowl` canary 已通过
+内部 human review 样包判断。
+
+- 产品侧已人工查看 `tabletop_overview.png`，反馈渲染图没问题。
+- Scenario Forge 侧判断：task contract 完整，adapter 能发现 contract，package check /
+  asset check 通过，EOS Stage.Open evidence 已保留，Scenario Forge 没越界引入 runner、
+  model adapter、leaderboard 或 simulator SDK。
+- 证据：`docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_canary_human_review_gate.yaml`。
+
+结论：该 canary 可以进入下一步 EOS task execution integration。
+
+仍然不能声明：public dataset release、真实 task success、official camera/material
+parity、physics fidelity、score release 或 leaderboard comparability。原因是资产 release
+权限仍记录为 `research-use`，外部分发需要单独审批；真实 task success 还没有由 EOS/EBench
+执行并保留证据。
 
 ### 35.1 目标
 

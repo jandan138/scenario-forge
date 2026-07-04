@@ -487,8 +487,14 @@ docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/
   apple_to_bowl_asset_lock.yaml
   apple_to_bowl_ebench_package.yaml
   apple_to_bowl_task_entrypoint.yaml
+  apple_to_bowl_task.yaml
+  apple_to_bowl_metrics.yaml
+  apple_to_bowl_task_contract.yaml
+  apple_to_bowl_adapter_report.yaml
   apple_to_bowl_usd_smoke_trace.json
   apple_to_bowl_runtime_smoke.yaml
+  phase10_10_task_contract_gate.yaml
+  phase11_canary_human_review_gate.yaml
   tabletop_overview.png
   tabletop_overview_render_metadata.json
   tabletop_overview_runtime.log
@@ -499,7 +505,15 @@ Verification:
 
 ```text
 PYTHONPATH=src python -m pytest tests/test_ebench_official_asset_intake.py tests/test_ebench_apple_to_bowl_canary.py -q
-  5 passed
+  7 passed
+
+PYTHONPATH=src python -m pytest tests/test_ebench_apple_to_bowl_canary.py tests/test_ebench_adapter.py tests/test_asset_schemas.py -q
+  14 passed
+
+make check
+  90 passed
+  ruff: All checks passed
+  Phase 10.x overall status: passed
 
 PYTHONPATH=src python -m scenario_forge.cli package check /tmp/ebench-apple-to-bowl-canary --require-asset-lock
   Package OK
@@ -513,13 +527,47 @@ EOS bridge Stage.Open smoke:
   lane: eos_usd_stage_open_smoke
 ```
 
+Phase 10.10 contract evidence:
+
+```text
+  apple_to_bowl_task.yaml
+  apple_to_bowl_metrics.yaml
+  apple_to_bowl_task_contract.yaml
+  apple_to_bowl_adapter_report.yaml
+  phase10_10_task_contract_gate.yaml
+```
+
+The Phase 10.10 task contract binds `mobile_manip/apple_to_fruit_bowl` to the
+official instruction, `apple_001` as the manipulated object, `bowl_001` as the
+target container, `apple_in_bowl` / `object_in_container` as the primary success
+predicate, the Lift2 robot hint, the `fixed_camera_lift2_simbox.yml` camera
+hint, and the EBench/EOS adapter boundary. The EBench package descriptor now
+advertises `entrypoints.task_contract: ../../task/task_contract.yaml`, and the
+adapter report records `task_contract: task/task_contract.yaml`.
+
+Phase 11 canary human review:
+
+```text
+  phase11_canary_human_review_gate.yaml
+```
+
+The user manually inspected `tabletop_overview.png` and reported no issue. The
+remaining review checks are judged by Scenario Forge evidence: the task contract
+is complete, the EBench adapter exposes it, package and asset checks pass, EOS
+Stage.Open evidence is retained, and Scenario Forge boundaries are preserved.
+This passes the apple-to-bowl canary for internal Phase 11 continuation into EOS
+task execution integration. It does not approve public dataset release because
+the retained asset license is `research-use`, explicit redistribution approval
+is still required, and executed task success has not been retained as evidence.
+
 Boundary:
 
-This closes Phase 10.6-10.9 for a real-asset apple-to-bowl canary package. It
+This closes Phase 10.6-10.10 for a real-asset apple-to-bowl canary package. It
 proves official EBench asset intake, Scenario Forge package composition, asset
 locking, EBench adapter export, package validation, asset validation, EOS USD
 Stage.Open smoke, and one EOS/IsaacSim41 engine-native tabletop visual canary
-with clean-room visual review PASS. It still does not close Phase 10.10
-task-contract hardening, model inference, task success, official EBench
-reproduction, physics fidelity, official material/camera parity, score release,
-or leaderboard comparability.
+with clean-room visual review PASS. Phase 10.10 additionally proves that the
+package contains a reviewable task contract. It still does not close model
+inference, executed task success, official EBench reproduction, physics
+fidelity, official material/camera parity, score release, or leaderboard
+comparability.

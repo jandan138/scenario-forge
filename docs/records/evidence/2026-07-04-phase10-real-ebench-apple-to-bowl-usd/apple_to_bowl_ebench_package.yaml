@@ -10,6 +10,7 @@ entrypoints:
   task: ../../task/task.yaml
   robot: ../../robot/robot.yaml
   metrics: ../../metrics/metrics.yaml
+  task_contract: ../../task/task_contract.yaml
 assets:
   asset_lock: ../../locks/asset_lock.yaml
 runtime_hints:

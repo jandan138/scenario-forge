@@ -26,12 +26,20 @@ Phase 10.8 EOS package-linked real-asset USD smoke:
   executed through the EOS bridge with runtime_status=executed and
   stage_open_status=passed.
 
+Phase 10.9 engine-native tabletop render and visual review:
+  executed through the EOS bridge with render_status=pass, material preflight
+  status=pass, and clean-room visual review verdict=PASS.
+
+Phase 10.10 task contract canary hardening:
+  implemented in Scenario Forge. The generated package now includes
+  task/task_contract.yaml and exposes it through the Scenario Forge manifest,
+  EBench package descriptor, and adapter report.
+
 Retained small evidence:
   docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/
 
-Still open:
-  Phase 10.9 engine-native tabletop render and visual review.
-  Phase 10.10 task contract canary hardening.
+Next open phase:
+  Phase 11 human review and release flow.
 ```
 
 ## File Structure
@@ -1153,7 +1161,7 @@ Actual:
 
 ```text
 make check
-  89 passed
+  90 passed
   ruff: All checks passed
   Phase 10.x overall status: passed
 ```
@@ -1233,6 +1241,37 @@ Expected: EOS bridge commit contains only EOS runtime/render lane code and tests
 - `scene/main.usda` references package-local copies of official EBench apple, bowl, scene, and robot USD bundles.
 - `locks/asset_lock.yaml` has checksums for the canonical USD files.
 - `adapters/ebench/package.yaml` and `task_entrypoint.yaml` identify `mobile_manip/apple_to_fruit_bowl`.
+- `task/task_contract.yaml` binds task semantics, success predicate, robot hint, camera hint, and adapter boundary.
 - EOS Stage.Open evidence is retained for the generated package.
 - EOS retains one engine-native `tabletop_overview` render PNG and a clean-room visual review PASS before claiming Phase 10.9 visual canary closure.
-- Documentation states the boundary: real USD asset package, not task success or leaderboard evidence.
+- Documentation states the boundary: real USD asset package and task contract, not task success, official parity, or leaderboard evidence.
+
+## Phase 10.10 Closure Evidence
+
+Scenario Forge now emits `task/task_contract.yaml` for the real EBench
+apple-to-bowl canary. The artifact is retained as
+`docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_task_contract.yaml`.
+
+The contract records:
+
+- task id `mobile_manip/apple_to_fruit_bowl` and the official instruction;
+- `apple_001` as the manipulated object and `bowl_001` as the target container;
+- primary success metric `apple_in_bowl` with predicate `object_in_container`;
+- Lift2 robot hint `manip/lift2/R5a` and spawn pose;
+- `fixed_camera_lift2_simbox.yml` as a hint-only camera source, with no official camera parity claim;
+- EOS/EBench as the runtime/evaluator owner, while Scenario Forge remains package artifacts and contracts only.
+
+Retained evidence:
+
+```text
+apple_to_bowl_task.yaml
+apple_to_bowl_metrics.yaml
+apple_to_bowl_task_contract.yaml
+apple_to_bowl_adapter_report.yaml
+phase10_10_task_contract_gate.yaml
+```
+
+Boundary: Phase 10.10 closes the real single-task EBench-compatible package
+contract canary. It still does not claim model inference, executed task success,
+official EBench reproduction, physics fidelity, official material/camera parity,
+score release, or leaderboard comparability.

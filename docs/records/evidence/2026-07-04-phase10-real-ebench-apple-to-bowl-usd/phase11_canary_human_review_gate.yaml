@@ -1,0 +1,76 @@
+schema_version: phase11-human-review-gate/v0.1
+phase: '11.0'
+scope: single_task_canary_human_review
+status: passed_for_internal_canary_review
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+review_date: '2026-07-04'
+human_visual_review:
+  status: passed
+  reviewer: product_owner_user
+  evidence:
+    render_png: tabletop_overview.png
+    render_metadata: tabletop_overview_render_metadata.json
+    clean_room_visual_review: tabletop_overview_visual_review.md
+  decision_note: User manually inspected the engine-native tabletop render and
+    reported no issue.
+automated_review:
+  status: passed
+  checks:
+  - name: task_contract_complete
+    status: passed
+    evidence: apple_to_bowl_task_contract.yaml
+    details:
+      task_id: mobile_manip/apple_to_fruit_bowl
+      manipulated_object: apple_001
+      target_container: bowl_001
+      success_metric: apple_in_bowl
+      success_predicate: object_in_container
+  - name: adapter_contract_discoverable
+    status: passed
+    evidence:
+    - apple_to_bowl_ebench_package.yaml
+    - apple_to_bowl_adapter_report.yaml
+    details:
+      task_contract_entrypoint: ../../task/task_contract.yaml
+      runtime_owner: embodied-eval-os
+  - name: package_integrity
+    status: passed
+    evidence:
+    - apple_to_bowl_package_manifest.yaml
+    - apple_to_bowl_asset_manifest.yaml
+    - apple_to_bowl_asset_lock.yaml
+    commands:
+    - PYTHONPATH=src python -m scenario_forge.cli package check /tmp/ebench-apple-to-bowl-canary --require-asset-lock
+    - PYTHONPATH=src python -m scenario_forge.cli assets check /tmp/ebench-apple-to-bowl-canary
+  - name: runtime_load_evidence_retained
+    status: passed
+    evidence:
+    - apple_to_bowl_runtime_smoke.yaml
+    - apple_to_bowl_usd_smoke_trace.json
+    details:
+      stage_open_status: passed
+      lane: eos_usd_stage_open_smoke
+  - name: scenario_forge_boundary_preserved
+    status: passed
+    details:
+      excludes:
+      - episode_runner
+      - model_adapter
+      - leaderboard_reporting
+      - simulator_runtime_execution
+      - convertasset_usd_mdl_mesh_conversion
+release_decision:
+  canary_review: pass
+  next_stage: eos_task_execution_integration
+  public_dataset_release: blocked
+  blockers:
+  - EBench asset license/use restriction is recorded as research-use; public or
+    external redistribution still needs explicit release approval.
+  - EOS/EBench executed task success has not been run or retained as evidence.
+  - Official camera/material parity and leaderboard comparability are not
+    claimed by this Scenario Forge review gate.
+claim_boundary: Phase 11.0 passes the apple-to-bowl canary human review for
+  internal continuation. It is not a full Workbench UI implementation, not a
+  public dataset release approval, not executed task success, and not
+  leaderboard evidence.

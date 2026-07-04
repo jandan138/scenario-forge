@@ -68,6 +68,7 @@ def test_ebench_export_v01_schema_artifact_exists_and_parses() -> None:
     assert schema["properties"]["schema_version"]["const"] == "ebench-scenario-export/v0.1"
     assert "entrypoints" in schema["required"]
     assert "runtime_hints" in schema["required"]
+    assert "task_contract" in schema["properties"]["entrypoints"]["properties"]
 
 
 def test_phase6_to_phase10_schema_artifacts_exist_and_parse() -> None:

@@ -10,6 +10,7 @@ entrypoints:
   scene_usd: scene/main.usda
   scene_instances: scene/instances.yaml
   task: task/task.yaml
+  task_contract: task/task_contract.yaml
   robot: robot/robot.yaml
   metrics: metrics/metrics.yaml
 assets:

@@ -16,6 +16,15 @@ def package_export_yaml(
     hints = primary_success_metric.get("adapter_hints", {})
     ebench_hints = hints.get("ebench", {}) if isinstance(hints, dict) else {}
     success_metric = str(ebench_hints.get("success_metric", primary_success_metric["id"]))
+    entrypoints = {
+        "scene_usd": _relative(out_dir, manifest.entrypoints["scene_usd"]),
+        "task": _relative(out_dir, manifest.entrypoints["task"]),
+        "robot": _relative(out_dir, manifest.entrypoints["robot"]),
+        "metrics": _relative(out_dir, manifest.entrypoints["metrics"]),
+    }
+    task_contract = manifest.entrypoints.get("task_contract")
+    if task_contract is not None:
+        entrypoints["task_contract"] = _relative(out_dir, task_contract)
     return {
         "schema_version": EBENCH_EXPORT_SCHEMA_VERSION,
         "source_package": {
@@ -23,12 +32,7 @@ def package_export_yaml(
             "schema_version": manifest.schema_version,
             "targets": list(manifest.targets),
         },
-        "entrypoints": {
-            "scene_usd": _relative(out_dir, manifest.entrypoints["scene_usd"]),
-            "task": _relative(out_dir, manifest.entrypoints["task"]),
-            "robot": _relative(out_dir, manifest.entrypoints["robot"]),
-            "metrics": _relative(out_dir, manifest.entrypoints["metrics"]),
-        },
+        "entrypoints": entrypoints,
         "assets": {
             "asset_lock": _relative(out_dir, manifest.assets["lock"]),
         },
