@@ -1,0 +1,26 @@
+schema_version: suite-spec/v0.2
+suite_id: phase10x_golden_suite
+domain: scientific_workbench
+target: ebench
+package_mode: fat
+robot_profiles:
+  - franka_panda_tabletop_v1
+num_tasks: 10
+task_families:
+  pick_place: 5
+  pipette_transfer_light: 5
+difficulties:
+  easy: 4
+  medium: 3
+  hard: 3
+splits:
+  dev: 4
+  validation: 3
+  test: 3
+variation_axes:
+  - layout
+  - instruction_language
+validation:
+  minimum_package_level: adapter_static_validated
+  require_asset_lock: true
+  require_suite_coverage_report: true

@@ -2831,6 +2831,21 @@ EOS / EBench 接住，并留下可复查证据。
 Phase 10.x 不做 UI，不做 leaderboard，不接管模型评测。它只把“静态包工厂”收口成
 “可交付给 downstream runtime 的 release candidate”。
 
+Implemented command:
+
+```bash
+scenario-forge suite phase10x \
+  --suite ./suite \
+  --eos-python "$EEOS_PYTHON" \
+  --external-evidence examples/phase10x_external_evidence.yaml \
+  --runtime-smoke examples/phase10x_runtime_smoke.yaml \
+  --strict
+```
+
+该命令生成 `evidence/golden_task_pack.yaml`、`external_input_hardening.yaml`、
+`eos_static_import.yaml`、`runtime_smoke.yaml` 和 `phase10x_rc_gate.yaml`。其中
+runtime smoke 只导入 EOS / EBench 产出的 evidence，不在 Scenario Forge 内启动仿真或模型。
+
 ```text
 Phase 10.1：Golden USD Task Pack Freeze
   冻结 10-20 个黄金任务，覆盖核心 task families、split、difficulty、asset locks、USD entrypoints。

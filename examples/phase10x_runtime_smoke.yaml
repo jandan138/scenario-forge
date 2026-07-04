@@ -1,0 +1,8 @@
+schema_version: phase10x-runtime-smoke-evidence/v0.1
+lane: eos_newton_smoke
+status: passed
+packages_tested:
+  - phase10x_golden_suite_000
+  - phase10x_golden_suite_001
+evidence_uri: eos://records/phase10x/newton-smoke
+summary: Downstream EOS runtime smoke accepted selected generated USD packages.

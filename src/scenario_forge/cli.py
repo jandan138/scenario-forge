@@ -21,6 +21,10 @@ from scenario_forge.evaluation.suite_quality_evidence import (
     SuiteQualityEvidenceError,
     generate_suite_quality_evidence,
 )
+from scenario_forge.evaluation.phase10x_gates import (
+    Phase10xEvidenceError,
+    generate_phase10x_evidence,
+)
 from scenario_forge.package import PackageError, load_package_manifest, validate_package
 from scenario_forge.scaffold import scaffold_starter_package
 from scenario_forge.scene.usd_compiler import USDSceneCompilerError, compile_usd_scene
@@ -137,6 +141,30 @@ def build_parser() -> argparse.ArgumentParser:
         "quality", help="Generate suite quality evidence"
     )
     suite_quality_parser.add_argument("--suite", required=True, help="Suite directory")
+
+    suite_phase10x_parser = suite_subparsers.add_parser(
+        "phase10x", help="Generate Phase 10.x EOS handoff gate evidence"
+    )
+    suite_phase10x_parser.add_argument("--suite", required=True, help="Suite directory")
+    suite_phase10x_parser.add_argument(
+        "--eos-python",
+        help="EOS project Python interpreter used to record static-import environment metadata",
+    )
+    suite_phase10x_parser.add_argument(
+        "--external-evidence",
+        help="External input A/B evidence YAML for LabBuilder / SimFoundry-style lanes",
+    )
+    suite_phase10x_parser.add_argument(
+        "--runtime-smoke",
+        help="Downstream EOS / EBench runtime-smoke evidence YAML",
+    )
+    suite_phase10x_parser.add_argument("--rc-min-packages", type=int, default=50)
+    suite_phase10x_parser.add_argument("--rc-max-packages", type=int, default=100)
+    suite_phase10x_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless all Phase 10.x gates pass",
+    )
 
     export_parser = subparsers.add_parser("export", help="Adapter export commands")
     export_subparsers = export_parser.add_subparsers(dest="export_command", required=True)
@@ -301,6 +329,28 @@ def main(argv: list[str] | None = None) -> int:
             print(exc)
             return 1
         print(f"Suite quality evidence written: {result.evidence_path}")
+        return 0
+
+    if args.command == "suite" and args.suite_command == "phase10x":
+        try:
+            result = generate_phase10x_evidence(
+                Path(args.suite),
+                eos_python=Path(args.eos_python) if args.eos_python else None,
+                external_evidence_path=Path(args.external_evidence)
+                if args.external_evidence
+                else None,
+                runtime_smoke_path=Path(args.runtime_smoke) if args.runtime_smoke else None,
+                rc_min_packages=args.rc_min_packages,
+                rc_max_packages=args.rc_max_packages,
+            )
+        except Phase10xEvidenceError as exc:
+            print(exc)
+            return 1
+        print(f"Phase 10.x evidence written: {result.suite_root / 'evidence'}")
+        print(f"Phase 10.x overall status: {result.overall_status}")
+        if args.strict and result.overall_status != "passed":
+            print("Phase 10.x strict gate did not pass")
+            return 1
         return 0
 
     if args.command == "export" and args.export_command == "ebench":

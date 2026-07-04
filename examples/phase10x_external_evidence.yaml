@@ -1,0 +1,23 @@
+schema_version: phase10x-external-input-evidence/v0.1
+lanes:
+  - id: scenario_forge_layout
+    status: passed
+    package_validity: passed
+    asset_lock_coverage: 1.0
+    predicate_binding: passed
+    layout_checks: passed
+    ebench_export: passed
+  - id: labuilder_layout_import
+    status: passed
+    package_validity: passed
+    asset_lock_coverage: 1.0
+    predicate_binding: passed
+    layout_checks: passed
+    ebench_export: passed
+  - id: simfoundry_real2sim_import
+    status: passed
+    package_validity: passed
+    asset_lock_coverage: 1.0
+    predicate_binding: passed
+    layout_checks: passed
+    ebench_export: passed

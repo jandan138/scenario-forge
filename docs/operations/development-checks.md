@@ -106,5 +106,26 @@ OpenPI EBench model sidecar:
   /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-sidecar-openpi-ebench-py311/bin/python
 ```
 
+Phase 10.x handoff gate smoke:
+
+```bash
+scenario-forge suite generate \
+  --spec examples/suite_spec_phase10x_golden.yaml \
+  --out /tmp/scenario-forge-phase10x-suite
+scenario-forge suite phase10x \
+  --suite /tmp/scenario-forge-phase10x-suite \
+  --eos-python "$EEOS_PYTHON" \
+  --external-evidence examples/phase10x_external_evidence.yaml \
+  --runtime-smoke examples/phase10x_runtime_smoke.yaml \
+  --rc-min-packages 10 \
+  --rc-max-packages 20 \
+  --strict
+```
+
+The example uses the Phase 10.1 golden-pack size of 10-20 tasks so it can run
+quickly in development. A formal Phase 10.5 release-candidate gate keeps the
+default 50-100 task range by omitting the `--rc-min-packages` and
+`--rc-max-packages` overrides.
+
 Heavy simulator checks are not part of the bootstrap lane. Future simulator checks should be
 separate targets and marked so pure package validation remains fast.

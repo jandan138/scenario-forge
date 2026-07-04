@@ -464,6 +464,96 @@ def test_cli_suite_quality_writes_quality_evidence(tmp_path: Path) -> None:
     assert (suite_dir / "evidence" / "suite_quality_evidence.yaml").exists()
 
 
+def test_cli_suite_phase10x_writes_passed_gate_evidence_in_strict_mode(tmp_path: Path) -> None:
+    spec_path = write_phase10x_suite_spec(tmp_path / "suite_spec.yaml")
+    suite_dir = tmp_path / "suite"
+    generated = run_cli(
+        "suite",
+        "generate",
+        "--spec",
+        str(spec_path),
+        "--out",
+        str(suite_dir),
+        cwd=tmp_path,
+    )
+    external = write_phase10x_external_evidence(tmp_path / "external.yaml")
+    runtime = write_phase10x_runtime_smoke(
+        tmp_path / "runtime.yaml",
+        package_ids=["phase10x_cli_suite_000", "phase10x_cli_suite_001"],
+    )
+
+    result = run_cli(
+        "suite",
+        "phase10x",
+        "--suite",
+        str(suite_dir),
+        "--eos-python",
+        sys.executable,
+        "--external-evidence",
+        str(external),
+        "--runtime-smoke",
+        str(runtime),
+        "--rc-min-packages",
+        "10",
+        "--rc-max-packages",
+        "20",
+        "--strict",
+        cwd=tmp_path,
+    )
+    rc_gate = yaml.safe_load(
+        (suite_dir / "evidence" / "phase10x_rc_gate.yaml").read_text(encoding="utf-8")
+    )
+
+    assert generated.returncode == 0, generated.stdout + generated.stderr
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Phase 10.x evidence written:" in result.stdout
+    assert rc_gate["overall_status"] == "passed"
+
+
+def test_cli_suite_phase10x_strict_returns_nonzero_without_runtime_smoke(
+    tmp_path: Path,
+) -> None:
+    spec_path = write_phase10x_suite_spec(tmp_path / "suite_spec.yaml")
+    suite_dir = tmp_path / "suite"
+    generated = run_cli(
+        "suite",
+        "generate",
+        "--spec",
+        str(spec_path),
+        "--out",
+        str(suite_dir),
+        cwd=tmp_path,
+    )
+    external = write_phase10x_external_evidence(tmp_path / "external.yaml")
+
+    result = run_cli(
+        "suite",
+        "phase10x",
+        "--suite",
+        str(suite_dir),
+        "--eos-python",
+        sys.executable,
+        "--external-evidence",
+        str(external),
+        "--rc-min-packages",
+        "10",
+        "--rc-max-packages",
+        "20",
+        "--strict",
+        cwd=tmp_path,
+    )
+    rc_gate = yaml.safe_load(
+        (suite_dir / "evidence" / "phase10x_rc_gate.yaml").read_text(encoding="utf-8")
+    )
+
+    assert generated.returncode == 0, generated.stdout + generated.stderr
+    assert result.returncode == 1
+    assert "Phase 10.x evidence written:" in result.stdout
+    assert "Phase 10.x strict gate did not pass" in result.stdout
+    assert rc_gate["overall_status"] == "warning"
+    assert (suite_dir / "evidence" / "runtime_smoke.yaml").exists()
+
+
 def test_cli_export_ebench_writes_package_adapter_artifacts(tmp_path: Path) -> None:
     package_dir = tmp_path / "starter"
     scaffold = run_cli("package", "scaffold", "--out", str(package_dir), cwd=tmp_path)
@@ -591,6 +681,65 @@ def test_cli_assets_lock_reports_missing_license(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert "Missing license for asset sample_bottle_50ml_v1" in result.stdout
     assert "Traceback" not in result.stderr
+
+
+def write_phase10x_suite_spec(path: Path) -> Path:
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "suite-spec/v0.2",
+                "suite_id": "phase10x_cli_suite",
+                "domain": "scientific_workbench",
+                "target": "ebench",
+                "package_mode": "fat",
+                "robot_profiles": ["franka_panda_tabletop_v1"],
+                "num_tasks": 10,
+                "task_families": {"pick_place": 5, "pipette_transfer_light": 5},
+                "difficulties": {"easy": 4, "medium": 3, "hard": 3},
+                "splits": {"dev": 4, "validation": 3, "test": 3},
+                "variation_axes": ["layout", "instruction_language"],
+                "validation": {"require_asset_lock": True},
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def write_phase10x_external_evidence(path: Path) -> Path:
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "phase10x-external-input-evidence/v0.1",
+                "lanes": [
+                    {"id": "scenario_forge_layout", "status": "passed"},
+                    {"id": "labuilder_layout_import", "status": "passed"},
+                    {"id": "simfoundry_real2sim_import", "status": "passed"},
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def write_phase10x_runtime_smoke(path: Path, *, package_ids: list[str]) -> Path:
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "phase10x-runtime-smoke-evidence/v0.1",
+                "lane": "eos_newton_smoke",
+                "status": "passed",
+                "packages_tested": package_ids,
+                "evidence_uri": "eos://records/phase10x/cli-smoke",
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    return path
 
 
 def test_cli_assets_check_uses_manifest_scene_for_usd_reference_check(tmp_path: Path) -> None:

@@ -36,6 +36,22 @@ Phases 6-10 produce static packages and suite construction evidence. Before Phas
 
 These gates are evidence handoff steps, not new ownership. Scenario Forge remains responsible for portable package construction and validation; EOS / EBench remain responsible for episode execution, model-facing traces, and benchmark reports.
 
+Implemented command:
+
+```bash
+scenario-forge suite phase10x \
+  --suite ./suite \
+  --eos-python "$EEOS_PYTHON" \
+  --external-evidence examples/phase10x_external_evidence.yaml \
+  --runtime-smoke examples/phase10x_runtime_smoke.yaml \
+  --strict
+```
+
+This command writes `golden_task_pack.yaml`, `external_input_hardening.yaml`,
+`eos_static_import.yaml`, `runtime_smoke.yaml`, and `phase10x_rc_gate.yaml`
+under `suite/evidence/`. Runtime smoke is imported from downstream evidence; it
+is not executed by Scenario Forge.
+
 ## Commands
 
 ```bash
@@ -45,4 +61,5 @@ scenario-forge real2sim import --result ./real2sim_result.yaml --out ./pkg
 scenario-forge real2sim cousins --package ./pkg --plan ./cousin_plan.yaml --out ./suite
 scenario-forge suite generate --spec examples/suite_spec_smoke.yaml --out ./suite
 scenario-forge suite quality --suite ./suite
+scenario-forge suite phase10x --suite ./suite
 ```
