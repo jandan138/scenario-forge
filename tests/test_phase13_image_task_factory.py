@@ -135,6 +135,161 @@ def test_image_task_compile_strict_fails_closed_for_unregistered_asset(tmp_path:
     ).exists(), "blocked requests should retain an asset-intake handoff instead of a fake package"
 
 
+def test_image_task_compile_strict_fails_closed_for_missing_mdl_dependency(tmp_path: Path) -> None:
+    registry_snapshot = _write_registry_snapshot(
+        tmp_path,
+        (
+            _AssetSeed(
+                "official_ebench_apple",
+                "manipulated_object",
+                "apple",
+                ("fruit", "pickable"),
+                usd_asset_refs=("gltf/pbr.mdl",),
+            ),
+            _AssetSeed("official_ebench_bowl", "target_container", "bowl", ("container", "rigid")),
+        ),
+    )
+    request = _write_image_task_request(tmp_path)
+    scene_result = _write_image_scene_result(tmp_path)
+    package_dir = tmp_path / "out" / "blocked_material"
+
+    code = main(
+        [
+            "image-task",
+            "compile",
+            "--request",
+            str(request),
+            "--scene-result",
+            str(scene_result),
+            "--registry-snapshot",
+            str(registry_snapshot),
+            "--out",
+            str(package_dir),
+            "--strict",
+        ]
+    )
+
+    assert code == 1
+    assert not (package_dir / "manifest.yaml").exists()
+    current_gate = _load_yaml(package_dir / "evidence/phase13_current_gate_index.yaml")
+    assert current_gate["overall_status"] == "blocked"
+    assert any(
+        blocker.startswith("selected asset official_ebench_apple material/texture closure failed")
+        and "gltf/pbr.mdl" in blocker
+        for blocker in current_gate["blockers"]
+    )
+    blockers = _load_yaml(package_dir / "handoff/asset_intake_blockers.yaml")
+    assert blockers["recommended_next_step"] == "fix_upstream_result_or_asset_registry_then_rerun_phase13"
+
+
+def test_image_task_compile_strict_reports_registry_material_dependency_blocker(
+    tmp_path: Path,
+) -> None:
+    registry_snapshot = _write_registry_snapshot(
+        tmp_path,
+        (
+            _AssetSeed(
+                "official_ebench_apple",
+                "manipulated_object",
+                "apple",
+                ("fruit", "pickable"),
+                material_closure={
+                    "status": "failed",
+                    "missing_texture_count": 0,
+                    "missing_textures": [],
+                    "missing_material_ref_count": 1,
+                    "missing_material_refs": [{"material": "gltf/pbr.mdl"}],
+                },
+            ),
+            _AssetSeed("official_ebench_bowl", "target_container", "bowl", ("container", "rigid")),
+        ),
+    )
+    request = _write_image_task_request(tmp_path)
+    scene_result = _write_image_scene_result(tmp_path)
+    package_dir = tmp_path / "out" / "registry_material_blocked"
+
+    code = main(
+        [
+            "image-task",
+            "compile",
+            "--request",
+            str(request),
+            "--scene-result",
+            str(scene_result),
+            "--registry-snapshot",
+            str(registry_snapshot),
+            "--out",
+            str(package_dir),
+            "--strict",
+        ]
+    )
+
+    assert code == 1
+    current_gate = _load_yaml(package_dir / "evidence/phase13_current_gate_index.yaml")
+    assert any("gltf/pbr.mdl" in blocker for blocker in current_gate["blockers"])
+
+
+def test_image_task_compile_allows_registry_approved_runtime_mdl_dependency(
+    tmp_path: Path,
+) -> None:
+    registry_snapshot = _write_registry_snapshot(
+        tmp_path,
+        (
+            _AssetSeed(
+                "official_ebench_apple",
+                "manipulated_object",
+                "apple",
+                ("fruit", "pickable"),
+                usd_asset_refs=("gltf/pbr.mdl",),
+                material_closure={
+                    "status": "passed",
+                    "missing_texture_count": 0,
+                    "missing_textures": [],
+                    "missing_material_ref_count": 0,
+                    "missing_material_refs": [],
+                    "package_local_missing_material_refs": [{"material": "gltf/pbr.mdl"}],
+                    "approved_runtime_mdl_dependencies": [
+                        {
+                            "module": "gltf/pbr.mdl",
+                            "resolution": "approved_runtime_module",
+                            "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
+                        }
+                    ],
+                },
+            ),
+            _AssetSeed("official_ebench_bowl", "target_container", "bowl", ("container", "rigid")),
+        ),
+    )
+    request = _write_image_task_request(tmp_path)
+    scene_result = _write_image_scene_result(tmp_path)
+    package_dir = tmp_path / "out" / "runtime_approved"
+
+    code = main(
+        [
+            "image-task",
+            "compile",
+            "--request",
+            str(request),
+            "--scene-result",
+            str(scene_result),
+            "--registry-snapshot",
+            str(registry_snapshot),
+            "--out",
+            str(package_dir),
+            "--strict",
+        ]
+    )
+
+    assert code == 0
+    current_gate = _load_yaml(package_dir / "evidence/phase13_current_gate_index.yaml")
+    assert current_gate["overall_status"] == "phase13_static_candidate_ready"
+    material_gate = _load_yaml(package_dir / "evidence/phase13_5_scene_layout_usd_materialization_gate.yaml")
+    apple_material = material_gate["material_closure"]["selected_assets"][0]
+    assert apple_material["asset_id"] == "official_ebench_apple"
+    assert apple_material["status"] == "passed"
+    assert apple_material["approved_runtime_mdl_dependencies"][0]["module"] == "gltf/pbr.mdl"
+
+
 def test_image_task_blocked_rerun_removes_previous_public_ready_manifest(tmp_path: Path) -> None:
     request = _write_image_task_request(tmp_path)
     scene_result = _write_image_scene_result(tmp_path)
@@ -196,11 +351,15 @@ class _AssetSeed:
         role: str,
         asset_type: str,
         semantic_tags: tuple[str, ...],
+        usd_asset_refs: tuple[str, ...] = (),
+        material_closure: dict | None = None,
     ) -> None:
         self.asset_id = asset_id
         self.role = role
         self.asset_type = asset_type
         self.semantic_tags = semantic_tags
+        self.usd_asset_refs = usd_asset_refs
+        self.material_closure = material_closure
 
 
 def _write_registry_snapshot(tmp_path: Path, seeds: tuple[_AssetSeed, ...]) -> Path:
@@ -214,7 +373,7 @@ def _write_registry_snapshot(tmp_path: Path, seeds: tuple[_AssetSeed, ...]) -> P
     lock_assets = {}
     registry_assets = []
     for seed in seeds:
-        source_usd = _write_source_usd(tmp_path / "source_assets" / seed.asset_id)
+        source_usd = _write_source_usd(tmp_path / "source_assets" / seed.asset_id, seed.usd_asset_refs)
         digest = f"sha256:{sha256(source_usd.read_bytes()).hexdigest()}"
         canonical_usd = f"assets/{seed.asset_id}/{source_usd.name}"
         retained_assets.append(
@@ -257,7 +416,7 @@ def _write_registry_snapshot(tmp_path: Path, seeds: tuple[_AssetSeed, ...]) -> P
                 "resolver_version": "scenario-forge-ebench-official-asset-intake/v0.1",
                 "semantic_tags": list(seed.semantic_tags),
                 "affordances": list(seed.semantic_tags),
-                "material_closure": {"status": "passed"},
+                "material_closure": seed.material_closure or {"status": "passed"},
                 "physics_readiness": {"status": "ready"},
                 "export_eligibility": {"ebench": True},
                 "provenance": {
@@ -416,9 +575,13 @@ def _write_image_scene_result(tmp_path: Path) -> Path:
     )
 
 
-def _write_source_usd(root: Path) -> Path:
+def _write_source_usd(root: Path, usd_asset_refs: tuple[str, ...] = ()) -> Path:
     root.mkdir(parents=True)
     usd = root / "model.usd"
+    asset_ref_lines = [
+        f'        custom asset scenarioForgeMaterialDependency{index} = @{asset_ref}@'
+        for index, asset_ref in enumerate(usd_asset_refs)
+    ]
     usd.write_text(
         "\n".join(
             [
@@ -428,6 +591,7 @@ def _write_source_usd(root: Path) -> Path:
                 ")",
                 'def Xform "World"',
                 "{",
+                *asset_ref_lines,
                 "}",
                 "",
             ]

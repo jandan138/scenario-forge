@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import shutil
 
@@ -74,6 +75,10 @@ def test_suite_phase12_generates_registry_snapshot_viewer_handoff_and_policy_clo
     assert first_asset["content_sha256"]
     assert first_asset["provenance"]["source_package_id"]
     assert first_asset["resolver_version"]
+    assert first_asset["material_closure"]["status"] == "passed"
+    assert first_asset["physics_readiness"]["status"] == "ready"
+    assert first_asset["export_eligibility"]["ebench"] is True
+    assert first_asset["role_suitability"]
 
     assert contract_gate["schema_version"] == "phase12-registry-contract-gate/v0.1"
     assert contract_gate["phase"] == "12.1"
@@ -292,6 +297,71 @@ def test_suite_phase12_redacts_absolute_local_source_uris_from_public_snapshot(
         and asset["source_uri_policy"] == "local_filesystem_source_uri_redacted"
         for asset in package_assets
     )
+
+
+def test_suite_phase12_classifies_mdl_with_retained_runtime_approval_as_passed(
+    tmp_path: Path,
+) -> None:
+    suite_dir, gate_index_path = write_phase12_ready_suite(tmp_path)
+    package_id = "phase12_pkg_0"
+    package_root = suite_dir / "packages" / package_id
+    source_usd = tmp_path / "source_assets" / "runtime_approved" / "object.usd"
+    source_usd.parent.mkdir(parents=True)
+    source_usd.write_bytes(b"\x00token\x00gltf/pbr.mdl\r\x00")
+
+    asset_manifest_path = package_root / "assets" / "asset_manifest.yaml"
+    asset_manifest = load_yaml(asset_manifest_path)
+    asset_manifest["assets"][0]["source_uri"] = str(source_usd)
+    write_yaml(asset_manifest_path, asset_manifest)
+    write_json(
+        package_root / "evidence" / "tabletop_overview_render_metadata.json",
+        {
+            "render_status": "pass",
+            "material_runtime_preflight": {
+                "status": "pass",
+                "blocked_dependency_count": 0,
+                "blocked_dependencies": [],
+                "approved_runtime_mdl_dependencies": [
+                    {
+                        "module": "gltf/pbr.mdl",
+                        "resolution": "approved_runtime_module",
+                        "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
+                    }
+                ],
+                "mdl_search_paths": ["/isaac-sim/kit/mdl/core/mdl"],
+            },
+        },
+    )
+
+    code = main(
+        [
+            "suite",
+            "phase12",
+            "--suite",
+            str(suite_dir),
+            "--gate-index",
+            str(gate_index_path),
+            "--strict",
+        ]
+    )
+
+    asset_registry = load_yaml(suite_dir / "registry" / "asset_registry.yaml")
+    approved_asset = next(
+        asset
+        for asset in asset_registry["assets"]
+        if asset["source_package_id"] == package_id
+        and asset["asset_id"] == asset_manifest["assets"][0]["asset_id"]
+    )
+    assert code == 0
+    assert approved_asset["material_closure"]["status"] == "passed"
+    assert approved_asset["material_closure"]["missing_material_ref_count"] == 0
+    assert approved_asset["material_closure"]["approved_runtime_mdl_dependencies"] == [
+        {
+            "module": "gltf/pbr.mdl",
+            "resolution": "approved_runtime_module",
+            "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
+        }
+    ]
 
 
 def test_suite_phase12_prefers_retained_artifact_variant_named_by_current_gate(
@@ -568,3 +638,8 @@ def load_yaml(path: Path) -> dict:
 def write_yaml(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+
+
+def write_json(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")

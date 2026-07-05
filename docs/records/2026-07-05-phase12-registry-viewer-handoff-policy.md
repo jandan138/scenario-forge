@@ -48,7 +48,7 @@ evidence/phase12_6_public_release_policy_closure_gate.yaml
 Snapshot digest:
 
 ```text
-sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
+sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
 ```
 
 ## Boundary
@@ -69,3 +69,20 @@ artifacts. For final-pass variants it uses current gate filenames such as
   asset manifest.
 - The retained three-task Phase 12 suite was regenerated after this hardening and
   remains `overall_status=phase13_allowed` with 12.0-12.6 passed.
+
+2026-07-05 asset-readiness metadata update:
+
+- Asset registry entries now include `semantic_tags`, `affordances`,
+  `role_suitability`, `material_closure`, `physics_readiness`, and
+  `export_eligibility`.
+- The material closure audit records MDL `texture_2d(...)` texture dependencies
+  and text/binary USD `.mdl` dependencies. The retained official apple and bowl
+  entries record package-local `gltf/pbr.mdl` refs plus approved runtime MDL
+  evidence from retained render metadata.
+- `phase13_allowed=true` remains a registry/readiness transition signal, not a
+  claim that every asset can be selected by every Phase 13 request. Phase 13
+  enforces selected-asset `material_closure.status=passed` and fails closed with
+  `handoff/asset_intake_blockers.yaml` when a chosen asset is not material-ready.
+  Runtime MDL modules only count as passed when retained material preflight
+  evidence records status pass, no blocked dependencies, search roots, and a
+  resolved runtime path.

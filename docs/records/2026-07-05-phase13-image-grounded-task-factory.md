@@ -2,7 +2,11 @@
 
 ## Status
 
-Phase 13 now has a static candidate compiler in Scenario Forge.
+Phase 13 now has a static candidate compiler in Scenario Forge. The current
+real official EBench apple/bowl probe reaches static candidate readiness after
+retained runtime evidence classifies `gltf/pbr.mdl` as an approved Isaac Sim MDL
+dependency. It is not a formal package release because 13.6 and 13.8 still need
+fresh downstream evidence.
 
 Implemented CLI:
 
@@ -20,6 +24,11 @@ The compiler ingests `image-task-request/v0.1` and
 registry snapshot, materializes retained USD bundles into a fat v0.2 package,
 generates `scene/main.usda`, writes `asset_lock.yaml`, exports EBench static
 adapter artifacts, and writes Phase 13 gate evidence.
+
+The retained official apple/bowl assets expose `gltf/pbr.mdl` dependencies in
+binary USD. The Phase 12 registry records the package-local unresolved ref plus
+approved runtime MDL evidence from retained render metadata. Phase 13 strict
+mode blocks selected assets whose `material_closure.status` is not `passed`.
 
 ## Local Completion Boundary
 
@@ -59,18 +68,49 @@ evidence/phase13_current_gate_index.yaml
 They intentionally do not include `manifest.yaml`, so they cannot be mistaken
 for public-ready packages.
 
+Real apple/bowl probe result after material-closure hardening:
+
+```text
+PYTHONPATH=src python -m scenario_forge.cli image-task compile \
+  --request /tmp/scenario-forge-phase13-real-probe/request.yaml \
+  --scene-result /tmp/scenario-forge-phase13-real-probe/result.yaml \
+  --registry-snapshot docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml \
+  --out /tmp/scenario-forge-phase13-real-probe/out \
+  --strict
+```
+
+```text
+Phase 13 status: phase13_static_candidate_ready
+next_required_gate: 13.6
+blockers:
+- 13.6 engine-native overview render gate is required before formal package readiness
+- 13.8 EOS execution/predicate canary gate is required before formal package readiness
+```
+
+The 13.5 gate records that apple and bowl both have
+`package_local_missing_material_refs: gltf/pbr.mdl` and
+`approved_runtime_mdl_dependencies: gltf/pbr.mdl`. USD dependency tooling still
+prints unresolved `gltf/pbr.mdl` warnings during materialization, so 13.6 must
+render the generated package and pass render-visual-reviewer before this can
+move toward formal readiness.
+
 ## Tests
 
 Focused regression:
 
 ```bash
-PYTHONPATH=src python -m pytest tests/test_phase13_image_task_factory.py -q
+PYTHONPATH=src python -m pytest \
+  tests/test_materials.py \
+  tests/test_phase12_registry.py \
+  tests/test_phase13_image_task_factory.py \
+  tests/test_ebench_official_asset_intake.py \
+  -q
 ```
 
 Expected result:
 
 ```text
-2 passed
+20 passed
 ```
 
 Full project verification remains `make check`.

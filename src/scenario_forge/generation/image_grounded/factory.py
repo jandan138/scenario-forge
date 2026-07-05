@@ -166,6 +166,7 @@ def generate_image_grounded_task_package(
         registry_snapshot=registry_snapshot,
         registry_snapshot_path=registry_file,
         local_blockers=[],
+        materialized_assets=materialized_assets,
     )
     current_gate = _load_yaml(gate_path)
     return Phase13ImageTaskResult(
@@ -337,8 +338,13 @@ def _asset_selection_blockers(
                 blockers.append(f"selected asset {asset_id} missing registry field {field}")
         if not _mapping(entry.get("provenance")).get("asset_manifest"):
             blockers.append(f"selected asset {asset_id} missing provenance.asset_manifest")
-        if _mapping(entry.get("material_closure")).get("status") != "passed":
-            blockers.append(f"selected asset {asset_id} material_closure.status must be passed")
+        material_closure = _mapping(entry.get("material_closure"))
+        if material_closure.get("status") != "passed":
+            detail = _material_closure_detail(material_closure)
+            blocker = f"selected asset {asset_id} material_closure.status must be passed"
+            if detail:
+                blocker = f"{blocker} ({detail})"
+            blockers.append(blocker)
         if _mapping(entry.get("physics_readiness")).get("status") != "ready":
             blockers.append(f"selected asset {asset_id} physics_readiness.status must be ready")
         if _mapping(entry.get("export_eligibility")).get("ebench") is not True:
@@ -405,6 +411,7 @@ def _materialize_selected_asset(
         license=str(registry_entry.get("license") or retained_asset.get("license") or ""),
     )
     audit = audit_mdl_texture_closure(root / "assets" / asset_id)
+    audit = _apply_registry_runtime_mdl_approval(audit, registry_entry)
     return _MaterializedRegistryAsset(
         asset_id=asset_id,
         role=str(registry_entry.get("role") or retained_asset.get("role") or "scene_object"),
@@ -470,8 +477,70 @@ def _materialization_blockers(materialized_assets: list[_MaterializedRegistryAss
     blockers: list[str] = []
     for asset in materialized_assets:
         if asset.material_audit.get("status") != "passed":
-            blockers.append(f"selected asset {asset.asset_id} material/texture closure failed")
+            detail = _material_closure_detail(asset.material_audit)
+            reason = f"selected asset {asset.asset_id} material/texture closure failed"
+            if detail:
+                reason = f"{reason} ({detail})"
+            blockers.append(reason)
     return blockers
+
+
+def _apply_registry_runtime_mdl_approval(
+    material_audit: dict[str, Any],
+    registry_entry: dict[str, Any],
+) -> dict[str, Any]:
+    if material_audit.get("status") != "failed":
+        return material_audit
+    if material_audit.get("missing_texture_count") not in (0, None):
+        return material_audit
+
+    missing_refs = _list_of_mappings(material_audit.get("missing_material_refs"))
+    if not missing_refs:
+        return material_audit
+    material_closure = _mapping(registry_entry.get("material_closure"))
+    approved_dependencies = _list_of_mappings(
+        material_closure.get("approved_runtime_mdl_dependencies")
+    )
+    approved_modules = {
+        str(item.get("module"))
+        for item in approved_dependencies
+        if item.get("module") and item.get("resolution") == "approved_runtime_module"
+    }
+    if not approved_modules:
+        return material_audit
+    unapproved_refs = [
+        item for item in missing_refs if str(item.get("material", "")) not in approved_modules
+    ]
+    if unapproved_refs:
+        return material_audit
+    return {
+        **material_audit,
+        "status": "passed",
+        "missing_material_ref_count": 0,
+        "missing_material_refs": [],
+        "package_local_missing_material_refs": missing_refs,
+        "approved_runtime_mdl_dependencies": approved_dependencies,
+        "registry_material_closure_source": "phase12_approved_runtime_mdl_dependencies",
+    }
+
+
+def _material_closure_detail(material_closure: dict[str, Any]) -> str:
+    details: list[str] = []
+    missing_materials = [
+        str(item.get("material"))
+        for item in _list_of_mappings(material_closure.get("missing_material_refs"))
+        if item.get("material")
+    ]
+    missing_textures = [
+        str(item.get("texture"))
+        for item in _list_of_mappings(material_closure.get("missing_textures"))
+        if item.get("texture")
+    ]
+    if missing_materials:
+        details.append(f"missing material refs: {', '.join(sorted(missing_materials))}")
+    if missing_textures:
+        details.append(f"missing textures: {', '.join(sorted(missing_textures))}")
+    return "; ".join(details)
 
 
 def _write_manifest(root: Path, request: dict[str, Any]) -> None:
@@ -847,6 +916,7 @@ def _write_phase13_gates(
     registry_snapshot: dict[str, Any],
     registry_snapshot_path: Path,
     local_blockers: list[str],
+    materialized_assets: list[_MaterializedRegistryAsset] | None = None,
 ) -> Path:
     evidence_dir = root / "evidence"
     request_id = request.get("request_id", root.name)
@@ -931,6 +1001,10 @@ def _write_phase13_gates(
                 "request_id": request_id,
                 "usd_entrypoint": "scene/main.usda" if not local_blockers else None,
                 "asset_lock": "locks/asset_lock.yaml" if not local_blockers else None,
+                "material_closure": _phase13_material_closure_summary(
+                    materialized_assets or [],
+                    local_blockers=local_blockers,
+                ),
                 "blockers": local_blockers,
             },
         ),
@@ -1006,6 +1080,40 @@ def _write_phase13_gates(
         ),
     }
     return write_yaml_artifact(evidence_dir / "phase13_current_gate_index.yaml", current)
+
+
+def _phase13_material_closure_summary(
+    materialized_assets: list[_MaterializedRegistryAsset],
+    *,
+    local_blockers: list[str],
+) -> dict[str, Any]:
+    return {
+        "status": "blocked" if local_blockers else "passed",
+        "selected_assets": [
+            {
+                "asset_id": asset.asset_id,
+                "status": asset.material_audit.get("status"),
+                "missing_texture_count": asset.material_audit.get("missing_texture_count"),
+                "missing_material_ref_count": asset.material_audit.get(
+                    "missing_material_ref_count"
+                ),
+                "missing_textures": asset.material_audit.get("missing_textures", []),
+                "missing_material_refs": asset.material_audit.get("missing_material_refs", []),
+                "package_local_missing_material_refs": asset.material_audit.get(
+                    "package_local_missing_material_refs",
+                    [],
+                ),
+                "approved_runtime_mdl_dependencies": asset.material_audit.get(
+                    "approved_runtime_mdl_dependencies",
+                    [],
+                ),
+                "registry_material_closure_source": asset.material_audit.get(
+                    "registry_material_closure_source"
+                ),
+            }
+            for asset in materialized_assets
+        ],
+    }
 
 
 def _task_bindings(scene_result: dict[str, Any]) -> dict[str, str]:

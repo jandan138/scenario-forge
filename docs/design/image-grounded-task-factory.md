@@ -1,6 +1,9 @@
 # Image-Grounded Task Factory Design
 
-Status: Phase 13 static candidate compiler implemented.
+Status: Phase 13 static candidate compiler implemented; real official EBench
+apple/bowl selection reaches static candidate readiness after retained runtime
+evidence classifies `gltf/pbr.mdl` as an approved Isaac Sim MDL dependency.
+Formal package readiness still waits on 13.6 render review and 13.8 execution.
 
 The image-grounded task factory turns a user-provided tabletop image request and
 an external image-to-scene result into a Scenario Forge package candidate. It is
@@ -75,6 +78,13 @@ They require an engine-native overview render, render-visual-reviewer PASS, EOS
 execution evidence, completed episode, simulator-state predicate success, and
 post-execution visual PASS.
 
+If a selected registry asset has `material_closure.status != passed`, or if
+post-materialization audit finds missing MDL/texture dependencies, the compiler
+blocks before public-ready package generation. Runtime MDL modules such as
+`gltf/pbr.mdl` are allowed only when the selected Phase 12 registry entry retains
+approved runtime dependency evidence: material runtime preflight pass, no blocked
+dependencies, concrete MDL search roots, and a resolved runtime path.
+
 ## Fail-Closed Behavior
 
 The compiler writes blocked evidence and `handoff/asset_intake_blockers.yaml`
@@ -89,6 +99,8 @@ instead of a package manifest when it sees:
 - selected asset missing from the Phase 12 registry snapshot;
 - missing selected asset digest, license, resolver version, retained provenance,
   material closure, physics readiness, or EBench export eligibility;
+- selected registry asset `material_closure.status` not passed, including
+  unresolved `.mdl` dependencies such as `gltf/pbr.mdl`;
 - unmaterializable retained asset source;
 - failed material/texture closure audit;
 - invalid scene instance binding or package validation failure.
@@ -104,6 +116,11 @@ External systems own image grounding, detections, segmentation, depth, camera
 pose, asset retrieval embeddings, model calls, 3D reconstruction, ConvertAsset
 USD/MDL/mesh/texture conversion, simulator settling, EOS execution, policy
 rollouts, and benchmark reports.
+
+Scenario Forge may record material dependency blockers and hand off the failing
+package, registry entry, dependency report, runtime log, and render evidence. It
+must not synthesize replacement textures or reimplement ConvertAsset conversion
+and material-normalization logic.
 
 Perception confidence, visual review PASS, or human approval must not be used as
 asset identity, binding correctness, predicate success, or release readiness.

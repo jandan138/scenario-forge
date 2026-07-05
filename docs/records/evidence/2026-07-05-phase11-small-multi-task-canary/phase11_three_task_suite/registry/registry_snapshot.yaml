@@ -109,6 +109,51 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_apple
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - manipulated_object
+    - usd_bundle
+    affordances:
+    - pickable
+    - rigid
+    role_suitability:
+    - role: manipulated_object
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: 5948de6770a5491ea158cd9e921ebce9.usd
+        material: gltf/pbr.mdl
+        resolved_path: gltf/pbr.mdl
+      approved_runtime_mdl_dependencies:
+      - module: gltf/pbr.mdl
+        resolution: approved_runtime_module
+        runtime_path: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/converted_from_partnet_mobility/d9d75b41ebf2430bb98ce42c3ca59503/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: manipulated_object
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
       asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
@@ -128,6 +173,51 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_bowl
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - target_container
+    - usd_bundle
+    affordances:
+    - container
+    - rigid
+    role_suitability:
+    - role: target_container
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: 307689f1c6884e1bb85bb20f00fef294.usd
+        material: gltf/pbr.mdl
+        resolved_path: gltf/pbr.mdl
+      approved_runtime_mdl_dependencies:
+      - module: gltf/pbr.mdl
+        resolution: approved_runtime_module
+        runtime_path: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/converted_from_partnet_mobility/d9d75b41ebf2430bb98ce42c3ca59503/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: target_container
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
       asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
@@ -147,6 +237,58 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml#asset_id=official_ebench_remote_control
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - manipulated_object
+    - usd_bundle
+    affordances:
+    - pickable
+    - rigid
+    role_suitability:
+    - role: manipulated_object
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: remote0.usd
+        material: gltf/pbr.mdl
+        resolved_path: gltf/pbr.mdl
+      approved_runtime_mdl_dependencies:
+      - module: gltf/pbr.mdl
+        resolution: approved_runtime_module
+        runtime_path: /isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_contactfixed_cam3_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_posefixed_cam2_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_retake_cam1_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_tabletop_overview_cam4_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /isaac-sim/kit/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: manipulated_object
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_remote_to_holder_canary
       asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
@@ -166,6 +308,50 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_robot
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - robot
+    - usd_bundle
+    affordances:
+    - robot
+    role_suitability:
+    - role: robot
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: robot.usd
+        material: OmniPBR.mdl
+        resolved_path: OmniPBR.mdl
+      approved_runtime_mdl_dependencies:
+      - module: OmniPBR.mdl
+        resolution: approved_runtime_module
+        runtime_path: /isaac-sim/kit/mdl/core/Base/OmniPBR.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/converted_from_partnet_mobility/d9d75b41ebf2430bb98ce42c3ca59503/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: robot
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
       asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
@@ -185,6 +371,57 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml#asset_id=official_ebench_robot
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - robot
+    - usd_bundle
+    affordances:
+    - robot
+    role_suitability:
+    - role: robot
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: robot.usd
+        material: OmniPBR.mdl
+        resolved_path: OmniPBR.mdl
+      approved_runtime_mdl_dependencies:
+      - module: OmniPBR.mdl
+        resolution: approved_runtime_module
+        runtime_path: /isaac-sim/kit/mdl/core/Base/OmniPBR.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_contactfixed_cam3_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_posefixed_cam2_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_retake_cam1_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_tabletop_overview_cam4_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /isaac-sim/kit/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: robot
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_soap_to_dish_canary
       asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
@@ -204,6 +441,57 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml#asset_id=official_ebench_robot
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - robot
+    - usd_bundle
+    affordances:
+    - robot
+    role_suitability:
+    - role: robot
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: robot.usd
+        material: OmniPBR.mdl
+        resolved_path: OmniPBR.mdl
+      approved_runtime_mdl_dependencies:
+      - module: OmniPBR.mdl
+        resolution: approved_runtime_module
+        runtime_path: /isaac-sim/kit/mdl/core/Base/OmniPBR.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_contactfixed_cam3_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_posefixed_cam2_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_retake_cam1_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_tabletop_overview_cam4_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /isaac-sim/kit/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: robot
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_remote_to_holder_canary
       asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
@@ -223,6 +511,57 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml#asset_id=official_ebench_scene
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - environment
+    - usd_bundle
+    affordances:
+    - support_surface
+    role_suitability:
+    - role: environment
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: scene.usd
+        material: gltf/pbr.mdl
+        resolved_path: gltf/pbr.mdl
+      approved_runtime_mdl_dependencies:
+      - module: gltf/pbr.mdl
+        resolution: approved_runtime_module
+        runtime_path: /isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_contactfixed_cam3_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_posefixed_cam2_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_retake_cam1_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_tabletop_overview_cam4_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /isaac-sim/kit/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: environment
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_remote_to_holder_canary
       asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
@@ -242,6 +581,71 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_scene
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - environment
+    - usd_bundle
+    affordances:
+    - support_surface
+    role_suitability:
+    - role: environment
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: failed
+      evidence_source: local_usd_bundle_mdl_texture_audit
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 12
+      missing_material_refs:
+      - usd: SubUSDs/0.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/0_1.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/1.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/1_1.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/2.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/3.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/5.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/6.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/6_1.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/8.usd
+        material: gltf/pbr.mdl
+        resolved_path: SubUSDs/gltf/pbr.mdl
+      - usd: SubUSDs/MVUHLWYKTKJ5EAABAAAAAAI8_usd_dinning_room_0.usd
+        material: M.mdl
+        resolved_path: SubUSDs/M.mdl
+      - usd: SubUSDs/model_42bfd814921da5caa11f98e41e207019_0.usd
+        material: a.mdl
+        resolved_path: SubUSDs/a.mdl
+    physics_readiness:
+      status: ready
+      role: environment
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
       asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
@@ -261,6 +665,47 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml#asset_id=official_ebench_scene
     source_uri_policy: mutable_local_source_uri_redacted
     resolver_version: ConvertAsset no-mdl public CLI; scenario-forge handoff v0.3
+    semantic_tags:
+    - environment
+    - usd_bundle
+    affordances:
+    - support_surface
+    role_suitability:
+    - role: environment
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: failed
+      evidence_source: local_usd_bundle_mdl_texture_audit
+      audit_scope: local_usd_bundle
+      missing_texture_count: 3
+      missing_textures:
+      - material: SubUSDs/materials/MI_655dcc9a9237ad0001ba8197.mdl
+        texture: ../textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg
+        resolved_path: SubUSDs/textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg
+      - material: SubUSDs/materials/MI_655dcc9ad6b50e000157727c.mdl
+        texture: ../textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg
+        resolved_path: SubUSDs/textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg
+      - material: SubUSDs/materials/MI_655dcc9ad6b50e000157727c.mdl
+        texture: ../textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg
+        resolved_path: SubUSDs/textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg
+      missing_material_ref_count: 1
+      missing_material_refs:
+      - usd: scene.usd
+        material: O.mdl
+        resolved_path: O.mdl
+    physics_readiness:
+      status: ready
+      role: environment
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_soap_to_dish_canary
       asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
@@ -280,6 +725,58 @@ asset_registry:
     source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml#asset_id=official_ebench_soap
     source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+    semantic_tags:
+    - manipulated_object
+    - usd_bundle
+    affordances:
+    - pickable
+    - rigid
+    role_suitability:
+    - role: manipulated_object
+      asset_type: usd_bundle
+      status: suitable
+      evidence_source: retained_package_role_binding
+    material_closure:
+      status: passed
+      evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+      audit_scope: local_usd_bundle
+      missing_texture_count: 0
+      missing_textures: []
+      missing_material_ref_count: 0
+      missing_material_refs: []
+      package_local_missing_material_refs:
+      - usd: soap0.usd
+        material: gltf/pbr.mdl
+        resolved_path: gltf/pbr.mdl
+      approved_runtime_mdl_dependencies:
+      - module: gltf/pbr.mdl
+        resolution: approved_runtime_module
+        runtime_path: /isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl
+      runtime_preflight_evidence:
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_contactfixed_cam3_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_posefixed_cam2_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_retake_cam1_render_metadata.json
+      - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_tabletop_overview_cam4_render_metadata.json
+      mdl_search_paths:
+      - /isaac-sim/kit/mdl/core/Base
+      - /isaac-sim/kit/mdl/core/mdl
+      - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+      - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
+      - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    physics_readiness:
+      status: ready
+      role: manipulated_object
+      evidence_source: phase11_release_candidate_gate
+      claim_boundary: Phase 12 records retained package readiness metadata only; simulator
+        runtime behavior remains evidenced by Phase 11/EOS gates.
+    export_eligibility:
+      ebench: true
+      license: research-use
+      evidence_source: phase11_release_candidate_gate
+      redistribution_scope: retained_phase12_registry_snapshot
     provenance:
       source_package_id: ebench_soap_to_dish_canary
       asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
@@ -303,5 +800,5 @@ registry_query_contract:
     required_fields:
     - package_id
     returns: retained_gate_refs
-snapshot_digest: sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
+snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
 immutability: content_addressed_metadata_snapshot

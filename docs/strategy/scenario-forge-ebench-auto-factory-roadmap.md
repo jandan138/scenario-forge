@@ -5412,7 +5412,7 @@ Authoritative current index:
 
 Registry snapshot:
   docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml
-  snapshot_digest=sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
+  snapshot_digest=sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
 ```
 
 这次实现刻意处理了一个真实证据问题：suite manifest 里的 runtime package
@@ -5422,6 +5422,13 @@ builder 会优先使用 retained evidence 中的稳定 artifact refs，并根据
 收尾固化时进一步收紧：public registry、snapshot、viewer 和 handoff 输出不暴露
 本机绝对 `source_uri`，包括 `/tmp/...`、`/cpfs/...` 和 `file://...`；这些来源会被
 替换为指向 retained asset manifest 的 `retained-artifact://...` 引用。
+Phase 12 registry 现在还记录 selected-asset readiness metadata，包括
+`material_closure`、`physics_readiness`、`export_eligibility`、semantic tags、
+affordances 和 role suitability。这里的 `phase13_allowed=true` 只说明 registry
+证据链可以进入 Phase 13；Phase 13 对实际选中资产仍要求
+`material_closure.status=passed`，否则生成 blocked handoff。`gltf/pbr.mdl`
+这类 runtime MDL 只能在 retained render metadata 明确给出 approved runtime
+dependency 和 MDL search-root evidence 后才算 passed。
 
 ### 36.2 产出
 
@@ -5620,6 +5627,29 @@ Current local status for a successful compile:
   overall_status=phase13_static_candidate_ready
   formal_package_ready=false
 
+2026-07-05 material-closure hardening update:
+- Phase 12 asset registry entries now retain material_closure, physics_readiness,
+  export_eligibility, semantic tags, affordances, and role_suitability metadata.
+- The material audit scans MDL `texture_2d(...)` references and text/binary USD
+  `.mdl` references. It treats unresolved package-local/runtime-unclassified MDL
+  modules as blockers on the Phase 13 selected-asset path unless retained runtime
+  evidence explicitly approves them.
+- The real Phase 13 apple-to-bowl probe using retained official EBench apple and
+  bowl initially exposed `gltf/pbr.mdl`. Phase 12 now classifies that module as
+  an approved Isaac Sim runtime dependency only because retained render metadata
+  records `material_runtime_preflight.status=pass`, blocked dependency count 0,
+  concrete MDL search roots, and the resolved runtime path.
+- Current real probe status: 13.0-13.5 and 13.7 pass,
+  `overall_status=phase13_static_candidate_ready`, and
+  `formal_package_ready=false`. USD dependency tooling may still print unresolved
+  `gltf/pbr.mdl` warnings during materialization; the 13.5 gate records the
+  approved runtime MDL evidence, and 13.6 must still prove the generated package
+  renders correctly.
+- If a missing MDL/texture is not package-local and not backed by retained
+  runtime approval, Phase 13 writes `handoff/asset_intake_blockers.yaml` and does
+  not write `manifest.yaml`. Scenario Forge must not copy ConvertAsset
+  USD/MDL/texture conversion logic here.
+
 Remaining external gates before calling it a formal EBench-compatible package:
 - 13.6 engine-native overview render + render-visual-reviewer PASS.
 - 13.8 EOS execution evidence + completed episode + simulator-state predicate
@@ -5737,7 +5767,8 @@ Phase 13 依赖 Phase 12 registry metadata。每个可被自动选择的 asset �
 ```text
 - asset_id, version, content digest, metadata digest。
 - asset_type, semantic_tags, category aliases, affordances, role suitability。
-- canonical USD, collision USD, texture/material dependency closure。
+- canonical USD, collision USD, texture/material dependency closure, or approved
+  runtime MDL dependency classification with retained search-root evidence。
 - physics readiness: rigid/articulated, mass, friction, collision type, graspability, scale。
 - license / use restriction / EBench export eligibility / public or internal policy。
 - normalized status, ConvertAsset provenance, resolver version。
@@ -5794,15 +5825,19 @@ release-ready package。
   goal: 生成 scene/instances.yaml、scene/main.usda、asset_manifest、asset_lock、
         package validation 和 material runtime preflight。
   gate: scene-layout-usd-materialization-gate/v0.1 requires USD entrypoint,
-        asset lock, layout/scale/collision/support checks, no missing material
-        dependency, and no placeholder asset on release path.
+        asset lock, layout/scale/collision/support checks, selected registry
+        asset `material_closure.status=passed`, no missing package-local material
+        dependency, and no placeholder asset on release path. Runtime MDL modules
+        such as `gltf/pbr.mdl` are not auto-passed; they need retained Isaac Sim
+        search-root evidence or a ConvertAsset/upstream repaired bundle.
 
 13.6 Factory Overview Visual Gate:
   owner: renderer owner + render-visual-reviewer.
   goal: 对生成 package 做 engine-native overview render 和 clean-room visual review。
   gate: factory-overview-visual-gate/v0.1 requires image hash/metadata,
         material preflight pass, render-visual-reviewer PASS. It only proves
-        visual readability, not asset identity or task success.
+        visual readability, not asset identity or task success. 13.6 cannot be
+        entered while 13.5 selected-asset material closure is blocked.
 
 13.7 Package Adapter Preflight:
   owner: Scenario Forge adapters.

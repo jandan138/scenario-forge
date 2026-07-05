@@ -9,11 +9,11 @@ from typing import Any
 import yaml
 
 from scenario_forge.assets.checksum import compute_sha256
+from scenario_forge.assets.materials import audit_mdl_texture_closure as audit_mdl_texture_closure
 
 
 OFFICIAL_ASSET_SOURCES_SCHEMA_VERSION = "ebench-official-asset-sources/v0.1"
 OFFICIAL_ASSET_INTAKE_RESOLVER = "scenario-forge-ebench-official-asset-intake/v0.1"
-MDL_TEXTURE_2D_RE = re.compile(r"texture_2d\(\s*\"([^\"]+)\"")
 USD_ASSET_REF_RE = re.compile(r"@([^@\n]+)@")
 
 
@@ -135,32 +135,6 @@ def materialize_official_asset_bundle(
     )
 
 
-def audit_mdl_texture_closure(root: str | Path) -> dict[str, object]:
-    bundle_root = Path(root)
-    missing_textures: list[dict[str, str]] = []
-    for material_path in sorted(bundle_root.rglob("*.mdl")):
-        material_text = material_path.read_text(encoding="utf-8", errors="ignore")
-        for texture_ref in MDL_TEXTURE_2D_RE.findall(material_text):
-            if _is_external_texture_reference(texture_ref):
-                continue
-            texture_path = (material_path.parent / texture_ref).resolve()
-            if texture_path.exists():
-                continue
-            missing_textures.append(
-                {
-                    "material": _display_path(material_path, bundle_root),
-                    "texture": texture_ref,
-                    "resolved_path": _display_path(texture_path, bundle_root),
-                }
-            )
-    return {
-        "status": "passed" if not missing_textures else "failed",
-        "root": str(bundle_root),
-        "missing_texture_count": len(missing_textures),
-        "missing_textures": missing_textures,
-    }
-
-
 def _required_string(data: dict[str, Any], key: str) -> str:
     value = data.get(key)
     if not isinstance(value, str) or not value:
@@ -241,17 +215,6 @@ def _is_relative_to(path: Path, parent: Path) -> bool:
     except ValueError:
         return False
     return True
-
-
-def _display_path(path: Path, root: Path) -> str:
-    try:
-        return path.resolve().relative_to(root.resolve()).as_posix()
-    except ValueError:
-        return str(path)
-
-
-def _is_external_texture_reference(texture_ref: str) -> bool:
-    return "://" in texture_ref or texture_ref.startswith(("/", "omniverse:", "mdl:"))
 
 
 def _is_external_usd_asset_reference(asset_ref: str) -> bool:

@@ -2,7 +2,7 @@ schema_version: readonly-evidence-viewer/v0.1
 suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
 mode: read_only
 status_source: retained_gate_files_only
-snapshot_digest: sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
+snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
 packages:
 - package_id: ebench_apple_to_bowl_canary
   task_label: apple_to_bowl

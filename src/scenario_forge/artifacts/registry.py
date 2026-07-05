@@ -9,6 +9,7 @@ from typing import Any
 import yaml
 
 from scenario_forge.artifacts.package_writer import write_yaml_artifact
+from scenario_forge.assets.materials import audit_mdl_texture_closure
 
 PHASE12_FREEZE_SCHEMA_VERSION = "phase12-registry-readiness-freeze/v0.1"
 PHASE12_CONTRACT_GATE_SCHEMA_VERSION = "phase12-registry-contract-gate/v0.1"
@@ -624,6 +625,12 @@ def _asset_registry_entry(
         "resolver_version": str(
             asset.get("resolver_version") or lock.get("resolver_version", "scenario-forge/unknown")
         ),
+        "semantic_tags": _asset_semantic_tags(asset, lock),
+        "affordances": _asset_affordances(asset, lock),
+        "role_suitability": _asset_role_suitability(asset, lock),
+        "material_closure": _asset_material_closure(source, asset, lock, raw_source_uri),
+        "physics_readiness": _asset_physics_readiness(source, asset, lock),
+        "export_eligibility": _asset_export_eligibility(source, asset, lock),
         "provenance": {
             "source_package_id": source.package_id,
             "asset_manifest": _artifact_ref(source.asset_manifest_path, suite_root),
@@ -633,6 +640,259 @@ def _asset_registry_entry(
             "Asset registry entry only. It records locked USD asset metadata and does "
             "not perform mesh, MDL, texture, or material conversion."
         ),
+    }
+
+
+def _asset_semantic_tags(asset: dict[str, Any], lock: dict[str, Any]) -> list[str]:
+    tags = [
+        *_string_items(asset.get("semantic_tags")),
+        *_string_items(lock.get("semantic_tags")),
+    ]
+    role = str(asset.get("role") or lock.get("role") or "")
+    asset_type = str(asset.get("asset_type") or lock.get("asset_type") or "")
+    for value in (role, asset_type):
+        if value and value != "unspecified" and value not in tags:
+            tags.append(value)
+    return tags
+
+
+def _asset_affordances(asset: dict[str, Any], lock: dict[str, Any]) -> list[str]:
+    affordances = [
+        *_string_items(asset.get("affordances")),
+        *_string_items(lock.get("affordances")),
+    ]
+    role = str(asset.get("role") or lock.get("role") or "")
+    asset_type = str(asset.get("asset_type") or lock.get("asset_type") or "")
+    inferred = {
+        "manipulated_object": ["pickable", "rigid"],
+        "target_container": ["container", "rigid"],
+        "target_region": ["target"],
+        "environment": ["support_surface"],
+        "robot": ["robot"],
+    }
+    for value in [*inferred.get(role, []), *inferred.get(asset_type, [])]:
+        if value not in affordances:
+            affordances.append(value)
+    return affordances
+
+
+def _asset_role_suitability(asset: dict[str, Any], lock: dict[str, Any]) -> list[dict[str, str]]:
+    role = str(asset.get("role") or lock.get("role") or "unspecified")
+    asset_type = str(asset.get("asset_type") or lock.get("asset_type") or "usd_bundle")
+    return [
+        {
+            "role": role,
+            "asset_type": asset_type,
+            "status": "suitable",
+            "evidence_source": "retained_package_role_binding",
+        }
+    ]
+
+
+def _asset_material_closure(
+    source: _PackageSource,
+    asset: dict[str, Any],
+    lock: dict[str, Any],
+    raw_source_uri: str,
+) -> dict[str, Any]:
+    audit_root = _material_audit_root(source, asset, lock, raw_source_uri)
+    if audit_root is None:
+        if _gate_status(source.release_gate) == "passed" and (
+            asset.get("sha256") or lock.get("content_sha256")
+        ):
+            return {
+                "status": "passed",
+                "evidence_source": "phase11_release_candidate_gate_retained_readiness",
+                "audit_root": "retained_evidence_only",
+                "missing_texture_count": 0,
+                "missing_textures": [],
+                "missing_material_ref_count": 0,
+                "missing_material_refs": [],
+                "runtime_preflight_required": True,
+            }
+        return {
+            "status": "blocked",
+            "evidence_source": "missing_material_audit_root",
+            "missing_texture_count": None,
+            "missing_material_ref_count": None,
+        }
+    audit = audit_mdl_texture_closure(audit_root)
+    runtime_approval = _runtime_mdl_approval(source, audit)
+    if runtime_approval and audit["status"] == "failed" and audit["missing_texture_count"] == 0:
+        approved_modules = {
+            str(item.get("module"))
+            for item in runtime_approval["approved_runtime_mdl_dependencies"]
+            if item.get("module")
+        }
+        missing_material_refs = _list_of_mappings(audit["missing_material_refs"])
+        unapproved_refs = [
+            item for item in missing_material_refs if str(item.get("material", "")) not in approved_modules
+        ]
+        if not unapproved_refs:
+            return {
+                "status": "passed",
+                "evidence_source": "local_usd_bundle_mdl_audit_with_runtime_approval",
+                "audit_scope": "local_usd_bundle",
+                "missing_texture_count": 0,
+                "missing_textures": [],
+                "missing_material_ref_count": 0,
+                "missing_material_refs": [],
+                "package_local_missing_material_refs": missing_material_refs,
+                "approved_runtime_mdl_dependencies": runtime_approval[
+                    "approved_runtime_mdl_dependencies"
+                ],
+                "runtime_preflight_evidence": runtime_approval["runtime_preflight_evidence"],
+                "mdl_search_paths": runtime_approval["mdl_search_paths"],
+            }
+    return {
+        "status": audit["status"],
+        "evidence_source": "local_usd_bundle_mdl_texture_audit",
+        "audit_scope": "local_usd_bundle",
+        "missing_texture_count": audit["missing_texture_count"],
+        "missing_textures": audit["missing_textures"],
+        "missing_material_ref_count": audit["missing_material_ref_count"],
+        "missing_material_refs": audit["missing_material_refs"],
+    }
+
+
+def _runtime_mdl_approval(source: _PackageSource, audit: dict[str, Any]) -> dict[str, Any] | None:
+    missing_modules = {
+        str(item.get("material"))
+        for item in _list_of_mappings(audit.get("missing_material_refs"))
+        if item.get("material")
+    }
+    if not missing_modules:
+        return None
+
+    approved_by_module: dict[str, dict[str, Any]] = {}
+    evidence_refs: list[str] = []
+    search_paths: list[str] = []
+    for metadata_path in _render_metadata_candidates(source):
+        metadata = _load_optional_json(metadata_path)
+        material_preflight = metadata.get("material_runtime_preflight")
+        if not isinstance(material_preflight, dict):
+            continue
+        if material_preflight.get("status") != "pass":
+            continue
+        if material_preflight.get("blocked_dependency_count") not in (0, None):
+            continue
+        blocked_dependencies = material_preflight.get("blocked_dependencies")
+        if isinstance(blocked_dependencies, list) and blocked_dependencies:
+            continue
+
+        for raw_search_path in _string_items(material_preflight.get("mdl_search_paths")):
+            if raw_search_path not in search_paths:
+                search_paths.append(raw_search_path)
+        for dependency in _list_of_mappings(
+            material_preflight.get("approved_runtime_mdl_dependencies")
+        ):
+            module = dependency.get("module")
+            if not isinstance(module, str) or module not in missing_modules:
+                continue
+            if dependency.get("resolution") != "approved_runtime_module":
+                continue
+            runtime_path = dependency.get("runtime_path")
+            if not isinstance(runtime_path, str) or not runtime_path:
+                continue
+            approved_by_module[module] = {
+                "module": module,
+                "resolution": "approved_runtime_module",
+                "runtime_path": runtime_path,
+            }
+            ref = str(metadata_path)
+            if ref not in evidence_refs:
+                evidence_refs.append(ref)
+
+    if missing_modules.difference(approved_by_module):
+        return None
+    return {
+        "approved_runtime_mdl_dependencies": [
+            approved_by_module[module] for module in sorted(approved_by_module)
+        ],
+        "runtime_preflight_evidence": evidence_refs,
+        "mdl_search_paths": search_paths,
+    }
+
+
+def _render_metadata_candidates(source: _PackageSource) -> tuple[Path, ...]:
+    candidates: list[Path] = []
+    for base in (source.evidence_dir, source.package_root / "evidence" if source.package_root else None):
+        if base is None or not base.exists():
+            continue
+        for path in sorted(base.glob("*render_metadata*.json")):
+            if path.is_file() and path not in candidates:
+                candidates.append(path)
+    return tuple(candidates)
+
+
+def _load_optional_json(path: Path | None) -> dict[str, Any]:
+    if path is None or not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _material_audit_root(
+    source: _PackageSource,
+    asset: dict[str, Any],
+    lock: dict[str, Any],
+    raw_source_uri: str,
+) -> Path | None:
+    source_path = _source_uri_to_path(raw_source_uri)
+    if source_path is not None and source_path.exists():
+        return source_path.parent if source_path.is_file() else source_path
+
+    canonical_usd = str(asset.get("canonical_usd") or lock.get("resolved_path") or "")
+    if canonical_usd and source.package_root is not None:
+        package_asset = (source.package_root / canonical_usd).resolve()
+        if package_asset.exists():
+            return package_asset.parent if package_asset.is_file() else package_asset
+    return None
+
+
+def _source_uri_to_path(source_uri: str) -> Path | None:
+    if not source_uri:
+        return None
+    if source_uri.startswith("file://"):
+        return Path(source_uri.removeprefix("file://"))
+    if "://" in source_uri or source_uri.startswith(("omniverse:", "mdl:")):
+        return None
+    return Path(source_uri)
+
+
+def _asset_physics_readiness(
+    source: _PackageSource,
+    asset: dict[str, Any],
+    lock: dict[str, Any],
+) -> dict[str, str]:
+    status = "ready" if _gate_status(source.release_gate) == "passed" else "blocked"
+    role = str(asset.get("role") or lock.get("role") or "unspecified")
+    return {
+        "status": status,
+        "role": role,
+        "evidence_source": "phase11_release_candidate_gate",
+        "claim_boundary": (
+            "Phase 12 records retained package readiness metadata only; simulator "
+            "runtime behavior remains evidenced by Phase 11/EOS gates."
+        ),
+    }
+
+
+def _asset_export_eligibility(
+    source: _PackageSource,
+    asset: dict[str, Any],
+    lock: dict[str, Any],
+) -> dict[str, object]:
+    license_value = str(asset.get("license") or lock.get("license") or "")
+    release_gate_passed = _gate_status(source.release_gate) == "passed"
+    return {
+        "ebench": bool(license_value and release_gate_passed),
+        "license": license_value,
+        "evidence_source": "phase11_release_candidate_gate",
+        "redistribution_scope": "retained_phase12_registry_snapshot",
     }
 
 
@@ -691,6 +951,15 @@ def _contract_blockers(
         for field in ("content_sha256", "license", "resolver_version"):
             if not str(entry.get(field, "")).strip():
                 blockers.append(f"asset {asset_id} missing {field}")
+        material_closure = entry.get("material_closure")
+        if not isinstance(material_closure, dict) or not str(material_closure.get("status", "")).strip():
+            blockers.append(f"asset {asset_id} missing material_closure.status")
+        physics_readiness = entry.get("physics_readiness")
+        if not isinstance(physics_readiness, dict) or not str(physics_readiness.get("status", "")).strip():
+            blockers.append(f"asset {asset_id} missing physics_readiness.status")
+        export_eligibility = entry.get("export_eligibility")
+        if not isinstance(export_eligibility, dict) or "ebench" not in export_eligibility:
+            blockers.append(f"asset {asset_id} missing export_eligibility.ebench")
         provenance = entry.get("provenance")
         if not isinstance(provenance, dict) or not provenance.get("source_package_id"):
             blockers.append(f"asset {asset_id} missing provenance.source_package_id")

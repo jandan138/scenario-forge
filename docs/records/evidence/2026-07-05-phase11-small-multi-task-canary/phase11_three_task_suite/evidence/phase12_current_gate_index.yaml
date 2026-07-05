@@ -32,7 +32,7 @@ latest_gates:
     schema_version: phase12-public-release-policy-closure-gate/v0.1
     status: passed
 registry_snapshot: registry/registry_snapshot.yaml
-snapshot_digest: sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
+snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
 blockers: []
 next_allowed_phase:
   phase: '13.0'
