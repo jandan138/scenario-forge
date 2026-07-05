@@ -2,12 +2,12 @@
 
 ## Status
 
-Phase 13 now has a static candidate compiler in Scenario Forge. The current
-real official EBench apple/bowl probe reaches static candidate readiness after
-retained runtime evidence classifies `gltf/pbr.mdl` as an approved Isaac Sim MDL
-dependency. It now also has real 13.6 overview visual evidence from Isaac Sim
-and render-visual-reviewer. It is not a formal package release because 13.8
-still needs fresh execution and predicate evidence.
+Phase 13 now has a static candidate compiler and retained batch-quality gate in
+Scenario Forge. The real official EBench apple/bowl probe reached formal package
+readiness after 13.6 overview visual evidence, EOS/EBench package-linked BPL19R
+execution, predicate success, post-execution visual review PASS, and release
+policy PASS. A retained 13.9 request-level batch gate also passed with three
+formal-ready generated packages.
 
 Implemented CLI:
 
@@ -46,7 +46,10 @@ The compiler ingests `image-task-request/v0.1` and
 `image-to-scene-result/v0.1`, selects only assets that exist in a Phase 12
 registry snapshot, materializes retained USD bundles into a fat v0.2 package,
 generates `scene/main.usda`, writes `asset_lock.yaml`, exports EBench static
-adapter artifacts, and writes Phase 13 gate evidence.
+adapter artifacts, and writes Phase 13 gate evidence. Duplicate registry
+`asset_id` entries can be disambiguated by `selected_asset_uid` or
+`selected_source_package_id`, and target fixture metadata such as
+`semantic_label` is preserved in the EBench task contract for EOS mapping.
 
 The retained official apple/bowl assets expose `gltf/pbr.mdl` dependencies in
 binary USD. The Phase 12 registry records the package-local unresolved ref plus
@@ -63,15 +66,17 @@ Local static completion means:
 - `evidence/phase13_current_gate_index.yaml` records
   `overall_status=phase13_static_candidate_ready`.
 
-This is not a formal EBench-compatible package release. The current index keeps
-`formal_package_ready=false` until external gates pass:
+This is not a formal EBench-compatible package release until external gates pass:
 
 - 13.8 EOS execution evidence, completed episode, simulator-state predicate
   success, and post-execution visual review PASS.
 
 After 13.6 passes, the current index records
 `overall_status=phase13_visual_candidate_ready`, `overview_visual_ready=true`,
-and `next_required_gate=13.8`.
+and `next_required_gate=13.8`. After 13.8 passes, it records
+`overall_status=phase13_formal_package_ready`, `formal_package_ready=true`, and
+`next_required_gate=13.9`. After the retained 13.9 suite passes, the suite gate
+records `next_stage=phase13_batch_factory_ready`.
 
 ## Fail-Closed Evidence
 
@@ -169,16 +174,16 @@ next_required_gate: 13.8
 
 The visual reviewer judged the apple and bowl visible and identifiable. The
 review also noted wide framing and missing table/robot context as a non-blocking
-readability caveat for this overview canary. The package is still not formal
-because 13.8 execution/predicate evidence remains blocked.
+readability caveat for this overview canary. 13.8 later promoted this package to
+formal package readiness.
 
 ## 13.8 Ingestion Status
 
 Scenario Forge now has the 13.8 gate ingestion path. It is intentionally only an
 evidence aggregator: it checks that the same generated package has passed Phase
 11 task execution, executed episode, success predicate, post-execution visual
-review, and single-task release-candidate gates. If those gates pass, 13.8 can
-promote the current index to:
+review, and single-task release-candidate gates. The retained apple/bowl package
+and request-level batch variants now use this path.
 
 ```text
 overall_status: phase13_formal_package_ready
@@ -187,11 +192,23 @@ execution_predicate_ready: true
 next_required_gate: 13.9
 ```
 
-The real apple/bowl probe does not have that downstream evidence yet. EOS
-currently has a Scenario Forge package task-execution CLI that consumes the
-package and writes a config-level blocked evidence record, but that lane states
-`no_scenario_forge_package_episode_runner_available_in_this_eos_lane`. Therefore
-13.8 is not passed for the real Phase 13 probe.
+Retained real apple/bowl result:
+
+```text
+package_id: phase13_tabletop_photo_goal_real_registry_probe
+task_id: image_task/tabletop_photo_goal_real_registry_probe
+native_task_id: mobile_manip/apple_to_fruit_bowl
+selected_success_attempt: attempt_006
+task_success: true
+standard_model_score: 1.0
+post_execution_visual_review: PASS
+phase13_8_execution_predicate_canary_gate: passed
+overall_status: phase13_formal_package_ready
+```
+
+The right-camera first/last frames show the apple separate from the bowl before
+execution and inside the bowl afterward. This remains a retained package-linked
+canary, not an official leaderboard result.
 
 ## 13.9 Ingestion Status
 
@@ -215,9 +232,40 @@ status: passed
 next_stage: phase13_batch_factory_ready
 ```
 
-No real Phase 13 batch suite is passed yet because the real apple/bowl probe is
-still blocked at 13.8 and there are not yet three formal-ready generated
-packages.
+Retained 13.9 suite:
+
+```text
+docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_batch_rc_20260705/
+```
+
+13.9 result:
+
+```text
+suite_id: phase13_image_grounded_existing_asset_batch_rc_20260705
+request_count: 3
+formal_package_ready_count: 3
+failed_or_blocked_count: 0
+status: passed
+next_stage: phase13_batch_factory_ready
+```
+
+The passing request-level batch contains:
+
+```text
+phase13_tabletop_photo_goal_real_registry_probe      apple_to_bowl
+phase13_tabletop_photo_goal_remote_to_holder         remote_to_holder
+phase13_tabletop_photo_goal_apple_to_bowl_retake     apple_to_bowl_retake
+```
+
+Known limitation: this proves request-level batch readiness, not broad task
+taxonomy coverage. `soap_to_dish` was probed but kept outside the passing batch
+because the selected `official_ebench_scene` registry entry still fails static
+material/texture closure with `O.mdl` and missing texture blockers. That blocker
+is retained under:
+
+```text
+phase13_batch_rc_20260705/blocked_probes/phase13_tabletop_photo_goal_soap_to_dish/
+```
 
 ## Tests
 
@@ -236,7 +284,7 @@ PYTHONPATH=src python -m pytest \
 Expected result:
 
 ```text
-24 passed
+27 passed
 ```
 
 Full project verification remains `make check`.

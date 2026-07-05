@@ -1,0 +1,20 @@
+schema_version: suite-manifest/v0.1
+suite_id: phase13_image_grounded_existing_asset_batch_rc_20260705
+packages:
+- package_id: phase13_tabletop_photo_goal_real_registry_probe
+  path: packages/phase13_tabletop_photo_goal_real_registry_probe
+  task_family: object_in_container
+  difficulty: easy
+  split: dev
+- package_id: phase13_tabletop_photo_goal_remote_to_holder
+  path: packages/phase13_tabletop_photo_goal_remote_to_holder
+  task_family: object_in_container
+  difficulty: medium
+  split: dev
+- package_id: phase13_tabletop_photo_goal_apple_to_bowl_retake
+  path: packages/phase13_tabletop_photo_goal_apple_to_bowl_retake
+  task_family: object_in_container
+  difficulty: easy
+  split: test
+claim_boundary: Phase 13.9 retained request-level batch suite for Scenario Forge factory
+  quality gating; not a benchmark leaderboard or model-quality report.

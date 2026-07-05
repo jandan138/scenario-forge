@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 
 from scenario_forge.cli import main
+from scenario_forge.generation.image_grounded.factory import _choose_registry_asset
 
 
 def test_image_task_compile_generates_existing_asset_package_candidate(tmp_path: Path) -> None:
@@ -94,6 +95,114 @@ def test_image_task_compile_generates_existing_asset_package_candidate(tmp_path:
     assert current_gate["latest_gates"]["13.5"]["status"] == "passed"
     assert current_gate["latest_gates"]["13.6"]["status"] == "blocked"
     assert current_gate["latest_gates"]["13.8"]["status"] == "blocked"
+
+
+def test_image_task_compile_preserves_target_container_semantic_label(tmp_path: Path) -> None:
+    registry_snapshot = _write_registry_snapshot(
+        tmp_path,
+        (
+            _AssetSeed("official_ebench_remote_control", "manipulated_object", "remote", ("pickable", "rigid")),
+            _AssetSeed("official_ebench_scene", "target_container", "scene", ("container", "rigid")),
+        ),
+    )
+    request = _write_image_task_request(
+        tmp_path,
+        request_id="tabletop_photo_goal_remote_to_holder",
+        goal_text="Put the remote control into the remote control holder.",
+    )
+    scene_result = _write_image_scene_result(
+        tmp_path,
+        result_id="tabletop_photo_goal_remote_to_holder_result",
+        goal_text="Put the remote control into the remote control holder.",
+        object_asset_id="official_ebench_remote_control",
+        object_instance_id="remote_001",
+        object_detection_label="remote control",
+        container_asset_id="official_ebench_scene",
+        container_instance_id="remote_holder_fixture",
+        container_detection_label="remote control holder",
+        container_semantic_label="remote_control_holder",
+        container_fixture_kind="environment_fixture",
+        container_source_uid="_00",
+    )
+    package_dir = tmp_path / "out" / "phase13_tabletop_photo_goal_remote_to_holder"
+
+    code = main(
+        [
+            "image-task",
+            "compile",
+            "--request",
+            str(request),
+            "--scene-result",
+            str(scene_result),
+            "--registry-snapshot",
+            str(registry_snapshot),
+            "--out",
+            str(package_dir),
+            "--strict",
+        ]
+    )
+
+    assert code == 0
+    contract = _load_yaml(package_dir / "task/task_contract.yaml")
+    target_container = contract["task_semantics"]["target_container"]
+    assert target_container["instance_id"] == "remote_holder_fixture"
+    assert target_container["asset_id"] == "official_ebench_scene"
+    assert target_container["semantic_label"] == "remote_control_holder"
+    assert target_container["fixture_kind"] == "environment_fixture"
+    assert target_container["source_uid"] == "_00"
+
+
+def test_registry_asset_selection_prefers_release_ready_duplicate_entries() -> None:
+    blocked_scene = {
+        "asset_id": "official_ebench_scene",
+        "source_package_id": "aaa_blocked_scene",
+        "asset_uid": "official_ebench_scene@blocked",
+        "material_closure": {"status": "failed"},
+        "physics_readiness": {"status": "ready"},
+        "export_eligibility": {"ebench": True},
+    }
+    release_ready_scene = {
+        "asset_id": "official_ebench_scene",
+        "source_package_id": "zzz_release_ready_scene",
+        "asset_uid": "official_ebench_scene@ready",
+        "material_closure": {"status": "passed"},
+        "physics_readiness": {"status": "ready"},
+        "export_eligibility": {"ebench": True},
+    }
+
+    chosen = _choose_registry_asset(
+        "official_ebench_scene",
+        {"official_ebench_scene": [blocked_scene, release_ready_scene]},
+    )
+
+    assert chosen["source_package_id"] == "zzz_release_ready_scene"
+
+
+def test_registry_asset_selection_honors_selected_asset_uid_for_duplicate_ids() -> None:
+    remote_scene = {
+        "asset_id": "official_ebench_scene",
+        "source_package_id": "ebench_remote_to_holder_canary",
+        "asset_uid": "official_ebench_scene@remote",
+        "material_closure": {"status": "passed"},
+        "physics_readiness": {"status": "ready"},
+        "export_eligibility": {"ebench": True},
+    }
+    soap_scene = {
+        "asset_id": "official_ebench_scene",
+        "source_package_id": "ebench_soap_to_dish_canary",
+        "asset_uid": "official_ebench_scene@soap",
+        "material_closure": {"status": "passed"},
+        "physics_readiness": {"status": "ready"},
+        "export_eligibility": {"ebench": True},
+    }
+
+    chosen = _choose_registry_asset(
+        "official_ebench_scene",
+        {"official_ebench_scene": [remote_scene, soap_scene]},
+        selected_asset_uid="official_ebench_scene@remote",
+    )
+
+    assert chosen["source_package_id"] == "ebench_remote_to_holder_canary"
 
 
 def test_image_task_compile_strict_fails_closed_for_unregistered_asset(tmp_path: Path) -> None:
@@ -646,7 +755,12 @@ def _write_registry_snapshot(tmp_path: Path, seeds: tuple[_AssetSeed, ...]) -> P
     return _write_yaml(registry_dir / "registry_snapshot.yaml", snapshot)
 
 
-def _write_image_task_request(tmp_path: Path) -> Path:
+def _write_image_task_request(
+    tmp_path: Path,
+    *,
+    request_id: str = "tabletop_photo_goal_001",
+    goal_text: str = "Put the apple into the bowl.",
+) -> Path:
     image_path = tmp_path / "inputs" / "tabletop_001.jpg"
     image_path.parent.mkdir(parents=True)
     image_path.write_bytes(b"fake-jpg")
@@ -654,14 +768,14 @@ def _write_image_task_request(tmp_path: Path) -> Path:
         tmp_path / "image_task_request.yaml",
         {
             "schema_version": "image-task-request/v0.1",
-            "request_id": "tabletop_photo_goal_001",
+            "request_id": request_id,
             "source": {
                 "image_uri": f"file://{image_path}",
                 "image_sha256": f"sha256:{sha256(image_path.read_bytes()).hexdigest()}",
                 "rights_status": "user_provided_for_task_generation",
             },
             "goal": {
-                "one_sentence_goal": "Put the apple into the bowl.",
+                "one_sentence_goal": goal_text,
                 "domain": "tabletop_manipulation",
                 "robot_profile": "franka_panda_tabletop_v1",
                 "target_export": "ebench",
@@ -675,27 +789,53 @@ def _write_image_task_request(tmp_path: Path) -> Path:
     )
 
 
-def _write_image_scene_result(tmp_path: Path) -> Path:
+def _write_image_scene_result(
+    tmp_path: Path,
+    *,
+    result_id: str = "tabletop_photo_goal_001_result",
+    goal_text: str = "Put the apple into the bowl.",
+    object_asset_id: str = "official_ebench_apple",
+    object_instance_id: str = "apple_001",
+    object_detection_label: str = "apple",
+    container_asset_id: str = "official_ebench_bowl",
+    container_instance_id: str = "bowl_001",
+    container_detection_label: str = "bowl",
+    container_semantic_label: str | None = None,
+    container_fixture_kind: str | None = None,
+    container_source_uid: str | None = None,
+) -> Path:
     image_path = tmp_path / "inputs" / "tabletop_001.jpg"
+    container_instance = {
+        "id": container_instance_id,
+        "role": "target_container",
+        "asset_id": container_asset_id,
+        "pose": {"xyz": [0.33, 0.04, 0.78], "wxyz": [1.0, 0.0, 0.0, 0.0]},
+    }
+    if container_semantic_label is not None:
+        container_instance["semantic_label"] = container_semantic_label
+    if container_fixture_kind is not None:
+        container_instance["fixture_kind"] = container_fixture_kind
+    if container_source_uid is not None:
+        container_instance["source_uid"] = container_source_uid
     return _write_yaml(
         tmp_path / "image_scene_result.yaml",
         {
             "schema_version": "image-to-scene-result/v0.1",
-            "result_id": "tabletop_photo_goal_001_result",
+            "result_id": result_id,
             "producer": {"name": "external-image-grounding-adapter", "version": "v0.1"},
             "source": {
                 "image_uri": f"file://{image_path}",
                 "image_sha256": f"sha256:{sha256(image_path.read_bytes()).hexdigest()}",
             },
             "goal": {
-                "raw_text": "Put the apple into the bowl.",
+                "raw_text": goal_text,
                 "normalized_task_family": "object_in_container",
             },
             "scene": {"coordinate_system": "tabletop_right_handed_z_up", "units": "meters"},
             "detections": [
                 {
                     "detection_id": "det_apple",
-                    "label": "apple",
+                    "label": object_detection_label,
                     "bbox_xywh": [120, 200, 80, 75],
                     "confidence": 0.91,
                     "semantic_tags": ["fruit", "pickable"],
@@ -703,7 +843,7 @@ def _write_image_scene_result(tmp_path: Path) -> Path:
                 },
                 {
                     "detection_id": "det_bowl",
-                    "label": "bowl",
+                    "label": container_detection_label,
                     "bbox_xywh": [250, 205, 110, 85],
                     "confidence": 0.88,
                     "semantic_tags": ["container"],
@@ -714,13 +854,13 @@ def _write_image_scene_result(tmp_path: Path) -> Path:
                 {
                     "role": "object",
                     "detection_id": "det_apple",
-                    "asset_type": "apple",
+                    "asset_type": object_detection_label,
                     "required_affordances": ["pickable", "rigid"],
                 },
                 {
                     "role": "target_container",
                     "detection_id": "det_bowl",
-                    "asset_type": "bowl",
+                    "asset_type": container_detection_label,
                     "required_affordances": ["container", "rigid"],
                 },
             ],
@@ -728,7 +868,7 @@ def _write_image_scene_result(tmp_path: Path) -> Path:
                 {
                     "role": "object",
                     "detection_id": "det_apple",
-                    "selected_asset_id": "official_ebench_apple",
+                    "selected_asset_id": object_asset_id,
                     "score": 0.84,
                     "matching_reason": "category_and_size_match",
                     "rejected_alternatives": [],
@@ -736,7 +876,7 @@ def _write_image_scene_result(tmp_path: Path) -> Path:
                 {
                     "role": "target_container",
                     "detection_id": "det_bowl",
-                    "selected_asset_id": "official_ebench_bowl",
+                    "selected_asset_id": container_asset_id,
                     "score": 0.86,
                     "matching_reason": "category_and_affordance_match",
                     "rejected_alternatives": [],
@@ -744,19 +884,14 @@ def _write_image_scene_result(tmp_path: Path) -> Path:
             ],
             "instances": [
                 {
-                    "id": "apple_001",
+                    "id": object_instance_id,
                     "role": "manipulated_object",
-                    "asset_id": "official_ebench_apple",
+                    "asset_id": object_asset_id,
                     "pose": {"xyz": [0.12, 0.04, 0.78], "wxyz": [1.0, 0.0, 0.0, 0.0]},
                 },
-                {
-                    "id": "bowl_001",
-                    "role": "target_container",
-                    "asset_id": "official_ebench_bowl",
-                    "pose": {"xyz": [0.33, 0.04, 0.78], "wxyz": [1.0, 0.0, 0.0, 0.0]},
-                },
+                container_instance,
             ],
-            "task_bindings": {"object": "apple_001", "container": "bowl_001"},
+            "task_bindings": {"object": object_instance_id, "container": container_instance_id},
             "evidence": {"confidence_summary": "usable_with_review", "blockers": []},
         },
     )

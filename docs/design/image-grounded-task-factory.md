@@ -1,10 +1,11 @@
 # Image-Grounded Task Factory Design
 
-Status: Phase 13 static candidate compiler implemented; real official EBench
-apple/bowl selection reaches 13.6 overview visual readiness after retained
-runtime evidence classifies `gltf/pbr.mdl` as an approved Isaac Sim MDL
-dependency. Formal package readiness still waits on 13.8 EOS execution and
-predicate evidence.
+Status: Phase 13 static candidate compiler, 13.8 execution/predicate canary
+ingestion, and 13.9 request-level batch quality gate are implemented. The real
+official EBench apple/bowl package reaches formal package readiness, and a
+retained three-request batch reaches `phase13_batch_factory_ready`. Soap-to-dish
+remains a blocked probe until ConvertAsset/Phase 12 registry material closure is
+fixed.
 
 The image-grounded task factory turns a user-provided tabletop image request and
 an external image-to-scene result into a Scenario Forge package candidate. It is
@@ -50,6 +51,14 @@ Inputs:
   instances, task bindings, confidence summary, and upstream blockers.
 - `registry-snapshot/v0.1`: Phase 12 asset registry snapshot used as the only
   allowed asset source.
+
+When a registry snapshot contains multiple entries for the same `asset_id`,
+`image-to-scene-result/v0.1` may provide `selected_asset_uid` or
+`selected_source_package_id` on an asset candidate or scene instance. The
+compiler uses that selector before release-readiness tie-breaks. Target
+fixture metadata such as `semantic_label`, `source_uid`, and `fixture_kind` is
+preserved in `task/task_contract.yaml` so EOS can map generated image-task IDs
+to native EBench tasks without Scenario Forge owning the runner.
 
 Outputs when local static gates pass:
 
@@ -112,6 +121,18 @@ three requests, formal-package-ready current gate indices for generated
 packages, and blocker taxonomy for every failed or blocked request. It writes
 `evidence/phase13_9_batch_factory_quality_gate.yaml` and does not report model
 performance or leaderboard quality.
+
+Retained 2026-07-05 evidence:
+
+```text
+docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_batch_rc_20260705/
+```
+
+That suite passes 13.9 with apple/bowl, remote/holder, and an apple/bowl retake
+request. It proves request-level batch readiness, not broad task taxonomy
+coverage. The retained soap-to-dish probe is blocked before package generation
+because its selected scene asset has unresolved static material/texture closure
+blockers.
 
 If a selected registry asset has `material_closure.status != passed`, or if
 post-materialization audit finds missing MDL/texture dependencies, the compiler

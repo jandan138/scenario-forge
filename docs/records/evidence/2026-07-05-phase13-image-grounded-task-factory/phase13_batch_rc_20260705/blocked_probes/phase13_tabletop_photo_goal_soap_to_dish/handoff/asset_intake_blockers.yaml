@@ -1,0 +1,9 @@
+schema_version: phase13-asset-intake-blockers/v0.1
+request_id: tabletop_photo_goal_soap_to_dish
+status: blocked
+blockers:
+- 'selected asset official_ebench_scene material_closure.status must be passed (missing
+  material refs: O.mdl; missing textures: ../textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg,
+  ../textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg, ../textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg)'
+recommended_next_step: fix_upstream_result_or_asset_registry_then_rerun_phase13
+claim_boundary: Blocked handoff only; no public-ready package was generated.

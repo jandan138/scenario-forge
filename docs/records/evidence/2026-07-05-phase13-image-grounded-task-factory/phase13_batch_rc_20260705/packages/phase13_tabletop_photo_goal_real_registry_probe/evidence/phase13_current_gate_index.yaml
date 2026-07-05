@@ -1,0 +1,52 @@
+schema_version: phase13-current-gate-index/v0.1
+request_id: tabletop_photo_goal_real_registry_probe
+package_id: phase13_tabletop_photo_goal_real_registry_probe
+overall_status: phase13_formal_package_ready
+formal_package_ready: true
+static_candidate_ready: true
+next_required_gate: '13.9'
+registry_snapshot: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml
+snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
+latest_gates:
+  '13.0':
+    path: evidence/phase13_0_image_goal_mvp_scope_gate.yaml
+    schema_version: image-goal-mvp-scope-gate/v0.1
+    status: passed
+  '13.1':
+    path: evidence/phase13_1_image_goal_intake_provenance_gate.yaml
+    schema_version: image-goal-intake-provenance-gate/v0.1
+    status: passed
+  '13.2':
+    path: evidence/phase13_2_image_understanding_candidate_gate.yaml
+    schema_version: image-understanding-candidate-gate/v0.1
+    status: passed
+  '13.3':
+    path: evidence/phase13_3_asset_registry_match_gate.yaml
+    schema_version: asset-registry-match-gate/v0.1
+    status: passed
+  '13.4':
+    path: evidence/phase13_4_goal_to_task_contract_gate.yaml
+    schema_version: goal-to-task-contract-gate/v0.1
+    status: passed
+  '13.5':
+    path: evidence/phase13_5_scene_layout_usd_materialization_gate.yaml
+    schema_version: scene-layout-usd-materialization-gate/v0.1
+    status: passed
+  '13.6':
+    path: evidence/phase13_6_factory_overview_visual_gate.yaml
+    schema_version: factory-overview-visual-gate/v0.1
+    status: passed
+  '13.7':
+    path: evidence/phase13_7_package_adapter_preflight_gate.yaml
+    schema_version: package-adapter-preflight-gate/v0.1
+    status: passed
+  '13.8':
+    path: evidence/phase13_8_execution_predicate_canary_gate.yaml
+    schema_version: execution-predicate-canary-gate/v0.1
+    status: passed
+blockers:
+- 13.9 batch factory quality gate is required before batch factory readiness
+claim_boundary: Phase 13 current gate index only. Static candidate readiness is not
+  a formal EBench package release, task execution success, or leaderboard result.
+overview_visual_ready: true
+execution_predicate_ready: true

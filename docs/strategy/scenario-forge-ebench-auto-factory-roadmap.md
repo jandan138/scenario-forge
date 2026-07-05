@@ -5623,9 +5623,12 @@ Implemented in Scenario Forge:
   confidence, material closure, source materialization, license, or bindings are
   insufficient.
 
-Current local status for a successful compile after 13.6 ingestion:
-  overall_status=phase13_visual_candidate_ready
-  formal_package_ready=false
+Current retained status after 13.9 ingestion:
+  apple/bowl and remote/holder generated packages can reach
+  overall_status=phase13_formal_package_ready
+  formal_package_ready=true
+  phase13_batch_factory_quality_gate.status=passed
+  next_stage=phase13_batch_factory_ready
 
 2026-07-05 material-closure hardening update:
 - Phase 12 asset registry entries now retain material_closure, physics_readiness,
@@ -5639,22 +5642,36 @@ Current local status for a successful compile after 13.6 ingestion:
   an approved Isaac Sim runtime dependency only because retained render metadata
   records `material_runtime_preflight.status=pass`, blocked dependency count 0,
   concrete MDL search roots, and the resolved runtime path.
-- Current real probe status: 13.0-13.7 pass, including 13.6 engine-native
-  overview render and render-visual-reviewer PASS. The current gate records
-  `overall_status=phase13_visual_candidate_ready`,
-  `overview_visual_ready=true`, `next_required_gate=13.8`, and
-  `formal_package_ready=false`. USD dependency tooling may still print unresolved
-  `gltf/pbr.mdl` warnings during materialization; the 13.5 gate records the
-  approved runtime MDL evidence, and 13.6 proves the generated package renders
-  without blocked material runtime signals.
+- Current real apple/bowl probe status: 13.0-13.8 pass, including 13.6
+  engine-native overview render and render-visual-reviewer PASS, package-linked
+  EOS/EBench BPL19R execution, simulator-state predicate success, post-execution
+  visual review PASS, and release policy PASS. The current gate records
+  `overall_status=phase13_formal_package_ready`, `formal_package_ready=true`,
+  `execution_predicate_ready=true`, and `next_required_gate=13.9`. USD
+  dependency tooling may still print unresolved `gltf/pbr.mdl` warnings during
+  materialization; the 13.5 gate records the approved runtime MDL evidence, and
+  13.6 proves the generated package renders without blocked material runtime
+  signals.
+- The retained 13.9 request-level batch gate also passes with three
+  formal-ready generated packages: apple/bowl, remote/holder, and an apple/bowl
+  retake request. This is batch factory readiness evidence, not broad task
+  taxonomy coverage or model-quality evidence.
+- The soap-to-dish Phase 13 probe remains outside the passing batch because the
+  retained `official_ebench_scene` registry entry for the soap scene still has
+  static material/texture closure blockers (`O.mdl` and missing textures). That
+  must be resolved through ConvertAsset/Phase 12 registry closure, not by
+  reimplementing conversion inside Scenario Forge.
 - If a missing MDL/texture is not package-local and not backed by retained
   runtime approval, Phase 13 writes `handoff/asset_intake_blockers.yaml` and does
   not write `manifest.yaml`. Scenario Forge must not copy ConvertAsset
   USD/MDL/texture conversion logic here.
 
-Remaining external gates before calling it a formal EBench-compatible package:
-- 13.8 EOS execution evidence + completed episode + simulator-state predicate
-  true + post-execution visual PASS + release policy pass.
+Remaining work after Phase 13:
+- broaden the passing request-level batch beyond apple/remote variants;
+- resolve soap-to-dish material/texture closure through ConvertAsset/Phase 12
+  registry evidence before adding it to a passing Phase 13.9 batch;
+- keep 13.8/13.9 as evidence aggregation only; Scenario Forge still must not run
+  simulator episodes or benchmark reports.
 ```
 
 ### 37.2 边界
@@ -5860,12 +5877,14 @@ release-ready package。
   gate: execution-predicate-canary-gate/v0.1 requires EOS execution evidence,
         completed episode, predicate true, post-execution visual PASS, release
         policy pass.
-  2026-07-05 Scenario Forge status: ingestion CLI implemented as
-        `image-task execution-predicate`. It only aggregates retained Phase 11
-        gates for the same generated package and must not run a simulator inside
-        Scenario Forge. The real apple/bowl Phase 13 probe remains blocked here:
-        current EOS Scenario Forge package execution evidence is config-level
-        only and states no package episode runner is available in that EOS lane.
+  2026-07-05 Scenario Forge status: passed for the retained apple/bowl Phase 13
+        package and the retained request-level batch variants. `image-task
+        execution-predicate` only aggregates retained Phase 11 gates for the
+        same generated package and must not run a simulator inside Scenario
+        Forge. The apple/bowl package-linked BPL19R success uses
+        selected_success_attempt=attempt_006; remote/holder reuses retained
+        package-linked BPL19R success evidence with task-contract semantic
+        mapping through `semantic_label=remote_control_holder`.
 
 13.9 Batch Factory Quality Gate:
   owner: Scenario Forge evaluation + registry owner.
@@ -5873,13 +5892,15 @@ release-ready package。
         coverage、failure rate、blocker taxonomy。
   gate: batch-factory-quality-gate/v0.1 requires machine-readable quality report
         and retained blockers for every failed/blocked request.
-  2026-07-05 Scenario Forge status: ingestion CLI implemented as
-        `image-task batch-quality`. It requires suite-quality evidence, at least
-        three requests, formal-package-ready Phase 13 current gate indices for
-        generated packages, and blocker taxonomy for every failed/blocked
-        request. The real Phase 13 batch gate remains pending because 13.8 is
-        not yet passed for the real apple/bowl package and no three-package
-        formal-ready batch exists.
+  2026-07-05 Scenario Forge status: passed for retained suite
+        `phase13_image_grounded_existing_asset_batch_rc_20260705`.
+        The passing request-level batch has three formal-ready packages:
+        apple/bowl, remote/holder, and apple/bowl retake. The gate writes
+        `phase13_9_batch_factory_quality_gate.yaml` with
+        `next_stage=phase13_batch_factory_ready`. Known limitation: this is not
+        broad task taxonomy coverage; soap-to-dish is retained as a blocked
+        probe because its selected scene registry entry still fails material and
+        texture closure.
 ```
 
 ### 37.6 防人工放行规则

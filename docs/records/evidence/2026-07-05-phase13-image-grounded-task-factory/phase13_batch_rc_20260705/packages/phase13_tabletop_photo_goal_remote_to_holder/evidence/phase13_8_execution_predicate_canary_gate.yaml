@@ -1,0 +1,47 @@
+schema_version: execution-predicate-canary-gate/v0.1
+phase: '13.8'
+status: passed
+package_id: phase13_tabletop_photo_goal_remote_to_holder
+request_id: tabletop_photo_goal_remote_to_holder
+phase11_chain:
+  phase11_task_execution_gate:
+    path: /tmp/scenario-forge-phase13-batch-suite/packages/phase13_tabletop_photo_goal_remote_to_holder/evidence/phase11_task_execution_gate.yaml
+    schema_version: phase11-task-execution-gate/v0.1
+    phase: '11.1'
+    status: passed
+    package_id: phase13_tabletop_photo_goal_remote_to_holder
+    task_id: image_task/tabletop_photo_goal_remote_to_holder
+  phase11_executed_episode_gate:
+    path: /tmp/scenario-forge-phase13-batch-suite/packages/phase13_tabletop_photo_goal_remote_to_holder/evidence/phase11_executed_episode_gate.yaml
+    schema_version: phase11-executed-episode-gate/v0.1
+    phase: '11.2'
+    status: passed
+    package_id: phase13_tabletop_photo_goal_remote_to_holder
+    task_id: image_task/tabletop_photo_goal_remote_to_holder
+  phase11_success_predicate_gate:
+    path: /tmp/scenario-forge-phase13-batch-suite/packages/phase13_tabletop_photo_goal_remote_to_holder/evidence/phase11_success_predicate_gate.yaml
+    schema_version: phase11-success-predicate-gate/v0.1
+    phase: '11.3'
+    status: passed
+    package_id: phase13_tabletop_photo_goal_remote_to_holder
+    task_id: image_task/tabletop_photo_goal_remote_to_holder
+  phase11_post_execution_visual_review_gate:
+    path: /tmp/scenario-forge-phase13-batch-suite/packages/phase13_tabletop_photo_goal_remote_to_holder/evidence/phase11_post_execution_visual_review_gate.yaml
+    schema_version: phase11-post-execution-visual-review-gate/v0.1
+    phase: '11.4'
+    status: passed
+    package_id: phase13_tabletop_photo_goal_remote_to_holder
+    task_id: image_task/tabletop_photo_goal_remote_to_holder
+  phase11_single_task_release_candidate_gate:
+    path: /tmp/scenario-forge-phase13-batch-suite/packages/phase13_tabletop_photo_goal_remote_to_holder/evidence/phase11_single_task_release_candidate_gate.yaml
+    schema_version: phase11-single-task-release-candidate-gate/v0.1
+    phase: '11.5'
+    status: passed
+    package_id: phase13_tabletop_photo_goal_remote_to_holder
+    task_id: image_task/tabletop_photo_goal_remote_to_holder
+blockers: []
+next_stage: batch_factory_quality_gate
+claim_boundary: Phase 13.8 execution/predicate canary gate only. It aggregates retained
+  EOS/EBench Phase 11 execution, completed episode, predicate, post-execution visual
+  review, and release-policy gates for this generated package. It is not a benchmark
+  report, leaderboard result, or batch-quality gate.

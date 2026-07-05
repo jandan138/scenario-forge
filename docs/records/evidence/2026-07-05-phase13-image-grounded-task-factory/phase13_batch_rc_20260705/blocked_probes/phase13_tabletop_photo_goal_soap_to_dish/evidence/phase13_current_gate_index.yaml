@@ -1,0 +1,52 @@
+schema_version: phase13-current-gate-index/v0.1
+request_id: tabletop_photo_goal_soap_to_dish
+package_id: phase13_tabletop_photo_goal_soap_to_dish
+overall_status: blocked
+formal_package_ready: false
+static_candidate_ready: false
+next_required_gate: '13.0'
+registry_snapshot: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml
+snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
+latest_gates:
+  '13.0':
+    path: evidence/phase13_0_image_goal_mvp_scope_gate.yaml
+    schema_version: image-goal-mvp-scope-gate/v0.1
+    status: blocked
+  '13.1':
+    path: evidence/phase13_1_image_goal_intake_provenance_gate.yaml
+    schema_version: image-goal-intake-provenance-gate/v0.1
+    status: blocked
+  '13.2':
+    path: evidence/phase13_2_image_understanding_candidate_gate.yaml
+    schema_version: image-understanding-candidate-gate/v0.1
+    status: blocked
+  '13.3':
+    path: evidence/phase13_3_asset_registry_match_gate.yaml
+    schema_version: asset-registry-match-gate/v0.1
+    status: blocked
+  '13.4':
+    path: evidence/phase13_4_goal_to_task_contract_gate.yaml
+    schema_version: goal-to-task-contract-gate/v0.1
+    status: blocked
+  '13.5':
+    path: evidence/phase13_5_scene_layout_usd_materialization_gate.yaml
+    schema_version: scene-layout-usd-materialization-gate/v0.1
+    status: blocked
+  '13.6':
+    path: evidence/phase13_6_factory_overview_visual_gate.yaml
+    schema_version: factory-overview-visual-gate/v0.1
+    status: blocked
+  '13.7':
+    path: evidence/phase13_7_package_adapter_preflight_gate.yaml
+    schema_version: package-adapter-preflight-gate/v0.1
+    status: blocked
+  '13.8':
+    path: evidence/phase13_8_execution_predicate_canary_gate.yaml
+    schema_version: execution-predicate-canary-gate/v0.1
+    status: blocked
+blockers:
+- 'selected asset official_ebench_scene material_closure.status must be passed (missing
+  material refs: O.mdl; missing textures: ../textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg,
+  ../textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg, ../textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg)'
+claim_boundary: Phase 13 current gate index only. Static candidate readiness is not
+  a formal EBench package release, task execution success, or leaderboard result.

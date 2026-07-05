@@ -69,6 +69,7 @@ def generate_image_grounded_task_package(
     registry_snapshot = _load_yaml(registry_file)
     registry_by_id = _registry_assets_by_id(registry_snapshot)
     selected_asset_ids = _selected_asset_ids(scene_result)
+    selected_asset_preferences = _selected_asset_preferences(scene_result)
 
     blockers = [
         *_request_blockers(request),
@@ -91,7 +92,11 @@ def generate_image_grounded_task_package(
             _materialize_selected_asset(
                 root=root,
                 asset_id=asset_id,
-                registry_entry=_choose_registry_asset(asset_id, registry_by_id),
+                registry_entry=_choose_registry_asset(
+                    asset_id,
+                    registry_by_id,
+                    **selected_asset_preferences.get(asset_id, {}),
+                ),
                 registry_snapshot_path=registry_file,
             )
             for asset_id in selected_asset_ids
@@ -317,6 +322,7 @@ def _asset_selection_blockers(
 ) -> list[str]:
     blockers: list[str] = []
     selected_ids = _selected_asset_ids(scene_result)
+    selected_asset_preferences = _selected_asset_preferences(scene_result)
     candidate_asset_ids = {
         str(candidate.get("selected_asset_id"))
         for candidate in _list_of_mappings(scene_result.get("asset_candidates"))
@@ -332,7 +338,15 @@ def _asset_selection_blockers(
         if not entries:
             blockers.append(f"selected asset {asset_id} is not present in the Phase 12 registry snapshot")
             continue
-        entry = _choose_registry_asset(asset_id, registry_by_id)
+        try:
+            entry = _choose_registry_asset(
+                asset_id,
+                registry_by_id,
+                **selected_asset_preferences.get(asset_id, {}),
+            )
+        except Phase13ImageTaskError as exc:
+            blockers.append(str(exc))
+            continue
         for field in ("asset_uid", "content_sha256", "license", "canonical_usd", "resolver_version"):
             if not _string(entry.get(field)):
                 blockers.append(f"selected asset {asset_id} missing registry field {field}")
@@ -367,13 +381,59 @@ def _registry_assets_by_id(registry_snapshot: dict[str, Any]) -> dict[str, list[
 def _choose_registry_asset(
     asset_id: str,
     registry_by_id: dict[str, list[dict[str, Any]]],
+    *,
+    selected_asset_uid: str | None = None,
+    selected_source_package_id: str | None = None,
 ) -> dict[str, Any]:
     entries = registry_by_id.get(asset_id, [])
     if not entries:
         raise Phase13ImageTaskError(
             f"selected asset {asset_id} is not present in the Phase 12 registry snapshot"
         )
-    return entries[0]
+    matching_entries = _matching_registry_entries(
+        entries,
+        selected_asset_uid=selected_asset_uid,
+        selected_source_package_id=selected_source_package_id,
+    )
+    if not matching_entries:
+        selectors = []
+        if selected_asset_uid:
+            selectors.append(f"asset_uid={selected_asset_uid}")
+        if selected_source_package_id:
+            selectors.append(f"source_package_id={selected_source_package_id}")
+        raise Phase13ImageTaskError(
+            f"selected asset {asset_id} registry entry does not match "
+            f"{', '.join(selectors)}"
+        )
+    return max(matching_entries, key=_registry_entry_selection_key)
+
+
+def _matching_registry_entries(
+    entries: list[dict[str, Any]],
+    *,
+    selected_asset_uid: str | None,
+    selected_source_package_id: str | None,
+) -> list[dict[str, Any]]:
+    matching = entries
+    if selected_asset_uid:
+        matching = [entry for entry in matching if entry.get("asset_uid") == selected_asset_uid]
+    if selected_source_package_id:
+        matching = [
+            entry
+            for entry in matching
+            if entry.get("source_package_id") == selected_source_package_id
+        ]
+    return matching
+
+
+def _registry_entry_selection_key(entry: dict[str, Any]) -> tuple[bool, bool, bool, str, str]:
+    return (
+        _mapping(entry.get("material_closure")).get("status") == "passed",
+        _mapping(entry.get("physics_readiness")).get("status") == "ready",
+        _mapping(entry.get("export_eligibility")).get("ebench") is True,
+        str(entry.get("source_package_id", "")),
+        str(entry.get("asset_uid", "")),
+    )
 
 
 def _selected_asset_ids(scene_result: dict[str, Any]) -> list[str]:
@@ -387,6 +447,35 @@ def _selected_asset_ids(scene_result: dict[str, Any]) -> list[str]:
         if isinstance(asset_id, str) and asset_id and asset_id not in selected:
             selected.append(asset_id)
     return selected
+
+
+def _selected_asset_preferences(scene_result: dict[str, Any]) -> dict[str, dict[str, str]]:
+    preferences: dict[str, dict[str, str]] = {}
+    for candidate in _list_of_mappings(scene_result.get("asset_candidates")):
+        asset_id = candidate.get("selected_asset_id")
+        if not isinstance(asset_id, str) or not asset_id:
+            continue
+        preference = preferences.setdefault(asset_id, {})
+        if _string(candidate.get("selected_asset_uid")):
+            preference["selected_asset_uid"] = str(candidate["selected_asset_uid"])
+        source_package_id = candidate.get("selected_source_package_id") or candidate.get(
+            "source_package_id"
+        )
+        if _string(source_package_id):
+            preference["selected_source_package_id"] = str(source_package_id)
+    for instance in _list_of_mappings(scene_result.get("instances")):
+        asset_id = instance.get("asset_id")
+        if not isinstance(asset_id, str) or not asset_id:
+            continue
+        preference = preferences.setdefault(asset_id, {})
+        if _string(instance.get("asset_uid")):
+            preference["selected_asset_uid"] = str(instance["asset_uid"])
+        source_package_id = instance.get("selected_source_package_id") or instance.get(
+            "source_package_id"
+        )
+        if _string(source_package_id):
+            preference["selected_source_package_id"] = str(source_package_id)
+    return preferences
 
 
 def _materialize_selected_asset(
@@ -753,8 +842,22 @@ def _write_task_contract(
         str(instance.get("id")): str(instance.get("asset_id"))
         for instance in _list_of_mappings(scene_result.get("instances"))
     }
+    instances_by_id = {
+        str(instance.get("id")): instance
+        for instance in _list_of_mappings(scene_result.get("instances"))
+        if _string(instance.get("id"))
+    }
     object_asset_id = instance_assets[bindings["object"]]
     container_asset_id = instance_assets[bindings["target_container"]]
+    target_container_semantics = {
+        "instance_id": bindings["target_container"],
+        "asset_id": container_asset_id,
+        "asset_uid": assets_by_id[container_asset_id].registry_entry.get("asset_uid"),
+        "role": "target_container",
+    }
+    target_container_semantics.update(
+        _task_contract_instance_metadata(instances_by_id[bindings["target_container"]])
+    )
     write_yaml_artifact(
         root / "task" / "task_contract.yaml",
         {
@@ -774,12 +877,7 @@ def _write_task_contract(
                     "asset_uid": assets_by_id[object_asset_id].registry_entry.get("asset_uid"),
                     "role": "manipulated_object",
                 },
-                "target_container": {
-                    "instance_id": bindings["target_container"],
-                    "asset_id": container_asset_id,
-                    "asset_uid": assets_by_id[container_asset_id].registry_entry.get("asset_uid"),
-                    "role": "target_container",
-                },
+                "target_container": target_container_semantics,
             },
             "success_predicate": {
                 "metric_id": "object_in_container",
@@ -825,6 +923,14 @@ def _write_task_contract(
             ),
         },
     )
+
+
+def _task_contract_instance_metadata(instance: dict[str, Any]) -> dict[str, str]:
+    return {
+        field: str(instance[field])
+        for field in ("semantic_label", "source_uid", "fixture_kind")
+        if _string(instance.get(field))
+    }
 
 
 def _write_validation_report(root: Path) -> None:

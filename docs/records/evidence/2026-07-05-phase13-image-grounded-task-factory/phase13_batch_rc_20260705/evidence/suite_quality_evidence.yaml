@@ -1,0 +1,38 @@
+schema_version: suite-quality-evidence/v0.1
+suite_id: phase13_image_grounded_existing_asset_batch_rc_20260705
+overall_status: passed
+coverage:
+  request_count: 3
+  formal_package_ready_count: 3
+  task_families:
+    object_in_container: 3
+  task_semantics:
+    apple_to_bowl: 2
+    remote_to_holder: 1
+  splits:
+    dev: 2
+    test: 1
+difficulty:
+  easy: 2
+  medium: 1
+leakage:
+  duplicate_request_rate: 0.0
+  duplicate_request_ids: []
+  split_leakage_package_ids: []
+  known_limitations:
+  - apple_to_bowl appears twice as original and retake request; this proves request-level
+    batch readiness, not broad task taxonomy coverage.
+assets:
+  license_completeness: 1.0
+  checksum_completeness: 1.0
+blocked_probe_notes:
+- request_id: tabletop_photo_goal_soap_to_dish
+  status: blocked_outside_passing_batch
+  evidence: blocked_probes/phase13_tabletop_photo_goal_soap_to_dish/handoff/asset_intake_blockers.yaml
+  reason: selected official_ebench_scene soap entry fails static material/texture
+    closure with O.mdl and missing texture blockers
+  recommended_owner: ConvertAsset/Phase12 registry closure before inclusion in a passing
+    Phase13.9 batch
+quality_findings: []
+claim_boundary: Suite quality evidence only; it does not claim broad benchmark coverage
+  or leaderboard comparability.
