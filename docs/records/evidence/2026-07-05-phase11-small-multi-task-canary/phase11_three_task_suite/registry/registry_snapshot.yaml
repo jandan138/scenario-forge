@@ -106,8 +106,8 @@ asset_registry:
     content_sha256: sha256:3cea327ec9c4d602f8400f8bbfe555742bc77743070a8f2636d92e651c4fd828
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/apple/ready/5948de6770a5491ea158cd9e921ebce9/5948de6770a5491ea158cd9e921ebce9.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_apple
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
@@ -125,8 +125,8 @@ asset_registry:
     content_sha256: sha256:28025950c6163ab1b26ffdd37f6cd4ab4f177a6eb6cc55c3832c2eec307e3d28
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/bowl/ready/307689f1c6884e1bb85bb20f00fef294/307689f1c6884e1bb85bb20f00fef294.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_bowl
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
@@ -144,8 +144,8 @@ asset_registry:
     content_sha256: sha256:261fb6ea8ee03dcb1472f7594333b9bc52b7d2a906a73aa7f52fd48b65b19ae9
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/remote_control/ready/remote0/remote0.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml#asset_id=official_ebench_remote_control
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_remote_to_holder_canary
@@ -163,8 +163,8 @@ asset_registry:
     content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_robot
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
@@ -182,8 +182,8 @@ asset_registry:
     content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml#asset_id=official_ebench_robot
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_soap_to_dish_canary
@@ -201,8 +201,8 @@ asset_registry:
     content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml#asset_id=official_ebench_robot
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_remote_to_holder_canary
@@ -220,8 +220,8 @@ asset_registry:
     content_sha256: sha256:45bde7851f394d8a919904bb1125b6a75e4cb50d8903632d858de31afc22f0c2
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task5/scene.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml#asset_id=official_ebench_scene
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_remote_to_holder_canary
@@ -239,8 +239,8 @@ asset_registry:
     content_sha256: sha256:56d11834ef12d47b66ac1c0114b328893f80a9ae70dd82d1e1f44102f01079a0
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task4/scene.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml#asset_id=official_ebench_scene
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_apple_to_bowl_canary
@@ -277,8 +277,8 @@ asset_registry:
     content_sha256: sha256:c147837fe9bdeba628c72efa33e1f152ec3b65f8f1b2671318c8f7298b73aae5
     license: research-use
     source_kind: official_ebench_asset
-    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/soap/ready/soap0/soap0.usd
-    source_uri_policy: source_uri_retained
+    source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml#asset_id=official_ebench_soap
+    source_uri_policy: local_filesystem_source_uri_redacted
     resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
     provenance:
       source_package_id: ebench_soap_to_dish_canary
@@ -303,5 +303,5 @@ registry_query_contract:
     required_fields:
     - package_id
     returns: retained_gate_refs
-snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+snapshot_digest: sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
 immutability: content_addressed_metadata_snapshot

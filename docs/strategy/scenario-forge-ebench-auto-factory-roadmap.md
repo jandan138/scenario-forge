@@ -5412,13 +5412,16 @@ Authoritative current index:
 
 Registry snapshot:
   docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml
-  snapshot_digest=sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+  snapshot_digest=sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
 ```
 
 这次实现刻意处理了一个真实证据问题：suite manifest 里的 runtime package
 path 可以是 `/tmp`，但 public/reproducible registry 不能引用 `/tmp`。Phase 12
 builder 会优先使用 retained evidence 中的稳定 artifact refs，并根据当前通过 gate
 文件名中的 `nomdl_relink`、`contactfixed` 等 variant hint 选择最终通过版本。
+收尾固化时进一步收紧：public registry、snapshot、viewer 和 handoff 输出不暴露
+本机绝对 `source_uri`，包括 `/tmp/...`、`/cpfs/...` 和 `file://...`；这些来源会被
+替换为指向 retained asset manifest 的 `retained-artifact://...` 引用。
 
 ### 36.2 产出
 

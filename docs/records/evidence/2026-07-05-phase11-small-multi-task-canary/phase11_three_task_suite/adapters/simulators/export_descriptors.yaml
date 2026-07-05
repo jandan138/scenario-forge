@@ -1,6 +1,6 @@
 schema_version: multi-simulator-export-descriptors/v0.1
 suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
-snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+snapshot_digest: sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
 descriptors:
 - simulator: isaacsim
   descriptor_version: v0.1

@@ -48,7 +48,7 @@ evidence/phase12_6_public_release_policy_closure_gate.yaml
 Snapshot digest:
 
 ```text
-sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+sha256:7dbf22b2ea435cb6c2eba19ee58d5c9aaebf728bea9a303a359439d2e0132007
 ```
 
 ## Boundary
@@ -60,3 +60,12 @@ reimplement ConvertAsset material/MDL/mesh conversion.
 The builder rejects mutable `/tmp` public snapshot refs and prefers retained evidence
 artifacts. For final-pass variants it uses current gate filenames such as
 `nomdl_relink` and `contactfixed` as artifact selection hints.
+
+2026-07-05 closure hardening:
+
+- Public registry, snapshot, viewer, and handoff outputs no longer expose local
+  filesystem `source_uri` values such as `/tmp/...`, `/cpfs/...`, or `file://...`.
+  They are replaced with `retained-artifact://...` references back to the retained
+  asset manifest.
+- The retained three-task Phase 12 suite was regenerated after this hardening and
+  remains `overall_status=phase13_allowed` with 12.0-12.6 passed.

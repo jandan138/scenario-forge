@@ -26,3 +26,5 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 ## Records
 
 - [2026-07-03 Bootstrap Decisions](records/2026-07-03-bootstrap-decisions.md)
+- [2026-07-04 Phase 10.x EOS Environment and Gates](records/2026-07-04-phase10x-eos-environment-and-gates.md)
+- [2026-07-05 Phase 12 Registry / Viewer / Handoff / Policy Evidence](records/2026-07-05-phase12-registry-viewer-handoff-policy.md)

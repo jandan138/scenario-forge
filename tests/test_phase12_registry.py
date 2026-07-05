@@ -228,6 +228,72 @@ def test_suite_phase12_prefers_retained_evidence_over_external_tmp_package_root(
     )
 
 
+def test_suite_phase12_redacts_absolute_local_source_uris_from_public_snapshot(
+    tmp_path: Path,
+) -> None:
+    suite_dir, gate_index_path = write_phase12_ready_suite(tmp_path)
+    package_id = "phase12_pkg_1"
+    external_package_root = tmp_path / "external_runtime_tmp_package"
+    scaffold_starter_package(external_package_root)
+    rewrite_package_id(external_package_root, package_id)
+    suite_manifest_path = suite_dir / "suite_manifest.yaml"
+    suite_manifest = load_yaml(suite_manifest_path)
+    suite_manifest["packages"][1]["path"] = str(external_package_root)
+    write_yaml(suite_manifest_path, suite_manifest)
+
+    retained_dir = suite_dir / "packages" / package_id / "evidence"
+    original_package_root = suite_dir / "packages" / package_id
+    shutil.copyfile(
+        original_package_root / "manifest.yaml",
+        retained_dir / f"{package_id}_package_manifest.yaml",
+    )
+    shutil.copyfile(
+        original_package_root / "assets" / "asset_manifest.yaml",
+        retained_dir / f"{package_id}_asset_manifest.yaml",
+    )
+    shutil.copyfile(
+        original_package_root / "locks" / "asset_lock.yaml",
+        retained_dir / f"{package_id}_asset_lock.yaml",
+    )
+    retained_asset_manifest_path = retained_dir / f"{package_id}_asset_manifest.yaml"
+    retained_asset_manifest = load_yaml(retained_asset_manifest_path)
+    retained_asset_manifest["assets"][0]["source_uri"] = (
+        "/cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/object.usd"
+    )
+    write_yaml(retained_asset_manifest_path, retained_asset_manifest)
+
+    code = main(
+        [
+            "suite",
+            "phase12",
+            "--suite",
+            str(suite_dir),
+            "--gate-index",
+            str(gate_index_path),
+            "--strict",
+        ]
+    )
+
+    asset_registry_text = (suite_dir / "registry" / "asset_registry.yaml").read_text(
+        encoding="utf-8"
+    )
+    registry_snapshot_text = (suite_dir / "registry" / "registry_snapshot.yaml").read_text(
+        encoding="utf-8"
+    )
+    asset_registry = load_yaml(suite_dir / "registry" / "asset_registry.yaml")
+    package_assets = [
+        asset for asset in asset_registry["assets"] if asset["source_package_id"] == package_id
+    ]
+    assert code == 0
+    assert "/cpfs/" not in asset_registry_text
+    assert "/cpfs/" not in registry_snapshot_text
+    assert any(
+        asset["source_uri"].startswith("retained-artifact://")
+        and asset["source_uri_policy"] == "local_filesystem_source_uri_redacted"
+        for asset in package_assets
+    )
+
+
 def test_suite_phase12_prefers_retained_artifact_variant_named_by_current_gate(
     tmp_path: Path,
 ) -> None:

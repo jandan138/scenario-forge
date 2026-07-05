@@ -1118,11 +1118,27 @@ def _public_source_uri(
             f"retained-artifact://{retained_ref}#asset_id={asset_id}",
             "mutable_local_source_uri_redacted",
         )
+    if _is_local_filesystem_uri(raw_source_uri):
+        retained_ref = asset_manifest_ref or "unknown_asset_manifest"
+        return (
+            f"retained-artifact://{retained_ref}#asset_id={asset_id}",
+            "local_filesystem_source_uri_redacted",
+        )
     return raw_source_uri, "source_uri_retained"
 
 
 def _is_mutable_tmp_uri(value: str) -> bool:
     return value.startswith("/tmp/") or value.startswith("file:///tmp/")
+
+
+def _is_local_filesystem_uri(value: str) -> bool:
+    if not value:
+        return False
+    if value.startswith("file://"):
+        return True
+    if "://" in value or value.startswith(("omniverse:", "mdl:")):
+        return False
+    return Path(value).is_absolute()
 
 
 def _all_blockers(gate_docs: dict[str, dict[str, Any]]) -> list[str]:
