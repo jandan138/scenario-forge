@@ -5603,6 +5603,29 @@ Phase 13 是 **Image-Grounded Existing-Asset MVP**。图片提供语义和空间
 一句话提供任务意图；Scenario Forge 负责把外部 perception/planning 结果导入为
 owned contracts，并编译成可验证 package。
 
+2026-07-05 implementation status:
+
+```text
+Implemented in Scenario Forge:
+- image-task-request/v0.1 and image-to-scene-result/v0.1 contract schemas.
+- `scenario-forge image-task compile` static candidate compiler.
+- Phase 12 registry-only asset selection, retained asset materialization,
+  asset_manifest, asset_lock, scene/instances, scene/main.usda, task contract,
+  metrics, provenance, EBench static export, and Phase 13 gate evidence.
+- Fail-closed blocked evidence and asset-intake handoff when registry assets,
+  confidence, material closure, source materialization, license, or bindings are
+  insufficient.
+
+Current local status for a successful compile:
+  overall_status=phase13_static_candidate_ready
+  formal_package_ready=false
+
+Remaining external gates before calling it a formal EBench-compatible package:
+- 13.6 engine-native overview render + render-visual-reviewer PASS.
+- 13.8 EOS execution evidence + completed episode + simulator-state predicate
+  true + post-execution visual PASS + release policy pass.
+```
+
 ### 37.2 边界
 
 应该在 Scenario Forge core / package layers 内：

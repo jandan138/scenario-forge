@@ -17,6 +17,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [USD Scene Compiler Design](design/usd-scene-compiler.md)
 - [EBench Adapter Design](design/ebench-adapter.md)
 - [Workflow, Layout, Real2Sim, Suite Factory Design](design/workflow-layout-suite-factory.md)
+- [Image-Grounded Task Factory Design](design/image-grounded-task-factory.md)
 
 ## Operations
 
@@ -28,3 +29,4 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-03 Bootstrap Decisions](records/2026-07-03-bootstrap-decisions.md)
 - [2026-07-04 Phase 10.x EOS Environment and Gates](records/2026-07-04-phase10x-eos-environment-and-gates.md)
 - [2026-07-05 Phase 12 Registry / Viewer / Handoff / Policy Evidence](records/2026-07-05-phase12-registry-viewer-handoff-policy.md)
+- [2026-07-05 Phase 13 Image-Grounded Existing-Asset Factory Evidence](records/2026-07-05-phase13-image-grounded-task-factory.md)

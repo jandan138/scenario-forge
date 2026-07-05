@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "image-to-scene-result-v0.1.schema.json",
+  "title": "Image To Scene Result v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "result_id",
+    "producer",
+    "source",
+    "goal",
+    "scene",
+    "detections",
+    "asset_requirements",
+    "asset_candidates",
+    "instances",
+    "task_bindings",
+    "evidence"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"const": "image-to-scene-result/v0.1"},
+    "result_id": {"type": "string", "minLength": 1},
+    "producer": {
+      "type": "object",
+      "required": ["name", "version"],
+      "additionalProperties": true,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["image_uri", "image_sha256"],
+      "additionalProperties": true,
+      "properties": {
+        "image_uri": {"type": "string", "minLength": 1},
+        "image_sha256": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"}
+      }
+    },
+    "goal": {
+      "type": "object",
+      "required": ["raw_text", "normalized_task_family"],
+      "additionalProperties": true,
+      "properties": {
+        "raw_text": {"type": "string", "minLength": 1},
+        "normalized_task_family": {"const": "object_in_container"}
+      }
+    },
+    "scene": {
+      "type": "object",
+      "required": ["coordinate_system", "units"],
+      "additionalProperties": true,
+      "properties": {
+        "coordinate_system": {"type": "string", "minLength": 1},
+        "units": {"const": "meters"}
+      }
+    },
+    "detections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["detection_id", "label", "bbox_xywh", "confidence"],
+        "additionalProperties": true,
+        "properties": {
+          "detection_id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "bbox_xywh": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {"type": "number"}
+          },
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "asset_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role", "detection_id", "asset_type"],
+        "additionalProperties": true
+      }
+    },
+    "asset_candidates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "detection_id",
+          "selected_asset_id",
+          "score",
+          "matching_reason",
+          "rejected_alternatives"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "selected_asset_id": {"type": "string", "minLength": 1},
+          "score": {"type": "number", "minimum": 0, "maximum": 1},
+          "matching_reason": {"type": "string", "minLength": 1},
+          "rejected_alternatives": {"type": "array"}
+        }
+      }
+    },
+    "instances": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "asset_id", "pose"],
+        "additionalProperties": true,
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "asset_id": {"type": "string", "minLength": 1},
+          "pose": {
+            "type": "object",
+            "required": ["xyz", "wxyz"],
+            "additionalProperties": true,
+            "properties": {
+              "xyz": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {"type": "number"}
+              },
+              "wxyz": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "task_bindings": {
+      "type": "object",
+      "required": ["object", "container"],
+      "additionalProperties": true,
+      "properties": {
+        "object": {"type": "string", "minLength": 1},
+        "container": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["confidence_summary", "blockers"],
+      "additionalProperties": true,
+      "properties": {
+        "confidence_summary": {"type": "string", "minLength": 1},
+        "blockers": {"type": "array"}
+      }
+    }
+  }
+}

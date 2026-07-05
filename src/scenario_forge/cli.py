@@ -44,6 +44,10 @@ from scenario_forge.generation.ebench_canary.apple_to_bowl import generate_apple
 from scenario_forge.generation.ebench_canary.single_object_fixture import (
     generate_single_object_fixture_canary,
 )
+from scenario_forge.generation.image_grounded import (
+    Phase13ImageTaskError,
+    generate_image_grounded_task_package,
+)
 from scenario_forge.package import PackageError, load_package_manifest, validate_package
 from scenario_forge.scaffold import scaffold_starter_package
 from scenario_forge.scene.usd_compiler import USDSceneCompilerError, compile_usd_scene
@@ -246,6 +250,40 @@ def build_parser() -> argparse.ArgumentParser:
     real2sim_cousins_parser.add_argument("--package", required=True, help="Base package")
     real2sim_cousins_parser.add_argument("--plan", required=True, help="cousin-plan/v0.1 YAML")
     real2sim_cousins_parser.add_argument("--out", required=True, help="Output suite directory")
+
+    image_task_parser = subparsers.add_parser(
+        "image-task",
+        help="Phase 13 image + goal existing-asset task package factory commands",
+    )
+    image_task_subparsers = image_task_parser.add_subparsers(
+        dest="image_task_command",
+        required=True,
+    )
+    image_task_compile_parser = image_task_subparsers.add_parser(
+        "compile",
+        help="Compile image-task-request and image-to-scene-result contracts into a package candidate",
+    )
+    image_task_compile_parser.add_argument(
+        "--request",
+        required=True,
+        help="image-task-request/v0.1 YAML",
+    )
+    image_task_compile_parser.add_argument(
+        "--scene-result",
+        required=True,
+        help="image-to-scene-result/v0.1 YAML emitted by an external grounding adapter",
+    )
+    image_task_compile_parser.add_argument(
+        "--registry-snapshot",
+        required=True,
+        help="Phase 12 registry_snapshot.yaml",
+    )
+    image_task_compile_parser.add_argument("--out", required=True, help="Output package directory")
+    image_task_compile_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless local Phase 13 static candidate gates pass",
+    )
 
     suite_parser = subparsers.add_parser("suite", help="Benchmark suite generation commands")
     suite_subparsers = suite_parser.add_subparsers(dest="suite_command", required=True)
@@ -606,6 +644,27 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Real2Sim cousin suite written: {result.suite_root}")
         for package in result.packages:
             print(package)
+        return 0
+
+    if args.command == "image-task" and args.image_task_command == "compile":
+        try:
+            result = generate_image_grounded_task_package(
+                request_path=Path(args.request),
+                scene_result_path=Path(args.scene_result),
+                registry_snapshot_path=Path(args.registry_snapshot),
+                package_root=Path(args.out),
+            )
+        except Phase13ImageTaskError as exc:
+            print(exc)
+            return 1
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 13 image-task package candidate: {result.package_root}")
+        print(f"Phase 13 status: {result.status}")
+        print(f"Phase 13 current gate: {result.evidence_path}")
+        if args.strict and result.status == "blocked":
+            print("Phase 13 strict local static gate did not pass")
+            return 1
         return 0
 
     if args.command == "suite" and args.suite_command == "generate":

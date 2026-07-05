@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "image-task-request-v0.1.schema.json",
+  "title": "Image Task Request v0.1",
+  "type": "object",
+  "required": ["schema_version", "request_id", "source", "goal", "constraints"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"const": "image-task-request/v0.1"},
+    "request_id": {"type": "string", "minLength": 1},
+    "source": {
+      "type": "object",
+      "required": ["image_uri", "image_sha256", "rights_status"],
+      "additionalProperties": true,
+      "properties": {
+        "image_uri": {"type": "string", "minLength": 1},
+        "image_sha256": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"},
+        "rights_status": {"type": "string", "minLength": 1}
+      }
+    },
+    "goal": {
+      "type": "object",
+      "required": ["one_sentence_goal", "domain", "robot_profile", "target_export"],
+      "additionalProperties": true,
+      "properties": {
+        "one_sentence_goal": {"type": "string", "minLength": 1},
+        "domain": {"const": "tabletop_manipulation"},
+        "robot_profile": {"type": "string", "minLength": 1},
+        "target_export": {"const": "ebench"}
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "required": ["package_mode", "asset_source", "allow_new_asset_reconstruction"],
+      "additionalProperties": true,
+      "properties": {
+        "package_mode": {"const": "fat"},
+        "asset_source": {"const": "phase12_registry_snapshot"},
+        "allow_new_asset_reconstruction": {"const": false}
+      }
+    }
+  }
+}
