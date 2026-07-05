@@ -34,6 +34,14 @@ PYTHONPATH=src python -m scenario_forge.cli image-task execution-predicate \
   --strict
 ```
 
+```bash
+PYTHONPATH=src python -m scenario_forge.cli image-task batch-quality \
+  --suite /tmp/scenario-forge-phase13-batch-suite \
+  --quality-report /tmp/scenario-forge-phase13-batch-suite/evidence/phase13_batch_factory_quality_report.yaml \
+  --suite-quality-evidence /tmp/scenario-forge-phase13-batch-suite/evidence/suite_quality_evidence.yaml \
+  --strict
+```
+
 The compiler ingests `image-task-request/v0.1` and
 `image-to-scene-result/v0.1`, selects only assets that exist in a Phase 12
 registry snapshot, materializes retained USD bundles into a fat v0.2 package,
@@ -185,12 +193,39 @@ package and writes a config-level blocked evidence record, but that lane states
 `no_scenario_forge_package_episode_runner_available_in_this_eos_lane`. Therefore
 13.8 is not passed for the real Phase 13 probe.
 
+## 13.9 Ingestion Status
+
+Scenario Forge now has the 13.9 batch factory quality gate ingestion path. It is
+suite-level and requires:
+
+```text
+suite_quality_evidence.yaml overall_status: passed
+phase13-batch-factory-quality-report/v0.1
+request_count >= 3
+formal-package-ready Phase 13 current gate index for every generated package
+failed_or_blocked_requests blockers + blocker_taxonomy for every failed/blocked request
+failure_rate and duplicate_request_rate within explicit/default thresholds
+```
+
+Passing 13.9 writes:
+
+```text
+evidence/phase13_9_batch_factory_quality_gate.yaml
+status: passed
+next_stage: phase13_batch_factory_ready
+```
+
+No real Phase 13 batch suite is passed yet because the real apple/bowl probe is
+still blocked at 13.8 and there are not yet three formal-ready generated
+packages.
+
 ## Tests
 
 Focused regression:
 
 ```bash
 PYTHONPATH=src python -m pytest \
+  tests/test_phase13_batch_quality.py \
   tests/test_materials.py \
   tests/test_phase12_registry.py \
   tests/test_phase13_image_task_factory.py \
@@ -201,7 +236,7 @@ PYTHONPATH=src python -m pytest \
 Expected result:
 
 ```text
-23 passed
+24 passed
 ```
 
 Full project verification remains `make check`.

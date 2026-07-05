@@ -37,6 +37,7 @@ from scenario_forge.evaluation.phase11_gates import (
     generate_phase11_visual_review_gate,
 )
 from scenario_forge.evaluation.phase13_gates import (
+    generate_phase13_batch_factory_quality_gate,
     generate_phase13_execution_predicate_canary_gate,
     generate_phase13_factory_overview_visual_gate,
 )
@@ -317,6 +318,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--strict",
         action="store_true",
         help="Return non-zero unless the Phase 13.8 execution/predicate canary gate passes",
+    )
+    image_task_batch_quality_parser = image_task_subparsers.add_parser(
+        "batch-quality",
+        help="Generate Phase 13.9 batch factory quality gate",
+    )
+    image_task_batch_quality_parser.add_argument("--suite", required=True, help="Suite directory")
+    image_task_batch_quality_parser.add_argument(
+        "--quality-report",
+        required=True,
+        help="phase13-batch-factory-quality-report/v0.1 YAML",
+    )
+    image_task_batch_quality_parser.add_argument(
+        "--suite-quality-evidence",
+        help="suite-quality-evidence/v0.1 YAML; defaults to suite/evidence/suite_quality_evidence.yaml",
+    )
+    image_task_batch_quality_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 13.9 batch factory quality gate passes",
     )
 
     suite_parser = subparsers.add_parser("suite", help="Benchmark suite generation commands")
@@ -728,6 +748,21 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Phase 13 current gate: {result.current_index_path}")
         if args.strict and result.status != "passed":
             print("Phase 13.8 execution/predicate strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "image-task" and args.image_task_command == "batch-quality":
+        result = generate_phase13_batch_factory_quality_gate(
+            Path(args.suite),
+            Path(args.quality_report),
+            Path(args.suite_quality_evidence) if args.suite_quality_evidence else None,
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 13.9 batch factory quality gate written: {result.evidence_path}")
+        print(f"Phase 13.9 batch factory quality gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 13.9 batch factory quality strict gate did not pass")
             return 1
         return 0
 

@@ -5873,6 +5873,13 @@ release-ready package。
         coverage、failure rate、blocker taxonomy。
   gate: batch-factory-quality-gate/v0.1 requires machine-readable quality report
         and retained blockers for every failed/blocked request.
+  2026-07-05 Scenario Forge status: ingestion CLI implemented as
+        `image-task batch-quality`. It requires suite-quality evidence, at least
+        three requests, formal-package-ready Phase 13 current gate indices for
+        generated packages, and blocker taxonomy for every failed/blocked
+        request. The real Phase 13 batch gate remains pending because 13.8 is
+        not yet passed for the real apple/bowl package and no three-package
+        formal-ready batch exists.
 ```
 
 ### 37.6 防人工放行规则

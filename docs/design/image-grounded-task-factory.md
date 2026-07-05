@@ -32,6 +32,12 @@ scenario-forge image-task execution-predicate \
   --package ./phase13_candidate \
   --single-task-rc-gate ./phase13_candidate/evidence/phase11_single_task_release_candidate_gate.yaml \
   --strict
+
+scenario-forge image-task batch-quality \
+  --suite ./phase13_batch_suite \
+  --quality-report ./phase13_batch_suite/evidence/phase13_batch_factory_quality_report.yaml \
+  --suite-quality-evidence ./phase13_batch_suite/evidence/suite_quality_evidence.yaml \
+  --strict
 ```
 
 Inputs:
@@ -99,6 +105,13 @@ success predicate, post-execution visual review, and single-task release
 candidate. Passing 13.8 updates the current gate index to
 `overall_status=phase13_formal_package_ready`, `formal_package_ready=true`, and
 `next_required_gate=13.9`. Phase 13 batch quality remains a separate 13.9 gate.
+
+The 13.9 ingestion command is suite-level. It requires `suite_quality_evidence`
+with `overall_status=passed`, a Phase 13 batch factory quality report, at least
+three requests, formal-package-ready current gate indices for generated
+packages, and blocker taxonomy for every failed or blocked request. It writes
+`evidence/phase13_9_batch_factory_quality_gate.yaml` and does not report model
+performance or leaderboard quality.
 
 If a selected registry asset has `material_closure.status != passed`, or if
 post-materialization audit finds missing MDL/texture dependencies, the compiler
