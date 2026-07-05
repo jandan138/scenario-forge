@@ -1,9 +1,25 @@
 from pathlib import Path
+import builtins
+import sys
 
 import yaml
 
 from scenario_forge.cli import main
 from scenario_forge.generation.ebench_canary.apple_to_bowl import generate_apple_to_bowl_canary
+
+
+def _block_pxr_imports(monkeypatch) -> None:
+    real_import = builtins.__import__
+    for module_name in tuple(sys.modules):
+        if module_name == "pxr" or module_name.startswith("pxr."):
+            monkeypatch.delitem(sys.modules, module_name, raising=False)
+
+    def blocked_import(name, *args, **kwargs):
+        if name == "pxr" or name.startswith("pxr."):
+            raise ModuleNotFoundError("No module named 'pxr'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", blocked_import)
 
 
 def _write_mesh_usda(path: Path, *, points: list[tuple[float, float, float]], prim_name: str) -> None:
@@ -210,6 +226,21 @@ def test_apple_to_bowl_canary_uses_official_tabletop_bbox_pose(tmp_path: Path) -
 
     scene = (package_dir / "scene/main.usda").read_text(encoding="utf-8")
     assert "xformOp:scale = (0.8, 0.8, 0.8)" in scene
+
+
+def test_apple_to_bowl_canary_uses_portable_bbox_fallback_without_pxr(
+    tmp_path: Path, monkeypatch
+) -> None:
+    _block_pxr_imports(monkeypatch)
+    source_manifest = _write_tiny_official_bbox_source_manifest(tmp_path)
+    package_dir = tmp_path / "out" / "ebench_apple_to_bowl_canary"
+
+    generate_apple_to_bowl_canary(source_manifest, package_dir)
+
+    instances = yaml.safe_load((package_dir / "scene/instances.yaml").read_text(encoding="utf-8"))
+    by_id = {instance["id"]: instance for instance in instances["instances"]}
+    assert by_id["apple_001"]["pose"]["xyz"] == [-0.35, -0.22, 0.046443]
+    assert by_id["bowl_001"]["pose"]["xyz"] == [-0.35, 0.24, 0.05037]
 
 
 def test_apple_to_bowl_canary_writes_phase1010_task_contract(tmp_path: Path) -> None:

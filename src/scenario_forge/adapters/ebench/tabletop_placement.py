@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from itertools import product
 from math import isfinite
 from pathlib import Path
+import re
 from typing import Callable, Iterable
 
 
@@ -21,6 +22,15 @@ OFFICIAL_OBJECT_TO_WORLD_ROTATION = (
     (0.0, 1.0, 0.0),
 )
 OFFICIAL_ADDITIONAL_HEIGHT_M = 0.01
+USD_MESH_WITH_POINTS_RE = re.compile(
+    r'def\s+Mesh\s+"(?P<name>[^"]+)".*?point3f\[\]\s+points\s*=\s*\[(?P<points>.*?)\]',
+    re.DOTALL,
+)
+USD_POINT_RE = re.compile(
+    r"\(\s*(?P<x>[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*,"
+    r"\s*(?P<y>[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*,"
+    r"\s*(?P<z>[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*\)"
+)
 
 
 @dataclass(frozen=True)
@@ -30,6 +40,21 @@ class OfficialTabletopPlacement:
     wxyz: tuple[float, float, float, float]
     scale_xyz: tuple[float, float, float]
     evidence: dict[str, object]
+
+
+@dataclass(frozen=True)
+class _PortableUsdPrim:
+    name: str
+    type_name: str
+
+    def GetName(self) -> str:
+        return self.name
+
+    def GetPath(self) -> str:
+        return f"/{self.name}"
+
+    def IsA(self, schema: object) -> bool:
+        return self.type_name == "Mesh" and getattr(schema, "__name__", "") == "Mesh"
 
 
 def derive_official_tabletop_placement(
@@ -102,7 +127,12 @@ def derive_official_tabletop_placement(
 
 
 def _is_mesh_prim(prim: object) -> bool:
-    from pxr import UsdGeom
+    if getattr(prim, "type_name", None) == "Mesh":
+        return True
+    try:
+        from pxr import UsdGeom
+    except ModuleNotFoundError:
+        return False
 
     return bool(prim.IsA(UsdGeom.Mesh))
 
@@ -112,7 +142,10 @@ def _combined_usd_bbox(
     *,
     include_prim: Callable[[object], bool],
 ) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
-    from pxr import Usd, UsdGeom
+    try:
+        from pxr import Usd, UsdGeom
+    except ModuleNotFoundError:
+        return _combined_portable_usda_bbox(path, include_prim=include_prim)
 
     stage = Usd.Stage.Open(str(path))
     if stage is None:
@@ -135,6 +168,35 @@ def _combined_usd_bbox(
         ):
             mins.append(low)
             maxes.append(high)
+    if not mins:
+        raise RuntimeError(f"No matching bbox prims found in USD stage: {path}")
+    return (
+        tuple(min(values[index] for values in mins) for index in range(3)),
+        tuple(max(values[index] for values in maxes) for index in range(3)),
+    )
+
+
+def _combined_portable_usda_bbox(
+    path: str | Path,
+    *,
+    include_prim: Callable[[object], bool],
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    usd_path = Path(path)
+    text = usd_path.read_text(encoding="utf-8", errors="ignore")
+    mins: list[tuple[float, float, float]] = []
+    maxes: list[tuple[float, float, float]] = []
+    for match in USD_MESH_WITH_POINTS_RE.finditer(text):
+        prim = _PortableUsdPrim(name=match.group("name"), type_name="Mesh")
+        if not include_prim(prim):
+            continue
+        points = [
+            (float(point.group("x")), float(point.group("y")), float(point.group("z")))
+            for point in USD_POINT_RE.finditer(match.group("points"))
+        ]
+        if not points:
+            continue
+        mins.append(tuple(min(point[index] for point in points) for index in range(3)))
+        maxes.append(tuple(max(point[index] for point in points) for index in range(3)))
     if not mins:
         raise RuntimeError(f"No matching bbox prims found in USD stage: {path}")
     return (

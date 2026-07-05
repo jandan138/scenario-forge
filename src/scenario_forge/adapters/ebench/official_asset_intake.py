@@ -14,6 +14,7 @@ from scenario_forge.assets.checksum import compute_sha256
 OFFICIAL_ASSET_SOURCES_SCHEMA_VERSION = "ebench-official-asset-sources/v0.1"
 OFFICIAL_ASSET_INTAKE_RESOLVER = "scenario-forge-ebench-official-asset-intake/v0.1"
 MDL_TEXTURE_2D_RE = re.compile(r"texture_2d\(\s*\"([^\"]+)\"")
+USD_ASSET_REF_RE = re.compile(r"@([^@\n]+)@")
 
 
 @dataclass(frozen=True)
@@ -204,18 +205,33 @@ def _existing_usd_asset_dependencies(source_usd: Path) -> tuple[Path, ...]:
     try:
         from pxr import UsdUtils
     except Exception:
-        return ()
+        return _portable_usda_asset_dependencies(source_usd)
 
     try:
         _layers, assets, _unresolved = UsdUtils.ComputeAllDependencies(str(source_usd))
     except Exception:
-        return ()
+        return _portable_usda_asset_dependencies(source_usd)
 
     dependencies: list[Path] = []
     for raw_asset in assets:
         path = Path(str(raw_asset))
         if path.exists():
             dependencies.append(path.resolve())
+    return tuple(dependencies)
+
+
+def _portable_usda_asset_dependencies(source_usd: Path) -> tuple[Path, ...]:
+    text = source_usd.read_text(encoding="utf-8", errors="ignore")
+    dependencies: list[Path] = []
+    seen: set[Path] = set()
+    for raw_ref in USD_ASSET_REF_RE.findall(text):
+        if _is_external_usd_asset_reference(raw_ref):
+            continue
+        dependency = (source_usd.parent / raw_ref).resolve()
+        if not dependency.exists() or dependency in seen:
+            continue
+        dependencies.append(dependency)
+        seen.add(dependency)
     return tuple(dependencies)
 
 
@@ -236,3 +252,7 @@ def _display_path(path: Path, root: Path) -> str:
 
 def _is_external_texture_reference(texture_ref: str) -> bool:
     return "://" in texture_ref or texture_ref.startswith(("/", "omniverse:", "mdl:"))
+
+
+def _is_external_usd_asset_reference(asset_ref: str) -> bool:
+    return "://" in asset_ref or asset_ref.startswith(("/", "omniverse:", "mdl:"))

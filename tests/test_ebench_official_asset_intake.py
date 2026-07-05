@@ -1,4 +1,6 @@
 from pathlib import Path
+import builtins
+import sys
 
 import pytest
 import yaml
@@ -8,6 +10,20 @@ from scenario_forge.adapters.ebench.official_asset_intake import (
     load_official_asset_sources,
     materialize_official_asset_bundle,
 )
+
+
+def _block_pxr_imports(monkeypatch) -> None:
+    real_import = builtins.__import__
+    for module_name in tuple(sys.modules):
+        if module_name == "pxr" or module_name.startswith("pxr."):
+            monkeypatch.delitem(sys.modules, module_name, raising=False)
+
+    def blocked_import(name, *args, **kwargs):
+        if name == "pxr" or name.startswith("pxr."):
+            raise ModuleNotFoundError("No module named 'pxr'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", blocked_import)
 
 
 def test_loads_apple_to_bowl_official_asset_sources(tmp_path: Path) -> None:
@@ -122,6 +138,56 @@ def test_materializes_sibling_sidecar_dependencies_under_asset_root(tmp_path: Pa
                 "(",
                 '    defaultPrim = "World"',
                 ")",
+                'def Xform "World"',
+                "{",
+                '    asset inputs:file = @../../63f5007c-eae0-4718-b760-df6c25e0e4ae/SubUSDs/textures/63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png@',
+                "}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    target_root = tmp_path / "package"
+
+    result = materialize_official_asset_bundle(
+        source_path=source_usd,
+        package_root=target_root,
+        asset_id="official_ebench_remote_control",
+        role="manipulated_object",
+        license="research-use",
+    )
+
+    assert result.canonical_usd == "assets/official_ebench_remote_control/ready/remote0/remote0.usda"
+    assert (target_root / result.canonical_usd).exists()
+    assert (
+        target_root
+        / "assets"
+        / "official_ebench_remote_control"
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae"
+        / "SubUSDs"
+        / "textures"
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png"
+    ).exists()
+
+
+def test_materializes_sibling_sidecar_dependencies_without_pxr(tmp_path: Path, monkeypatch) -> None:
+    _block_pxr_imports(monkeypatch)
+    collection_root = tmp_path / "remote_control"
+    source_bundle = collection_root / "ready" / "remote0"
+    source_bundle.mkdir(parents=True)
+    dependency_texture = (
+        collection_root
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae"
+        / "SubUSDs"
+        / "textures"
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png"
+    )
+    dependency_texture.parent.mkdir(parents=True)
+    dependency_texture.write_bytes(b"remote-texture")
+    source_usd = source_bundle / "remote0.usda"
+    source_usd.write_text(
+        "\n".join(
+            [
+                "#usda 1.0",
                 'def Xform "World"',
                 "{",
                 '    asset inputs:file = @../../63f5007c-eae0-4718-b760-df6c25e0e4ae/SubUSDs/textures/63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png@',
