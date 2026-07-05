@@ -1,9 +1,10 @@
 # Image-Grounded Task Factory Design
 
 Status: Phase 13 static candidate compiler implemented; real official EBench
-apple/bowl selection reaches static candidate readiness after retained runtime
-evidence classifies `gltf/pbr.mdl` as an approved Isaac Sim MDL dependency.
-Formal package readiness still waits on 13.6 render review and 13.8 execution.
+apple/bowl selection reaches 13.6 overview visual readiness after retained
+runtime evidence classifies `gltf/pbr.mdl` as an approved Isaac Sim MDL
+dependency. Formal package readiness still waits on 13.8 EOS execution and
+predicate evidence.
 
 The image-grounded task factory turns a user-provided tabletop image request and
 an external image-to-scene result into a Scenario Forge package candidate. It is
@@ -12,7 +13,7 @@ converter, simulator runner, or benchmark reporter.
 
 ## Scope
 
-Implemented command:
+Implemented commands:
 
 ```bash
 scenario-forge image-task compile \
@@ -20,6 +21,16 @@ scenario-forge image-task compile \
   --scene-result image_to_scene_result.yaml \
   --registry-snapshot registry_snapshot.yaml \
   --out ./phase13_candidate \
+  --strict
+
+scenario-forge image-task overview-visual \
+  --package ./phase13_candidate \
+  --visual-review ./phase13_candidate/evidence/phase13_tabletop_overview_visual_review.yaml \
+  --strict
+
+scenario-forge image-task execution-predicate \
+  --package ./phase13_candidate \
+  --single-task-rc-gate ./phase13_candidate/evidence/phase11_single_task_release_candidate_gate.yaml \
   --strict
 ```
 
@@ -74,9 +85,20 @@ The compiler writes Phase 13 gate evidence for:
 Passing 13.0-13.5 and 13.7 produces
 `overall_status=phase13_static_candidate_ready`. The package is still not a
 formal EBench-compatible task package because 13.6 and 13.8 are external gates.
-They require an engine-native overview render, render-visual-reviewer PASS, EOS
-execution evidence, completed episode, simulator-state predicate success, and
-post-execution visual PASS.
+The 13.6 ingestion command requires a render-visual-reviewer PASS, an existing
+render image, render metadata with `render_status=pass`, and
+`material_runtime_preflight.status=pass`. Passing 13.6 updates the current gate
+index to `overall_status=phase13_visual_candidate_ready`,
+`overview_visual_ready=true`, and `next_required_gate=13.8`. Formal readiness
+still requires EOS execution evidence, completed episode, simulator-state
+predicate success, and post-execution visual PASS.
+
+The 13.8 ingestion command does not run a simulator. It only aggregates retained
+Phase 11 gates for the same generated package: task execution, executed episode,
+success predicate, post-execution visual review, and single-task release
+candidate. Passing 13.8 updates the current gate index to
+`overall_status=phase13_formal_package_ready`, `formal_package_ready=true`, and
+`next_required_gate=13.9`. Phase 13 batch quality remains a separate 13.9 gate.
 
 If a selected registry asset has `material_closure.status != passed`, or if
 post-materialization audit finds missing MDL/texture dependencies, the compiler

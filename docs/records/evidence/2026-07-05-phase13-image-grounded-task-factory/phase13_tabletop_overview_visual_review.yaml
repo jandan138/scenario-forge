@@ -1,0 +1,21 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+verdict: PASS
+image_path: phase13_tabletop_overview.png
+render_metadata_path: phase13_tabletop_overview_render_metadata.json
+visible_evidence:
+- target: apple
+  status: visible
+  note: Small red/yellow apple is unobstructed and identifiable below-left of the bowl.
+- target: bowl
+  status: visible
+  note: Blue/white patterned bowl is unobstructed and identifiable above the apple.
+- target: material_quality
+  status: visible
+  note: No fallback red/black material, blank frame, clipping, or severe lighting artifact is visible.
+- target: framing
+  status: visible
+  note: Wide overview has substantial empty space but supports the apple-into-bowl visual canary.
+retake_recommendation: none_required_closer_overview_would_improve_readability
+confidence: high

@@ -290,6 +290,193 @@ def test_image_task_compile_allows_registry_approved_runtime_mdl_dependency(
     assert apple_material["approved_runtime_mdl_dependencies"][0]["module"] == "gltf/pbr.mdl"
 
 
+def test_image_task_overview_visual_gate_promotes_candidate_after_visual_review_pass(
+    tmp_path: Path,
+) -> None:
+    registry_snapshot = _write_registry_snapshot(
+        tmp_path,
+        (
+            _AssetSeed("official_ebench_apple", "manipulated_object", "apple", ("fruit", "pickable")),
+            _AssetSeed("official_ebench_bowl", "target_container", "bowl", ("container", "rigid")),
+        ),
+    )
+    request = _write_image_task_request(tmp_path)
+    scene_result = _write_image_scene_result(tmp_path)
+    package_dir = tmp_path / "out" / "phase13_visual"
+    compile_code = main(
+        [
+            "image-task",
+            "compile",
+            "--request",
+            str(request),
+            "--scene-result",
+            str(scene_result),
+            "--registry-snapshot",
+            str(registry_snapshot),
+            "--out",
+            str(package_dir),
+            "--strict",
+        ]
+    )
+    review_path = _write_phase13_visual_review(package_dir)
+
+    visual_code = main(
+        [
+            "image-task",
+            "overview-visual",
+            "--package",
+            str(package_dir),
+            "--visual-review",
+            str(review_path),
+            "--strict",
+        ]
+    )
+
+    assert compile_code == 0
+    assert visual_code == 0
+    visual_gate = _load_yaml(package_dir / "evidence/phase13_6_factory_overview_visual_gate.yaml")
+    assert visual_gate["status"] == "passed"
+    assert visual_gate["visual_review"]["reviewer"] == "render-visual-reviewer"
+    current_gate = _load_yaml(package_dir / "evidence/phase13_current_gate_index.yaml")
+    assert current_gate["overall_status"] == "phase13_visual_candidate_ready"
+    assert current_gate["next_required_gate"] == "13.8"
+    assert current_gate["latest_gates"]["13.6"]["status"] == "passed"
+    assert current_gate["formal_package_ready"] is False
+    assert current_gate["blockers"] == [
+        "13.8 EOS execution/predicate canary gate is required before formal package readiness"
+    ]
+
+
+def test_image_task_overview_visual_gate_requires_render_metadata(tmp_path: Path) -> None:
+    registry_snapshot = _write_registry_snapshot(
+        tmp_path,
+        (
+            _AssetSeed("official_ebench_apple", "manipulated_object", "apple", ("fruit", "pickable")),
+            _AssetSeed("official_ebench_bowl", "target_container", "bowl", ("container", "rigid")),
+        ),
+    )
+    request = _write_image_task_request(tmp_path)
+    scene_result = _write_image_scene_result(tmp_path)
+    package_dir = tmp_path / "out" / "phase13_visual_missing_metadata"
+    assert (
+        main(
+            [
+                "image-task",
+                "compile",
+                "--request",
+                str(request),
+                "--scene-result",
+                str(scene_result),
+                "--registry-snapshot",
+                str(registry_snapshot),
+                "--out",
+                str(package_dir),
+                "--strict",
+            ]
+        )
+        == 0
+    )
+    review_path = _write_phase13_visual_review(package_dir, include_render_metadata=False)
+
+    visual_code = main(
+        [
+            "image-task",
+            "overview-visual",
+            "--package",
+            str(package_dir),
+            "--visual-review",
+            str(review_path),
+            "--strict",
+        ]
+    )
+
+    assert visual_code == 1
+    visual_gate = _load_yaml(package_dir / "evidence/phase13_6_factory_overview_visual_gate.yaml")
+    assert visual_gate["status"] == "failed"
+    assert "phase13 visual review render_metadata_path is required for 13.6" in visual_gate["blockers"]
+    current_gate = _load_yaml(package_dir / "evidence/phase13_current_gate_index.yaml")
+    assert current_gate["overall_status"] == "blocked"
+    assert current_gate["formal_package_ready"] is False
+    assert current_gate["overview_visual_ready"] is False
+    assert current_gate["next_required_gate"] == "13.6"
+
+
+def test_image_task_execution_predicate_gate_promotes_visual_candidate_to_formal_package(
+    tmp_path: Path,
+) -> None:
+    registry_snapshot = _write_registry_snapshot(
+        tmp_path,
+        (
+            _AssetSeed("official_ebench_apple", "manipulated_object", "apple", ("fruit", "pickable")),
+            _AssetSeed("official_ebench_bowl", "target_container", "bowl", ("container", "rigid")),
+        ),
+    )
+    request = _write_image_task_request(tmp_path)
+    scene_result = _write_image_scene_result(tmp_path)
+    package_dir = tmp_path / "out" / "phase13_execution"
+    assert (
+        main(
+            [
+                "image-task",
+                "compile",
+                "--request",
+                str(request),
+                "--scene-result",
+                str(scene_result),
+                "--registry-snapshot",
+                str(registry_snapshot),
+                "--out",
+                str(package_dir),
+                "--strict",
+            ]
+        )
+        == 0
+    )
+    review_path = _write_phase13_visual_review(package_dir)
+    assert (
+        main(
+            [
+                "image-task",
+                "overview-visual",
+                "--package",
+                str(package_dir),
+                "--visual-review",
+                str(review_path),
+                "--strict",
+            ]
+        )
+        == 0
+    )
+    rc_gate_path = _write_phase13_passed_phase11_execution_chain(package_dir)
+
+    execution_code = main(
+        [
+            "image-task",
+            "execution-predicate",
+            "--package",
+            str(package_dir),
+            "--single-task-rc-gate",
+            str(rc_gate_path),
+            "--strict",
+        ]
+    )
+
+    assert execution_code == 0
+    execution_gate = _load_yaml(package_dir / "evidence/phase13_8_execution_predicate_canary_gate.yaml")
+    assert execution_gate["status"] == "passed"
+    assert execution_gate["phase11_chain"]["phase11_single_task_release_candidate_gate"]["status"] == "passed"
+    assert execution_gate["next_stage"] == "batch_factory_quality_gate"
+    current_gate = _load_yaml(package_dir / "evidence/phase13_current_gate_index.yaml")
+    assert current_gate["overall_status"] == "phase13_formal_package_ready"
+    assert current_gate["formal_package_ready"] is True
+    assert current_gate["execution_predicate_ready"] is True
+    assert current_gate["next_required_gate"] == "13.9"
+    assert current_gate["latest_gates"]["13.8"]["status"] == "passed"
+    assert current_gate["blockers"] == [
+        "13.9 batch factory quality gate is required before batch factory readiness"
+    ]
+
+
 def test_image_task_blocked_rerun_removes_previous_public_ready_manifest(tmp_path: Path) -> None:
     request = _write_image_task_request(tmp_path)
     scene_result = _write_image_scene_result(tmp_path)
@@ -599,6 +786,105 @@ def _write_source_usd(root: Path, usd_asset_refs: tuple[str, ...] = ()) -> Path:
         encoding="utf-8",
     )
     return usd
+
+
+def _write_phase13_visual_review(package_dir: Path, *, include_render_metadata: bool = True) -> Path:
+    evidence_dir = package_dir / "evidence"
+    image_path = evidence_dir / "phase13_overview.png"
+    runtime_log_path = evidence_dir / "phase13_overview_runtime.log"
+    metadata_path = evidence_dir / "phase13_overview_render_metadata.json"
+    review_path = evidence_dir / "phase13_overview_visual_review.yaml"
+    image_path.write_bytes(b"fake-render-png")
+    runtime_log_path.write_text("render completed without blocking material signals\n", encoding="utf-8")
+    if include_render_metadata:
+        metadata_path.write_text(
+            "\n".join(
+                [
+                    "{",
+                    '  "render_status": "pass",',
+                    '  "runtime_log_path": "phase13_overview_runtime.log",',
+                    '  "material_runtime_preflight": {',
+                    '    "status": "pass",',
+                    '    "blocked_dependency_count": 0,',
+                    '    "blocked_dependencies": []',
+                    "  }",
+                    "}",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+    review = {
+        "schema_version": "phase11-visual-review/v0.1",
+        "reviewer": "render-visual-reviewer",
+        "review_mode": "clean_room_visual_skill",
+        "verdict": "PASS",
+        "image_path": "phase13_overview.png",
+        "visible_evidence": [
+            {"target": "tabletop", "status": "visible"},
+            {"target": "apple", "status": "visible"},
+            {"target": "bowl", "status": "visible"},
+        ],
+        "retake_recommendation": "none",
+    }
+    if include_render_metadata:
+        review["render_metadata_path"] = "phase13_overview_render_metadata.json"
+    return _write_yaml(review_path, review)
+
+
+def _write_phase13_passed_phase11_execution_chain(package_dir: Path) -> Path:
+    evidence_dir = package_dir / "evidence"
+    manifest = _load_yaml(package_dir / "manifest.yaml")
+    task = _load_yaml(package_dir / "task" / "task.yaml")
+    package_id = manifest["package_id"]
+    task_id = task["task_id"]
+    gate_specs = (
+        ("phase11_task_execution_gate.yaml", "phase11-task-execution-gate/v0.1", "11.1"),
+        ("phase11_executed_episode_gate.yaml", "phase11-executed-episode-gate/v0.1", "11.2"),
+        ("phase11_success_predicate_gate.yaml", "phase11-success-predicate-gate/v0.1", "11.3"),
+        (
+            "phase11_post_execution_visual_review_gate.yaml",
+            "phase11-post-execution-visual-review-gate/v0.1",
+            "11.4",
+        ),
+    )
+    required_gates: dict[str, dict[str, str]] = {}
+    for filename, schema_version, phase in gate_specs:
+        _write_yaml(
+            evidence_dir / filename,
+            {
+                "schema_version": schema_version,
+                "phase": phase,
+                "status": "passed",
+                "package_id": package_id,
+                "task_id": task_id,
+                "blockers": [],
+            },
+        )
+        required_gates[filename] = {
+            "path": str(evidence_dir / filename),
+            "schema_version": schema_version,
+            "status": "passed",
+        }
+    return _write_yaml(
+        evidence_dir / "phase11_single_task_release_candidate_gate.yaml",
+        {
+            "schema_version": "phase11-single-task-release-candidate-gate/v0.1",
+            "phase": "11.5",
+            "status": "passed",
+            "package_id": package_id,
+            "task_id": task_id,
+            "required_gates": required_gates,
+            "release_policy": {
+                "schema_version": "phase11-release-policy/v0.1",
+                "policy_owner": "scenario-forge-policy-gate",
+                "release_policy_status": "pass",
+                "asset_license_status": "pass",
+                "redistribution_approval": "pass",
+            },
+            "blockers": [],
+        },
+    )
 
 
 def _write_yaml(path: Path, data: dict) -> Path:

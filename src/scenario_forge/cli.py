@@ -36,6 +36,10 @@ from scenario_forge.evaluation.phase11_gates import (
     generate_phase11_task_execution_gate,
     generate_phase11_visual_review_gate,
 )
+from scenario_forge.evaluation.phase13_gates import (
+    generate_phase13_execution_predicate_canary_gate,
+    generate_phase13_factory_overview_visual_gate,
+)
 from scenario_forge.artifacts.registry import (
     Phase12RegistryError,
     generate_phase12_registry_artifacts,
@@ -283,6 +287,36 @@ def build_parser() -> argparse.ArgumentParser:
         "--strict",
         action="store_true",
         help="Return non-zero unless local Phase 13 static candidate gates pass",
+    )
+    image_task_overview_visual_parser = image_task_subparsers.add_parser(
+        "overview-visual",
+        help="Generate Phase 13.6 factory overview visual gate from render-visual-reviewer evidence",
+    )
+    image_task_overview_visual_parser.add_argument("--package", required=True, help="Package directory")
+    image_task_overview_visual_parser.add_argument(
+        "--visual-review",
+        required=True,
+        help="phase11-visual-review/v0.1 YAML emitted by render-visual-reviewer for Phase 13.6",
+    )
+    image_task_overview_visual_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 13.6 overview visual gate passes",
+    )
+    image_task_execution_parser = image_task_subparsers.add_parser(
+        "execution-predicate",
+        help="Generate Phase 13.8 execution/predicate canary gate from Phase 11 evidence",
+    )
+    image_task_execution_parser.add_argument("--package", required=True, help="Package directory")
+    image_task_execution_parser.add_argument(
+        "--single-task-rc-gate",
+        required=True,
+        help="phase11-single-task-release-candidate-gate/v0.1 YAML for this package",
+    )
+    image_task_execution_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 13.8 execution/predicate canary gate passes",
     )
 
     suite_parser = subparsers.add_parser("suite", help="Benchmark suite generation commands")
@@ -664,6 +698,36 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Phase 13 current gate: {result.evidence_path}")
         if args.strict and result.status == "blocked":
             print("Phase 13 strict local static gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "image-task" and args.image_task_command == "overview-visual":
+        result = generate_phase13_factory_overview_visual_gate(
+            Path(args.package),
+            Path(args.visual_review),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 13.6 overview visual gate written: {result.evidence_path}")
+        print(f"Phase 13.6 overview visual gate status: {result.status}")
+        print(f"Phase 13 current gate: {result.current_index_path}")
+        if args.strict and result.status != "passed":
+            print("Phase 13.6 overview visual strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "image-task" and args.image_task_command == "execution-predicate":
+        result = generate_phase13_execution_predicate_canary_gate(
+            Path(args.package),
+            Path(args.single_task_rc_gate),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 13.8 execution/predicate canary gate written: {result.evidence_path}")
+        print(f"Phase 13.8 execution/predicate canary gate status: {result.status}")
+        print(f"Phase 13 current gate: {result.current_index_path}")
+        if args.strict and result.status != "passed":
+            print("Phase 13.8 execution/predicate strict gate did not pass")
             return 1
         return 0
 

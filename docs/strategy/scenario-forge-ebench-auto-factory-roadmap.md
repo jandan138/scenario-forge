@@ -5623,8 +5623,8 @@ Implemented in Scenario Forge:
   confidence, material closure, source materialization, license, or bindings are
   insufficient.
 
-Current local status for a successful compile:
-  overall_status=phase13_static_candidate_ready
+Current local status for a successful compile after 13.6 ingestion:
+  overall_status=phase13_visual_candidate_ready
   formal_package_ready=false
 
 2026-07-05 material-closure hardening update:
@@ -5639,19 +5639,20 @@ Current local status for a successful compile:
   an approved Isaac Sim runtime dependency only because retained render metadata
   records `material_runtime_preflight.status=pass`, blocked dependency count 0,
   concrete MDL search roots, and the resolved runtime path.
-- Current real probe status: 13.0-13.5 and 13.7 pass,
-  `overall_status=phase13_static_candidate_ready`, and
+- Current real probe status: 13.0-13.7 pass, including 13.6 engine-native
+  overview render and render-visual-reviewer PASS. The current gate records
+  `overall_status=phase13_visual_candidate_ready`,
+  `overview_visual_ready=true`, `next_required_gate=13.8`, and
   `formal_package_ready=false`. USD dependency tooling may still print unresolved
   `gltf/pbr.mdl` warnings during materialization; the 13.5 gate records the
-  approved runtime MDL evidence, and 13.6 must still prove the generated package
-  renders correctly.
+  approved runtime MDL evidence, and 13.6 proves the generated package renders
+  without blocked material runtime signals.
 - If a missing MDL/texture is not package-local and not backed by retained
   runtime approval, Phase 13 writes `handoff/asset_intake_blockers.yaml` and does
   not write `manifest.yaml`. Scenario Forge must not copy ConvertAsset
   USD/MDL/texture conversion logic here.
 
 Remaining external gates before calling it a formal EBench-compatible package:
-- 13.6 engine-native overview render + render-visual-reviewer PASS.
 - 13.8 EOS execution evidence + completed episode + simulator-state predicate
   true + post-execution visual PASS + release policy pass.
 ```
@@ -5838,6 +5839,13 @@ release-ready package。
         material preflight pass, render-visual-reviewer PASS. It only proves
         visual readability, not asset identity or task success. 13.6 cannot be
         entered while 13.5 selected-asset material closure is blocked.
+  2026-07-05 status: passed for the real official EBench apple/bowl Phase 13
+        probe. Retained evidence lives under
+        `docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/`.
+        The rendered image hash is
+        `sha256:955f68cbabcd438409c6c44fd47eb15e30cbb28f47195882b8e0a5cdfbbb318c`.
+        The visual review notes wide framing and no table/robot context as
+        non-blocking caveats. This does not prove task execution success.
 
 13.7 Package Adapter Preflight:
   owner: Scenario Forge adapters.
@@ -5852,6 +5860,12 @@ release-ready package。
   gate: execution-predicate-canary-gate/v0.1 requires EOS execution evidence,
         completed episode, predicate true, post-execution visual PASS, release
         policy pass.
+  2026-07-05 Scenario Forge status: ingestion CLI implemented as
+        `image-task execution-predicate`. It only aggregates retained Phase 11
+        gates for the same generated package and must not run a simulator inside
+        Scenario Forge. The real apple/bowl Phase 13 probe remains blocked here:
+        current EOS Scenario Forge package execution evidence is config-level
+        only and states no package episode runner is available in that EOS lane.
 
 13.9 Batch Factory Quality Gate:
   owner: Scenario Forge evaluation + registry owner.
