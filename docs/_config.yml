@@ -1,2 +1,5 @@
+encoding: UTF-8
+
 exclude:
   - records/evidence
+  - records/evidence/**
