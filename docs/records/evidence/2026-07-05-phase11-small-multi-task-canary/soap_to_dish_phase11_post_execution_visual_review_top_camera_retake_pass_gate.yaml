@@ -1,0 +1,29 @@
+schema_version: phase11-post-execution-visual-review-gate/v0.1
+phase: '11.4'
+status: passed
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+visual_review:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_post_execution_visual_review_top_camera_retake_pass.yaml
+  schema_version: phase11-post-execution-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: PASS
+  initial_image_path: soap_to_dish_phase11_4_top_camera_retake_visual_review_frames/top_camera_first.jpg
+  final_image_path: soap_to_dish_phase11_4_top_camera_retake_dense_frames/top_camera_after_t7_009.jpg
+  visible_evidence:
+  - Initial top-camera frame shows the purple soap clearly separated from the shallow
+    gray soap dish/container on the bathroom countertop.
+  - Final top-camera retake frame shows the purple soap visibly overlapping and sitting
+    on the shallow gray dish/container.
+  - Both the soap and the dish/container remain identifiable in the final frame; the
+    gripper is visible but does not make the soap-dish relationship unreadable.
+  success_predicate_gate: soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+  retake_recommendation: For an even cleaner non-gate artifact, capture a final frame
+    after the gripper has lifted or moved slightly away from the dish, with the top
+    camera unchanged and the soap fully visible inside/on the container.
+blockers: []
+next_stage: single_task_automated_release_candidate
+claim_boundary: Post-execution visual review gate only; visual coherence supports
+  inspection but does not replace predicate success, release approval, or leaderboard
+  evidence.

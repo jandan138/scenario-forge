@@ -1,0 +1,12 @@
+schema_version: phase11-release-policy/v0.1
+policy_owner: scenario-forge-policy-gate
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+release_policy_status: blocked
+asset_license_status: research-use; public redistribution approval not retained
+redistribution_approval: false
+blockers:
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+claim_boundary: Policy gate only; technical Phase 11 gates can form internal evidence,
+  but public dataset release requires explicit redistribution approval.

@@ -1,0 +1,21 @@
+Phase 11.1 soap-to-dish EOS live task execution integration.
+package_id=ebench_soap_to_dish_canary
+task_id=mobile_manip/soap_to_dish
+runtime_owner=embodied-eval-os
+runtime_preflight=passed
+curobo_runtime_check=passed
+run_id=scenario_forge_phase11_soap_to_dish_20260704T215406Z
+server_url=http://127.0.0.1:18349
+start_new_job_status=200
+start_new_job_success=true
+smoke_run_command=python -m adapters.ebench.smoke_run --task-config /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml --server-url http://127.0.0.1:18349 --worker-id 0 --trace-dir /tmp/scenario-forge-phase11-soap-to-dish-start-trace --max-policy-calls 1 --reset-result-timeout-s 900
+episode_id=ebench/scenario_forge_phase11_soap_to_dish_20260704T215406Z/ebench/mobile_manip/soap_to_dish_test_mini/000
+runtime_status=executed
+trace_source=/tmp/scenario-forge-phase11-soap-to-dish-start-trace/ebench/scenario_forge_phase11_soap_to_dish_20260704T215406Z/ebench/mobile_manip/soap_to_dish_test_mini/000.json
+initial_keyframe_source=/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_soap_to_dish_20260704T215406Z/ebench/mobile_manip/soap_to_dish_test_mini/000/46da9117db7a44a6aadcdd69f5d1a4a1/overlook_camera/00000.png
+server_log=/cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_soap_to_dish_20260704T215406Z/server_20260705_055419_336891.log
+worker_log=/cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_soap_to_dish_20260704T215406Z/worker/pool_20260705_055419_339508_worker_0_20260705_055458_513248.log
+lifecycle.reset=passed
+lifecycle.step=passed
+lifecycle.close=passed
+claim_boundary=EOS task execution integration evidence only; not task success, model quality, official EBench score, physics fidelity, release approval, or leaderboard evidence.

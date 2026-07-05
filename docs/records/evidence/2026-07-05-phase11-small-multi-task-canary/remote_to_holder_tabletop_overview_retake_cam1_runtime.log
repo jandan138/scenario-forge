@@ -1,0 +1,378 @@
+[Warning] [omni.isaac.kit.simulation_app] Modules: ['omni.kit_app'] were loaded before SimulationApp was started and might not be loaded correctly.
+[Warning] [omni.isaac.kit.simulation_app] Please check to make sure no extra omniverse or pxr modules are imported before the call to SimulationApp(...)
+[Info] [carb] Logging to file: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/logs/Kit/Isaac-Sim/4.1/kit_20260705_025925.log
+2026-07-04 18:59:25 [1ms] [Warning] [omni.kit.app.plugin] No crash reporter present, dumps uploading isn't available.
+[0.269s] [ext: omni.kit.async_engine-0.0.0] startup
+[5.494s] [ext: omni.stats-1.0.1] startup
+[5.497s] [ext: omni.client-1.1.0] startup
+[5.544s] [ext: omni.datastore-0.0.0] startup
+[5.546s] [ext: omni.blobkey-1.1.0] startup
+[5.548s] [ext: omni.ujitso.default-1.0.0] startup
+[5.551s] [ext: omni.hsscclient-0.0.0] startup
+[5.554s] [ext: omni.rtx.shadercache.vulkan-1.0.0] startup
+[5.561s] [ext: omni.assets.plugins-0.0.0] startup
+[5.565s] [ext: omni.gpu_foundation-0.0.0] startup
+[5.604s] [ext: carb.windowing.plugins-1.0.0] startup
+2026-07-04 18:59:31 [5,565ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:31 [5,565ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+[5.607s] [ext: omni.kit.renderer.init-0.0.0] startup
+2026-07-04 18:59:31 [5,610ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 570.153.02    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA GeForce RTX 4090          | Yes: 0 |     | 46314   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2684      | f12b8fdb.. |
+|     |                                  |        |     |            | 8         |            |
+|=============================================================================================|
+| OS: 22.04.5 LTS (Jammy Jellyfish) ubuntu, Version: 22.04.5, Kernel: 5.10.134-17.3.al8.x86_64
+| Processor: Intel(R) Xeon(R) Gold 6462C | Cores: 64 | Logical: 128
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 1031320 | Free Memory: 82654
+| Total Page/Swap (MB): 0 | Free Page/Swap: 0
+|---------------------------------------------------------------------------------------------|
+2026-07-04 18:59:32 [6,327ms] [Warning] [gpu.foundation.plugin] ECC is enabled on physical device 0
+2026-07-04 18:59:32 [6,328ms] [Warning] [gpu.foundation.plugin] IOMMU is enabled.
+[6.564s] [ext: omni.kit.pipapi-0.0.0] startup
+[6.567s] [ext: omni.kit.pip_archive-0.0.0] startup
+[6.568s] [ext: omni.mtlx-0.1.0] startup
+[6.570s] [ext: omni.usd.config-1.0.4] startup
+[6.658s] [ext: omni.gpucompute.plugins-0.0.0] startup
+[6.660s] [ext: omni.usd.libs-1.0.1] startup
+[6.790s] [ext: omni.kit.telemetry-0.5.0] startup
+[6.852s] [ext: omni.kit.loop-isaac-1.2.0] startup
+[6.855s] [ext: omni.kit.test-0.0.0] startup
+[7.011s] [ext: omni.appwindow-1.1.8] startup
+2026-07-04 18:59:32 [6,972ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:32 [6,972ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+[7.017s] [ext: omni.kit.renderer.core-1.0.1] startup
+2026-07-04 18:59:32 [6,980ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:32 [6,980ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+2026-07-04 18:59:32 [6,989ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:32 [6,989ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+[7.033s] [ext: omni.kit.renderer.capture-0.0.0] startup
+[7.041s] [ext: omni.kit.renderer.imgui-1.0.1] startup
+2026-07-04 18:59:32 [7,017ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:32 [7,017ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+2026-07-04 18:59:32 [7,019ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:32 [7,019ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+2026-07-04 18:59:32 [7,020ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:32 [7,020ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+[7.160s] [ext: omni.ui-2.23.11] startup
+[7.176s] [ext: omni.kit.mainwindow-1.0.3] startup
+[7.180s] [ext: carb.audio-0.1.0] startup
+[7.183s] [ext: omni.uiaudio-1.0.0] startup
+[7.186s] [ext: omni.kit.uiapp-0.0.0] startup
+[7.186s] [ext: omni.usd.schema.audio-0.0.0] startup
+[7.304s] [ext: omni.usd.schema.physx-106.0.20] startup
+[7.350s] [ext: omni.usd.schema.forcefield-106.0.20] startup
+[7.360s] [ext: omni.usd.schema.anim-0.0.0] startup
+[7.395s] [ext: omni.usd.schema.omniscripting-1.0.0] startup
+[7.405s] [ext: omni.usd.schema.omnigraph-1.0.0] startup
+[7.417s] [ext: omni.anim.graph.schema-106.0.2] startup
+[7.428s] [ext: omni.anim.navigation.schema-106.0.2] startup
+[7.436s] [ext: omni.usd.schema.isaac-2.1.0] startup
+[7.449s] [ext: omni.usd.schema.semantics-0.0.0] startup
+[7.459s] [ext: omni.usd.schema.geospatial-0.0.0] startup
+[7.465s] [ext: omni.usd.schema.scene.visualization-2.0.2] startup
+[7.472s] [ext: omni.graph.exec-0.9.3] startup
+[7.474s] [ext: omni.usd_resolver-1.0.0] startup
+[7.494s] [ext: omni.activity.core-1.0.1] startup
+[7.497s] [ext: omni.kit.usd_undo-0.1.8] startup
+[7.499s] [ext: omni.kit.exec.core-0.13.2] startup
+[7.507s] [ext: omni.usd.core-1.2.11] startup
+[7.512s] [ext: omni.kit.actions.core-1.0.0] startup
+[7.516s] [ext: omni.resourcemonitor-105.0.1] startup
+[7.524s] [ext: omni.kit.window.popup_dialog-2.0.24] startup
+[7.534s] [ext: omni.timeline-1.0.10] startup
+[7.537s] [ext: omni.kit.commands-1.4.9] startup
+[7.550s] [ext: usdrt.scenegraph-7.4.8] startup
+[7.612s] [ext: omni.kit.widget.nucleus_connector-1.1.8] startup
+[7.618s] [ext: omni.kit.audiodeviceenum-1.0.1] startup
+[7.622s] [ext: omni.hydra.usdrt_delegate-7.4.7] startup
+[7.650s] [ext: omni.hydra.scene_delegate-0.3.3] startup
+[7.659s] [ext: omni.kit.collaboration.telemetry-1.0.0] startup
+[7.660s] [ext: omni.usd-1.11.2] startup
+[7.719s] [ext: omni.kit.collaboration.channel_manager-1.0.11] startup
+[7.723s] [ext: omni.kit.usd.layers-2.1.31] startup
+[7.742s] [ext: omni.kit.collaboration.presence_layer-1.0.8] startup
+[7.749s] [ext: omni.kit.window.cursor-1.1.2] startup
+[7.753s] [ext: omni.kit.menu.utils-1.5.27] startup
+[7.778s] [ext: omni.iray.libs-0.0.0] startup
+[7.788s] [ext: omni.kit.primitive.mesh-1.0.16] startup
+[7.801s] [ext: omni.mdl.neuraylib-0.2.5] startup
+[7.806s] [ext: omni.hydra.engine.stats-1.0.2] startup
+[7.812s] [ext: omni.kit.widget.searchable_combobox-1.0.6] startup
+[7.816s] [ext: omni.kit.widget.path_field-2.0.9] startup
+[7.820s] [ext: omni.kit.clipboard-1.0.3] startup
+[7.822s] [ext: omni.ujitso.processor.texture-1.0.0] startup
+[7.825s] [ext: omni.kit.widget.browser_bar-2.0.10] startup
+[7.828s] [ext: omni.kit.notification_manager-1.0.8] startup
+[7.838s] [ext: omni.volume-0.5.0] startup
+[7.842s] [ext: omni.ujitso.client-0.0.0] startup
+[7.843s] [ext: omni.kit.helper.file_utils-0.1.8] startup
+[7.847s] [ext: omni.kit.widget.nucleus_info-1.0.2] startup
+[7.850s] [ext: omni.kit.widget.filebrowser-2.10.48] startup
+[7.870s] [ext: omni.kit.search_core-1.0.5] startup
+[7.873s] [ext: omni.kit.widget.options_menu-1.1.4] startup
+[7.884s] [ext: omni.ui.scene-1.9.3] startup
+[7.892s] [ext: omni.kit.widget.search_delegate-1.0.4] startup
+[7.898s] [ext: omni.kit.widget.options_button-1.0.2] startup
+[7.900s] [ext: omni.kit.widget.context_menu-1.2.1] startup
+[7.904s] [ext: omni.kit.hotkeys.core-1.3.3] startup
+[7.905s] [ext: omni.kit.window.filepicker-2.10.34] startup
+[7.949s] [ext: omni.hydra.rtx-0.2.0] startup
+[7.984s] [ext: omni.kit.context_menu-1.8.0] startup
+[7.992s] [ext: omni.mdl-52.0.1] startup
+[8.008s] [ext: omni.kit.window.file_importer-1.1.11] startup
+[8.011s] [ext: omni.kit.raycast.query-1.0.5] startup
+[8.023s] [ext: omni.kit.viewport.registry-104.0.6] startup
+[8.025s] [ext: omni.kit.viewport.legacy_gizmos-1.0.15] startup
+[8.031s] [ext: omni.kit.material.library-1.4.4] startup
+[8.044s] [ext: omni.kit.window.file_exporter-1.0.29] startup
+[8.047s] [ext: omni.kit.hydra_texture-1.2.6] startup
+[8.057s] [ext: omni.kit.window.drop_support-1.0.2] startup
+[8.059s] [ext: omni.kit.widget.viewport-106.0.3] startup
+[8.072s] [ext: omni.kit.widget.filter-1.1.4] startup
+[8.074s] [ext: omni.kit.viewport.window-106.0.8] startup
+[8.112s] [ext: omni.kit.widget.settings-1.1.1] startup
+[8.118s] [ext: omni.kit.widget.prompt-1.0.7] startup
+[8.121s] [ext: omni.kit.viewport.utility-1.0.17] startup
+[8.122s] [ext: omni.kit.window.preferences-1.5.3] startup
+[8.162s] [ext: omni.kit.widget.live_session_management.ui-1.0.1] startup
+[8.172s] [ext: omni.kit.viewport.actions-106.0.3] startup
+[8.177s] [ext: omni.kit.widget.stage-2.10.26] startup
+[8.209s] [ext: omni.kit.stage_template.core-1.1.21] startup
+[8.211s] [ext: omni.kit.widget.live_session_management-1.2.18] startup
+[8.220s] [ext: omni.kit.viewport.menubar.core-106.0.2] startup
+[8.270s] [ext: omni.kit.manipulator.transform-104.7.5] startup
+[8.277s] [ext: omni.kit.stage_templates-1.2.3] startup
+[8.284s] [ext: omni.debugdraw-0.1.3] startup
+[8.292s] [ext: omni.kit.viewport.menubar.display-106.0.2] startup
+[8.297s] [ext: omni.kvdb-106.0.20] startup
+[8.303s] [ext: omni.inspect-1.0.1] startup
+[8.307s] [ext: omni.kit.window.file-1.3.52] startup
+[8.315s] [ext: omni.kit.window.content_browser_registry-0.0.6] startup
+[8.317s] [ext: omni.usdphysics-106.0.20] startup
+[8.321s] [ext: omni.convexdecomposition-106.0.20] startup
+[8.331s] [ext: omni.kit.window.content_browser-2.9.14] startup
+[8.353s] [ext: omni.usdphysics.ui-106.0.20] startup
+[8.389s] [ext: omni.localcache-106.0.20] startup
+[8.396s] [ext: omni.physx.foundation-106.0.20] startup
+[8.397s] [ext: omni.kit.widget.highlight_label-1.0.2] startup
+[8.400s] [ext: omni.graph.core-2.170.3] startup
+[8.406s] [ext: omni.kit.widget.searchfield-1.1.6] startup
+[8.412s] [ext: omni.physx.cooking-106.0.20] startup
+[8.483s] [ext: omni.kit.widget.text_editor-1.0.2] startup
+[8.487s] [ext: omni.graph.image.core-0.3.2] startup
+[8.493s] [ext: omni.kit.window.property-1.11.1] startup
+[8.508s] [ext: omni.physx-106.0.20] startup
+[8.533s] [ext: omni.kit.widget.toolbar-1.6.2] startup
+[8.559s] [ext: omni.kit.property.usd-3.21.28] startup
+[8.580s] [ext: omni.physx.stageupdate-106.0.20] startup
+[8.588s] [ext: omni.physx.commands-106.0.20] startup
+[8.597s] [ext: omni.kit.manipulator.tool.snap-1.4.5] startup
+[8.612s] [ext: omni.graph.tools-1.78.0] startup
+[8.676s] [ext: omni.physx.ui-106.0.20] startup
+[8.722s] [ext: omni.graph-1.135.0] startup
+[8.800s] [ext: omni.physx.demos-106.0.20] startup
+[8.862s] [ext: omni.graph.image.nodes-1.0.2] startup
+[8.866s] [ext: omni.graph.action_core-1.1.4] startup
+[8.878s] [ext: omni.isaac.version-1.1.0] startup
+[8.882s] [ext: omni.syntheticdata-0.6.7] startup
+[8.934s] [ext: omni.physx.graph-106.0.20] startup
+[8.963s] [ext: omni.isaac.nucleus-0.3.0] startup
+[8.968s] [ext: omni.physx.telemetry-106.0.20] startup
+[8.980s] [ext: omni.kit.manipulator.selector-1.1.1] startup
+[8.987s] [ext: omni.ui_query-1.1.2] startup
+[8.989s] [ext: omni.kit.widget.graph-1.12.8] startup
+[9.005s] [ext: omni.kit.property.material-1.9.4] startup
+[9.018s] [ext: omni.kit.window.extensions-1.4.9] startup
+[9.035s] [ext: omni.kit.property.physx-106.0.20] startup
+[9.133s] [ext: omni.graph.ui-1.70.0] startup
+[9.182s] [ext: omni.physx.vehicle-106.0.20] startup
+[9.226s] [ext: omni.kit.manipulator.viewport-107.0.0] startup
+[9.231s] [ext: omni.kit.viewport.manipulator.transform-106.0.1] startup
+[9.235s] [ext: omni.kit.ui_test-1.2.18] startup
+[9.242s] [ext: omni.graph.action_nodes-1.23.0] startup
+[9.254s] [ext: omni.physx.camera-106.0.20] startup
+[9.275s] [ext: omni.fabric.commands-1.1.4] startup
+[9.287s] [ext: omni.kit.manipulator.prim.core-107.0.3] startup
+[9.308s] [ext: omni.physx.cct-106.0.20] startup
+[9.339s] [ext: omni.graph.action-1.102.1] startup
+[9.341s] [ext: omni.graph.nodes-1.143.0] startup
+[9.359s] [ext: omni.graph.ui_nodes-1.25.1] startup
+[9.373s] [ext: omni.kit.manipulator.prim.fabric-106.0.1] startup
+[9.390s] [ext: omni.physics.tensors-106.0.20] startup
+[9.415s] [ext: omni.kit.graph.delegate.default-1.2.2] startup
+[9.423s] [ext: omni.kit.manipulator.prim.usd-106.0.1] startup
+[9.431s] [ext: omni.graph.bundle.action-2.0.4] startup
+[9.432s] [ext: omni.command.usd-1.0.3] startup
+[9.434s] [ext: omni.physx.tensors-106.0.20] startup
+[9.441s] [ext: omni.kit.graph.editor.core-1.5.3] startup
+[9.461s] [ext: omni.kit.manipulator.prim-106.0.0] startup
+[9.461s] [ext: omni.kit.manipulator.selection-104.0.9] startup
+[9.466s] [ext: omni.kit.widget.layers-1.7.9] startup
+[9.578s] [ext: omni.kit.window.toolbar-1.6.1] startup
+[9.595s] [ext: omni.kit.graph.usd.commands-1.3.1] startup
+[9.600s] [ext: omni.kit.widget.material_preview-1.0.16] startup
+[9.606s] [ext: omni.physx.supportui-106.0.20] startup
+[9.633s] [ext: omni.warp.core-1.2.1] startup
+[9.699s] [ext: omni.kit.window.material_graph-1.8.15] startup
+[9.756s] [ext: omni.kit.numpy.common-0.1.2] startup
+[9.760s] [ext: omni.warp-1.2.1] startup
+[9.771s] [ext: omni.sensors.tiled-0.0.4] startup
+[9.776s] [ext: omni.physx.bundle-106.0.20] startup
+[9.776s] [ext: omni.graph.scriptnode-1.19.1] startup
+[9.780s] [ext: omni.isaac.dynamic_control-1.3.8] startup
+[9.803s] [ext: omni.replicator.core-1.11.14] startup
+2026-07-04 18:59:36 [10,161ms] [Warning] [omni.replicator.core.scripts.annotators] Annotator PostProcessDispatch is already registered, overwriting annotator template
+[10.559s] [ext: omni.isaac.core-3.18.1] startup
+[12.680s] [ext: omni.graph.visualization.nodes-2.1.1] startup
+[12.698s] [ext: omni.isaac.core_nodes-1.16.1] startup
+[12.726s] [ext: omni.isaac.cloner-0.8.1] startup
+[12.731s] [ext: omni.isaac.ui-0.16.0] startup
+[12.756s] [ext: omni.kit.graph.widget.variables-2.1.0] startup
+[12.762s] [ext: omni.kit.graph.delegate.modern-1.10.6] startup
+[12.771s] [ext: omni.isaac.wheeled_robots-2.3.3] startup
+[12.806s] [ext: omni.isaac.gym-0.11.3] startup
+[12.807s] [ext: omni.graph.window.core-1.109.0] startup
+[12.842s] [ext: omni.isaac.debug_draw-1.1.0] startup
+[12.853s] [ext: omni.isaac.block_world-1.0.0] startup
+[12.861s] [ext: omni.graph.window.generic-1.24.0] startup
+[12.877s] [ext: omni.isaac.menu-0.5.0] startup
+[12.883s] [ext: omni.isaac.occupancy_map-1.0.2] startup
+[12.903s] [ext: omni.importer.mjcf-1.1.1] startup
+[12.932s] [ext: omni.graph.window.action-1.26.0] startup
+[12.945s] [ext: omni.kit.widget.live-2.1.6] startup
+[12.952s] [ext: omni.kit.actions.window-1.1.1] startup
+[12.967s] [ext: omni.kit.ui.actions-1.0.1] startup
+[12.971s] [ext: omni.kit.widget.cache_indicator-2.0.8] startup
+[13.063s] [ext: omni.kit.hotkeys.window-1.4.5] startup
+[13.087s] [ext: omni.kit.selection-0.1.4] startup
+[13.090s] [ext: omni.kit.menu.common-1.1.5] startup
+[13.095s] [ext: omni.sensors.nv.common-1.2.2-isaac] startup
+[13.120s] [ext: omni.isaac.kit-1.13.0] startup
+[13.121s] [ext: omni.kit.menu.edit-1.1.24] startup
+[13.130s] [ext: omni.kit.menu.file-1.1.10] startup
+[13.136s] [ext: omni.isaac.range_sensor-3.1.1] startup
+[13.180s] [ext: omni.sensors.nv.materials-1.2.1-isaac] startup
+[13.191s] [ext: omni.kit.property.audio-1.0.11] startup
+[13.198s] [ext: omni.kit.widget.stage_icons-1.0.4] startup
+[13.200s] [ext: omni.kit.property.geometry-1.3.0] startup
+[13.209s] [ext: omni.kit.property.camera-1.0.6] startup
+[13.213s] [ext: omni.sensors.nv.lidar-1.2.2-isaac] startup
+[13.223s] [ext: omni.sensors.nv.wpm-1.2.1-isaac] startup
+[13.230s] [ext: omni.hydra.scene_api-0.1.2] startup
+[13.240s] [ext: omni.kit.window.stage-2.5.10] startup
+[13.249s] [ext: omni.kit.property.render-1.1.1] startup
+[13.253s] [ext: omni.kit.property.light-1.0.8] startup
+[13.257s] [ext: omni.sensors.nv.radar-1.2.1-isaac] startup
+[13.269s] [ext: omni.kit.property.transform-1.5.1] startup
+[13.283s] [ext: omni.kit.menu.stage-1.2.5] startup
+[13.286s] [ext: omni.kit.profiler.window-2.2.1] startup
+2026-07-04 18:59:39 [13,258ms] [Warning] [omni.kit.profiler.window] remove _SpanInstance.__lt__ and use insort 'key' arg instead
+[14.044s] [ext: omni.kit.property.bundle-1.2.11] startup
+[14.051s] [ext: omni.kit.property.isaac-0.2.3] startup
+[14.057s] [ext: omni.isaac.sensor-12.7.1] startup
+[14.173s] [ext: omni.isaac.surface_gripper-1.0.1] startup
+[14.184s] [ext: omni.kit.stage_column.payload-2.0.0] startup
+[14.195s] [ext: omni.kit.property.layer-1.1.6] startup
+[14.208s] [ext: omni.isaac.scene_blox-0.1.2] startup
+[14.212s] [ext: omni.isaac.quadruped-1.4.5] startup
+[14.236s] [ext: omni.isaac.manipulators-2.1.0] startup
+[14.248s] [ext: omni.isaac.lula-3.0.1] startup
+[14.269s] [ext: omni.kit.viewport.menubar.render-106.1.3] startup
+[14.282s] [ext: omni.kit.viewport.menubar.settings-106.0.1] startup
+[14.306s] [ext: omni.kit.viewport.menubar.camera-105.1.8] startup
+[14.327s] [ext: omni.kit.manipulator.camera-105.0.5] startup
+[14.338s] [ext: omni.isaac.motion_generation-7.1.0] startup
+[14.363s] [ext: omni.kit.widget.calendar-1.0.8] startup
+[14.368s] [ext: omni.kit.stage_column.variant-1.0.13] startup
+[14.374s] [ext: omni.kit.viewport.bundle-104.0.1] startup
+[14.374s] [ext: omni.isaac.universal_robots-0.3.5] startup
+[14.377s] [ext: omni.kit.widget.extended_searchfield-1.0.28] startup
+[14.397s] [ext: omni.kit.widget.timeline-105.0.1] startup
+[14.407s] [ext: omni.kit.window.commands-0.2.5] startup
+[14.414s] [ext: omni.kit.window.console-0.2.12] startup
+[14.430s] [ext: omni.kit.window.script_editor-1.7.6] startup
+[14.436s] [ext: omni.kit.menu.create-1.0.13] startup
+[14.441s] [ext: omni.kit.window.status_bar-0.1.6] startup
+[14.450s] [ext: omni.rtx.window.settings-0.6.16] startup
+[14.461s] [ext: omni.isaac.franka-0.4.1] startup
+[14.465s] [ext: omni.kit.window.title-1.1.3] startup
+2026-07-04 18:59:40 [14,428ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:40 [14,428ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+2026-07-04 18:59:40 [14,431ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:40 [14,431ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+[14.473s] [ext: omni.replicator.isaac-1.15.0] startup
+[14.557s] [ext: omni.replicator.replicator_yaml-2.0.5] startup
+[14.594s] [ext: omni.rtx.settings.core-0.6.0] startup
+[14.609s] [ext: omni.isaac.cortex-0.3.8] startup
+[14.612s] [ext: omni.kit.viewport.menubar.lighting-106.0.2] startup
+[14.619s] [ext: semantics.schema.editor-0.3.6] startup
+[14.625s] [ext: semantics.schema.property-1.0.3] startup
+[14.629s] [ext: omni.kit.viewport.rtx-104.0.1] startup
+[14.630s] [ext: omni.isaac.utils-1.0.1] startup
+[14.636s] [ext: omni.isaac.cortex.sample_behaviors-1.0.5] startup
+[14.639s] [ext: omni.importer.urdf-1.14.1] startup
+[14.697s] [ext: omni.kit.window.stats-0.1.6] startup
+[14.704s] [ext: omni.isaac.sim.python-4.1.0] startup
+[14.706s] Simulation App Starting
+2026-07-04 18:59:40 [14,935ms] [Warning] [rtx.neuraylib.plugin] [IRAY:RENDER]   1.1   IRAY   rend warn : CUDA device 0 (NVIDIA GeForce RTX 4090): ECC is enabled, this will reduce rendering performance (it is strongly recommended to disable ECC with iray)
+[16.976s] app ready
+2026-07-04 18:59:42 [17,123ms] [Warning] [omni.kit.imgui_renderer.plugin] _createExtendCursor: No windowing.
+2026-07-04 18:59:42 [17,123ms] [Warning] [omni.kit.imgui_renderer.plugin] _createExtendCursor: No windowing.
+[17.890s] Simulation App Startup Complete
+2026-07-04 18:59:44 [18,299ms] [Warning] [rtx.neuraylib.plugin] [MDLC:COMPILER]   1.0   MDLC   comp warn : file:/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl?watch=00007fb59bbb6640(823,21): C183 unused parameter 'vertex_opacity_name_spec'
+2026-07-04 18:59:44 [18,300ms] [Warning] [rtx.neuraylib.plugin] [MDLC:COMPILER]   1.0   MDLC   comp warn : file:/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl?watch=00007fb59bbb6640(823,21): C183 unused parameter 'vertex_opacity_name_spec'
+2026-07-04 18:59:44 [18,313ms] [Warning] [rtx.neuraylib.plugin] [MDLC:COMPILER]   1.0   MDLC   comp warn : file:/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl?watch=00007fb59bbb6640(823,21): C183 unused parameter 'vertex_opacity_name_spec'
+2026-07-04 18:59:44 [18,313ms] [Warning] [rtx.neuraylib.plugin] [MDLC:COMPILER]   1.0   MDLC   comp warn : file:/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl?watch=00007fb59bbb6640(823,21): C183 unused parameter 'vertex_opacity_name_spec'
+2026-07-04 18:59:48 [22,169ms] [Warning] [omni.hydra] Mesh '/World/Instances/environment_scene/Asset/obj_table/model_6c6e0ad86bfda72cf00031de7fca9b42_0/Instance/Group_default_00/SM_02_obj3_0' has corrupted data in primvar 'normal': buffer size 3648 doesn't match expected size 610 in vertex primvars
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:translate' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:orient' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:scale' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:translate' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:orient' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:scale' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:translate' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:orient' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:scale' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:translate' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:orient' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,049ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:scale' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,050ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:translate' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,050ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:orient' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,050ms] [Warning] [omni.usd] Coding Error: in AddXformOp at line 190 of /buildAgent/work/ac88d7d902b57417/USD/pxr/usd/usdGeom/xformable.cpp -- The xformOp 'xformOp:scale' already exists in xformOpOrder [[xformOp:translate, xformOp:orient, xformOp:scale, xformOp:rotateX:unitsResolve, xformOp:scale:unitsResolve]].
+
+2026-07-04 18:59:50 [25,052ms] [Warning] [omni.physx.plugin] The rigid body at /World/Instances/lift2_robot_asset/Asset/lift2/lift2/dummy_base_rotate has a possibly invalid inertia tensor of {1.0, 1.0, 1.0} and a negative mass, small sphere approximated inertia was used. Either specify correct values in the mass properties, or add collider(s) to any shape(s) that you wish to automatically compute mass properties for.
+2026-07-04 18:59:50 [25,052ms] [Warning] [omni.physx.plugin] The rigid body at /World/Instances/lift2_robot_asset/Asset/lift2/lift2/dummy_base_x has a possibly invalid inertia tensor of {1.0, 1.0, 1.0} and a negative mass, small sphere approximated inertia was used. Either specify correct values in the mass properties, or add collider(s) to any shape(s) that you wish to automatically compute mass properties for.
+2026-07-04 18:59:50 [25,052ms] [Warning] [omni.physx.plugin] The rigid body at /World/Instances/lift2_robot_asset/Asset/lift2/lift2/dummy_base_y has a possibly invalid inertia tensor of {1.0, 1.0, 1.0} and a negative mass, small sphere approximated inertia was used. Either specify correct values in the mass properties, or add collider(s) to any shape(s) that you wish to automatically compute mass properties for.
+2026-07-04 18:59:51 [25,632ms] [Warning] [omni.syntheticdata.plugin] OgnSdPostRenderVarToHost : rendervar copy from texture directly to host buffer is counter-performant. Please use copy from texture to device buffer first.
+2026-07-04 18:59:53 [27,370ms] [Warning] [carb.windowing-glfw.plugin] GLFW initialization failed.
+2026-07-04 18:59:53 [27,370ms] [Warning] [carb] Failed to startup plugin carb.windowing-glfw.plugin (interfaces: [carb::windowing::IGLContext v1.0],[carb::windowing::IWindowing v1.4]) (impl: carb.windowing-glfw.plugin)
+2026-07-04 18:59:53 [27,730ms] [Warning] [carb] Plugin interface for a client: omni.hydratexture.plugin was already released.
+2026-07-04 18:59:53 [27,730ms] [Warning] [omni.usd] Unexpected reference count of 2 for UsdStage '/tmp/ebench-remote-to-holder-canary/scene/main.usda' while being closed in UsdContext (this may indicate it is still resident in memory).
+[27.851s] Simulation App Shutting Down
+
+--- STDERR ---
+Warning: Possible version incompatibility. Attempting to load omni::fabric::IPath with version v0.2 against v0.1.
+Warning: Possible version incompatibility. Attempting to load omni::fabric::IPath with version v0.2 against v0.1.

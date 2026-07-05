@@ -1,0 +1,12 @@
+schema_version: phase12-registry-snapshot-gate/v0.1
+phase: '12.2'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+registry_snapshot: registry/registry_snapshot.yaml
+resolver_snapshot: registry/resolver_snapshot.yaml
+snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+snapshot_digest_file: registry/snapshot_digest.txt
+blockers: []
+next_stage: readonly_evidence_package_viewer
+claim_boundary: Phase 12.2 snapshot gate only. It proves deterministic registry metadata
+  digesting and resolver references, not simulator runtime readiness.

@@ -22,7 +22,7 @@ class ConvertAssetCommandPlan:
         current_input = self.input_usd
         for operation in self.operations:
             if operation == "no-mdl":
-                commands.append((wrapper, main, "no-mdl", current_input, "--out", self.output_usd))
+                commands.append((wrapper, main, "no-mdl", current_input))
                 current_input = self.output_usd
             elif operation == "mesh-faces":
                 commands.append((wrapper, main, "mesh-faces", current_input))

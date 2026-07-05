@@ -1,0 +1,10 @@
+schema_version: phase12-readonly-viewer-gate/v0.1
+phase: '12.3'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+viewer_manifest: viewer/readonly_index.yaml
+viewer_index: viewer/index.md
+blockers: []
+next_stage: ebench_eos_handoff_examples
+claim_boundary: Phase 12.3 read-only viewer gate only. Viewer status is derived from
+  retained gate files and cannot override failed or blocked evidence.

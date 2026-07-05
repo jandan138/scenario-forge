@@ -1,0 +1,58 @@
+schema_version: phase11-post-execution-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+verdict: PASS
+initial_image_path: soap_to_dish_phase11_4_top_camera_retake_visual_review_frames/top_camera_first.jpg
+final_image_path: soap_to_dish_phase11_4_top_camera_retake_dense_frames/top_camera_after_t7_009.jpg
+success_predicate_gate: soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+visible_evidence:
+- Initial top-camera frame shows the purple soap clearly separated from the shallow
+  gray soap dish/container on the bathroom countertop.
+- Final top-camera retake frame shows the purple soap visibly overlapping and
+  sitting on the shallow gray dish/container.
+- Both the soap and the dish/container remain identifiable in the final frame;
+  the gripper is visible but does not make the soap-dish relationship unreadable.
+visual_review_packet:
+  reviewer_agent_id: 019f2f9e-813f-7340-a2c9-509e42a4dee3
+  independent_review: true
+  confidence: high
+  best_final_candidate: final_candidate_t11_0
+  per_image_verdicts:
+  - id: initial_top_camera
+    verdict: PASS
+    visible_evidence: Purple soap is clearly visible on the countertop, separated
+      from the shallow gray dish/container. Dish is visible and identifiable.
+    main_risk: None blocking.
+  - id: final_candidate_t11_0
+    verdict: PASS
+    visible_evidence: Purple soap is visibly overlapping/sitting on the gray
+      dish/container. Both soap and dish remain identifiable despite the gripper.
+    main_risk: Mild gripper occlusion, but relationship is still readable.
+  - id: final_candidate_t11_5
+    verdict: WARN
+    visible_evidence: Purple soap and gray dish are visible, and the soap appears
+      on/inside the dish area.
+    main_risk: Gripper/end-effector occludes more of the soap-dish contact area,
+      making the claim less clean.
+retake_evidence:
+  package_linked_bpl19r_rerun: soap_to_dish_phase11_4_bpl19r_top_camera_retake_live_allowed_config/phase11_package_linked_bpl19r_rerun.yaml
+  retake_camera_config: soap_to_dish_phase11_4_top_camera_retake.yml
+  retake_camera_config_sha256: 8c669a02969642b5f23dad278c1870941df386fbd34f1902c297910d31c30c81
+  selected_success_attempt: attempt_000
+  task_success: true
+  standard_model_score: 1.0
+  top_camera_video: soap_to_dish_phase11_4_bpl19r_top_camera_retake_live_allowed_config/bpl19r_rerun/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/full_temporal/top_camera.mp4
+  top_camera_video_duration_s: 12.066667
+  top_camera_video_frame_count: 362
+  top_camera_video_resolution:
+  - 1280
+  - 720
+image_hashes:
+  initial_image_sha256: 232afd507ea70514c1978349c566a8035751954bb4bb06baadd6f76e16067fcc
+  final_image_sha256: 189e610c93bcddd2a43e5550e9b24368ed763450a5f3f867517e2c102b44c6c5
+retake_recommendation: For an even cleaner non-gate artifact, capture a final frame
+  after the gripper has lifted or moved slightly away from the dish, with the top
+  camera unchanged and the soap fully visible inside/on the container.
+claim_boundary: Post-execution visual review evidence only; it supports retained
+  visual readability and does not replace simulator-state predicate success,
+  release approval, public dataset release, or leaderboard comparability.

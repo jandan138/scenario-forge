@@ -1,0 +1,49 @@
+{
+  "allowed_claims": [
+    "EOS retained an official-style online policy rollout"
+  ],
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "online_policy_score_gate_report.json",
+      "role": "online_policy_score_gate_report",
+      "schema_id": "embodied_eval_os_bpl19m_online_policy_score_gate_report.v0",
+      "size_bytes": 1444
+    }
+  ],
+  "backend_parity": false,
+  "blocked_claims": [
+    "official_benchmark_reproduction",
+    "leaderboard_comparability",
+    "backend_parity",
+    "model_superiority",
+    "real_world_safety"
+  ],
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "positive_claim_authorization": {
+    "authorization_id": "bpl19m_official_style_online_policy_rollout_v0",
+    "authorization_status": "authorized",
+    "authorized_fields": [
+      "openpi_task_success",
+      "standard_model_score"
+    ],
+    "backend_parity": false,
+    "blocker_ids": [],
+    "bpl_stage": "BPL-19M",
+    "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+    "official_benchmark_reproduction": false,
+    "real_world_safety": false,
+    "schema": "embodied_eval_os_bpl19m_positive_claim_authorization.v0",
+    "score_protocol_id": "eos_bpl19m_online_policy_rollout_score_v0"
+  },
+  "real_world_safety": false,
+  "reports_standard_model_score": true,
+  "schema": "embodied_eval_os_bpl19m_claim_boundary_report.v0",
+  "standard_model_score": 0.0,
+  "standard_model_score_protocol_id": "eos_bpl19m_online_policy_rollout_score_v0"
+}

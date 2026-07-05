@@ -1,0 +1,25 @@
+schema_version: asset-lock/v0.2
+lock_id: ebench-soap-to-dish-canary-nomdl-relink_asset_lock
+created_by: scenario-forge
+assets:
+  official_ebench_scene:
+    source_kind: convertasset_nomdl_artifact
+    source_uri: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+    resolved_path: assets/official_ebench_scene/scene_noMDL.usd
+    content_sha256: sha256:e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
+    license: research-use
+    resolver_version: ConvertAsset no-mdl public CLI; scenario-forge handoff v0.3
+  official_ebench_robot:
+    source_kind: official_ebench_asset
+    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+    resolved_path: assets/official_ebench_robot/robot.usd
+    content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+    license: research-use
+    resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  official_ebench_soap:
+    source_kind: official_ebench_asset
+    source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/soap/ready/soap0/soap0.usd
+    resolved_path: assets/official_ebench_soap/soap0.usd
+    content_sha256: sha256:c147837fe9bdeba628c72efa33e1f152ec3b65f8f1b2671318c8f7298b73aae5
+    license: research-use
+    resolver_version: scenario-forge-ebench-official-asset-intake/v0.1

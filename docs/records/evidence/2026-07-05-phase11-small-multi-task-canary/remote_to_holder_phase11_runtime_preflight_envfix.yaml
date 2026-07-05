@@ -1,0 +1,26 @@
+schema_version: phase11-runtime-preflight/v0.1
+phase: 11.1.c.0
+status: passed
+runtime_owner: embodied-eval-os
+runtime: GenManip/IsaacSim41 EvalServer
+python: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python
+env_root: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310
+curobo_src: /cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src
+cuda11_lib: /isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/nvidia/cuda_runtime/lib
+import_check:
+  status: passed
+  output:
+  - curobo_runtime_check=passed
+  - curobo_file=/cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src/curobo/__init__.py
+  - fused_module=curobo.curobolib.kinematics_fused_cu
+server:
+  url: http://127.0.0.1:18348
+  run_id: scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z
+  launch_command: ray_eval_server.py --host 127.0.0.1 --port 18348 --run_id scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z
+    --episode_recorder_save_every 1 --reset_timeout 1200 --step_timeout 1200 --create_timeout
+    1200 --load_config_timeout 300
+  server_log: /cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/server_20260705_035154_378744.log
+  worker_log: /cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/worker/pool_20260705_035154_381747_worker_0_20260705_035217_750487.log
+blockers: []
+claim_boundary: Runtime preflight only; proves cuRobo/CUDA overlays and EvalServer
+  launch inputs for Phase 11.1, not task success or release readiness.

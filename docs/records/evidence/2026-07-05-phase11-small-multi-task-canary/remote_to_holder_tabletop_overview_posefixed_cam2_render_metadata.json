@@ -1,0 +1,121 @@
+{
+  "camera": {
+    "azimuth": -42.0,
+    "distance": 1.35,
+    "elevation": 42.0,
+    "engine_native": true,
+    "focal_mm": 14.0,
+    "fov_or_intrinsics_source": "runtime_focal_mm_visual_canary",
+    "intent": "full_tabletop_overview",
+    "look_at": [
+      -0.26,
+      -0.14,
+      0.14
+    ],
+    "name": "tabletop_overview_remote_posefixed_cam2",
+    "pose_selection_policy": "official_hint_then_filtered_workspace_look_at",
+    "pose_source": "eos_native_tabletop_look_at",
+    "position": [
+      0.48555671,
+      -0.81130228,
+      1.04332632
+    ],
+    "rejected_bounds": [
+      "whole_stage_bbox"
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "source_candidates": [
+      {
+        "name": "fixed_camera_lift2_simbox.yml",
+        "reason": "official cameras are not claimed as parity for this visual canary",
+        "status": "preserved_as_hint"
+      }
+    ],
+    "target_anchors": [
+      {
+        "name": "remote_001",
+        "role": "manipulated_object"
+      },
+      {
+        "name": "remote_holder_fixture",
+        "role": "target_container"
+      },
+      {
+        "name": "environment_scene",
+        "role": "tabletop"
+      },
+      {
+        "name": "lift2_robot_asset",
+        "role": "robot_or_spawn"
+      }
+    ]
+  },
+  "claim_boundary": "Engine-native visual canary only. Not task success, not official camera parity, not official material parity, and not leaderboard evidence.",
+  "engine": "isaacsim41_sensor_camera",
+  "image": {
+    "bytes": 955229,
+    "path": "remote_to_holder_tabletop_overview_posefixed_cam2.png",
+    "sha256": "efd210d8b3f77f921b59f72633fc5b0e061c4787e9f6b492422069b0a16330d2"
+  },
+  "image_path": "remote_to_holder_tabletop_overview_posefixed_cam2.png",
+  "material_runtime_preflight": {
+    "approved_runtime_mdl_dependencies": [
+      {
+        "module": "OmniPBR.mdl",
+        "resolution": "approved_runtime_module",
+        "runtime_path": "/isaac-sim/kit/mdl/core/Base/OmniPBR.mdl"
+      },
+      {
+        "module": "gltf/pbr.mdl",
+        "resolution": "approved_runtime_module",
+        "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl"
+      }
+    ],
+    "blocked_dependencies": [],
+    "blocked_dependency_count": 0,
+    "claim_level": "required_visual_canary_material_runtime_closure",
+    "full_material_parity_claimed": false,
+    "genmanip_mdl_system_path_hint": "/isaac-sim/materials/:{ASSETS_DIR}/miscs/mdl/ebench/mdl:{ASSETS_DIR}/scene_usds/.../SubUSDs/materials",
+    "mdl_search_paths": [
+      "/isaac-sim/kit/mdl/core/Base",
+      "/isaac-sim/kit/mdl/core/mdl",
+      "/cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl",
+      "/tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials"
+    ],
+    "package_local_dependency_counts": {
+      "mdl": 0,
+      "texture": 0,
+      "usd": 0
+    },
+    "package_root": "/tmp/ebench-remote-to-holder-canary",
+    "runtime_log_scan": {
+      "blocked_signals": [],
+      "counters": {
+        "failed_shader_node_count": 0,
+        "mdlc_count": 8,
+        "missing_texture_count": 0
+      },
+      "status": "pass",
+      "warning_signals": [
+        "MDLC"
+      ]
+    },
+    "source_policy": "convertasset_aan03_aan04_aan11_inspired_preflight",
+    "status": "pass"
+  },
+  "package_id": "ebench_remote_to_holder_canary",
+  "render_status": "pass",
+  "runtime_log_path": "remote_to_holder_tabletop_overview_posefixed_cam2_runtime.log",
+  "scene_usd": "remote_to_holder_main_posefixed.usda",
+  "schema": "scenario_forge_tabletop_overview_render.v0",
+  "visible_targets_expected": [
+    "tabletop",
+    "remote_control",
+    "remote_holder",
+    "scene_context",
+    "robot_or_spawn"
+  ]
+}

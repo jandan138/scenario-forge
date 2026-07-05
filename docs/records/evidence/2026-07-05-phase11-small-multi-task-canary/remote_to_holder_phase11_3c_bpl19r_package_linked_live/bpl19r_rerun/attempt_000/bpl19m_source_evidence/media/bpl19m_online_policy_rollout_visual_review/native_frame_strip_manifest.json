@@ -1,0 +1,46 @@
+{
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg",
+      "role": "native_initial_observation_frame",
+      "schema_id": "image/jpeg",
+      "size_bytes": 99169
+    },
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg",
+      "role": "native_post_action_observation_frame",
+      "schema_id": "image/jpeg",
+      "size_bytes": 101729
+    },
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/full_temporal/left_camera.mp4",
+      "role": "native_operation_video",
+      "schema_id": "video/mp4",
+      "size_bytes": 4166462
+    },
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/full_temporal/right_camera.mp4",
+      "role": "native_operation_video_right_camera",
+      "schema_id": "video/mp4",
+      "size_bytes": 4214282
+    }
+  ],
+  "backend_parity": false,
+  "bpl_stage": "BPL-19M",
+  "camera_name": "overlook_camera",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "frame_count": 2,
+  "frame_scope": "reset_ready_and_post_action_observation_plus_retained_full_temporal_media",
+  "full_temporal_artifact_count": 2,
+  "full_temporal_rollout_video": true,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "real_world_safety": false,
+  "schema": "embodied_eval_os_bpl19m_online_policy_rollout_frame_strip_manifest.v0",
+  "standard_model_score": null
+}

@@ -1,0 +1,59 @@
+schema_version: phase11-small-multi-task-canary/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  single_task_rc_gate: ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers:
+  - apple_to_bowl_single_task_rc_policy_blocked_for_public_release
+- package_id: ebench_soap_to_dish_canary
+  single_task_rc_gate: soap_to_dish_phase11_single_task_rc_bpl19r_top_camera_retake_internal_policy_blocked_gate.yaml
+  overview_visual_review_gate: soap_to_dish_phase11_visual_review_gate_nomdl_relink_cam4_pass.yaml
+  task_execution_gate: soap_to_dish_phase11_task_execution_gate_live.yaml
+  executed_episode_gate: soap_to_dish_phase11_executed_episode_bpl19r_success_gate.yaml
+  success_predicate_gate: soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+  post_execution_visual_review_gate: soap_to_dish_phase11_post_execution_visual_review_top_camera_retake_pass_gate.yaml
+  package_linked_rerun: soap_to_dish_phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_rerun.yaml
+  phase11_4_retake_rerun: soap_to_dish_phase11_4_bpl19r_top_camera_retake_live_allowed_config/phase11_package_linked_bpl19r_rerun.yaml
+  real_asset_package: true
+  task_contract: true
+  material_runtime_closure: passed
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  post_execution_visual_review_status: passed
+  blockers:
+  - soap_to_dish_single_task_rc_policy_blocked_for_public_release
+- package_id: ebench_remote_to_holder_canary
+  single_task_rc_gate: remote_to_holder_phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  overview_visual_review_gate: remote_to_holder_phase11_visual_review_gate_contactfixed_cam3_pass.yaml
+  task_execution_gate: remote_to_holder_phase11_task_execution_gate_live.yaml
+  executed_episode_gate: remote_to_holder_phase11_executed_episode_bpl19r_success_gate.yaml
+  success_predicate_gate: remote_to_holder_phase11_success_predicate_bpl19r_success_gate.yaml
+  post_execution_visual_review_gate: remote_to_holder_phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  material_runtime_closure: passed
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  post_execution_visual_review_status: passed
+  blockers:
+  - remote_to_holder_single_task_rc_policy_blocked_for_public_release
+blockers:
+- apple_to_bowl_single_task_rc_policy_blocked_for_public_release
+- soap_to_dish_single_task_rc_policy_blocked_for_public_release
+- remote_to_holder_single_task_rc_policy_blocked_for_public_release
+claim_boundary: >-
+  Apple-to-bowl, soap-to-dish, and remote-to-holder now each have retained
+  Phase 11.0-11.4 technical evidence, including real-asset package checks,
+  overview visual review, EOS execution, completed episode evidence,
+  simulator-state success predicate, and post-execution visual review. The
+  small multi-task canary remains blocked only because the included single-task
+  release candidates are internal / policy-blocked for public release. This
+  evidence does not claim public dataset release, official score release,
+  leaderboard comparability, or official camera/material parity.

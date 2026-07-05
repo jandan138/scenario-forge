@@ -1,0 +1,75 @@
+schema_version: ebench-task-contract/v0.1
+phase_gate: '10.10'
+package_id: ebench_remote_to_holder_canary
+task:
+  task_id: mobile_manip/remote_to_holder
+  task_family: pick_place
+  instruction: Pick up the remote control from the coffee table and place it into
+    the remote control holder.
+task_semantics:
+  action: pick_place
+  manipulated_object:
+    instance_id: remote_001
+    asset_id: official_ebench_remote_control
+    role: manipulated_object
+  target_container:
+    instance_id: remote_holder_fixture
+    asset_id: official_ebench_scene
+    role: target_container
+    source_uid: _00
+    semantic_label: remote_control_holder
+    fixture_kind: environment_fixture
+success_predicate:
+  metric_id: remote_in_holder
+  role: primary_success
+  predicate: object_in_container
+  object: remote_001
+  container: remote_holder_fixture
+  evaluator_owner: embodied-eval-os-ebench-adapter
+  claim_boundary: portable predicate binding only; target is an environment fixture;
+    not an executed task success result
+robot_hints:
+  robot_id: manip/lift2/R5a
+  robot_instance: lift2_robot_asset
+  spawn:
+    xyz:
+    - -0.955
+    - -0.507
+    - -0.502
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  usage: hint_only
+camera_hints:
+  source_asset_key: camera_yaml
+  source_file: fixed_camera_lift2_simbox.yml
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml
+  license: research-use
+  role: camera_config
+  usage: hint_only
+  claim_boundary: official camera config preserved as hint; no official camera parity
+    claim
+adapter_contract:
+  adapter: ebench
+  package_descriptor: adapters/ebench/package.yaml
+  task_entrypoint: adapters/ebench/task_entrypoint.yaml
+  runtime_owner: embodied-eval-os
+  scenario_forge_scope: package_artifacts_and_contracts_only
+  scenario_forge_excludes:
+  - episode_runner
+  - model_adapter
+  - leaderboard_reporting
+  - simulator_runtime_execution
+  - convertasset_usd_mdl_mesh_conversion
+phase_11_readiness:
+  status: ready_for_automated_visual_review
+  required_review_artifacts:
+  - scene/main.usda
+  - locks/asset_lock.yaml
+  - adapters/ebench/package.yaml
+  - adapters/ebench/task_entrypoint.yaml
+  - task/task_contract.yaml
+claim_boundary: real EBench single-task fixture package contract only; not task success,
+  not official camera/material parity, not leaderboard evidence

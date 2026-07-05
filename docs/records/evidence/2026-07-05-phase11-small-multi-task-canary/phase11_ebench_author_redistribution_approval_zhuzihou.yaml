@@ -1,0 +1,33 @@
+schema_version: phase11-asset-redistribution-approval/v0.1
+approval_id: ebench_author_zhuzihou_phase11_three_task_canary_20260705
+approved_at_utc: '2026-07-05T09:05:00Z'
+approver:
+  name: zhuzihou
+  role: EBench author
+  authority_basis: user-attested EBench author and asset rights owner for this approval scope
+approval_scope:
+  suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+  packages:
+  - package_id: ebench_apple_to_bowl_canary
+    task_id: mobile_manip/apple_to_fruit_bowl
+  - package_id: ebench_soap_to_dish_canary
+    task_id: mobile_manip/soap_to_dish
+  - package_id: ebench_remote_to_holder_canary
+    task_id: mobile_manip/remote_to_holder
+  assets: official EBench assets retained by the current Phase 11 three-task canary
+permissions:
+  scenario_forge_package_redistribution: true
+  public_registry_distribution: true
+  usd_scene_asset_bundle_distribution: true
+  derivative_task_package_distribution: true
+limitations:
+- Approval is scoped to the current Scenario Forge Phase 11 three-task canary packages
+  and their retained official EBench asset references.
+- This record does not grant rights for unrelated third-party assets outside the
+  retained EBench package evidence.
+- This record does not claim leaderboard comparability or official benchmark score
+  release; it only clears the asset redistribution policy blocker for package release.
+claim_boundary: >-
+  Author-provided redistribution approval evidence. It is consumed by Phase 11
+  release-policy gates to clear research-use / redistribution blockers for the
+  current retained EBench canary assets.

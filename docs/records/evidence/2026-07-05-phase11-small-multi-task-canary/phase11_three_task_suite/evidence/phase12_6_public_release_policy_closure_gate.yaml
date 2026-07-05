@@ -1,0 +1,13 @@
+schema_version: phase12-public-release-policy-closure-gate/v0.1
+phase: '12.6'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+hosted_internal_registry_alpha: registry/hosted_internal_registry_alpha.yaml
+license_policy: pass
+redistribution_approval: true
+known_blockers: &id001 []
+blockers: *id001
+next_stage: phase13_image_grounded_task_factory
+claim_boundary: Phase 12.6 policy closure gate only. Public release claims are limited
+  to packages with license_policy=pass, redistribution_approval=true, and no known
+  blockers; this is not leaderboard comparability.

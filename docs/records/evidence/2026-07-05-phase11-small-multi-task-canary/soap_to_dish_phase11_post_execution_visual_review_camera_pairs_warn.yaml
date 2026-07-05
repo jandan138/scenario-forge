@@ -1,0 +1,37 @@
+schema_version: phase11-post-execution-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+review_scope: post_execution_candidate_camera_pairs
+initial_image_path: soap_to_dish_phase11_4_bpl19r_visual_review_frames/right_camera_first.jpg
+final_image_path: soap_to_dish_phase11_4_bpl19r_visual_review_frames/right_camera_last.jpg
+verdict: WARN
+visible_evidence:
+  - Top pair is WARN: initial frame clearly shows the gray dish and purple soap separated, but final frame is cropped and partially occluded by the gripper and sink; dish/container placement is not fully unambiguous.
+  - Left pair is FAIL: final frame does not show the soap or dish/container clearly enough to support task completion.
+  - Right pair is WARN and the best candidate: final close-up suggests the soap is inside or directly on the gray dish/container, but the initial dish is mostly cropped off at far left and the final is tight/gripper-occluded.
+success_predicate_gate: soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+retake_recommendation: Rerender with a fixed wide 3/4 or top-oblique camera that keeps the soap and the full dish/container visible in both initial and final frames. In the final frame, show the soap after release or with the gripper lifted enough that soap-dish contact is visible. Avoid the sink dominating the crop and leave margin around the gray dish.
+confidence: high
+candidate_pairs:
+  top:
+    verdict: WARN
+    initial: soap_to_dish_phase11_4_bpl19r_visual_review_frames/top_camera_first.jpg
+    final: soap_to_dish_phase11_4_bpl19r_visual_review_frames/top_camera_last.jpg
+  left:
+    verdict: FAIL
+    initial: soap_to_dish_phase11_4_bpl19r_visual_review_frames/left_camera_first.jpg
+    final: soap_to_dish_phase11_4_bpl19r_visual_review_frames/left_camera_last.jpg
+  right:
+    verdict: WARN
+    initial: soap_to_dish_phase11_4_bpl19r_visual_review_frames/right_camera_first.jpg
+    final: soap_to_dish_phase11_4_bpl19r_visual_review_frames/right_camera_last.jpg
+source_artifacts:
+  bpl19r_rerun_evidence: soap_to_dish_phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_rerun.yaml
+  top_camera_video: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/full_temporal/top_camera.mp4
+  left_camera_video: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/full_temporal/left_camera.mp4
+  right_camera_video: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/full_temporal/right_camera.mp4
+claim_boundary: This diagnostic visual review evaluates candidate camera pairs extracted
+  from retained full-temporal videos after the default post-execution visual review
+  failed. It does not close Phase 11.4 because the verdict is WARN, not PASS.

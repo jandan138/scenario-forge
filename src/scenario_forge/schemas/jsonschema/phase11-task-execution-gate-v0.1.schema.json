@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-task-execution-gate-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Task Execution Gate v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "phase",
+    "status",
+    "package_id",
+    "task_id",
+    "execution",
+    "blockers",
+    "next_stage",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-task-execution-gate/v0.1"
+    },
+    "phase": {
+      "const": "11.1"
+    },
+    "status": {
+      "enum": ["passed", "failed"]
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution": {
+      "type": "object"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_stage": {
+      "enum": ["executed_episode_evidence_gate", "blocked"]
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

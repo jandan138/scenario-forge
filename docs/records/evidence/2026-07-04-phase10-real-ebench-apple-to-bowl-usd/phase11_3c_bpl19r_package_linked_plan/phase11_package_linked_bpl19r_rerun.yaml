@@ -1,0 +1,43 @@
+schema_version: phase11-scenario-forge-bpl19r-package-linked-rerun/v0.1
+runtime_owner: embodied-eval-os
+phase: 11.3.c
+rerun_status: planned
+attempt_count: 10
+selected_success_attempt: null
+attempts: []
+package_linkage:
+  package_loaded: true
+  package_id: ebench_apple_to_bowl_canary
+  task_id: mobile_manip/apple_to_fruit_bowl
+  package_root: /tmp/ebench-apple-to-bowl-canary
+  adapter_descriptor: /tmp/ebench-apple-to-bowl-canary/adapters/ebench/package.yaml
+  task_contract: /tmp/ebench-apple-to-bowl-canary/task/task_contract.yaml
+  scene_usd: /tmp/ebench-apple-to-bowl-canary/scene/main.usda
+  asset_lock: /tmp/ebench-apple-to-bowl-canary/locks/asset_lock.yaml
+  native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml
+  native_task_config_exists: true
+  mapping_source: eos_scenario_forge_bpl19r_static_task_mapping_v0
+bpl19r_invocation:
+  runner: run_bpl19r_r1_same_checkpoint_online_lane
+  output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_3c_bpl19r_package_linked_plan/bpl19r_rerun
+  q5_evidence_root: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/docs/records/evidence/2026-06-20-bpl19q-q5-decision-report
+  selected_checkpoint_id: pi05-ebench-generalist
+  selected_policy_config: pi05_ebench_all
+  checkpoint_dir: /cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist
+  max_cycles: 34
+  deployed_replan_horizon: 30
+  live_runner_server_url: null
+  live_runner_worker_id: '0'
+  live_runner_timeout_s: 1200.0
+  inference_timeout_s: 900.0
+bpl19r_report: {}
+artifact_refs:
+  package_linked_evidence: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_3c_bpl19r_package_linked_plan/phase11_package_linked_bpl19r_rerun.yaml
+  runtime_log: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_3c_bpl19r_package_linked_plan/phase11_package_linked_bpl19r_runtime.log
+  bpl19r_output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_3c_bpl19r_package_linked_plan/bpl19r_rerun
+blockers:
+- live_bpl19r_rerun_not_executed
+claim_boundary: Scenario Forge package-linked BPL-19R rerun evidence. EOS loads the
+  Scenario Forge package and maps its task contract to a native GenManip task config
+  before invoking the existing BPL-19R online lane. This is not official leaderboard
+  evidence.

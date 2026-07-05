@@ -1,0 +1,26 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+reviewer_agent: 019f2e94-8a30-7382-8411-fed0cbc3b926
+image_path: remote_to_holder_tabletop_overview_contactfixed_cam3.png
+render_metadata_path: remote_to_holder_tabletop_overview_contactfixed_cam3_render_metadata.json
+verdict: PASS
+visible_evidence:
+  - >-
+    The remote is visible on the tabletop near the lower center-left, with a
+    recognizable elongated shape and button-like surface detail.
+  - >-
+    The black compartment tray/holder is clearly visible in the upper
+    center-right and reads as the likely target container.
+  - >-
+    The camera gives a useful tabletop overview with both source object and
+    target in frame, plus partial robot context at left.
+main_risk: >-
+  Holder interior is very dark, and the remote texture is somewhat busy or
+  PCB-like, but both remain identifiable.
+retake_recommendation: Not required.
+confidence: high
+claim_boundary: >-
+  Automated visual review evidence only. It is not task success, official
+  camera parity, full material parity, physics-fidelity evidence, model quality
+  evidence, release approval, or leaderboard evidence.

@@ -1,0 +1,192 @@
+schema_version: phase11-scenario-forge-bpl19r-package-linked-rerun/v0.1
+runtime_owner: embodied-eval-os
+phase: 11.3.c
+rerun_status: executed
+attempt_count: 1
+selected_success_attempt: null
+attempts:
+- attempt_id: attempt_000
+  output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_fresh_live/bpl19r_rerun
+  task_success: null
+  standard_model_score: null
+  blocker_ids:
+  - blocked_live_online_rollout_exception
+  - blocked_genmanip_reset_not_ready
+  - blocked_online_policy_rollout_not_executed
+  - blocked_reset_ready_observation_not_completed
+  - blocked_policy_inference_cycle_count_lt_2
+  - blocked_online_cycles_missing_for_input_parity
+  - blocked_no_completed_native_episode_result
+  - blocked_native_task_success_measurement_missing
+  - blocked_source_online_lane_not_executed
+  - blocked_source_score_not_eligible
+package_linkage:
+  package_loaded: true
+  package_id: ebench_soap_to_dish_canary
+  task_id: mobile_manip/soap_to_dish
+  package_root: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+  adapter_descriptor: /tmp/ebench-soap-to-dish-canary-nomdl-relink/adapters/ebench/package.yaml
+  task_contract: /tmp/ebench-soap-to-dish-canary-nomdl-relink/task/task_contract.yaml
+  scene_usd: /tmp/ebench-soap-to-dish-canary-nomdl-relink/scene/main.usda
+  asset_lock: /tmp/ebench-soap-to-dish-canary-nomdl-relink/locks/asset_lock.yaml
+  native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+  native_task_config_exists: true
+  effective_native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/scenario_forge/phase11_4_retake/soap_to_dish_soap_to_dish_phase11_4_side_camera_retake_phase11_4_retake_task_config.yml
+  effective_native_task_config_exists: true
+  mapping_source: eos_scenario_forge_bpl19r_static_task_mapping_v0
+retake_camera_override:
+  enabled: true
+  camera_config: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_side_camera_retake.yml
+  camera_config_exists: true
+  camera_config_sha256: 82847b3198c3abf80330cb4199461e5f510c5ad66f89d2e2ae78ea7cb42c98f0
+  source_native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+  source_native_task_config_sha256: e757d0d8dcc79f3a09d9eabf06ba7efcd06448c670dd03bc76a8c158a1e232e0
+  effective_native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/scenario_forge/phase11_4_retake/soap_to_dish_soap_to_dish_phase11_4_side_camera_retake_phase11_4_retake_task_config.yml
+  effective_native_task_config_sha256: 71401ac7ee67c92cbf9b37fd53ec4c420ec084f32fa8249fc9197b2326eff64b
+  overridden_sections:
+  - demonstration_configs[0].domain_randomization.cameras.config_path
+  - evaluation_configs[0].domain_randomization.cameras.config_path
+  claim_boundary: Retake camera config only changes retained evidence cameras; policy
+    input camera use must remain owned by the EOS/GenManip runtime lane.
+bpl19r_invocation:
+  runner: run_bpl19r_r1_same_checkpoint_online_lane
+  output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_fresh_live/bpl19r_rerun
+  q5_evidence_root: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/docs/records/evidence/2026-06-20-bpl19q-q5-decision-report
+  selected_checkpoint_id: pi05-ebench-generalist
+  selected_policy_config: pi05_ebench_all
+  checkpoint_dir: /cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist
+  max_cycles: 34
+  deployed_replan_horizon: 30
+  live_runner_server_url: http://127.0.0.1:18354
+  live_runner_worker_id: '0'
+  live_runner_timeout_s: 1200.0
+  inference_timeout_s: 900.0
+bpl19r_report:
+  schema: embodied_eval_os_bpl19r_r1_same_checkpoint_online_lane_report.v0
+  bpl_stage: BPL-19R.R1
+  claim_scope: bpl19_ebench_post_trained_checkpoint_lane_v0
+  bpl19r_status: closed_r1_blocked_with_evidence
+  q5_decision_report_status: retained
+  q5_primary_decision: not_comparable_due_to_scope
+  q5_recommended_next_stage: BPL-19R.R1
+  same_checkpoint_boundary_status: satisfied
+  same_checkpoint_eos_pi05_online_lane_status: blocked
+  source_bpl19m_status: closed_blocked_with_evidence
+  selected_checkpoint_id: pi05-ebench-generalist
+  selected_policy_config: pi05_ebench_all
+  checkpoint_dir: /cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist
+  deployed_replan_horizon: 30
+  policy_inference_cycle_count: 0
+  fresh_live_observation_cycle_count: 0
+  test_override_used: false
+  fallback_profile_used: false
+  reused_bpl19j_action_chunk: false
+  repeated_fixed_chunk_replay: false
+  completed_native_episode_result_retained: false
+  score_eligibility_status: blocked
+  task_success: null
+  openpi_task_success: false
+  standard_model_score: null
+  standard_model_score_protocol_id: null
+  reports_standard_model_score: false
+  positive_claim_authorization: null
+  official_benchmark_reproduction: false
+  official_leaderboard_comparable: false
+  backend_parity: false
+  model_superiority: false
+  real_world_safety: false
+  blocked_claims:
+  - standard_model_score
+  - openpi_task_success
+  - official_benchmark_reproduction
+  - official_leaderboard_comparable
+  - official_runner_score_source
+  - backend_parity
+  - GenManip equivalence
+  - model_superiority
+  - benchmark_wide_model_quality
+  - real_world_safety
+  artifact_linkage_audit_status: passed
+  forbidden_claims_audit_status: passed
+  path_leakage_audit_status: passed
+  blocker_ids:
+  - blocked_live_online_rollout_exception
+  - blocked_genmanip_reset_not_ready
+  - blocked_online_policy_rollout_not_executed
+  - blocked_reset_ready_observation_not_completed
+  - blocked_policy_inference_cycle_count_lt_2
+  - blocked_online_cycles_missing_for_input_parity
+  - blocked_no_completed_native_episode_result
+  - blocked_native_task_success_measurement_missing
+  - blocked_source_online_lane_not_executed
+  - blocked_source_score_not_eligible
+  artifact_refs:
+    q5_source_summary:
+      path: q5_source_summary.json
+      role: q5_source_summary
+      exists: true
+      schema_id: embodied_eval_os_bpl19r_q5_source_summary.v0
+      size_bytes: 756
+    bpl19m_source_run_report:
+      path: bpl19m_source_evidence/run_report.json
+      role: bpl19m_source_run_report
+      exists: true
+      schema_id: embodied_eval_os_bpl19m_online_policy_rollout_report.v0
+      size_bytes: 4219
+    bpl19m_source_artifact_linkage_audit:
+      path: bpl19m_source_evidence/artifact_linkage_audit.json
+      role: bpl19m_source_artifact_linkage_audit
+      exists: true
+      schema_id: embodied_eval_os_artifact_linkage_audit.v0
+      size_bytes: 315
+    bpl19m_source_forbidden_claims_audit:
+      path: bpl19m_source_evidence/forbidden_claims_audit.json
+      role: bpl19m_source_forbidden_claims_audit
+      exists: true
+      schema_id: embodied_eval_os_forbidden_claims_audit.v0
+      size_bytes: 321
+    bpl19m_source_path_leakage_audit:
+      path: bpl19m_source_evidence/path_leakage_audit.json
+      role: bpl19m_source_path_leakage_audit
+      exists: true
+      schema_id: embodied_eval_os_bpl12_path_leakage_audit.v0
+      size_bytes: 297
+    r1_same_checkpoint_report:
+      path: r1_same_checkpoint_report.json
+      role: r1_same_checkpoint_report
+      exists: true
+      schema_id: embodied_eval_os_bpl19r_r1_same_checkpoint_report.v0
+      size_bytes: 3728
+    claim_boundary_report:
+      path: claim_boundary_report.json
+      role: claim_boundary_report
+      exists: true
+      schema_id: embodied_eval_os_bpl19r_r1_claim_boundary_report.v0
+      size_bytes: 1690
+    diagnostic_report:
+      path: diagnostic_report.md
+      role: diagnostic_report
+      exists: true
+      schema_id: markdown_diagnostic_report
+      size_bytes: 461
+  output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_fresh_live/bpl19r_rerun
+artifact_refs:
+  package_linked_evidence: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_fresh_live/phase11_package_linked_bpl19r_rerun.yaml
+  runtime_log: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_fresh_live/phase11_package_linked_bpl19r_runtime.log
+  bpl19r_output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_fresh_live/bpl19r_rerun
+blockers:
+- package_linked_bpl19r_success_missing
+- blocked_live_online_rollout_exception
+- blocked_genmanip_reset_not_ready
+- blocked_online_policy_rollout_not_executed
+- blocked_reset_ready_observation_not_completed
+- blocked_policy_inference_cycle_count_lt_2
+- blocked_online_cycles_missing_for_input_parity
+- blocked_no_completed_native_episode_result
+- blocked_native_task_success_measurement_missing
+- blocked_source_online_lane_not_executed
+- blocked_source_score_not_eligible
+claim_boundary: Scenario Forge package-linked BPL-19R rerun evidence. EOS loads the
+  Scenario Forge package and maps its task contract to a native GenManip task config
+  before invoking the existing BPL-19R online lane. This is not official leaderboard
+  evidence.

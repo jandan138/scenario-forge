@@ -1,0 +1,30 @@
+schema_version: phase11-executed-episode-gate/v0.1
+phase: '11.2'
+status: failed
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+episode:
+  source: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_started_blocked_evidence.yaml
+  schema_version: phase11-executed-episode-evidence/v0.1
+  runtime_owner: embodied-eval-os
+  episode_status: started
+  trace_uri: phase11_task_execution_live_trace.json
+  runtime_log: phase11_task_execution_live_runtime.log
+  keyframes:
+    initial: phase11_task_execution_initial_overlook.png
+    final: phase11_task_execution_step1_overlook.png
+    final_note: This is the frame after one zero-policy smoke step, not a completed
+      episode final state.
+  final_state:
+    source_trace: phase11_task_execution_live_trace.json
+    source_step_index: 1
+    status: partial_started_episode_state
+    note: Reset and one zero-policy step executed, but EOS has not retained a completed
+      episode final state for the Scenario Forge package.
+blockers:
+- executed episode_status must be completed; got started
+- eos_completed_episode_not_retained_for_scenario_forge_package
+- one_step_smoke_is_not_phase11_2_completed_episode
+next_stage: blocked
+claim_boundary: Executed episode evidence gate only; not task success, not model quality,
+  not release approval, and not leaderboard evidence.

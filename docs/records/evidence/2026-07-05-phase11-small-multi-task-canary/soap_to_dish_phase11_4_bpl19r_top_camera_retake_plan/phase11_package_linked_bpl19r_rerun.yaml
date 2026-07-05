@@ -1,0 +1,59 @@
+schema_version: phase11-scenario-forge-bpl19r-package-linked-rerun/v0.1
+runtime_owner: embodied-eval-os
+phase: 11.3.c
+rerun_status: planned
+attempt_count: 1
+selected_success_attempt: null
+attempts: []
+package_linkage:
+  package_loaded: true
+  package_id: ebench_soap_to_dish_canary
+  task_id: mobile_manip/soap_to_dish
+  package_root: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+  adapter_descriptor: /tmp/ebench-soap-to-dish-canary-nomdl-relink/adapters/ebench/package.yaml
+  task_contract: /tmp/ebench-soap-to-dish-canary-nomdl-relink/task/task_contract.yaml
+  scene_usd: /tmp/ebench-soap-to-dish-canary-nomdl-relink/scene/main.usda
+  asset_lock: /tmp/ebench-soap-to-dish-canary-nomdl-relink/locks/asset_lock.yaml
+  native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+  native_task_config_exists: true
+  effective_native_task_config: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_top_camera_retake_plan/phase11_4_retake_task_config.yaml
+  effective_native_task_config_exists: true
+  mapping_source: eos_scenario_forge_bpl19r_static_task_mapping_v0
+retake_camera_override:
+  enabled: true
+  camera_config: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_top_camera_retake.yml
+  camera_config_exists: true
+  camera_config_sha256: 8c669a02969642b5f23dad278c1870941df386fbd34f1902c297910d31c30c81
+  source_native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+  source_native_task_config_sha256: e757d0d8dcc79f3a09d9eabf06ba7efcd06448c670dd03bc76a8c158a1e232e0
+  effective_native_task_config: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_top_camera_retake_plan/phase11_4_retake_task_config.yaml
+  effective_native_task_config_sha256: c5abae8851b1da87c0b4b32e795b58aba963a942ed937c8ac0b2ec0ae6cb17d5
+  overridden_sections:
+  - demonstration_configs[0].domain_randomization.cameras.config_path
+  - evaluation_configs[0].domain_randomization.cameras.config_path
+  claim_boundary: Retake camera config only changes retained evidence cameras; policy
+    input camera use must remain owned by the EOS/GenManip runtime lane.
+bpl19r_invocation:
+  runner: run_bpl19r_r1_same_checkpoint_online_lane
+  output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_top_camera_retake_plan/bpl19r_rerun
+  q5_evidence_root: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/docs/records/evidence/2026-06-20-bpl19q-q5-decision-report
+  selected_checkpoint_id: pi05-ebench-generalist
+  selected_policy_config: pi05_ebench_all
+  checkpoint_dir: /cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist
+  max_cycles: 34
+  deployed_replan_horizon: 30
+  live_runner_server_url: null
+  live_runner_worker_id: '0'
+  live_runner_timeout_s: 1200.0
+  inference_timeout_s: 900.0
+bpl19r_report: {}
+artifact_refs:
+  package_linked_evidence: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_top_camera_retake_plan/phase11_package_linked_bpl19r_rerun.yaml
+  runtime_log: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_top_camera_retake_plan/phase11_package_linked_bpl19r_runtime.log
+  bpl19r_output_dir: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_top_camera_retake_plan/bpl19r_rerun
+blockers:
+- live_bpl19r_rerun_not_executed
+claim_boundary: Scenario Forge package-linked BPL-19R rerun evidence. EOS loads the
+  Scenario Forge package and maps its task contract to a native GenManip task config
+  before invoking the existing BPL-19R online lane. This is not official leaderboard
+  evidence.

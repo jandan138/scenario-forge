@@ -1,0 +1,41 @@
+schema_version: ebench-official-asset-sources/v0.1
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+task_family: pick_place
+instruction: Pick up the bar of soap from the bathtub edge and place it into the soap dish.
+assets:
+  scene:
+    role: environment
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task3/scene.usd
+    license: research-use
+  robot:
+    role: robot
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+    license: research-use
+  soap:
+    role: manipulated_object
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/soap/ready/soap0/soap0.usd
+    license: research-use
+  camera_yaml:
+    role: camera_config
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml
+    license: research-use
+fixture_task:
+  manipulated_asset_key: soap
+  manipulated_asset_id: official_ebench_soap
+  manipulated_instance_id: soap_001
+  target_fixture:
+    instance_id: soap_dish_fixture
+    source_uid: _01
+    role: target_container
+    semantic_label: soap_dish
+  success_metric_id: soap_in_dish
+  success_predicate: object_in_container
+  object_pose:
+    xyz: [-0.35, -0.2, 0.99]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
+    scale_xyz: [1.0, 1.0, 1.0]
+  robot_spawn:
+    xyz: [-1.02, 0.0, 0.31]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
+  source_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml

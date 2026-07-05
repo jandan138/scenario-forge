@@ -1,0 +1,116 @@
+record_type: phase11_successful_rollout_source_selection
+record_version: v0.1
+phase: "11.3.b"
+created_on: "2026-07-05"
+status: selected_candidate_rerun_required
+package:
+  package_id: ebench_apple_to_bowl_canary
+  package_root: /tmp/ebench-apple-to-bowl-canary
+  package_descriptor: /tmp/ebench-apple-to-bowl-canary/adapters/ebench/package.yaml
+  task_contract: /tmp/ebench-apple-to-bowl-canary/task/task_contract.yaml
+  scene_usd: /tmp/ebench-apple-to-bowl-canary/scene/main.usda
+  asset_lock: /tmp/ebench-apple-to-bowl-canary/locks/asset_lock.yaml
+  task_id: mobile_manip/apple_to_fruit_bowl
+  success_metric: apple_in_bowl
+  success_predicate: object_in_container
+  predicate_object: apple_001
+  predicate_container: bowl_001
+decision:
+  selected_first_candidate: eos_bpl19r_r2_pi05_same_checkpoint_online_lane
+  preferred_debug_reference_attempt: "007"
+  decision_basis:
+    - BPL-19R.R2 is a retained EOS online policy cohort, not fixed action replay.
+    - It uses the same pi0.5 EBench generalist checkpoint and policy config that previously produced apple-to-bowl successes.
+    - Retained GenManip result_info files show attempts 005, 006, 007, and 009 with score=1.0 and success_rate=1.
+    - It is closer to the desired EOS task-execution lane than an offline historical video or manual visual judgment.
+    - Attempt 007 is the preferred debugging reference because it is a retained success with score=1.0, success_rate=1, and the shortest retained success horizon of 13 cycles.
+selected_source:
+  owner: embodied-eval-os
+  source_id: bpl19r_r2_pi05_10_attempt_same_checkpoint_eos_cohort
+  source_stage: BPL-19R.R2
+  source_claim_scope: bpl19r_pi05_10_attempt_same_checkpoint_eos_cohort_v0
+  selected_checkpoint_id: pi05-ebench-generalist
+  selected_policy_config: pi05_ebench_all
+  model_profile_id: openpi_ebench_pi05_generalist_sidecar
+  checkpoint_dir: /cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist
+  native_genmanip_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml
+  eos_historical_evidence_root: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/docs/records/evidence/2026-06-20-bpl19r-r2-pi05-10-attempt-eos-cohort
+  eos_historical_run_report: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/docs/records/evidence/2026-06-20-bpl19r-r2-pi05-10-attempt-eos-cohort/run_report.json
+  genmanip_historical_result_root: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/bpl19r_r2_pi05_10_attempt_curobo/ebench/mobile_manip/apple_to_fruit_bowl_test_mini
+  retained_historical_outcome:
+    attempt_count: 10
+    completed_native_episode_result_count: 10
+    task_success_count: 4
+    task_failure_count: 6
+    standard_model_score: 0.4
+    successful_attempts:
+      - attempt_id: "005"
+        score: 1.0
+        success_rate: 1
+        result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/bpl19r_r2_pi05_10_attempt_curobo/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/005/result_info.json
+      - attempt_id: "006"
+        score: 1.0
+        success_rate: 1
+        result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/bpl19r_r2_pi05_10_attempt_curobo/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/006/result_info.json
+      - attempt_id: "007"
+        score: 1.0
+        success_rate: 1
+        preferred_debug_reference: true
+        retained_cycle_count: 13
+        result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/bpl19r_r2_pi05_10_attempt_curobo/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/007/result_info.json
+      - attempt_id: "009"
+        score: 1.0
+        success_rate: 1
+        result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/bpl19r_r2_pi05_10_attempt_curobo/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/009/result_info.json
+package_linkage_assessment:
+  historical_source_is_package_linked: false
+  historical_source_status: reference_only
+  reason: BPL-19R.R2 consumed the native GenManip task config directly and did not load the Scenario Forge package descriptor, task contract, scene USD, or asset lock.
+  phase_11_3c_wrapper_status: multi_attempt_dry_run_package_linkage_verified
+  phase_11_3c_plan_evidence: /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_3c_bpl19r_package_linked_plan/phase11_package_linked_bpl19r_rerun.yaml
+  phase_11_3c_planned_attempt_count: 10
+  phase_11_3c_live_rerun_status: pending
+  required_for_phase_11_3c:
+    - EOS loads the Scenario Forge package descriptor from /tmp/ebench-apple-to-bowl-canary/adapters/ebench/package.yaml.
+    - EOS records package_id, task_id, task_contract path, scene_usd path, asset_lock path, and adapter descriptor path in the run evidence.
+    - EOS maps mobile_manip/apple_to_fruit_bowl to the native GenManip apple_to_fruit_bowl.yml config with the mapping source recorded.
+    - EOS launches the BPL-19R online policy lane with a package-scoped run_id.
+    - EOS permits repeated package-scoped attempts because the current BPL-19R CLI cannot target or replay the retained successful attempt 007 seed directly.
+    - EOS translates BPL-19R native run reports into Phase 11 completed-episode and success-predicate evidence if the native trace format is not directly consumable by the existing Phase 11 CLI.
+    - EOS retains terminal episode_result, trace, runtime log, initial/final keyframes, and simulator-state projection for the new package-linked run.
+    - Scenario Forge ingests the new executed-episode evidence and strict predicate evidence; historical BPL-19R result_info files are not used as the final predicate pass.
+alternate_sources:
+  genmanip_native_demogen_curobo:
+    status: backup_regeneration_lane_not_selected
+    native_commands:
+      - cd /cpfs/shared/simulation/zhuzihou/dev/GenManip && python demogen.py -cfg configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml
+      - cd /cpfs/shared/simulation/zhuzihou/dev/GenManip && python demogen.py -cfg configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml --eval
+    success_recording:
+      metric_condition: scene metric score == 1
+      demonstration_output_root: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/demonstrations/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/trajectory
+      eval_task_output_root: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/tasks/ebench/mobile_manip/apple_to_fruit_bowl_test_mini
+    current_limitations:
+      - no_reusable_local_apple_demogen_or_task_lmdb_found
+      - existing_eval_result_dirs_are_success_evidence_not_clean_replay_sources
+      - direct_scenario_forge_package_usd_consumption_not_supported_by_genmanip_demogen
+      - scenario_forge_to_genmanip_adapter_or_exporter_required_for_package_linked_claim
+    planning_use: Keep as fallback if BPL-19R package-linked online rerun cannot produce success or if an oracle-style regeneration path becomes necessary.
+rejected_shortcuts:
+  - zero_policy_completed_episode_cannot_pass_success_predicate
+  - historical_success_video_or_result_info_cannot_close_phase_11_3_without_package_linkage
+  - genmanip_native_demogen_success_cannot_close_phase_11_3_without_scenario_forge_package_linkage
+  - human_inspection_cannot_override_predicate_status
+  - render_visual_reviewer_cannot_override_a_failed_simulator_state_predicate
+next_phase:
+  phase: "11.3.c"
+  name: package-linked successful completed episode rerun
+  owner: embodied-eval-os / GenManip runtime
+  status: multi_attempt_package_linkage_plan_verified_live_rerun_pending
+known_blockers:
+  - live_bpl19r_rerun_not_executed
+  - bpl19r_attempt_007_seed_not_directly_targetable
+  - bpl19r_native_trace_to_phase11_evidence_translator_missing
+  - scenario_forge_to_genmanip_adapter_missing_for_demogen_backup_lane
+  - successful_package_linked_episode_missing
+  - predicate_status_true_evidence_missing
+claim_boundary: This selects the first rerun source for Phase 11.3.c. It does not claim Scenario Forge package task success and does not close Phase 11.3.

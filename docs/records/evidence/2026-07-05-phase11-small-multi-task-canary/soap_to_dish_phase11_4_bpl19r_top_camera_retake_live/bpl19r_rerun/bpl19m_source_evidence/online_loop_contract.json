@@ -1,0 +1,33 @@
+{
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl19j_retained_action_reuse_allowed": false,
+  "bpl_stage": "BPL-19M",
+  "checkpoint_dir": "/cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "deployed_replan_horizon": 30,
+  "fixed_chunk_replay_allowed": false,
+  "live_runner_run_id": null,
+  "loop_order": [
+    "reset_ready_live_observation",
+    "openpi_inference",
+    "official_action_transform",
+    "genmanip_step_chunk",
+    "next_live_observation",
+    "repeat_until_episode_result_or_blocked"
+  ],
+  "max_cycles": 34,
+  "model_action_horizon": 50,
+  "model_profile_id": "openpi_ebench_pi05_generalist_sidecar",
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "official_loop_contract_status": "declared",
+  "real_world_safety": false,
+  "schema": "embodied_eval_os_bpl19m_online_loop_contract.v0",
+  "score_source": "completed_native_episode_result_only",
+  "selected_checkpoint_id": "pi05-ebench-generalist",
+  "selected_policy_config": "pi05_ebench_all",
+  "source_action_contract_id": "ebench_openpi_generalist_50x19_v0",
+  "standard_model_score": null
+}

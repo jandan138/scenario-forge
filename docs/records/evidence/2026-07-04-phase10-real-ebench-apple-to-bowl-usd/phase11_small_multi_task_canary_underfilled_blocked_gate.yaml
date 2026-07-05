@@ -1,0 +1,20 @@
+schema_version: phase11-small-multi-task-canary-gate/v0.1
+phase: '11.6'
+status: blocked
+suite_id: scenario_forge_phase11_underfilled_canary
+package_count: 1
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  single_task_rc_gate: phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers: []
+blockers:
+- small multi-task canary package_count must be between 3 and 5; got 1
+- only_one_real_ebench_task_available; need 3-5 tasks for Phase 11.6
+next_stage: blocked
+claim_boundary: Small multi-task canary gate only; not public dataset release, official
+  score release, leaderboard comparability, or broad benchmark coverage evidence.

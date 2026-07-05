@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-single-task-release-candidate-gate-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Single-Task Release Candidate Gate v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "phase",
+    "status",
+    "package_id",
+    "task_id",
+    "required_gates",
+    "release_policy",
+    "blockers",
+    "next_stage",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-single-task-release-candidate-gate/v0.1"
+    },
+    "phase": {
+      "const": "11.5"
+    },
+    "status": {
+      "enum": ["passed", "blocked"]
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "required_gates": {
+      "type": "object"
+    },
+    "release_policy": {
+      "type": "object"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_stage": {
+      "enum": ["small_multi_task_canary", "blocked"]
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

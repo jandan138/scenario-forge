@@ -1,0 +1,13 @@
+{
+  "audit": "artifact_linkage",
+  "evidence_root": "bpl19m_source_evidence",
+  "findings": [],
+  "result": "passed",
+  "schema": "embodied_eval_os_artifact_linkage_audit.v0",
+  "status": "passed",
+  "summary": {
+    "checked_artifact_ref_count": 2,
+    "finding_count": 0,
+    "virtual_artifact_ref_count": 0
+  }
+}

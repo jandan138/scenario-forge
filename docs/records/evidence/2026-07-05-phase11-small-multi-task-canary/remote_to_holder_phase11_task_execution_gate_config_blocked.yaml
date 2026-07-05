@@ -1,0 +1,31 @@
+schema_version: phase11-task-execution-gate/v0.1
+phase: '11.1'
+status: failed
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+execution:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_eos_task_execution_config_blocked_evidence.yaml
+  schema_version: phase11-eos-task-execution/v0.1
+  runtime_owner: embodied-eval-os
+  contract_consumed: true
+  execution_config_status: generated
+  episode_status: blocked
+  trace_uri: remote_to_holder_phase11_task_execution_config_trace.json
+  runtime_log: remote_to_holder_phase11_task_execution_config_runtime.log
+  lifecycle:
+    reset: blocked
+    step: blocked
+    close: blocked
+  keyframes:
+    initial: phase11_task_execution_initial_missing.png
+blockers:
+- execution episode_status must be started or completed; got blocked
+- execution lifecycle.reset must be passed; got blocked
+- execution lifecycle.step must be passed; got blocked
+- execution lifecycle.close must be passed; got blocked
+- 'execution initial keyframe does not exist: phase11_task_execution_initial_missing.png'
+- eos_episode_start_not_run_for_scenario_forge_package
+- no_scenario_forge_package_episode_runner_available_in_this_eos_lane
+next_stage: blocked
+claim_boundary: EOS task execution integration gate only; not task success, not model
+  quality, not release approval, and not leaderboard evidence.

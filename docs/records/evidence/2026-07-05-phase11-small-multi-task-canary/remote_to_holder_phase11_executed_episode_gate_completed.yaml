@@ -1,0 +1,182 @@
+schema_version: phase11-executed-episode-gate/v0.1
+phase: '11.2'
+status: passed
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+episode:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_executed_episode_completed_evidence.yaml
+  schema_version: phase11-executed-episode-evidence/v0.1
+  runtime_owner: embodied-eval-os
+  episode_status: completed
+  trace_uri: remote_to_holder_phase11_executed_episode_completed_trace.json
+  runtime_log: remote_to_holder_phase11_executed_episode_completed_runtime.log
+  keyframes:
+    initial: remote_to_holder_phase11_executed_episode_initial_overlook.png
+    final: remote_to_holder_phase11_executed_episode_final_overlook.png
+  final_state:
+    status: completed_episode_state
+    episode_result: &id001
+      episode_id: ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000
+      score: 0.0
+      seed: '000'
+      sr: 0.0
+      task_name: ebench/mobile_manip/remote_to_holder_test_mini
+    observation_status: post_completion_reset_observation
+    blocker_note: GenManip returned a next-episode reset observation together with
+      the completed episode_result; final keyframe and episode_result remain the authoritative
+      completed-episode artifacts.
+    completed_episode_id: ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000
+    observation_episode_id: ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/001
+    final_step_index: 1
+    physical_state_projection:
+      contacts: []
+      joints: {}
+      metadata:
+        source: ebench_genmanip_runtime_smoke
+      objects: {}
+      robots:
+        manip/lift2/R5a:
+          base:
+            data: gXgAs3arCjPzHBiv
+            dtype: float32
+            shape:
+            - 3
+            type: numpy_array
+          ee_pose:
+          - - data: 7zbNPRSI4jSiaSc+
+              dtype: float32
+              shape:
+              - 3
+              type: numpy_array
+            - data: AACAP+2XCCxUOas3v03Jsw==
+              dtype: float32
+              shape:
+              - 4
+              type: numpy_array
+          - - data: /jbNPYL75DTQaSc+
+              dtype: float32
+              shape:
+              - 3
+              type: numpy_array
+            - data: AACAPwm0z6zQuLA3vNqWtA==
+              dtype: float32
+              shape:
+              - 4
+              type: numpy_array
+          gripper:
+            data: Ujk0PVE5ND1ROTQ9Tzk0PQ==
+            dtype: float32
+            shape:
+            - 4
+            type: numpy_array
+          joints:
+            data: GT96tIKdPjdOjPi3keUDskY4ADL2Aeav0H/ysrm/hjcHL9+3AE3wNE0QLDXuDDWx
+            dtype: float32
+            shape:
+            - 12
+            type: numpy_array
+      time_s: 0.0
+    task_semantic_metadata:
+      episode_result: *id001
+      evaluator_only: true
+      metric:
+        '*(1/20)ebench/mobile_manip/remote_to_holder_test_mini':
+          score: 0.0
+          sr: 0.0
+      worker_envelope:
+        episode_result:
+          episode_id: ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000
+          score: 0.0
+          seed: '000'
+          sr: 0.0
+          task_name: ebench/mobile_manip/remote_to_holder_test_mini
+        metric:
+          '*(1/20)ebench/mobile_manip/remote_to_holder_test_mini':
+            score: 0.0
+            sr: 0.0
+        obs:
+          episode_id: ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/001
+          instruction: Pick up the remote control from the coffee table and place
+            it into the remote control holder.
+          reset: true
+          robot_id: manip/lift2/R5a
+          state.base:
+            data: gXgAs3arCjPzHBiv
+            dtype: float32
+            shape:
+            - 3
+            type: numpy_array
+          state.ee_pose:
+          - - data: 7zbNPRSI4jSiaSc+
+              dtype: float32
+              shape:
+              - 3
+              type: numpy_array
+            - data: AACAP+2XCCxUOas3v03Jsw==
+              dtype: float32
+              shape:
+              - 4
+              type: numpy_array
+          - - data: /jbNPYL75DTQaSc+
+              dtype: float32
+              shape:
+              - 3
+              type: numpy_array
+            - data: AACAPwm0z6zQuLA3vNqWtA==
+              dtype: float32
+              shape:
+              - 4
+              type: numpy_array
+          state.gripper:
+            data: Ujk0PVE5ND1ROTQ9Tzk0PQ==
+            dtype: float32
+            shape:
+            - 4
+            type: numpy_array
+          state.joints:
+            data: GT96tIKdPjdOjPi3keUDskY4ADL2Aeav0H/ysrm/hjcHL9+3AE3wNE0QLDXuDDWx
+            dtype: float32
+            shape:
+            - 12
+            type: numpy_array
+          timestep: 0
+          video.left_camera_view:
+            artifact_ref: memory://ebench/video_left_camera_view/1
+            byte_length: 47563
+            dtype: uint8
+            shape:
+            - 480
+            - 640
+            - 3
+            type: jpeg_bytes
+          video.overlook_camera_view:
+            artifact_ref: memory://ebench/video_overlook_camera_view/1
+            byte_length: 104173
+            dtype: uint8
+            shape:
+            - 720
+            - 1280
+            - 3
+            type: jpeg_bytes
+          video.right_camera_view:
+            artifact_ref: memory://ebench/video_right_camera_view/1
+            byte_length: 50233
+            dtype: uint8
+            shape:
+            - 480
+            - 640
+            - 3
+            type: jpeg_bytes
+          video.top_camera_view:
+            artifact_ref: memory://ebench/video_top_camera_view/1
+            byte_length: 104098
+            dtype: uint8
+            shape:
+            - 720
+            - 1280
+            - 3
+            type: jpeg_bytes
+blockers: []
+next_stage: success_predicate_evaluation_gate
+claim_boundary: Executed episode evidence gate only; not task success, not model quality,
+  not release approval, and not leaderboard evidence.

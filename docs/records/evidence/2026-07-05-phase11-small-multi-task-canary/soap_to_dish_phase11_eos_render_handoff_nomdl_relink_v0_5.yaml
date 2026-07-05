@@ -1,0 +1,123 @@
+schema_version: phase11-eos-render-handoff/v0.1
+phase: 11.0 / 11.6.a.2
+task_id: mobile_manip/soap_to_dish
+package_id: ebench_soap_to_dish_canary
+status: eos_isaacsim41_package_render_entrypoint_required
+created_utc: '2026-07-05T00:00:00Z'
+owner_boundary:
+  scenario_forge:
+    - retain package evidence, locks, hashes, handoff records, and strict visual gate inputs
+    - consume render metadata, runtime log, and render-visual-reviewer evidence
+    - do not import simulator SDKs or implement an episode/render runner in this repo
+  eos_isaacsim41:
+    - open the Scenario Forge package-linked stage in the IsaacSim41 runtime lane
+    - produce an engine-native tabletop overview render from the relinked no-MDL package
+    - retain render metadata, runtime log, camera metadata, and artifact hashes
+  render_visual_reviewer:
+    - perform clean-room visual review from image path plus visual expectation packet
+    - return structured PASS/WARN/FAIL evidence without reading package internals
+input_package:
+  path: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+  scene_entrypoint: scene/main.usda
+  relinked_scene_reference: ../assets/official_ebench_scene/scene_noMDL.usd
+  no_mdl_artifact_path: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+  no_mdl_artifact_sha256: e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
+upstream_evidence:
+  convertasset_handoff: soap_to_dish_phase11_convertasset_handoff_v0_2.yaml
+  convertasset_nomdl_result: soap_to_dish_phase11_convertasset_nomdl_result_v0_3.yaml
+  relink_static_gate: soap_to_dish_phase11_nomdl_relink_static_gate_v0_4.yaml
+  relink_package_check_log: soap_to_dish_nomdl_relink_package_check.log
+  relink_stage_mesh_faces_log: soap_to_dish_nomdl_relink_stage_mesh_faces.log
+current_static_status:
+  package_check: pass
+  relink_stage_openability: pass
+  relink_stage_mesh_faces: 925370
+  phase11_visual_gate: blocked_until_render_and_visual_review_exist
+eos_environment_requirements:
+  eeos_repo: /cpfs/user/zhuzihou/dev/embodied-eval-os
+  eeos_python: /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-py310/bin/python
+  isaacsim41_env_root: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310
+  isaacsim41_python: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python
+  required_exports:
+    EEOS_ISAACSIM41_ENV_ROOT: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310
+    EEOS_ISAACSIM41_PYTHON: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python
+    CUROBO_SRC: /cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src
+    CUDA11_LIB: /isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/nvidia/cuda_runtime/lib
+    ACCEPT_EULA: 'Y'
+    OMNI_KIT_ACCEPT_EULA: 'YES'
+    PYTHONNOUSERSITE: '1'
+  required_preflight:
+    command: "$EEOS_ISAACSIM41_PYTHON - <<'PY'\nfrom curobo.types.state import JointState\nimport curobo.curobolib.kinematics_fused_cu as k\nprint('curobo_runtime_check=passed')\nPY"
+    pass_signal: curobo_runtime_check=passed
+render_entrypoint_discovery:
+  searched_repo: /cpfs/user/zhuzihou/dev/embodied-eval-os
+  searched_scopes:
+    - scripts
+    - src
+    - adapters
+    - tests
+    - docs
+  searched_terms:
+    - scenario_forge render
+    - phase11 render
+    - tabletop_overview
+    - material_runtime_preflight
+    - scene/main.usda
+    - package render
+  finding: no direct Scenario Forge package-linked overview render CLI was identified in the searched EOS paths
+  non_applicable_reference:
+    path: scripts/taskbook03b_r5_official_observation_renderer_worker.py
+    reason: Newton official observation worker; it consumes an asset manifest and camera ids, not a Scenario Forge package scene/main.usda in the IsaacSim41 package-linked lane.
+required_eos_outputs:
+  render_png: soap_to_dish_nomdl_relink_tabletop_overview.png
+  render_metadata_json: soap_to_dish_nomdl_relink_tabletop_overview_render_metadata.json
+  runtime_log: soap_to_dish_nomdl_relink_tabletop_overview_runtime.log
+  artifact_hashes:
+    - render_png_sha256
+    - render_metadata_sha256
+    - runtime_log_sha256
+  metadata_required_fields:
+    package_root: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+    scene_entrypoint: scene/main.usda
+    stage_reference: assets/official_ebench_scene/scene_noMDL.usd
+    render_status: pass
+    material_runtime_preflight.status: pass
+    camera.engine_native: true
+    camera.expectation_source: task_specific_soap_to_dish
+  runtime_log_blocking_signals_must_be_absent:
+    - rtx.mdltranslator
+    - "wasn't resolved properly"
+    - References an asset that can not be found
+    - "Can't open"
+    - failed to resolve
+visual_review_requirements:
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  input_packet_must_include_only:
+    - image path
+    - task id
+    - short visual expectation
+  visual_expectation:
+    - soap object is visible and identifiable
+    - soap dish is visible and identifiable
+    - bathtub or work surface context is visible
+    - robot or spawn context is not contradicted
+    - no red or pink fallback material dominates the target assets
+    - no blank frame, severe clipping, or severe object occlusion
+  required_output: soap_to_dish_nomdl_relink_tabletop_overview_visual_review.yaml
+scenario_forge_followup_gate:
+  command_after_visual_review_retained: PYTHONPATH=src python -m scenario_forge.cli package phase11-visual-review --package /tmp/ebench-soap-to-dish-canary-nomdl-relink --visual-review docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_tabletop_overview_visual_review.yaml --strict
+  required_output: soap_to_dish_phase11_visual_review_gate_nomdl_relink.yaml
+  pass_condition:
+    - render metadata material_runtime_preflight.status is pass
+    - runtime log has no blocking material or missing asset signal
+    - render-visual-reviewer verdict is PASS
+    - visual evidence names soap and soap dish specifically, not apple or bowl anchors
+blockers:
+  - eos_package_linked_isaacsim41_overview_render_not_yet_produced
+  - render_metadata_for_nomdl_relink_package_missing
+  - render_visual_reviewer_not_rerun_for_nomdl_relink_package
+next_stage:
+  when_eos_render_cli_exists: run the package-linked IsaacSim41 overview render on /tmp/ebench-soap-to-dish-canary-nomdl-relink and retain the required outputs above
+  when_eos_render_cli_is_missing: EOS owner identifies or adds a package-linked overview render entrypoint in EOS, then returns exact invocation and artifacts in follow-up evidence
+claim_boundary: This handoff records the exact downstream render artifact contract for the soap-to-dish no-MDL relink package. It does not close Phase 11.0, does not prove IsaacSim material runtime closure, does not prove visual review PASS, does not claim task success, and does not approve public release.

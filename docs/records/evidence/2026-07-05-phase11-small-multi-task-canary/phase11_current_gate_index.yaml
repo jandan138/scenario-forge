@@ -1,0 +1,87 @@
+schema_version: phase11-current-gate-index/v0.1
+indexed_at_utc: '2026-07-05T09:20:00Z'
+index_owner: scenario-forge-roadmap-release-owner
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+overall_status: phase12_allowed
+technical_closure_status: passed
+public_release_status: release_candidate_passed
+phase12_allowed: true
+claim_boundary: >-
+  Current Phase 11 gate index only. This record identifies the retained active
+  evidence paths and status taxonomy; it does not rerun episodes, alter gate
+  statuses, approve redistribution, or claim leaderboard comparability.
+status_taxonomy:
+  technical_passed:
+  - package_check
+  - asset_lock_check
+  - adapter_contract
+  - overview_visual_review
+  - eos_execution
+  - completed_episode
+  - success_predicate
+  - post_execution_visual_review
+  - material_runtime_closure
+  policy_passed:
+  - release_policy
+  - redistribution_approval_retained
+  manual_blockers: []
+  unknown_blockers: []
+authorization_evidence: phase11_ebench_author_redistribution_approval_zhuzihou.yaml
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  task_label: apple_to_bowl
+  technical_gates:
+    '11.0': ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_visual_review_gate.yaml
+    '11.1': ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_task_execution_gate_live.yaml
+    '11.2': ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+  release_gate:
+    '11.5': ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  current_status: single_task_rc_passed
+  current_blocker_class: none
+- package_id: ebench_soap_to_dish_canary
+  task_label: soap_to_dish
+  technical_gates:
+    '11.0': soap_to_dish_phase11_visual_review_gate_nomdl_relink_cam4_pass.yaml
+    '11.1': soap_to_dish_phase11_task_execution_gate_live.yaml
+    '11.2': soap_to_dish_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': soap_to_dish_phase11_post_execution_visual_review_top_camera_retake_pass_gate.yaml
+  release_gate:
+    '11.5': soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  current_status: single_task_rc_passed
+  current_blocker_class: none
+- package_id: ebench_remote_to_holder_canary
+  task_label: remote_to_holder
+  technical_gates:
+    '11.0': remote_to_holder_phase11_visual_review_gate_contactfixed_cam3_pass.yaml
+    '11.1': remote_to_holder_phase11_task_execution_gate_live.yaml
+    '11.2': remote_to_holder_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': remote_to_holder_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': remote_to_holder_phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+  release_gate:
+    '11.5': remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  current_status: single_task_rc_passed
+  current_blocker_class: none
+suite_gates:
+  '11.6':
+    path: phase11_small_multi_task_canary_three_task_ebench_author_redistribution_pass_gate.yaml
+    status: passed
+    blocker_class: none
+  '11.7':
+    path: phase11_automated_release_three_task_ebench_author_redistribution_pass_gate.yaml
+    status: passed
+    blocker_class: none
+  '11.8_readiness_note':
+    path: phase11_8_phase12_readiness_ebench_author_redistribution_pass.yaml
+    status: passed
+    blocker_class: none
+  '11.8_gate':
+    path: phase11_8_phase12_readiness_ebench_author_redistribution_pass_gate.yaml
+    status: passed
+    blocker_class: none
+next_allowed_phase:
+  phase: '12.0'
+  scope: registry_readiness_freeze
+  starting_condition: phase11_8_gate_passed

@@ -1,0 +1,50 @@
+{
+  "allowed_claims": [],
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "r1_same_checkpoint_report.json",
+      "role": "r1_same_checkpoint_report",
+      "schema_id": "embodied_eval_os_bpl19r_r1_same_checkpoint_report.v0",
+      "size_bytes": 3728
+    }
+  ],
+  "backend_parity": false,
+  "blocked_claims": [
+    "standard_model_score",
+    "openpi_task_success",
+    "official_benchmark_reproduction",
+    "official_leaderboard_comparable",
+    "official_runner_score_source",
+    "backend_parity",
+    "GenManip equivalence",
+    "model_superiority",
+    "benchmark_wide_model_quality",
+    "real_world_safety"
+  ],
+  "blocker_ids": [
+    "blocked_live_online_rollout_exception",
+    "blocked_genmanip_reset_not_ready",
+    "blocked_online_policy_rollout_not_executed",
+    "blocked_reset_ready_observation_not_completed",
+    "blocked_policy_inference_cycle_count_lt_2",
+    "blocked_online_cycles_missing_for_input_parity",
+    "blocked_no_completed_native_episode_result",
+    "blocked_native_task_success_measurement_missing",
+    "blocked_source_online_lane_not_executed",
+    "blocked_source_score_not_eligible"
+  ],
+  "bpl_stage": "BPL-19R.R1",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "openpi_task_success": false,
+  "positive_claim_authorization": null,
+  "real_world_safety": false,
+  "reports_standard_model_score": false,
+  "same_checkpoint_boundary_status": "satisfied",
+  "schema": "embodied_eval_os_bpl19r_r1_claim_boundary_report.v0",
+  "standard_model_score": null,
+  "standard_model_score_protocol_id": null
+}

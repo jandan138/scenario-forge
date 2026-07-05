@@ -1,0 +1,70 @@
+record_type: phase11_nomdl_relink_static_gate
+record_version: v0.4
+phase: 11.0 / 11.6.a.2
+created_on: '2026-07-05'
+status: relink_static_pass_render_required
+package:
+  package_id: ebench_soap_to_dish_canary
+  task_id: mobile_manip/soap_to_dish
+  source_package_root: /tmp/ebench-soap-to-dish-canary
+  relink_package_root: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+  relink_scope: temporary_runtime_package_for_render_preflight
+relink_change:
+  scene_entrypoint: /tmp/ebench-soap-to-dish-canary-nomdl-relink/scene/main.usda
+  original_reference: ../assets/official_ebench_scene/scene.usd
+  relinked_reference: ../assets/official_ebench_scene/scene_noMDL.usd
+  retained_main_usda: soap_to_dish_nomdl_relink_main.usda
+  retained_main_usda_sha256: 89bcaf33402b99f7c783dbda8ff0bfb6d955691c6d021481bec0c95ed8ff2565
+asset_lock_update:
+  asset_id: official_ebench_scene
+  canonical_usd: assets/official_ebench_scene/scene_noMDL.usd
+  content_sha256: sha256:e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
+  source_kind: convertasset_nomdl_artifact
+  source_uri: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+  retained_asset_manifest: soap_to_dish_nomdl_relink_asset_manifest.yaml
+  retained_asset_manifest_sha256: 7377935199544e05b905b1ba941e99ead335331685e9ce851274e0eb43252f73
+  retained_asset_lock: soap_to_dish_nomdl_relink_asset_lock.yaml
+  retained_asset_lock_sha256: 9923ad813e65d5437fe31dfc1c6f8aff39701c041dfd6aed9f59812c50bb06b9
+package_check:
+  command:
+    - PYTHONPATH=src
+    - python
+    - -m
+    - scenario_forge.cli
+    - package
+    - check
+    - /tmp/ebench-soap-to-dish-canary-nomdl-relink
+  exit_status: 0
+  result: Package OK
+  retained_log: soap_to_dish_nomdl_relink_package_check.log
+  retained_log_sha256: 1a3b58376a01f33780d99963fdd625d9f5ba8cd2dbbfe8201e84a5c94cdd9de2
+stage_open_mesh_faces:
+  owner: ConvertAsset public CLI / Isaac Python USD stack
+  command:
+    - /cpfs/shared/simulation/zhuzihou/dev/ConvertAsset/scripts/isaac_python.sh
+    - /cpfs/shared/simulation/zhuzihou/dev/ConvertAsset/main.py
+    - mesh-faces
+    - /tmp/ebench-soap-to-dish-canary-nomdl-relink/scene/main.usda
+  exit_status: 0
+  total_render_mesh_faces: 925370
+  retained_log: soap_to_dish_nomdl_relink_stage_mesh_faces.log
+  retained_log_sha256: 0d81f611026362ef1d645e41c9cb68b6ea14f3bca52eb1b291c1a6168f2901bf
+upstream_nomdl_artifact:
+  path: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+  sha256: e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
+  source_evidence: soap_to_dish_phase11_convertasset_nomdl_result_v0_3.yaml
+phase11_0_status:
+  previous_gate: soap_to_dish_phase11_visual_review_gate_failed.yaml
+  current_status: blocked
+  blockers:
+    - relinked_nomdl_package_not_yet_rendered_in_isaacsim_overview_lane
+    - material_runtime_preflight_not_yet_rerun_on_relinked_package
+    - render_visual_reviewer_not_rerun_for_relinked_nomdl_package
+    - soap_to_dish_overview_camera_retake_required_after_material_closure
+next_actions:
+  - Use /tmp/ebench-soap-to-dish-canary-nomdl-relink as the EOS/IsaacSim41 overview render input.
+  - Retain render PNG, render metadata JSON, and runtime log for the relinked package.
+  - Require material_runtime_preflight.status=pass and no blocking material signals in the runtime log.
+  - Run render-visual-reviewer with soap/dish-specific expectations.
+  - Rerun Scenario Forge Phase 11.0 strict visual gate only after the render and visual review exist.
+claim_boundary: This gate proves only static package validity and USD-stage openability after relinking to the ConvertAsset no-MDL artifact. It does not prove IsaacSim material runtime closure, does not close Phase 11.0 visual review, and does not claim task success, policy quality, or release approval.

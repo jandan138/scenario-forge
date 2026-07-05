@@ -28,3 +28,7 @@ asset_cache/
 *.jpg
 *.jpeg
 !examples/**/scene.usda
+!docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_task_execution_initial_overlook.png
+!docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_task_execution_step1_overlook.png
+!docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_initial_overlook.png
+!docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_final_overlook.png

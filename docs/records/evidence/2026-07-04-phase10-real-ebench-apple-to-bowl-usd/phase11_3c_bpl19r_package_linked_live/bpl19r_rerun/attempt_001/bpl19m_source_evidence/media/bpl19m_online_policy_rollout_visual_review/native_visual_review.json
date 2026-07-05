@@ -1,0 +1,54 @@
+{
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/overlook_camera_before_after.mp4",
+      "role": "native_before_after_observation_video",
+      "schema_id": "video/mp4",
+      "size_bytes": 81293
+    },
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/full_temporal/left_camera.mp4",
+      "role": "native_operation_video",
+      "schema_id": "video/mp4",
+      "size_bytes": 5598167
+    },
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/full_temporal/right_camera.mp4",
+      "role": "native_operation_video_right_camera",
+      "schema_id": "video/mp4",
+      "size_bytes": 1310768
+    },
+    {
+      "exists": true,
+      "path": "media/bpl19m_online_policy_rollout_visual_review/native_frame_strip_manifest.json",
+      "role": "native_frame_strip_manifest",
+      "schema_id": "embodied_eval_os_bpl19m_online_policy_rollout_frame_strip_manifest.v0",
+      "size_bytes": 1555
+    }
+  ],
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "real_world_safety": false,
+  "reports_standard_model_score": false,
+  "review_method": "automated_artifact_retention_check",
+  "review_scope": "diagnostic_before_after_camera_observations_with_full_temporal_native_genmanip_operation_video_retained",
+  "schema": "embodied_eval_os_bpl19m_online_policy_rollout_visual_review.v0",
+  "standard_model_score": null,
+  "visual_review_checks": {
+    "before_after_video_retained": true,
+    "full_temporal_rollout_video": true,
+    "initial_observation_frame_retained": true,
+    "post_action_observation_frame_retained": true,
+    "task_success_judged_from_video": false
+  },
+  "visual_review_limitations": "This artifact retains reset-ready and post-action camera evidence plus finalized GenManip full temporal media. The video is explanatory evidence and is not a score source.",
+  "visual_review_status": "warn"
+}

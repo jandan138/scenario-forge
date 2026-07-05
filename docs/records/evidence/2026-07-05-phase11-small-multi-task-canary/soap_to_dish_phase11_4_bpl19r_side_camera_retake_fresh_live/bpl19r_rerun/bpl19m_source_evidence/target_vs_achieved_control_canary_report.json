@@ -1,0 +1,33 @@
+{
+  "backend_parity": false,
+  "blocker_ids": [
+    "blocked_online_cycles_missing",
+    "blocked_target_vs_achieved_state_not_measured"
+  ],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "cycle_count": 0,
+  "cycles": [],
+  "deployed_replan_horizon": 30,
+  "max_base_delta_error_l2": null,
+  "max_gripper_target_error_l2": null,
+  "max_joint_target_error_l2": null,
+  "mean_achieved_base_delta_norm_l2": null,
+  "mean_base_delta_error_l2": null,
+  "mean_commanded_base_delta_norm_l2": null,
+  "mean_gripper_target_error_l2": null,
+  "mean_joint_target_error_l2": null,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "openpi_task_success": false,
+  "real_world_safety": false,
+  "reports_standard_model_score": false,
+  "saturated_value_count": 0,
+  "saturation_bound_abs": 1.0,
+  "schema": "embodied_eval_os_bpl19m_target_vs_achieved_control_canary_report.v0",
+  "standard_model_score": null,
+  "target_vs_achieved_control_canary_status": "blocked_with_evidence",
+  "target_vs_achieved_state_status": "not_run",
+  "warning_ids": []
+}

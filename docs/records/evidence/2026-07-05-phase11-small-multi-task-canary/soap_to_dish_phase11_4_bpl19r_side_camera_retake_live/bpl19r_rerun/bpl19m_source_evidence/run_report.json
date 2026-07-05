@@ -1,0 +1,113 @@
+{
+  "artifact_linkage_audit_status": "passed",
+  "artifact_refs": {
+    "media_artifacts": [
+      {
+        "claim_boundary": "full temporal native GenManip operation video retained for explanation; not a score source",
+        "exists": true,
+        "media_type": "video/mp4",
+        "path": "media/bpl19m_online_policy_rollout_visual_review/full_temporal/left_camera.mp4",
+        "role": "native_operation_video",
+        "schema_id": "video/mp4",
+        "size_bytes": 4022182
+      },
+      {
+        "claim_boundary": "diagnostic before/after observation video; not a score source",
+        "exists": true,
+        "media_type": "video/mp4",
+        "path": "media/bpl19m_online_policy_rollout_visual_review/overlook_camera_before_after.mp4",
+        "role": "native_before_after_observation_video",
+        "schema_id": "video/mp4",
+        "size_bytes": 60901
+      },
+      {
+        "exists": true,
+        "media_type": "application/json",
+        "path": "media/bpl19m_online_policy_rollout_visual_review/native_frame_strip_manifest.json",
+        "role": "native_frame_strip_manifest",
+        "schema_id": "embodied_eval_os_bpl19m_online_policy_rollout_frame_strip_manifest.v0",
+        "size_bytes": 1319
+      },
+      {
+        "exists": true,
+        "media_type": "application/json",
+        "path": "media/bpl19m_online_policy_rollout_visual_review/native_visual_review.json",
+        "role": "native_visual_review_report",
+        "schema_id": "embodied_eval_os_bpl19m_online_policy_rollout_visual_review.v0",
+        "size_bytes": 1870
+      }
+    ]
+  },
+  "backend_parity": false,
+  "blocked_claims": [
+    "official_benchmark_reproduction",
+    "leaderboard_comparability",
+    "backend_parity",
+    "model_superiority",
+    "real_world_safety"
+  ],
+  "blocker_ids": [],
+  "bpl19m_status": "closed_online_policy_rollout_retained",
+  "bpl_stage": "BPL-19M",
+  "checkpoint_dir": "/cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "completed_native_episode_result_retained": true,
+  "deployed_replan_horizon": 30,
+  "fallback_profile_used": false,
+  "forbidden_claims_audit_status": "passed",
+  "fresh_live_observation_cycle_count": 34,
+  "live_rollout_error": null,
+  "live_runner_run_id": null,
+  "model_action_horizon": 50,
+  "model_profile_id": "openpi_ebench_pi05_generalist_sidecar",
+  "model_superiority": false,
+  "native_step_chunk_execution_status": "executed",
+  "observation_pixel_parity_status": "matched",
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "official_live_input_parity_status": "executed_with_evidence",
+  "official_live_input_reference_status": "retained",
+  "official_loop_contract_status": "declared",
+  "online_policy_rollout_status": "executed",
+  "openpi_task_success": false,
+  "output_dir": "/cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_live/bpl19r_rerun/bpl19m_source_evidence",
+  "path_leakage_audit_status": "passed",
+  "policy_inference_cycle_count": 34,
+  "positive_claim_authorization": {
+    "authorization_id": "bpl19m_official_style_online_policy_rollout_v0",
+    "authorization_status": "authorized",
+    "authorized_fields": [
+      "openpi_task_success",
+      "standard_model_score"
+    ],
+    "backend_parity": false,
+    "blocker_ids": [],
+    "bpl_stage": "BPL-19M",
+    "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+    "official_benchmark_reproduction": false,
+    "real_world_safety": false,
+    "schema": "embodied_eval_os_bpl19m_positive_claim_authorization.v0",
+    "score_protocol_id": "eos_bpl19m_online_policy_rollout_score_v0"
+  },
+  "post_terminal_reset_pending": false,
+  "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+  "real_world_safety": false,
+  "repeated_fixed_chunk_replay": false,
+  "reports_standard_model_score": true,
+  "reset_pending_observation_accepted": false,
+  "reset_pending_resolved_count": 1,
+  "reset_ready_status": "completed",
+  "reused_bpl19j_action_chunk": false,
+  "schema": "embodied_eval_os_bpl19m_online_policy_rollout_report.v0",
+  "score_eligibility_status": "score_eligible",
+  "selected_checkpoint_id": "pi05-ebench-generalist",
+  "selected_policy_config": "pi05_ebench_all",
+  "source_action_contract_id": "ebench_openpi_generalist_50x19_v0",
+  "standard_model_score": 0.0,
+  "standard_model_score_protocol_id": "eos_bpl19m_online_policy_rollout_score_v0",
+  "state_numeric_parity_status": "matched",
+  "target_vs_achieved_control_canary_status": "executed_with_evidence",
+  "target_vs_achieved_state_status": "measured",
+  "task_success": false,
+  "test_override_used": false
+}

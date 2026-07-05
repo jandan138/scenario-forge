@@ -1,0 +1,5 @@
+2026-07-05 06:07:46,462 [INFO] EvalServer[scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z][20260705_060746_448435]: Configured server logging. run_id=scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z server_id=20260705_060746_448435
+2026-07-05 06:07:46,462 [INFO] EvalServer[scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z][20260705_060746_448435]: Registered worker pool. initial_run_id=scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z
+2026-07-05 06:07:46,462 [INFO] EvalServer[scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z][20260705_060746_448435]: Starting uvicorn server on 127.0.0.1:18351 with workers=1
+2026-07-05 06:08:38,880 [INFO] EvalServer[scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z][20260705_060746_448435]: Configured server logging. run_id=scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z server_id=20260705_060746_448435
+2026-07-05 06:08:38,881 [INFO] EvalServer[scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z][20260705_060746_448435]: Started new job. run_id=scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z config_count=1

@@ -1,0 +1,44 @@
+schema_version: phase11-executed-episode-evidence/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+episode_status: completed
+trace_uri: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/episode_trace.json
+runtime_log: soap_to_dish_phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_runtime.log
+keyframes:
+  initial: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+  final: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg
+final_state:
+  status: completed_episode_state
+  episode_result:
+    episode_id: ebench/scenario_forge_phase11_soap_to_dish_bpl19r_live_20260705/ebench/mobile_manip/soap_to_dish_test_mini/000
+    native_raw_result_value: 1.0
+    native_raw_sr_value: 1.0
+    seed: '000'
+    task_name: ebench/mobile_manip/soap_to_dish_test_mini
+    score: 1.0
+    sr: 1.0
+  task_success: true
+  source_trace_kind: official_style_online_policy_rollout
+  policy_inference_cycle_count: 13
+  fresh_live_observation_cycle_count: 13
+  package_linkage:
+    package_loaded: true
+    package_id: ebench_soap_to_dish_canary
+    task_id: mobile_manip/soap_to_dish
+    package_root: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+    adapter_descriptor: /tmp/ebench-soap-to-dish-canary-nomdl-relink/adapters/ebench/package.yaml
+    task_contract: /tmp/ebench-soap-to-dish-canary-nomdl-relink/task/task_contract.yaml
+    scene_usd: /tmp/ebench-soap-to-dish-canary-nomdl-relink/scene/main.usda
+    asset_lock: /tmp/ebench-soap-to-dish-canary-nomdl-relink/locks/asset_lock.yaml
+    native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+    native_task_config_exists: true
+    mapping_source: eos_scenario_forge_bpl19r_static_task_mapping_v0
+  bpl19r_source:
+    rerun_evidence: soap_to_dish_phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_rerun.yaml
+    source_run_report: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/run_report.json
+    score_gate_report: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/online_policy_score_gate_report.json
+blockers: []
+claim_boundary: Scenario Forge package-linked BPL-19R bridge evidence. EOS projects
+  the retained package-linked BPL-19R episode_result and score evidence into Scenario
+  Forge Phase 11 evidence contracts. This is not official leaderboard evidence.

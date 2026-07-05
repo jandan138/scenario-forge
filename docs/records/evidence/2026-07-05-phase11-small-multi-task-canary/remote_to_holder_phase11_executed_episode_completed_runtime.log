@@ -1,0 +1,19 @@
+Phase 11.2 remote-to-holder completed episode evidence.
+package_id=ebench_remote_to_holder_canary
+task_id=mobile_manip/remote_to_holder
+runtime_owner=embodied-eval-os
+run_id=scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z
+server_url=http://127.0.0.1:18348
+smoke_run_command=python -m adapters.ebench.smoke_run --task-config /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/remote_to_holder.yml --server-url http://127.0.0.1:18348 --worker-id 0 --trace-dir /tmp/scenario-forge-phase11-remote-to-holder-completed-trace --max-policy-calls 1000 --step-chunk-size 1000 --reset-result-timeout-s 600
+episode_id=ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000
+runtime_status=executed
+episode_status=completed
+episode_result_score=0.0
+episode_result_sr=None
+trace_source=/tmp/scenario-forge-phase11-remote-to-holder-completed-trace/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000.json
+result_info_source=/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000/result_info.json
+overlook_mp4=/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000/overlook_camera.mp4
+overlook_mp4_frame_count=1001
+initial_keyframe_source=/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000/33f2d2e2b042446ba2bd2a3887328d74/overlook_camera/00000.png
+final_keyframe_source=/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000/overlook_camera.mp4:frame_1000
+claim_boundary=Completed episode evidence only; score/sr are retained for predicate evaluation, but this is not task success unless Phase 11.3 predicate gate passes.

@@ -1,0 +1,121 @@
+{
+  "artifact_linkage_audit_status": "passed",
+  "artifact_refs": {
+    "bpl19m_source_artifact_linkage_audit": {
+      "exists": true,
+      "path": "bpl19m_source_evidence/artifact_linkage_audit.json",
+      "role": "bpl19m_source_artifact_linkage_audit",
+      "schema_id": "embodied_eval_os_artifact_linkage_audit.v0",
+      "size_bytes": 315
+    },
+    "bpl19m_source_forbidden_claims_audit": {
+      "exists": true,
+      "path": "bpl19m_source_evidence/forbidden_claims_audit.json",
+      "role": "bpl19m_source_forbidden_claims_audit",
+      "schema_id": "embodied_eval_os_forbidden_claims_audit.v0",
+      "size_bytes": 321
+    },
+    "bpl19m_source_path_leakage_audit": {
+      "exists": true,
+      "path": "bpl19m_source_evidence/path_leakage_audit.json",
+      "role": "bpl19m_source_path_leakage_audit",
+      "schema_id": "embodied_eval_os_bpl12_path_leakage_audit.v0",
+      "size_bytes": 297
+    },
+    "bpl19m_source_run_report": {
+      "exists": true,
+      "path": "bpl19m_source_evidence/run_report.json",
+      "role": "bpl19m_source_run_report",
+      "schema_id": "embodied_eval_os_bpl19m_online_policy_rollout_report.v0",
+      "size_bytes": 4219
+    },
+    "claim_boundary_report": {
+      "exists": true,
+      "path": "claim_boundary_report.json",
+      "role": "claim_boundary_report",
+      "schema_id": "embodied_eval_os_bpl19r_r1_claim_boundary_report.v0",
+      "size_bytes": 1690
+    },
+    "diagnostic_report": {
+      "exists": true,
+      "path": "diagnostic_report.md",
+      "role": "diagnostic_report",
+      "schema_id": "markdown_diagnostic_report",
+      "size_bytes": 461
+    },
+    "q5_source_summary": {
+      "exists": true,
+      "path": "q5_source_summary.json",
+      "role": "q5_source_summary",
+      "schema_id": "embodied_eval_os_bpl19r_q5_source_summary.v0",
+      "size_bytes": 756
+    },
+    "r1_same_checkpoint_report": {
+      "exists": true,
+      "path": "r1_same_checkpoint_report.json",
+      "role": "r1_same_checkpoint_report",
+      "schema_id": "embodied_eval_os_bpl19r_r1_same_checkpoint_report.v0",
+      "size_bytes": 3728
+    }
+  },
+  "backend_parity": false,
+  "blocked_claims": [
+    "standard_model_score",
+    "openpi_task_success",
+    "official_benchmark_reproduction",
+    "official_leaderboard_comparable",
+    "official_runner_score_source",
+    "backend_parity",
+    "GenManip equivalence",
+    "model_superiority",
+    "benchmark_wide_model_quality",
+    "real_world_safety"
+  ],
+  "blocker_ids": [
+    "blocked_live_online_rollout_exception",
+    "blocked_genmanip_reset_not_ready",
+    "blocked_online_policy_rollout_not_executed",
+    "blocked_reset_ready_observation_not_completed",
+    "blocked_policy_inference_cycle_count_lt_2",
+    "blocked_online_cycles_missing_for_input_parity",
+    "blocked_no_completed_native_episode_result",
+    "blocked_native_task_success_measurement_missing",
+    "blocked_source_online_lane_not_executed",
+    "blocked_source_score_not_eligible"
+  ],
+  "bpl19r_status": "closed_r1_blocked_with_evidence",
+  "bpl_stage": "BPL-19R.R1",
+  "checkpoint_dir": "/cpfs/shared/simulation/zhuzihou/dev/_models/EBench/pi05-ebench-generalist/pi05_generalist",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "completed_native_episode_result_retained": false,
+  "deployed_replan_horizon": 30,
+  "fallback_profile_used": false,
+  "forbidden_claims_audit_status": "passed",
+  "fresh_live_observation_cycle_count": 0,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "openpi_task_success": false,
+  "output_dir": "/cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_side_camera_retake_fresh_live/bpl19r_rerun",
+  "path_leakage_audit_status": "passed",
+  "policy_inference_cycle_count": 0,
+  "positive_claim_authorization": null,
+  "q5_decision_report_status": "retained",
+  "q5_primary_decision": "not_comparable_due_to_scope",
+  "q5_recommended_next_stage": "BPL-19R.R1",
+  "real_world_safety": false,
+  "repeated_fixed_chunk_replay": false,
+  "reports_standard_model_score": false,
+  "reused_bpl19j_action_chunk": false,
+  "same_checkpoint_boundary_status": "satisfied",
+  "same_checkpoint_eos_pi05_online_lane_status": "blocked",
+  "schema": "embodied_eval_os_bpl19r_r1_same_checkpoint_online_lane_report.v0",
+  "score_eligibility_status": "blocked",
+  "selected_checkpoint_id": "pi05-ebench-generalist",
+  "selected_policy_config": "pi05_ebench_all",
+  "source_bpl19m_status": "closed_blocked_with_evidence",
+  "standard_model_score": null,
+  "standard_model_score_protocol_id": null,
+  "task_success": null,
+  "test_override_used": false
+}

@@ -1,0 +1,28 @@
+schema_version: phase11-success-predicate-gate/v0.1
+phase: '11.3'
+status: failed
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+predicate:
+  source: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_success_predicate_failed_evidence.yaml
+  schema_version: phase11-success-predicate-evaluation/v0.1
+  evaluator_owner: embodied-eval-os-ebench-adapter
+  success_metric: apple_in_bowl
+  predicate: object_in_container
+  object: apple_001
+  container: bowl_001
+  predicate_status: false
+  executed_episode_gate: phase11_executed_episode_gate_completed.yaml
+  measurement:
+    source: phase11_executed_episode_completed_evidence.yaml
+    source_episode_id: ebench/scenario_forge_phase11_apple_to_bowl_chunk_20260704T154825Z/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/000
+    eos_episode_result:
+      score: 0.0
+      sr: 0.0
+    interpretation: completed_episode_did_not_satisfy_success_predicate
+blockers:
+- predicate_status must be true; got False
+- episode_result_sr_zero
+next_stage: blocked
+claim_boundary: Success predicate evaluation gate only; episode-level task success
+  is predicate-based and is not model quality, release approval, or leaderboard evidence.

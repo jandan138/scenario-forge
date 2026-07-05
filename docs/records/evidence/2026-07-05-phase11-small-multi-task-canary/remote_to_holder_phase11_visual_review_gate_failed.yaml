@@ -1,0 +1,27 @@
+schema_version: phase11-visual-review-gate/v0.1
+phase: '11.0'
+status: failed
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+visual_review:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_visual_review.yaml
+  schema_version: phase11-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: FAIL
+  image_path: remote_to_holder_tabletop_overview.png
+  render_metadata_path: remote_to_holder_tabletop_overview_render_metadata.json
+  visible_evidence:
+  - Work surface, surrounding room, and robot or spawn are visible.
+  - A black compartment tray or holder may be visible.
+  - The remote control is not visible or identifiable.
+  retake_recommendation: Retake with the remote clearly visible on the table near
+    the holder, preferably with stronger contrast against the surface and less overlap
+    from unrelated props.
+blockers:
+- visual review verdict must be PASS; got FAIL
+- 'visual review render runtime log contains blocking material signal: References
+  an asset that can not be found'
+next_stage: blocked
+claim_boundary: Automated visual review gate only; not task success, not physics fidelity,
+  not release approval, and not leaderboard evidence.

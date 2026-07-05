@@ -1,0 +1,4627 @@
+{
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "online_policy_cycle_000_request.npz",
+      "role": "online_policy_cycle_000_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 1874630
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_001_request.npz",
+      "role": "online_policy_cycle_001_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 1971289
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_002_request.npz",
+      "role": "online_policy_cycle_002_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2083249
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_003_request.npz",
+      "role": "online_policy_cycle_003_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2119210
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_004_request.npz",
+      "role": "online_policy_cycle_004_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2116196
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_005_request.npz",
+      "role": "online_policy_cycle_005_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2112797
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_006_request.npz",
+      "role": "online_policy_cycle_006_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2095312
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_007_request.npz",
+      "role": "online_policy_cycle_007_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2084736
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_008_request.npz",
+      "role": "online_policy_cycle_008_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 1989053
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_009_request.npz",
+      "role": "online_policy_cycle_009_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 1869882
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_010_request.npz",
+      "role": "online_policy_cycle_010_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 1821064
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_011_request.npz",
+      "role": "online_policy_cycle_011_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 1924325
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_012_request.npz",
+      "role": "online_policy_cycle_012_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 1985278
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_013_request.npz",
+      "role": "online_policy_cycle_013_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2021397
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_014_request.npz",
+      "role": "online_policy_cycle_014_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2149592
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_015_request.npz",
+      "role": "online_policy_cycle_015_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2169376
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_016_request.npz",
+      "role": "online_policy_cycle_016_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2112994
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_017_request.npz",
+      "role": "online_policy_cycle_017_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2107654
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_018_request.npz",
+      "role": "online_policy_cycle_018_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2107291
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_019_request.npz",
+      "role": "online_policy_cycle_019_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2106478
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_020_request.npz",
+      "role": "online_policy_cycle_020_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2104517
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_021_request.npz",
+      "role": "online_policy_cycle_021_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2108491
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_022_request.npz",
+      "role": "online_policy_cycle_022_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2110335
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_023_request.npz",
+      "role": "online_policy_cycle_023_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2108254
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_024_request.npz",
+      "role": "online_policy_cycle_024_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2107311
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_025_request.npz",
+      "role": "online_policy_cycle_025_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2105946
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_026_request.npz",
+      "role": "online_policy_cycle_026_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2104070
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_027_request.npz",
+      "role": "online_policy_cycle_027_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2111808
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_028_request.npz",
+      "role": "online_policy_cycle_028_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2110394
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_029_request.npz",
+      "role": "online_policy_cycle_029_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2108857
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_030_request.npz",
+      "role": "online_policy_cycle_030_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2110921
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_031_request.npz",
+      "role": "online_policy_cycle_031_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2107727
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_032_request.npz",
+      "role": "online_policy_cycle_032_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2108560
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_033_request.npz",
+      "role": "online_policy_cycle_033_model_visible_request",
+      "schema_id": "npz_openpi_request_official_prep_input_v0",
+      "size_bytes": 2106378
+    }
+  ],
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "cycle_count": 34,
+  "cycles": [
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_000_request.npz",
+          "role": "online_policy_cycle_000_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 1874630
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 0,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "d82f7b927d8c7e27fef2eb5e8b6e5cf619d2b180a3bc6ab0e563b703493eae26",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "ddf311b5a1a659412be1bfa4339f622b1e16ad87c47aed9ce17c0416acb83989",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "f882a1dc0a098b9f33d9d6d4406ebcc81c5c2ef7da43c6335be332cf1063441a",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "4f5c2f291309fc4ac909f5591d404f7461698a18585754ad9da487b9d4896726",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "4ebffe1199289c0b96c120b290bd73558121ac5456f97ea2986aa874badcac17",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "cec1a69de3692158ac28b213157a454a734699d26d6ffa3412afb8ac8bbbee7d",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "d82f7b927d8c7e27fef2eb5e8b6e5cf619d2b180a3bc6ab0e563b703493eae26",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "ddf311b5a1a659412be1bfa4339f622b1e16ad87c47aed9ce17c0416acb83989",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "f882a1dc0a098b9f33d9d6d4406ebcc81c5c2ef7da43c6335be332cf1063441a",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "4f5c2f291309fc4ac909f5591d404f7461698a18585754ad9da487b9d4896726",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "4ebffe1199289c0b96c120b290bd73558121ac5456f97ea2986aa874badcac17",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "cec1a69de3692158ac28b213157a454a734699d26d6ffa3412afb8ac8bbbee7d",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_001_request.npz",
+          "role": "online_policy_cycle_001_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 1971289
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 1,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "8d0efd199723ef319503572a1b084449f72fc6d58c55d7b01711f2681e7eb103",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "3156465b915b9ac0415539638aae44ebc67c148e40c597675af960fbc467212e",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "0835ecdb24e76323070ca892185f0098ace2f00ebef4e90e99f6f1c42b58ce8c",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "12b809107a505ad09db3f161170695052e379017015f4d09977ebc19c697851c",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "8f13e8e154a7c0527cb3b158f9a14babde131171e6e76dcacb69a775612a43bf",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "5702d0cf5375ae0f4146aa50426bbd7fd54d02950ffd9580c91dffb07248b03a",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "8d0efd199723ef319503572a1b084449f72fc6d58c55d7b01711f2681e7eb103",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "3156465b915b9ac0415539638aae44ebc67c148e40c597675af960fbc467212e",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "0835ecdb24e76323070ca892185f0098ace2f00ebef4e90e99f6f1c42b58ce8c",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "12b809107a505ad09db3f161170695052e379017015f4d09977ebc19c697851c",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "8f13e8e154a7c0527cb3b158f9a14babde131171e6e76dcacb69a775612a43bf",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "5702d0cf5375ae0f4146aa50426bbd7fd54d02950ffd9580c91dffb07248b03a",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_002_request.npz",
+          "role": "online_policy_cycle_002_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2083249
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 2,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "1cec7a474e90aff7505439e758f1af921166d7b270bdec1929e43e83af02fc67",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "81a527b9dea1aaed7194225524a61095908b779e1c62ef1ba2031d76526104ee",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "26b74f3b66f0393c00e5451b3f0a0886227962a0bb589937d95f16e7514e2ae8",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "c1591a03006da61c3a1dbd682fea123e4e6138b4fc3266b00e14792ee70b5500",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "002096a56caa4989ea3346bfc324df20db33ce2d1f4a3bfa0dde78fdf9182c26",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "349f0c1b26fa93afb9a8194019951754094eeab531c9a75e2f0559a1ca89df2a",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "1cec7a474e90aff7505439e758f1af921166d7b270bdec1929e43e83af02fc67",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "81a527b9dea1aaed7194225524a61095908b779e1c62ef1ba2031d76526104ee",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "26b74f3b66f0393c00e5451b3f0a0886227962a0bb589937d95f16e7514e2ae8",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "c1591a03006da61c3a1dbd682fea123e4e6138b4fc3266b00e14792ee70b5500",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "002096a56caa4989ea3346bfc324df20db33ce2d1f4a3bfa0dde78fdf9182c26",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "349f0c1b26fa93afb9a8194019951754094eeab531c9a75e2f0559a1ca89df2a",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_003_request.npz",
+          "role": "online_policy_cycle_003_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2119210
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 3,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "5ae372cd2190bbe60d23f1b2ee25ffd6f94b894fee22e8dcfdd5356bef56a760",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "64fd0a48c53ba08141196fb52cc8820ca59f3b758ceef678bd7bbb89f7140111",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "8b1174d4072aa195fa6f180b167d78703b2a4605c8a95e2902f9c340b4593ad0",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "68ecd78c04ed0e3435784991933b33bb87d314d3162e4abe616621555af5ce06",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "370f9e97d223381e9e25e0ae1f88a9ae1dfbea9276b2a08d19a03ff5548e4858",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "76e1e8652deaedb269ef957ae407f5d6b8a9ac90ebb25eb1f4eff263cb68ff49",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "5ae372cd2190bbe60d23f1b2ee25ffd6f94b894fee22e8dcfdd5356bef56a760",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "64fd0a48c53ba08141196fb52cc8820ca59f3b758ceef678bd7bbb89f7140111",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "8b1174d4072aa195fa6f180b167d78703b2a4605c8a95e2902f9c340b4593ad0",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "68ecd78c04ed0e3435784991933b33bb87d314d3162e4abe616621555af5ce06",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "370f9e97d223381e9e25e0ae1f88a9ae1dfbea9276b2a08d19a03ff5548e4858",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "76e1e8652deaedb269ef957ae407f5d6b8a9ac90ebb25eb1f4eff263cb68ff49",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_004_request.npz",
+          "role": "online_policy_cycle_004_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2116196
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 4,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "8d184a49886e03b7e4464a2025f6a12181748180297847aee35e3ef859d28516",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "ce6250a54a56e4531c33c1a7adbca854758dde20413902eb1e721bdacc310091",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "a67394e25819e6ec8f28dc3a7e58d17ba97de098ee4cc75e650232a1dd176015",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "3e611615dbe53c4b8943cf01b33c90afcffd90f8a5a50a3c66ad944839bcffab",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "393b7d2f61d26befd445a30255ffad2736f78aebaab290b55a03a3a34ab32b5b",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "7ec0f7fc68c52cc669fa668a6c381124bd9884b68b5f5ca5f2c4ae36a9fc8ef8",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "8d184a49886e03b7e4464a2025f6a12181748180297847aee35e3ef859d28516",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "ce6250a54a56e4531c33c1a7adbca854758dde20413902eb1e721bdacc310091",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "a67394e25819e6ec8f28dc3a7e58d17ba97de098ee4cc75e650232a1dd176015",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "3e611615dbe53c4b8943cf01b33c90afcffd90f8a5a50a3c66ad944839bcffab",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "393b7d2f61d26befd445a30255ffad2736f78aebaab290b55a03a3a34ab32b5b",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "7ec0f7fc68c52cc669fa668a6c381124bd9884b68b5f5ca5f2c4ae36a9fc8ef8",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_005_request.npz",
+          "role": "online_policy_cycle_005_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2112797
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 5,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "208beeed396caeb7df504ef3a25c9b6c77a3131764d8037ad99b8de21aea7517",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "bcd399aca3edd489ddb38498c932b3bc362760fffbe7e16ea2cfa5e12f14aae8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "88e610edee2fd1ed00b2019877eff5ae2409352fab1b6852d4667d4968bb5a16",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "f5e9a295bce2ca131f2cba429f628f186971e3031a41e02567f240f791493cbb",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "90871cb73fa06f2a1a51e7ef0ec2fef761c475abd7e352c9ab403ced20023ae8",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "1274adccc40757cce0f7678015927d3f43e12f44bbcb47f86f773c8462dc0269",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "208beeed396caeb7df504ef3a25c9b6c77a3131764d8037ad99b8de21aea7517",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "bcd399aca3edd489ddb38498c932b3bc362760fffbe7e16ea2cfa5e12f14aae8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "88e610edee2fd1ed00b2019877eff5ae2409352fab1b6852d4667d4968bb5a16",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "f5e9a295bce2ca131f2cba429f628f186971e3031a41e02567f240f791493cbb",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "90871cb73fa06f2a1a51e7ef0ec2fef761c475abd7e352c9ab403ced20023ae8",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "1274adccc40757cce0f7678015927d3f43e12f44bbcb47f86f773c8462dc0269",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_006_request.npz",
+          "role": "online_policy_cycle_006_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2095312
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 6,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "002f4efc51ccb68833f87ee0bc1cd5b97313672448ae0a25a7fdeb675009e735",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "5f365af4579771a9afddd81b8893921a585d9212691eeb7c86d5c784df6e6ff8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "c48e0e4ed40ed56748f82b55b1f790333b4a30eeae0145cab7fbe09a3e8fbffa",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "f9a7a6a3cad77b6438ba539d75caaa5bf25d4e8bd9b9b7ed23cb84058a95e15a",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "b7b40cfd5888f2f4cf5502b91c1175d4198e2d14f0f8b2c4391889a53beeaade",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "13a021d31f0293c1c26145032d39b718cfcc6b4170720330d24ac471bf15135c",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "002f4efc51ccb68833f87ee0bc1cd5b97313672448ae0a25a7fdeb675009e735",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "5f365af4579771a9afddd81b8893921a585d9212691eeb7c86d5c784df6e6ff8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "c48e0e4ed40ed56748f82b55b1f790333b4a30eeae0145cab7fbe09a3e8fbffa",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "f9a7a6a3cad77b6438ba539d75caaa5bf25d4e8bd9b9b7ed23cb84058a95e15a",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "b7b40cfd5888f2f4cf5502b91c1175d4198e2d14f0f8b2c4391889a53beeaade",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "13a021d31f0293c1c26145032d39b718cfcc6b4170720330d24ac471bf15135c",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_007_request.npz",
+          "role": "online_policy_cycle_007_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2084736
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 7,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "093ea9448f54f9eec4f19803a4bdc0b5a002372791d05a04c483dab26996da7a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "33fca99ae7fbbcd2ab9ead16cad7c680d650f83a0dc4199addfb220cd30a44b1",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "9820d13465fba1b83efb92daefdf854812c83895a4f1830989bcae54a5689bd2",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "6bfa2d0404bf6191b5fca24bdc298b9a6f01e284b51709fa31ef8e607d74be84",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "7ebd5de483f5dce1632f537034364ac5b33386382779ce304076894b082277cf",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "0d4988c8dae381aa622f8ac0aa6385f812d380e749357a78dcca4fb725096617",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "093ea9448f54f9eec4f19803a4bdc0b5a002372791d05a04c483dab26996da7a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "33fca99ae7fbbcd2ab9ead16cad7c680d650f83a0dc4199addfb220cd30a44b1",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "9820d13465fba1b83efb92daefdf854812c83895a4f1830989bcae54a5689bd2",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "6bfa2d0404bf6191b5fca24bdc298b9a6f01e284b51709fa31ef8e607d74be84",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "7ebd5de483f5dce1632f537034364ac5b33386382779ce304076894b082277cf",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "0d4988c8dae381aa622f8ac0aa6385f812d380e749357a78dcca4fb725096617",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_008_request.npz",
+          "role": "online_policy_cycle_008_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 1989053
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 8,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "8df1b16d1ab85d070a7b7c10fbf0ef0a98f7b0c373ac59c4e474dda5ca70387c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "05e7203277a617980c9325a434daa9a362345b7b187cd602b7e9d650df16c86a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "18aea5b4ffc7ebdabb6c6917c2dea1b5d58c212b61478708f5c8acf69155df15",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "ec7c5ec49fe380cc43becbdfb453161fb7507df5e7818280fae18f843ef70855",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "0249a97621a67583953694f613cd1491fc0019b534d0c0114032b7b45b6c71d6",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "410abc8d0f7be2f81b572638d888e2bff15a42ed8fb2b709b38367a80c332938",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "8df1b16d1ab85d070a7b7c10fbf0ef0a98f7b0c373ac59c4e474dda5ca70387c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "05e7203277a617980c9325a434daa9a362345b7b187cd602b7e9d650df16c86a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "18aea5b4ffc7ebdabb6c6917c2dea1b5d58c212b61478708f5c8acf69155df15",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "ec7c5ec49fe380cc43becbdfb453161fb7507df5e7818280fae18f843ef70855",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "0249a97621a67583953694f613cd1491fc0019b534d0c0114032b7b45b6c71d6",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "410abc8d0f7be2f81b572638d888e2bff15a42ed8fb2b709b38367a80c332938",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_009_request.npz",
+          "role": "online_policy_cycle_009_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 1869882
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 9,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "9cf279224541706accc51186e9d7bb4b5eada2215889bba6892091bbe138f741",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "7e8d682ce85cd39f8d84e4efc5de7d7813868134228d94fb17fa908df9dc6f6a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "8a7fdfffff37a726f6f7ee9744540bac530b938077633c6ccd0756e55a49da86",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "bfb637a251b8bcbc7bb745598d2ebe212444006b1c7fed106971fffaddc35839",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "461c1f89365aca3f878e61bda3babe40d1a5d5cecf42626046f5d7d8ae604536",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "a077b4847d8217f939f2d754b3e90aa01e2d4800a3dae20db6f5ff248d102e8b",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "9cf279224541706accc51186e9d7bb4b5eada2215889bba6892091bbe138f741",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "7e8d682ce85cd39f8d84e4efc5de7d7813868134228d94fb17fa908df9dc6f6a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "8a7fdfffff37a726f6f7ee9744540bac530b938077633c6ccd0756e55a49da86",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "bfb637a251b8bcbc7bb745598d2ebe212444006b1c7fed106971fffaddc35839",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "461c1f89365aca3f878e61bda3babe40d1a5d5cecf42626046f5d7d8ae604536",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "a077b4847d8217f939f2d754b3e90aa01e2d4800a3dae20db6f5ff248d102e8b",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_010_request.npz",
+          "role": "online_policy_cycle_010_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 1821064
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 10,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "c970462f69aeedf6de56c827538e56c419d38e9b71c95ca236652f8f958d48af",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "085de753a264db79e8e013078c40185b58d5fc8780ea06b60db56ac2849ff2c9",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "6dca9d2e84ffcfcd36cf77cc23fac92807d58d77059167632b695031d34482ee",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "2a109317ef20f813bb50e8a36dc85e9507a94de5a78a06f4ee402de8f68cc1e5",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "4556a6b06fdc20b92573a916d602b95a4bd0d9a82d17d88b42184047828b4251",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "d04dd09c58251c4824ec2c4ad1546ae5a7d442dbf554d321540c39d73b0d2b41",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "c970462f69aeedf6de56c827538e56c419d38e9b71c95ca236652f8f958d48af",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "085de753a264db79e8e013078c40185b58d5fc8780ea06b60db56ac2849ff2c9",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "6dca9d2e84ffcfcd36cf77cc23fac92807d58d77059167632b695031d34482ee",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "2a109317ef20f813bb50e8a36dc85e9507a94de5a78a06f4ee402de8f68cc1e5",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "4556a6b06fdc20b92573a916d602b95a4bd0d9a82d17d88b42184047828b4251",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "d04dd09c58251c4824ec2c4ad1546ae5a7d442dbf554d321540c39d73b0d2b41",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_011_request.npz",
+          "role": "online_policy_cycle_011_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 1924325
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 11,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "065d78b9ff6956dff8b17c1cbd9bef7dc2e3d787f92b49738c98ebed87676a70",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "5ff91b07c84364bf7c2719bee3fd2f1c9289e16c1cfa145d020e29ca191dab6e",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "2df4c89b70373c4c250af7b5c01c6eb70186acb031d7f8d19186bcb89df0daf5",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "4be8f8b9eb1d8e5cdf00025af267dd6f4284a79801f21a86f91015c18637a4e6",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "0f95544446f44bc372ea56fdcf7b154f43c35d2f90b73943dd458d22418e6381",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "86a93c95efcf89bf1e52c3491a75cab5af82d409158c56c242a71118fc31dd61",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "065d78b9ff6956dff8b17c1cbd9bef7dc2e3d787f92b49738c98ebed87676a70",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "5ff91b07c84364bf7c2719bee3fd2f1c9289e16c1cfa145d020e29ca191dab6e",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "2df4c89b70373c4c250af7b5c01c6eb70186acb031d7f8d19186bcb89df0daf5",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "4be8f8b9eb1d8e5cdf00025af267dd6f4284a79801f21a86f91015c18637a4e6",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "0f95544446f44bc372ea56fdcf7b154f43c35d2f90b73943dd458d22418e6381",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "86a93c95efcf89bf1e52c3491a75cab5af82d409158c56c242a71118fc31dd61",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_012_request.npz",
+          "role": "online_policy_cycle_012_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 1985278
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 12,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "91fc5ba3eb886ba4c9ddab435093851e4acd6d22005a93b5c1d9584c83fba8cf",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "44922425650a54e039f1ecfed823654f546032d8602a7a5c92d0d40ebf0b32e1",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "dd7dab72d9dc054ed07859bbeb59b858787d13f4bfa37c4e2d934b2d88010b51",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "c2a8f9e939e4287a76eacc1cbc1c15c808d6943637d4866d0dc5436e18e7e542",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "5d63c0bb0d1d698b75b19f0e2347624923a914a6510c8d510594e5c09aa01ef8",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "abb166c5a9fc050fe9dd4792d9646f4185f8ca90730d2e311743c88882d60c05",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "91fc5ba3eb886ba4c9ddab435093851e4acd6d22005a93b5c1d9584c83fba8cf",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "44922425650a54e039f1ecfed823654f546032d8602a7a5c92d0d40ebf0b32e1",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "dd7dab72d9dc054ed07859bbeb59b858787d13f4bfa37c4e2d934b2d88010b51",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "c2a8f9e939e4287a76eacc1cbc1c15c808d6943637d4866d0dc5436e18e7e542",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "5d63c0bb0d1d698b75b19f0e2347624923a914a6510c8d510594e5c09aa01ef8",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "abb166c5a9fc050fe9dd4792d9646f4185f8ca90730d2e311743c88882d60c05",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_013_request.npz",
+          "role": "online_policy_cycle_013_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2021397
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 13,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "c55f0b9dc81577eda07c2a5a45cfbdef14c64678278889b2d68b7107dcec7ec9",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "49b7b14db388ccad540473a104820ad5979e23a64b6babd68436151c62e803dd",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "c16d35609746aa60f77b85d7f76666a8349d9276beb32f8c59d9a9a7494ac0f7",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "2c0c0bf7fd9ac27b019c8dba243908dd99a10bdd595709283ba945ce2d08a7cd",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "3f9800361ebc4f727c77cfdeeea85ad5e3be98b4e07074a2e88d1ed5e9acd305",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "8b84080f1f4c5ef72e8121558e379b207caa80c382053f737e48019023030013",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "c55f0b9dc81577eda07c2a5a45cfbdef14c64678278889b2d68b7107dcec7ec9",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "49b7b14db388ccad540473a104820ad5979e23a64b6babd68436151c62e803dd",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "c16d35609746aa60f77b85d7f76666a8349d9276beb32f8c59d9a9a7494ac0f7",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "2c0c0bf7fd9ac27b019c8dba243908dd99a10bdd595709283ba945ce2d08a7cd",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "3f9800361ebc4f727c77cfdeeea85ad5e3be98b4e07074a2e88d1ed5e9acd305",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "8b84080f1f4c5ef72e8121558e379b207caa80c382053f737e48019023030013",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_014_request.npz",
+          "role": "online_policy_cycle_014_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2149592
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 14,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "2d00e9c625e2da1cd454fce939604095d29e18f20aeafac920e7e9e6f1aac7dc",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "a86b2ec1606977c87fb2bcfabfdd770edcfd604bd83979e95ce90d6073ef3a62",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "6f75b059f43d1d8638f573d96d516db63e6a7d39e3f0de4d4a2cb91da963985e",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "3fffd5c9ea430a1702f76f04b4b53863fd3ede49cffcb86ae4e1f7304135a847",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "223371ea5648b8a1bba619150c5c33ed465b09bb7705f90d12bd60169bd62164",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "71a64115be1c427efc5b0261e37b23b7e186cae8321f3fa284696c3b652e1e67",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "2d00e9c625e2da1cd454fce939604095d29e18f20aeafac920e7e9e6f1aac7dc",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "a86b2ec1606977c87fb2bcfabfdd770edcfd604bd83979e95ce90d6073ef3a62",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "6f75b059f43d1d8638f573d96d516db63e6a7d39e3f0de4d4a2cb91da963985e",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "3fffd5c9ea430a1702f76f04b4b53863fd3ede49cffcb86ae4e1f7304135a847",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "223371ea5648b8a1bba619150c5c33ed465b09bb7705f90d12bd60169bd62164",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "71a64115be1c427efc5b0261e37b23b7e186cae8321f3fa284696c3b652e1e67",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_015_request.npz",
+          "role": "online_policy_cycle_015_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2169376
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 15,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "9c6ff650cb0e7e14755a6f8cc6a68d3ca6b80a9b3e9031d35965250e2bab8e74",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "d0400c1a1dc3d8a9fd14be1a1046dff82ae678c2fa8cf6247621f949707abdbd",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "75264a074623dd53718c59b8886eb53d84fbc2ce7c6a8428474195f48a9019a5",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "0c4cc589e0b0bc8e5daa95c1347076c59b0bc82c4e2882a16476b3b1b6fc52f6",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "e3de5e69489bf3e0ad0ff6aaeab574793c70b0b65e8fc3ff503aca92a2d679ea",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "79e90811da4ff0f3ecee12dc2e1350c8efe15dd505fdfca1d97969e23b58e357",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "9c6ff650cb0e7e14755a6f8cc6a68d3ca6b80a9b3e9031d35965250e2bab8e74",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "d0400c1a1dc3d8a9fd14be1a1046dff82ae678c2fa8cf6247621f949707abdbd",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "75264a074623dd53718c59b8886eb53d84fbc2ce7c6a8428474195f48a9019a5",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "0c4cc589e0b0bc8e5daa95c1347076c59b0bc82c4e2882a16476b3b1b6fc52f6",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "e3de5e69489bf3e0ad0ff6aaeab574793c70b0b65e8fc3ff503aca92a2d679ea",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "79e90811da4ff0f3ecee12dc2e1350c8efe15dd505fdfca1d97969e23b58e357",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_016_request.npz",
+          "role": "online_policy_cycle_016_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2112994
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 16,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "7c4c1473831592f923ebee5232673e5c0ac6913fb63a6184a7ef3a870ef891ff",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "03a20a80f6ddc44c2e33e8506432bf78c1438b23d815ba2ef217a7904a117586",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "27933ac2a992bd3ffb6894a9c3274dac5d4754ca3b78d675682dcec045d9dfdf",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "33ae1c8410de4f5a6c5fd5727312b99d4c5892df6a7e0b7390695b891c44c2a4",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "e27aab21d78bf17c594595dccb121e96ef5977560167b7d156f1efe5876d3c7c",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "7c4c1473831592f923ebee5232673e5c0ac6913fb63a6184a7ef3a870ef891ff",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "03a20a80f6ddc44c2e33e8506432bf78c1438b23d815ba2ef217a7904a117586",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "27933ac2a992bd3ffb6894a9c3274dac5d4754ca3b78d675682dcec045d9dfdf",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "33ae1c8410de4f5a6c5fd5727312b99d4c5892df6a7e0b7390695b891c44c2a4",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "e27aab21d78bf17c594595dccb121e96ef5977560167b7d156f1efe5876d3c7c",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_017_request.npz",
+          "role": "online_policy_cycle_017_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2107654
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 17,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "91bdfeec45c100ccd719c81ab2e1d429bb059ba0802bfe896cbd5af01ff4ea90",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "a216f9a50193830669a3bca8faaa9eedd1f8041762a289372f3dd0c8bc41f8f1",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "a00aa9d8cc425dab016bed82b8ec3a69fa3184f4b00720cc800e21154ef5097b",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "a07ae1c3d074b1d9826a60124721e42222b58297228c4d715b31816d7f03e1b8",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "811fed5ed2d44b301354c9c9e12011a0701b144606c1f652ca07f1c7f9dd7a56",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "91bdfeec45c100ccd719c81ab2e1d429bb059ba0802bfe896cbd5af01ff4ea90",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "a216f9a50193830669a3bca8faaa9eedd1f8041762a289372f3dd0c8bc41f8f1",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "a00aa9d8cc425dab016bed82b8ec3a69fa3184f4b00720cc800e21154ef5097b",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "a07ae1c3d074b1d9826a60124721e42222b58297228c4d715b31816d7f03e1b8",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "811fed5ed2d44b301354c9c9e12011a0701b144606c1f652ca07f1c7f9dd7a56",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_018_request.npz",
+          "role": "online_policy_cycle_018_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2107291
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 18,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "a7744045ec0f38c340f8977e552432ffc628839e1a0ac9ce7eec36927488145d",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "eb517e65d0c080788260e04bcaa33c8422a06dab7fcea143a27c545418cba425",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "6e7932b4b180241adc5742312583ada2162fb632b9ceb3dfc4eb59434405d909",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "181cd1d48b5612d749a39da9c7931355af5e68534aacac12bf672c26a6b7576e",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "8387c035efbdfc40eaaaed4e30dd50972d69338b1f3910a05dbc5e1746cf8ce5",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "a7744045ec0f38c340f8977e552432ffc628839e1a0ac9ce7eec36927488145d",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "eb517e65d0c080788260e04bcaa33c8422a06dab7fcea143a27c545418cba425",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "6e7932b4b180241adc5742312583ada2162fb632b9ceb3dfc4eb59434405d909",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "181cd1d48b5612d749a39da9c7931355af5e68534aacac12bf672c26a6b7576e",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "8387c035efbdfc40eaaaed4e30dd50972d69338b1f3910a05dbc5e1746cf8ce5",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_019_request.npz",
+          "role": "online_policy_cycle_019_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2106478
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 19,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "7dd74a6478f633b4e72d7a312d1c996f95eef82943e61a85a78b0cffdd1a1b94",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "7b3861e418ac9ba4bab115c37a13dfd385ce5304a1387e1b126e000feb77d66f",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "5c05ddd718bdada1a8036c0e2c6224adb43a36336a63c5a6ee5f79d2b8ec6dbd",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "315174ab13c05998931082cbee5b3856e8a74babc16c6df1f3ad805a3357d33f",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "3cd80ff2914d76017d2c91c79fa5782b0cd92cd076c066c523dc46d594cfecb8",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "7dd74a6478f633b4e72d7a312d1c996f95eef82943e61a85a78b0cffdd1a1b94",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "7b3861e418ac9ba4bab115c37a13dfd385ce5304a1387e1b126e000feb77d66f",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "5c05ddd718bdada1a8036c0e2c6224adb43a36336a63c5a6ee5f79d2b8ec6dbd",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "315174ab13c05998931082cbee5b3856e8a74babc16c6df1f3ad805a3357d33f",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "e4097e14502ea1b078bd9c0eaf57764fbea22855ce5fc4b431e5529bf6f3f421",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "3cd80ff2914d76017d2c91c79fa5782b0cd92cd076c066c523dc46d594cfecb8",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_020_request.npz",
+          "role": "online_policy_cycle_020_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2104517
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 20,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "1d231a73b259588396974b79c6572b9ebee5b33f5ef87c629cb39c259e9466c3",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "de19db027d47f681cec91a22e27dbaab5169cd128b04551cf81ace4986c27eb3",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "8e8c5ad5f7741f52b3fc0201dab04fb4fc8c9d07b7cbcde0fb7cad19dc61797d",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "b5e12c466ae02e0106a0a88ed659f852fdae5fcaafcc2b66021091aeb8e689ff",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "1bead8e786f278200dd1d5a214dc8ccf6eed7e46027d08267b1cbcf499a7c042",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "be6ccd939308306a82283a63dc3b4d1b9d55e4acb5a31e54ef1fa45f00ae13fa",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "1d231a73b259588396974b79c6572b9ebee5b33f5ef87c629cb39c259e9466c3",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "de19db027d47f681cec91a22e27dbaab5169cd128b04551cf81ace4986c27eb3",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "8e8c5ad5f7741f52b3fc0201dab04fb4fc8c9d07b7cbcde0fb7cad19dc61797d",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "b5e12c466ae02e0106a0a88ed659f852fdae5fcaafcc2b66021091aeb8e689ff",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "1bead8e786f278200dd1d5a214dc8ccf6eed7e46027d08267b1cbcf499a7c042",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "be6ccd939308306a82283a63dc3b4d1b9d55e4acb5a31e54ef1fa45f00ae13fa",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_021_request.npz",
+          "role": "online_policy_cycle_021_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2108491
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 21,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "bf647338eb9328db1e40b7d1c76060f132e54c46e4ec48fd44269d0721917004",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "2e32e535f8e032bc2b144ee1314f5f00e90ba63ff9b6e6c6afec45cffe29b058",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "3ac802dfdffd0bb752d8ec87c06c2cd2738b5813bebbdc204503938d468fcf62",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "293fa995e881e6df78de6a7391aff92483d088a06ae07922403cf7272722e376",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "86d8d89ed0c0c7277e39aa671125a84a89c325db67bd3ee2013a48e149dba776",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "a1774b5f4415a4c2e43016480b0bc59bf42d72903741eae6afbdb5846beab5a5",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "bf647338eb9328db1e40b7d1c76060f132e54c46e4ec48fd44269d0721917004",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "2e32e535f8e032bc2b144ee1314f5f00e90ba63ff9b6e6c6afec45cffe29b058",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "3ac802dfdffd0bb752d8ec87c06c2cd2738b5813bebbdc204503938d468fcf62",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "293fa995e881e6df78de6a7391aff92483d088a06ae07922403cf7272722e376",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "86d8d89ed0c0c7277e39aa671125a84a89c325db67bd3ee2013a48e149dba776",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "a1774b5f4415a4c2e43016480b0bc59bf42d72903741eae6afbdb5846beab5a5",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_022_request.npz",
+          "role": "online_policy_cycle_022_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2110335
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 22,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "4e325426b8a2c4bf3cfe6d3bb437b687f8d9a0ef6ffd2be849f5ec3fd4e9f43c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "1c3d6b833aeaab88310aee0a4b7fb1335312257718e700f6e1e42f835b710e4a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "693067e60b8562f97f07a89d2c8724269549331fbc126ce86096c5a641391db8",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "a4b64a4fc34a1a63c5c62ebd3c8b9ff38ee5e1342a2cc4fed7911c7c34c976be",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "6fcd8ceda2b36f90b855c2e4e5b4483bea47f64045dedab38c4d443f057b6747",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "b4e81576fa5feb196bb6dd3443a699d1a23bfa64e23f8e580f3491b2ea8235cc",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "4e325426b8a2c4bf3cfe6d3bb437b687f8d9a0ef6ffd2be849f5ec3fd4e9f43c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "1c3d6b833aeaab88310aee0a4b7fb1335312257718e700f6e1e42f835b710e4a",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "693067e60b8562f97f07a89d2c8724269549331fbc126ce86096c5a641391db8",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "a4b64a4fc34a1a63c5c62ebd3c8b9ff38ee5e1342a2cc4fed7911c7c34c976be",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "6fcd8ceda2b36f90b855c2e4e5b4483bea47f64045dedab38c4d443f057b6747",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "b4e81576fa5feb196bb6dd3443a699d1a23bfa64e23f8e580f3491b2ea8235cc",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_023_request.npz",
+          "role": "online_policy_cycle_023_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2108254
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 23,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "70b365f1708b2125aef39ece29ee634bd19a7cabfbe33f66f85fb4b286b8a2c4",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "37bbdba6313c42b7c2d10cd93154e5f436413fade3685901ffd145038577feaf",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "334a812438eaf1567e71b84b87b72a35060cc0527fa1bcbf1b939942ef625c9f",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "86925158b89d5411bb556de837e1fdf8a410de95052c73b29ee573710f885d6f",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "67db7e6cdcb77081f83031d47aae0158831ab1c0152fc80ef1dc39f75c8340ec",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "ae9878b2dffbda338c4a81090a7b02cbe670279d864f8b494b9d8e1f3a8eb6a1",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "70b365f1708b2125aef39ece29ee634bd19a7cabfbe33f66f85fb4b286b8a2c4",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "37bbdba6313c42b7c2d10cd93154e5f436413fade3685901ffd145038577feaf",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "334a812438eaf1567e71b84b87b72a35060cc0527fa1bcbf1b939942ef625c9f",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "86925158b89d5411bb556de837e1fdf8a410de95052c73b29ee573710f885d6f",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "67db7e6cdcb77081f83031d47aae0158831ab1c0152fc80ef1dc39f75c8340ec",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "ae9878b2dffbda338c4a81090a7b02cbe670279d864f8b494b9d8e1f3a8eb6a1",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_024_request.npz",
+          "role": "online_policy_cycle_024_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2107311
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 24,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "90420eb6e0df35c079d6bcbbaa35b31da766f92fed704a73c0dba92d40d79dcb",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "2a49bae0bf424418f90414b8d89222e15607b70be54d72688248f760f44e720c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "2ff9b770b117a5eb443c18971ed033eb2f35201b3c90394cfad49d59045c35ba",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "913de5a78f9679036737f2032208796703dfc5ef8ff270a7e98a080ec63a88a3",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "fb780bfc297db1c35e306b87c325b44cf01b65d3edf2b09dd288eccb26dce8d8",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "88a70abe3ff50b06502b7ddf73427ba7e39d0d3c537eb0ed18aa5ec6c07d0076",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "90420eb6e0df35c079d6bcbbaa35b31da766f92fed704a73c0dba92d40d79dcb",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "2a49bae0bf424418f90414b8d89222e15607b70be54d72688248f760f44e720c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "2ff9b770b117a5eb443c18971ed033eb2f35201b3c90394cfad49d59045c35ba",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "913de5a78f9679036737f2032208796703dfc5ef8ff270a7e98a080ec63a88a3",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "fb780bfc297db1c35e306b87c325b44cf01b65d3edf2b09dd288eccb26dce8d8",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "88a70abe3ff50b06502b7ddf73427ba7e39d0d3c537eb0ed18aa5ec6c07d0076",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_025_request.npz",
+          "role": "online_policy_cycle_025_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2105946
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 25,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "a6d54bdff3943a69f6d43a646fea94b5a9d2ce1830fa1257322ae4f8c4d3aeed",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "60b3caa6a12c2393bed4038a32ec46e27c6306a36a3889f02aceaad824452331",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "58465dcddab132d062f980cfd478a805e88b48c8b2242ef3f8ba1925b2d4cb65",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "75c3535686a320513326185dec2a721ae08d1753f9805eaad6727e05e8186511",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "e1d9e67449fcdae932e30043ca3233e43780c9604105775deb50a06530dd3922",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "70f5e2f526b5e74284987179eb90759996b65d3df51a0942e54f6ca21258c0e7",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "a6d54bdff3943a69f6d43a646fea94b5a9d2ce1830fa1257322ae4f8c4d3aeed",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "60b3caa6a12c2393bed4038a32ec46e27c6306a36a3889f02aceaad824452331",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "58465dcddab132d062f980cfd478a805e88b48c8b2242ef3f8ba1925b2d4cb65",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "75c3535686a320513326185dec2a721ae08d1753f9805eaad6727e05e8186511",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "e1d9e67449fcdae932e30043ca3233e43780c9604105775deb50a06530dd3922",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "70f5e2f526b5e74284987179eb90759996b65d3df51a0942e54f6ca21258c0e7",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_026_request.npz",
+          "role": "online_policy_cycle_026_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2104070
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 26,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "6a24dd0c602408ec9cfb2f6834870d9279e743e3805fde090eaa8289b679eacb",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "307bb176fe8fc476b45b828862401ecf3e075ec48d5c8763e2d9851d06bf5e04",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "257f36c8f03af17a6b4d5bfe3474ea794ced2af1d89123857fcab3fa7c7a2b50",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "89c4c320705ce30382fbfb6c84aa6cd8d06ec46759d326e759b3c89ddf573a83",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "01318e0f91eff35972bf6cd5e5bfdb41851f46aae3dfbfe894abd4514edcbc49",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "93ae42cef2a26caa9f407957ee3954c42b8a50d34b4b0f52ba95792ff3200a25",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "6a24dd0c602408ec9cfb2f6834870d9279e743e3805fde090eaa8289b679eacb",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "307bb176fe8fc476b45b828862401ecf3e075ec48d5c8763e2d9851d06bf5e04",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "257f36c8f03af17a6b4d5bfe3474ea794ced2af1d89123857fcab3fa7c7a2b50",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "89c4c320705ce30382fbfb6c84aa6cd8d06ec46759d326e759b3c89ddf573a83",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "01318e0f91eff35972bf6cd5e5bfdb41851f46aae3dfbfe894abd4514edcbc49",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "93ae42cef2a26caa9f407957ee3954c42b8a50d34b4b0f52ba95792ff3200a25",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_027_request.npz",
+          "role": "online_policy_cycle_027_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2111808
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 27,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "da5904faca2dcb7fe98ebcd99272d71c9e2a552c67f18aaed240d42daf7471d8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "3ae172c0b503f6981488b41180c11635c40f61dc760d5de16edc8856454bdf28",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "24e6f8e5a70ed322ccb6ecf08af1042b4d54847f48c7c1c9cdbcff1309b93eff",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "ed480dd2826acaa55bc4120f74744c0b3e6a8521694d349266c0b1647f5f155c",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "d570d1f2d5dfd622e098cd51bfd8febb09a8b2ef978464d822466babbce7c342",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "182c83beae7a2bc1f18db95e3add0360813f3d3e02a60b74d38127aa340b64a3",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "da5904faca2dcb7fe98ebcd99272d71c9e2a552c67f18aaed240d42daf7471d8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "3ae172c0b503f6981488b41180c11635c40f61dc760d5de16edc8856454bdf28",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "24e6f8e5a70ed322ccb6ecf08af1042b4d54847f48c7c1c9cdbcff1309b93eff",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "ed480dd2826acaa55bc4120f74744c0b3e6a8521694d349266c0b1647f5f155c",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "d570d1f2d5dfd622e098cd51bfd8febb09a8b2ef978464d822466babbce7c342",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "182c83beae7a2bc1f18db95e3add0360813f3d3e02a60b74d38127aa340b64a3",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_028_request.npz",
+          "role": "online_policy_cycle_028_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2110394
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 28,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "614234eed326bc8b5c6fb311ef17932fdf8ec0557f7e3bfc9412791e1aadb154",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "49ba3225ad604183481990099e794b51cc204d87d09a084d644ac61fc7d42c33",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "f1a79dda9d15f99f7a359ff62a26760fc64fb6316cda8351967335d89c88bfe8",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "553f82d9f8bbf4936d1993eb134f9c7662f8e4995ef8d0b79850d7b920fc10df",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "d3b0e2ccb9c1e3d0e9b6d08f87591c799ee9357fb10f39639b0e258bc0a0b144",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "cbcc142549ffb8dbf10c2cc298a7d67ffb5135ed9addae65b9c89ba664cf9518",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "614234eed326bc8b5c6fb311ef17932fdf8ec0557f7e3bfc9412791e1aadb154",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "49ba3225ad604183481990099e794b51cc204d87d09a084d644ac61fc7d42c33",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "f1a79dda9d15f99f7a359ff62a26760fc64fb6316cda8351967335d89c88bfe8",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "553f82d9f8bbf4936d1993eb134f9c7662f8e4995ef8d0b79850d7b920fc10df",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "d3b0e2ccb9c1e3d0e9b6d08f87591c799ee9357fb10f39639b0e258bc0a0b144",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "cbcc142549ffb8dbf10c2cc298a7d67ffb5135ed9addae65b9c89ba664cf9518",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_029_request.npz",
+          "role": "online_policy_cycle_029_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2108857
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 29,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "520ce27e30b9166bc46300fc68b1e33f6f45a5f8d6fdcabb280d8b80e26bcc5b",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "b8f52d97869fcec44e52000620255eb6756b6bc60d820acfe96d6c8dc439d253",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "f242874e062b1e4fd6e2c8a2dd3bcda681651f3e8829e3b32e07dc9b7b57fa8e",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "efbf3c464f61a25192118d9af235b707b2ab074db85923926f5712449a0e0ec3",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "8c140d3af63a7ce9528388f9dcb1fa6dd15b6f53ed14eddc627e908ce1244dec",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "878c64a223359d52c7c4a59a0dbc4429869ae0d8bf8efa5d1d929f72a7289626",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "520ce27e30b9166bc46300fc68b1e33f6f45a5f8d6fdcabb280d8b80e26bcc5b",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "b8f52d97869fcec44e52000620255eb6756b6bc60d820acfe96d6c8dc439d253",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "f242874e062b1e4fd6e2c8a2dd3bcda681651f3e8829e3b32e07dc9b7b57fa8e",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "efbf3c464f61a25192118d9af235b707b2ab074db85923926f5712449a0e0ec3",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "8c140d3af63a7ce9528388f9dcb1fa6dd15b6f53ed14eddc627e908ce1244dec",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "878c64a223359d52c7c4a59a0dbc4429869ae0d8bf8efa5d1d929f72a7289626",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_030_request.npz",
+          "role": "online_policy_cycle_030_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2110921
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 30,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "176a51a8cf90b2e25cf789b392c734d9b53a1faa6898f99979fca6e575df2005",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "206d7a12bdbaa23af878ae272f887a99b239ee61a9a7708562146e798a08a70c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "f9a1f605660a10319c0905b31bf08a867fb875af0e65bf678b6623d117109535",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "eb55776b55ec24af477b763d831f8dfb5334db645714f9d9a84368ddf0daa4b0",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "055d39935dbde8fe7309551f5a52bb81f7e2728015153a7f98d3256959aca9c7",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "fff6d440db49658900ccff37fd23b78e48246f6c173431c1e1119d84474ac8df",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "176a51a8cf90b2e25cf789b392c734d9b53a1faa6898f99979fca6e575df2005",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "206d7a12bdbaa23af878ae272f887a99b239ee61a9a7708562146e798a08a70c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "f9a1f605660a10319c0905b31bf08a867fb875af0e65bf678b6623d117109535",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "eb55776b55ec24af477b763d831f8dfb5334db645714f9d9a84368ddf0daa4b0",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "055d39935dbde8fe7309551f5a52bb81f7e2728015153a7f98d3256959aca9c7",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "fff6d440db49658900ccff37fd23b78e48246f6c173431c1e1119d84474ac8df",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_031_request.npz",
+          "role": "online_policy_cycle_031_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2107727
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 31,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "3cae01255f67d5eb43f6b1d4600686bc435aa4eec8ce0d38cf7cd877b56d60cd",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "58453bc08244368bf2d82e5c1e226f76d5d48c89489354710dab21692881d637",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "19ff7663469547dc872182d3f5bdbeecc5bfbc249917090e4d0f0b74df5cbb67",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "85e8b33ba7d4b5b49e131b97e6c55679de51fdd03f8aff7ebfae5bbe1edf8a70",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "6f87fc494caf287168e93c2a6cfb4da1fe836501a995cc594f505f9f27d0450d",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "0a3ba2e9ee7b7966be0c7d5ce690d075991ee471d375cf1a9d6137db2c026add",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "3cae01255f67d5eb43f6b1d4600686bc435aa4eec8ce0d38cf7cd877b56d60cd",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "58453bc08244368bf2d82e5c1e226f76d5d48c89489354710dab21692881d637",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "19ff7663469547dc872182d3f5bdbeecc5bfbc249917090e4d0f0b74df5cbb67",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "85e8b33ba7d4b5b49e131b97e6c55679de51fdd03f8aff7ebfae5bbe1edf8a70",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "6f87fc494caf287168e93c2a6cfb4da1fe836501a995cc594f505f9f27d0450d",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "0a3ba2e9ee7b7966be0c7d5ce690d075991ee471d375cf1a9d6137db2c026add",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_032_request.npz",
+          "role": "online_policy_cycle_032_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2108560
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 32,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "8ca6afe96b37b610674c42cff6615d655cd464d6da805771e5913e636209294c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "ec3d19fbc31d21c74beae7d3feb6b5674bb95b84c2729028de9b182956c9c8b4",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "2709a4e1b862b564b85ed3f442fd622d333352eb387ab1c373ef00f99af25f66",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "71026accc0f65158e2e50a6de51ef8512e05fe253753147e9d3c39b23a1cd483",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "f20d58d10e04f8f70e58f87d8ffcf362473f5de60adad235e3f8441b17e92bf5",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "d00a64dcbcc24209b7f9a81711af00ace834bf139f74be8497756a676022a978",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "8ca6afe96b37b610674c42cff6615d655cd464d6da805771e5913e636209294c",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "ec3d19fbc31d21c74beae7d3feb6b5674bb95b84c2729028de9b182956c9c8b4",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "2709a4e1b862b564b85ed3f442fd622d333352eb387ab1c373ef00f99af25f66",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "71026accc0f65158e2e50a6de51ef8512e05fe253753147e9d3c39b23a1cd483",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "f20d58d10e04f8f70e58f87d8ffcf362473f5de60adad235e3f8441b17e92bf5",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "d00a64dcbcc24209b7f9a81711af00ace834bf139f74be8497756a676022a978",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    },
+    {
+      "artifact_refs": [
+        {
+          "exists": true,
+          "path": "online_policy_cycle_033_request.npz",
+          "role": "online_policy_cycle_033_model_visible_request",
+          "schema_id": "npz_openpi_request_official_prep_input_v0",
+          "size_bytes": 2106378
+        }
+      ],
+      "blocker_ids": [],
+      "cycle_index": 33,
+      "eos_model_visible_input_manifest": {
+        "images_hand_left": {
+          "dtype": "uint8",
+          "sha256": "ef6faca8a2efc83ec0140f814fbaf689dc5d71c7fde37062557b3d7ef9d925a8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_hand_right": {
+          "dtype": "uint8",
+          "sha256": "c493e3bbb29e88e62c256b9122b84d412ccaeed6e438ba09cd3a8ab5169c8278",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images_head": {
+          "dtype": "uint8",
+          "sha256": "67d8046787d807ae61849984428c2aaaab04e9510fef76a7656d8ff5e0c1da6f",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states_base": {
+          "dtype": "float32",
+          "sha256": "554457dee4f40257cf18cc638b79bd4973c88557729ff6b1edda3773cd8e6701",
+          "shape": [
+            3
+          ]
+        },
+        "states_gripper": {
+          "dtype": "float32",
+          "sha256": "25fee98516af2a00203a750db083c984ca4d024fda1f5f6b95cefdeb67d0448d",
+          "shape": [
+            4
+          ]
+        },
+        "states_joint": {
+          "dtype": "float32",
+          "sha256": "dc13e3e920fd63f7663e08ad30217732647ec8e9416b41bea5892e776a512ddd",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "observation_pixel_parity_status": "matched",
+      "official_input_manifest": {
+        "images/hand_left": {
+          "dtype": "uint8",
+          "sha256": "ef6faca8a2efc83ec0140f814fbaf689dc5d71c7fde37062557b3d7ef9d925a8",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/hand_right": {
+          "dtype": "uint8",
+          "sha256": "c493e3bbb29e88e62c256b9122b84d412ccaeed6e438ba09cd3a8ab5169c8278",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "images/head": {
+          "dtype": "uint8",
+          "sha256": "67d8046787d807ae61849984428c2aaaab04e9510fef76a7656d8ff5e0c1da6f",
+          "shape": [
+            720,
+            1280,
+            3
+          ]
+        },
+        "prompt": {
+          "char_count": 73,
+          "sha256": "7d08c12151c756116d238105d49378a851a08de3533b7c8c7aba911ed201e68f",
+          "type": "prompt_text"
+        },
+        "states/base": {
+          "dtype": "float32",
+          "sha256": "554457dee4f40257cf18cc638b79bd4973c88557729ff6b1edda3773cd8e6701",
+          "shape": [
+            3
+          ]
+        },
+        "states/gripper": {
+          "dtype": "float32",
+          "sha256": "25fee98516af2a00203a750db083c984ca4d024fda1f5f6b95cefdeb67d0448d",
+          "shape": [
+            4
+          ]
+        },
+        "states/joint": {
+          "dtype": "float32",
+          "sha256": "dc13e3e920fd63f7663e08ad30217732647ec8e9416b41bea5892e776a512ddd",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+      "privileged_state_exposed": false,
+      "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+      "state_numeric_parity_status": "matched"
+    }
+  ],
+  "eos_model_visible_input_status": "retained",
+  "model_superiority": false,
+  "observation_pixel_parity_status": "matched",
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "official_live_input_parity_status": "executed_with_evidence",
+  "official_live_input_reference_status": "retained",
+  "official_prep_input_required_keys": [
+    "images/head",
+    "images/hand_left",
+    "images/hand_right",
+    "states/joint",
+    "states/gripper",
+    "states/base",
+    "prompt"
+  ],
+  "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+  "openpi_task_success": false,
+  "privileged_state_exposed": false,
+  "prompt_token_parity_basis": "prompt_text_hash_without_tokenizer",
+  "prompt_token_parity_status": "matched_prompt_text_no_tokenizer",
+  "real_world_safety": false,
+  "reports_standard_model_score": false,
+  "schema": "embodied_eval_os_bpl19m_official_live_input_parity_report.v0",
+  "standard_model_score": null,
+  "state_numeric_parity_status": "matched"
+}

@@ -1,0 +1,27 @@
+schema_version: phase11-post-execution-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+review_scope: post_execution_initial_final_keyframes
+initial_image_path: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+final_image_path: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg
+verdict: FAIL
+visible_evidence:
+  - Initial frame shows the soap-like purple object and the rectangular dish/container both visible on the counter, with a useful overhead task view.
+  - Final frame keeps the soap/object and dish/container visible, but the soap/object appears beside the dish rather than visibly in or on it.
+  - The final dish/container appears empty in the reviewed frame, so the retained final image does not visually support the soap-to-dish completion claim.
+success_predicate_gate: soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+retake_recommendation: Retake the final frame with the soap/object clearly resting inside or directly on the rectangular dish/container. Keep the overhead view, but crop or center the dish/object area more tightly and avoid the darker final exposure.
+confidence: high
+source_artifacts:
+  bpl19r_rerun_evidence: soap_to_dish_phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_rerun.yaml
+  executed_episode_evidence: soap_to_dish_phase11_executed_episode_bpl19r_success_evidence.yaml
+  predicate_evidence: soap_to_dish_phase11_success_predicate_bpl19r_success_evidence.yaml
+  extracted_initial_frame: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+  extracted_final_frame: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg
+claim_boundary: Post-execution visual QA only. The Phase 11.3 predicate gate records
+  a successful simulator-state result, but this Phase 11.4 visual review records
+  that the retained final frame is not visually sufficient for the soap-to-dish
+  evidence packet. This is not release approval, official leaderboard evidence,
+  or a model-quality claim.

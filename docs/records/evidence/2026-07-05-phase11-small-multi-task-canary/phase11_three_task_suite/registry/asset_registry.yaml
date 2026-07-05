@@ -1,0 +1,195 @@
+schema_version: asset-registry/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+registry_scope: local_immutable_snapshot_seed
+entry_schema: asset-registry-entry/v0.1
+assets:
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_apple@3cea327ec9c4
+  asset_id: official_ebench_apple
+  source_package_id: ebench_apple_to_bowl_canary
+  role: manipulated_object
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_apple/5948de6770a5491ea158cd9e921ebce9.usd
+  content_sha256: sha256:3cea327ec9c4d602f8400f8bbfe555742bc77743070a8f2636d92e651c4fd828
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/apple/ready/5948de6770a5491ea158cd9e921ebce9/5948de6770a5491ea158cd9e921ebce9.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_apple_to_bowl_canary
+    asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_bowl@28025950c616
+  asset_id: official_ebench_bowl
+  source_package_id: ebench_apple_to_bowl_canary
+  role: target_container
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_bowl/307689f1c6884e1bb85bb20f00fef294.usd
+  content_sha256: sha256:28025950c6163ab1b26ffdd37f6cd4ab4f177a6eb6cc55c3832c2eec307e3d28
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/bowl/ready/307689f1c6884e1bb85bb20f00fef294/307689f1c6884e1bb85bb20f00fef294.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_apple_to_bowl_canary
+    asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_remote_control@261fb6ea8ee0
+  asset_id: official_ebench_remote_control
+  source_package_id: ebench_remote_to_holder_canary
+  role: manipulated_object
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_remote_control/ready/remote0/remote0.usd
+  content_sha256: sha256:261fb6ea8ee03dcb1472f7594333b9bc52b7d2a906a73aa7f52fd48b65b19ae9
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/remote_control/ready/remote0/remote0.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_remote_to_holder_canary
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_robot@5cfdc18d9040
+  asset_id: official_ebench_robot
+  source_package_id: ebench_apple_to_bowl_canary
+  role: robot
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_robot/robot.usd
+  content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_apple_to_bowl_canary
+    asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_robot@5cfdc18d9040
+  asset_id: official_ebench_robot
+  source_package_id: ebench_soap_to_dish_canary
+  role: robot
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_robot/robot.usd
+  content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_soap_to_dish_canary
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_robot@5cfdc18d9040
+  asset_id: official_ebench_robot
+  source_package_id: ebench_remote_to_holder_canary
+  role: robot
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_robot/robot.usd
+  content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_remote_to_holder_canary
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_scene@45bde7851f39
+  asset_id: official_ebench_scene
+  source_package_id: ebench_remote_to_holder_canary
+  role: environment
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_scene/scene.usd
+  content_sha256: sha256:45bde7851f394d8a919904bb1125b6a75e4cb50d8903632d858de31afc22f0c2
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task5/scene.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_remote_to_holder_canary
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_scene@56d11834ef12
+  asset_id: official_ebench_scene
+  source_package_id: ebench_apple_to_bowl_canary
+  role: environment
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_scene/scene.usd
+  content_sha256: sha256:56d11834ef12d47b66ac1c0114b328893f80a9ae70dd82d1e1f44102f01079a0
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task4/scene.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_apple_to_bowl_canary
+    asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_scene@e1cf0d5b4d76
+  asset_id: official_ebench_scene
+  source_package_id: ebench_soap_to_dish_canary
+  role: environment
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_scene/scene_noMDL.usd
+  content_sha256: sha256:e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
+  license: research-use
+  source_kind: convertasset_nomdl_artifact
+  source_uri: retained-artifact://docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml#asset_id=official_ebench_scene
+  source_uri_policy: mutable_local_source_uri_redacted
+  resolver_version: ConvertAsset no-mdl public CLI; scenario-forge handoff v0.3
+  provenance:
+    source_package_id: ebench_soap_to_dish_canary
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_soap@c147837fe9bd
+  asset_id: official_ebench_soap
+  source_package_id: ebench_soap_to_dish_canary
+  role: manipulated_object
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_soap/soap0.usd
+  content_sha256: sha256:c147837fe9bdeba628c72efa33e1f152ec3b65f8f1b2671318c8f7298b73aae5
+  license: research-use
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/soap/ready/soap0/soap0.usd
+  source_uri_policy: source_uri_retained
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  provenance:
+    source_package_id: ebench_soap_to_dish_canary
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+  claim_boundary: Asset registry entry only. It records locked USD asset metadata
+    and does not perform mesh, MDL, texture, or material conversion.

@@ -1,0 +1,34 @@
+schema_version: phase11-small-multi-task-canary-gate/v0.1
+phase: '11.6'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+package_count: 3
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  single_task_rc_gate: ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers: []
+- package_id: ebench_soap_to_dish_canary
+  single_task_rc_gate: soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers: []
+- package_id: ebench_remote_to_holder_canary
+  single_task_rc_gate: remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers: []
+blockers: []
+next_stage: automated_release_gate
+claim_boundary: Small multi-task canary gate only; not public dataset release, official
+  score release, leaderboard comparability, or broad benchmark coverage evidence.

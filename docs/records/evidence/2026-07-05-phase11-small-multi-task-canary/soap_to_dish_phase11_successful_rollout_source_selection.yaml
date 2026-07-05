@@ -1,0 +1,121 @@
+record_type: phase11_successful_rollout_source_selection
+record_version: v0.1
+phase: "11.3.b"
+created_on: "2026-07-05"
+status: package_linked_plan_verified_live_rerun_pending
+package:
+  package_id: ebench_soap_to_dish_canary
+  package_root: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+  package_descriptor: /tmp/ebench-soap-to-dish-canary-nomdl-relink/adapters/ebench/package.yaml
+  task_contract: /tmp/ebench-soap-to-dish-canary-nomdl-relink/task/task_contract.yaml
+  scene_usd: /tmp/ebench-soap-to-dish-canary-nomdl-relink/scene/main.usda
+  asset_lock: /tmp/ebench-soap-to-dish-canary-nomdl-relink/locks/asset_lock.yaml
+  task_id: mobile_manip/soap_to_dish
+  success_metric: soap_in_dish
+  success_predicate: object_in_container
+  predicate_object: soap_001
+  predicate_container: soap_dish_fixture
+current_phase11_status:
+  phase11_0_visual_review_gate: soap_to_dish_phase11_visual_review_gate_nomdl_relink_cam4_pass.yaml
+  phase11_0_status: passed
+  phase11_1_task_execution_gate: soap_to_dish_phase11_task_execution_gate_live.yaml
+  phase11_1_status: passed
+  phase11_2_executed_episode_gate: soap_to_dish_phase11_executed_episode_gate_completed.yaml
+  phase11_2_status: passed
+  phase11_3_success_predicate_gate: soap_to_dish_phase11_success_predicate_gate_failed.yaml
+  phase11_3_status: failed
+  phase11_3_failure_reason:
+    - retained completed episode is zero-policy
+    - terminal episode_result score=0.0
+    - terminal episode_result sr=0.0
+investigation:
+  inspected_roots:
+    - /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution
+    - /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench
+    - /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini
+  inspected_eos_patterns:
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/adapters/ebench/scenario_forge_bpl19r.py
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/adapters/ebench/scenario_forge_bpl19r_phase11_bridge.py
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/scripts/run_phase11_scenario_forge_bpl19r_rerun.py
+  retained_soap_success_found: true
+  retained_soap_success_is_package_linked: false
+  retained_soap_success_status: reference_only
+  retained_soap_successes:
+    - source: taskbook01c_pi05
+      run_id: taskbook01c-20260627T024056Z-clean3-mobile-manip-soap-to-dish-taskbook01c-attempt-000
+      result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/taskbook01c-20260627T024056Z-clean3-mobile-manip-soap-to-dish-taskbook01c-attempt-000/ebench/mobile_manip/soap_to_dish_test_mini/000/result_info.json
+      score: 1.0
+      success_rate: 1
+      package_linkage: false
+      planning_use: debugging_reference_only
+  retained_soap_failures:
+    - result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/2026-06-30_14_21_56_287953/ebench/mobile_manip/soap_to_dish_test_mini/000/result_info.json
+      score: 0.0
+      success_rate: 0
+    - result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/2026-06-30_16_58_28_033549/ebench/mobile_manip/soap_to_dish_test_mini/000/result_info.json
+      score: 0.0
+      success_rate: 0
+    - result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/2026-06-30_16_58_28_033549/ebench/mobile_manip/soap_to_dish_test_mini/001/result_info.json
+      score: 0.0
+      success_rate: 0
+    - result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/taskbook02c_p3_internvla_26task_live_execution/ebench/mobile_manip/soap_to_dish_test_mini/000/result_info.json
+      score: 0.0
+      success_rate: 0
+    - result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/taskbook02k_pi05_cycle_budget/ebench/mobile_manip/soap_to_dish_test_mini/000/result_info.json
+      score: 0.0
+      success_rate: 0
+    - result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/taskbook02m_official_style_repaired/ebench/mobile_manip/soap_to_dish_test_mini/000/result_info.json
+      score: 0.0
+      success_rate: 0
+    - result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/taskbook02m_p3_26task_official_style_execution/ebench/mobile_manip/soap_to_dish_test_mini/000/result_info.json
+      score: 0.0
+      success_rate: 0
+decision:
+  selected_first_candidate: eos_bpl19r_pi05_package_linked_multi_attempt_lane_after_mapping_extension
+  decision_basis:
+    - The retained TaskBook01c soap result proves a local native GenManip soap-to-dish success exists, but it did not consume the Scenario Forge package.
+    - The existing EOS BPL-19R package-linked wrapper and bridge already produced apple-to-bowl and remote-to-holder Phase 11.2/11.3 success evidence.
+    - The wrapper has now been extended under test to map mobile_manip/soap_to_dish to the native GenManip soap_to_dish.yml config.
+    - A dry-run package-linkage plan now records the Scenario Forge package descriptor, task contract, scene USD, asset lock, native task config, attempt_count=10, and the live-run blocker.
+selected_next_source:
+  owner: embodied-eval-os
+  source_stage: BPL-19R-derived package-linked soap rerun
+  policy_checkpoint_id: pi05-ebench-generalist
+  native_genmanip_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+  required_eos_mapping:
+    mobile_manip/soap_to_dish: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+  eos_mapping_status: unit_test_and_dry_run_verified
+  eos_mapping_test: tests/test_phase11_scenario_forge_bpl19r_rerun.py::test_package_linked_bpl19r_wrapper_maps_soap_to_dish_package
+  phase_11_3c_plan_evidence: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_3c_bpl19r_package_linked_plan/phase11_package_linked_bpl19r_rerun.yaml
+  phase_11_3c_runtime_log: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_3c_bpl19r_package_linked_plan/phase11_package_linked_bpl19r_runtime.log
+  planned_attempt_count: 10
+  required_eos_change:
+    - Run package-linked multi-attempt BPL-19R/pi0.5 lane for soap-to-dish.
+    - Bridge the first successful terminal result, if any, into Phase 11.2 executed-episode evidence and Phase 11.3 predicate evidence.
+    - If all package-linked attempts fail, retain failed attempt summaries and keep Phase 11.3 blocked.
+package_linkage_assessment:
+  historical_soap_success_is_package_linked: false
+  historical_soap_success_status: reference_only
+  wrapper_status: soap_mapping_unit_tested_and_dry_run_verified_live_rerun_pending
+  dry_run_rerun_status: planned
+  dry_run_blockers:
+    - live_bpl19r_rerun_not_executed
+  scenario_forge_repo_boundary: Scenario Forge must only consume EOS evidence and must not implement the policy runner, model adapter, simulator episode runner, or leaderboard reporter.
+rejected_shortcuts:
+  - zero_policy_completed_episode_cannot_pass_success_predicate
+  - historical_taskbook01c_soap_success_cannot_close_phase_11_3_without_package_linkage
+  - manual_visual_review_cannot_override_predicate_status
+  - render_visual_reviewer_cannot_override_failed_simulator_state_predicate
+  - scenario_forge_repo_must_not_embed_bpl19r_or_genmanip_runner
+next_phase:
+  phase: "11.3.c"
+  name: package-linked successful completed episode rerun
+  owner: embodied-eval-os / GenManip runtime
+  status: package_linked_plan_verified_live_rerun_pending
+known_blockers:
+  - historical_soap_success_not_package_linked
+  - soap_to_dish_package_linked_bpl19r_live_rerun_not_executed
+  - successful_package_linked_soap_episode_missing
+  - predicate_status_true_evidence_missing
+claim_boundary: This selects and verifies the next EOS implementation path for soap-to-dish Phase 11.3 recovery. It does not claim task success and does not close Phase 11.3.

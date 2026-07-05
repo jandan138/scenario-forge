@@ -1,0 +1,22 @@
+schema_version: phase11-post-execution-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+initial_image_path: phase11_4_bpl19r_visual_review_frames/right_camera_first.jpg
+final_image_path: phase11_4_bpl19r_visual_review_frames/right_camera_last.jpg
+verdict: PASS
+visible_evidence:
+- Initial right-camera frame shows the white bowl empty on the lower left and the
+  red apple separately on the tabletop near the robot gripper.
+- Final right-camera frame shows the red apple visibly inside the white bowl, with
+  both target object and container identifiable.
+- The same camera view is used for the retained first and last frames, making the
+  before/after comparison visually coherent.
+- No blank frame, severe clipping, red/pink fallback material, or broken geometry
+  is visible in the reviewed frames.
+success_predicate_gate: phase11_success_predicate_bpl19r_success_gate.yaml
+retake_recommendation: not_required
+review_limitations: Local clean-room fallback was used because subagent spawn is restricted
+  without an explicit current-turn delegation request; review used only the supplied
+  image paths and task expectation.
+claim_boundary: Post-execution visual QA only; predicate success remains owned by
+  EOS/EBench evidence.

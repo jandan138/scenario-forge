@@ -1,0 +1,42 @@
+{
+  "allowed_claims": [],
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "online_policy_score_gate_report.json",
+      "role": "online_policy_score_gate_report",
+      "schema_id": "embodied_eval_os_bpl19m_online_policy_score_gate_report.v0",
+      "size_bytes": 1175
+    }
+  ],
+  "backend_parity": false,
+  "blocked_claims": [
+    "standard_model_score",
+    "openpi_task_success",
+    "official_benchmark_reproduction",
+    "leaderboard_comparability",
+    "backend_parity",
+    "model_superiority",
+    "real_world_safety"
+  ],
+  "blocker_ids": [
+    "blocked_live_online_rollout_exception",
+    "blocked_online_policy_rollout_not_executed",
+    "blocked_reset_ready_observation_not_completed",
+    "blocked_policy_inference_cycle_count_lt_2",
+    "blocked_online_cycles_missing_for_input_parity",
+    "blocked_no_completed_native_episode_result",
+    "blocked_native_task_success_measurement_missing"
+  ],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "positive_claim_authorization": null,
+  "real_world_safety": false,
+  "reports_standard_model_score": false,
+  "schema": "embodied_eval_os_bpl19m_claim_boundary_report.v0",
+  "standard_model_score": null,
+  "standard_model_score_protocol_id": null
+}

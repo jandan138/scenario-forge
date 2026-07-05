@@ -1,0 +1,89 @@
+schema_version: package-registry/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+registry_scope: local_immutable_snapshot_seed
+entry_schema: package-registry-entry/v0.1
+packages:
+- schema_version: package-registry-entry/v0.1
+  package_id: ebench_apple_to_bowl_canary
+  registry_version: v0.2+3be34d1b7c18
+  scenario_domain: home_manipulation
+  task_label: apple_to_bowl
+  task_family: pick_place
+  package_mode: fat
+  targets:
+  - ebench
+  - embodied-eval-os
+  release_status: passed
+  artifact_refs:
+    manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_package_manifest.yaml
+    asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+    scene_usd: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_main.usda
+    task: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_task.yaml
+    metrics: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_metrics.yaml
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_visual_review_gate.yaml
+    '11.1': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+    '11.5': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  content_digest: sha256:3be34d1b7c18df85939e8f043aadfc4c839378cdef1122a23bf566082f457821
+  claim_boundary: Package registry entry only. Runtime and task-success claims must
+    be read from retained Phase 11 gate evidence.
+- schema_version: package-registry-entry/v0.1
+  package_id: ebench_soap_to_dish_canary
+  registry_version: v0.2+b6897fd60cc7
+  scenario_domain: home_manipulation
+  task_label: soap_to_dish
+  task_family: unspecified
+  package_mode: fat
+  targets:
+  - ebench
+  - embodied-eval-os
+  release_status: passed
+  artifact_refs:
+    manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_package_manifest.yaml
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+    scene_usd: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_main.usda
+    task: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_single_task_rc_nomdl_relink_11_1_pass_policy_blocked_gate.yaml
+    metrics: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_metrics.yaml
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_visual_review_gate_nomdl_relink_cam4_pass.yaml
+    '11.1': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_post_execution_visual_review_top_camera_retake_pass_gate.yaml
+    '11.5': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  content_digest: sha256:b6897fd60cc7e0dd0ec04f9ccc155bf5d02a97ce1e38c27c3cf1f7b484b1318b
+  claim_boundary: Package registry entry only. Runtime and task-success claims must
+    be read from retained Phase 11 gate evidence.
+- schema_version: package-registry-entry/v0.1
+  package_id: ebench_remote_to_holder_canary
+  registry_version: v0.2+1d76665a540a
+  scenario_domain: home_manipulation
+  task_label: remote_to_holder
+  task_family: unspecified
+  package_mode: fat
+  targets:
+  - ebench
+  - embodied-eval-os
+  release_status: passed
+  artifact_refs:
+    manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_package_manifest_contactfixed.yaml
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+    scene_usd: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_main_contactfixed.usda
+    task: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_task_contract_contactfixed.yaml
+    metrics: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_metrics.yaml
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_visual_review_gate_contactfixed_cam3_pass.yaml
+    '11.1': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+    '11.5': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  content_digest: sha256:1d76665a540a92e18c361c7fc989aeb7693bba3dd881463f94a0a3cb253aff00
+  claim_boundary: Package registry entry only. Runtime and task-success claims must
+    be read from retained Phase 11 gate evidence.

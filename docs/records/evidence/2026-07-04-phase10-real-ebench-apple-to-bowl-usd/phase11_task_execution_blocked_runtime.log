@@ -1,0 +1,13 @@
+Phase 11.1 blocked evidence for Scenario Forge apple-to-bowl canary.
+
+Package:
+  /tmp/ebench-apple-to-bowl-canary
+
+Current state:
+  Scenario Forge has Phase 11.1 evidence/gate schemas and CLI.
+  The package has Phase 11.0 visual review gate evidence.
+  No real EOS task execution evidence for this Scenario Forge package was found in the current repo state.
+
+Boundary:
+  This log is a blocked-evidence marker only.
+  It is not an EOS episode trace, not a reset/step/close runtime log, and not task success evidence.

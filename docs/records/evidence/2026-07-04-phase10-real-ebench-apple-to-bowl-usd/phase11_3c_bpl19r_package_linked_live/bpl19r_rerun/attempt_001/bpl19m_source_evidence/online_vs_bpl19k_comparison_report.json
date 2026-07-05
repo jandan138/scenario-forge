@@ -1,0 +1,18 @@
+{
+  "artifact_refs": [],
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl19k_score_source": "not_loaded_by_bpl19m_minimal_gate",
+  "bpl19k_score_value": null,
+  "bpl19m_standard_model_score": 0.0,
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "comparison_scope": "bpl19m_online_policy_rollout_vs_bpl19k_fixed_chunk_replay",
+  "comparison_status": "retained",
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "real_world_safety": false,
+  "schema": "embodied_eval_os_bpl19m_online_vs_bpl19k_comparison_report.v0",
+  "standard_model_score": null
+}

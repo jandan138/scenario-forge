@@ -1,0 +1,54 @@
+schema_version: phase11-small-multi-task-canary-gate/v0.1
+phase: '11.6'
+status: blocked
+suite_id: scenario_forge_phase11_three_task_downstream_blocked_canary
+package_count: 3
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  single_task_rc_gate: ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers:
+  - apple_to_bowl_single_task_rc_policy_blocked_for_public_release
+- package_id: ebench_soap_to_dish_canary
+  single_task_rc_gate: soap_to_dish_phase11_single_task_rc_nomdl_relink_visual_pass_policy_blocked_gate.yaml
+  overview_visual_review_gate: soap_to_dish_phase11_visual_review_gate_nomdl_relink_cam4_pass.yaml
+  real_asset_package: true
+  task_contract: true
+  material_runtime_closure: passed
+  overview_visual_review: passed
+  execution_lane_status: blocked
+  predicate_evaluation_status: blocked
+  blockers:
+  - soap_to_dish_eos_execution_not_run
+  - soap_to_dish_completed_episode_not_run
+  - soap_to_dish_success_predicate_not_evaluated
+  - soap_to_dish_post_execution_visual_review_not_run
+  - soap_to_dish_single_task_rc_blocked
+- package_id: ebench_remote_to_holder_canary
+  single_task_rc_gate: remote_to_holder_phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  overview_visual_review_gate: remote_to_holder_phase11_visual_review_gate_contactfixed_cam3_pass.yaml
+  task_execution_gate: remote_to_holder_phase11_task_execution_gate_live.yaml
+  executed_episode_gate: remote_to_holder_phase11_executed_episode_bpl19r_success_gate.yaml
+  success_predicate_gate: remote_to_holder_phase11_success_predicate_bpl19r_success_gate.yaml
+  post_execution_visual_review_gate: remote_to_holder_phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  material_runtime_closure: passed
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers:
+  - remote_to_holder_single_task_rc_policy_blocked_for_public_release
+blockers:
+- soap_to_dish_eos_execution_not_run
+- soap_to_dish_completed_episode_not_run
+- soap_to_dish_success_predicate_not_evaluated
+- soap_to_dish_post_execution_visual_review_not_run
+- soap_to_dish_single_task_rc_blocked
+next_stage: blocked
+claim_boundary: Small multi-task canary gate only; not public dataset release, official
+  score release, leaderboard comparability, or broad benchmark coverage evidence.

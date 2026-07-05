@@ -1,0 +1,19 @@
+schema_version: phase11-eos-task-execution/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+contract_consumed: false
+execution_config_status: blocked
+episode_status: blocked
+trace_uri: eos://blocked/scenario-forge/phase11/apple-to-bowl/no-execution
+runtime_log: phase11_task_execution_blocked_runtime.log
+lifecycle:
+  reset: blocked
+  step: blocked
+  close: blocked
+keyframes:
+  initial: phase11_task_execution_initial_keyframe_missing.png
+blockers:
+  - eos_task_execution_integration_not_run_for_scenario_forge_package
+  - no_eos_package_episode_runner_available_in_current_eos_repo_state
+  - scenario_forge_gate_contract_ready_but_real_eos_evidence_missing

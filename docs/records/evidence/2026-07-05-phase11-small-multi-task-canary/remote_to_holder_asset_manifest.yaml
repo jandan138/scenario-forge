@@ -1,0 +1,29 @@
+schema_version: asset-manifest/v0.2
+assets:
+- asset_id: official_ebench_scene
+  role: environment
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_scene/scene.usd
+  license: research-use
+  sha256: sha256:45bde7851f394d8a919904bb1125b6a75e4cb50d8903632d858de31afc22f0c2
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task5/scene.usd
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+- asset_id: official_ebench_robot
+  role: robot
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_robot/robot.usd
+  license: research-use
+  sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+- asset_id: official_ebench_remote_control
+  role: manipulated_object
+  asset_type: usd_bundle
+  canonical_usd: assets/official_ebench_remote_control/ready/remote0/remote0.usd
+  license: research-use
+  sha256: sha256:261fb6ea8ee03dcb1472f7594333b9bc52b7d2a906a73aa7f52fd48b65b19ae9
+  source_kind: official_ebench_asset
+  source_uri: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/remote_control/ready/remote0/remote0.usd
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1

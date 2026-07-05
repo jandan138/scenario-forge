@@ -1,0 +1,95 @@
+schema_version: phase11-task-package-generation-evidence/v0.1
+phase: 11.6.task-package
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+task_family: pick_place
+source_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/remote_to_holder.yml
+package_root: /tmp/ebench-remote-to-holder-canary
+generator:
+  owner: scenario-forge
+  command: >-
+    PYTHONPATH=src python -m scenario_forge.cli ebench canary single-object-fixture
+    --asset-sources examples/ebench_remote_to_holder_asset_sources.yaml
+    --out /tmp/ebench-remote-to-holder-canary
+  generator_module: scenario_forge.generation.ebench_canary.single_object_fixture
+source_assets:
+  scene: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task5/scene.usd
+  robot: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+  manipulated_object: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/remote_control/ready/remote0/remote0.usd
+  camera_yaml: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml
+target_fixture:
+  fixture_kind: environment_fixture
+  source_asset_id: official_ebench_scene
+  source_uid: _00
+  instance_id: remote_holder_fixture
+  semantic_label: remote_control_holder
+  bbox_probe:
+    prim_path: /root/obj__00
+    bbox_min: [-0.363224, -0.032107, 0.003521]
+    bbox_max: [-0.151019, 0.28912, 0.139452]
+artifact_snapshots:
+  package_manifest: remote_to_holder_package_manifest.yaml
+  scene_usd: remote_to_holder_main.usda
+  scene_instances: remote_to_holder_instances.yaml
+  asset_manifest: remote_to_holder_asset_manifest.yaml
+  asset_lock: remote_to_holder_asset_lock.yaml
+  task: remote_to_holder_task.yaml
+  task_contract: remote_to_holder_task_contract.yaml
+  metrics: remote_to_holder_metrics.yaml
+  ebench_package: remote_to_holder_ebench_package.yaml
+  task_entrypoint: remote_to_holder_task_entrypoint.yaml
+  adapter_report: remote_to_holder_adapter_report.yaml
+  layout_checks: remote_to_holder_layout_checks.yaml
+artifact_hashes:
+  remote_to_holder_main.usda: 050726f46239aa069ec40dfbdc947ea38b8e97675fb2f5d743aea4434ba7ad0b
+  remote_to_holder_asset_lock.yaml: 41389fe0cadbbe42c16d1ac4c910f5976f3fd781f337e8138b0b4400bf0585c3
+  remote_to_holder_task_contract.yaml: f33f6150c04196de8b2c62fd3fb54994a5f18bdf490dac42fffda3a3a6a5ec3a
+material_closure_update:
+  status: scenario_forge_sidecar_materialization_fixed
+  root_cause: >-
+    The official remote_control ready/remote0 USD references a sibling sidecar
+    texture bundle under the same remote_control collection root. The first
+    package materialization copied only ready/remote0 and missed that sibling
+    sidecar.
+  fixed_canonical_usd: assets/official_ebench_remote_control/ready/remote0/remote0.usd
+  fixed_sidecar_texture: >-
+    assets/official_ebench_remote_control/63f5007c-eae0-4718-b760-df6c25e0e4ae/SubUSDs/textures/63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png
+  fixed_render_evidence:
+    image: remote_to_holder_tabletop_overview_material_fixed.png
+    render_metadata: remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+    runtime_log: remote_to_holder_tabletop_overview_material_fixed_runtime.log
+    image_sha256: c90d85de48c3718058c5a931f301ad7783d034e20039cb7e47ac170591e4186d
+    render_metadata_sha256: 3c46aa97266a7d15e9e9f3316a6dac461370f25cef9925bb5a26d4aa5bf19c8a
+  material_runtime_preflight:
+    status: passed
+    missing_texture_count: 0
+    blocking_runtime_log_signals: []
+verification:
+  package_check:
+    command: PYTHONPATH=src python -m scenario_forge.cli package check /tmp/ebench-remote-to-holder-canary --require-asset-lock
+    status: passed
+    output: Package OK
+  asset_lock_check:
+    command: PYTHONPATH=src python -m scenario_forge.cli assets check /tmp/ebench-remote-to-holder-canary
+    status: passed
+    output: Asset lock OK
+  usd_stage_open:
+    command: PYTHONPATH=src python -c "from pxr import Usd; Usd.Stage.Open('/tmp/ebench-remote-to-holder-canary/scene/main.usda')"
+    status: passed
+    checked_prims:
+      - /World/Instances/environment_scene
+      - /World/Instances/lift2_robot_asset
+      - /World/Instances/remote_001
+status: package_static_passed
+next_stage: phase11_6_visual_review_and_eos_execution
+blockers:
+  - remote_to_holder_phase11_0_visual_review_warn_camera_retake_required
+  - remote_to_holder_eos_execution_not_run
+  - remote_to_holder_success_predicate_not_evaluated
+  - remote_to_holder_single_task_rc_not_run
+claim_boundary: >-
+  This evidence proves a third real EBench USD-bearing task package was generated,
+  asset-locked, EBench-exported, and statically opened as USD. It also records
+  that the remote material sidecar closure bug has a retained fixed render with
+  material_runtime_preflight.status=pass. It does not claim visual review PASS,
+  EOS execution, predicate success, public release, or leaderboard comparability.

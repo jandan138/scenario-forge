@@ -1,0 +1,55 @@
+{
+  "allowed_claims": [
+    "EOS retained a pi0.5 same-checkpoint online lane for the scoped local task.",
+    "The scoped EOS score comes from a completed native episode_result."
+  ],
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "r1_same_checkpoint_report.json",
+      "role": "r1_same_checkpoint_report",
+      "schema_id": "embodied_eval_os_bpl19r_r1_same_checkpoint_report.v0",
+      "size_bytes": 3824
+    }
+  ],
+  "backend_parity": false,
+  "blocked_claims": [
+    "official_benchmark_reproduction",
+    "official_leaderboard_comparable",
+    "official_runner_score_source",
+    "backend_parity",
+    "GenManip equivalence",
+    "model_superiority",
+    "benchmark_wide_model_quality",
+    "real_world_safety"
+  ],
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19R.R1",
+  "claim_scope": "bpl19r_pi05_same_checkpoint_online_lane_v0",
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "openpi_task_success": true,
+  "positive_claim_authorization": {
+    "authorization_id": "bpl19r_pi05_same_checkpoint_online_lane_v0",
+    "authorization_status": "authorized",
+    "authorized_fields": [
+      "openpi_task_success",
+      "standard_model_score"
+    ],
+    "backend_parity": false,
+    "blocker_ids": [],
+    "bpl_stage": "BPL-19R.R1",
+    "claim_scope": "bpl19r_pi05_same_checkpoint_online_lane_v0",
+    "official_benchmark_reproduction": false,
+    "real_world_safety": false,
+    "schema": "embodied_eval_os_bpl19r_positive_claim_authorization.v0",
+    "score_protocol_id": "eos_bpl19r_pi05_same_checkpoint_online_score_v0"
+  },
+  "real_world_safety": false,
+  "reports_standard_model_score": true,
+  "same_checkpoint_boundary_status": "satisfied",
+  "schema": "embodied_eval_os_bpl19r_r1_claim_boundary_report.v0",
+  "standard_model_score": 1.0,
+  "standard_model_score_protocol_id": "eos_bpl19r_pi05_same_checkpoint_online_score_v0"
+}

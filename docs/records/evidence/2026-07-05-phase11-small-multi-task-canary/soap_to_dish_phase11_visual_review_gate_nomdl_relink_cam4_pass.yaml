@@ -1,0 +1,24 @@
+schema_version: phase11-visual-review-gate/v0.1
+phase: '11.0'
+status: passed
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+visual_review:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_tabletop_overview_cam4_visual_review.yaml
+  schema_version: phase11-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: PASS
+  image_path: soap_to_dish_nomdl_relink_tabletop_overview_cam4.png
+  render_metadata_path: soap_to_dish_nomdl_relink_tabletop_overview_cam4_render_metadata.json
+  visible_evidence:
+  - 'Bathroom/work-surface context is clear: sink, countertop, tile wall, towel/holder,
+    cup, and partial robot/spawn context are visible.'
+  - A pink soap-like object is visible upright on the countertop near the right-center.
+  - A shallow white rectangular soap dish/container is visible on the work surface
+    near the center-left.
+  retake_recommendation: No retake required.
+blockers: []
+next_stage: eos_task_execution_integration
+claim_boundary: Automated visual review gate only; not task success, not physics fidelity,
+  not release approval, and not leaderboard evidence.

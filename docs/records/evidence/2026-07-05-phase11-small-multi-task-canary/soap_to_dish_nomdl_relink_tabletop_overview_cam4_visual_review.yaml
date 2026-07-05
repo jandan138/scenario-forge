@@ -1,0 +1,27 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+reviewer_agent: 019f2f12-6e7b-7ac3-9dfa-8394e6183f4c
+image_path: soap_to_dish_nomdl_relink_tabletop_overview_cam4.png
+render_metadata_path: soap_to_dish_nomdl_relink_tabletop_overview_cam4_render_metadata.json
+verdict: PASS
+visible_evidence:
+  - >-
+    Bathroom/work-surface context is clear: sink, countertop, tile wall,
+    towel/holder, cup, and partial robot/spawn context are visible.
+  - >-
+    A pink soap-like object is visible upright on the countertop near the
+    right-center.
+  - >-
+    A shallow white rectangular soap dish/container is visible on the work
+    surface near the center-left.
+main_risk: >-
+  The white dish has low contrast against the pale counter, and the pink soap is
+  quite saturated, but it still reads as a plausible soap object rather than
+  unusable fallback material.
+retake_recommendation: No retake required.
+confidence: high
+claim_boundary: >-
+  Automated visual review evidence only. It is not task success, official camera
+  parity, full material parity, physics-fidelity evidence, model quality
+  evidence, release approval, or leaderboard evidence.

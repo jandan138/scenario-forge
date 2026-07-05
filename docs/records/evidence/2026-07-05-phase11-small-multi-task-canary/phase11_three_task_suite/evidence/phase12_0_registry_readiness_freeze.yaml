@@ -1,0 +1,45 @@
+schema_version: phase12-registry-readiness-freeze/v0.1
+phase: '12.0'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+source_gate_index: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_current_gate_index.yaml
+phase11_readiness_gate: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_8_phase12_readiness_ebench_author_redistribution_pass_gate.yaml
+package_count: 3
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  registry_version: v0.2+3be34d1b7c18
+  release_status: passed
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_visual_review_gate.yaml
+    '11.1': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+    '11.5': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+- package_id: ebench_soap_to_dish_canary
+  registry_version: v0.2+b6897fd60cc7
+  release_status: passed
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_visual_review_gate_nomdl_relink_cam4_pass.yaml
+    '11.1': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_post_execution_visual_review_top_camera_retake_pass_gate.yaml
+    '11.5': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+- package_id: ebench_remote_to_holder_canary
+  registry_version: v0.2+1d76665a540a
+  release_status: passed
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_visual_review_gate_contactfixed_cam3_pass.yaml
+    '11.1': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+    '11.5': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+manual_blockers: []
+unknown_blockers: []
+blockers: []
+next_stage: local_package_asset_registry_contract
+claim_boundary: Phase 12.0 registry readiness freeze only. It freezes retained Phase
+  11 evidence references and does not rerun episodes, alter gate status, or claim
+  leaderboard comparability.

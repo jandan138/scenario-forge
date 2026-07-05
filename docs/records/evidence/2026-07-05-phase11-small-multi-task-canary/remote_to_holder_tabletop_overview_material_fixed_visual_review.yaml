@@ -1,0 +1,28 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+reviewer_agent: 019f2e76-bd6f-7a62-9920-ac733b58ea70
+image_path: remote_to_holder_tabletop_overview_material_fixed.png
+render_metadata_path: remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+verdict: WARN
+visible_evidence:
+  - The image is nonblank and rendered from a high tabletop overview.
+  - Most of the table surface is visible.
+  - A small dark remote-like object is visible near the center-left, but it is weakly identifiable.
+  - A black compartment holder or tray is visible near the upper middle.
+  - A robot or robot spawn with arms and grippers is visible at the left edge of the table.
+  - Room context, chairs, cup, headphones, bowl, and window make the scene readable as a tabletop manipulation scene.
+main_risk: >-
+  The remote control is very small and low-detail from this camera distance, so
+  it is only weakly identifiable. The holder is visible, but could be read as a
+  generic black organizer or tray.
+retake_recommendation: >-
+  Retake from a slightly lower or closer oblique overview, keeping the full
+  tabletop and robot visible while making the remote and holder larger in frame.
+  Avoid changing the scene layout.
+confidence: high
+claim_boundary: >-
+  Automated visual review evidence only. It is not task success, official camera
+  parity, official material parity, physics-fidelity evidence, model quality
+  evidence, or leaderboard evidence. This fixed review supersedes only the old
+  remote material-runtime blocker; it does not close the Phase 11.0 visual gate.

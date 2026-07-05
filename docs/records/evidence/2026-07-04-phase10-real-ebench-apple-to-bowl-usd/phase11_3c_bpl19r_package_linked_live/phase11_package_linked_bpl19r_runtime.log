@@ -1,0 +1,9 @@
+Phase 11.3.c Scenario Forge package-linked BPL-19R rerun evidence.
+package_id=ebench_apple_to_bowl_canary
+task_id=mobile_manip/apple_to_fruit_bowl
+native_task_config=/cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml
+mapping_source=eos_scenario_forge_bpl19r_static_task_mapping_v0
+rerun_status=executed
+bpl19r_status=closed_r1_same_checkpoint_online_lane_retained
+blockers=
+claim_boundary=Scenario Forge package-linked BPL-19R rerun evidence. EOS loads the Scenario Forge package and maps its task contract to a native GenManip task config before invoking the existing BPL-19R online lane. This is not official leaderboard evidence.

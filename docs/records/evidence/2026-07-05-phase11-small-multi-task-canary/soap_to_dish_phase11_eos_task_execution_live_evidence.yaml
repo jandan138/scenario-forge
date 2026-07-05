@@ -1,0 +1,39 @@
+schema_version: phase11-eos-task-execution/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+contract_consumed: true
+execution_config_status: generated
+episode_status: started
+trace_uri: soap_to_dish_phase11_task_execution_live_trace.json
+runtime_log: soap_to_dish_phase11_task_execution_live_runtime.log
+lifecycle:
+  reset: passed
+  step: passed
+  close: passed
+keyframes:
+  initial: soap_to_dish_phase11_task_execution_initial_overlook.png
+  initial_camera: overlook_camera
+  initial_source_frame: '00000'
+blockers: []
+runtime_details:
+  server_url: http://127.0.0.1:18349
+  run_id: scenario_forge_phase11_soap_to_dish_20260704T215406Z
+  episode_id: ebench/scenario_forge_phase11_soap_to_dish_20260704T215406Z/ebench/mobile_manip/soap_to_dish_test_mini/000
+  reset_result_timeout_s: 900.0
+  max_policy_calls: 1
+  trace_source: /tmp/scenario-forge-phase11-soap-to-dish-start-trace/ebench/scenario_forge_phase11_soap_to_dish_20260704T215406Z/ebench/mobile_manip/soap_to_dish_test_mini/000.json
+  keyframe_source: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_soap_to_dish_20260704T215406Z/ebench/mobile_manip/soap_to_dish_test_mini/000/46da9117db7a44a6aadcdd69f5d1a4a1/overlook_camera/00000.png
+  runtime_preflight: soap_to_dish_phase11_runtime_preflight_envfix.yaml
+  start_new_job_response: soap_to_dish_phase11_start_new_job_response.json
+  server_log: /cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_soap_to_dish_20260704T215406Z/server_20260705_055419_336891.log
+  worker_log: /cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_soap_to_dish_20260704T215406Z/worker/pool_20260705_055419_339508_worker_0_20260705_055458_513248.log
+  eos_worktree: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution
+  eos_branch: phase11-scenario-forge-execution
+  trace_sha256: 9755f38dfc4ef29e5d2a49fd7d693d386937828ae686276621a2cc6bebb6397b
+  initial_keyframe_sha256: 29f654ddac7098aebb7d7092aaa04840ba53cc2a533fd83cbfb673ab20f9a525
+  runtime_log_sha256: 01b67e01508c40fb20d47ba6b39e081d095f1157053afedd7d885e3f3c444995
+claim_boundary: EOS task execution integration evidence only. EOS/GenManip started
+  a live soap-to-dish smoke, completed reset, one zero-policy step, cleanup close,
+  and retained trace/log/initial keyframe. This is not task success, not model quality,
+  not official EBench score, not physics fidelity, and not release approval.

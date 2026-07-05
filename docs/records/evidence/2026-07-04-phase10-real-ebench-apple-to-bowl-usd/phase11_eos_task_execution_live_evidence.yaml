@@ -1,0 +1,32 @@
+schema_version: phase11-eos-task-execution/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+contract_consumed: true
+execution_config_status: generated
+episode_status: started
+trace_uri: phase11_task_execution_live_trace.json
+runtime_log: phase11_task_execution_live_runtime.log
+lifecycle:
+  reset: passed
+  step: passed
+  close: passed
+keyframes:
+  initial: phase11_task_execution_initial_overlook.png
+  initial_camera: overlook_camera
+  initial_source_frame: '00000'
+blockers: []
+runtime_details:
+  server_url: http://127.0.0.1:8087
+  run_id: scenario_forge_phase11_apple_to_bowl_tracefix_20260704T151344Z
+  episode_id: ebench/scenario_forge_phase11_apple_to_bowl_tracefix_20260704T151344Z/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/000
+  reset_result_timeout_s: 240.0
+  max_policy_calls: 1
+  trace_source: /tmp/scenario-forge-phase11-genmanip-smoke-tracefix/ebench/scenario_forge_phase11_apple_to_bowl_tracefix_20260704T151344Z/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/000.json
+  keyframe_source: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_apple_to_bowl_tracefix_20260704T151344Z/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/000/a18ed86ed2f947ebb687253020a2b1a5/overlook_camera/00000.png
+  eos_worktree: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution
+  eos_branch: phase11-scenario-forge-execution
+claim_boundary: EOS task execution integration evidence only. EOS/GenManip started
+  a live apple-to-bowl smoke, completed reset, one zero-policy step, cleanup close,
+  and retained trace/log/initial keyframe. This is not task success, not model
+  quality, not official EBench score, not physics fidelity, and not release approval.

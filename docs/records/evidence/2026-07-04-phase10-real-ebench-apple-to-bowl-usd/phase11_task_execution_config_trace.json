@@ -1,0 +1,67 @@
+{
+  "blockers": [
+    "eos_episode_start_not_run_for_scenario_forge_package",
+    "no_scenario_forge_package_episode_runner_available_in_this_eos_lane"
+  ],
+  "claim_boundary": "Scenario Forge package task execution config evidence only. EOS consumed the package and generated a runtime config, but no simulator episode was started in this lane.",
+  "contract_consumed": true,
+  "episode_status": "blocked",
+  "execution_config": {
+    "adapter_descriptor": "/tmp/ebench-apple-to-bowl-canary/adapters/ebench/package.yaml",
+    "asset_lock": "/tmp/ebench-apple-to-bowl-canary/locks/asset_lock.yaml",
+    "camera_hints": {
+      "claim_boundary": "official camera config preserved as hint; no official camera parity claim",
+      "license": "research-use",
+      "role": "camera_config",
+      "source_asset_key": "camera_yaml",
+      "source_file": "fixed_camera_lift2_simbox.yml",
+      "source_uri": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml",
+      "usage": "hint_only"
+    },
+    "instruction": "Pick up the apple from the dining table and place it into the fruit bowl.",
+    "package_id": "ebench_apple_to_bowl_canary",
+    "robot_hints": {
+      "robot_id": "manip/lift2/R5a",
+      "robot_instance": "lift2_robot_asset",
+      "spawn": {
+        "wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "xyz": [
+          -0.9,
+          0.1,
+          -0.5
+        ]
+      },
+      "usage": "hint_only"
+    },
+    "runtime_hints": {
+      "max_episode_steps": 300,
+      "reset_policy": "deterministic",
+      "simulator": "usd_capable",
+      "success_metric": "apple_in_bowl",
+      "success_predicate": "object_in_container"
+    },
+    "scene_usd": "/tmp/ebench-apple-to-bowl-canary/scene/main.usda",
+    "success_predicate": {
+      "claim_boundary": "portable predicate binding only; not an executed task success result",
+      "container": "bowl_001",
+      "evaluator_owner": "embodied-eval-os-ebench-adapter",
+      "metric_id": "apple_in_bowl",
+      "object": "apple_001",
+      "predicate": "object_in_container",
+      "role": "primary_success"
+    },
+    "task_contract": "/tmp/ebench-apple-to-bowl-canary/task/task_contract.yaml",
+    "task_entrypoint": "/tmp/ebench-apple-to-bowl-canary/adapters/ebench/task_entrypoint.yaml",
+    "task_family": "pick_place",
+    "task_id": "mobile_manip/apple_to_fruit_bowl"
+  },
+  "package_id": "ebench_apple_to_bowl_canary",
+  "runtime_owner": "embodied-eval-os",
+  "schema": "phase11_scenario_forge_task_execution_trace.v0",
+  "task_id": "mobile_manip/apple_to_fruit_bowl"
+}

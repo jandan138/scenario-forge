@@ -1,0 +1,11 @@
+schema_version: ebench-task-entrypoint/v0.1
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+task_family: pick_place
+instruction: Pick up the remote control from the coffee table and place it into the
+  remote control holder.
+success_metric: remote_in_holder
+metric_role: primary_success
+bindings:
+  object: remote_001
+  target_container: remote_holder_fixture

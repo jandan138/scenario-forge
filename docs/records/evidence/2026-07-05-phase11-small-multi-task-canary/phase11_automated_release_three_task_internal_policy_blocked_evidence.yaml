@@ -1,0 +1,28 @@
+schema_version: phase11-automated-release-evidence/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+small_multi_task_canary_gate: phase11_small_multi_task_canary_three_task_internal_policy_blocked_gate.yaml
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: pass
+  episode_execution: pass
+  predicate_evaluation: pass
+  license_policy: blocked
+known_blockers:
+- small_multi_task_canary_policy_blocked
+- apple_to_bowl_single_task_rc_policy_blocked_for_public_release
+- soap_to_dish_single_task_rc_policy_blocked_for_public_release
+- remote_to_holder_single_task_rc_policy_blocked_for_public_release
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+release_policy:
+  release_policy_status: blocked
+  asset_license_status: research-use; public redistribution approval not retained
+  redistribution_approval: false
+claim_boundary: >-
+  Automated release evidence after soap-to-dish Phase 11.4 top-camera retake
+  visual PASS. Package/static, visual, execution, completed-episode, and
+  predicate gates are no longer the active release blockers for the three-task
+  canary. Public release remains blocked by license / redistribution policy and
+  by the suite-level policy-blocked single-task RC statuses.

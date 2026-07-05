@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-automated-release-evidence-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Automated Release Evidence v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "suite_id",
+    "small_multi_task_canary_gate",
+    "release_critical_gates",
+    "known_blockers",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-automated-release-evidence/v0.1"
+    },
+    "suite_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "small_multi_task_canary_gate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "release_critical_gates": {
+      "type": "object",
+      "required": [
+        "package_check",
+        "asset_lock_check",
+        "adapter_contract",
+        "visual_review",
+        "episode_execution",
+        "predicate_evaluation",
+        "license_policy"
+      ],
+      "properties": {
+        "package_check": {
+          "enum": ["pass", "blocked", "failed"]
+        },
+        "asset_lock_check": {
+          "enum": ["pass", "blocked", "failed"]
+        },
+        "adapter_contract": {
+          "enum": ["pass", "blocked", "failed"]
+        },
+        "visual_review": {
+          "enum": ["pass", "blocked", "failed"]
+        },
+        "episode_execution": {
+          "enum": ["pass", "blocked", "failed"]
+        },
+        "predicate_evaluation": {
+          "enum": ["pass", "blocked", "failed"]
+        },
+        "license_policy": {
+          "enum": ["pass", "blocked", "failed"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "known_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

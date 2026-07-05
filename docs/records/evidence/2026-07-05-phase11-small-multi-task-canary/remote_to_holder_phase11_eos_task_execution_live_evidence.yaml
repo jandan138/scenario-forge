@@ -1,0 +1,35 @@
+schema_version: phase11-eos-task-execution/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+contract_consumed: true
+execution_config_status: generated
+episode_status: started
+trace_uri: remote_to_holder_phase11_task_execution_live_trace.json
+runtime_log: remote_to_holder_phase11_task_execution_live_runtime.log
+lifecycle:
+  reset: passed
+  step: passed
+  close: passed
+keyframes:
+  initial: remote_to_holder_phase11_task_execution_initial_overlook.png
+  initial_camera: overlook_camera
+  initial_source_frame: '00000'
+blockers: []
+runtime_details:
+  server_url: http://127.0.0.1:18348
+  run_id: scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z
+  episode_id: ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000
+  reset_result_timeout_s: 600.0
+  max_policy_calls: 1
+  trace_source: /tmp/scenario-forge-phase11-remote-to-holder-envfix-trace/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000.json
+  keyframe_source: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000/33f2d2e2b042446ba2bd2a3887328d74/overlook_camera/00000.png
+  runtime_preflight: remote_to_holder_phase11_runtime_preflight_envfix.yaml
+  server_log: /cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/server_20260705_035154_378744.log
+  worker_log: /cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/worker/pool_20260705_035154_381747_worker_0_20260705_035217_750487.log
+  eos_worktree: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution
+  eos_branch: phase11-scenario-forge-execution
+claim_boundary: EOS task execution integration evidence only. EOS/GenManip started
+  a live remote-to-holder smoke, completed reset, one zero-policy step, cleanup close,
+  and retained trace/log/initial keyframe. This is not task success, not model quality,
+  not official EBench score, not physics fidelity, and not release approval.

@@ -1,0 +1,3 @@
+r_frame_rate=30/1
+duration=12.066667
+nb_frames=362

@@ -1,0 +1,100 @@
+record_type: phase11_material_closure_handoff
+record_version: v0.1
+phase: 11.0 / 11.6.a.2
+created_on: '2026-07-05'
+status: external_repaired_source_or_convertasset_handoff_required
+package:
+  package_id: ebench_soap_to_dish_canary
+  package_root: /tmp/ebench-soap-to-dish-canary
+  task_id: mobile_manip/soap_to_dish
+  scene_asset_id: official_ebench_scene
+  package_scene_root: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene
+  official_source_root: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task3
+  scene_usd: /tmp/ebench-soap-to-dish-canary/scene/main.usda
+current_gate:
+  phase11_visual_review_gate: soap_to_dish_phase11_visual_review_gate_failed.yaml
+  status: failed
+  blockers:
+    - visual review verdict must be PASS; got FAIL
+    - visual review render metadata material_runtime_preflight.status must be pass; got failed
+    - 'visual review render runtime log contains blocking material signal: rtx.mdltranslator'
+    - 'visual review render runtime log contains blocking material signal: wasn''t resolved properly'
+runtime_material_failure:
+  runtime_log: soap_to_dish_tabletop_overview_runtime.log
+  render_metadata: soap_to_dish_tabletop_overview_render_metadata.json
+  log_lines:
+    - line: 367
+      signal: rtx.mdltranslator.plugin
+      message: Texture file referenced in the material parameter defaults was not resolved properly.
+      missing_texture: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/SubUSDs/textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg
+    - line: 368
+      signal: rtx.mdltranslator.plugin
+      message: Texture file referenced in the material parameter defaults was not resolved properly.
+      missing_texture: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/SubUSDs/textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg
+    - line: 369
+      signal: rtx.mdltranslator.plugin
+      message: Texture file referenced in the material parameter defaults was not resolved properly.
+      missing_texture: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/SubUSDs/textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg
+static_mdl_texture_closure_audit:
+  audit_owner: scenario-forge-ebench-official-asset-intake/v0.1
+  package_audit:
+    status: failed
+    root: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene
+    missing_texture_count: 3
+    missing_textures:
+      - material: SubUSDs/materials/MI_655dcc9a9237ad0001ba8197.mdl
+        texture: ../textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg
+        resolved_path: SubUSDs/textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg
+      - material: SubUSDs/materials/MI_655dcc9ad6b50e000157727c.mdl
+        texture: ../textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg
+        resolved_path: SubUSDs/textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg
+      - material: SubUSDs/materials/MI_655dcc9ad6b50e000157727c.mdl
+        texture: ../textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg
+        resolved_path: SubUSDs/textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg
+  official_source_audit:
+    status: failed
+    root: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task3
+    missing_texture_count: 3
+    missing_textures:
+      - material: SubUSDs/materials/MI_655dcc9a9237ad0001ba8197.mdl
+        texture: ../textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg
+        resolved_path: SubUSDs/textures/c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg
+      - material: SubUSDs/materials/MI_655dcc9ad6b50e000157727c.mdl
+        texture: ../textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg
+        resolved_path: SubUSDs/textures/bf77ddc86c270d02747e7d0517103514ab51d0f.jpg
+      - material: SubUSDs/materials/MI_655dcc9ad6b50e000157727c.mdl
+        texture: ../textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg
+        resolved_path: SubUSDs/textures/c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg
+local_repair_assessment:
+  existing_local_assets_sufficient: false
+  exact_filename_search_result: no copies found in checked EBench-Assets or GenManip roots
+  reason:
+    - The packaged texture directory and official task3 source texture directory both lack the three referenced JPG files.
+    - The missing references originate inside official task3 MDL files, not inside Scenario Forge-generated USD.
+    - This differs from remote-to-holder, where the missing sidecar texture existed locally and could be materialized by Scenario Forge intake.
+visual_framing_failure:
+  review: soap_to_dish_tabletop_overview_visual_review.yaml
+  verdict: FAIL
+  observed_issue:
+    - soap and soap dish are not visible or identifiable
+    - view is clipped or overexposed by bathroom geometry
+    - robot or robot spawn is not framed
+  metadata_issue:
+    - retained render metadata still uses apple/bowl target anchors for a soap-to-dish package
+  retake_required_after_material_closure: true
+required_external_handoff:
+  preferred_owner: EBench official asset owner
+  preferred_fix: provide repaired task3 scene closure containing the three missing JPG textures under task3/SubUSDs/textures
+  fallback_owner: ConvertAsset or external conversion lane
+  fallback_fix: produce repaired material-normalized/no-MDL task3 artifact plus dependency closure report, provenance, hashes, render log, and render image
+scenario_forge_next_action:
+  - Keep soap-to-dish Phase 11.0 blocked until repaired source or ConvertAsset handoff is available.
+  - Do not synthesize missing textures or copy ConvertAsset conversion logic into Scenario Forge.
+  - After repaired asset ingestion, regenerate package, rerun static MDL texture closure audit, rerun IsaacSim material preflight/render, and rerun render-visual-reviewer.
+  - After material closure, retake task-specific overview camera using soap_001 and soap_dish_fixture anchors.
+known_blockers:
+  - official_task3_scene_missing_mdl_texture_c00e97e58585d8ddb0f8b16a724d05a13eae31_jpg
+  - official_task3_scene_missing_mdl_texture_bf77ddc86c270d02747e7d0517103514ab51d0f_jpg
+  - official_task3_scene_missing_mdl_texture_c9c274d4ea1de7d059cec0a795b3b27e3941935_jpg
+  - soap_to_dish_overview_camera_retake_required_after_material_closure
+claim_boundary: This is material-closure and handoff evidence only. It does not claim Phase 11.0 visual pass, task success, policy quality, release approval, or leaderboard evidence.

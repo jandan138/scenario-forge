@@ -1,0 +1,24 @@
+{
+  "action_transform_cycle_count": 13,
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "episode_result": {
+    "episode_id": "scenario_forge/scenario_forge_phase11_soap_to_dish_11_4_retake_20260705T073000Z/ebench/mobile_manip/soap_to_dish_test_mini/000",
+    "native_raw_result_value": 1.0,
+    "native_raw_sr_value": 1.0,
+    "seed": "000",
+    "task_name": "ebench/mobile_manip/soap_to_dish_test_mini"
+  },
+  "fresh_live_observation_cycle_count": 13,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "policy_inference_cycle_count": 13,
+  "real_world_safety": false,
+  "schema": "embodied_eval_os_episode_trace.v0",
+  "standard_model_score": null,
+  "step_chunk_cycle_count": 13,
+  "trace_kind": "official_style_online_policy_rollout"
+}

@@ -1,0 +1,50 @@
+schema_version: phase11-phase12-readiness-gate/v0.1
+phase: '11.8'
+status: passed
+phase12_status: allowed
+phase12_allowed: true
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+latest_gates:
+  apple_to_bowl_single_task_rc:
+    path: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+    schema_version: phase11-single-task-release-candidate-gate/v0.1
+    status: passed
+  soap_to_dish_single_task_rc:
+    path: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+    schema_version: phase11-single-task-release-candidate-gate/v0.1
+    status: passed
+  remote_to_holder_single_task_rc:
+    path: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+    schema_version: phase11-single-task-release-candidate-gate/v0.1
+    status: passed
+  small_multi_task_canary:
+    path: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_small_multi_task_canary_three_task_ebench_author_redistribution_pass_gate.yaml
+    schema_version: phase11-small-multi-task-canary-gate/v0.1
+    status: passed
+  automated_release:
+    path: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_automated_release_three_task_ebench_author_redistribution_pass_gate.yaml
+    schema_version: phase11-automated-release-gate/v0.1
+    status: passed
+technical_gate_summary:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  overview_visual_review: pass
+  eos_execution: pass
+  completed_episode: pass
+  success_predicate: pass
+  post_execution_visual_review: pass
+  material_runtime_closure: pass
+policy_gate_summary:
+  release_policy: pass
+  asset_license_status: redistribution-approved-by-ebench-author
+  redistribution_approval: true
+manual_blockers: []
+unknown_blockers: []
+known_policy_blockers: []
+known_non_policy_blockers: []
+blockers: []
+next_stage: phase12_registry_readiness
+claim_boundary: Phase 11.8 readiness gate only; it allows Phase 12 planning scope
+  when all referenced evidence and release-policy blockers are clear, but it is not
+  public dataset publication or leaderboard comparability.

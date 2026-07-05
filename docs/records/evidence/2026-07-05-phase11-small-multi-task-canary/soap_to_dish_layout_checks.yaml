@@ -1,0 +1,29 @@
+schema_version: layout-checks/v0.2
+status: passed
+checks:
+- name: official_fixture_pose_from_task_config
+  status: passed
+fixture_placement:
+  placement_source_kind: official_task_config_fixture_binding
+  object_pose:
+    xyz:
+    - -0.35
+    - -0.2
+    - 0.99
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    scale_xyz:
+    - 1.0
+    - 1.0
+    - 1.0
+  target_fixture:
+    instance_id: soap_dish_fixture
+    source_uid: _01
+    role: target_container
+    semantic_label: soap_dish
+    fixture_kind: environment_fixture
+    source_asset_id: official_ebench_scene
+  source_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml

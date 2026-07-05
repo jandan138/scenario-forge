@@ -1,0 +1,12 @@
+record_type: phase11_bpl19r_live_server_probe
+record_version: v0.1
+phase: "11.3.c"
+created_on: "2026-07-05"
+server_url: http://127.0.0.1:8087
+probe_command: curl -fsS --max-time 3 http://127.0.0.1:8087/docs
+probe_status: unavailable
+exit_code: 7
+result: connection_refused
+impact: live BPL-19R package-linked rerun was not started in this step because no GenManip live server was reachable on 127.0.0.1:8087.
+next_action: Start the GenManip ray_eval_server with the Phase 11 package-scoped run id, then invoke scripts/run_phase11_scenario_forge_bpl19r_rerun.py with --attempt-count 10 and live_runner_server_url=http://127.0.0.1:8087.
+claim_boundary: Server availability probe only; not a task execution result and not a success predicate evaluation.

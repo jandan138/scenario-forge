@@ -1,0 +1,62 @@
+schema_version: scene-instances/v0.2
+instances:
+- id: environment_scene
+  asset_id: official_ebench_scene
+  role: environment
+  pose:
+    xyz:
+    - 0.0
+    - 0.0
+    - 0.0
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  semantic_tags:
+  - environment
+  initial_state: {}
+- id: lift2_robot_asset
+  asset_id: official_ebench_robot
+  role: robot_asset
+  pose:
+    xyz:
+    - -1.02
+    - 0.0
+    - 0.31
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  semantic_tags:
+  - robot_asset
+  initial_state: {}
+- id: soap_001
+  asset_id: official_ebench_soap
+  role: manipulated_object
+  pose:
+    xyz:
+    - -0.35
+    - -0.2
+    - 0.99
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    scale_xyz:
+    - 1.0
+    - 1.0
+    - 1.0
+  semantic_tags:
+  - manipulated_object
+  initial_state: {}
+fixture_bindings:
+  target_container:
+    instance_id: soap_dish_fixture
+    source_uid: _01
+    role: target_container
+    semantic_label: soap_dish
+    fixture_kind: environment_fixture
+    source_asset_id: official_ebench_scene

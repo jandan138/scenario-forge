@@ -1,0 +1,42 @@
+schema_version: phase12-current-gate-index/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+overall_status: phase13_allowed
+phase13_allowed: true
+latest_gates:
+  '12.0':
+    path: evidence/phase12_0_registry_readiness_freeze.yaml
+    schema_version: phase12-registry-readiness-freeze/v0.1
+    status: passed
+  '12.1':
+    path: evidence/phase12_1_registry_contract_gate.yaml
+    schema_version: phase12-registry-contract-gate/v0.1
+    status: passed
+  '12.2':
+    path: evidence/phase12_2_registry_snapshot_gate.yaml
+    schema_version: phase12-registry-snapshot-gate/v0.1
+    status: passed
+  '12.3':
+    path: evidence/phase12_3_readonly_viewer_gate.yaml
+    schema_version: phase12-readonly-viewer-gate/v0.1
+    status: passed
+  '12.4':
+    path: evidence/phase12_4_ebench_eos_handoff_gate.yaml
+    schema_version: phase12-ebench-eos-handoff-gate/v0.1
+    status: passed
+  '12.5':
+    path: evidence/phase12_5_multi_simulator_export_gate.yaml
+    schema_version: phase12-multi-simulator-export-gate/v0.1
+    status: passed
+  '12.6':
+    path: evidence/phase12_6_public_release_policy_closure_gate.yaml
+    schema_version: phase12-public-release-policy-closure-gate/v0.1
+    status: passed
+registry_snapshot: registry/registry_snapshot.yaml
+snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+blockers: []
+next_allowed_phase:
+  phase: '13.0'
+  scope: image_grounded_existing_asset_mvp
+claim_boundary: Phase 12 current gate index only. It records retained registry, viewer,
+  handoff, descriptor, and policy evidence and does not run episodes or publish leaderboard
+  results.

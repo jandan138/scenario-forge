@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-post-execution-visual-review-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Post-Execution Visual Review v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "reviewer",
+    "review_mode",
+    "initial_image_path",
+    "final_image_path",
+    "verdict",
+    "visible_evidence",
+    "success_predicate_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-post-execution-visual-review/v0.1"
+    },
+    "reviewer": {
+      "const": "render-visual-reviewer"
+    },
+    "review_mode": {
+      "const": "clean_room_visual_skill"
+    },
+    "initial_image_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "final_image_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "enum": ["PASS", "WARN", "FAIL"]
+    },
+    "visible_evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "success_predicate_gate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retake_recommendation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

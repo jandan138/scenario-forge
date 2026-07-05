@@ -1,0 +1,373 @@
+{
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "cycle_count": 34,
+  "cycles": [
+    {
+      "achieved_base_delta_norm_l2": 0.206515045883,
+      "base_delta_error_l2": 0.000344300968,
+      "commanded_base_delta_norm_l2": 0.206799404682,
+      "cycle_index": 0,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 0.000121458716,
+      "joint_target_error_l2": 0.000148229629
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.032992828328,
+      "base_delta_error_l2": 0.000347343927,
+      "commanded_base_delta_norm_l2": 0.032645577961,
+      "cycle_index": 1,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 8.5075452e-05,
+      "joint_target_error_l2": 0.001620064222
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000331047842,
+      "base_delta_error_l2": 1.9630814e-05,
+      "commanded_base_delta_norm_l2": 0.000334047607,
+      "cycle_index": 2,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 9.5430663e-05,
+      "joint_target_error_l2": 0.001710584303
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000289793184,
+      "base_delta_error_l2": 1.7972043e-05,
+      "commanded_base_delta_norm_l2": 0.00030668624,
+      "cycle_index": 3,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 6.0351115e-05,
+      "joint_target_error_l2": 0.000170309673
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000157979139,
+      "base_delta_error_l2": 1.6267973e-05,
+      "commanded_base_delta_norm_l2": 0.000151114367,
+      "cycle_index": 4,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 6.3553072e-05,
+      "joint_target_error_l2": 0.00056574034
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000349026182,
+      "base_delta_error_l2": 8.3612023e-05,
+      "commanded_base_delta_norm_l2": 0.000331971074,
+      "cycle_index": 5,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 0.05395659758,
+      "joint_target_error_l2": 0.025551316649
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000514329759,
+      "base_delta_error_l2": 8.772266e-05,
+      "commanded_base_delta_norm_l2": 0.00051970171,
+      "cycle_index": 6,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 2.4574005e-05,
+      "joint_target_error_l2": 0.000682405755
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.178113372118,
+      "base_delta_error_l2": 0.000372690304,
+      "commanded_base_delta_norm_l2": 0.178483259965,
+      "cycle_index": 7,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 7.9658364e-05,
+      "joint_target_error_l2": 0.000221737649
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.056594257578,
+      "base_delta_error_l2": 0.000338568333,
+      "commanded_base_delta_norm_l2": 0.056255734116,
+      "cycle_index": 8,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 2.893011e-05,
+      "joint_target_error_l2": 0.000392938754
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.002255579356,
+      "base_delta_error_l2": 3.6896536e-05,
+      "commanded_base_delta_norm_l2": 0.002240381881,
+      "cycle_index": 9,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 4.0796925e-05,
+      "joint_target_error_l2": 0.000719276455
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000116819076,
+      "base_delta_error_l2": 7.082779e-06,
+      "commanded_base_delta_norm_l2": 0.000113051685,
+      "cycle_index": 10,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 2.6078311e-05,
+      "joint_target_error_l2": 0.000289534254
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000132987548,
+      "base_delta_error_l2": 3.963218e-06,
+      "commanded_base_delta_norm_l2": 0.000130531201,
+      "cycle_index": 11,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 9.702735e-05,
+      "joint_target_error_l2": 0.000324639026
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000104585787,
+      "base_delta_error_l2": 1.0038321e-05,
+      "commanded_base_delta_norm_l2": 0.000112861031,
+      "cycle_index": 12,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 8.6463259e-05,
+      "joint_target_error_l2": 0.000242958633
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000155669245,
+      "base_delta_error_l2": 7.208888e-06,
+      "commanded_base_delta_norm_l2": 0.000151031461,
+      "cycle_index": 13,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 6.2778864e-05,
+      "joint_target_error_l2": 0.000123436618
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000716413773,
+      "base_delta_error_l2": 1.3980901e-05,
+      "commanded_base_delta_norm_l2": 0.000730331212,
+      "cycle_index": 14,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 4.6651235e-05,
+      "joint_target_error_l2": 0.000155379131
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000327694028,
+      "base_delta_error_l2": 1.0795035e-05,
+      "commanded_base_delta_norm_l2": 0.000317553819,
+      "cycle_index": 15,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 6.0095275e-05,
+      "joint_target_error_l2": 0.000132838384
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000310850381,
+      "base_delta_error_l2": 1.866822e-06,
+      "commanded_base_delta_norm_l2": 0.000310712339,
+      "cycle_index": 16,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 5.9852727e-05,
+      "joint_target_error_l2": 0.000139628411
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000516418882,
+      "base_delta_error_l2": 7.413615e-06,
+      "commanded_base_delta_norm_l2": 0.000523820494,
+      "cycle_index": 17,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 4.1220156e-05,
+      "joint_target_error_l2": 0.000238070814
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.00053296998,
+      "base_delta_error_l2": 4.984016e-06,
+      "commanded_base_delta_norm_l2": 0.000529305632,
+      "cycle_index": 18,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 0.000108621501,
+      "joint_target_error_l2": 0.000183703821
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000106953708,
+      "base_delta_error_l2": 7.771763e-06,
+      "commanded_base_delta_norm_l2": 9.9584571e-05,
+      "cycle_index": 19,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 0.00423323927,
+      "joint_target_error_l2": 0.000134731473
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000113817648,
+      "base_delta_error_l2": 4.741528e-06,
+      "commanded_base_delta_norm_l2": 0.000112866009,
+      "cycle_index": 20,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 5.9834923e-05,
+      "joint_target_error_l2": 0.000572026393
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000339682785,
+      "base_delta_error_l2": 1.4349651e-05,
+      "commanded_base_delta_norm_l2": 0.000352767827,
+      "cycle_index": 21,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 5.9380384e-05,
+      "joint_target_error_l2": 0.000158435331
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000121231959,
+      "base_delta_error_l2": 1.3731552e-05,
+      "commanded_base_delta_norm_l2": 0.000130521467,
+      "cycle_index": 22,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 5.9941737e-05,
+      "joint_target_error_l2": 0.000221213997
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000502668235,
+      "base_delta_error_l2": 1.7203893e-05,
+      "commanded_base_delta_norm_l2": 0.000519701443,
+      "cycle_index": 23,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 4.4965962e-05,
+      "joint_target_error_l2": 0.000174336071
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000109241683,
+      "base_delta_error_l2": 1.0303822e-05,
+      "commanded_base_delta_norm_l2": 9.9577445e-05,
+      "cycle_index": 24,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 6.2193614e-05,
+      "joint_target_error_l2": 0.000155501745
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000115588913,
+      "base_delta_error_l2": 3.87327e-06,
+      "commanded_base_delta_norm_l2": 0.000112864997,
+      "cycle_index": 25,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 6.3762273e-05,
+      "joint_target_error_l2": 0.000179026998
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000307253095,
+      "base_delta_error_l2": 1.0428466e-05,
+      "commanded_base_delta_norm_l2": 0.000317551429,
+      "cycle_index": 26,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 2.1138569e-05,
+      "joint_target_error_l2": 0.000200039949
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000512829942,
+      "base_delta_error_l2": 7.145756e-06,
+      "commanded_base_delta_norm_l2": 0.000519700533,
+      "cycle_index": 27,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 4.5236555e-05,
+      "joint_target_error_l2": 0.000161581983
+    },
+    {
+      "achieved_base_delta_norm_l2": 8.7476112e-05,
+      "base_delta_error_l2": 3.4356916e-05,
+      "commanded_base_delta_norm_l2": 0.00012048371,
+      "cycle_index": 28,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 0.004241835999,
+      "joint_target_error_l2": 0.000186731188
+    },
+    {
+      "achieved_base_delta_norm_l2": 6.5800693e-05,
+      "base_delta_error_l2": 2.7082849e-05,
+      "commanded_base_delta_norm_l2": 9.2567014e-05,
+      "cycle_index": 29,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 8.9149085e-05,
+      "joint_target_error_l2": 0.000600489911
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.00013691623,
+      "base_delta_error_l2": 1.7607831e-05,
+      "commanded_base_delta_norm_l2": 0.000151591109,
+      "cycle_index": 30,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 2.2795423e-05,
+      "joint_target_error_l2": 0.000172246703
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.0001049146,
+      "base_delta_error_l2": 1.0693961e-05,
+      "commanded_base_delta_norm_l2": 0.000112859168,
+      "cycle_index": 31,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 4.3850536e-05,
+      "joint_target_error_l2": 0.000136815
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.000129770533,
+      "base_delta_error_l2": 7.56179e-06,
+      "commanded_base_delta_norm_l2": 0.000136683384,
+      "cycle_index": 32,
+      "deployed_action_count": 30,
+      "executed_steps": 30,
+      "gripper_target_error_l2": 6.0850207e-05,
+      "joint_target_error_l2": 0.000128657549
+    },
+    {
+      "achieved_base_delta_norm_l2": 0.401317315403,
+      "base_delta_error_l2": 0.400853268488,
+      "commanded_base_delta_norm_l2": 0.000516978165,
+      "cycle_index": 33,
+      "deployed_action_count": 30,
+      "executed_steps": 10,
+      "gripper_target_error_l2": 8.3857865e-05,
+      "joint_target_error_l2": 2.599153993595
+    }
+  ],
+  "deployed_replan_horizon": 30,
+  "max_base_delta_error_l2": 0.400853268488,
+  "max_gripper_target_error_l2": 0.05395659758,
+  "max_joint_target_error_l2": 2.599153993595,
+  "mean_achieved_base_delta_norm_l2": 0.026032327341,
+  "mean_base_delta_error_l2": 0.011846248845,
+  "mean_commanded_base_delta_norm_l2": 0.014246569904,
+  "mean_gripper_target_error_l2": 0.001892271973,
+  "mean_joint_target_error_l2": 0.0775279006,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "openpi_task_success": false,
+  "real_world_safety": false,
+  "reports_standard_model_score": false,
+  "saturated_value_count": 2609,
+  "saturation_bound_abs": 1.0,
+  "schema": "embodied_eval_os_bpl19m_target_vs_achieved_control_canary_report.v0",
+  "standard_model_score": null,
+  "target_vs_achieved_control_canary_status": "executed_with_evidence",
+  "target_vs_achieved_state_status": "measured",
+  "warning_ids": [
+    "warn_action_values_outside_unit_interval"
+  ]
+}

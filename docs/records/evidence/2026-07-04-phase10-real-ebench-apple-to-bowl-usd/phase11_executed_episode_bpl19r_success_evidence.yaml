@@ -1,0 +1,44 @@
+schema_version: phase11-executed-episode-evidence/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+episode_status: completed
+trace_uri: phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_002/bpl19m_source_evidence/episode_trace.json
+runtime_log: phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_runtime.log
+keyframes:
+  initial: phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_002/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+  final: phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_002/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg
+final_state:
+  status: completed_episode_state
+  episode_result:
+    episode_id: ebench/phase11_3c_sf_pkg_bpl19r_pi05_attempt10/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/002
+    native_raw_result_value: 1.0
+    native_raw_sr_value: 1.0
+    seed: '002'
+    task_name: ebench/mobile_manip/apple_to_fruit_bowl_test_mini
+    score: 1.0
+    sr: 1.0
+  task_success: true
+  source_trace_kind: official_style_online_policy_rollout
+  policy_inference_cycle_count: 11
+  fresh_live_observation_cycle_count: 11
+  package_linkage:
+    package_loaded: true
+    package_id: ebench_apple_to_bowl_canary
+    task_id: mobile_manip/apple_to_fruit_bowl
+    package_root: /tmp/ebench-apple-to-bowl-canary
+    adapter_descriptor: /tmp/ebench-apple-to-bowl-canary/adapters/ebench/package.yaml
+    task_contract: /tmp/ebench-apple-to-bowl-canary/task/task_contract.yaml
+    scene_usd: /tmp/ebench-apple-to-bowl-canary/scene/main.usda
+    asset_lock: /tmp/ebench-apple-to-bowl-canary/locks/asset_lock.yaml
+    native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml
+    native_task_config_exists: true
+    mapping_source: eos_scenario_forge_bpl19r_static_task_mapping_v0
+  bpl19r_source:
+    rerun_evidence: phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_rerun.yaml
+    source_run_report: phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_002/bpl19m_source_evidence/run_report.json
+    score_gate_report: phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_002/bpl19m_source_evidence/online_policy_score_gate_report.json
+blockers: []
+claim_boundary: Scenario Forge package-linked BPL-19R bridge evidence. EOS projects
+  the retained package-linked BPL-19R episode_result and score evidence into Scenario
+  Forge Phase 11 evidence contracts. This is not official leaderboard evidence.

@@ -1,0 +1,43 @@
+schema_version: phase11-single-task-release-candidate-gate/v0.1
+phase: '11.5'
+status: blocked
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+required_gates:
+  phase11_visual_review_gate.yaml:
+    path: /tmp/ebench-soap-to-dish-canary-nomdl-relink/evidence/phase11_visual_review_gate.yaml
+    schema_version: phase11-visual-review-gate/v0.1
+    status: passed
+  phase11_task_execution_gate.yaml:
+    path: /tmp/ebench-soap-to-dish-canary-nomdl-relink/evidence/phase11_task_execution_gate.yaml
+    schema_version: phase11-task-execution-gate/v0.1
+    status: passed
+  phase11_executed_episode_gate.yaml:
+    path: /tmp/ebench-soap-to-dish-canary-nomdl-relink/evidence/phase11_executed_episode_gate.yaml
+    schema_version: phase11-executed-episode-gate/v0.1
+    status: passed
+  phase11_success_predicate_gate.yaml:
+    path: /tmp/ebench-soap-to-dish-canary-nomdl-relink/evidence/phase11_success_predicate_gate.yaml
+    schema_version: phase11-success-predicate-gate/v0.1
+    status: passed
+  phase11_post_execution_visual_review_gate.yaml:
+    path: /tmp/ebench-soap-to-dish-canary-nomdl-relink/evidence/phase11_post_execution_visual_review_gate.yaml
+    schema_version: phase11-post-execution-visual-review-gate/v0.1
+    status: failed
+release_policy:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_release_policy_internal_blocked.yaml
+  schema_version: phase11-release-policy/v0.1
+  policy_owner: scenario-forge-policy-gate
+  release_policy_status: blocked
+  asset_license_status: research-use; public redistribution approval not retained
+  redistribution_approval: false
+blockers:
+- phase11_post_execution_visual_review_gate.yaml status must be passed; got failed
+- release policy status must be pass; got blocked
+- release policy redistribution_approval must be true
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+next_stage: blocked
+claim_boundary: Single-task automated release candidate gate only; not public dataset
+  release, official score release, leaderboard comparability, or multi-task coverage
+  evidence.

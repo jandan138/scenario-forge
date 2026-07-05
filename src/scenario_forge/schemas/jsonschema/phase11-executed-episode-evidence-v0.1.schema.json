@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-executed-episode-evidence-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Executed Episode Evidence v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "runtime_owner",
+    "package_id",
+    "task_id",
+    "episode_status",
+    "trace_uri",
+    "runtime_log",
+    "keyframes",
+    "final_state",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-executed-episode-evidence/v0.1"
+    },
+    "runtime_owner": {
+      "const": "embodied-eval-os"
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "episode_status": {
+      "enum": ["completed", "failed", "blocked", "started"]
+    },
+    "trace_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_log": {
+      "type": "string",
+      "minLength": 1
+    },
+    "keyframes": {
+      "type": "object",
+      "required": ["initial", "final"],
+      "properties": {
+        "initial": {
+          "type": "string",
+          "minLength": 1
+        },
+        "final": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "final_state": {
+      "type": "object"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

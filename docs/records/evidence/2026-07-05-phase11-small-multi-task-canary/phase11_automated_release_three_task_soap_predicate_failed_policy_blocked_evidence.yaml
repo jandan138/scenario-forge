@@ -1,0 +1,20 @@
+schema_version: phase11-automated-release-evidence/v0.1
+suite_id: scenario_forge_phase11_three_task_downstream_blocked_canary
+small_multi_task_canary_gate: phase11_small_multi_task_canary_three_task_soap_predicate_failed_downstream_blocked_gate.yaml
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: pass
+  episode_execution: pass
+  predicate_evaluation: blocked
+  license_policy: blocked
+known_blockers:
+- soap_to_dish_success_predicate_failed_zero_policy
+- soap_to_dish_successful_policy_or_oracle_rerun_needed
+- soap_to_dish_post_execution_visual_review_not_run_because_predicate_failed
+- soap_to_dish_single_task_rc_blocked
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+blockers: []
+claim_boundary: Automated release remains blocked after soap-to-dish Phase 11.2 completed episode evidence passed. Episode execution is no longer a release blocker for soap. The active soap blockers are the failed zero-policy success predicate, missing package-linked successful rerun, missing post-execution visual review because predicate failed, single-task RC blockage, and release policy. This evidence does not claim Phase 11.6 pass, public dataset release, official score release, or leaderboard comparability.

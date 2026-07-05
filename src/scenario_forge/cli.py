@@ -25,7 +25,25 @@ from scenario_forge.evaluation.phase10x_gates import (
     Phase10xEvidenceError,
     generate_phase10x_evidence,
 )
+from scenario_forge.evaluation.phase11_gates import (
+    generate_phase11_automated_release_gate,
+    generate_phase11_executed_episode_gate,
+    generate_phase11_phase12_readiness_gate,
+    generate_phase11_post_execution_visual_review_gate,
+    generate_phase11_single_task_release_candidate_gate,
+    generate_phase11_small_multi_task_canary_gate,
+    generate_phase11_success_predicate_gate,
+    generate_phase11_task_execution_gate,
+    generate_phase11_visual_review_gate,
+)
+from scenario_forge.artifacts.registry import (
+    Phase12RegistryError,
+    generate_phase12_registry_artifacts,
+)
 from scenario_forge.generation.ebench_canary.apple_to_bowl import generate_apple_to_bowl_canary
+from scenario_forge.generation.ebench_canary.single_object_fixture import (
+    generate_single_object_fixture_canary,
+)
 from scenario_forge.package import PackageError, load_package_manifest, validate_package
 from scenario_forge.scaffold import scaffold_starter_package
 from scenario_forge.scene.usd_compiler import USDSceneCompilerError, compile_usd_scene
@@ -56,6 +74,106 @@ def build_parser() -> argparse.ArgumentParser:
         "--require-asset-lock",
         action="store_true",
         help="Fail if locks/asset_lock.yaml is missing or invalid",
+    )
+
+    phase11_visual_parser = package_subparsers.add_parser(
+        "phase11-visual-review",
+        help="Generate Phase 11.0 automated visual review gate evidence",
+    )
+    phase11_visual_parser.add_argument("--package", required=True, help="Package directory")
+    phase11_visual_parser.add_argument(
+        "--visual-review",
+        required=True,
+        help="phase11-visual-review/v0.1 YAML emitted from render-visual-reviewer",
+    )
+    phase11_visual_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.0 visual review gate passes",
+    )
+
+    phase11_task_execution_parser = package_subparsers.add_parser(
+        "phase11-task-execution",
+        help="Generate Phase 11.1 EOS task execution integration gate evidence",
+    )
+    phase11_task_execution_parser.add_argument("--package", required=True, help="Package directory")
+    phase11_task_execution_parser.add_argument(
+        "--execution-evidence",
+        required=True,
+        help="phase11-eos-task-execution/v0.1 YAML emitted by EOS",
+    )
+    phase11_task_execution_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.1 EOS task execution gate passes",
+    )
+
+    phase11_executed_episode_parser = package_subparsers.add_parser(
+        "phase11-executed-episode",
+        help="Generate Phase 11.2 executed episode evidence gate",
+    )
+    phase11_executed_episode_parser.add_argument("--package", required=True, help="Package directory")
+    phase11_executed_episode_parser.add_argument(
+        "--episode-evidence",
+        required=True,
+        help="phase11-executed-episode-evidence/v0.1 YAML emitted by EOS",
+    )
+    phase11_executed_episode_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.2 executed episode gate passes",
+    )
+
+    phase11_success_predicate_parser = package_subparsers.add_parser(
+        "phase11-success-predicate",
+        help="Generate Phase 11.3 success predicate evaluation gate",
+    )
+    phase11_success_predicate_parser.add_argument("--package", required=True, help="Package directory")
+    phase11_success_predicate_parser.add_argument(
+        "--predicate-evidence",
+        required=True,
+        help="phase11-success-predicate-evaluation/v0.1 YAML emitted by EOS/EBench",
+    )
+    phase11_success_predicate_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.3 success predicate gate passes",
+    )
+
+    phase11_post_execution_visual_parser = package_subparsers.add_parser(
+        "phase11-post-execution-visual-review",
+        help="Generate Phase 11.4 post-execution visual review gate",
+    )
+    phase11_post_execution_visual_parser.add_argument(
+        "--package",
+        required=True,
+        help="Package directory",
+    )
+    phase11_post_execution_visual_parser.add_argument(
+        "--visual-review",
+        required=True,
+        help="phase11-post-execution-visual-review/v0.1 YAML emitted by render-visual-reviewer",
+    )
+    phase11_post_execution_visual_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.4 post-execution visual gate passes",
+    )
+
+    phase11_single_task_rc_parser = package_subparsers.add_parser(
+        "phase11-single-task-rc",
+        help="Generate Phase 11.5 single-task automated release candidate gate",
+    )
+    phase11_single_task_rc_parser.add_argument("--package", required=True, help="Package directory")
+    phase11_single_task_rc_parser.add_argument(
+        "--release-policy",
+        required=True,
+        help="phase11-release-policy/v0.1 YAML emitted by the release policy gate",
+    )
+    phase11_single_task_rc_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.5 single-task RC gate passes",
     )
 
     assets_parser = subparsers.add_parser("assets", help="Asset manifest and lock commands")
@@ -171,6 +289,70 @@ def build_parser() -> argparse.ArgumentParser:
         help="Return non-zero unless all Phase 10.x gates pass",
     )
 
+    suite_phase11_small_canary_parser = suite_subparsers.add_parser(
+        "phase11-small-canary",
+        help="Generate Phase 11.6 small multi-task canary gate evidence",
+    )
+    suite_phase11_small_canary_parser.add_argument("--suite", required=True, help="Suite directory")
+    suite_phase11_small_canary_parser.add_argument(
+        "--canary-evidence",
+        required=True,
+        help="phase11-small-multi-task-canary/v0.1 YAML",
+    )
+    suite_phase11_small_canary_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.6 small multi-task canary gate passes",
+    )
+
+    suite_phase11_release_parser = suite_subparsers.add_parser(
+        "phase11-release",
+        help="Generate Phase 11.7 automated release gate evidence",
+    )
+    suite_phase11_release_parser.add_argument("--suite", required=True, help="Suite directory")
+    suite_phase11_release_parser.add_argument(
+        "--release-evidence",
+        required=True,
+        help="phase11-automated-release-evidence/v0.1 YAML",
+    )
+    suite_phase11_release_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.7 automated release gate passes",
+    )
+
+    suite_phase11_readiness_parser = suite_subparsers.add_parser(
+        "phase11-readiness",
+        help="Generate Phase 11.8 Phase-12 readiness gate evidence",
+    )
+    suite_phase11_readiness_parser.add_argument("--suite", required=True, help="Suite directory")
+    suite_phase11_readiness_parser.add_argument(
+        "--readiness-evidence",
+        required=True,
+        help="phase11-phase12-readiness/v0.1 YAML",
+    )
+    suite_phase11_readiness_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless the Phase 11.8 readiness gate passes",
+    )
+
+    suite_phase12_parser = suite_subparsers.add_parser(
+        "phase12",
+        help="Generate Phase 12.0-12.6 registry, viewer, handoff, and policy evidence",
+    )
+    suite_phase12_parser.add_argument("--suite", required=True, help="Suite directory")
+    suite_phase12_parser.add_argument(
+        "--gate-index",
+        required=True,
+        help="phase11-current-gate-index/v0.1 YAML retained from Phase 11.8",
+    )
+    suite_phase12_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero unless all Phase 12.0-12.6 gates pass",
+    )
+
     export_parser = subparsers.add_parser("export", help="Adapter export commands")
     export_subparsers = export_parser.add_subparsers(dest="export_command", required=True)
 
@@ -193,6 +375,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     apple_to_bowl_parser.add_argument("--asset-sources", required=True, help="Official asset source YAML")
     apple_to_bowl_parser.add_argument("--out", required=True, help="Output package directory")
+    single_object_fixture_parser = ebench_canary_subparsers.add_parser(
+        "single-object-fixture",
+        help="Generate a real-asset EBench canary with one object and a target scene fixture",
+    )
+    single_object_fixture_parser.add_argument(
+        "--asset-sources",
+        required=True,
+        help="Official asset source YAML with fixture_task metadata",
+    )
+    single_object_fixture_parser.add_argument("--out", required=True, help="Output package directory")
 
     return parser
 
@@ -214,6 +406,93 @@ def main(argv: list[str] | None = None) -> int:
             print("Package OK")
             return 0
         return 1
+
+    if args.command == "package" and args.package_command == "phase11-visual-review":
+        result = generate_phase11_visual_review_gate(
+            Path(args.package),
+            Path(args.visual_review),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.0 visual review gate written: {result.evidence_path}")
+        print(f"Phase 11.0 visual review gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.0 visual review strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "package" and args.package_command == "phase11-task-execution":
+        result = generate_phase11_task_execution_gate(
+            Path(args.package),
+            Path(args.execution_evidence),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.1 task execution gate written: {result.evidence_path}")
+        print(f"Phase 11.1 task execution gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.1 task execution strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "package" and args.package_command == "phase11-executed-episode":
+        result = generate_phase11_executed_episode_gate(
+            Path(args.package),
+            Path(args.episode_evidence),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.2 executed episode gate written: {result.evidence_path}")
+        print(f"Phase 11.2 executed episode gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.2 executed episode strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "package" and args.package_command == "phase11-success-predicate":
+        result = generate_phase11_success_predicate_gate(
+            Path(args.package),
+            Path(args.predicate_evidence),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.3 success predicate gate written: {result.evidence_path}")
+        print(f"Phase 11.3 success predicate gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.3 success predicate strict gate did not pass")
+            return 1
+        return 0
+
+    if (
+        args.command == "package"
+        and args.package_command == "phase11-post-execution-visual-review"
+    ):
+        result = generate_phase11_post_execution_visual_review_gate(
+            Path(args.package),
+            Path(args.visual_review),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.4 post-execution visual review gate written: {result.evidence_path}")
+        print(f"Phase 11.4 post-execution visual review gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.4 post-execution visual review strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "package" and args.package_command == "phase11-single-task-rc":
+        result = generate_phase11_single_task_release_candidate_gate(
+            Path(args.package),
+            Path(args.release_policy),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.5 single-task RC gate written: {result.evidence_path}")
+        print(f"Phase 11.5 single-task RC gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.5 single-task RC strict gate did not pass")
+            return 1
+        return 0
 
     if args.command == "assets" and args.assets_command == "lock":
         try:
@@ -374,6 +653,66 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         return 0
 
+    if args.command == "suite" and args.suite_command == "phase11-small-canary":
+        result = generate_phase11_small_multi_task_canary_gate(
+            Path(args.suite),
+            Path(args.canary_evidence),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.6 small multi-task canary gate written: {result.evidence_path}")
+        print(f"Phase 11.6 small multi-task canary gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.6 small multi-task canary strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "suite" and args.suite_command == "phase11-release":
+        result = generate_phase11_automated_release_gate(
+            Path(args.suite),
+            Path(args.release_evidence),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.7 automated release gate written: {result.evidence_path}")
+        print(f"Phase 11.7 automated release gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.7 automated release strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "suite" and args.suite_command == "phase11-readiness":
+        result = generate_phase11_phase12_readiness_gate(
+            Path(args.suite),
+            Path(args.readiness_evidence),
+        )
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 11.8 Phase-12 readiness gate written: {result.evidence_path}")
+        print(f"Phase 11.8 Phase-12 readiness gate status: {result.status}")
+        if args.strict and result.status != "passed":
+            print("Phase 11.8 Phase-12 readiness strict gate did not pass")
+            return 1
+        return 0
+
+    if args.command == "suite" and args.suite_command == "phase12":
+        try:
+            result = generate_phase12_registry_artifacts(
+                Path(args.suite),
+                Path(args.gate_index),
+            )
+        except Phase12RegistryError as exc:
+            print(exc)
+            return 1
+        for blocker in result.blockers:
+            print(blocker)
+        print(f"Phase 12 evidence written: {result.suite_root / 'evidence'}")
+        print(f"Phase 12 overall status: {result.status}")
+        if args.strict and result.status != "phase13_allowed":
+            print("Phase 12 strict gate did not pass")
+            return 1
+        return 0
+
     if args.command == "export" and args.export_command == "ebench":
         if args.package:
             try:
@@ -395,6 +734,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.ebench_canary_command == "apple-to-bowl":
             try:
                 result = generate_apple_to_bowl_canary(Path(args.asset_sources), Path(args.out))
+            except ValueError as exc:
+                print(exc)
+                return 1
+            print(f"Package written: {result.package_root}")
+            print(f"USD entrypoint: {result.scene_usd}")
+            return 0
+        if args.ebench_canary_command == "single-object-fixture":
+            try:
+                result = generate_single_object_fixture_canary(Path(args.asset_sources), Path(args.out))
             except ValueError as exc:
                 print(exc)
                 return 1

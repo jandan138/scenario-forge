@@ -1,0 +1,34 @@
+schema_version: phase11-automated-release-gate/v0.1
+phase: '11.7'
+status: blocked
+release_status: blocked
+suite_id: scenario_forge_phase11_three_task_downstream_blocked_canary
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: pass
+  episode_execution: pass
+  predicate_evaluation: blocked
+  license_policy: blocked
+known_blockers:
+- soap_to_dish_success_predicate_failed_zero_policy
+- soap_to_dish_successful_policy_or_oracle_rerun_needed
+- soap_to_dish_post_execution_visual_review_not_run_because_predicate_failed
+- soap_to_dish_single_task_rc_blocked
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+blockers:
+- small multi-task canary gate status must be passed; got blocked
+- release-critical gate predicate_evaluation must be pass; got blocked
+- release-critical gate license_policy must be pass; got blocked
+- known_blockers must be empty; got 6
+- soap_to_dish_success_predicate_failed_zero_policy
+- soap_to_dish_successful_policy_or_oracle_rerun_needed
+- soap_to_dish_post_execution_visual_review_not_run_because_predicate_failed
+- soap_to_dish_single_task_rc_blocked
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+next_stage: blocked
+claim_boundary: Automated release gate only; release candidate passed is not official
+  leaderboard comparability or public dataset publication without external approval.

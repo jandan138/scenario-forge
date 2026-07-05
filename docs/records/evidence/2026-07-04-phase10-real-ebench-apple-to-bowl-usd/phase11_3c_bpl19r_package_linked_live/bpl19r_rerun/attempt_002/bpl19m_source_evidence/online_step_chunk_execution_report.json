@@ -1,0 +1,98 @@
+{
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "cycle_count": 11,
+  "cycles": [
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 0,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 1,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 2,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 3,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 4,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 5,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 6,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 7,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 8,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": false,
+      "cycle_index": 9,
+      "executed_steps": 30,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": false
+    },
+    {
+      "completed_native_episode_result_retained": true,
+      "cycle_index": 10,
+      "executed_steps": 11,
+      "genmanip_step_chunk_status": "executed",
+      "stopped_early": true
+    }
+  ],
+  "executed_steps": 311,
+  "model_superiority": false,
+  "native_robot_control_execution_status": "executed",
+  "native_robot_physics_policy_rollout": true,
+  "native_step_chunk_execution_status": "executed",
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "online_step_chunk_execution_status": "executed",
+  "real_world_safety": false,
+  "schema": "embodied_eval_os_bpl19m_online_step_chunk_execution_report.v0",
+  "stage_projection_used": false,
+  "standard_model_score": null
+}

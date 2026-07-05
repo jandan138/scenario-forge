@@ -1,0 +1,17 @@
+schema_version: phase11-automated-release-evidence/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+small_multi_task_canary_gate: phase11_small_multi_task_canary_three_task_ebench_author_redistribution_pass_gate.yaml
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: pass
+  episode_execution: pass
+  predicate_evaluation: pass
+  license_policy: pass
+known_blockers: []
+blockers: []
+claim_boundary: >-
+  Phase 11.7 automated release evidence after EBench author redistribution
+  approval. This can clear Scenario Forge release-gate blockers for the retained
+  three-task canary, but it does not claim official leaderboard comparability.

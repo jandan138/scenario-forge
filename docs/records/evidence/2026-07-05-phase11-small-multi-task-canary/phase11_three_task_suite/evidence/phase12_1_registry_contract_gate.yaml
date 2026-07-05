@@ -1,0 +1,15 @@
+schema_version: phase12-registry-contract-gate/v0.1
+phase: '12.1'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+contracts:
+- package-registry-entry/v0.1
+- asset-registry-entry/v0.1
+- registry-query-contract/v0.1
+package_registry: registry/package_registry.yaml
+asset_registry: registry/asset_registry.yaml
+registry_query_contract: registry/registry_query_contract.yaml
+blockers: []
+next_stage: registry_snapshot_resolver_snapshot
+claim_boundary: Phase 12.1 registry contract gate only. It validates registry metadata
+  shape and retained references, not runtime execution or task success.

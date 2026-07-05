@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-automated-release-gate-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Automated Release Gate v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "phase",
+    "status",
+    "release_status",
+    "suite_id",
+    "release_critical_gates",
+    "known_blockers",
+    "blockers",
+    "next_stage",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-automated-release-gate/v0.1"
+    },
+    "phase": {
+      "const": "11.7"
+    },
+    "status": {
+      "enum": ["passed", "blocked"]
+    },
+    "release_status": {
+      "enum": ["passed", "blocked"]
+    },
+    "suite_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "release_critical_gates": {
+      "type": "object"
+    },
+    "known_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_stage": {
+      "enum": ["release_candidate_passed", "blocked"]
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

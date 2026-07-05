@@ -89,3 +89,34 @@ def test_phase6_to_phase10_schema_artifacts_exist_and_parse() -> None:
         assert schema["type"] == "object"
         assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
         assert schema["properties"]["schema_version"]["const"] == schema_version
+
+
+def test_phase11_schema_artifacts_exist_and_parse() -> None:
+    expected = {
+        "phase11-visual-review-v0.1.schema.json": "phase11-visual-review/v0.1",
+        "phase11-visual-review-gate-v0.1.schema.json": "phase11-visual-review-gate/v0.1",
+        "phase11-eos-task-execution-v0.1.schema.json": "phase11-eos-task-execution/v0.1",
+        "phase11-task-execution-gate-v0.1.schema.json": "phase11-task-execution-gate/v0.1",
+        "phase11-executed-episode-evidence-v0.1.schema.json": "phase11-executed-episode-evidence/v0.1",
+        "phase11-executed-episode-gate-v0.1.schema.json": "phase11-executed-episode-gate/v0.1",
+        "phase11-success-predicate-evaluation-v0.1.schema.json": "phase11-success-predicate-evaluation/v0.1",
+        "phase11-success-predicate-gate-v0.1.schema.json": "phase11-success-predicate-gate/v0.1",
+        "phase11-post-execution-visual-review-v0.1.schema.json": "phase11-post-execution-visual-review/v0.1",
+        "phase11-post-execution-visual-review-gate-v0.1.schema.json": "phase11-post-execution-visual-review-gate/v0.1",
+        "phase11-release-policy-v0.1.schema.json": "phase11-release-policy/v0.1",
+        "phase11-single-task-release-candidate-gate-v0.1.schema.json": "phase11-single-task-release-candidate-gate/v0.1",
+        "phase11-small-multi-task-canary-v0.1.schema.json": "phase11-small-multi-task-canary/v0.1",
+        "phase11-small-multi-task-canary-gate-v0.1.schema.json": "phase11-small-multi-task-canary-gate/v0.1",
+        "phase11-automated-release-evidence-v0.1.schema.json": "phase11-automated-release-evidence/v0.1",
+        "phase11-automated-release-gate-v0.1.schema.json": "phase11-automated-release-gate/v0.1",
+        "phase11-phase12-readiness-v0.1.schema.json": "phase11-phase12-readiness/v0.1",
+        "phase11-phase12-readiness-gate-v0.1.schema.json": "phase11-phase12-readiness-gate/v0.1",
+    }
+    for filename, schema_version in expected.items():
+        schema_path = REPO_ROOT / "src" / "scenario_forge" / "schemas" / "jsonschema" / filename
+
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+        assert schema["type"] == "object"
+        assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+        assert schema["properties"]["schema_version"]["const"] == schema_version

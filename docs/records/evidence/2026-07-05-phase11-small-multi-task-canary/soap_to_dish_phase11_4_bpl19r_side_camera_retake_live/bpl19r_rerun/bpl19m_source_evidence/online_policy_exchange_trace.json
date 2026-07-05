@@ -1,0 +1,1151 @@
+{
+  "artifact_refs": [
+    {
+      "exists": true,
+      "path": "online_policy_cycle_000_actions.npy",
+      "role": "online_policy_cycle_000_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_001_actions.npy",
+      "role": "online_policy_cycle_001_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_002_actions.npy",
+      "role": "online_policy_cycle_002_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_003_actions.npy",
+      "role": "online_policy_cycle_003_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_004_actions.npy",
+      "role": "online_policy_cycle_004_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_005_actions.npy",
+      "role": "online_policy_cycle_005_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_006_actions.npy",
+      "role": "online_policy_cycle_006_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_007_actions.npy",
+      "role": "online_policy_cycle_007_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_008_actions.npy",
+      "role": "online_policy_cycle_008_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_009_actions.npy",
+      "role": "online_policy_cycle_009_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_010_actions.npy",
+      "role": "online_policy_cycle_010_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_011_actions.npy",
+      "role": "online_policy_cycle_011_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_012_actions.npy",
+      "role": "online_policy_cycle_012_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_013_actions.npy",
+      "role": "online_policy_cycle_013_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_014_actions.npy",
+      "role": "online_policy_cycle_014_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_015_actions.npy",
+      "role": "online_policy_cycle_015_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_016_actions.npy",
+      "role": "online_policy_cycle_016_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_017_actions.npy",
+      "role": "online_policy_cycle_017_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_018_actions.npy",
+      "role": "online_policy_cycle_018_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_019_actions.npy",
+      "role": "online_policy_cycle_019_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_020_actions.npy",
+      "role": "online_policy_cycle_020_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_021_actions.npy",
+      "role": "online_policy_cycle_021_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_022_actions.npy",
+      "role": "online_policy_cycle_022_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_023_actions.npy",
+      "role": "online_policy_cycle_023_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_024_actions.npy",
+      "role": "online_policy_cycle_024_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_025_actions.npy",
+      "role": "online_policy_cycle_025_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_026_actions.npy",
+      "role": "online_policy_cycle_026_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_027_actions.npy",
+      "role": "online_policy_cycle_027_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_028_actions.npy",
+      "role": "online_policy_cycle_028_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_029_actions.npy",
+      "role": "online_policy_cycle_029_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_030_actions.npy",
+      "role": "online_policy_cycle_030_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_031_actions.npy",
+      "role": "online_policy_cycle_031_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_032_actions.npy",
+      "role": "online_policy_cycle_032_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    },
+    {
+      "exists": true,
+      "path": "online_policy_cycle_033_actions.npy",
+      "role": "online_policy_cycle_033_actions",
+      "schema_id": "npy_openpi_actions_50x19_v0",
+      "size_bytes": 7728
+    }
+  ],
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "cycles": [
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_000_actions.npy",
+        "role": "online_policy_cycle_000_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "33db2757e17ee389e4b1d5b9e3a038ddd28c5d5a629eb9a5e9024a69285a1601",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 0,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "7d1adf54be3264fab4c7506c2c36722c12c01fd43c65e7cf4152abf70b7767ec",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_001_actions.npy",
+        "role": "online_policy_cycle_001_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "8f6b832ba31f07174bf569dd3b1c9a17410262a2b029de09e4371dbeaf5d96ba",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 1,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "9cf51b76b17e1fd50f17604c5659f3b31fb41e6361582ebd7f6089bcd47e9e15",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_002_actions.npy",
+        "role": "online_policy_cycle_002_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "5dd39528ff18f4f2e55888be753b333592d1797ba272965cbb5b48198381a188",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 2,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "89abaa7a7d6c844e49666fa046358c45b15f330af210392854f43376a997b85a",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_003_actions.npy",
+        "role": "online_policy_cycle_003_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "8178152a3dfca40e3522488f2c6a7b0f3132bb2ccff340342aba7c439b1c9d6f",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 3,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "c106483a8b7a29a34708556a44cd38a210bef6440a8e158327b9fd9d2f5228e7",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_004_actions.npy",
+        "role": "online_policy_cycle_004_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "dda27c512b358ff4c62da31377d7723104d5303ab493054e3fdfd7ce83175252",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 4,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "0ae55285d87076dc98cf31944b1ce452ee287fb21405caae60016d72c9a8c312",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_005_actions.npy",
+        "role": "online_policy_cycle_005_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "4c5caefdfe42b213b2ef29eb1bd210dc8ba482d059392cee6e6fad23d10d36c4",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 5,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "2013a52534704bf98e6ba45f6939e2cb26756325d3fae1577ab83ddee8418d7a",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_006_actions.npy",
+        "role": "online_policy_cycle_006_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "e7ced560948c4c5b5cd28f853e99628485b0cc2594a01d251cb32314b1f20eb1",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 6,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "056240f9d52bbf62238fca9deac38578b9f18fc3cfc0871f115babab7138a46d",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_007_actions.npy",
+        "role": "online_policy_cycle_007_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "c30a4f9ed818f892bb355ee5379c7de98f5a9531e10853a6e8e9233f63f81528",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 7,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "b70633e9e7ae04a19e75d37665796075336fee0db1570ae83eee135ecf9272ff",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_008_actions.npy",
+        "role": "online_policy_cycle_008_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "c5774c002a8ae8ff560a4afc82302682e273962f124e5361b2208dd73e460c11",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 8,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "a11076a950c84732e8af8c28334f7ff28ecc186b10aa4602ed25fd0c5829ccfd",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_009_actions.npy",
+        "role": "online_policy_cycle_009_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "f175e1631315c8bb9cfc3cf98fff073d290c79504e2b14933fd6548bd846e24d",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 9,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "87cd6f4b3c225142c6947c149111ccb87248dc5b0d3feb2d11b17801b789ec67",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_010_actions.npy",
+        "role": "online_policy_cycle_010_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "89c373c44b594cce6d64ea7194b7b54deff26446bc7d3959fa45696691061331",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 10,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "731e376a23ccaaf4e5fb7d21beeefa86e9329cfb0d1505691df04c1ee820af01",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_011_actions.npy",
+        "role": "online_policy_cycle_011_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "586c9e91ccbcb9327021c480a793b2f7eefe36bdd56f395c72097ddd3b1f557e",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 11,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "3d2fdfed0a7a83235592963bd61ea964498ff9571f5af394ae0632788becec97",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_012_actions.npy",
+        "role": "online_policy_cycle_012_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "020081b9260f43e17a249b7b62fb46b179e6c654ec7a026b58d672cb0db1ccc7",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 12,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "f6168c7f0addc13f1e92b46cfc93894671897506c35f09a8b31145aed57fe82d",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_013_actions.npy",
+        "role": "online_policy_cycle_013_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "ea98ca66ca4d547a3b980d753301e2d58e4d900cb6f353e2deb5e05a7ad76226",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 13,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "98a3e751783bc3c2d6519c991f7d834b661ec4d65022744d499200e0d95deeed",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_014_actions.npy",
+        "role": "online_policy_cycle_014_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "7cb0653d413e578447c7a21c0a825da1e7d5c7b38068119f64dcfe6d79666593",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 14,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "ffa77acd7ef236a2ba1e0d10428a704bf596a9f743d631c2f035c84fea96e656",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_015_actions.npy",
+        "role": "online_policy_cycle_015_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "d56f29050ee36ec54a910caf443112115e324053b4cfa62c5f737d685e7157e6",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 15,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "a0593d4985414e531e5b7a66f8f1d34542ea80e84fbde5bcd43455cee3266339",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_016_actions.npy",
+        "role": "online_policy_cycle_016_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "60d37f4f7264ebfc301d28aa6dc018c486413beadbcfbc70bf15027bac0c5923",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 16,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "05de97dae9a2e2e7d67a47e5a7a429b3d89a53e76e22832e72318df3b021b99f",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_017_actions.npy",
+        "role": "online_policy_cycle_017_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "93e24c4b53cbc261ada54b76c5e4c975c37e59a84bd3b92fd3374561527afce5",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 17,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "f411b1c31b3c931db98c726e2a781350644f6756fbab45a3ac47596d1a8ae681",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_018_actions.npy",
+        "role": "online_policy_cycle_018_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "bfe65c1f00feabd174f18d41a69697680ba856dc426739ade5ae19ea1364be14",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 18,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "73c697572477f47d4e26cabb6bd97d57b6ee2aaacd68f5c7e0b44f60e1b41cb7",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_019_actions.npy",
+        "role": "online_policy_cycle_019_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "f63b73aa1b808733b52a980f837e02db8429ad0832a86adfa60ceeedd11d7eba",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 19,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "f3d4e02014c565f0f5c7c584ab68ff38cf63b12341b91d0f7a1e3d630e7b7a6c",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_020_actions.npy",
+        "role": "online_policy_cycle_020_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "b74dc1b07e6b7706167e85104918aa05630c48cac9b9c97e5555b04e1f9f20d5",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 20,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "a95b2be39a420292454602d69f09d4a5bb7668ebf2e0b8546f72c40d75237438",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_021_actions.npy",
+        "role": "online_policy_cycle_021_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "7211f714ed77a42c908f718ee0d9f1e3fe7ce08d6b698fda7f6932c074937f27",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 21,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "c6c58f8abbe807591d22b6e131dcd50d936de22795534b2fe6abe0215bf0595b",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_022_actions.npy",
+        "role": "online_policy_cycle_022_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "d6058095257b6ed892cd471bfd27f7185b0bf8e501b4deaece64fffd39714d38",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 22,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "ff57c6e85b09c6a36d70801201dfeea1e19f8437dc3a0a8c657322bc7292047a",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_023_actions.npy",
+        "role": "online_policy_cycle_023_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "0b60059fee196ab13cfcf8d08d33b87f5824e78b73bb7e5230cac4f291b0c84a",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 23,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "c1d50b27fc505179f415ff75981e2c32f35cfe1304ef61985bc08853d875c44e",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_024_actions.npy",
+        "role": "online_policy_cycle_024_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "d2f058b1c3e96b30bc8f3cd3e81fd58619703ef32fc4d778b7a7def1c47fee7b",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 24,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "680c9a47f0433c2aa7979e37067cce137801bd517c3c3eef2e712b7fe80148ab",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_025_actions.npy",
+        "role": "online_policy_cycle_025_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "6e9f009ed4e72a419f3c6472cd65956f8a3cfbac106fad39e05514ec57412e9e",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 25,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "22774e0cfb625cd409a3b2bd05422125269a1634edf146cdac7ff9eaccdc255e",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_026_actions.npy",
+        "role": "online_policy_cycle_026_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "8fb72e5c817aa78ead108679d1a8c92be6809f6189889492351ccb000c0ed57a",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 26,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "0255ea73988fbf57bf72bbc54bf2cd6be4041d3c5922734d49f9439ed3b81366",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_027_actions.npy",
+        "role": "online_policy_cycle_027_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "d979ddfc02af7d978e0b9b18c0544e25c16755e0b7547f1e11673dc1b41cb3cb",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 27,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "901a884be44cf1793c8bdb382f7458aed4cd8279471696c7933952baeb03cece",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_028_actions.npy",
+        "role": "online_policy_cycle_028_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "c53fa43726958d9ab76504f5a67e3730cba1e5d1992481d3a20a320443c1a35e",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 28,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "435e7bbc11e06a5576ad29a92b1da9e57a52306a27f5bf34c8c70cbc1b23bc35",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_029_actions.npy",
+        "role": "online_policy_cycle_029_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "4d18be14d6c282f6a3c9a1da4fb22dbfe0df6c240df544195004dfa4d5f384de",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 29,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "1581c252fd371fd6f740c9120ec938e1b6b822fc9b08e922aa0b5f6a3ff699da",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_030_actions.npy",
+        "role": "online_policy_cycle_030_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "98a55186bac9c0813c583e5d74a4ef453bdb7500ce3d14e2d871a42a244c1987",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 30,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "687f6e1317e984d7646ca7294926c788d8a993c81c25c49f4f663b82d6732934",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_031_actions.npy",
+        "role": "online_policy_cycle_031_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "9428f2b4252ef7956d6f804cc2c37a5c9486a86e12cc864bca940c3666018a85",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 31,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "cdf8c4141093b9ef368d89c8076e940555eb20c2027855a8c0ce707c5c956146",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_032_actions.npy",
+        "role": "online_policy_cycle_032_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "f44e26838422cfd7b1660ce3ffd345cccee9bca1d36d91de3e0847f4d1687711",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 32,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "fe92c14289ebd52e2cabbc043a3552247527ee0d69770e9b9cedb1b27a805076",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    },
+    {
+      "action_artifact_ref": {
+        "exists": true,
+        "path": "online_policy_cycle_033_actions.npy",
+        "role": "online_policy_cycle_033_actions",
+        "schema_id": "npy_openpi_actions_50x19_v0",
+        "size_bytes": 7728
+      },
+      "actions_finite": true,
+      "actions_sha256": "455595a69806ceeb9a8d402545a0efa6ca0cb910a95b0788338223f761d6bcb6",
+      "actions_shape": [
+        50,
+        19
+      ],
+      "checkpoint_loaded": true,
+      "cycle_index": 33,
+      "fallback_profile_used": false,
+      "inference_execution_mode": "sidecar_subprocess",
+      "live_observation_sha256": "90f3279727990d72951a4921db9e17f0411fdc8fbdd5092aa4eceb6f10d91c02",
+      "real_model_inference": true,
+      "request_response_status": "executed",
+      "sidecar_subprocess_invoked": true,
+      "step_chunk_error": null,
+      "step_chunk_status": "executed",
+      "test_override_used": false
+    }
+  ],
+  "fallback_profile_used": false,
+  "fresh_live_observation_cycle_count": 34,
+  "live_rollout_error": null,
+  "live_runner_run_id": null,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "online_policy_rollout_status": "executed",
+  "policy_inference_cycle_count": 34,
+  "post_terminal_reset_pending": false,
+  "real_world_safety": false,
+  "repeated_fixed_chunk_replay": false,
+  "reset_pending_observation_accepted": false,
+  "reset_pending_resolved_count": 1,
+  "reset_ready_status": "completed",
+  "reused_bpl19j_action_chunk": false,
+  "schema": "embodied_eval_os_bpl19m_online_policy_exchange_trace.v0",
+  "standard_model_score": null,
+  "test_override_used": false
+}

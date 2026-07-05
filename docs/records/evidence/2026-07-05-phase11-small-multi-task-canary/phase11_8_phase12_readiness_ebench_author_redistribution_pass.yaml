@@ -1,0 +1,44 @@
+schema_version: phase11-phase12-readiness/v0.1
+phase: '11.8'
+status: passed
+phase12_status: allowed
+readiness_owner: scenario-forge-roadmap-release-owner
+readiness_checked_at_utc: '2026-07-05T09:15:00Z'
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+latest_gates:
+  apple_to_bowl_single_task_rc: ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  soap_to_dish_single_task_rc: soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  remote_to_holder_single_task_rc: remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  small_multi_task_canary: phase11_small_multi_task_canary_three_task_ebench_author_redistribution_pass_gate.yaml
+  automated_release: phase11_automated_release_three_task_ebench_author_redistribution_pass_gate.yaml
+technical_gate_summary:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  overview_visual_review: pass
+  eos_execution: pass
+  completed_episode: pass
+  success_predicate: pass
+  post_execution_visual_review: pass
+  material_runtime_closure: pass
+policy_gate_summary:
+  release_policy: pass
+  asset_license_status: redistribution-approved-by-ebench-author
+  redistribution_approval: true
+manual_blockers: []
+unknown_blockers: []
+known_policy_blockers: []
+known_non_policy_blockers: []
+phase12_allowed: true
+phase12_allowed_reason: >-
+  Phase 11 technical execution, predicate, visual-review, package evidence,
+  release policy, and redistribution approval are all machine-readable and pass
+  for the retained three-task EBench canary.
+next_actions:
+- Start Phase 12 registry readiness and evidence-browser work with this retained
+  three-task canary as the initial public-release candidate.
+- Preserve the EBench author redistribution approval evidence with every public
+  registry snapshot that includes these retained official EBench assets.
+claim_boundary: >-
+  Phase 11.8 readiness audit only. This note does not rerun episodes, alter
+  predicate evidence, or claim official leaderboard comparability.

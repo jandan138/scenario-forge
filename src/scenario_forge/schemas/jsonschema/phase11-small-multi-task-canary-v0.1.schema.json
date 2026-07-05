@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-small-multi-task-canary-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Small Multi-Task Canary v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "suite_id",
+    "packages",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-small-multi-task-canary/v0.1"
+    },
+    "suite_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packages": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "package_id",
+          "single_task_rc_gate",
+          "real_asset_package",
+          "task_contract",
+          "overview_visual_review",
+          "execution_lane_status",
+          "predicate_evaluation_status",
+          "blockers"
+        ],
+        "properties": {
+          "package_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "single_task_rc_gate": {
+            "type": "string",
+            "minLength": 1
+          },
+          "real_asset_package": {
+            "type": "boolean"
+          },
+          "task_contract": {
+            "type": "boolean"
+          },
+          "overview_visual_review": {
+            "enum": ["passed", "failed", "blocked"]
+          },
+          "execution_lane_status": {
+            "enum": ["started", "completed", "blocked"]
+          },
+          "predicate_evaluation_status": {
+            "enum": ["passed", "blocked"]
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

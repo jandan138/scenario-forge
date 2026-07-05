@@ -1,0 +1,18 @@
+schema_version: phase11-automated-release-gate/v0.1
+phase: '11.7'
+status: passed
+release_status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: pass
+  episode_execution: pass
+  predicate_evaluation: pass
+  license_policy: pass
+known_blockers: []
+blockers: []
+next_stage: release_candidate_passed
+claim_boundary: Automated release gate only; release candidate passed is not official
+  leaderboard comparability or public dataset publication without external approval.

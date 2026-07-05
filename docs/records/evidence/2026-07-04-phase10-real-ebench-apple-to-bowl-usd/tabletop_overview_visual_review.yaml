@@ -1,0 +1,18 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+image_path: tabletop_overview.png
+verdict: PASS
+visible_evidence:
+- Red apple is visible on the table.
+- Blue/white bowl is clearly visible.
+- Tabletop surface, surrounding room, and robot/spawn near the table are in frame.
+- Lighting and materials look usable.
+- No UI/debug axes or red/pink fallback materials are visible.
+main_risk: Robot is partly occluded by table/view angle, but still visible enough
+  for review.
+retake_recommendation: not_required
+confidence: high
+claim_boundary: Automated visual review evidence only. It is not task success,
+  official camera parity, official material parity, physics-fidelity evidence,
+  model quality evidence, or leaderboard evidence.

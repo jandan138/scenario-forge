@@ -1,0 +1,38 @@
+{
+  "artifact_refs": [],
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "completed_native_episode_result_retained": true,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "online_policy_score_gate_status": "score_released",
+  "openpi_task_success": false,
+  "positive_claim_authorization": {
+    "authorization_id": "bpl19m_official_style_online_policy_rollout_v0",
+    "authorization_status": "authorized",
+    "authorized_fields": [
+      "openpi_task_success",
+      "standard_model_score"
+    ],
+    "backend_parity": false,
+    "blocker_ids": [],
+    "bpl_stage": "BPL-19M",
+    "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+    "official_benchmark_reproduction": false,
+    "real_world_safety": false,
+    "schema": "embodied_eval_os_bpl19m_positive_claim_authorization.v0",
+    "score_protocol_id": "eos_bpl19m_online_policy_rollout_score_v0"
+  },
+  "real_world_safety": false,
+  "reports_standard_model_score": true,
+  "schema": "embodied_eval_os_bpl19m_online_policy_score_gate_report.v0",
+  "score_eligibility_status": "score_eligible",
+  "stage_projection_used": false,
+  "standard_model_score": 0.0,
+  "standard_model_score_protocol_id": "eos_bpl19m_online_policy_rollout_score_v0",
+  "task_success": false,
+  "task_success_status": "evaluated"
+}

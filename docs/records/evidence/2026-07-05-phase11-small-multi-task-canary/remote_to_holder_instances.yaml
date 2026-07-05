@@ -1,0 +1,62 @@
+schema_version: scene-instances/v0.2
+instances:
+- id: environment_scene
+  asset_id: official_ebench_scene
+  role: environment
+  pose:
+    xyz:
+    - 0.0
+    - 0.0
+    - 0.0
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  semantic_tags:
+  - environment
+  initial_state: {}
+- id: lift2_robot_asset
+  asset_id: official_ebench_robot
+  role: robot_asset
+  pose:
+    xyz:
+    - -0.955
+    - -0.507
+    - -0.502
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  semantic_tags:
+  - robot_asset
+  initial_state: {}
+- id: remote_001
+  asset_id: official_ebench_remote_control
+  role: manipulated_object
+  pose:
+    xyz:
+    - -0.25
+    - -0.4
+    - 0.11
+    wxyz:
+    - 0.70710677
+    - 0.11
+    - 0.11
+    - 0.70710677
+    scale_xyz:
+    - 1.0
+    - 1.0
+    - 1.0
+  semantic_tags:
+  - manipulated_object
+  initial_state: {}
+fixture_bindings:
+  target_container:
+    instance_id: remote_holder_fixture
+    source_uid: _00
+    role: target_container
+    semantic_label: remote_control_holder
+    fixture_kind: environment_fixture
+    source_asset_id: official_ebench_scene

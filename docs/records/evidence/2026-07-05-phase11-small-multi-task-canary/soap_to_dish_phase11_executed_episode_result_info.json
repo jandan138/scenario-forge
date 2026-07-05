@@ -1,0 +1,63 @@
+{
+  "claim_boundary": "Completed episode artifact evidence only. score=0/sr=0 means this does not prove task success; Phase 11.3 must evaluate or rerun success predicate separately.",
+  "episode_id": "ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000",
+  "episode_metrics": {
+    "imported_task_outcome": {
+      "family": "task_outcome",
+      "source": "genmanip_episode_result",
+      "success_rate": false,
+      "value": 0.0
+    },
+    "runtime_attempted": true,
+    "runtime_status": "executed",
+    "server_connection_attempted": true
+  },
+  "keyframe_sources": {
+    "final_overlook": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000/dceb9f04325f433faea76a1aa2ccedff/overlook_camera/01000.png",
+    "initial_overlook": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000/dceb9f04325f433faea76a1aa2ccedff/overlook_camera/00000.png"
+  },
+  "package_id": "ebench_soap_to_dish_canary",
+  "recorder_dir": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000/dceb9f04325f433faea76a1aa2ccedff",
+  "result_root": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000",
+  "retained_artifacts": {
+    "final_keyframe": "soap_to_dish_phase11_executed_episode_final_overlook.png",
+    "initial_keyframe": "soap_to_dish_phase11_executed_episode_initial_overlook.png",
+    "runtime_log": "soap_to_dish_phase11_executed_episode_completed_runtime.log",
+    "server_log": "soap_to_dish_phase11_executed_episode_server.log",
+    "start_new_job_response": "soap_to_dish_phase11_executed_episode_start_new_job_response.json",
+    "trace": "soap_to_dish_phase11_executed_episode_completed_trace.json",
+    "worker_log": "soap_to_dish_phase11_executed_episode_worker.log",
+    "worker_pool_log": "soap_to_dish_phase11_executed_episode_worker_pool.log"
+  },
+  "run_id": "scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z",
+  "runtime_owner": "embodied-eval-os",
+  "schema_version": "phase11-executed-episode-result-info/v0.1",
+  "server_url": "http://127.0.0.1:18351",
+  "sha256": {
+    "final_keyframe": "b7d6ee219cf88a9004d4cd88d3c059b7cc79713666fdbd905baee0b2224ee579",
+    "initial_keyframe": "af8bed1d5be40240f9f0ea92e7a3844ad6073c93296c39e751872a02d6e33962",
+    "server_log": "943cc1598500c80cbc2dd2bccf4dac82b6f052cbd59b64f5b151f14d1d552fb4",
+    "trace": "0e1af754b9e4b9348014be51c28a5f23c585499a38afbf631321fa29283c09ab",
+    "worker_log": "b4526cb3147a6601aa54bc4346a43d970f5543798d1c51cb54e5e2f2df2e8479",
+    "worker_pool_log": "77a2a39791373fd603dbca0fc29bc6efef4d081c95d4064ce34b178009c06598"
+  },
+  "step_execution": {
+    "executed_steps": 1000,
+    "mode": "step_chunk",
+    "native_step_end": 1000,
+    "native_step_start": 1,
+    "requested_steps": 1000,
+    "stopped_early": true
+  },
+  "task_id": "mobile_manip/soap_to_dish",
+  "terminal_episode_result": {
+    "episode_id": "ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000",
+    "score": 0.0,
+    "seed": "000",
+    "sr": 0.0,
+    "task_name": "ebench/mobile_manip/soap_to_dish_test_mini"
+  },
+  "terminal_episode_result_present": true,
+  "trace_source": "/tmp/scenario-forge-phase11-soap-to-dish-completed-trace/ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000.json",
+  "trace_step_count": 2
+}

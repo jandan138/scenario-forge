@@ -1,0 +1,9 @@
+Phase 11.1 Scenario Forge package execution integration evidence.
+package_id=ebench_remote_to_holder_canary
+task_id=mobile_manip/remote_to_holder
+contract_consumed=true
+execution_config_status=generated
+episode_status=blocked
+trace=/tmp/phase11-remote-to-holder-task-execution-config/phase11_task_execution_config_trace.json
+blocker=eos_episode_start_not_run_for_scenario_forge_package
+claim_boundary=config generated only; no simulator reset/step/close run.

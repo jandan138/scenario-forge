@@ -1,0 +1,42 @@
+schema_version: phase11-single-task-release-candidate-gate/v0.1
+phase: '11.5'
+status: blocked
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+required_gates:
+  phase11_visual_review_gate.yaml:
+    path: /tmp/ebench-apple-to-bowl-canary/evidence/phase11_visual_review_gate.yaml
+    schema_version: phase11-visual-review-gate/v0.1
+    status: passed
+  phase11_task_execution_gate.yaml:
+    path: /tmp/ebench-apple-to-bowl-canary/evidence/phase11_task_execution_gate.yaml
+    schema_version: phase11-task-execution-gate/v0.1
+    status: passed
+  phase11_executed_episode_gate.yaml:
+    path: /tmp/ebench-apple-to-bowl-canary/evidence/phase11_executed_episode_gate.yaml
+    schema_version: phase11-executed-episode-gate/v0.1
+    status: passed
+  phase11_success_predicate_gate.yaml:
+    path: /tmp/ebench-apple-to-bowl-canary/evidence/phase11_success_predicate_gate.yaml
+    schema_version: phase11-success-predicate-gate/v0.1
+    status: passed
+  phase11_post_execution_visual_review_gate.yaml:
+    path: /tmp/ebench-apple-to-bowl-canary/evidence/phase11_post_execution_visual_review_gate.yaml
+    schema_version: phase11-post-execution-visual-review-gate/v0.1
+    status: passed
+release_policy:
+  source: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_release_policy_bpl19r_internal_rc_blocked.yaml
+  schema_version: phase11-release-policy/v0.1
+  policy_owner: scenario-forge-policy-gate
+  release_policy_status: blocked
+  asset_license_status: research-use; public redistribution approval not retained
+  redistribution_approval: false
+blockers:
+- release policy status must be pass; got blocked
+- release policy redistribution_approval must be true
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+next_stage: blocked
+claim_boundary: Single-task automated release candidate gate only; not public dataset
+  release, official score release, leaderboard comparability, or multi-task coverage
+  evidence.

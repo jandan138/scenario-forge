@@ -1,0 +1,24 @@
+{
+  "action_transform_cycle_count": 34,
+  "backend_parity": false,
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19m_official_style_online_policy_rollout_v0",
+  "episode_result": {
+    "episode_id": "ebench/phase11_3c_sf_pkg_bpl19r_pi05_attempt10/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/001",
+    "native_raw_result_value": 0.0,
+    "native_raw_sr_value": 0.0,
+    "seed": "001",
+    "task_name": "ebench/mobile_manip/apple_to_fruit_bowl_test_mini"
+  },
+  "fresh_live_observation_cycle_count": 34,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "policy_inference_cycle_count": 34,
+  "real_world_safety": false,
+  "schema": "embodied_eval_os_episode_trace.v0",
+  "standard_model_score": null,
+  "step_chunk_cycle_count": 34,
+  "trace_kind": "official_style_online_policy_rollout"
+}

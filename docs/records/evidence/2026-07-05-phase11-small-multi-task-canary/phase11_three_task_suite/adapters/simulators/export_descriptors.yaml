@@ -1,0 +1,52 @@
+schema_version: multi-simulator-export-descriptors/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+descriptors:
+- simulator: isaacsim
+  descriptor_version: v0.1
+  input_contract: scenario-package/v0.2
+  required_artifacts:
+  - manifest.yaml
+  - scene/main.usda
+  - scene/instances.yaml
+  - locks/asset_lock.yaml
+  - task/task.yaml
+  core_import_policy: no_simulator_sdk_in_core
+  runtime_smoke_owner: downstream_adapter
+  claim_boundary: Export descriptor only; downstream runtime smoke is external.
+- simulator: habitat
+  descriptor_version: v0.1
+  input_contract: scenario-package/v0.2
+  required_artifacts:
+  - manifest.yaml
+  - scene/main.usda
+  - scene/instances.yaml
+  - locks/asset_lock.yaml
+  - task/task.yaml
+  core_import_policy: no_simulator_sdk_in_core
+  runtime_smoke_owner: downstream_adapter
+  claim_boundary: Export descriptor only; downstream runtime smoke is external.
+- simulator: maniskill
+  descriptor_version: v0.1
+  input_contract: scenario-package/v0.2
+  required_artifacts:
+  - manifest.yaml
+  - scene/main.usda
+  - scene/instances.yaml
+  - locks/asset_lock.yaml
+  - task/task.yaml
+  core_import_policy: no_simulator_sdk_in_core
+  runtime_smoke_owner: downstream_adapter
+  claim_boundary: Export descriptor only; downstream runtime smoke is external.
+- simulator: omnigibson
+  descriptor_version: v0.1
+  input_contract: scenario-package/v0.2
+  required_artifacts:
+  - manifest.yaml
+  - scene/main.usda
+  - scene/instances.yaml
+  - locks/asset_lock.yaml
+  - task/task.yaml
+  core_import_policy: no_simulator_sdk_in_core
+  runtime_smoke_owner: downstream_adapter
+  claim_boundary: Export descriptor only; downstream runtime smoke is external.

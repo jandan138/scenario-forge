@@ -1,0 +1,25 @@
+schema_version: phase11-post-execution-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+review_scope: post_execution_initial_final_keyframes
+initial_image_path: remote_to_holder_phase11_4_bpl19r_visual_review_frames/left_camera_first.jpg
+final_image_path: remote_to_holder_phase11_4_bpl19r_visual_review_frames/left_camera_last.jpg
+verdict: PASS
+visible_evidence:
+- Initial frame shows the remote control on the tabletop, separate from the black holder/tray visible at frame left.
+- Final frame shows a close view of the remote control resting inside the black holder/tray, with the remote buttons and tray walls identifiable.
+- The relevant object and target holder are visible without an empty frame, severe clipping, broken geometry, or red/pink fallback material.
+success_predicate_gate: remote_to_holder_phase11_success_predicate_bpl19r_success_gate.yaml
+retake_recommendation: Not required for the current Phase 11.4 evidence packet.
+confidence: high
+source_artifacts:
+  bpl19r_rerun_evidence: remote_to_holder_phase11_3c_bpl19r_package_linked_live/phase11_package_linked_bpl19r_rerun.yaml
+  source_left_camera_video: remote_to_holder_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/full_temporal/left_camera.mp4
+  extracted_initial_frame: remote_to_holder_phase11_4_bpl19r_visual_review_frames/left_camera_first.jpg
+  extracted_final_frame: remote_to_holder_phase11_4_bpl19r_visual_review_frames/left_camera_last.jpg
+claim_boundary: Visual review confirms the retained initial/final frames are readable
+  and visually consistent with the predicate-passed remote-to-holder episode. Task
+  success remains owned by the Phase 11.3 EOS/EBench predicate gate; this is not
+  release approval, official leaderboard evidence, or model-quality evidence.

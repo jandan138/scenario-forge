@@ -1,0 +1,123 @@
+{
+  "camera": {
+    "azimuth": -42.0,
+    "distance": 1.95,
+    "elevation": 56.0,
+    "engine_native": true,
+    "focal_mm": 11.0,
+    "fov_or_intrinsics_source": "runtime_focal_mm_visual_canary",
+    "intent": "full_tabletop_overview",
+    "look_at": [
+      -0.36,
+      0.0,
+      0.06
+    ],
+    "name": "tabletop_overview",
+    "pose_selection_policy": "official_hint_then_filtered_workspace_look_at",
+    "pose_source": "eos_native_tabletop_look_at",
+    "position": [
+      0.45034456,
+      -0.72963752,
+      1.67662327
+    ],
+    "rejected_bounds": [
+      "whole_stage_bbox"
+    ],
+    "resolution": [
+      1280,
+      720
+    ],
+    "source_candidates": [
+      {
+        "name": "fixed_camera_lift2_simbox.yml",
+        "reason": "official cameras are not claimed as parity for this visual canary",
+        "status": "preserved_as_hint"
+      }
+    ],
+    "target_anchors": [
+      {
+        "name": "apple_001",
+        "role": "manipulated_object"
+      },
+      {
+        "name": "bowl_001",
+        "role": "container"
+      },
+      {
+        "name": "environment_scene.obj_table",
+        "role": "tabletop"
+      },
+      {
+        "name": "lift2_robot_asset",
+        "role": "robot_or_spawn"
+      }
+    ]
+  },
+  "claim_boundary": "Engine-native visual canary only. Not task success, not official camera parity, not official material parity, and not leaderboard evidence.",
+  "engine": "isaacsim41_sensor_camera",
+  "image": {
+    "bytes": 285807,
+    "path": "soap_to_dish_tabletop_overview.png",
+    "sha256": "8541ccf04b94e1e8e095dd021ba0b77c1586f06b54f019079e4dad119429c97c"
+  },
+  "image_path": "soap_to_dish_tabletop_overview.png",
+  "material_runtime_preflight": {
+    "approved_runtime_mdl_dependencies": [
+      {
+        "module": "OmniPBR.mdl",
+        "resolution": "approved_runtime_module",
+        "runtime_path": "/isaac-sim/kit/mdl/core/Base/OmniPBR.mdl"
+      },
+      {
+        "module": "gltf/pbr.mdl",
+        "resolution": "approved_runtime_module",
+        "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl"
+      }
+    ],
+    "blocked_dependencies": [],
+    "blocked_dependency_count": 0,
+    "claim_level": "required_visual_canary_material_runtime_closure",
+    "full_material_parity_claimed": false,
+    "genmanip_mdl_system_path_hint": "/isaac-sim/materials/:{ASSETS_DIR}/miscs/mdl/ebench/mdl:{ASSETS_DIR}/scene_usds/.../SubUSDs/materials",
+    "mdl_search_paths": [
+      "/isaac-sim/kit/mdl/core/Base",
+      "/isaac-sim/kit/mdl/core/mdl",
+      "/cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl",
+      "/tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/SubUSDs/materials"
+    ],
+    "package_local_dependency_counts": {
+      "mdl": 0,
+      "texture": 0,
+      "usd": 0
+    },
+    "package_root": "/tmp/ebench-soap-to-dish-canary",
+    "runtime_log_scan": {
+      "blocked_signals": [
+        "rtx.mdltranslator"
+      ],
+      "counters": {
+        "failed_shader_node_count": 0,
+        "mdlc_count": 8,
+        "missing_texture_count": 0
+      },
+      "status": "failed",
+      "warning_signals": [
+        "MDLC"
+      ]
+    },
+    "source_policy": "convertasset_aan03_aan04_aan11_inspired_preflight",
+    "status": "failed"
+  },
+  "package_id": "ebench_soap_to_dish_canary",
+  "render_status": "pass",
+  "runtime_log_path": "soap_to_dish_tabletop_overview_runtime.log",
+  "scene_usd": "/tmp/ebench-soap-to-dish-canary/scene/main.usda",
+  "schema": "scenario_forge_tabletop_overview_render.v0",
+  "visible_targets_expected": [
+    "tabletop",
+    "apple",
+    "bowl",
+    "scene_context",
+    "robot_or_spawn"
+  ]
+}

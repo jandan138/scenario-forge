@@ -1,0 +1,22 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+reviewer_agent: 019f2e66-1453-7a51-ba80-48de16beb376
+image_path: soap_to_dish_tabletop_overview.png
+render_metadata_path: soap_to_dish_tabletop_overview_render_metadata.json
+verdict: FAIL
+visible_evidence:
+  - Soap and soap dish or holder are not visible or identifiable.
+  - View is mostly clipped or overexposed white bathroom geometry.
+  - Only a partial drawer or edge is visible.
+  - Robot or robot spawn is not framed.
+main_risk: Camera framing is unusable for the soap-to-dish task.
+retake_recommendation: >-
+  Retake from a higher or offset overview angle that shows the full bathroom-edge
+  work surface, the soap, the soap dish or holder, and the robot or spawn in
+  frame; avoid clipping through bright white counter or cabinet geometry.
+confidence: high
+claim_boundary: >-
+  Automated visual review evidence only. It is not task success, official camera
+  parity, official material parity, physics-fidelity evidence, model quality
+  evidence, or leaderboard evidence.

@@ -1,0 +1,31 @@
+schema_version: phase11-visual-review-gate/v0.1
+phase: '11.0'
+status: failed
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+visual_review:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_tabletop_overview_material_fixed_visual_review.yaml
+  schema_version: phase11-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: WARN
+  image_path: remote_to_holder_tabletop_overview_material_fixed.png
+  render_metadata_path: remote_to_holder_tabletop_overview_material_fixed_render_metadata.json
+  visible_evidence:
+  - The image is nonblank and rendered from a high tabletop overview.
+  - Most of the table surface is visible.
+  - A small dark remote-like object is visible near the center-left, but it is weakly
+    identifiable.
+  - A black compartment holder or tray is visible near the upper middle.
+  - A robot or robot spawn with arms and grippers is visible at the left edge of the
+    table.
+  - Room context, chairs, cup, headphones, bowl, and window make the scene readable
+    as a tabletop manipulation scene.
+  retake_recommendation: Retake from a slightly lower or closer oblique overview,
+    keeping the full tabletop and robot visible while making the remote and holder
+    larger in frame. Avoid changing the scene layout.
+blockers:
+- visual review verdict must be PASS; got WARN
+next_stage: blocked
+claim_boundary: Automated visual review gate only; not task success, not physics fidelity,
+  not release approval, and not leaderboard evidence.

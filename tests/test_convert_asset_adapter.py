@@ -5,7 +5,7 @@ def test_convert_asset_plan_builds_command_without_executing_conversion() -> Non
     plan = ConvertAssetCommandPlan(
         convert_asset_root="/tools/ConvertAsset",
         input_usd="/data/raw/beaker.usd",
-        output_usd="/data/processed/beaker_noMDL.usd",
+        output_usd="/data/raw/beaker_noMDL.usd",
         operations=("no-mdl", "mesh-faces"),
     )
 
@@ -17,14 +17,12 @@ def test_convert_asset_plan_builds_command_without_executing_conversion() -> Non
             "/tools/ConvertAsset/main.py",
             "no-mdl",
             "/data/raw/beaker.usd",
-            "--out",
-            "/data/processed/beaker_noMDL.usd",
         ),
         (
             "/tools/ConvertAsset/scripts/isaac_python.sh",
             "/tools/ConvertAsset/main.py",
             "mesh-faces",
-            "/data/processed/beaker_noMDL.usd",
+            "/data/raw/beaker_noMDL.usd",
         ),
     )
 

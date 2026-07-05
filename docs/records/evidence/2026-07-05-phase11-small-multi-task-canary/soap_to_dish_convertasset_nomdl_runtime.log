@@ -1,0 +1,51 @@
+[DEBUG] materials.py loaded (BREAK_INSTANCE_FOR_MDL=True)
+[DIAG][deps] collected entries=0 from scene.usd
+[DIAG][deps] unique child usd candidates=0
+[DIAG][deps] processed child count=0 missing=0
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_00/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+    [layer] /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_01/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+    [layer] /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_02/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+    [layer] /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_03/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+    [layer] /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_04/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+    [layer] /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_05/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_06/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_07/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_fe2f9de8_aa52_4c17_8d12_d92b2c8eb7e1/SM_00/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index114892 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/WorldGridMaterial prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index115880 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index115928 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index115976 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index116024 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index116072 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index123653 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index123748 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_8f0823037b50e731fd5e7da_index114844 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][fail-classify] prim=/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d380dd497d0d30001a2ac48 prop=outputs:mdl:surface owned=True has_root_attr_spec=True instanceable=False variant_sets=[] stack_layers=1
+[DIAG][clean-delete] no external active MDL shaders remain after suppression.
+[DIAG] surface_post: total=176 missing=7 auto_created=7
+    [missing-surface] /root/layout/Meshes/Furnitures/mirror/model_c175d74dc53d065c9616a2d7272d2712_0/Others/PM_plastic
+    [missing-surface] /root/layout/Meshes/Animation/washingmachine/model_4ccdcfde6a7f0a3ff4c6bff6b8a47c43_0/Instance/PhysicsMaterial/PM_glass
+    [missing-surface] /root/layout/Meshes/Animation/washingmachine/model_4ccdcfde6a7f0a3ff4c6bff6b8a47c43_0/Instance/PhysicsMaterial/PM_plastic
+    [missing-surface] /root/layout/Meshes/Animation/washingmachine/model_4ccdcfde6a7f0a3ff4c6bff6b8a47c43_0/Others/PM_glass
+    [missing-surface] /root/layout/Meshes/Animation/washingmachine/model_4ccdcfde6a7f0a3ff4c6bff6b8a47c43_0/Others/PM_plastic
+    [missing-surface] /root/layout/Meshes/Animation/faucet/model_90fdcd0c0d2d87ba859c09ace1318b43_0/Instance/PhysicsMaterial/PM_metal
+    [missing-surface] /root/layout/Meshes/Animation/faucet/model_90fdcd0c0d2d87ba859c09ace1318b43_0/Others/PM_metal
+[DIAG] missing_children= 0
+[DIAG] mdl_report ok= True local_shaders= 0 ext_shaders= 0 local_outs= 0 ext_outs= 0 blocked_native= 0 blocked_forced= 176
+[DIAG] root_owned shaders= 0 mat_outputs= 0 blocked= 176
+[DIAG] external shaders= 0 mat_outputs= 0 blocked= 0
+[DONE] scene.usd -> scene_noMDL.usd | mats 169/176 noMDL=True (strict-pass)
+[SUMMARY] written: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL_summary.txt
+[AUDIT] written: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL_audit.json
+
+=== SUMMARY ===
+/tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene.usd -> /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+
+Top-level new file: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+CONVERTASSET_EXIT_STATUS=0

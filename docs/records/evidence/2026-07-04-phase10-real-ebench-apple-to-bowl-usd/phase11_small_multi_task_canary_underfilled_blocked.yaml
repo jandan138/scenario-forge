@@ -1,0 +1,15 @@
+schema_version: phase11-small-multi-task-canary/v0.1
+suite_id: scenario_forge_phase11_underfilled_canary
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  single_task_rc_gate: phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  real_asset_package: true
+  task_contract: true
+  overview_visual_review: passed
+  execution_lane_status: completed
+  predicate_evaluation_status: passed
+  blockers: []
+blockers:
+- only_one_real_ebench_task_available; need 3-5 tasks for Phase 11.6
+claim_boundary: Small multi-task canary blocked evidence; records breadth gap, not
+  release readiness.

@@ -1,0 +1,28 @@
+schema_version: phase11-success-predicate-gate/v0.1
+phase: '11.3'
+status: failed
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+predicate:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_success_predicate_failed_evidence.yaml
+  schema_version: phase11-success-predicate-evaluation/v0.1
+  evaluator_owner: embodied-eval-os-ebench-adapter
+  success_metric: soap_in_dish
+  predicate: object_in_container
+  object: soap_001
+  container: soap_dish_fixture
+  predicate_status: false
+  executed_episode_gate: soap_to_dish_phase11_executed_episode_gate_completed.yaml
+  measurement:
+    source: soap_to_dish_phase11_executed_episode_completed_evidence.yaml
+    source_episode_id: ebench/scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z/ebench/mobile_manip/soap_to_dish_test_mini/000
+    eos_episode_result:
+      score: 0.0
+      sr: 0.0
+    interpretation: completed_episode_did_not_satisfy_success_predicate
+blockers:
+- predicate_status must be true; got False
+- episode_result_sr_zero
+next_stage: blocked
+claim_boundary: Success predicate evaluation gate only; episode-level task success
+  is predicate-based and is not model quality, release approval, or leaderboard evidence.

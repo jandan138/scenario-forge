@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-success-predicate-evaluation-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Success Predicate Evaluation v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "evaluator_owner",
+    "package_id",
+    "task_id",
+    "success_metric",
+    "predicate",
+    "object",
+    "container",
+    "predicate_status",
+    "executed_episode_gate",
+    "measurement",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-success-predicate-evaluation/v0.1"
+    },
+    "evaluator_owner": {
+      "const": "embodied-eval-os-ebench-adapter"
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "success_metric": {
+      "type": "string",
+      "minLength": 1
+    },
+    "predicate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "object": {
+      "type": "string",
+      "minLength": 1
+    },
+    "container": {
+      "type": "string",
+      "minLength": 1
+    },
+    "predicate_status": {
+      "oneOf": [
+        {"type": "boolean"},
+        {"const": "blocked"}
+      ]
+    },
+    "executed_episode_gate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "measurement": {
+      "type": "object"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

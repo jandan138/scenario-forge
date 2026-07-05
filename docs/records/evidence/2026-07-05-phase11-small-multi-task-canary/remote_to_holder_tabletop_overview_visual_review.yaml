@@ -1,0 +1,21 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+reviewer_agent: 019f2e66-1453-7a51-ba80-48de16beb376
+image_path: remote_to_holder_tabletop_overview.png
+render_metadata_path: remote_to_holder_tabletop_overview_render_metadata.json
+verdict: FAIL
+visible_evidence:
+  - Work surface, surrounding room, and robot or spawn are visible.
+  - A black compartment tray or holder may be visible.
+  - The remote control is not visible or identifiable.
+main_risk: Task cannot be validated because the manipulated object is missing or indistinguishable.
+retake_recommendation: >-
+  Retake with the remote clearly visible on the table near the holder, preferably
+  with stronger contrast against the surface and less overlap from unrelated
+  props.
+confidence: high
+claim_boundary: >-
+  Automated visual review evidence only. It is not task success, official camera
+  parity, official material parity, physics-fidelity evidence, model quality
+  evidence, or leaderboard evidence.

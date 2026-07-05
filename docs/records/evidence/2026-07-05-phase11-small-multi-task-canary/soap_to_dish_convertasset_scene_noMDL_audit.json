@@ -1,0 +1,57 @@
+{
+  "sourceUsd": "/tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene.usd",
+  "outputUsd": "/tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd",
+  "resultStrict": true,
+  "reason": "strict-pass",
+  "stats": {
+    "materialsTotal": 176,
+    "materialsConverted": 169,
+    "externalOverridden": 0,
+    "externalDeactivated": 0,
+    "externalSuppressedExtra": null,
+    "externalFinalActive": 0,
+    "forcedBlockedOutputs": 176,
+    "forcedBlockedSamples": [
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_00/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_01/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_02/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_03/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_04/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_05/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_06/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_Static/SM_07/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Instance/Group_fe2f9de8_aa52_4c17_8d12_d92b2c8eb7e1/SM_00/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index114892::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/WorldGridMaterial::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index115880::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index115928::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index115976::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index116024::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index116072::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index123653::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d33c408b5cb690001741df5_index123748::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_8f0823037b50e731fd5e7da_index114844::outputs:mdl:surface",
+      "/root/layout/Meshes/BaseAnimation/cabinet/model_fe8868db8e086e14544a66a85c720b98_0/Looks/_d380dd497d0d30001a2ac48::outputs:mdl:surface"
+    ],
+    "materialsWithoutSurface": 7,
+    "autoCreatedSurface": 7
+  },
+  "timings": {
+    "open": 0.01732451841235161,
+    "collect_deps_and_children": 0.020137585699558258,
+    "export_root_layer": 0.13477574288845062,
+    "convert_strip": 0.261683352291584,
+    "final_export": 0.01996002346277237,
+    "verify": 0.04167966917157173
+  },
+  "missingChildren": [],
+  "missingChildrenTruncated": false,
+  "report": {
+    "mdlShadersLocal": [],
+    "mdlShadersExternal": [],
+    "mdlOutputsLocal": [],
+    "mdlOutputsExternal": [],
+    "blockedForcedCount": 176
+  },
+  "statsHash": "5e509d6ab02b9f64"
+}

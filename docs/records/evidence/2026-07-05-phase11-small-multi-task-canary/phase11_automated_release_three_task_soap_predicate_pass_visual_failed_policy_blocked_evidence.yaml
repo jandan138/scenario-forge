@@ -1,0 +1,27 @@
+schema_version: phase11-automated-release-evidence/v0.1
+suite_id: scenario_forge_phase11_three_task_downstream_blocked_canary
+small_multi_task_canary_gate: phase11_small_multi_task_canary_three_task_soap_predicate_pass_visual_failed_downstream_blocked_gate.yaml
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: blocked
+  episode_execution: pass
+  predicate_evaluation: pass
+  license_policy: blocked
+known_blockers:
+  - soap_to_dish_post_execution_visual_review_failed_retake_required
+  - soap_to_dish_single_task_rc_blocked
+  - ebench_assets_research_use_only
+  - redistribution_approval_missing
+blockers: []
+claim_boundary: >-
+  Automated release remains blocked after soap-to-dish package-linked BPL-19R
+  evidence passed Phase 11.2 completed episode and Phase 11.3 success predicate.
+  Episode execution and predicate evaluation are no longer active soap blockers.
+  The active soap blocker is Phase 11.4 post-execution visual review: retained
+  final keyframes do not cleanly show the soap inside or directly on the dish, so
+  EOS must retake or rerender the execution keyframes before soap can reach Phase
+  11.5. Release policy also remains blocked by research-use assets and missing
+  redistribution approval. This evidence does not claim Phase 11.6 pass, public
+  dataset release, official score release, or leaderboard comparability.

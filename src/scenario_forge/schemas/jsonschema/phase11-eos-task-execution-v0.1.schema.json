@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-eos-task-execution-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 EOS Task Execution Evidence v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "runtime_owner",
+    "package_id",
+    "task_id",
+    "contract_consumed",
+    "execution_config_status",
+    "episode_status",
+    "trace_uri",
+    "runtime_log",
+    "lifecycle",
+    "keyframes",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-eos-task-execution/v0.1"
+    },
+    "runtime_owner": {
+      "const": "embodied-eval-os"
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_consumed": {
+      "type": "boolean"
+    },
+    "execution_config_status": {
+      "enum": ["generated", "blocked", "failed"]
+    },
+    "episode_status": {
+      "enum": ["started", "completed", "blocked", "failed"]
+    },
+    "trace_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_log": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle": {
+      "type": "object",
+      "properties": {
+        "reset": {
+          "enum": ["passed", "failed", "blocked"]
+        },
+        "step": {
+          "enum": ["passed", "failed", "blocked"]
+        },
+        "close": {
+          "enum": ["passed", "failed", "blocked"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "keyframes": {
+      "type": "object",
+      "properties": {
+        "initial": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

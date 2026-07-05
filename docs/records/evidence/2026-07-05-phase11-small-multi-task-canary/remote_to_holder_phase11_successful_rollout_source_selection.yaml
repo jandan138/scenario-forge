@@ -1,0 +1,102 @@
+record_type: phase11_successful_rollout_source_selection
+record_version: v0.1
+phase: 11.3.b
+created_on: '2026-07-05'
+status: eos_wrapper_mapping_verified_live_rerun_pending
+package:
+  package_id: ebench_remote_to_holder_canary
+  package_root: /tmp/ebench-remote-to-holder-canary
+  package_descriptor: /tmp/ebench-remote-to-holder-canary/adapters/ebench/package.yaml
+  task_contract: /tmp/ebench-remote-to-holder-canary/task/task_contract.yaml
+  scene_usd: /tmp/ebench-remote-to-holder-canary/scene/main.usda
+  asset_lock: /tmp/ebench-remote-to-holder-canary/locks/asset_lock.yaml
+  task_id: mobile_manip/remote_to_holder
+  success_metric: remote_in_holder
+  success_predicate: object_in_container
+  predicate_object: remote_001
+  predicate_container: remote_holder_fixture
+current_phase11_status:
+  phase11_0_visual_review_gate: remote_to_holder_phase11_visual_review_gate_contactfixed_cam3_pass.yaml
+  phase11_0_status: passed
+  phase11_1_task_execution_gate: remote_to_holder_phase11_task_execution_gate_live.yaml
+  phase11_1_status: passed
+  phase11_2_executed_episode_gate: remote_to_holder_phase11_executed_episode_gate_completed.yaml
+  phase11_2_status: passed
+  phase11_3_success_predicate_gate: remote_to_holder_phase11_success_predicate_gate_failed.yaml
+  phase11_3_status: failed
+  phase11_3_failure_reason:
+    - retained completed episode is zero-policy
+    - terminal episode_result score=0.0
+    - terminal episode_result sr=0.0
+investigation:
+  inspected_roots:
+    - /cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/docs/records/evidence
+    - /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench
+    - /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini
+  inspected_eos_patterns:
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/adapters/ebench/scenario_forge_bpl19r.py
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/adapters/ebench/scenario_forge_bpl19r_phase11_bridge.py
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/scripts/run_phase11_scenario_forge_bpl19r_rerun.py
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/scripts/run_bpl19r_same_checkpoint_online_lane.py
+    - /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution/scripts/run_bpl19m_online_policy_rollout.py
+  retained_remote_success_found: false
+  retained_remote_failure_examples:
+    - source: phase11_package_run
+      result_info: /cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000/result_info.json
+      score: 0.0
+      sr: 0.0
+    - source: taskbook01c_pi05
+      run_id: taskbook01c-20260627T024056Z-clean3-mobile-manip-remote-to-holder-taskbook01c-attempt-000
+      task_success: false
+    - source: taskbook02c_internvla
+      run_id: taskbook02c_p3_attempt_000
+      score: 0.0
+      sr: 0.0
+    - source: taskbook02k_pi05_cycle_budget
+      score: 0.0
+      success_rate: 0
+    - source: taskbook02m_official_style_internvla
+      score: 0.0
+      success_rate: 0
+decision:
+  selected_first_candidate: eos_bpl19r_pi05_package_linked_multi_attempt_lane_after_mapping_extension
+  decision_basis:
+    - No retained remote-to-holder task_success=true / sr=1 / score=1.0 artifact was found.
+    - The existing EOS BPL-19R same-checkpoint runner already has the policy-lane shape needed for package-linked reruns.
+    - The existing Scenario Forge BPL-19R package wrapper and Phase 11 bridge have already produced apple-to-bowl 11.2/11.3 success evidence.
+    - The EOS wrapper was apple-only at investigation time; it has now been generalized and dry-run verified for remote-to-holder package linkage.
+selected_next_source:
+  owner: embodied-eval-os
+  source_stage: BPL-19R-derived package-linked remote rerun
+  policy_checkpoint_id: pi05-ebench-generalist
+  native_genmanip_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/remote_to_holder.yml
+  required_eos_mapping:
+    mobile_manip/remote_to_holder: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/remote_to_holder.yml
+  eos_mapping_status: dry_run_verified
+  phase_11_3c_plan_evidence: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_3c_bpl19r_package_linked_plan/phase11_package_linked_bpl19r_rerun.yaml
+  required_eos_change:
+    - Run package-linked multi-attempt BPL-19R/pi0.5 lane for remote-to-holder.
+    - Bridge the first successful terminal result, if any, into Phase 11.2 executed-episode evidence and Phase 11.3 predicate evidence.
+package_linkage_assessment:
+  historical_remote_success_is_package_linked: false
+  historical_remote_success_status: none_found
+  wrapper_status: remote_mapping_dry_run_verified_live_rerun_pending
+  scenario_forge_repo_boundary: Scenario Forge must only consume EOS evidence and must not implement the policy runner or model adapter.
+rejected_shortcuts:
+  - zero_policy_completed_episode_cannot_pass_success_predicate
+  - failed_historical_remote_result_info_cannot_close_phase_11_3
+  - apple_to_bowl_bpl19r_success_cannot_close_remote_to_holder_phase_11_3
+  - manual_visual_review_cannot_override_predicate_status
+  - render_visual_reviewer_cannot_override_failed_simulator_state_predicate
+next_phase:
+  phase: 11.3.c
+  name: package-linked successful completed episode rerun
+  owner: embodied-eval-os / GenManip runtime
+  status: package_linked_plan_verified_live_rerun_pending
+known_blockers:
+  - no_retained_remote_to_holder_success_artifact_found
+  - remote_to_holder_package_linked_bpl19r_rerun_not_executed
+  - successful_package_linked_remote_episode_missing
+  - predicate_status_true_evidence_missing
+claim_boundary: This selects the next EOS implementation path for remote-to-holder Phase 11.3 recovery. It does not claim task success and does not close Phase 11.3.

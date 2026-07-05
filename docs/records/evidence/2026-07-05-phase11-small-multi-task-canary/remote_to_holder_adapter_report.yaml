@@ -1,0 +1,16 @@
+schema_version: ebench-adapter-report/v0.1
+adapter: ebench
+status: passed
+entrypoints:
+  scene_usd: scene/main.usda
+  task: task/task.yaml
+  robot: robot/robot.yaml
+  metrics: metrics/metrics.yaml
+  asset_lock: locks/asset_lock.yaml
+  validation_report: evidence/validation_report.yaml
+  task_contract: task/task_contract.yaml
+blockers: []
+artifacts:
+- package.yaml
+- task_entrypoint.yaml
+- adapter_report.yaml

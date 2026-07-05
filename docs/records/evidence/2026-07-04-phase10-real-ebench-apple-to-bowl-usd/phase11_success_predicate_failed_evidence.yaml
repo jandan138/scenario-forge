@@ -1,0 +1,23 @@
+schema_version: phase11-success-predicate-evaluation/v0.1
+evaluator_owner: embodied-eval-os-ebench-adapter
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+success_metric: apple_in_bowl
+predicate: object_in_container
+object: apple_001
+container: bowl_001
+predicate_status: false
+executed_episode_gate: phase11_executed_episode_gate_completed.yaml
+measurement:
+  source: phase11_executed_episode_completed_evidence.yaml
+  source_episode_id: ebench/scenario_forge_phase11_apple_to_bowl_chunk_20260704T154825Z/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/000
+  eos_episode_result:
+    score: 0.0
+    sr: 0.0
+  interpretation: completed_episode_did_not_satisfy_success_predicate
+blockers:
+  - episode_result_sr_zero
+claim_boundary: >-
+  EOS/EBench success predicate evidence only. This records task success or
+  failure for the completed episode and does not claim model quality, release
+  approval, or leaderboard comparability.

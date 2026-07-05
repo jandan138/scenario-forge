@@ -1,0 +1,14 @@
+Source USD: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene.usd
+Output USD: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+Result: SUCCESS (strict-pass)
+Materials converted (preview/total): 169/176
+External materials overridden with preview: 0
+External MDL shaders deactivated: 0
+External MDL shaders final active: 0
+Materials without surface (after): 7 (auto_created=7)
+External MDL shaders: 0
+Root-owned MDL shaders: 0
+Forced blocked outputs: 176
+Child USD processed: 0
+
+Timestamp end.

@@ -1,0 +1,12 @@
+Phase 11.3.c Scenario Forge package-linked BPL-19R rerun evidence.
+package_id=ebench_soap_to_dish_canary
+task_id=mobile_manip/soap_to_dish
+native_task_config=/cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+effective_native_task_config=/cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_bpl19r_top_camera_retake_live/phase11_4_retake_task_config.yaml
+mapping_source=eos_scenario_forge_bpl19r_static_task_mapping_v0
+retake_camera_override_enabled=True
+retake_camera_config=/cpfs/user/zhuzihou/dev/scenario-forge/docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_4_top_camera_retake.yml
+rerun_status=executed
+bpl19r_status=closed_r1_blocked_with_evidence
+blockers=package_linked_bpl19r_success_missing,blocked_live_online_rollout_exception,blocked_online_policy_rollout_not_executed,blocked_reset_ready_observation_not_completed,blocked_policy_inference_cycle_count_lt_2,blocked_online_cycles_missing_for_input_parity,blocked_no_completed_native_episode_result,blocked_native_task_success_measurement_missing,blocked_source_online_lane_not_executed,blocked_source_score_not_eligible
+claim_boundary=Scenario Forge package-linked BPL-19R rerun evidence. EOS loads the Scenario Forge package and maps its task contract to a native GenManip task config before invoking the existing BPL-19R online lane. This is not official leaderboard evidence.

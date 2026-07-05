@@ -1,0 +1,21 @@
+Phase 11.1 remote-to-holder EOS live task execution integration.
+package_id=ebench_remote_to_holder_canary
+task_id=mobile_manip/remote_to_holder
+runtime_owner=embodied-eval-os
+runtime_preflight=passed
+curobo_runtime_check=passed
+run_id=scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z
+server_url=http://127.0.0.1:18348
+start_new_job_status=200
+start_new_job_success=true
+smoke_run_command=python -m adapters.ebench.smoke_run --task-config /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/remote_to_holder.yml --server-url http://127.0.0.1:18348 --worker-id 0 --trace-dir /tmp/scenario-forge-phase11-remote-to-holder-envfix-trace --max-policy-calls 1 --reset-result-timeout-s 600
+episode_id=ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000
+runtime_status=executed
+trace_source=/tmp/scenario-forge-phase11-remote-to-holder-envfix-trace/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000.json
+initial_keyframe_source=/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/eval_results/ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000/33f2d2e2b042446ba2bd2a3887328d74/overlook_camera/00000.png
+server_log=/cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/server_20260705_035154_378744.log
+worker_log=/cpfs/shared/simulation/zhuzihou/dev/GenManip/logs/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/worker/pool_20260705_035154_381747_worker_0_20260705_035217_750487.log
+lifecycle.reset=passed
+lifecycle.step=passed
+lifecycle.close=passed
+claim_boundary=EOS task execution integration evidence only; not task success, model quality, official EBench score, physics fidelity, release approval, or leaderboard evidence.

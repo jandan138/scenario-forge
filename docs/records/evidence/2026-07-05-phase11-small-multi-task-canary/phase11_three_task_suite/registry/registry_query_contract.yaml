@@ -1,0 +1,16 @@
+schema_version: registry-query-contract/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+supported_queries:
+- name: packages_by_task_family
+  required_fields:
+  - task_family
+  returns: package-registry-entry/v0.1
+- name: assets_by_semantic_role
+  required_fields:
+  - role
+  - asset_type
+  returns: asset-registry-entry/v0.1
+- name: evidence_by_package
+  required_fields:
+  - package_id
+  returns: retained_gate_refs

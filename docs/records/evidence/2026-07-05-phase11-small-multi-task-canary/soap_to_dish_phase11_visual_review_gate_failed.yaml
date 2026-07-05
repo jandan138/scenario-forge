@@ -1,0 +1,32 @@
+schema_version: phase11-visual-review-gate/v0.1
+phase: '11.0'
+status: failed
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+visual_review:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_tabletop_overview_visual_review.yaml
+  schema_version: phase11-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: FAIL
+  image_path: soap_to_dish_tabletop_overview.png
+  render_metadata_path: soap_to_dish_tabletop_overview_render_metadata.json
+  visible_evidence:
+  - Soap and soap dish or holder are not visible or identifiable.
+  - View is mostly clipped or overexposed white bathroom geometry.
+  - Only a partial drawer or edge is visible.
+  - Robot or robot spawn is not framed.
+  retake_recommendation: Retake from a higher or offset overview angle that shows
+    the full bathroom-edge work surface, the soap, the soap dish or holder, and the
+    robot or spawn in frame; avoid clipping through bright white counter or cabinet
+    geometry.
+blockers:
+- visual review verdict must be PASS; got FAIL
+- visual review render metadata material_runtime_preflight.status must be pass; got
+  failed
+- 'visual review render runtime log contains blocking material signal: rtx.mdltranslator'
+- 'visual review render runtime log contains blocking material signal: wasn''t resolved
+  properly'
+next_stage: blocked
+claim_boundary: Automated visual review gate only; not task success, not physics fidelity,
+  not release approval, and not leaderboard evidence.

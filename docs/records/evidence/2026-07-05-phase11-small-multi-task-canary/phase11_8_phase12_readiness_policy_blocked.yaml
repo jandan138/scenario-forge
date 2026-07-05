@@ -1,0 +1,52 @@
+schema_version: phase11-phase12-readiness/v0.1
+phase: '11.8'
+status: blocked
+phase12_status: deferred
+readiness_owner: scenario-forge-roadmap-release-owner
+readiness_checked_at_utc: '2026-07-05T08:20:00Z'
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+latest_gates:
+  apple_to_bowl_single_task_rc: ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  soap_to_dish_single_task_rc: soap_to_dish_phase11_single_task_rc_bpl19r_top_camera_retake_internal_policy_blocked_gate.yaml
+  remote_to_holder_single_task_rc: remote_to_holder_phase11_single_task_rc_bpl19r_internal_policy_blocked_gate.yaml
+  small_multi_task_canary: phase11_small_multi_task_canary_three_task_internal_policy_blocked_gate.yaml
+  automated_release: phase11_automated_release_three_task_internal_policy_blocked_gate.yaml
+technical_gate_summary:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  overview_visual_review: pass
+  eos_execution: pass
+  completed_episode: pass
+  success_predicate: pass
+  post_execution_visual_review: pass
+  material_runtime_closure: pass
+policy_gate_summary:
+  release_policy: blocked
+  asset_license_status: research-use; public redistribution approval not retained
+  redistribution_approval: false
+manual_blockers: []
+unknown_blockers: []
+known_policy_blockers:
+- apple_to_bowl_single_task_rc_policy_blocked_for_public_release
+- soap_to_dish_single_task_rc_policy_blocked_for_public_release
+- remote_to_holder_single_task_rc_policy_blocked_for_public_release
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+known_non_policy_blockers: []
+phase12_allowed: false
+phase12_deferred_reason: >-
+  Phase 11 technical execution, predicate, visual-review, and package evidence
+  are machine-readable and no manual/unknown blockers remain. Phase 12 registry,
+  viewer, and multi-simulator work remains deferred because 11.6 / 11.7 are still
+  blocked by release policy and public redistribution approval.
+next_actions:
+- Keep the current three-task canary as internal evidence only.
+- Obtain or replace official asset license / redistribution approval before any
+  public release claim.
+- Do not start public registry or official score release work under Phase 12 until
+  license_policy passes or Phase 12 scope is explicitly limited to internal-only
+  evidence browsing.
+claim_boundary: >-
+  Phase 11.8 readiness audit only. This note does not run episodes, change gate
+  statuses, approve public release, or claim leaderboard comparability.

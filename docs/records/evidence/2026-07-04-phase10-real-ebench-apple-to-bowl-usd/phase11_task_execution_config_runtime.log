@@ -1,0 +1,9 @@
+Phase 11.1 Scenario Forge package execution integration evidence.
+package_id=ebench_apple_to_bowl_canary
+task_id=mobile_manip/apple_to_fruit_bowl
+contract_consumed=true
+execution_config_status=generated
+episode_status=blocked
+trace=/tmp/ebench-apple-to-bowl-canary/evidence/phase11_task_execution_trace.json
+blocker=eos_episode_start_not_run_for_scenario_forge_package
+claim_boundary=config generated only; no simulator reset/step/close run.

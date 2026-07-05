@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-phase12-readiness-gate-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Phase-12 Readiness Gate v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "phase",
+    "status",
+    "phase12_status",
+    "phase12_allowed",
+    "suite_id",
+    "latest_gates",
+    "technical_gate_summary",
+    "policy_gate_summary",
+    "manual_blockers",
+    "unknown_blockers",
+    "known_policy_blockers",
+    "known_non_policy_blockers",
+    "blockers",
+    "next_stage",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-phase12-readiness-gate/v0.1"
+    },
+    "phase": {
+      "const": "11.8"
+    },
+    "status": {
+      "enum": ["passed", "blocked"]
+    },
+    "phase12_status": {
+      "enum": ["allowed", "deferred"]
+    },
+    "phase12_allowed": {
+      "type": "boolean"
+    },
+    "suite_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "latest_gates": {
+      "type": "object"
+    },
+    "technical_gate_summary": {
+      "type": "object"
+    },
+    "policy_gate_summary": {
+      "type": "object"
+    },
+    "manual_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unknown_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "known_policy_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "known_non_policy_blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_stage": {
+      "enum": ["phase12_registry_readiness", "blocked"]
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

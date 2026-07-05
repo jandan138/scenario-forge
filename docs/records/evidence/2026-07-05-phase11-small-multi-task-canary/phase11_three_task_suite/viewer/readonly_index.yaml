@@ -1,0 +1,59 @@
+schema_version: readonly-evidence-viewer/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+mode: read_only
+status_source: retained_gate_files_only
+snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  task_label: apple_to_bowl
+  release_status: passed
+  artifact_refs:
+    manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_package_manifest.yaml
+    asset_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+    scene_usd: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_main.usda
+    task: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_task.yaml
+    metrics: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_metrics.yaml
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_visual_review_gate.yaml
+    '11.1': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+    '11.5': docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+- package_id: ebench_soap_to_dish_canary
+  task_label: soap_to_dish
+  release_status: passed
+  artifact_refs:
+    manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_package_manifest.yaml
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+    scene_usd: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_main.usda
+    task: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_single_task_rc_nomdl_relink_11_1_pass_policy_blocked_gate.yaml
+    metrics: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_metrics.yaml
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_visual_review_gate_nomdl_relink_cam4_pass.yaml
+    '11.1': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_post_execution_visual_review_top_camera_retake_pass_gate.yaml
+    '11.5': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+- package_id: ebench_remote_to_holder_canary
+  task_label: remote_to_holder
+  release_status: passed
+  artifact_refs:
+    manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_package_manifest_contactfixed.yaml
+    asset_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_manifest.yaml
+    asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+    scene_usd: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_main_contactfixed.usda
+    task: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_task_contract_contactfixed.yaml
+    metrics: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_metrics.yaml
+  evidence_refs:
+    '11.0': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_visual_review_gate_contactfixed_cam3_pass.yaml
+    '11.1': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_task_execution_gate_live.yaml
+    '11.2': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_executed_episode_bpl19r_success_gate.yaml
+    '11.3': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_success_predicate_bpl19r_success_gate.yaml
+    '11.4': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_post_execution_visual_review_bpl19r_success_gate.yaml
+    '11.5': docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+claim_boundary: Read-only evidence viewer manifest. It can display retained evidence
+  but cannot edit or override gate status.

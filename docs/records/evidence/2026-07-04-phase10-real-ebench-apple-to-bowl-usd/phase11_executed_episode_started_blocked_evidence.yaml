@@ -1,0 +1,23 @@
+schema_version: phase11-executed-episode-evidence/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+episode_status: started
+trace_uri: phase11_task_execution_live_trace.json
+runtime_log: phase11_task_execution_live_runtime.log
+keyframes:
+  initial: phase11_task_execution_initial_overlook.png
+  final: phase11_task_execution_step1_overlook.png
+  final_note: This is the frame after one zero-policy smoke step, not a completed episode final state.
+final_state:
+  source_trace: phase11_task_execution_live_trace.json
+  source_step_index: 1
+  status: partial_started_episode_state
+  note: Reset and one zero-policy step executed, but EOS has not retained a completed episode final state for the Scenario Forge package.
+blockers:
+- eos_completed_episode_not_retained_for_scenario_forge_package
+- one_step_smoke_is_not_phase11_2_completed_episode
+claim_boundary: Explicit Phase 11.2 blocked evidence. The referenced live smoke
+  proves Phase 11.1 task execution integration only. It does not prove a completed
+  episode, task success, model quality, official EBench score, physics fidelity,
+  release approval, or leaderboard comparability.

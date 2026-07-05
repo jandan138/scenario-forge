@@ -1,0 +1,13 @@
+schema_version: phase11-release-policy/v0.1
+policy_owner: scenario-forge-policy-gate
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+release_policy_status: pass
+asset_license_status: redistribution-approved-by-ebench-author
+redistribution_approval: true
+approval_evidence: phase11_ebench_author_redistribution_approval_zhuzihou.yaml
+blockers: []
+claim_boundary: >-
+  Release-policy gate only. This clears asset redistribution policy for the
+  retained soap-to-dish Phase 11 package; it does not rerun execution, alter
+  predicate evidence, or claim leaderboard comparability.

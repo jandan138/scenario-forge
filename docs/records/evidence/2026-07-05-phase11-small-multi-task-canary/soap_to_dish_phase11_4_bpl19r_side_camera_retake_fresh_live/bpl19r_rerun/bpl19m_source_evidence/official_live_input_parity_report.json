@@ -1,0 +1,37 @@
+{
+  "artifact_refs": [],
+  "backend_parity": false,
+  "blocker_ids": [
+    "blocked_online_cycles_missing_for_input_parity"
+  ],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "cycle_count": 0,
+  "cycles": [],
+  "eos_model_visible_input_status": "blocked",
+  "model_superiority": false,
+  "observation_pixel_parity_status": "blocked",
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "official_live_input_parity_status": "blocked_with_evidence",
+  "official_live_input_reference_status": "blocked",
+  "official_prep_input_required_keys": [
+    "images/head",
+    "images/hand_left",
+    "images/hand_right",
+    "states/joint",
+    "states/gripper",
+    "states/base",
+    "prompt"
+  ],
+  "official_prep_input_source": "ebench_openpi_pi0client_prep_input_v0",
+  "openpi_task_success": false,
+  "privileged_state_exposed": false,
+  "prompt_token_parity_basis": "prompt_text_hash_without_tokenizer",
+  "prompt_token_parity_status": "blocked",
+  "real_world_safety": false,
+  "reports_standard_model_score": false,
+  "schema": "embodied_eval_os_bpl19m_official_live_input_parity_report.v0",
+  "standard_model_score": null,
+  "state_numeric_parity_status": "blocked"
+}

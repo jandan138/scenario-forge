@@ -1,0 +1,19 @@
+{
+  "blocker_ids": [],
+  "bpl_stage": "BPL-19R.R1",
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "official_pi05_attempt_count": 10,
+  "official_pi05_failure_count": 7,
+  "official_pi05_success_count": 3,
+  "official_pi05_terminal_result_count": 10,
+  "q5_decision_report_status": "retained",
+  "q5_expand_official_native_to_20": false,
+  "q5_primary_decision": "not_comparable_due_to_scope",
+  "q5_recommended_next_stage": "BPL-19R.R1",
+  "q5_status": "closed_q5_decision_report_retained",
+  "reports_standard_model_score": false,
+  "schema": "embodied_eval_os_bpl19r_q5_source_summary.v0",
+  "source_evidence_root": "docs/records/evidence/2026-06-20-bpl19q-q5-decision-report",
+  "standard_model_score": null
+}

@@ -1,0 +1,26 @@
+{
+  "backend_parity": false,
+  "blocker_ids": [
+    "blocked_live_online_rollout_exception",
+    "blocked_genmanip_reset_not_ready",
+    "blocked_online_policy_rollout_not_executed",
+    "blocked_reset_ready_observation_not_completed",
+    "blocked_policy_inference_cycle_count_lt_2"
+  ],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "cycle_count": 0,
+  "cycles": [],
+  "executed_steps": 0,
+  "model_superiority": false,
+  "native_robot_control_execution_status": "not_claimed",
+  "native_robot_physics_policy_rollout": false,
+  "native_step_chunk_execution_status": "blocked",
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "online_step_chunk_execution_status": "blocked",
+  "real_world_safety": false,
+  "schema": "embodied_eval_os_bpl19m_online_step_chunk_execution_report.v0",
+  "stage_projection_used": false,
+  "standard_model_score": null
+}

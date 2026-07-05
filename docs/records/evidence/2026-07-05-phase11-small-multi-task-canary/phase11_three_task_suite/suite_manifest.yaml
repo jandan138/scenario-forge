@@ -1,0 +1,9 @@
+schema_version: scenario-suite/v0.2
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+packages:
+- package_id: ebench_apple_to_bowl_canary
+  path: ../2026-07-04-phase10-real-ebench-apple-to-bowl-usd
+- package_id: ebench_soap_to_dish_canary
+  path: /tmp/ebench-soap-to-dish-canary-nomdl-relink
+- package_id: ebench_remote_to_holder_canary
+  path: .

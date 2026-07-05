@@ -1,0 +1,36 @@
+schema_version: ebench-eos-handoff-examples/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+pinned_registry_snapshot: registry/registry_snapshot.yaml
+snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+examples:
+- package_id: ebench_apple_to_bowl_canary
+  task_label: apple_to_bowl
+  package_manifest: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_package_manifest.yaml
+  ebench_export: null
+  eos_consumes:
+  - docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_package_manifest.yaml
+  - docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_main.usda
+  - docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+  - docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  runtime_claim_source: retained_phase11_eos_and_predicate_gates
+- package_id: ebench_soap_to_dish_canary
+  task_label: soap_to_dish
+  package_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_package_manifest.yaml
+  ebench_export: null
+  eos_consumes:
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_package_manifest.yaml
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_main.usda
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  runtime_claim_source: retained_phase11_eos_and_predicate_gates
+- package_id: ebench_remote_to_holder_canary
+  task_label: remote_to_holder
+  package_manifest: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_package_manifest_contactfixed.yaml
+  ebench_export: null
+  eos_consumes:
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_package_manifest_contactfixed.yaml
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_main_contactfixed.usda
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+  - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_single_task_rc_bpl19r_ebench_author_redistribution_pass_gate.yaml
+  runtime_claim_source: retained_phase11_eos_and_predicate_gates
+non_goal: Scenario Forge does not run EOS episodes or model adapters.

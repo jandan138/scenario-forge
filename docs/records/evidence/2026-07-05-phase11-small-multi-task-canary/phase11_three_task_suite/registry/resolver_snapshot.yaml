@@ -1,0 +1,55 @@
+schema_version: resolver-snapshot/v0.1
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+snapshot_digest: sha256:2e868c505b4c98efe8839cc79f47c3cce68cffc3b470aa6fb3f49b9537c02710
+resolver_policy: locked_asset_uid_to_retained_artifact_ref
+assets:
+- asset_uid: official_ebench_apple@3cea327ec9c4
+  asset_id: official_ebench_apple
+  content_sha256: sha256:3cea327ec9c4d602f8400f8bbfe555742bc77743070a8f2636d92e651c4fd828
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+- asset_uid: official_ebench_bowl@28025950c616
+  asset_id: official_ebench_bowl
+  content_sha256: sha256:28025950c6163ab1b26ffdd37f6cd4ab4f177a6eb6cc55c3832c2eec307e3d28
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+- asset_uid: official_ebench_remote_control@261fb6ea8ee0
+  asset_id: official_ebench_remote_control
+  content_sha256: sha256:261fb6ea8ee03dcb1472f7594333b9bc52b7d2a906a73aa7f52fd48b65b19ae9
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+- asset_uid: official_ebench_robot@5cfdc18d9040
+  asset_id: official_ebench_robot
+  content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+- asset_uid: official_ebench_robot@5cfdc18d9040
+  asset_id: official_ebench_robot
+  content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+- asset_uid: official_ebench_robot@5cfdc18d9040
+  asset_id: official_ebench_robot
+  content_sha256: sha256:5cfdc18d904019e681966eb6a02beca3581ce11a6a7979fe4061b56914346396
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+- asset_uid: official_ebench_scene@45bde7851f39
+  asset_id: official_ebench_scene
+  content_sha256: sha256:45bde7851f394d8a919904bb1125b6a75e4cb50d8903632d858de31afc22f0c2
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_asset_lock_contactfixed.yaml
+- asset_uid: official_ebench_scene@56d11834ef12
+  asset_id: official_ebench_scene
+  content_sha256: sha256:56d11834ef12d47b66ac1c0114b328893f80a9ae70dd82d1e1f44102f01079a0
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/apple_to_bowl_asset_lock.yaml
+- asset_uid: official_ebench_scene@e1cf0d5b4d76
+  asset_id: official_ebench_scene
+  content_sha256: sha256:e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
+  resolver_version: ConvertAsset no-mdl public CLI; scenario-forge handoff v0.3
+  asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+- asset_uid: official_ebench_soap@c147837fe9bd
+  asset_id: official_ebench_soap
+  content_sha256: sha256:c147837fe9bdeba628c72efa33e1f152ec3b65f8f1b2671318c8f7298b73aae5
+  resolver_version: scenario-forge-ebench-official-asset-intake/v0.1
+  asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml

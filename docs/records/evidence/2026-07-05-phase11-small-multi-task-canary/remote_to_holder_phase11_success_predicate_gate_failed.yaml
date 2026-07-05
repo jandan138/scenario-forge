@@ -1,0 +1,28 @@
+schema_version: phase11-success-predicate-gate/v0.1
+phase: '11.3'
+status: failed
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+predicate:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_success_predicate_failed_evidence.yaml
+  schema_version: phase11-success-predicate-evaluation/v0.1
+  evaluator_owner: embodied-eval-os-ebench-adapter
+  success_metric: remote_in_holder
+  predicate: object_in_container
+  object: remote_001
+  container: remote_holder_fixture
+  predicate_status: false
+  executed_episode_gate: remote_to_holder_phase11_executed_episode_gate_completed.yaml
+  measurement:
+    source: remote_to_holder_phase11_executed_episode_completed_evidence.yaml
+    source_episode_id: ebench/scenario_forge_phase11_remote_to_holder_envfix_20260704T195141Z/ebench/mobile_manip/remote_to_holder_test_mini/000
+    eos_episode_result:
+      score: 0.0
+      sr: 0.0
+    interpretation: completed_episode_did_not_satisfy_success_predicate
+blockers:
+- predicate_status must be true; got False
+- episode_result_sr_zero
+next_stage: blocked
+claim_boundary: Success predicate evaluation gate only; episode-level task success
+  is predicate-based and is not model quality, release approval, or leaderboard evidence.

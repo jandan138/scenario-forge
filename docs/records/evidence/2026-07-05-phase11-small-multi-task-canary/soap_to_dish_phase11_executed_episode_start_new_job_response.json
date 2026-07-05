@@ -1,0 +1,6 @@
+{
+  "status_code": 200,
+  "body": "{\"data\":{\"success\":true}}",
+  "run_id": "scenario_forge_phase11_soap_to_dish_completed_20260704T220735Z",
+  "config_path": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml"
+}

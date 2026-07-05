@@ -1,0 +1,9 @@
+schema_version: phase12-multi-simulator-export-gate/v0.1
+phase: '12.5'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+export_descriptors: adapters/simulators/export_descriptors.yaml
+blockers: []
+next_stage: hosted_internal_registry_alpha_policy_closure
+claim_boundary: Phase 12.5 export descriptor gate only. Descriptors are portable mapping
+  examples and do not prove downstream runtime smoke for every simulator.

@@ -1,0 +1,75 @@
+schema_version: phase11-task-package-generation-evidence/v0.1
+phase: 11.6.task-package
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+task_family: pick_place
+source_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+package_root: /tmp/ebench-soap-to-dish-canary
+generator:
+  owner: scenario-forge
+  command: >-
+    PYTHONPATH=src python -m scenario_forge.cli ebench canary single-object-fixture
+    --asset-sources examples/ebench_soap_to_dish_asset_sources.yaml
+    --out /tmp/ebench-soap-to-dish-canary
+  generator_module: scenario_forge.generation.ebench_canary.single_object_fixture
+source_assets:
+  scene: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task3/scene.usd
+  robot: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+  manipulated_object: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/soap/ready/soap0/soap0.usd
+  camera_yaml: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml
+target_fixture:
+  fixture_kind: environment_fixture
+  source_asset_id: official_ebench_scene
+  source_uid: _01
+  instance_id: soap_dish_fixture
+  semantic_label: soap_dish
+  bbox_probe:
+    prim_path: /root/obj__01
+    bbox_min: [-0.4304, 0.1066, 0.9582]
+    bbox_max: [-0.2808, 0.2076, 0.9925]
+artifact_snapshots:
+  package_manifest: soap_to_dish_package_manifest.yaml
+  scene_usd: soap_to_dish_main.usda
+  scene_instances: soap_to_dish_instances.yaml
+  asset_manifest: soap_to_dish_asset_manifest.yaml
+  asset_lock: soap_to_dish_asset_lock.yaml
+  task: soap_to_dish_task.yaml
+  task_contract: soap_to_dish_task_contract.yaml
+  metrics: soap_to_dish_metrics.yaml
+  ebench_package: soap_to_dish_ebench_package.yaml
+  task_entrypoint: soap_to_dish_task_entrypoint.yaml
+  adapter_report: soap_to_dish_adapter_report.yaml
+  layout_checks: soap_to_dish_layout_checks.yaml
+artifact_hashes:
+  soap_to_dish_main.usda: 7f6e3fb312f14e583927fbfd1da7aa98aa78da6f19ff4dca750955aa8deff773
+  soap_to_dish_asset_lock.yaml: 781ce530f14134c46d43856092eca863de09ac33e1fc7674801a6d300198d0d8
+  soap_to_dish_task_contract.yaml: ec79a5e57ca8f8413ae47b322f77a7cbcf38d56915de3b3d22ceafff1c5e1326
+verification:
+  package_check:
+    command: PYTHONPATH=src python -m scenario_forge.cli package check /tmp/ebench-soap-to-dish-canary --require-asset-lock
+    status: passed
+    output: Package OK
+  asset_lock_check:
+    command: PYTHONPATH=src python -m scenario_forge.cli assets check /tmp/ebench-soap-to-dish-canary
+    status: passed
+    output: Asset lock OK
+  usd_stage_open:
+    command: PYTHONPATH=src python -c "from pxr import Usd; Usd.Stage.Open('/tmp/ebench-soap-to-dish-canary/scene/main.usda')"
+    status: passed
+    checked_prims:
+      - /World/Instances/environment_scene
+      - /World/Instances/lift2_robot_asset
+      - /World/Instances/soap_001
+status: package_static_passed
+next_stage: phase11_6_visual_review_and_eos_execution
+blockers:
+  - phase11_6_requires_3_to_5_real_ebench_tasks; current generated task packages are apple-to-bowl and soap-to-dish
+  - soap_to_dish_overview_visual_review_not_run
+  - soap_to_dish_eos_execution_not_run
+  - soap_to_dish_success_predicate_not_evaluated
+  - soap_to_dish_single_task_rc_not_run
+claim_boundary: >-
+  This evidence proves a second real EBench USD-bearing task package was generated,
+  asset-locked, EBench-exported, and statically opened as USD. It does not claim
+  visual review PASS, EOS execution, predicate success, public release, or
+  leaderboard comparability.

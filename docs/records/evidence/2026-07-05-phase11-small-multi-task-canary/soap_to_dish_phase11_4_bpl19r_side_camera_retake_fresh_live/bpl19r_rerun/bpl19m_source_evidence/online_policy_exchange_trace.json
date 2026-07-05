@@ -1,0 +1,36 @@
+{
+  "artifact_refs": [],
+  "backend_parity": false,
+  "blocker_ids": [
+    "blocked_live_online_rollout_exception",
+    "blocked_genmanip_reset_not_ready",
+    "blocked_online_policy_rollout_not_executed",
+    "blocked_reset_ready_observation_not_completed",
+    "blocked_policy_inference_cycle_count_lt_2"
+  ],
+  "bpl_stage": "BPL-19M",
+  "claim_scope": "bpl19_ebench_post_trained_checkpoint_lane_v0",
+  "cycles": [],
+  "fallback_profile_used": false,
+  "fresh_live_observation_cycle_count": 0,
+  "live_rollout_error": {
+    "error_message": "POST http://127.0.0.1:18354/reset_result failed with 500: {\"detail\":\"RuntimeError: Worker 0 reset failed for task=ebench/mobile_manip/soap_to_dish_test_mini seed=000: ActorDiedError: The actor died because of an error raised in its creation task, \\u001b[36mray::IsaacWorker.__init__()\\u001b[39m (pid=1396812, ip=10.150.153.120, actor_id=d641565b8c9f76818457342101000000, repr=<genmanip.core.evaluator.isaac_worker.IsaacWorker object at 0x7f14c63479d0>)\\n  File \\\"/cpfs/shared/simulation/zhuzihou/dev/GenManip/genmanip/core/evaluator/isaac_worker.py\\\", line 132, in __init__\\n    from genmanip.core.evaluator.env import IsaacEvalEnvRay\\n  File \\\"/cpfs/shared/simulation/zhuzihou/dev/GenManip/genmanip/core/evaluator/env.py\\\", line 8, in <module>\\n    from genmanip.core.robot.dualarm_manip import DualArmEmbodiment\\n  File \\\"/cpfs/shared/simulation/zhuzihou/dev/GenManip/genmanip/core/robot/dualarm_manip.py\\\", line 14, in <module>\\n    from curobo.types.state import JointState\\nModuleNotFoundError: No module named 'curobo'\"}",
+    "error_type": "RuntimeError"
+  },
+  "live_runner_run_id": null,
+  "model_superiority": false,
+  "official_benchmark_reproduction": false,
+  "official_leaderboard_comparable": false,
+  "online_policy_rollout_status": "blocked",
+  "policy_inference_cycle_count": 0,
+  "post_terminal_reset_pending": false,
+  "real_world_safety": false,
+  "repeated_fixed_chunk_replay": false,
+  "reset_pending_observation_accepted": false,
+  "reset_pending_resolved_count": 0,
+  "reset_ready_status": "blocked",
+  "reused_bpl19j_action_chunk": false,
+  "schema": "embodied_eval_os_bpl19m_online_policy_exchange_trace.v0",
+  "standard_model_score": null,
+  "test_override_used": false
+}

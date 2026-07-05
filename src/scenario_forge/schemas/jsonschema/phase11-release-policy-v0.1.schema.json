@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-release-policy-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Release Policy v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "policy_owner",
+    "package_id",
+    "task_id",
+    "release_policy_status",
+    "asset_license_status",
+    "redistribution_approval",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-release-policy/v0.1"
+    },
+    "policy_owner": {
+      "const": "scenario-forge-policy-gate"
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "release_policy_status": {
+      "enum": ["pass", "blocked"]
+    },
+    "asset_license_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "redistribution_approval": {
+      "type": "boolean"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

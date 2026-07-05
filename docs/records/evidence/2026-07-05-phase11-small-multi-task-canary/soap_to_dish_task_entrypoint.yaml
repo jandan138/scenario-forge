@@ -1,0 +1,11 @@
+schema_version: ebench-task-entrypoint/v0.1
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+task_family: pick_place
+instruction: Pick up the bar of soap from the bathtub edge and place it into the soap
+  dish.
+success_metric: soap_in_dish
+metric_role: primary_success
+bindings:
+  object: soap_001
+  target_container: soap_dish_fixture

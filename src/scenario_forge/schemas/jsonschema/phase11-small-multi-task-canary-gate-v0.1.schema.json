@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/phase11-small-multi-task-canary-gate-v0.1.schema.json",
+  "title": "Scenario Forge Phase 11 Small Multi-Task Canary Gate v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "phase",
+    "status",
+    "suite_id",
+    "package_count",
+    "packages",
+    "blockers",
+    "next_stage",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase11-small-multi-task-canary-gate/v0.1"
+    },
+    "phase": {
+      "const": "11.6"
+    },
+    "status": {
+      "enum": ["passed", "blocked"]
+    },
+    "suite_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "packages": {
+      "type": "array"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_stage": {
+      "enum": ["automated_release_gate", "blocked"]
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

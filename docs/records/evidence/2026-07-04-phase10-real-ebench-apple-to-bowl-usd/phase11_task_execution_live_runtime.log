@@ -1,0 +1,43 @@
+Phase 11.1 live EOS task execution integration evidence.
+
+Date: 2026-07-04
+EOS worktree: /root/.config/superpowers/worktrees/embodied-eval-os/phase11-scenario-forge-execution
+EOS branch: phase11-scenario-forge-execution
+Scenario Forge package: /tmp/ebench-apple-to-bowl-canary
+Package id: ebench_apple_to_bowl_canary
+Task id: mobile_manip/apple_to_fruit_bowl
+
+Runtime:
+  GenManip EvalServer: http://127.0.0.1:8087
+  task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml
+  run_id: scenario_forge_phase11_apple_to_bowl_tracefix_20260704T151344Z
+  worker_id: 0
+  max_policy_calls: 1
+  reset_result_timeout_s: 240.0
+
+Command:
+  /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-py310/bin/python -m adapters.ebench.smoke_run \
+    --task-config /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml \
+    --server-url http://127.0.0.1:8087 \
+    --worker-id 0 \
+    --trace-dir /tmp/scenario-forge-phase11-genmanip-smoke-tracefix \
+    --max-policy-calls 1 \
+    --reset-result-timeout-s 240
+
+Observed result:
+  episode_id=ebench/scenario_forge_phase11_apple_to_bowl_tracefix_20260704T151344Z/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/000
+  runtime_status=executed
+  trace_path=/tmp/scenario-forge-phase11-genmanip-smoke-tracefix/ebench/scenario_forge_phase11_apple_to_bowl_tracefix_20260704T151344Z/ebench/mobile_manip/apple_to_fruit_bowl_test_mini/000.json
+
+Retained Scenario Forge record artifacts:
+  phase11_task_execution_live_trace.json
+  phase11_task_execution_initial_overlook.png
+  phase11_eos_task_execution_live_evidence.yaml
+  phase11_task_execution_live_runtime.log
+
+Boundary:
+  This evidence proves Phase 11.1 task execution integration only: EOS connected
+  to GenManip/IsaacSim41, consumed the mapped apple-to-bowl runtime config,
+  completed reset, one step, cleanup close, and retained an initial keyframe.
+  It does not prove task success, completed episode success, model quality,
+  official EBench score, release approval, or leaderboard comparability.

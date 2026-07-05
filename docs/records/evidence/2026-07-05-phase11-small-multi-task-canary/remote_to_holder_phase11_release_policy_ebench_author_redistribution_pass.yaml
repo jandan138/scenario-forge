@@ -1,0 +1,13 @@
+schema_version: phase11-release-policy/v0.1
+policy_owner: scenario-forge-policy-gate
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+release_policy_status: pass
+asset_license_status: redistribution-approved-by-ebench-author
+redistribution_approval: true
+approval_evidence: phase11_ebench_author_redistribution_approval_zhuzihou.yaml
+blockers: []
+claim_boundary: >-
+  Release-policy gate only. This clears asset redistribution policy for the
+  retained remote-to-holder Phase 11 package; it does not rerun execution, alter
+  predicate evidence, or claim leaderboard comparability.

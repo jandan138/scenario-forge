@@ -1,0 +1,26 @@
+schema_version: phase11-task-execution-gate/v0.1
+phase: '11.1'
+status: passed
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+execution:
+  source: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_phase11_eos_task_execution_live_evidence.yaml
+  schema_version: phase11-eos-task-execution/v0.1
+  runtime_owner: embodied-eval-os
+  contract_consumed: true
+  execution_config_status: generated
+  episode_status: started
+  trace_uri: soap_to_dish_phase11_task_execution_live_trace.json
+  runtime_log: soap_to_dish_phase11_task_execution_live_runtime.log
+  lifecycle:
+    reset: passed
+    step: passed
+    close: passed
+  keyframes:
+    initial: soap_to_dish_phase11_task_execution_initial_overlook.png
+    initial_camera: overlook_camera
+    initial_source_frame: '00000'
+blockers: []
+next_stage: executed_episode_evidence_gate
+claim_boundary: EOS task execution integration gate only; not task success, not model
+  quality, not release approval, and not leaderboard evidence.

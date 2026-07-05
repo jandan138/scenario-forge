@@ -1,0 +1,41 @@
+schema_version: ebench-official-asset-sources/v0.1
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+task_family: pick_place
+instruction: Pick up the remote control from the coffee table and place it into the remote control holder.
+assets:
+  scene:
+    role: environment
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/ebench/simple_pnp/task5/scene.usd
+    license: research-use
+  robot:
+    role: robot
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/robot_usds/lift2/robot.usd
+    license: research-use
+  remote:
+    role: manipulated_object
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/object_usds/custom_usd/ebench_usds/remote_control/ready/remote0/remote0.usd
+    license: research-use
+  camera_yaml:
+    role: camera_config
+    source_path: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/cameras/fixed_camera_lift2_simbox.yml
+    license: research-use
+fixture_task:
+  manipulated_asset_key: remote
+  manipulated_asset_id: official_ebench_remote_control
+  manipulated_instance_id: remote_001
+  target_fixture:
+    instance_id: remote_holder_fixture
+    source_uid: _00
+    role: target_container
+    semantic_label: remote_control_holder
+  success_metric_id: remote_in_holder
+  success_predicate: object_in_container
+  object_pose:
+    xyz: [-0.25, -0.4, 0.0142]
+    wxyz: [0.11, 0.11, 0.70710677, 0.70710677]
+    scale_xyz: [1.0, 1.0, 1.0]
+  robot_spawn:
+    xyz: [-0.955, -0.507, -0.502]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
+  source_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/remote_to_holder.yml

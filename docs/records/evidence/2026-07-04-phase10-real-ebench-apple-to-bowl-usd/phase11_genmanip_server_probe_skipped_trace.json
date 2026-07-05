@@ -1,0 +1,112 @@
+{
+  "backend_components": {
+    "control": {
+      "name": "genmanip_lift2_r5a_actions",
+      "status": "attempted_or_unknown_failed"
+    },
+    "physics": {
+      "name": "isaac_physx_server_managed",
+      "status": "attempted_or_unknown_failed"
+    },
+    "platform": {
+      "name": "genmanip_server",
+      "status": "attempted_or_unknown_failed"
+    },
+    "process_runtime": {
+      "name": "genmanip_eval_server",
+      "status": "attempted_or_unknown_failed"
+    },
+    "renderer": {
+      "name": "isaac_rtx_server_managed",
+      "status": "attempted_or_unknown_failed"
+    },
+    "sensors": [
+      {
+        "name": "genmanip_worker_observations",
+        "status": "attempted_or_unknown_failed"
+      }
+    ]
+  },
+  "backend_profile_id": "ebench_genmanip_legacy",
+  "claim_boundary": "EBench GenManip runtime smoke attempted but did not complete; structured skip only. No completed GenManip episode evidence, benchmark reproduction, simulator fidelity, model-quality, or real-world safety claim.",
+  "episode_id": "ebench-live-apple_to_fruit_bowl-0-skipped",
+  "episode_metrics": {
+    "runtime_attempted": true,
+    "runtime_status": "skipped",
+    "server_connection_attempted": true,
+    "skip_reasons": [
+      "GenManip protocol failed after probe readiness: ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=8087): Max retries exceeded with url: /docs (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8087): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+    ]
+  },
+  "metadata": {
+    "action_schema": "genmanip_lift2_r5a_zero_action.v0",
+    "asset_provenance": "unknown",
+    "environment": {
+      "python": "3.10.20",
+      "runtime_mode": "live_runtime_smoke"
+    },
+    "external_benchmark": "ebench",
+    "external_commits": {
+      "ebench_commit": "a2a7bcbb9876143e65fd6fdb23825f582323cf01",
+      "genmanip_client_commit": "d58d76200e07c14bacb6796e516d30506d68b82f",
+      "genmanip_commit": "6ff55ed7c7bd441825d56f1016a30e03b524ebea"
+    },
+    "external_episode_id": "ebench-live-apple_to_fruit_bowl-0-skipped",
+    "external_repo_path": "/cpfs/shared/simulation/zhuzihou/dev/EBench",
+    "external_task_id": "apple_to_fruit_bowl",
+    "max_policy_calls": 1,
+    "observation_schema": "genmanip_worker_observation.v0",
+    "probe": {
+      "available": false,
+      "checks": {
+        "ebench_root": true,
+        "genmanip_client_root": true,
+        "genmanip_root": true,
+        "module:numpy": true,
+        "module:requests": true,
+        "module:yaml": true,
+        "task_config": true
+      },
+      "ebench_root": "/cpfs/shared/simulation/zhuzihou/dev/EBench",
+      "external_commits": {
+        "ebench_commit": "a2a7bcbb9876143e65fd6fdb23825f582323cf01",
+        "genmanip_client_commit": "d58d76200e07c14bacb6796e516d30506d68b82f",
+        "genmanip_commit": "6ff55ed7c7bd441825d56f1016a30e03b524ebea"
+      },
+      "genmanip_client_root": "/cpfs/shared/simulation/zhuzihou/dev/genmanip-client",
+      "genmanip_root": "/cpfs/shared/simulation/zhuzihou/dev/GenManip",
+      "python_executable": "/cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-py310/bin/python",
+      "reasons": [
+        "GenManip protocol failed after probe readiness: ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=8087): Max retries exceeded with url: /docs (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8087): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+      ],
+      "status": "skipped_after_protocol_failure",
+      "task_config": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/apple_to_fruit_bowl.yml"
+    },
+    "reproduction_mode": "live_runtime_smoke",
+    "runtime_attempted": true,
+    "runtime_mode": "live_runtime_smoke",
+    "runtime_status": "skipped",
+    "score_schema": "not_available_runtime_skipped",
+    "server_connection_attempted": true,
+    "server_url": "http://127.0.0.1:8087",
+    "source_adapter": "adapters.ebench",
+    "worker_id": "0"
+  },
+  "model_profile_id": "stub_zero_policy",
+  "physics_profile_id": null,
+  "privileged_state_policy": "model_input_excludes_privileged_state",
+  "renderer_profile_id": null,
+  "scenario_pack": "home_manipulation",
+  "seed": 11,
+  "steps": [],
+  "task_id": "ebench/apple_to_fruit_bowl",
+  "versions": {
+    "adapter": "ebench_smoke_run.v0",
+    "external_commits": {
+      "ebench_commit": "a2a7bcbb9876143e65fd6fdb23825f582323cf01",
+      "genmanip_client_commit": "d58d76200e07c14bacb6796e516d30506d68b82f",
+      "genmanip_commit": "6ff55ed7c7bd441825d56f1016a30e03b524ebea"
+    },
+    "repo_commit": "4096906e396651e674300448409e02f89a39b484"
+  }
+}

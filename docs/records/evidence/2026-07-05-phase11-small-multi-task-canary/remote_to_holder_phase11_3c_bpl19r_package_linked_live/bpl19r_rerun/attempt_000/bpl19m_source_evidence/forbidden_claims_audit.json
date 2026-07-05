@@ -1,0 +1,13 @@
+{
+  "audit": "forbidden_claims",
+  "evidence_root": "bpl19m_source_evidence",
+  "findings": [],
+  "result": "passed",
+  "schema": "embodied_eval_os_forbidden_claims_audit.v0",
+  "status": "passed",
+  "summary": {
+    "authorized_positive_claim_finding_count": 3,
+    "checked_file_count": 14,
+    "finding_count": 0
+  }
+}

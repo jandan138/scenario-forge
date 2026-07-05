@@ -1,0 +1,9 @@
+schema_version: phase12-ebench-eos-handoff-gate/v0.1
+phase: '12.4'
+status: passed
+suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
+handoff_examples: handoff/ebench_eos_handoff_examples.yaml
+blockers: []
+next_stage: multi_simulator_export_descriptors
+claim_boundary: Phase 12.4 handoff gate only. It documents how EBench/EOS consume
+  the snapshot; Scenario Forge still does not run episodes or evaluate models.

@@ -1,0 +1,33 @@
+schema_version: phase11-task-execution-gate/v0.1
+phase: '11.1'
+status: failed
+package_id: ebench_apple_to_bowl_canary
+task_id: mobile_manip/apple_to_fruit_bowl
+execution:
+  source: docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_task_execution_blocked_evidence.yaml
+  schema_version: phase11-eos-task-execution/v0.1
+  runtime_owner: embodied-eval-os
+  contract_consumed: false
+  execution_config_status: blocked
+  episode_status: blocked
+  trace_uri: eos://blocked/scenario-forge/phase11/apple-to-bowl/no-execution
+  runtime_log: phase11_task_execution_blocked_runtime.log
+  lifecycle:
+    reset: blocked
+    step: blocked
+    close: blocked
+  keyframes:
+    initial: phase11_task_execution_initial_keyframe_missing.png
+blockers:
+  - execution contract_consumed must be true
+  - execution execution_config_status must be generated; got blocked
+  - execution episode_status must be started or completed; got blocked
+  - execution lifecycle.reset must be passed; got blocked
+  - execution lifecycle.step must be passed; got blocked
+  - execution lifecycle.close must be passed; got blocked
+  - 'execution initial keyframe does not exist: phase11_task_execution_initial_keyframe_missing.png'
+  - eos_task_execution_integration_not_run_for_scenario_forge_package
+  - no_eos_package_episode_runner_available_in_current_eos_repo_state
+  - scenario_forge_gate_contract_ready_but_real_eos_evidence_missing
+next_stage: blocked
+claim_boundary: EOS task execution integration gate only; not task success, not model quality, not release approval, and not leaderboard evidence.

@@ -1,0 +1,15 @@
+schema_version: metrics/v0.2
+metrics:
+- id: remote_in_holder
+  type: predicate_satisfaction
+  role: primary_success
+  predicate: object_in_container
+  object: remote_001
+  container: remote_holder_fixture
+  adapter_hints:
+    ebench:
+      success_metric: remote_in_holder
+      predicate: object_in_container
+      object: remote_001
+      container: remote_holder_fixture
+      target_fixture_source_uid: _00

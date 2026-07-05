@@ -4,6 +4,7 @@ import pytest
 import yaml
 
 from scenario_forge.adapters.ebench.official_asset_intake import (
+    audit_mdl_texture_closure,
     load_official_asset_sources,
     materialize_official_asset_bundle,
 )
@@ -98,3 +99,107 @@ def test_materializes_usd_bundle_with_subusds(tmp_path: Path) -> None:
     assert (target_root / "assets/official_ebench_apple/apple_annotation.json").exists()
     assert result.asset_manifest_entry()["source_kind"] == "official_ebench_asset"
     assert result.asset_manifest_entry()["source_uri"] == str(source_usd)
+
+
+def test_materializes_sibling_sidecar_dependencies_under_asset_root(tmp_path: Path) -> None:
+    collection_root = tmp_path / "remote_control"
+    source_bundle = collection_root / "ready" / "remote0"
+    source_bundle.mkdir(parents=True)
+    dependency_texture = (
+        collection_root
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae"
+        / "SubUSDs"
+        / "textures"
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png"
+    )
+    dependency_texture.parent.mkdir(parents=True)
+    dependency_texture.write_bytes(b"remote-texture")
+    source_usd = source_bundle / "remote0.usda"
+    source_usd.write_text(
+        "\n".join(
+            [
+                "#usda 1.0",
+                "(",
+                '    defaultPrim = "World"',
+                ")",
+                'def Xform "World"',
+                "{",
+                '    asset inputs:file = @../../63f5007c-eae0-4718-b760-df6c25e0e4ae/SubUSDs/textures/63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png@',
+                "}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    target_root = tmp_path / "package"
+
+    result = materialize_official_asset_bundle(
+        source_path=source_usd,
+        package_root=target_root,
+        asset_id="official_ebench_remote_control",
+        role="manipulated_object",
+        license="research-use",
+    )
+
+    assert result.canonical_usd == "assets/official_ebench_remote_control/ready/remote0/remote0.usda"
+    assert (target_root / result.canonical_usd).exists()
+    assert (
+        target_root
+        / "assets"
+        / "official_ebench_remote_control"
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae"
+        / "SubUSDs"
+        / "textures"
+        / "63f5007c-eae0-4718-b760-df6c25e0e4ae_texture0.png"
+    ).exists()
+
+
+def test_audits_mdl_texture_closure_reports_missing_relative_textures(tmp_path: Path) -> None:
+    bundle_root = tmp_path / "task3"
+    material_dir = bundle_root / "SubUSDs" / "materials"
+    texture_dir = bundle_root / "SubUSDs" / "textures"
+    material_dir.mkdir(parents=True)
+    texture_dir.mkdir(parents=True)
+    (texture_dir / "present.jpg").write_bytes(b"jpg")
+    material = material_dir / "MI_missing_texture.mdl"
+    material.write_text(
+        "\n".join(
+            [
+                'export material Example(',
+                '    color present = texture_2d("../textures/present.jpg", ::tex::gamma_srgb, ""),',
+                '    color missing = texture_2d("../textures/missing.jpg", ::tex::gamma_srgb, "")',
+                ") = material();",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    audit = audit_mdl_texture_closure(bundle_root)
+
+    assert audit["status"] == "failed"
+    assert audit["missing_texture_count"] == 1
+    assert audit["missing_textures"] == [
+        {
+            "material": "SubUSDs/materials/MI_missing_texture.mdl",
+            "texture": "../textures/missing.jpg",
+            "resolved_path": "SubUSDs/textures/missing.jpg",
+        }
+    ]
+
+
+def test_audits_mdl_texture_closure_passes_when_textures_exist(tmp_path: Path) -> None:
+    bundle_root = tmp_path / "task3"
+    material_dir = bundle_root / "SubUSDs" / "materials"
+    texture_dir = bundle_root / "SubUSDs" / "textures"
+    material_dir.mkdir(parents=True)
+    texture_dir.mkdir(parents=True)
+    (texture_dir / "present.jpg").write_bytes(b"jpg")
+    (material_dir / "MI_present_texture.mdl").write_text(
+        'export material Example(color diffuse = texture_2d("../textures/present.jpg", ::tex::gamma_srgb, "")) = material();',
+        encoding="utf-8",
+    )
+
+    audit = audit_mdl_texture_closure(bundle_root)
+
+    assert audit["status"] == "passed"
+    assert audit["missing_texture_count"] == 0
+    assert audit["missing_textures"] == []

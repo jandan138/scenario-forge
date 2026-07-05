@@ -1,0 +1,21 @@
+schema_version: phase11-eos-task-execution/v0.1
+runtime_owner: embodied-eval-os
+package_id: ebench_remote_to_holder_canary
+task_id: mobile_manip/remote_to_holder
+contract_consumed: true
+execution_config_status: generated
+episode_status: blocked
+trace_uri: remote_to_holder_phase11_task_execution_config_trace.json
+runtime_log: remote_to_holder_phase11_task_execution_config_runtime.log
+lifecycle:
+  reset: blocked
+  step: blocked
+  close: blocked
+keyframes:
+  initial: phase11_task_execution_initial_missing.png
+blockers:
+- eos_episode_start_not_run_for_scenario_forge_package
+- no_scenario_forge_package_episode_runner_available_in_this_eos_lane
+claim_boundary: Scenario Forge package task execution config evidence only. EOS consumed
+  the package and generated a runtime config, but no simulator episode was started
+  in this lane.

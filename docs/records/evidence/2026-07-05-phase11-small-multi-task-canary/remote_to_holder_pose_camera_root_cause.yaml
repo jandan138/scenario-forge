@@ -1,0 +1,96 @@
+schema_version: phase11-root-cause-note/v0.1
+phase: 11.6.a.4
+task_id: mobile_manip/remote_to_holder
+package_id: ebench_remote_to_holder_canary
+status: corrected
+root_cause_summary: >-
+  The remote-to-holder WARN was not only a camera-framing issue. Scenario Forge's
+  first example manifest had already corrected the remote orientation to match
+  GenManip's wxyz convention, but kept a static z center of 0.11 m. With the
+  corrected orientation, that placed the remote bottom about 9.6 cm above the
+  task5 table top, making the object appear to float in the retained render.
+official_task_reference:
+  path: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/remote_to_holder.yml
+  custom_tableset_object_0:
+    orientation_wxyz: [0.11, 0.11, 0.70710677, 0.70710677]
+    reset_orientation: true
+    additional_height: 0.01
+scenario_forge_pose_before_contact_fix:
+  source_manifest: examples/ebench_remote_to_holder_asset_sources.yaml
+  xyz: [-0.25, -0.4, 0.11]
+  wxyz: [0.11, 0.11, 0.70710677, 0.70710677]
+  generated_remote_bbox_world:
+    min: [-0.310241, -0.50474, 0.096045]
+    max: [-0.189759, -0.29526, 0.123955]
+    size: [0.120482, 0.20948, 0.027911]
+  task5_table_top_bbox_world:
+    min: [-0.521674, -0.876434, -0.014838]
+    max: [0.521674, 0.876434, 0.000162]
+    size: [1.043348, 1.752867, 0.015]
+  remote_bottom_minus_table_top_m: 0.095883
+scenario_forge_pose_after_contact_fix:
+  source_manifest: examples/ebench_remote_to_holder_asset_sources.yaml
+  xyz: [-0.25, -0.4, 0.0142]
+  wxyz: [0.11, 0.11, 0.70710677, 0.70710677]
+  generated_remote_bbox_world:
+    min: [-0.310241, -0.50474, 0.000245]
+    max: [-0.189759, -0.29526, 0.028155]
+    size: [0.120482, 0.20948, 0.027911]
+  task5_table_top_bbox_world:
+    min: [-0.521674, -0.876434, -0.014838]
+    max: [0.521674, 0.876434, 0.000162]
+    size: [1.043348, 1.752867, 0.015]
+  remote_bottom_minus_table_top_m: 0.000083
+fix:
+  owner: scenario-forge
+  changed_files:
+    - examples/ebench_remote_to_holder_asset_sources.yaml
+    - tests/test_ebench_single_object_fixture_canary.py
+  tests:
+    red:
+      command: >-
+        PYTHONPATH=src python -m pytest
+        tests/test_ebench_single_object_fixture_canary.py::test_remote_to_holder_example_places_remote_on_task5_tabletop
+        -q
+      result: failed on z=0.11 before manifest fix
+    green:
+      command: >-
+        PYTHONPATH=src python -m pytest
+        tests/test_ebench_single_object_fixture_canary.py::test_remote_to_holder_example_preserves_genmanip_wxyz_orientation
+        tests/test_ebench_single_object_fixture_canary.py::test_remote_to_holder_example_places_remote_on_task5_tabletop
+        -q
+      result: 2 passed
+verification:
+  package_generation:
+    command: >-
+      PYTHONPATH=src python -m scenario_forge.cli ebench canary
+      single-object-fixture --asset-sources
+      examples/ebench_remote_to_holder_asset_sources.yaml --out
+      /tmp/ebench-remote-to-holder-canary
+    status: passed
+  package_check:
+    command: >-
+      PYTHONPATH=src python -m scenario_forge.cli package check
+      /tmp/ebench-remote-to-holder-canary --require-asset-lock
+    status: passed
+    output: Package OK
+  asset_lock_check:
+    command: >-
+      PYTHONPATH=src python -m scenario_forge.cli assets check
+      /tmp/ebench-remote-to-holder-canary
+    status: passed
+    output: Asset lock OK
+  render:
+    image: remote_to_holder_tabletop_overview_contactfixed_cam3.png
+    metadata: remote_to_holder_tabletop_overview_contactfixed_cam3_render_metadata.json
+    runtime_log: remote_to_holder_tabletop_overview_contactfixed_cam3_runtime.log
+    image_sha256: 765249dda85d422e5f04e73fe9862cfcc4605e1323f83b86607f5473efe4b67c
+    render_metadata_sha256: 6293eb03829f62585e7340d7cf48eb1dfca025314c42ac26d20630dc024e347c
+    runtime_log_sha256: 997b13cb3bef809ed1fd63d862dfdb5b648e97fd7b49e5eb1d3f7115f87c3cad
+    material_runtime_preflight: pass
+    runtime_log_blocking_signal_scan: no matches
+claim_boundary: >-
+  This note closes only the remote-to-holder Phase 11.0 pose/contact/camera
+  root-cause blocker. It is not task success, EOS execution evidence, official
+  camera parity, full material parity, physics-fidelity evidence, model-quality
+  evidence, release approval, or leaderboard evidence.

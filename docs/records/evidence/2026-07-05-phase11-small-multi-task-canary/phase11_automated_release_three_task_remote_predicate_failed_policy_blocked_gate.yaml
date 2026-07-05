@@ -1,0 +1,50 @@
+schema_version: phase11-automated-release-gate/v0.1
+phase: '11.7'
+status: blocked
+release_status: blocked
+suite_id: scenario_forge_phase11_three_task_downstream_blocked_canary
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: blocked
+  episode_execution: blocked
+  predicate_evaluation: blocked
+  license_policy: blocked
+known_blockers:
+- soap_to_dish_phase11_0_visual_review_failed
+- soap_to_dish_overview_camera_retake_required
+- soap_to_dish_material_runtime_preflight_failed_missing_scene_textures
+- soap_to_dish_eos_execution_not_run
+- soap_to_dish_success_predicate_not_evaluated
+- soap_to_dish_post_execution_visual_review_not_run
+- soap_to_dish_single_task_rc_blocked
+- remote_to_holder_success_predicate_failed_zero_policy
+- remote_to_holder_successful_policy_or_oracle_rerun_needed
+- remote_to_holder_post_execution_visual_review_not_run_because_predicate_failed
+- remote_to_holder_single_task_rc_blocked
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+blockers:
+- small multi-task canary gate status must be passed; got blocked
+- release-critical gate visual_review must be pass; got blocked
+- release-critical gate episode_execution must be pass; got blocked
+- release-critical gate predicate_evaluation must be pass; got blocked
+- release-critical gate license_policy must be pass; got blocked
+- known_blockers must be empty; got 13
+- soap_to_dish_phase11_0_visual_review_failed
+- soap_to_dish_overview_camera_retake_required
+- soap_to_dish_material_runtime_preflight_failed_missing_scene_textures
+- soap_to_dish_eos_execution_not_run
+- soap_to_dish_success_predicate_not_evaluated
+- soap_to_dish_post_execution_visual_review_not_run
+- soap_to_dish_single_task_rc_blocked
+- remote_to_holder_success_predicate_failed_zero_policy
+- remote_to_holder_successful_policy_or_oracle_rerun_needed
+- remote_to_holder_post_execution_visual_review_not_run_because_predicate_failed
+- remote_to_holder_single_task_rc_blocked
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+next_stage: blocked
+claim_boundary: Automated release gate only; release candidate passed is not official
+  leaderboard comparability or public dataset publication without external approval.

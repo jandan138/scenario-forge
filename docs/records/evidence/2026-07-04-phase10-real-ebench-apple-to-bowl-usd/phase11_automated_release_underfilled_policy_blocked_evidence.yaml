@@ -1,0 +1,18 @@
+schema_version: phase11-automated-release-evidence/v0.1
+suite_id: scenario_forge_phase11_underfilled_canary
+small_multi_task_canary_gate: phase11_small_multi_task_canary_underfilled_blocked_gate.yaml
+release_critical_gates:
+  package_check: pass
+  asset_lock_check: pass
+  adapter_contract: pass
+  visual_review: pass
+  episode_execution: pass
+  predicate_evaluation: pass
+  license_policy: blocked
+known_blockers:
+- phase11_6_requires_3_to_5_real_ebench_tasks; current structured canary has 1
+- ebench_assets_research_use_only
+- redistribution_approval_missing
+blockers: []
+claim_boundary: Automated release blocked evidence; not public dataset release or
+  official leaderboard evidence.

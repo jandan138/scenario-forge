@@ -1,0 +1,114 @@
+schema_version: phase11-visual-retake-diagnostic/v0.1
+diagnostic_id: soap_to_dish_phase11_4_target_identity_and_retake
+created_at_utc: '2026-07-05T00:00:00Z'
+package_id: ebench_soap_to_dish_canary
+task_id: mobile_manip/soap_to_dish
+phase: 11.4
+status: retake_required
+owner: scenario-forge-evidence-triage
+claim_boundary: Diagnostic evidence only. This does not replace
+  render-visual-reviewer clean-room PASS evidence, does not close Phase 11.4,
+  and does not override the passed EOS/EBench simulator-state predicate.
+root_cause:
+  summary: Existing BPL-19R full-temporal videos contain a successful simulator
+    predicate lane, but the retained and extracted visual frames do not show the
+    target soap dish, soap, and post-release contact relationship clearly enough
+    for a Phase 11.4 visual PASS.
+  active_blocker: soap_to_dish_post_execution_visual_review_failed_retake_required
+target_identity:
+  contract_target_container:
+    instance_id: soap_dish_fixture
+    source_uid: _01
+    semantic_label: soap_dish
+    source_asset_id: official_ebench_scene
+  native_task_binding:
+    object_config_key: '1'
+    uid_list:
+    - _01
+    goal_binding: obj1_uid=0_to_obj2_uid=1
+  usd_prim:
+    path: /root/obj__01
+    type: Xform
+    world_bbox_center_xyz:
+    - -0.355586
+    - 0.157072
+    - 0.975341
+    world_bbox_size_xyz:
+    - 0.149592
+    - 0.101030
+    - 0.034224
+  visually_identified_as: black soap dish / holder near the wall side of the
+    bathtub counter.
+excluded_visual_decoy:
+  source_uid: _06
+  usd_prim:
+    path: /root/obj__06
+    type: Xform
+    world_bbox_center_xyz:
+    - -0.107715
+    - -0.039476
+    - 0.961348
+    world_bbox_size_xyz:
+    - 0.213894
+    - 0.219701
+    - 0.071383
+  reason: The gray tray-like object is not the target container named by the
+    task contract or native task goal binding, so a frame that only shows soap
+    near this gray object cannot close Phase 11.4.
+candidate_artifacts:
+  source_videos:
+  - path: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/full_temporal/top_camera.mp4
+    fps: 30
+    duration_seconds: 12.066667
+    frame_count: 362
+  - path: soap_to_dish_phase11_3c_bpl19r_package_linked_live/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/full_temporal/right_camera.mp4
+    fps: 30
+    duration_seconds: 12.066667
+    frame_count: 362
+  contact_sheets:
+  - path: soap_to_dish_phase11_4_bpl19r_candidate_frames/top_camera_15f_contact_sheet.jpg
+    sha256: 6115c7f21a04aeecf1824ecb7f1a77f7472c1e26715c4d61c2de28aa73443b47
+  - path: soap_to_dish_phase11_4_bpl19r_candidate_frames/right_camera_15f_contact_sheet.jpg
+    sha256: b8e6d6e1faccf39c6bc8169bf8b5196cbbaaa14541f620058cbae0a23e16b02b
+  sampled_frames:
+  - path: soap_to_dish_phase11_4_bpl19r_candidate_frames/top_camera_t7_5.jpg
+    timestamp_seconds: 7.5
+    sha256: a3f1322005148a13e10ab407137b9607ce38f96a856eac8082dc1bb0065516a0
+    diagnostic_observation: The black _01 dish and soap are visible, but the
+      soap is still offset from the dish and held by the gripper.
+  - path: soap_to_dish_phase11_4_bpl19r_candidate_frames/top_camera_t8_0.jpg
+    timestamp_seconds: 8.0
+    sha256: f6691a9416843a24b18508c7a83f6be71bc47e7f60d3c0090316c594f5a69ad6
+    diagnostic_observation: The soap overlaps the black _01 dish area, but the
+      soap and gripper are clipped by the right image edge and contact is not
+      cleanly readable.
+  - path: soap_to_dish_phase11_4_bpl19r_candidate_frames/right_camera_t7_5.jpg
+    timestamp_seconds: 7.5
+    sha256: 45a11b540950aa564a5eb85095b926f583ae7f57e7455a3c9cda74d992d987c5
+    diagnostic_observation: The frame is a close-up of the soap; the target _01
+      dish is cropped out.
+  - path: soap_to_dish_phase11_4_bpl19r_candidate_frames/right_camera_t8_0.jpg
+    timestamp_seconds: 8.0
+    sha256: 0f3d3ed444d029e90f74b5f10ffd604ddbbec96194c3541fddbff1c6215336e0
+    diagnostic_observation: The frame shows the soap and part of the gray _06
+      tray-like object, but not the black _01 target dish.
+retake_requirements:
+  camera:
+    required_view: fixed wide 3/4 or top-oblique engine-native camera
+    framing:
+    - full black _01 soap dish visible in initial and final keyframes
+    - full purple soap visible in initial and final keyframes
+    - gripper lifted or out of the contact area in the final keyframe
+    - gray _06 tray may remain visible but must not be the only visible container
+    - avoid right-edge clipping and bathtub/sink occlusion of the target contact
+      area
+  visual_review_packet:
+    expectation: Purple bar soap should start away from the black soap dish and
+      end visibly inside or directly on the black soap dish / holder.
+    target_description: black soap dish / holder near the wall side of the
+      bathtub counter
+    non_target_description: gray tray-like object is not sufficient by itself
+  pass_condition: A fresh render-visual-reviewer clean-room PASS evidence and
+    strict phase11-post-execution-visual-review gate are required before
+    rerunning soap Phase 11.5.
+next_stage: eos_owned_phase11_4_keyframe_retake_or_rerender

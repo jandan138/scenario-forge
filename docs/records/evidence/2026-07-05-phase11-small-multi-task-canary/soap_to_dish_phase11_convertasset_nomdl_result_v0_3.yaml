@@ -1,0 +1,78 @@
+record_type: phase11_convertasset_nomdl_result
+record_version: v0.3
+phase: 11.0 / 11.6.a.2
+created_on: '2026-07-05'
+status: convertasset_nomdl_artifact_generated_relink_and_render_required
+package:
+  package_id: ebench_soap_to_dish_canary
+  task_id: mobile_manip/soap_to_dish
+  package_root: /tmp/ebench-soap-to-dish-canary
+  current_scene_entrypoint: /tmp/ebench-soap-to-dish-canary/scene/main.usda
+  current_scene_reference: ../assets/official_ebench_scene/scene.usd
+  current_scene_reference_status: still_references_original_scene_usd
+convertasset_run:
+  owner: ConvertAsset public CLI
+  repository: /cpfs/shared/simulation/zhuzihou/dev/ConvertAsset
+  command:
+    - /cpfs/shared/simulation/zhuzihou/dev/ConvertAsset/scripts/isaac_python.sh
+    - /cpfs/shared/simulation/zhuzihou/dev/ConvertAsset/main.py
+    - no-mdl
+    - /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene.usd
+  exit_status: 0
+  retained_runtime_log: soap_to_dish_convertasset_nomdl_runtime.log
+  retained_runtime_log_sha256: c9c916974d2d63f441360939c9315683b5a3287c5f99aed4af3c3b2a6e556059
+source_artifact:
+  path: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene.usd
+  sha256: 62f62e8c71dabd7e79589414e2e9f8058c12d0509ad23f329ba26cf5c817adde
+nomdl_artifact:
+  path: /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+  exists: true
+  size_bytes: 180498920
+  sha256: e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
+  copied_into_repo: false
+  reason_not_copied: large_binary_runtime_artifact_retained_by_path_and_hash
+convertasset_audit:
+  retained_summary: soap_to_dish_convertasset_scene_noMDL_summary.txt
+  retained_summary_sha256: d3e013d9d30bfea1c424a4d6dfe3c120bff2c79414521cd80126e6a00ca3865d
+  retained_audit_json: soap_to_dish_convertasset_scene_noMDL_audit.json
+  retained_audit_json_sha256: 3e3d9c662571c2438fe448e6f3266927965942bb065053ae94070ca7dff3a728
+  resultStrict: true
+  reason: strict-pass
+  materials_converted_preview_over_total: 169/176
+  materials_without_surface_after: 7
+  auto_created_surface: 7
+  root_owned_mdl_shaders: 0
+  external_mdl_shaders: 0
+  forced_blocked_outputs: 176
+mesh_faces_check:
+  command:
+    - /cpfs/shared/simulation/zhuzihou/dev/ConvertAsset/scripts/isaac_python.sh
+    - /cpfs/shared/simulation/zhuzihou/dev/ConvertAsset/main.py
+    - mesh-faces
+    - /tmp/ebench-soap-to-dish-canary/assets/official_ebench_scene/scene_noMDL.usd
+  exit_status: 0
+  total_render_mesh_faces: 568692
+  retained_log: soap_to_dish_convertasset_nomdl_mesh_faces.log
+  retained_log_sha256: 3c32294a57a4d183e0737caa32e43a2c2ae365ff5cb73a821451e449bb6abc83
+residual_missing_texture_string_scan:
+  method: exact byte-string count in scene_noMDL.usd
+  counts:
+    c00e97e58585d8ddb0f8b16a724d05a13eae31.jpg: 0
+    bf77ddc86c270d02747e7d0517103514ab51d0f.jpg: 0
+    c9c274d4ea1de7d059cec0a795b3b27e3941935.jpg: 1
+  interpretation: ConvertAsset no-MDL strict-pass removes active MDL shader outputs, but one original texture filename string remains in the binary USD, so IsaacSim render preflight is still required before declaring material runtime closure.
+phase11_0_status:
+  previous_gate: soap_to_dish_phase11_visual_review_gate_failed.yaml
+  current_status: blocked
+  blockers:
+    - package_scene_main_usda_still_references_original_scene_usd
+    - scene_noMDL_artifact_not_yet_rendered_in_isaacsim
+    - render_visual_reviewer_not_rerun_for_soap_to_dish_nomdl_scene
+    - soap_to_dish_overview_camera_retake_required_after_material_closure
+next_actions:
+  - Relink a regenerated or temporary soap package scene from scene.usd to scene_noMDL.usd.
+  - Rerun EOS/IsaacSim41 engine-native tabletop overview render using soap/dish-specific camera expectations.
+  - Require material_runtime_preflight.status=pass and no blocking runtime log signals.
+  - Run render-visual-reviewer clean-room review on the new render.
+  - Rerun Scenario Forge Phase 11.0 strict visual gate only after the render and visual review exist.
+claim_boundary: This evidence proves only that ConvertAsset produced a no-MDL artifact and that the artifact can be opened for mesh-face counting. It does not close soap-to-dish Phase 11.0, does not prove IsaacSim material runtime closure, does not prove visual review PASS, and does not claim task success or release approval.
