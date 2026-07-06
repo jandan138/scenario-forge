@@ -440,6 +440,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="phase11-current-gate-index/v0.1 YAML retained from Phase 11.8",
     )
     suite_phase12_parser.add_argument(
+        "--asset-handoff",
+        action="append",
+        default=[],
+        help=(
+            "External asset handoff mapping YAML to overlay into the Phase 12 registry; "
+            "may be repeated"
+        ),
+    )
+    suite_phase12_parser.add_argument(
         "--strict",
         action="store_true",
         help="Return non-zero unless all Phase 12.0-12.6 gates pass",
@@ -858,6 +867,7 @@ def main(argv: list[str] | None = None) -> int:
             result = generate_phase12_registry_artifacts(
                 Path(args.suite),
                 Path(args.gate_index),
+                asset_handoff_paths=[Path(path) for path in args.asset_handoff],
             )
         except Phase12RegistryError as exc:
             print(exc)

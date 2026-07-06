@@ -1,0 +1,9 @@
+schema_version: image-goal-mvp-scope-gate/v0.1
+phase: '13.0'
+status: passed
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+domain: tabletop_manipulation
+target_export: ebench
+asset_source: phase12_registry_snapshot
+allow_new_asset_reconstruction: false
+blockers: []

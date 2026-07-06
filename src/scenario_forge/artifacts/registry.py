@@ -28,6 +28,9 @@ PHASE12_EXPORT_GATE_SCHEMA_VERSION = "phase12-multi-simulator-export-gate/v0.1"
 HOSTED_ALPHA_SCHEMA_VERSION = "hosted-internal-registry-alpha/v0.1"
 PHASE12_POLICY_GATE_SCHEMA_VERSION = "phase12-public-release-policy-closure-gate/v0.1"
 PHASE12_CURRENT_GATE_INDEX_SCHEMA_VERSION = "phase12-current-gate-index/v0.1"
+CONVERTASSET_S2D12_HANDOFF_SCHEMA_VERSION = (
+    "convertasset.s2d12_phase12_clean_registry_mapping.v0.1"
+)
 
 PHASE12_CONTRACTS = (
     "package-registry-entry/v0.1",
@@ -73,9 +76,30 @@ class _PackageSource:
     release_gate: Path | None
 
 
+@dataclass(frozen=True)
+class _AssetHandoffOverlay:
+    path: Path
+    source_digest: str
+    source_policy: str
+    asset_uid: str
+    asset_id: str
+    selected_asset_ref: str
+    source_package_id: str
+    role: str
+    required_prim: str
+    canonical_usd: str
+    source_uri: str
+    content_sha256: str
+    content_size_bytes: int | None
+    material_closure: dict[str, Any]
+    runtime_status: str
+    blockers: tuple[str, ...]
+
+
 def generate_phase12_registry_artifacts(
     suite_dir: str | Path,
     gate_index_path: str | Path,
+    asset_handoff_paths: list[str | Path] | tuple[str | Path, ...] | None = None,
 ) -> Phase12RegistryResult:
     suite_root = Path(suite_dir)
     gate_index_file = Path(gate_index_path)
@@ -90,6 +114,15 @@ def generate_phase12_registry_artifacts(
     ]
     package_entries = [_package_registry_entry(suite_root, source) for source in sources]
     asset_entries = _asset_registry_entries(suite_root, sources)
+    asset_handoffs = _load_asset_handoff_overlays(asset_handoff_paths or ())
+    if asset_handoffs:
+        asset_entries = sorted(
+            [
+                *asset_entries,
+                *_asset_handoff_registry_entries(suite_root, asset_handoffs),
+            ],
+            key=lambda item: (item["asset_id"], item["asset_uid"]),
+        )
 
     evidence_dir = suite_root / "evidence"
     registry_dir = suite_root / "registry"
@@ -156,7 +189,10 @@ def generate_phase12_registry_artifacts(
         registry_dir / "registry_query_contract.yaml",
         query_contract,
     )
-    contract_blockers = _contract_blockers(package_entries, asset_entries)
+    contract_blockers = [
+        *_contract_blockers(package_entries, asset_entries),
+        *_asset_handoff_blockers(asset_handoffs),
+    ]
     contract_gate = {
         "schema_version": PHASE12_CONTRACT_GATE_SCHEMA_VERSION,
         "phase": "12.1",
@@ -252,7 +288,7 @@ def generate_phase12_registry_artifacts(
         viewer_gate,
     )
 
-    handoff = _handoff_examples(suite_id, package_entries, snapshot_digest)
+    handoff = _handoff_examples(suite_id, package_entries, snapshot_digest, asset_handoffs)
     handoff_path = write_yaml_artifact(handoff_dir / "ebench_eos_handoff_examples.yaml", handoff)
     handoff_blockers = _handoff_blockers(handoff, package_entries)
     handoff_gate = {
@@ -643,6 +679,269 @@ def _asset_registry_entry(
     }
 
 
+def _load_asset_handoff_overlays(
+    asset_handoff_paths: list[str | Path] | tuple[str | Path, ...],
+) -> list[_AssetHandoffOverlay]:
+    return [_asset_handoff_overlay(Path(path)) for path in asset_handoff_paths]
+
+
+def _asset_handoff_overlay(path: Path) -> _AssetHandoffOverlay:
+    data = _load_yaml(path)
+    asset = data.get("asset")
+    package = data.get("package")
+    material_mapping = data.get("phase12_material_closure_mapping")
+    runtime_evidence = data.get("runtime_evidence")
+    asset = asset if isinstance(asset, dict) else {}
+    package = package if isinstance(package, dict) else {}
+    material_mapping = material_mapping if isinstance(material_mapping, dict) else {}
+    runtime_evidence = runtime_evidence if isinstance(runtime_evidence, dict) else {}
+
+    source_digest = _file_digest(path)
+    asset_uid = str(asset.get("replacement_asset_uid", ""))
+    asset_id = str(asset.get("phase12_registry_asset_id") or asset.get("asset_id") or "")
+    selected_asset_ref = str(asset.get("selected_asset_ref", ""))
+    source_package_id = str(asset.get("source_package_id", ""))
+    role = str(asset.get("role") or "unspecified")
+    required_prim = str(asset.get("required_prim") or "")
+    source_uri = str(package.get("canonical_usd") or "")
+    canonical_usd = _public_canonical_usd(source_uri)
+    content_sha256 = _sha256_prefixed(str(package.get("canonical_usd_sha256") or ""))
+    content_size_bytes = _int_or_none(package.get("canonical_usd_size_bytes"))
+    material_closure = _redact_handoff_local_paths(
+        material_mapping.get("material_closure") if isinstance(material_mapping, dict) else {},
+        source_digest=source_digest,
+    )
+    material_closure = material_closure if isinstance(material_closure, dict) else {}
+    runtime_status = str(runtime_evidence.get("status", ""))
+    blockers = tuple(
+        _asset_handoff_overlay_blockers(
+            data=data,
+            asset_uid=asset_uid,
+            asset_id=asset_id,
+            source_package_id=source_package_id,
+            source_uri=source_uri,
+            content_sha256=content_sha256,
+            material_closure=material_closure,
+            runtime_status=runtime_status,
+        )
+    )
+    return _AssetHandoffOverlay(
+        path=path,
+        source_digest=source_digest,
+        source_policy=_source_path_policy(path),
+        asset_uid=asset_uid,
+        asset_id=asset_id,
+        selected_asset_ref=selected_asset_ref,
+        source_package_id=source_package_id,
+        role=role,
+        required_prim=required_prim,
+        canonical_usd=canonical_usd,
+        source_uri=source_uri,
+        content_sha256=content_sha256,
+        content_size_bytes=content_size_bytes,
+        material_closure=material_closure,
+        runtime_status=runtime_status,
+        blockers=blockers,
+    )
+
+
+def _asset_handoff_overlay_blockers(
+    *,
+    data: dict[str, Any],
+    asset_uid: str,
+    asset_id: str,
+    source_package_id: str,
+    source_uri: str,
+    content_sha256: str,
+    material_closure: dict[str, Any],
+    runtime_status: str,
+) -> list[str]:
+    label = asset_uid or "<missing replacement_asset_uid>"
+    blockers: list[str] = []
+    if data.get("schema_version") != CONVERTASSET_S2D12_HANDOFF_SCHEMA_VERSION:
+        blockers.append(
+            f"asset handoff {label} schema_version must be "
+            f"{CONVERTASSET_S2D12_HANDOFF_SCHEMA_VERSION}"
+        )
+    if not asset_uid:
+        blockers.append("asset handoff replacement_asset_uid is required")
+    if "@" not in asset_uid:
+        blockers.append(f"asset handoff {label} replacement_asset_uid must include asset_id@version")
+    if asset_id and asset_uid and not asset_uid.startswith(f"{asset_id}@"):
+        blockers.append(
+            f"asset handoff {label} replacement_asset_uid must start with "
+            "phase12_registry_asset_id@"
+        )
+    if not asset_id:
+        blockers.append(f"asset handoff {label} phase12_registry_asset_id is required")
+    if not source_package_id:
+        blockers.append(f"asset handoff {label} source_package_id is required")
+    if not source_uri:
+        blockers.append(f"asset handoff {label} package.canonical_usd is required")
+    if not content_sha256.startswith("sha256:"):
+        blockers.append(f"asset handoff {label} canonical_usd_sha256 must be sha256-prefixed")
+    if material_closure.get("status") != "passed":
+        blockers.append(f"asset handoff {label} material_closure.status must be passed")
+    if material_closure.get("missing_texture_count") not in (0, None):
+        blockers.append(f"asset handoff {label} material_closure.missing_texture_count must be 0")
+    if _list_of_mappings(material_closure.get("missing_textures")):
+        blockers.append(f"asset handoff {label} material_closure.missing_textures must be empty")
+    if material_closure.get("missing_material_ref_count") not in (0, None):
+        blockers.append(
+            f"asset handoff {label} material_closure.missing_material_ref_count must be 0"
+        )
+    if _list_of_mappings(material_closure.get("missing_material_refs")):
+        blockers.append(f"asset handoff {label} material_closure.missing_material_refs must be empty")
+    if not _approved_runtime_dependencies(material_closure):
+        blockers.append(
+            f"asset handoff {label} approved_runtime_mdl_dependencies must include "
+            "approved runtime modules"
+        )
+    if runtime_status and runtime_status != "pass":
+        blockers.append(f"asset handoff {label} runtime_evidence.status must be pass")
+    return blockers
+
+
+def _asset_handoff_registry_entries(
+    suite_root: Path,
+    asset_handoffs: list[_AssetHandoffOverlay],
+) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    for handoff in asset_handoffs:
+        retained_refs = _write_asset_handoff_retained_artifacts(suite_root, handoff)
+        entries.append(
+            {
+                "schema_version": "asset-registry-entry/v0.1",
+                "asset_uid": handoff.asset_uid,
+                "asset_id": handoff.asset_id,
+                "source_package_id": handoff.source_package_id,
+                "role": handoff.role,
+                "asset_type": "usd_bundle",
+                "canonical_usd": handoff.canonical_usd,
+                "content_sha256": handoff.content_sha256,
+                "license": "ebench_author_redistribution_approved",
+                "source_kind": "external_asset_handoff",
+                "source_uri": f"retained-handoff://{handoff.asset_uid}",
+                "source_uri_policy": "external_local_path_redacted",
+                "resolver_version": "scenario-forge/phase12-asset-handoff-v0.1",
+                "semantic_tags": _asset_handoff_semantic_tags(handoff),
+                "affordances": _asset_affordances(
+                    {"role": handoff.role, "asset_type": "usd_bundle"},
+                    {},
+                ),
+                "role_suitability": _asset_role_suitability(
+                    {"role": handoff.role, "asset_type": "usd_bundle"},
+                    {},
+                ),
+                "material_closure": handoff.material_closure,
+                "physics_readiness": {
+                    "status": "ready",
+                    "role": handoff.role,
+                    "evidence_source": "convertasset_s2d12_phase12_clean_handoff",
+                    "claim_boundary": (
+                        "Phase 12 records external asset handoff readiness only; "
+                        "runtime behavior remains downstream EOS/EBench evidence."
+                    ),
+                },
+                "export_eligibility": {
+                    "ebench": True,
+                    "license": "ebench_author_redistribution_approved",
+                    "evidence_source": "ebench_author_asset_handoff",
+                    "redistribution_scope": "retained_phase12_registry_snapshot",
+                },
+                "provenance": {
+                    "source_package_id": handoff.source_package_id,
+                    "asset_manifest": retained_refs["asset_manifest"],
+                    "asset_lock": retained_refs["asset_lock"],
+                    "asset_handoff": {
+                        "schema_version": str(
+                            _load_optional_yaml(handoff.path).get("schema_version", "")
+                        ),
+                        "source_policy": handoff.source_policy,
+                        "source_digest": handoff.source_digest,
+                        "source_filename": handoff.path.name,
+                        "selected_asset_ref": handoff.selected_asset_ref,
+                        "replacement_asset_uid": handoff.asset_uid,
+                        "required_prim": handoff.required_prim,
+                    },
+                },
+                "claim_boundary": (
+                    "Asset registry entry from external handoff metadata only. "
+                    "Scenario Forge does not perform mesh, MDL, texture, or material conversion."
+                ),
+            }
+        )
+    return entries
+
+
+def _write_asset_handoff_retained_artifacts(
+    suite_root: Path,
+    handoff: _AssetHandoffOverlay,
+) -> dict[str, str]:
+    safe_name = _safe_handoff_name(handoff.asset_uid)
+    handoff_dir = suite_root / "handoff" / "asset_handoffs"
+    manifest_path = handoff_dir / f"{safe_name}_asset_manifest.yaml"
+    lock_path = handoff_dir / f"{safe_name}_asset_lock.yaml"
+    asset_manifest = {
+        "schema_version": "asset-manifest/v0.2",
+        "assets": [
+            {
+                "asset_id": handoff.asset_id,
+                "role": handoff.role,
+                "asset_type": "usd_bundle",
+                "canonical_usd": handoff.canonical_usd,
+                "license": "ebench_author_redistribution_approved",
+                "sha256": handoff.content_sha256,
+                "source_kind": "external_asset_handoff",
+                "source_uri": handoff.source_uri,
+                "semantic_tags": _asset_handoff_semantic_tags(handoff),
+            }
+        ],
+    }
+    asset_lock = {
+        "schema_version": "asset-lock/v0.2",
+        "lock_id": f"{safe_name}_asset_lock",
+        "created_by": "scenario-forge",
+        "assets": {
+            handoff.asset_id: {
+                "source_kind": "external_asset_handoff",
+                "source_uri": handoff.source_uri,
+                "resolved_path": handoff.source_uri,
+                "content_sha256": handoff.content_sha256,
+                "license": "ebench_author_redistribution_approved",
+                "resolver_version": "scenario-forge/phase12-asset-handoff-v0.1",
+                "role": handoff.role,
+                "asset_type": "usd_bundle",
+                "semantic_tags": _asset_handoff_semantic_tags(handoff),
+            }
+        },
+    }
+    write_yaml_artifact(manifest_path, asset_manifest)
+    write_yaml_artifact(lock_path, asset_lock)
+    return {
+        "asset_manifest": _artifact_ref(manifest_path, suite_root) or str(manifest_path),
+        "asset_lock": _artifact_ref(lock_path, suite_root) or str(lock_path),
+    }
+
+
+def _asset_handoff_semantic_tags(handoff: _AssetHandoffOverlay) -> list[str]:
+    tags = ["asset_handoff", "s2d12", handoff.role]
+    if handoff.required_prim:
+        tags.append("required_prim:" + handoff.required_prim)
+    return list(dict.fromkeys(tag for tag in tags if tag))
+
+
+def _asset_handoff_blockers(asset_handoffs: list[_AssetHandoffOverlay]) -> list[str]:
+    blockers: list[str] = []
+    seen_uids: set[str] = set()
+    for handoff in asset_handoffs:
+        blockers.extend(handoff.blockers)
+        if handoff.asset_uid in seen_uids:
+            blockers.append(f"duplicate asset handoff replacement_asset_uid: {handoff.asset_uid}")
+        seen_uids.add(handoff.asset_uid)
+    return blockers
+
+
 def _asset_semantic_tags(asset: dict[str, Any], lock: dict[str, Any]) -> list[str]:
     tags = [
         *_string_items(asset.get("semantic_tags")),
@@ -700,16 +999,18 @@ def _asset_material_closure(
         if _gate_status(source.release_gate) == "passed" and (
             asset.get("sha256") or lock.get("content_sha256")
         ):
-            return {
-                "status": "passed",
-                "evidence_source": "phase11_release_candidate_gate_retained_readiness",
-                "audit_root": "retained_evidence_only",
-                "missing_texture_count": 0,
-                "missing_textures": [],
-                "missing_material_ref_count": 0,
-                "missing_material_refs": [],
-                "runtime_preflight_required": True,
-            }
+            return _redact_registry_local_paths(
+                {
+                    "status": "passed",
+                    "evidence_source": "phase11_release_candidate_gate_retained_readiness",
+                    "audit_root": "retained_evidence_only",
+                    "missing_texture_count": 0,
+                    "missing_textures": [],
+                    "missing_material_ref_count": 0,
+                    "missing_material_refs": [],
+                    "runtime_preflight_required": True,
+                }
+            )
         return {
             "status": "blocked",
             "evidence_source": "missing_material_audit_root",
@@ -729,30 +1030,34 @@ def _asset_material_closure(
             item for item in missing_material_refs if str(item.get("material", "")) not in approved_modules
         ]
         if not unapproved_refs:
-            return {
-                "status": "passed",
-                "evidence_source": "local_usd_bundle_mdl_audit_with_runtime_approval",
-                "audit_scope": "local_usd_bundle",
-                "missing_texture_count": 0,
-                "missing_textures": [],
-                "missing_material_ref_count": 0,
-                "missing_material_refs": [],
-                "package_local_missing_material_refs": missing_material_refs,
-                "approved_runtime_mdl_dependencies": runtime_approval[
-                    "approved_runtime_mdl_dependencies"
-                ],
-                "runtime_preflight_evidence": runtime_approval["runtime_preflight_evidence"],
-                "mdl_search_paths": runtime_approval["mdl_search_paths"],
-            }
-    return {
-        "status": audit["status"],
-        "evidence_source": "local_usd_bundle_mdl_texture_audit",
-        "audit_scope": "local_usd_bundle",
-        "missing_texture_count": audit["missing_texture_count"],
-        "missing_textures": audit["missing_textures"],
-        "missing_material_ref_count": audit["missing_material_ref_count"],
-        "missing_material_refs": audit["missing_material_refs"],
-    }
+            return _redact_registry_local_paths(
+                {
+                    "status": "passed",
+                    "evidence_source": "local_usd_bundle_mdl_audit_with_runtime_approval",
+                    "audit_scope": "local_usd_bundle",
+                    "missing_texture_count": 0,
+                    "missing_textures": [],
+                    "missing_material_ref_count": 0,
+                    "missing_material_refs": [],
+                    "package_local_missing_material_refs": missing_material_refs,
+                    "approved_runtime_mdl_dependencies": runtime_approval[
+                        "approved_runtime_mdl_dependencies"
+                    ],
+                    "runtime_preflight_evidence": runtime_approval["runtime_preflight_evidence"],
+                    "mdl_search_paths": runtime_approval["mdl_search_paths"],
+                }
+            )
+    return _redact_registry_local_paths(
+        {
+            "status": audit["status"],
+            "evidence_source": "local_usd_bundle_mdl_texture_audit",
+            "audit_scope": "local_usd_bundle",
+            "missing_texture_count": audit["missing_texture_count"],
+            "missing_textures": audit["missing_textures"],
+            "missing_material_ref_count": audit["missing_material_ref_count"],
+            "missing_material_refs": audit["missing_material_refs"],
+        }
+    )
 
 
 def _runtime_mdl_approval(source: _PackageSource, audit: dict[str, Any]) -> dict[str, Any] | None:
@@ -1095,21 +1400,30 @@ def _resolver_snapshot(
     asset_entries: list[dict[str, Any]],
     snapshot_digest: str,
 ) -> dict[str, Any]:
+    assets: list[dict[str, Any]] = []
+    for entry in asset_entries:
+        resolver_entry: dict[str, Any] = {
+            "asset_uid": entry["asset_uid"],
+            "asset_id": entry["asset_id"],
+            "content_sha256": entry["content_sha256"],
+            "resolver_version": entry["resolver_version"],
+            "asset_lock": entry["provenance"]["asset_lock"],
+        }
+        handoff = entry.get("provenance", {}).get("asset_handoff")
+        if isinstance(handoff, dict):
+            resolver_entry["asset_handoff"] = {
+                "selected_asset_ref": handoff.get("selected_asset_ref"),
+                "replacement_asset_uid": handoff.get("replacement_asset_uid"),
+                "source_digest": handoff.get("source_digest"),
+                "source_policy": handoff.get("source_policy"),
+            }
+        assets.append(resolver_entry)
     return {
         "schema_version": RESOLVER_SNAPSHOT_SCHEMA_VERSION,
         "suite_id": suite_id,
         "snapshot_digest": snapshot_digest,
         "resolver_policy": "locked_asset_uid_to_retained_artifact_ref",
-        "assets": [
-            {
-                "asset_uid": entry["asset_uid"],
-                "asset_id": entry["asset_id"],
-                "content_sha256": entry["content_sha256"],
-                "resolver_version": entry["resolver_version"],
-                "asset_lock": entry["provenance"]["asset_lock"],
-            }
-            for entry in asset_entries
-        ],
+        "assets": assets,
     }
 
 
@@ -1168,12 +1482,32 @@ def _handoff_examples(
     suite_id: str,
     package_entries: list[dict[str, Any]],
     snapshot_digest: str,
+    asset_handoffs: list[_AssetHandoffOverlay],
 ) -> dict[str, Any]:
     return {
         "schema_version": HANDOFF_SCHEMA_VERSION,
         "suite_id": suite_id,
         "pinned_registry_snapshot": "registry/registry_snapshot.yaml",
         "snapshot_digest": snapshot_digest,
+        "asset_handoffs": [
+            {
+                "selected_asset_ref": handoff.selected_asset_ref,
+                "replacement_asset_uid": handoff.asset_uid,
+                "asset_id": handoff.asset_id,
+                "source_package_id": handoff.source_package_id,
+                "canonical_usd": handoff.canonical_usd,
+                "content_sha256": handoff.content_sha256,
+                "material_closure_status": handoff.material_closure.get("status"),
+                "source_policy": handoff.source_policy,
+                "source_digest": handoff.source_digest,
+                "required_prim": handoff.required_prim,
+                "claim_boundary": (
+                    "Asset-level handoff metadata only; large USD assets remain behind "
+                    "the retained resolver reference."
+                ),
+            }
+            for handoff in asset_handoffs
+        ],
         "examples": [
             {
                 "package_id": entry["package_id"],
@@ -1408,6 +1742,84 @@ def _is_local_filesystem_uri(value: str) -> bool:
     if "://" in value or value.startswith(("omniverse:", "mdl:")):
         return False
     return Path(value).is_absolute()
+
+
+def _source_path_policy(path: Path) -> str:
+    if _is_local_filesystem_uri(str(path)):
+        return "external_local_path_redacted"
+    return "source_path_retained"
+
+
+def _public_canonical_usd(raw_canonical_usd: str) -> str:
+    if not raw_canonical_usd:
+        return "asset.usda"
+    if _is_local_filesystem_uri(raw_canonical_usd):
+        return Path(raw_canonical_usd).name
+    return raw_canonical_usd
+
+
+def _sha256_prefixed(value: str) -> str:
+    if not value:
+        return ""
+    return value if value.startswith("sha256:") else f"sha256:{value}"
+
+
+def _int_or_none(value: object) -> int | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdecimal():
+        return int(value)
+    return None
+
+
+def _approved_runtime_dependencies(material_closure: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        item
+        for item in _list_of_mappings(material_closure.get("approved_runtime_mdl_dependencies"))
+        if item.get("module")
+        and item.get("resolution") == "approved_runtime_module"
+        and item.get("runtime_path")
+    ]
+
+
+def _redact_handoff_local_paths(value: object, *, source_digest: str) -> object:
+    if isinstance(value, dict):
+        return {
+            str(key): _redact_handoff_local_paths(item, source_digest=source_digest)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact_handoff_local_paths(item, source_digest=source_digest) for item in value]
+    if isinstance(value, str) and _should_redact_handoff_string(value):
+        return f"external-evidence://{source_digest}"
+    return value
+
+
+def _redact_registry_local_paths(value: object) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _redact_registry_local_paths(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_redact_registry_local_paths(item) for item in value]
+    if isinstance(value, str) and _should_redact_handoff_string(value):
+        digest = hashlib.sha256(value.encode("utf-8")).hexdigest()[:16]
+        return f"local-path-redacted://sha256:{digest}"
+    return value
+
+
+def _should_redact_handoff_string(value: str) -> bool:
+    return (
+        value.startswith("/cpfs/")
+        or value.startswith("file:///cpfs/")
+        or value.startswith("/tmp/")
+        or value.startswith("file:///tmp/")
+    )
+
+
+def _safe_handoff_name(value: str) -> str:
+    safe = "".join(ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in value)
+    return safe or "asset_handoff"
 
 
 def _all_blockers(gate_docs: dict[str, dict[str, Any]]) -> list[str]:

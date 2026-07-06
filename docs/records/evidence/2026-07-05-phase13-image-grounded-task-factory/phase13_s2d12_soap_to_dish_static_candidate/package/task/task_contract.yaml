@@ -1,0 +1,54 @@
+schema_version: ebench-task-contract/v0.1
+phase_gate: '13.4'
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task:
+  task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+  task_family: pick_place
+  instruction: Pick up the bar of soap and place it into the soap dish.
+task_semantics:
+  action: pick_place
+  manipulated_object:
+    instance_id: soap_001
+    asset_id: official_ebench_soap
+    asset_uid: official_ebench_soap@c147837fe9bd
+    role: manipulated_object
+  target_container:
+    instance_id: soap_dish_fixture
+    asset_id: official_ebench_scene
+    asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+    role: target_container
+    semantic_label: soap_dish
+    source_uid: _01
+    fixture_kind: environment_fixture
+success_predicate:
+  metric_id: object_in_container
+  role: primary_success
+  predicate: object_in_container
+  object: soap_001
+  container: soap_dish_fixture
+  evaluator_owner: embodied-eval-os-ebench-adapter
+  claim_boundary: simulator-state predicate binding only; image confidence and visual
+    review are not task success
+robot_hints:
+  robot_id: franka_panda_tabletop_v1
+  usage: hint_only
+adapter_contract:
+  adapter: ebench
+  package_descriptor: adapters/ebench/package.yaml
+  task_entrypoint: adapters/ebench/task_entrypoint.yaml
+  runtime_owner: embodied-eval-os
+  scenario_forge_scope: package_artifacts_and_contracts_only
+  scenario_forge_excludes:
+  - episode_runner
+  - model_adapter
+  - leaderboard_reporting
+  - simulator_runtime_execution
+  - convertasset_usd_mdl_mesh_conversion
+  - image_understanding_model_calls
+phase_13_readiness:
+  status: static_candidate_ready_for_downstream_gates
+  required_external_gates:
+  - 13.6 factory overview visual gate
+  - 13.8 execution predicate canary gate
+claim_boundary: Phase 13 static task contract only. It binds selected registry assets
+  to simulator-state predicates and does not claim task execution success.

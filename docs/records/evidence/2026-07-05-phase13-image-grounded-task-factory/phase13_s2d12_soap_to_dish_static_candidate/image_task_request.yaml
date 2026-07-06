@@ -1,0 +1,15 @@
+schema_version: image-task-request/v0.1
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+source:
+  image_uri: file:///tmp/scenario-forge-phase13-s2d12-soap-to-dish/inputs/soap_to_dish_tabletop.jpg
+  image_sha256: sha256:8f274213bd1af3684e26f2387f4fa1b4931aba561227ab0fd9f1a6fd2c8bcde4
+  rights_status: user_provided_for_task_generation
+goal:
+  one_sentence_goal: Pick up the bar of soap and place it into the soap dish.
+  domain: tabletop_manipulation
+  robot_profile: franka_panda_tabletop_v1
+  target_export: ebench
+constraints:
+  package_mode: fat
+  asset_source: phase12_registry_snapshot
+  allow_new_asset_reconstruction: false

@@ -328,7 +328,10 @@ def test_suite_phase12_classifies_mdl_with_retained_runtime_approval_as_passed(
                         "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
                     }
                 ],
-                "mdl_search_paths": ["/isaac-sim/kit/mdl/core/mdl"],
+                "mdl_search_paths": [
+                    "/isaac-sim/kit/mdl/core/mdl",
+                    "/cpfs/shared/simulation/runtime/mdl",
+                ],
             },
         },
     )
@@ -346,6 +349,9 @@ def test_suite_phase12_classifies_mdl_with_retained_runtime_approval_as_passed(
     )
 
     asset_registry = load_yaml(suite_dir / "registry" / "asset_registry.yaml")
+    asset_registry_text = (suite_dir / "registry" / "asset_registry.yaml").read_text(
+        encoding="utf-8"
+    )
     approved_asset = next(
         asset
         for asset in asset_registry["assets"]
@@ -362,6 +368,206 @@ def test_suite_phase12_classifies_mdl_with_retained_runtime_approval_as_passed(
             "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
         }
     ]
+    assert "/tmp/" not in asset_registry_text
+    assert "/cpfs/" not in asset_registry_text
+
+
+def test_suite_phase12_asset_handoff_overlay_registers_clean_s2d12_asset(
+    tmp_path: Path,
+) -> None:
+    suite_dir, gate_index_path = write_phase12_ready_suite(tmp_path)
+    add_old_ebench_scene_asset(suite_dir, "phase12_pkg_0")
+    handoff_path = write_s2d12_asset_handoff(tmp_path / "s2d12_registry_mapping.yaml")
+
+    code = main(
+        [
+            "suite",
+            "phase12",
+            "--suite",
+            str(suite_dir),
+            "--gate-index",
+            str(gate_index_path),
+            "--asset-handoff",
+            str(handoff_path),
+            "--strict",
+        ]
+    )
+
+    registry_dir = suite_dir / "registry"
+    handoff_dir = suite_dir / "handoff"
+    asset_registry_text = (registry_dir / "asset_registry.yaml").read_text(encoding="utf-8")
+    registry_snapshot_text = (registry_dir / "registry_snapshot.yaml").read_text(encoding="utf-8")
+    resolver_snapshot_text = (registry_dir / "resolver_snapshot.yaml").read_text(encoding="utf-8")
+    eos_handoff_text = (handoff_dir / "ebench_eos_handoff_examples.yaml").read_text(
+        encoding="utf-8"
+    )
+    asset_registry = load_yaml(registry_dir / "asset_registry.yaml")
+    registry_snapshot = load_yaml(registry_dir / "registry_snapshot.yaml")
+    resolver_snapshot = load_yaml(registry_dir / "resolver_snapshot.yaml")
+    eos_handoff = load_yaml(handoff_dir / "ebench_eos_handoff_examples.yaml")
+    current_index = load_yaml(suite_dir / "evidence" / "phase12_current_gate_index.yaml")
+
+    old_uid = "official_ebench_scene@e1cf0d5b4d76"
+    clean_uid = "official_ebench_scene@e1cf0d5b4d76_native_phase12_clean"
+    asset_uids = {asset["asset_uid"] for asset in asset_registry["assets"]}
+    clean_asset = next(asset for asset in asset_registry["assets"] if asset["asset_uid"] == clean_uid)
+    resolver_asset = next(asset for asset in resolver_snapshot["assets"] if asset["asset_uid"] == clean_uid)
+    asset_handoff = eos_handoff["asset_handoffs"][0]
+    retained_asset_manifest_ref = clean_asset["provenance"]["asset_manifest"]
+    retained_asset_lock_ref = clean_asset["provenance"]["asset_lock"]
+    retained_asset_manifest = load_yaml(suite_dir / retained_asset_manifest_ref)
+    retained_asset_lock = load_yaml(suite_dir / retained_asset_lock_ref)
+
+    assert code == 0
+    assert old_uid in asset_uids
+    assert clean_uid in asset_uids
+    assert clean_asset["asset_id"] == "official_ebench_scene"
+    assert clean_asset["source_package_id"] == "s2d12_native_mdl_phase12_clean"
+    assert clean_asset["role"] == "target_container"
+    assert clean_asset["asset_type"] == "usd_bundle"
+    assert clean_asset["canonical_usd"] == "asset.usda"
+    assert clean_asset["content_sha256"] == (
+        "sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673"
+    )
+    assert clean_asset["source_kind"] == "external_asset_handoff"
+    assert clean_asset["source_uri"] == (
+        "retained-handoff://official_ebench_scene@e1cf0d5b4d76_native_phase12_clean"
+    )
+    assert clean_asset["material_closure"]["status"] == "passed"
+    assert clean_asset["material_closure"]["missing_texture_count"] == 0
+    assert clean_asset["material_closure"]["missing_textures"] == []
+    assert clean_asset["material_closure"]["missing_material_ref_count"] == 0
+    assert clean_asset["material_closure"]["missing_material_refs"] == []
+    assert clean_asset["material_closure"]["approved_runtime_mdl_dependencies"] == [
+        {
+            "module": "gltf/pbr.mdl",
+            "resolution": "approved_runtime_module",
+            "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
+        }
+    ]
+    assert clean_asset["physics_readiness"]["status"] == "ready"
+    assert clean_asset["export_eligibility"]["ebench"] is True
+    assert retained_asset_manifest_ref.startswith("handoff/asset_handoffs/")
+    assert retained_asset_lock_ref.startswith("handoff/asset_handoffs/")
+    assert retained_asset_manifest["assets"][0]["asset_id"] == "official_ebench_scene"
+    assert retained_asset_manifest["assets"][0]["source_uri"].startswith("/cpfs/")
+    assert retained_asset_lock["assets"]["official_ebench_scene"]["source_uri"].startswith("/cpfs/")
+    assert clean_asset["provenance"]["asset_handoff"]["source_policy"] == (
+        "external_local_path_redacted"
+    )
+    assert resolver_asset["asset_lock"] == retained_asset_lock_ref
+    assert resolver_asset["asset_handoff"]["replacement_asset_uid"] == clean_uid
+    assert asset_handoff["selected_asset_ref"] == old_uid
+    assert asset_handoff["replacement_asset_uid"] == clean_uid
+    assert asset_handoff["source_package_id"] == "s2d12_native_mdl_phase12_clean"
+    assert asset_handoff["material_closure_status"] == "passed"
+    assert registry_snapshot["snapshot_digest"] == resolver_snapshot["snapshot_digest"]
+    assert current_index["overall_status"] == "phase13_allowed"
+    assert "/cpfs/" not in asset_registry_text
+    assert "/cpfs/" not in registry_snapshot_text
+    assert "/cpfs/" not in resolver_snapshot_text
+    assert "/cpfs/" not in eos_handoff_text
+
+
+def test_suite_phase12_strict_blocks_failed_asset_handoff_material_closure(
+    tmp_path: Path,
+) -> None:
+    suite_dir, gate_index_path = write_phase12_ready_suite(tmp_path)
+    handoff_path = write_s2d12_asset_handoff(
+        tmp_path / "s2d12_failed_registry_mapping.yaml",
+        material_status="failed",
+    )
+
+    code = main(
+        [
+            "suite",
+            "phase12",
+            "--suite",
+            str(suite_dir),
+            "--gate-index",
+            str(gate_index_path),
+            "--asset-handoff",
+            str(handoff_path),
+            "--strict",
+        ]
+    )
+
+    contract_gate = load_yaml(suite_dir / "evidence" / "phase12_1_registry_contract_gate.yaml")
+    current_index = load_yaml(suite_dir / "evidence" / "phase12_current_gate_index.yaml")
+    assert code == 1
+    assert contract_gate["status"] == "blocked"
+    assert any(
+        "asset handoff official_ebench_scene@e1cf0d5b4d76_native_phase12_clean "
+        "material_closure.status must be passed"
+        in blocker
+        for blocker in contract_gate["blockers"]
+    )
+    assert current_index["overall_status"] == "blocked"
+    assert current_index["phase13_allowed"] is False
+
+
+def test_suite_phase12_strict_blocks_asset_handoff_without_runtime_approval(
+    tmp_path: Path,
+) -> None:
+    suite_dir, gate_index_path = write_phase12_ready_suite(tmp_path)
+    handoff_path = write_s2d12_asset_handoff(
+        tmp_path / "s2d12_missing_runtime_approval.yaml",
+        include_runtime_approval=False,
+    )
+
+    code = main(
+        [
+            "suite",
+            "phase12",
+            "--suite",
+            str(suite_dir),
+            "--gate-index",
+            str(gate_index_path),
+            "--asset-handoff",
+            str(handoff_path),
+            "--strict",
+        ]
+    )
+
+    contract_gate = load_yaml(suite_dir / "evidence" / "phase12_1_registry_contract_gate.yaml")
+    assert code == 1
+    assert contract_gate["status"] == "blocked"
+    assert any(
+        "approved_runtime_mdl_dependencies must include approved runtime modules" in blocker
+        for blocker in contract_gate["blockers"]
+    )
+
+
+def test_suite_phase12_strict_blocks_asset_handoff_uid_asset_id_mismatch(
+    tmp_path: Path,
+) -> None:
+    suite_dir, gate_index_path = write_phase12_ready_suite(tmp_path)
+    handoff_path = write_s2d12_asset_handoff(
+        tmp_path / "s2d12_uid_mismatch.yaml",
+        replacement_asset_uid="wrong_scene@e1cf0d5b4d76_native_phase12_clean",
+    )
+
+    code = main(
+        [
+            "suite",
+            "phase12",
+            "--suite",
+            str(suite_dir),
+            "--gate-index",
+            str(gate_index_path),
+            "--asset-handoff",
+            str(handoff_path),
+            "--strict",
+        ]
+    )
+
+    contract_gate = load_yaml(suite_dir / "evidence" / "phase12_1_registry_contract_gate.yaml")
+    assert code == 1
+    assert contract_gate["status"] == "blocked"
+    assert any(
+        "replacement_asset_uid must start with phase12_registry_asset_id@" in blocker
+        for blocker in contract_gate["blockers"]
+    )
 
 
 def test_suite_phase12_prefers_retained_artifact_variant_named_by_current_gate(
@@ -627,6 +833,128 @@ def write_phase11_package_gates(package_root: Path, package_id: str) -> None:
                 "blockers": [],
             },
         )
+
+
+def add_old_ebench_scene_asset(suite_dir: Path, package_id: str) -> None:
+    package_root = suite_dir / "packages" / package_id
+    old_sha = "sha256:" + "e1cf0d5b4d76" + ("0" * 52)
+    asset_manifest_path = package_root / "assets" / "asset_manifest.yaml"
+    asset_manifest = load_yaml(asset_manifest_path)
+    asset_manifest["assets"].append(
+        {
+            "asset_id": "official_ebench_scene",
+            "role": "target_container",
+            "asset_type": "usd_bundle",
+            "canonical_usd": "assets/scenes/official_ebench_scene/asset.usda",
+            "license": "ebench_author_redistribution_approved",
+            "sha256": old_sha,
+            "source_kind": "official_ebench_asset",
+            "semantic_tags": ["soap_dish", "environment_fixture"],
+        }
+    )
+    write_yaml(asset_manifest_path, asset_manifest)
+
+    asset_lock_path = package_root / "locks" / "asset_lock.yaml"
+    asset_lock = load_yaml(asset_lock_path)
+    asset_lock["assets"]["official_ebench_scene"] = {
+        "source_kind": "official_ebench_asset",
+        "source_uri": "assets/scenes/official_ebench_scene/asset.usda",
+        "resolved_path": "assets/scenes/official_ebench_scene/asset.usda",
+        "content_sha256": old_sha,
+        "license": "ebench_author_redistribution_approved",
+        "resolver_version": "scenario-forge/phase11-official-ebench",
+        "role": "target_container",
+        "asset_type": "usd_bundle",
+        "semantic_tags": ["soap_dish", "environment_fixture"],
+    }
+    write_yaml(asset_lock_path, asset_lock)
+
+
+def write_s2d12_asset_handoff(
+    path: Path,
+    *,
+    material_status: str = "passed",
+    include_runtime_approval: bool = True,
+    replacement_asset_uid: str = "official_ebench_scene@e1cf0d5b4d76_native_phase12_clean",
+) -> Path:
+    write_yaml(
+        path,
+        {
+            "schema_version": "convertasset.s2d12_phase12_clean_registry_mapping.v0.1",
+            "created_utc": "2026-07-05",
+            "asset": {
+                "asset_id": "official_ebench_scene_e1cf0d5b4d76_soap_to_dish",
+                "phase12_registry_asset_id": "official_ebench_scene",
+                "selected_asset_ref": "official_ebench_scene@e1cf0d5b4d76",
+                "replacement_asset_uid": replacement_asset_uid,
+                "source_package_id": "s2d12_native_mdl_phase12_clean",
+                "role": "target_container",
+                "required_prim": "/root/obj__01",
+            },
+            "package": {
+                "root": "/cpfs/user/zhuzihou/assets/convertasset/task3",
+                "canonical_usd": "/cpfs/user/zhuzihou/assets/convertasset/task3/asset.usda",
+                "canonical_usd_sha256": (
+                    "1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673"
+                ),
+                "canonical_usd_size_bytes": 814317445,
+                "official_source_modified": False,
+            },
+            "phase12_material_closure_mapping": {
+                "projection_path": "/cpfs/user/zhuzihou/assets/convertasset/projection.json",
+                "material_closure": {
+                    "status": material_status,
+                    "evidence_source": "local_usd_bundle_mdl_audit_with_runtime_approval",
+                    "audit_scope": "local_usd_bundle",
+                    "missing_texture_count": 0,
+                    "missing_textures": [],
+                    "missing_material_ref_count": 0 if material_status == "passed" else 1,
+                    "missing_material_refs": []
+                    if material_status == "passed"
+                    else [
+                        {
+                            "usd": "asset.usda",
+                            "material": "O.mdl",
+                            "resolved_path": "O.mdl",
+                        }
+                    ],
+                    "package_local_missing_material_refs": [
+                        {
+                            "usd": "asset.usda",
+                            "material": "gltf/pbr.mdl",
+                            "resolved_path": "gltf/pbr.mdl",
+                        }
+                    ],
+                    "approved_runtime_mdl_dependencies": [
+                        {
+                            "module": "gltf/pbr.mdl",
+                            "resolution": "approved_runtime_module",
+                            "runtime_path": "/isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl",
+                        }
+                    ]
+                    if include_runtime_approval
+                    else [],
+                    "runtime_preflight_evidence": [
+                        "/cpfs/user/zhuzihou/assets/convertasset/render_metadata.json"
+                    ],
+                    "mdl_search_paths": [
+                        "/isaac-sim/kit/mdl/core/mdl",
+                        "/cpfs/user/zhuzihou/assets/convertasset/task3/SubUSDs/materials",
+                    ],
+                },
+            },
+            "runtime_evidence": {
+                "status": "pass",
+                "root_usd": "/cpfs/user/zhuzihou/assets/convertasset/task3/asset.usda",
+            },
+            "source_evidence": {
+                "runtime_render_metadata": (
+                    "/cpfs/user/zhuzihou/assets/convertasset/render_metadata.json"
+                )
+            },
+        },
+    )
+    return path
 
 
 def load_yaml(path: Path) -> dict:

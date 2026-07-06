@@ -1,0 +1,13 @@
+schema_version: robot/v0.2
+robot_id: franka_panda_tabletop_v1
+spawn:
+  xyz:
+  - 0.0
+  - 0.0
+  - 0.0
+  wxyz:
+  - 1.0
+  - 0.0
+  - 0.0
+  - 0.0
+usage: phase13_hint_only

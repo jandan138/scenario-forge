@@ -1,0 +1,47 @@
+schema_version: phase11-executed-episode-evidence/v0.1
+runtime_owner: embodied-eval-os
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+episode_status: completed
+trace_uri: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/episode_trace.json
+runtime_log: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/phase11_package_linked_bpl19r_runtime.log
+keyframes:
+  initial: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+  final: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg
+final_state:
+  status: completed_episode_state
+  episode_result:
+    episode_id: ebench/scenario_forge_phase13_s2d12_shared_base_contrast_20260706/ebench/mobile_manip/soap_to_dish_test_mini/000
+    native_raw_result_value: 1.0
+    native_raw_sr_value: 1.0
+    seed: '000'
+    task_name: ebench/mobile_manip/soap_to_dish_test_mini
+    score: 1.0
+    sr: 1.0
+  task_success: true
+  source_trace_kind: official_style_online_policy_rollout
+  policy_inference_cycle_count: 13
+  fresh_live_observation_cycle_count: 13
+  package_linkage:
+    package_loaded: true
+    package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+    task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+    native_task_id: mobile_manip/soap_to_dish
+    package_root: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package
+    adapter_descriptor: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/adapters/ebench/package.yaml
+    task_contract: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/task/task_contract.yaml
+    scene_usd: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/scene/main.usda
+    asset_lock: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/locks/asset_lock.yaml
+    native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+    native_task_config_exists: true
+    effective_native_task_config: /cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/soap_to_dish.yml
+    effective_native_task_config_exists: true
+    mapping_source: eos_scenario_forge_bpl19r_static_task_mapping_v0
+  bpl19r_source:
+    rerun_evidence: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/phase11_package_linked_bpl19r_rerun.yaml
+    source_run_report: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/run_report.json
+    score_gate_report: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/online_policy_score_gate_report.json
+blockers: []
+claim_boundary: Scenario Forge package-linked BPL-19R bridge evidence. EOS projects
+  the retained package-linked BPL-19R episode_result and score evidence into Scenario
+  Forge Phase 11 evidence contracts. This is not official leaderboard evidence.

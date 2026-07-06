@@ -1,0 +1,34 @@
+schema_version: phase11-visual-review-gate/v0.1
+phase: '11.0'
+status: passed
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+visual_review:
+  source: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase13_tabletop_overview_visual_review.yaml
+  schema_version: phase11-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: PASS
+  image_path: phase13_tabletop_overview.png
+  render_metadata_path: phase13_tabletop_overview_render_metadata.json
+  visible_evidence:
+  - target: soap
+    status: visible
+    note: Pink bar of soap is visible on the countertop near center-right.
+  - target: soap_dish
+    status: visible
+    note: Gray shallow dish or tray-like target is visible below the soap and is usable
+      for the visual canary.
+  - target: tabletop
+    status: visible
+    note: Countertop, sink, cabinet, and surrounding fixtures are clearly framed from
+      an overhead overview.
+  - target: material_quality
+    status: visible
+    note: Lighting is bright and no fallback red, black, transparent, blank-frame,
+      or task-blocking geometry artifact is visible.
+  retake_recommendation: none_required
+blockers: []
+next_stage: eos_task_execution_integration
+claim_boundary: Automated visual review gate only; not task success, not physics fidelity,
+  not release approval, and not leaderboard evidence.

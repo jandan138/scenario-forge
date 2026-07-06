@@ -1,0 +1,38 @@
+schema_version: phase11-single-task-release-candidate-gate/v0.1
+phase: '11.5'
+status: passed
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+required_gates:
+  phase11_visual_review_gate.yaml:
+    path: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_visual_review_gate.yaml
+    schema_version: phase11-visual-review-gate/v0.1
+    status: passed
+  phase11_task_execution_gate.yaml:
+    path: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_task_execution_gate.yaml
+    schema_version: phase11-task-execution-gate/v0.1
+    status: passed
+  phase11_executed_episode_gate.yaml:
+    path: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_executed_episode_gate.yaml
+    schema_version: phase11-executed-episode-gate/v0.1
+    status: passed
+  phase11_success_predicate_gate.yaml:
+    path: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_success_predicate_gate.yaml
+    schema_version: phase11-success-predicate-gate/v0.1
+    status: passed
+  phase11_post_execution_visual_review_gate.yaml:
+    path: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_post_execution_visual_review_gate.yaml
+    schema_version: phase11-post-execution-visual-review-gate/v0.1
+    status: passed
+release_policy:
+  source: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_release_policy_author_approved.yaml
+  schema_version: phase11-release-policy/v0.1
+  policy_owner: scenario-forge-policy-gate
+  release_policy_status: pass
+  asset_license_status: redistribution-approved-by-ebench-author
+  redistribution_approval: true
+blockers: []
+next_stage: small_multi_task_canary
+claim_boundary: Single-task automated release candidate gate only; not public dataset
+  release, official score release, leaderboard comparability, or multi-task coverage
+  evidence.

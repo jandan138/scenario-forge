@@ -1,7 +1,7 @@
 schema_version: phase13-batch-factory-quality-report/v0.1
 suite_id: phase13_image_grounded_existing_asset_batch_rc_20260705
 factory_mode: image_grounded_existing_asset
-request_count: 3
+request_count: 4
 package_results:
 - request_id: tabletop_photo_goal_real_registry_probe
   package_id: phase13_tabletop_photo_goal_real_registry_probe
@@ -18,6 +18,11 @@ package_results:
   status: formal_package_ready
   phase13_current_gate_index: packages/phase13_tabletop_photo_goal_apple_to_bowl_retake/evidence/phase13_current_gate_index.yaml
   task_semantic: apple_to_bowl_retake
+- request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+  package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+  status: formal_package_ready
+  phase13_current_gate_index: packages/phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean/evidence/phase13_current_gate_index.yaml
+  task_semantic: soap_to_dish
 failed_or_blocked_requests: []
 quality_metrics:
   failure_rate: 0.0
@@ -25,7 +30,9 @@ quality_metrics:
   coverage_status: passed
   blocker_taxonomy_status: passed
 known_limitations:
-- Request-level batch includes an apple-to-bowl retake variant; soap-to-dish remains
-  blocked by retained registry material closure and is not counted as formal-ready.
+- Request-level batch includes an apple-to-bowl retake variant; this proves retained
+  batch factory readiness, not broad task taxonomy coverage.
+- Soap-to-dish is counted only after Phase13.8 passed with retained EOS predicate
+  success and post-execution visual confirmation evidence.
 claim_boundary: Phase 13.9 batch quality report only; not model-quality, official
   score, or leaderboard evidence.

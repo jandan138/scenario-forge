@@ -1,0 +1,10 @@
+schema_version: image-goal-intake-provenance-gate/v0.1
+phase: '13.1'
+status: passed
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+image_sha256: sha256:8f274213bd1af3684e26f2387f4fa1b4931aba561227ab0fd9f1a6fd2c8bcde4
+rights_status: user_provided_for_task_generation
+producer:
+  name: scenario-forge-retained-soap-to-dish-s2d12-input
+  version: v0.1
+blockers: []

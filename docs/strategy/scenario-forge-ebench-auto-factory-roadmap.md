@@ -5587,6 +5587,75 @@ gate blocked，只能回到对应 owner evidence 重新生成，不能人工覆�
 - Multi-simulator descriptor 等价于每个 simulator runtime 都跑通。
 ```
 
+### 36.6 2026-07-06 S2D-12 ConvertAsset Handoff Closure
+
+ConvertAsset has now completed the soap-to-dish S2D-12 handoff at the
+asset-closure boundary. Scenario Forge has now indexed the repaired clean asset
+through Phase 12 metadata. The active blocker has moved to the fresh Phase 13
+soap-to-dish compile, 13.6 visual, 13.8 execution/predicate, and 13.9 batch
+refresh.
+
+Key handoff:
+
+```text
+/cpfs/user/zhuzihou/assets/convertasset_research/experiments/ebench/official_asset_closure/soap_to_dish_e1cf0d5b4d76_20260705/evidence/s2d12_phase12_clean_registry_mapping.yaml
+
+replacement_asset_uid:
+  official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+
+source_package_id:
+  s2d12_native_mdl_phase12_clean
+
+canonical_usd:
+  asset.usda
+
+content_sha256:
+  sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673
+```
+
+S2D-12 reports `material_closure.status=passed`, `missing_material_refs=[]`,
+`missing_textures=[]`, and approved runtime `gltf/pbr.mdl` evidence. The clean
+USD is large and remains outside Scenario Forge; Scenario Forge should retain
+only small handoff/projection/metadata evidence and resolver references.
+
+Completed Phase 12 work:
+
+```text
+12.s2d12.1 Added Phase 12 asset-handoff overlay input, e.g. --asset-handoff PATH.
+12.s2d12.2 Parses S2D-12 mapping as external evidence only; does not import
+           ConvertAsset code or copy conversion logic.
+12.s2d12.3 Generates normal Phase 12 registry artifacts first, then applies the
+           clean asset overlay before snapshot digest, resolver snapshot, viewer,
+           and handoff examples are written.
+12.s2d12.4 Preserves the old failed
+           official_ebench_scene@e1cf0d5b4d76 entry for provenance.
+12.s2d12.5 Adds the clean UID to asset_registry/resolver_snapshot and records an
+           asset-level handoff section.
+12.s2d12.6 Redacts or internalizes absolute /cpfs paths in public registry fields.
+```
+
+Implemented tests:
+
+```text
+- overlay creates exact clean UID/source_package_id/canonical_usd/content_sha256;
+- clean entry material_closure is passed with zero missing refs/textures;
+- approved gltf/pbr.mdl runtime dependency is retained;
+- old failed UID remains traceable or explicitly superseded;
+- resolver snapshot contains the clean UID;
+- malformed or non-passed handoff blocks Phase 12 strict mode.
+```
+
+Detailed plan: `docs/records/2026-07-06-s2d12-soap-to-dish-phase12-phase13-plan.md`.
+
+Retained evidence:
+
+```text
+docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/asset_registry.yaml
+docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/resolver_snapshot.yaml
+docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/handoff/ebench_eos_handoff_examples.yaml
+docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/evidence/phase12_current_gate_index.yaml
+```
+
 ---
 
 ## 37. Phase 13：Image-Grounded Existing-Asset Task Package Factory
@@ -5623,8 +5692,8 @@ Implemented in Scenario Forge:
   confidence, material closure, source materialization, license, or bindings are
   insufficient.
 
-Current retained status after 13.9 ingestion:
-  apple/bowl and remote/holder generated packages can reach
+Current retained status after refreshed 13.9 ingestion:
+  apple/bowl, remote/holder, apple/bowl retake, and soap-to-dish generated packages can reach
   overall_status=phase13_formal_package_ready
   formal_package_ready=true
   phase13_batch_factory_quality_gate.status=passed
@@ -5652,24 +5721,25 @@ Current retained status after 13.9 ingestion:
   materialization; the 13.5 gate records the approved runtime MDL evidence, and
   13.6 proves the generated package renders without blocked material runtime
   signals.
-- The retained 13.9 request-level batch gate also passes with three
-  formal-ready generated packages: apple/bowl, remote/holder, and an apple/bowl
-  retake request. This is batch factory readiness evidence, not broad task
+- The refreshed retained 13.9 request-level batch gate passes with four
+  formal-ready generated packages: apple/bowl, remote/holder, apple/bowl retake,
+  and soap-to-dish. This is batch factory readiness evidence, not broad task
   taxonomy coverage or model-quality evidence.
-- The soap-to-dish Phase 13 probe remains outside the passing batch because the
-  retained `official_ebench_scene` registry entry for the soap scene still has
-  static material/texture closure blockers (`O.mdl` and missing textures). That
-  must be resolved through ConvertAsset/Phase 12 registry closure, not by
-  reimplementing conversion inside Scenario Forge.
+- The soap-to-dish Phase 13 blocker is closed for the S2D-12 clean package:
+  ConvertAsset completed the repaired native-MDL Phase12-clean handoff, Scenario
+  Forge promoted that clean asset through Phase 12 registry metadata, regenerated
+  a fresh non-smoke Phase 13 package with the clean scene UID and real
+  `official_ebench_soap`, passed 13.6 overview visual, passed package-matching
+  13.8 EOS predicate ingestion, and included it in the refreshed 13.9 batch.
 - If a missing MDL/texture is not package-local and not backed by retained
   runtime approval, Phase 13 writes `handoff/asset_intake_blockers.yaml` and does
   not write `manifest.yaml`. Scenario Forge must not copy ConvertAsset
   USD/MDL/texture conversion logic here.
 
 Remaining work after Phase 13:
-- broaden the passing request-level batch beyond apple/remote variants;
-- resolve soap-to-dish material/texture closure through ConvertAsset/Phase 12
-  registry evidence before adding it to a passing Phase 13.9 batch;
+- broaden the passing request-level batch beyond the current four request rows;
+- move from retained single-package/batch evidence to unattended new-task
+  generation from image + goal inputs;
 - keep 13.8/13.9 as evidence aggregation only; Scenario Forge still must not run
   simulator episodes or benchmark reports.
 ```
@@ -5892,15 +5962,53 @@ release-ready package。
         coverage、failure rate、blocker taxonomy。
   gate: batch-factory-quality-gate/v0.1 requires machine-readable quality report
         and retained blockers for every failed/blocked request.
-  2026-07-05 Scenario Forge status: passed for retained suite
+  2026-07-06 Scenario Forge status: passed for refreshed retained suite
         `phase13_image_grounded_existing_asset_batch_rc_20260705`.
-        The passing request-level batch has three formal-ready packages:
-        apple/bowl, remote/holder, and apple/bowl retake. The gate writes
+        The passing request-level batch has four formal-ready packages:
+        apple/bowl, remote/holder, apple/bowl retake, and soap-to-dish. The gate writes
         `phase13_9_batch_factory_quality_gate.yaml` with
         `next_stage=phase13_batch_factory_ready`. Known limitation: this is not
-        broad task taxonomy coverage; soap-to-dish is retained as a blocked
-        probe because its selected scene registry entry still fails material and
-        texture closure.
+        broad task taxonomy coverage; the apple/bowl retake remains as a
+        regression row.
+
+13.s2d12 Soap-to-Dish Clean Asset Promotion:
+  owner: Scenario Forge Phase 12/13 owners + EOS package-linked execution owner.
+  goal: Promote ConvertAsset S2D-12 clean scene asset into Phase 12, then turn
+        soap-to-dish from blocked probe into a formal-ready Phase 13 package.
+  status: complete through refreshed 13.9 batch inclusion.
+  steps:
+    1. Done - Phase 12 overlay: ingest
+       `s2d12_phase12_clean_registry_mapping.yaml` with an explicit
+       `--asset-handoff` path, creating
+       `official_ebench_scene@e1cf0d5b4d76_native_phase12_clean` while preserving
+       the old failed UID for provenance.
+    2. Done - Fresh compile: rerun image-task compile for soap-to-dish using the clean
+       scene UID/source package and the real `official_ebench_soap` object.
+       Preserve `semantic_label=soap_dish`, `source_uid=_01`, and
+       `fixture_kind=environment_fixture` for EOS mapping.
+       Evidence:
+       `/cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package`
+       and
+       `docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate`.
+    3. Done - 13.6: rendered the generated package with the Isaac Sim overview
+       renderer and recorded render-visual-reviewer PASS. The current gate index
+       is now `overall_status=phase13_visual_candidate_ready`,
+       `overview_visual_ready=true`, and `next_required_gate=13.8`.
+       Evidence:
+       `docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/package/evidence/phase13_tabletop_overview.png`,
+       `phase13_tabletop_overview_render_metadata.json`,
+       `phase13_tabletop_overview_visual_review.yaml`, and
+       `phase13_6_factory_overview_visual_gate.yaml`.
+    4. Done - 13.8: produced package-matching Phase 11/EOS evidence for the
+       generated Phase 13 package. Old `ebench_soap_to_dish_canary` gates were
+       not promoted because 13.8 checks generated package_id equality.
+       Result: `phase13_8_execution_predicate_canary_gate.status=passed`,
+       `task_success=true`, `standard_model_score=1.0`.
+    5. Done - 13.9: refreshed the retained batch as a four-package batch,
+       preserving apple/bowl retake for regression continuity and adding
+       soap-to-dish as formal-ready.
+  pass condition: satisfied. Refreshed 13.9 gate passes and soap-to-dish is
+        listed as formal_package_ready, with no blocked_probe_notes for soap.
 ```
 
 ### 37.6 防人工放行规则

@@ -1,0 +1,8 @@
+schema_version: package-adapter-preflight-gate/v0.1
+phase: '13.7'
+status: passed
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+package_check: passed
+ebench_export: passed
+blockers: []
+core_import_policy: no_simulator_sdk_in_core

@@ -1,0 +1,7 @@
+schema_version: task/v0.2
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_family: pick_place
+instruction: Pick up the bar of soap and place it into the soap dish.
+bindings:
+  object: soap_001
+  target_container: soap_dish_fixture

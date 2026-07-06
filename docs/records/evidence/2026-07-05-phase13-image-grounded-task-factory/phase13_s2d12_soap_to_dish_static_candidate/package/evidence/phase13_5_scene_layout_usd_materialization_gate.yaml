@@ -1,0 +1,40 @@
+schema_version: scene-layout-usd-materialization-gate/v0.1
+phase: '13.5'
+status: passed
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+usd_entrypoint: scene/main.usda
+asset_lock: locks/asset_lock.yaml
+material_closure:
+  status: passed
+  selected_assets:
+  - asset_id: official_ebench_soap
+    status: passed
+    missing_texture_count: 0
+    missing_material_ref_count: 0
+    missing_textures: []
+    missing_material_refs: []
+    package_local_missing_material_refs:
+    - usd: soap0.usd
+      material: gltf/pbr.mdl
+      resolved_path: gltf/pbr.mdl
+    approved_runtime_mdl_dependencies:
+    - module: gltf/pbr.mdl
+      resolution: approved_runtime_module
+      runtime_path: /isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl
+    registry_material_closure_source: phase12_approved_runtime_mdl_dependencies
+  - asset_id: official_ebench_scene
+    status: passed
+    missing_texture_count: 0
+    missing_material_ref_count: 0
+    missing_textures: []
+    missing_material_refs: []
+    package_local_missing_material_refs:
+    - usd: asset.usda
+      material: gltf/pbr.mdl
+      resolved_path: gltf/pbr.mdl
+    approved_runtime_mdl_dependencies:
+    - module: gltf/pbr.mdl
+      resolution: approved_runtime_module
+      runtime_path: /isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl
+    registry_material_closure_source: phase12_approved_runtime_mdl_dependencies
+blockers: []

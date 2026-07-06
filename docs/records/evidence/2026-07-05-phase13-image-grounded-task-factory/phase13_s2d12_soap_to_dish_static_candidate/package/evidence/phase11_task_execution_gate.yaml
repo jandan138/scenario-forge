@@ -1,0 +1,25 @@
+schema_version: phase11-task-execution-gate/v0.1
+phase: '11.1'
+status: passed
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+execution:
+  source: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_task_execution_bpl19r_success_evidence.yaml
+  schema_version: phase11-eos-task-execution/v0.1
+  runtime_owner: embodied-eval-os
+  contract_consumed: true
+  execution_config_status: generated
+  episode_status: completed
+  trace_uri: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/episode_trace.json
+  runtime_log: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/phase11_package_linked_bpl19r_runtime.log
+  lifecycle:
+    reset: passed
+    step: passed
+    close: passed
+  keyframes:
+    initial: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+    final: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg
+blockers: []
+next_stage: executed_episode_evidence_gate
+claim_boundary: EOS task execution integration gate only; not task success, not model
+  quality, not release approval, and not leaderboard evidence.

@@ -1,0 +1,20 @@
+schema_version: phase11-eos-task-execution/v0.1
+runtime_owner: embodied-eval-os
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+contract_consumed: true
+execution_config_status: generated
+episode_status: completed
+trace_uri: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/episode_trace.json
+runtime_log: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/phase11_package_linked_bpl19r_runtime.log
+lifecycle:
+  reset: passed
+  step: passed
+  close: passed
+keyframes:
+  initial: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+  final: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_001_post_action.jpg
+blockers: []
+claim_boundary: Scenario Forge package-linked EOS execution evidence. EOS consumed
+  the package task contract, mapped it to the native EBench soap_to_dish config,
+  and completed the online lane; this is not leaderboard evidence.

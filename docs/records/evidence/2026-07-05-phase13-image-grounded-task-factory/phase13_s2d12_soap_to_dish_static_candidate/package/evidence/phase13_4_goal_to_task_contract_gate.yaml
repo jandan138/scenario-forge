@@ -1,0 +1,10 @@
+schema_version: goal-to-task-contract-gate/v0.1
+phase: '13.4'
+status: passed
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_bindings:
+  object: soap_001
+  container: soap_dish_fixture
+predicate: object_in_container
+predicate_source: simulator_state
+blockers: []

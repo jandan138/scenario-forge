@@ -1,0 +1,23 @@
+schema_version: phase11-success-predicate-evaluation/v0.1
+evaluator_owner: embodied-eval-os-ebench-adapter
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+success_metric: object_in_container
+predicate: object_in_container
+object: soap_001
+container: soap_dish_fixture
+predicate_status: true
+executed_episode_gate: phase11_executed_episode_gate.yaml
+measurement:
+  task_success: true
+  standard_model_score: 1.0
+  native_raw_result_value: 1.0
+  native_raw_sr_value: 1.0
+  standard_model_score_protocol_id: eos_bpl19m_online_policy_rollout_score_v0
+  source: package_linked_bpl19r_online_policy_rollout
+  bpl19r_rerun_evidence: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/phase11_package_linked_bpl19r_rerun.yaml
+  score_gate_report: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/online_policy_score_gate_report.json
+blockers: []
+claim_boundary: Scenario Forge package-linked BPL-19R bridge evidence. EOS projects
+  the retained package-linked BPL-19R episode_result and score evidence into Scenario
+  Forge Phase 11 evidence contracts. This is not official leaderboard evidence.

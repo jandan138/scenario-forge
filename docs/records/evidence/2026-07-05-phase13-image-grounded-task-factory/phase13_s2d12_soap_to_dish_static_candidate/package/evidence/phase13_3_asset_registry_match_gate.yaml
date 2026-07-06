@@ -1,0 +1,24 @@
+schema_version: asset-registry-match-gate/v0.1
+phase: '13.3'
+status: passed
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+registry_snapshot: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml
+snapshot_digest: sha256:c39ce57a6f19b7dacb75618195172bd6e84d72c0ec6bff410487ad75a1cbf282
+asset_candidates:
+- role: object
+  detection_id: det_soap
+  selected_asset_id: official_ebench_soap
+  selected_asset_uid: official_ebench_soap@c147837fe9bd
+  selected_source_package_id: ebench_soap_to_dish_canary
+  score: 0.87
+  matching_reason: retained_official_ebench_soap_asset
+  rejected_alternatives: []
+- role: target_container
+  detection_id: det_soap_dish
+  selected_asset_id: official_ebench_scene
+  selected_asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  selected_source_package_id: s2d12_native_mdl_phase12_clean
+  score: 0.9
+  matching_reason: convertasset_s2d12_clean_scene_handoff_with_soap_dish_fixture
+  rejected_alternatives: []
+blockers: []

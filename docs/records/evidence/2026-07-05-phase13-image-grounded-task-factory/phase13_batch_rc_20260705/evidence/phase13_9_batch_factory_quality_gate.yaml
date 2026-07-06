@@ -2,8 +2,8 @@ schema_version: batch-factory-quality-gate/v0.1
 phase: '13.9'
 status: passed
 suite_id: phase13_image_grounded_existing_asset_batch_rc_20260705
-request_count: 3
-formal_package_ready_count: 3
+request_count: 4
+formal_package_ready_count: 4
 failed_or_blocked_count: 0
 suite_quality:
   source: docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_batch_rc_20260705/evidence/suite_quality_evidence.yaml
@@ -34,6 +34,11 @@ package_results:
   status: formal_package_ready
   phase13_current_gate_index: packages/phase13_tabletop_photo_goal_apple_to_bowl_retake/evidence/phase13_current_gate_index.yaml
   task_semantic: apple_to_bowl_retake
+- request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+  package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+  status: formal_package_ready
+  phase13_current_gate_index: packages/phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean/evidence/phase13_current_gate_index.yaml
+  task_semantic: soap_to_dish
 failed_or_blocked_requests: []
 blockers: []
 next_stage: phase13_batch_factory_ready

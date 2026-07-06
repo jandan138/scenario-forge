@@ -42,14 +42,14 @@ assets:
     approved_runtime_mdl_dependencies:
     - module: gltf/pbr.mdl
       resolution: approved_runtime_module
-      runtime_path: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl
+      runtime_path: local-path-redacted://sha256:9dd0f19645c49e0f
     runtime_preflight_evidence:
     - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
-    - /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/converted_from_partnet_mobility/d9d75b41ebf2430bb98ce42c3ca59503/SubUSDs/materials
+    - local-path-redacted://sha256:672f77b0cbec2900
+    - local-path-redacted://sha256:b23b41a8770e6a93
+    - local-path-redacted://sha256:1fea7b92aae35147
   physics_readiness:
     status: ready
     role: manipulated_object
@@ -106,14 +106,14 @@ assets:
     approved_runtime_mdl_dependencies:
     - module: gltf/pbr.mdl
       resolution: approved_runtime_module
-      runtime_path: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl/gltf/pbr.mdl
+      runtime_path: local-path-redacted://sha256:9dd0f19645c49e0f
     runtime_preflight_evidence:
     - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
-    - /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/converted_from_partnet_mobility/d9d75b41ebf2430bb98ce42c3ca59503/SubUSDs/materials
+    - local-path-redacted://sha256:672f77b0cbec2900
+    - local-path-redacted://sha256:b23b41a8770e6a93
+    - local-path-redacted://sha256:1fea7b92aae35147
   physics_readiness:
     status: ready
     role: target_container
@@ -181,10 +181,10 @@ assets:
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
     - /isaac-sim/kit/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+    - local-path-redacted://sha256:b23b41a8770e6a93
     - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    - local-path-redacted://sha256:e6d5a8e528da0c81
+    - local-path-redacted://sha256:e2ce2f959d8b8bbe
   physics_readiness:
     status: ready
     role: manipulated_object
@@ -245,9 +245,9 @@ assets:
     - docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/../2026-07-04-phase10-real-ebench-apple-to-bowl-usd/tabletop_overview_render_metadata.json
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
-    - /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/lib/python3.10/site-packages/omni/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/scene_usds/converted_from_partnet_mobility/d9d75b41ebf2430bb98ce42c3ca59503/SubUSDs/materials
+    - local-path-redacted://sha256:672f77b0cbec2900
+    - local-path-redacted://sha256:b23b41a8770e6a93
+    - local-path-redacted://sha256:1fea7b92aae35147
   physics_readiness:
     status: ready
     role: robot
@@ -314,10 +314,10 @@ assets:
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
     - /isaac-sim/kit/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+    - local-path-redacted://sha256:b23b41a8770e6a93
     - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    - local-path-redacted://sha256:e6d5a8e528da0c81
+    - local-path-redacted://sha256:e2ce2f959d8b8bbe
   physics_readiness:
     status: ready
     role: robot
@@ -384,10 +384,10 @@ assets:
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
     - /isaac-sim/kit/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+    - local-path-redacted://sha256:b23b41a8770e6a93
     - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    - local-path-redacted://sha256:e6d5a8e528da0c81
+    - local-path-redacted://sha256:e2ce2f959d8b8bbe
   physics_readiness:
     status: ready
     role: robot
@@ -454,10 +454,10 @@ assets:
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
     - /isaac-sim/kit/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+    - local-path-redacted://sha256:b23b41a8770e6a93
     - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    - local-path-redacted://sha256:e6d5a8e528da0c81
+    - local-path-redacted://sha256:e2ce2f959d8b8bbe
   physics_readiness:
     status: ready
     role: environment
@@ -620,6 +620,78 @@ assets:
   claim_boundary: Asset registry entry only. It records locked USD asset metadata
     and does not perform mesh, MDL, texture, or material conversion.
 - schema_version: asset-registry-entry/v0.1
+  asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  asset_id: official_ebench_scene
+  source_package_id: s2d12_native_mdl_phase12_clean
+  role: target_container
+  asset_type: usd_bundle
+  canonical_usd: asset.usda
+  content_sha256: sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673
+  license: ebench_author_redistribution_approved
+  source_kind: external_asset_handoff
+  source_uri: retained-handoff://official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  source_uri_policy: external_local_path_redacted
+  resolver_version: scenario-forge/phase12-asset-handoff-v0.1
+  semantic_tags:
+  - asset_handoff
+  - s2d12
+  - target_container
+  - required_prim:/root/obj__01
+  affordances:
+  - container
+  - rigid
+  role_suitability:
+  - role: target_container
+    asset_type: usd_bundle
+    status: suitable
+    evidence_source: retained_package_role_binding
+  material_closure:
+    status: passed
+    evidence_source: local_usd_bundle_mdl_audit_with_runtime_approval
+    audit_scope: local_usd_bundle
+    missing_texture_count: 0
+    missing_textures: []
+    missing_material_ref_count: 0
+    missing_material_refs: []
+    package_local_missing_material_refs:
+    - usd: asset.usda
+      material: gltf/pbr.mdl
+      resolved_path: gltf/pbr.mdl
+    approved_runtime_mdl_dependencies:
+    - module: gltf/pbr.mdl
+      resolution: approved_runtime_module
+      runtime_path: /isaac-sim/kit/mdl/core/mdl/gltf/pbr.mdl
+    runtime_preflight_evidence:
+    - external-evidence://sha256:d9c8d77c7d89949571d939abb29a70b62ce5bb4f8f2a8a45ab9754a3f9f59f4d
+    mdl_search_paths:
+    - /isaac-sim/kit/mdl/core/mdl
+    - external-evidence://sha256:d9c8d77c7d89949571d939abb29a70b62ce5bb4f8f2a8a45ab9754a3f9f59f4d
+  physics_readiness:
+    status: ready
+    role: target_container
+    evidence_source: convertasset_s2d12_phase12_clean_handoff
+    claim_boundary: Phase 12 records external asset handoff readiness only; runtime
+      behavior remains downstream EOS/EBench evidence.
+  export_eligibility:
+    ebench: true
+    license: ebench_author_redistribution_approved
+    evidence_source: ebench_author_asset_handoff
+    redistribution_scope: retained_phase12_registry_snapshot
+  provenance:
+    source_package_id: s2d12_native_mdl_phase12_clean
+    asset_manifest: handoff/asset_handoffs/official_ebench_scene_e1cf0d5b4d76_native_phase12_clean_asset_manifest.yaml
+    asset_lock: handoff/asset_handoffs/official_ebench_scene_e1cf0d5b4d76_native_phase12_clean_asset_lock.yaml
+    asset_handoff:
+      schema_version: convertasset.s2d12_phase12_clean_registry_mapping.v0.1
+      source_policy: external_local_path_redacted
+      source_digest: sha256:d9c8d77c7d89949571d939abb29a70b62ce5bb4f8f2a8a45ab9754a3f9f59f4d
+      source_filename: s2d12_phase12_clean_registry_mapping.yaml
+      selected_asset_ref: official_ebench_scene@e1cf0d5b4d76
+      replacement_asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+      required_prim: /root/obj__01
+  claim_boundary: Asset registry entry from external handoff metadata only. Scenario
+    Forge does not perform mesh, MDL, texture, or material conversion.
+- schema_version: asset-registry-entry/v0.1
   asset_uid: official_ebench_soap@c147837fe9bd
   asset_id: official_ebench_soap
   source_package_id: ebench_soap_to_dish_canary
@@ -669,10 +741,10 @@ assets:
     mdl_search_paths:
     - /isaac-sim/kit/mdl/core/Base
     - /isaac-sim/kit/mdl/core/mdl
-    - /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets/miscs/mdl/ebench/mdl
+    - local-path-redacted://sha256:b23b41a8770e6a93
     - remote_to_holder_contactfixed_package/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-remote-to-holder-canary/assets/official_ebench_scene/SubUSDs/materials
-    - /tmp/ebench-soap-to-dish-canary-nomdl-relink/assets/official_ebench_scene/SubUSDs/materials
+    - local-path-redacted://sha256:e6d5a8e528da0c81
+    - local-path-redacted://sha256:e2ce2f959d8b8bbe
   physics_readiness:
     status: ready
     role: manipulated_object

@@ -1,7 +1,20 @@
 schema_version: ebench-eos-handoff-examples/v0.1
 suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
 pinned_registry_snapshot: registry/registry_snapshot.yaml
-snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
+snapshot_digest: sha256:c39ce57a6f19b7dacb75618195172bd6e84d72c0ec6bff410487ad75a1cbf282
+asset_handoffs:
+- selected_asset_ref: official_ebench_scene@e1cf0d5b4d76
+  replacement_asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  asset_id: official_ebench_scene
+  source_package_id: s2d12_native_mdl_phase12_clean
+  canonical_usd: asset.usda
+  content_sha256: sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673
+  material_closure_status: passed
+  source_policy: external_local_path_redacted
+  source_digest: sha256:d9c8d77c7d89949571d939abb29a70b62ce5bb4f8f2a8a45ab9754a3f9f59f4d
+  required_prim: /root/obj__01
+  claim_boundary: Asset-level handoff metadata only; large USD assets remain behind
+    the retained resolver reference.
 examples:
 - package_id: ebench_apple_to_bowl_canary
   task_label: apple_to_bowl

@@ -1,0 +1,42 @@
+schema_version: scene-instances/v0.2
+instances:
+- id: soap_001
+  asset_id: official_ebench_soap
+  role: manipulated_object
+  pose:
+    xyz:
+    - -0.35
+    - -0.2
+    - 0.99
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    scale_xyz:
+    - 1.0
+    - 1.0
+    - 1.0
+  semantic_tags:
+  - manipulated_object
+  initial_state: {}
+- id: soap_dish_fixture
+  asset_id: official_ebench_scene
+  role: target_container
+  pose:
+    xyz:
+    - 0.0
+    - 0.0
+    - 0.0
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    scale_xyz:
+    - 1.0
+    - 1.0
+    - 1.0
+  semantic_tags:
+  - target_container
+  initial_state: {}

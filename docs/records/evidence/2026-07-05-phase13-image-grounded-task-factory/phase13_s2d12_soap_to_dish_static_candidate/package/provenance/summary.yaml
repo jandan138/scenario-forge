@@ -1,0 +1,8 @@
+schema_version: provenance-summary/v0.1
+source_kind: image_grounded_existing_asset_factory
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+image_task_request: provenance/phase13_image_task_request.yaml
+image_to_scene_result: provenance/phase13_image_to_scene_result.yaml
+registry_snapshot: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml
+claim_boundary: Package provenance records inputs and selected registry assets only;
+  it does not prove visual readability or task success.

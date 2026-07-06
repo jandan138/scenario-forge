@@ -1,0 +1,28 @@
+schema_version: scenario-generation-plan/v0.2
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+source_kind: image_grounded_existing_asset_factory
+source_image:
+  image_uri: file:///tmp/scenario-forge-phase13-s2d12-soap-to-dish/inputs/soap_to_dish_tabletop.jpg
+  image_sha256: sha256:8f274213bd1af3684e26f2387f4fa1b4931aba561227ab0fd9f1a6fd2c8bcde4
+  rights_status: user_provided_for_task_generation
+one_sentence_goal: Pick up the bar of soap and place it into the soap dish.
+target_exports:
+- ebench
+- embodied-eval-os
+package_mode: fat
+registry_snapshot_digest: sha256:c39ce57a6f19b7dacb75618195172bd6e84d72c0ec6bff410487ad75a1cbf282
+selected_assets:
+- asset_id: official_ebench_soap
+  asset_uid: official_ebench_soap@c147837fe9bd
+  role: manipulated_object
+  content_sha256: sha256:c147837fe9bdeba628c72efa33e1f152ec3b65f8f1b2671318c8f7298b73aae5
+- asset_id: official_ebench_scene
+  asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  role: target_container
+  content_sha256: sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673
+workflow_bindings:
+  object: soap_001
+  target_container: soap_dish_fixture
+confidence_summary: retained_phase13_s2d12_clean_input
+claim_boundary: Phase 13 generation plan only. External image grounding confidence
+  is retained as provenance and is not a task success or release claim.

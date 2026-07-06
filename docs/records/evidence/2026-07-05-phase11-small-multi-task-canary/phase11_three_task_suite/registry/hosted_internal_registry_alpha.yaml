@@ -1,7 +1,7 @@
 schema_version: hosted-internal-registry-alpha/v0.1
 suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
 mode: internal_read_only_alpha
-snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
+snapshot_digest: sha256:c39ce57a6f19b7dacb75618195172bd6e84d72c0ec6bff410487ad75a1cbf282
 package_count: 3
 included_packages:
 - ebench_apple_to_bowl_canary

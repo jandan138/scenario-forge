@@ -1,0 +1,15 @@
+schema_version: asset-manifest/v0.2
+assets:
+- asset_id: official_ebench_scene
+  role: target_container
+  asset_type: usd_bundle
+  canonical_usd: asset.usda
+  license: ebench_author_redistribution_approved
+  sha256: sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673
+  source_kind: external_asset_handoff
+  source_uri: /cpfs/user/zhuzihou/assets/convertasset_research/experiments/ebench/official_asset_closure/soap_to_dish_e1cf0d5b4d76_20260705/source_mdl_phase12_clean/task3/asset.usda
+  semantic_tags:
+  - asset_handoff
+  - s2d12
+  - target_container
+  - required_prim:/root/obj__01

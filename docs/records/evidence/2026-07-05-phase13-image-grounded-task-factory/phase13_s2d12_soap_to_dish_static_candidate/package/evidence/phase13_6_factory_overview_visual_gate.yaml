@@ -1,0 +1,37 @@
+schema_version: factory-overview-visual-gate/v0.1
+phase: '13.6'
+status: passed
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+visual_review:
+  source: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase13_tabletop_overview_visual_review.yaml
+  schema_version: phase11-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: PASS
+  image_path: phase13_tabletop_overview.png
+  image_sha256: sha256:882f7f55e0e00d0ea502603a3d8cb14159703902afe53b5709f99b180cec3f39
+  render_metadata_path: phase13_tabletop_overview_render_metadata.json
+  render_metadata_sha256: sha256:47b3a5e71521582eff927ec3080887acddf48c9f05301c923ba9989944a2173a
+  visible_evidence:
+  - target: soap
+    status: visible
+    note: Pink bar of soap is visible on the countertop near center-right.
+  - target: soap_dish
+    status: visible
+    note: Gray shallow dish or tray-like target is visible below the soap and is usable
+      for the visual canary.
+  - target: tabletop
+    status: visible
+    note: Countertop, sink, cabinet, and surrounding fixtures are clearly framed from
+      an overhead overview.
+  - target: material_quality
+    status: visible
+    note: Lighting is bright and no fallback red, black, transparent, blank-frame,
+      or task-blocking geometry artifact is visible.
+  retake_recommendation: none_required
+blockers: []
+next_stage: execution_predicate_canary
+claim_boundary: Phase 13.6 factory overview visual gate only. It proves engine-native
+  visual readability for the generated package, not task success, asset identity,
+  policy quality, or leaderboard readiness.

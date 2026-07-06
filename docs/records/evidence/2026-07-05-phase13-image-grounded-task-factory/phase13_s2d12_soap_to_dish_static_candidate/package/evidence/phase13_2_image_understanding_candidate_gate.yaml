@@ -1,0 +1,36 @@
+schema_version: image-understanding-candidate-gate/v0.1
+phase: '13.2'
+status: passed
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+detections:
+- detection_id: det_soap
+  label: bar of soap
+  bbox_xywh:
+  - 120
+  - 210
+  - 90
+  - 65
+  confidence: 0.91
+  semantic_tags:
+  - soap
+  - pickable
+  affordance_guesses:
+  - pickable
+  - rigid
+- detection_id: det_soap_dish
+  label: soap dish
+  bbox_xywh:
+  - 255
+  - 205
+  - 120
+  - 80
+  confidence: 0.89
+  semantic_tags:
+  - soap_dish
+  - container
+  affordance_guesses:
+  - container
+  - rigid
+confidence_summary: retained_phase13_s2d12_clean_input
+blockers: []
+claim_boundary: External image grounding evidence only; no runtime success claim.

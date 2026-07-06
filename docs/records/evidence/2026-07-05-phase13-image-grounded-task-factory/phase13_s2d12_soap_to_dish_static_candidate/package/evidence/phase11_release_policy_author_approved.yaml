@@ -1,0 +1,16 @@
+schema_version: phase11-release-policy/v0.1
+policy_owner: scenario-forge-policy-gate
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+release_policy_status: pass
+asset_license_status: redistribution-approved-by-ebench-author
+redistribution_approval: true
+approval_basis:
+  approver: zhuzihou
+  role: EBench author
+  scope: Scenario Forge package evidence and official EBench-derived USD assets
+    used by this soap-to-dish release candidate.
+blockers: []
+claim_boundary: Release policy covers package redistribution approval for this
+  Scenario Forge release candidate. It does not claim official leaderboard
+  comparability, model superiority, or public benchmark score publication.

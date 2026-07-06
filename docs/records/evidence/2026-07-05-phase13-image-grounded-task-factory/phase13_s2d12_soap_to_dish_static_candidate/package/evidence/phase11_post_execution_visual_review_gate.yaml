@@ -1,0 +1,33 @@
+schema_version: phase11-post-execution-visual-review-gate/v0.1
+phase: '11.4'
+status: passed
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+visual_review:
+  source: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package/evidence/phase11_post_execution_visual_review_bpl19r_success.yaml
+  schema_version: phase11-post-execution-visual-review/v0.1
+  reviewer: render-visual-reviewer
+  review_mode: clean_room_visual_skill
+  verdict: PASS
+  initial_image_path: phase11_s2d12_bpl19r_package_linked_base_shared_fresh_contrast/bpl19r_rerun/attempt_000/bpl19m_source_evidence/media/bpl19m_online_policy_rollout_visual_review/overlook_camera_000_initial.jpg
+  final_image_path: phase11_s2d12_post_execution_right_camera_final_confirmation.jpg
+  visible_evidence:
+  - target: initial_task_objects
+    status: visible
+    note: Initial context frame shows the purple soap and gray soap dish as separated,
+      identifiable task objects on the counter.
+  - target: final_success_confirmation
+    status: visible
+    note: Final confirmation frame shows the purple soap seated in or on the gray
+      soap dish, with the dish rim visible around the soap.
+  - target: visual_quality
+    status: pass
+    note: Lighting, occlusion, scale, material appearance, and geometry are sufficient
+      for post-execution visual confirmation.
+  success_predicate_gate: phase11_success_predicate_gate.yaml
+  retake_recommendation: none_required
+blockers: []
+next_stage: single_task_automated_release_candidate
+claim_boundary: Post-execution visual review gate only; visual coherence supports
+  inspection but does not replace predicate success, release approval, or leaderboard
+  evidence.

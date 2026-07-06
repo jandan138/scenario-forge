@@ -3,9 +3,12 @@
 Status: Phase 13 static candidate compiler, 13.8 execution/predicate canary
 ingestion, and 13.9 request-level batch quality gate are implemented. The real
 official EBench apple/bowl package reaches formal package readiness, and a
-retained three-request batch reaches `phase13_batch_factory_ready`. Soap-to-dish
-remains a blocked probe until ConvertAsset/Phase 12 registry material closure is
-fixed.
+retained four-request batch reaches `phase13_batch_factory_ready`. ConvertAsset
+S2D-12 completed the soap-to-dish clean asset handoff, and Scenario Forge
+promoted the clean scene asset through Phase 12 registry metadata, regenerated
+a fresh soap-to-dish Phase 13 package, passed 13.6 overview visual, passed 13.8
+execution/predicate ingestion, and included soap-to-dish in the refreshed 13.9
+passing batch.
 
 The image-grounded task factory turns a user-provided tabletop image request and
 an external image-to-scene result into a Scenario Forge package candidate. It is
@@ -128,11 +131,12 @@ Retained 2026-07-05 evidence:
 docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_batch_rc_20260705/
 ```
 
-That suite passes 13.9 with apple/bowl, remote/holder, and an apple/bowl retake
-request. It proves request-level batch readiness, not broad task taxonomy
-coverage. The retained soap-to-dish probe is blocked before package generation
-because its selected scene asset has unresolved static material/texture closure
-blockers.
+That suite passes 13.9 with apple/bowl, remote/holder, an apple/bowl retake
+request, and the S2D-12 clean soap-to-dish package. It proves request-level
+batch readiness, not broad task taxonomy coverage. The older retained
+soap-to-dish blocked probe is still historical pre-S2D-12 evidence and is not
+promotable as-is because it selected the old scene asset with unresolved static
+material/texture closure blockers.
 
 If a selected registry asset has `material_closure.status != passed`, or if
 post-materialization audit finds missing MDL/texture dependencies, the compiler
@@ -140,6 +144,13 @@ blocks before public-ready package generation. Runtime MDL modules such as
 `gltf/pbr.mdl` are allowed only when the selected Phase 12 registry entry retains
 approved runtime dependency evidence: material runtime preflight pass, no blocked
 dependencies, concrete MDL search roots, and a resolved runtime path.
+
+A completed ConvertAsset handoff is necessary but not sufficient for Phase 13
+selection. The compiler trusts the current Phase 12 registry snapshot, not
+out-of-band knowledge of repaired files. S2D-12 is now indexed as a Phase 12
+asset-handoff overlay; the fresh soap-to-dish compile selects
+`official_ebench_scene@e1cf0d5b4d76_native_phase12_clean` and has now reached
+formal Phase 13 package readiness.
 
 ## Fail-Closed Behavior
 

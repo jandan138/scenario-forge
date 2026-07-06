@@ -1,0 +1,10 @@
+schema_version: ebench-task-entrypoint/v0.1
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_id: image_task/tabletop_photo_goal_soap_to_dish_s2d12_clean
+task_family: pick_place
+instruction: Pick up the bar of soap and place it into the soap dish.
+success_metric: object_in_container
+metric_role: primary_success
+bindings:
+  object: soap_001
+  target_container: soap_dish_fixture

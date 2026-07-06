@@ -1,0 +1,13 @@
+schema_version: validation-report/v0.2
+status: static_candidate
+overall_level: adapter_static_validated
+checks:
+- name: package_validation
+  status: passed
+- name: asset_lock
+  status: passed
+- name: usd_static_compile
+  status: passed
+- name: adapter_export
+  status: passed
+messages: []

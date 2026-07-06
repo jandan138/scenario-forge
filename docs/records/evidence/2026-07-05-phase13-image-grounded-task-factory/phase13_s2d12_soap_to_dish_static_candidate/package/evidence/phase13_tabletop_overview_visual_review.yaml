@@ -1,0 +1,26 @@
+schema_version: phase11-visual-review/v0.1
+reviewer: render-visual-reviewer
+review_mode: clean_room_visual_skill
+verdict: PASS
+image_path: phase13_tabletop_overview.png
+render_metadata_path: phase13_tabletop_overview_render_metadata.json
+visible_evidence:
+- target: soap
+  status: visible
+  note: Pink bar of soap is visible on the countertop near center-right.
+- target: soap_dish
+  status: visible
+  note: Gray shallow dish or tray-like target is visible below the soap and is usable for the visual canary.
+- target: tabletop
+  status: visible
+  note: Countertop, sink, cabinet, and surrounding fixtures are clearly framed from an overhead overview.
+- target: material_quality
+  status: visible
+  note: Lighting is bright and no fallback red, black, transparent, blank-frame, or task-blocking geometry artifact is visible.
+retake_recommendation: none_required
+confidence: high
+independent_review:
+  reviewer_agent: 019f35d0-3039-7a53-b550-da6f1552fa99
+  fork_context: false
+  verdict: PASS
+  note: Dish is somewhat small and could read as a generic tray, but it is visible enough for a visual canary.

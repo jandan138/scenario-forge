@@ -1,0 +1,67 @@
+schema_version: phase13-s2d12-soap-to-dish-static-candidate-summary/v0.1
+created_utc: '2026-07-06'
+request_id: tabletop_photo_goal_soap_to_dish_s2d12_clean
+package_id: phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean
+external_full_package_path: /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package
+external_full_package_size: 789M
+retained_repo_snapshot: docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate
+retained_repo_snapshot_policy: small metadata/evidence only; large official USD assets
+  are not copied into the repo
+phase13_status:
+  overall_status: phase13_visual_candidate_ready
+  static_candidate_ready: true
+  formal_package_ready: false
+  overview_visual_ready: true
+  next_required_gate: '13.8'
+  remaining_blockers:
+  - 13.8 EOS execution/predicate canary gate is required before formal package readiness
+phase13_6_overview_visual:
+  status: passed
+  render_status: pass
+  visual_review: PASS
+  material_runtime_preflight: pass
+  image_sha256: sha256:882f7f55e0e00d0ea502603a3d8cb14159703902afe53b5709f99b180cec3f39
+  render_metadata_sha256: sha256:47b3a5e71521582eff927ec3080887acddf48c9f05301c923ba9989944a2173a
+  evidence:
+  - package/evidence/phase13_tabletop_overview.png
+  - package/evidence/phase13_tabletop_overview_render_metadata.json
+  - package/evidence/phase13_tabletop_overview_runtime.log
+  - package/evidence/phase13_tabletop_overview_visual_review.yaml
+  - package/evidence/phase13_6_factory_overview_visual_gate.yaml
+  - package/evidence/phase13_current_gate_index.yaml
+selected_assets:
+- role: manipulated_object
+  asset_id: official_ebench_soap
+  asset_uid: official_ebench_soap@c147837fe9bd
+  source_package_id: ebench_soap_to_dish_canary
+  evidence: package/assets/asset_manifest.yaml
+- role: target_container
+  asset_id: official_ebench_scene
+  asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  source_package_id: s2d12_native_mdl_phase12_clean
+  evidence: package/assets/asset_manifest.yaml
+target_fixture_semantics:
+  instance_id: soap_dish_fixture
+  semantic_label: soap_dish
+  source_uid: _01
+  fixture_kind: environment_fixture
+material_closure:
+  status: passed
+  selected_assets:
+  - asset_id: official_ebench_soap
+    missing_texture_count: 0
+    missing_material_ref_count: 0
+    approved_runtime_mdl_dependency: gltf/pbr.mdl
+  - asset_id: official_ebench_scene
+    missing_texture_count: 0
+    missing_material_ref_count: 0
+    approved_runtime_mdl_dependency: gltf/pbr.mdl
+  evidence: package/evidence/phase13_5_scene_layout_usd_materialization_gate.yaml
+compile_command: PYTHONPATH=src python -m scenario_forge.cli image-task compile --request
+  <summary_dir>/image_task_request.yaml --scene-result <summary_dir>/image_scene_result.yaml
+  --registry-snapshot docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/phase11_three_task_suite/registry/registry_snapshot.yaml
+  --out /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package
+  --strict
+claim_boundary: Visual candidate package only. This completes 13.6 overview readability
+  and material runtime preflight, but does not complete 13.8 execution/predicate,
+  13.9 batch refresh, task success, or leaderboard reporting.

@@ -4,7 +4,7 @@ status: passed
 suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
 registry_snapshot: registry/registry_snapshot.yaml
 resolver_snapshot: registry/resolver_snapshot.yaml
-snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
+snapshot_digest: sha256:c39ce57a6f19b7dacb75618195172bd6e84d72c0ec6bff410487ad75a1cbf282
 snapshot_digest_file: registry/snapshot_digest.txt
 blockers: []
 next_stage: readonly_evidence_package_viewer

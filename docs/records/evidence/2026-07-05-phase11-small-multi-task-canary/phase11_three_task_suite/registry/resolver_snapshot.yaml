@@ -1,6 +1,6 @@
 schema_version: resolver-snapshot/v0.1
 suite_id: scenario_forge_phase11_three_task_internal_policy_blocked_canary
-snapshot_digest: sha256:dd49ae0063d90e891b863a4ced8e8da7cea9c194113faa21a8195893028f2586
+snapshot_digest: sha256:c39ce57a6f19b7dacb75618195172bd6e84d72c0ec6bff410487ad75a1cbf282
 resolver_policy: locked_asset_uid_to_retained_artifact_ref
 assets:
 - asset_uid: official_ebench_apple@3cea327ec9c4
@@ -48,6 +48,16 @@ assets:
   content_sha256: sha256:e1cf0d5b4d76cdc32cb57459be501e55e736f533effe17838191fa63ee107840
   resolver_version: ConvertAsset no-mdl public CLI; scenario-forge handoff v0.3
   asset_lock: docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/soap_to_dish_nomdl_relink_asset_lock.yaml
+- asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  asset_id: official_ebench_scene
+  content_sha256: sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673
+  resolver_version: scenario-forge/phase12-asset-handoff-v0.1
+  asset_lock: handoff/asset_handoffs/official_ebench_scene_e1cf0d5b4d76_native_phase12_clean_asset_lock.yaml
+  asset_handoff:
+    selected_asset_ref: official_ebench_scene@e1cf0d5b4d76
+    replacement_asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+    source_digest: sha256:d9c8d77c7d89949571d939abb29a70b62ce5bb4f8f2a8a45ab9754a3f9f59f4d
+    source_policy: external_local_path_redacted
 - asset_uid: official_ebench_soap@c147837fe9bd
   asset_id: official_ebench_soap
   content_sha256: sha256:c147837fe9bdeba628c72efa33e1f152ec3b65f8f1b2671318c8f7298b73aae5

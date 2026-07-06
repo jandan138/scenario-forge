@@ -1,0 +1,113 @@
+schema_version: image-to-scene-result/v0.1
+result_id: tabletop_photo_goal_soap_to_dish_s2d12_clean_result
+producer:
+  name: scenario-forge-retained-soap-to-dish-s2d12-input
+  version: v0.1
+source:
+  image_uri: file:///tmp/scenario-forge-phase13-s2d12-soap-to-dish/inputs/soap_to_dish_tabletop.jpg
+  image_sha256: sha256:8f274213bd1af3684e26f2387f4fa1b4931aba561227ab0fd9f1a6fd2c8bcde4
+goal:
+  raw_text: Pick up the bar of soap and place it into the soap dish.
+  normalized_task_family: object_in_container
+scene:
+  coordinate_system: tabletop_right_handed_z_up
+  units: meters
+detections:
+- detection_id: det_soap
+  label: bar of soap
+  bbox_xywh:
+  - 120
+  - 210
+  - 90
+  - 65
+  confidence: 0.91
+  semantic_tags:
+  - soap
+  - pickable
+  affordance_guesses:
+  - pickable
+  - rigid
+- detection_id: det_soap_dish
+  label: soap dish
+  bbox_xywh:
+  - 255
+  - 205
+  - 120
+  - 80
+  confidence: 0.89
+  semantic_tags:
+  - soap_dish
+  - container
+  affordance_guesses:
+  - container
+  - rigid
+asset_requirements:
+- role: object
+  detection_id: det_soap
+  asset_type: soap
+  required_affordances:
+  - pickable
+  - rigid
+- role: target_container
+  detection_id: det_soap_dish
+  asset_type: soap_dish
+  required_affordances:
+  - container
+  - rigid
+asset_candidates:
+- role: object
+  detection_id: det_soap
+  selected_asset_id: official_ebench_soap
+  selected_asset_uid: official_ebench_soap@c147837fe9bd
+  selected_source_package_id: ebench_soap_to_dish_canary
+  score: 0.87
+  matching_reason: retained_official_ebench_soap_asset
+  rejected_alternatives: []
+- role: target_container
+  detection_id: det_soap_dish
+  selected_asset_id: official_ebench_scene
+  selected_asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  selected_source_package_id: s2d12_native_mdl_phase12_clean
+  score: 0.9
+  matching_reason: convertasset_s2d12_clean_scene_handoff_with_soap_dish_fixture
+  rejected_alternatives: []
+instances:
+- id: soap_001
+  role: manipulated_object
+  asset_id: official_ebench_soap
+  asset_uid: official_ebench_soap@c147837fe9bd
+  selected_source_package_id: ebench_soap_to_dish_canary
+  pose:
+    xyz:
+    - -0.35
+    - -0.2
+    - 0.99
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+- id: soap_dish_fixture
+  role: target_container
+  asset_id: official_ebench_scene
+  asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+  selected_source_package_id: s2d12_native_mdl_phase12_clean
+  pose:
+    xyz:
+    - 0.0
+    - 0.0
+    - 0.0
+    wxyz:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  semantic_label: soap_dish
+  fixture_kind: environment_fixture
+  source_uid: _01
+task_bindings:
+  object: soap_001
+  container: soap_dish_fixture
+evidence:
+  confidence_summary: retained_phase13_s2d12_clean_input
+  blockers: []

@@ -6,8 +6,8 @@ Phase 13 now has a static candidate compiler and retained batch-quality gate in
 Scenario Forge. The real official EBench apple/bowl probe reached formal package
 readiness after 13.6 overview visual evidence, EOS/EBench package-linked BPL19R
 execution, predicate success, post-execution visual review PASS, and release
-policy PASS. A retained 13.9 request-level batch gate also passed with three
-formal-ready generated packages.
+policy PASS. The refreshed retained 13.9 request-level batch gate now passes
+with four formal-ready generated packages, including soap-to-dish.
 
 Implemented CLI:
 
@@ -242,8 +242,8 @@ docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_bat
 
 ```text
 suite_id: phase13_image_grounded_existing_asset_batch_rc_20260705
-request_count: 3
-formal_package_ready_count: 3
+request_count: 4
+formal_package_ready_count: 4
 failed_or_blocked_count: 0
 status: passed
 next_stage: phase13_batch_factory_ready
@@ -255,16 +255,93 @@ The passing request-level batch contains:
 phase13_tabletop_photo_goal_real_registry_probe      apple_to_bowl
 phase13_tabletop_photo_goal_remote_to_holder         remote_to_holder
 phase13_tabletop_photo_goal_apple_to_bowl_retake     apple_to_bowl_retake
+phase13_tabletop_photo_goal_soap_to_dish_s2d12_clean soap_to_dish
 ```
 
 Known limitation: this proves request-level batch readiness, not broad task
-taxonomy coverage. `soap_to_dish` was probed but kept outside the passing batch
-because the selected `official_ebench_scene` registry entry still fails static
-material/texture closure with `O.mdl` and missing texture blockers. That blocker
-is retained under:
+taxonomy coverage. The batch keeps the apple/bowl retake as a regression row,
+so it is a four-request retained batch rather than a minimal three-task coverage
+suite.
+
+## 2026-07-06 S2D-12 Soap-to-Dish Update
+
+ConvertAsset has completed the S2D-12 clean handoff for the soap-to-dish selected
+scene asset, and Scenario Forge has promoted that clean asset through the Phase
+12 retained registry. Scenario Forge has also regenerated a fresh non-smoke
+Phase 13 soap-to-dish static candidate using the clean scene UID and the real
+`official_ebench_soap`. The stale pre-S2D-12 blocked probe remains historical
+evidence only; the new S2D-12 package is the one promoted through 13.8 and the
+refreshed 13.9 batch.
+
+New clean asset promoted through Phase 12:
 
 ```text
-phase13_batch_rc_20260705/blocked_probes/phase13_tabletop_photo_goal_soap_to_dish/
+asset_uid: official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+source_package_id: s2d12_native_mdl_phase12_clean
+canonical_usd: asset.usda
+content_sha256: sha256:1fedd44093435591458cf10c303bdf2e856e20b18608307ed7e7dc59b71f0673
+material_closure.status: passed
+```
+
+ConvertAsset also retained a Phase 13 compile smoke showing the clean scene entry
+can reach `phase13_static_candidate_ready`, with 13.0-13.5 and 13.7 passed and
+only the expected 13.6 / 13.8 downstream gates remaining. That smoke is supporting
+closure evidence, not formal Scenario Forge evidence, because it uses a minimal
+smoke object and a placeholder snapshot.
+
+Formal Scenario Forge compile evidence:
+
+```text
+external full package:
+  /cpfs/user/zhuzihou/assets/scenario_forge_runs/phase13_s2d12_soap_to_dish_static_candidate_20260706/package
+
+retained small evidence snapshot:
+  docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate
+
+status:
+  phase13_formal_package_ready
+
+selected assets:
+  official_ebench_soap@c147837fe9bd
+  official_ebench_scene@e1cf0d5b4d76_native_phase12_clean
+
+target fixture:
+  semantic_label=soap_dish
+  source_uid=_01
+  fixture_kind=environment_fixture
+```
+
+Formal Scenario Forge rerun plan:
+
+```text
+1. Done: refresh Phase 12 with an S2D-12 asset-handoff overlay.
+2. Done: freshly compile soap-to-dish using the clean scene UID and the existing real
+   official_ebench_soap object.
+3. Preserve target fixture semantics for EOS mapping:
+   semantic_label=soap_dish, source_uid=_01, fixture_kind=environment_fixture.
+4. Done: run 13.6 on the generated package with Isaac Sim overview render and
+   render-visual-reviewer PASS. Retained evidence now includes
+   `phase13_tabletop_overview.png`,
+   `phase13_tabletop_overview_render_metadata.json`,
+   `phase13_tabletop_overview_visual_review.yaml`, and
+   `phase13_6_factory_overview_visual_gate.yaml` under the soap-to-dish
+   package evidence snapshot.
+5. Done: generated package-matching Phase 11/EOS evidence for 13.8; old
+   ebench_soap_to_dish_canary gates were not promoted because 13.8 checks
+   generated package_id equality.
+6. Done: refreshed 13.9 so soap-to-dish is in the passing batch and removed from
+   blocked_probe_notes. The retained batch now has four formal-ready request rows.
+```
+
+Product milestone reached: soap-to-dish is now included in the passing 13.9
+suite. The batch keeps the duplicate apple/bowl retake for regression continuity,
+giving a four-request batch with apple-to-bowl, remote-to-holder, apple-to-bowl
+retake, and soap-to-dish.
+
+Detailed planning record:
+
+```text
+docs/records/2026-07-06-s2d12-soap-to-dish-phase12-phase13-plan.md
 ```
 
 ## Tests
