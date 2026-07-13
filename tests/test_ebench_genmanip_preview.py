@@ -37,7 +37,7 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
     assert request["purpose"] == "evidence_only"
     assert request["affects_policy_observation"] is False
     assert request["moment"] == "post_reset_pre_action"
-    assert request["camera_policy_version"] == "scenario-forge/task-anchor-fit-v3"
+    assert request["camera_policy_version"] == "scenario-forge/task-anchor-fit-v4"
     assert request["input_digest"] == compute_preview_input_digest(collected_package)
     assert request["expected_runtime_ids"] == {
         "robot": "lift2",
@@ -74,6 +74,7 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
         "lift2_end_effectors",
         *_TASK_RUNTIME_IDS,
     ]
+    assert request["views"]["workspace_closeup"]["azimuth_deg"] == -35.0
     assert request["views"]["workspace_closeup"]["elevation_deg"] == 34.0
     assert request["views"]["workspace_closeup"]["minimum_distance"] == 1.0
     assert request["views"]["scene_overview"]["required_runtime_ids"] == [
@@ -81,7 +82,7 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
         _TABLE_RUNTIME_ID,
         *_TASK_RUNTIME_IDS,
     ]
-    assert request["views"]["scene_overview"]["azimuth_deg"] == 140.0
+    assert request["views"]["scene_overview"]["azimuth_deg"] == -35.0
     assert request["views"]["scene_overview"]["elevation_deg"] == 30.0
     assert request["views"]["scene_overview"]["framing_margin"] == 0.7
     assert request["views"]["scene_overview"]["minimum_distance"] == 1.6

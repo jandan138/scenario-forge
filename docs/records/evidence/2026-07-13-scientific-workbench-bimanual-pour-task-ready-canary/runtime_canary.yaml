@@ -1,0 +1,278 @@
+schema_version: scenario-forge-runtime-canary/v0.1
+recorded_at: 2026-07-13T10:40:00Z
+status: passed
+scope: exact_task_ready_collected_package_reset_neutral_step_terminal
+
+package:
+  package_id: scientific_workbench_bimanual_pour
+  task_name: scenario_forge/scientific_workbench_bimanual_pour
+  episode_seed: "000"
+  robot_id: manip/lift2/R5a
+  source_license: CC-BY-NC-4.0
+  redistributable: false
+  portable_tree:
+    file_count: 123
+    byte_count: 61656201
+    sha256sum_stream_sha256: e5151c1801266312fd6215fb975f33db00fb24367bdbe657e3f6d02cee7de702
+  collected_tree:
+    file_count: 61
+    byte_count: 31273506
+    sha256sum_stream_sha256: ec09d519cab41970d24bde1d0cd88e57c73698616933aab309f57eab66c1021d
+    runtime_copy_matches_source_before_and_after_run: true
+  task_ready_context:
+    retained_physical_context_prim: /World/DryingBox_03
+    retained_context_is_visual_only: false
+    inactive_prim_paths:
+      - /World/Cube
+      - /World/lounge_booth_table
+      - /World/beaker1
+      - /World/beaker2
+      - /World/beaker3
+      - /World/conical_bottle01
+      - /World/conical_bottle02
+      - /World/conical_bottle04
+      - /World/target_plat
+      - /World/target_plat2
+      - /World/DryingBox_01
+      - /World/DryingBox_02
+      - /World/DryingBox_04
+      - /World/MuffleFurnace
+      - /World/Cabinet_01
+      - /World/Cabinet_02
+  frozen_inputs:
+    portable_manifest:
+      sha256: fe352d908cd0c2d6fb7140df1092bd31209b6d5071439ce55c120bbc545937ee
+    portable_scene:
+      sha256: 4d36bef3f43fa401599354872328ee62fa2793b47dbff3ebbdc3a5af8a182a20
+      pxr_stage_open: true
+    genmanip_package_manifest:
+      sha256: 1de01eb240a7842180346a61a0a4a21fc7bb8890c8528f27a35bd35f37d8a0bd
+    task_config:
+      sha256: 6d6a75836a49506a38da9435761edba488870b9e38742fcf8dc797dcce1f1e97
+    episode_metadata:
+      sha256: a5788816bee3b0b5cb9fb8abe374c1e7e9a8d10a2a1a63ba26ff314309d5be23
+    meta_info_pickle:
+      sha256: 5b0c8248419f0f4f1fccc53abefa40fb488a607dfddfdf0a284f1af0892cf540
+    scene_usda:
+      sha256: 8c2de1a5b5a02647a81bfe238f1ad0a8f1d1d43501f7576be2dfa9ded8df75b7
+      pxr_stage_open: true
+    source_bundle_tree:
+      sha256: facbfdde33ffce019d96ad0878d141b3656e2bff23412371d745e9487e2193fa
+      path_names: source_bundle_root_relative
+      digest_stream: path_utf8_nul_content_sha256_bytes
+    evaluation_camera:
+      sha256: c6fe59138ebe80d12e97501cb0736363924e66e97064c987b3cf02d3700d4cd2
+  initial_scene_evidence:
+    moment: post_reset_pre_action
+    action_count: 0
+    camera_policy_version: scenario-forge/task-anchor-fit-v4
+    generated_from_genmanip_commit_export: 6ff55ed7c7bd441825d56f1016a30e03b524ebea
+    visual_ready_gate: passed
+    structural_verification_scope: structural_artifact_and_runtime_prim_presence
+    declared_material_signal_scan: passed
+    input_digest: 3e8fb54448a09cf2efa52e4a00604e3a7303e9c82edad32e78ee421324177d3d
+    render_request_sha256: 2d5098ed456441468cf555f4562ef6dd493e95da9fa4c5877a20fb1d886d4723
+    render_manifest_sha256: d3453f7504cc18e8f426daa3de16d50adee0ed8f643cbf27ef12b8bdfca98da5
+    runtime_log_sha256: cce797479cd8c222770ad661a545d57853d78baa4dd6ded29881e10365ca9c97
+    visual_ready_gate_sha256: 0239ac630dd7921e25419f17439c9946e27acd991fc19bcc2f6f83e91ec1baed
+    workspace_closeup_sha256: 623416cf00050dd61d29866b73a23e741077cf3dd9fa41300132631e58dcddcd
+    scene_overview_sha256: 75806937ca17f69f985354875de7cd9f0e0154c45714472bf912d493d30f223b
+    independent_visual_review:
+      status: warning_usable
+      context: image_only_clean_room
+      establishes:
+        - The two views jointly show Lift2, the table, both task vessels, and exactly one peripheral drying box.
+        - No extra loose laboratory clutter, broken mesh, severe clipping, or fallback material is visible.
+        - The retained drying box does not cover either task vessel or enter the tabletop workspace.
+      limitations:
+        - The close-up crops the table while the overview makes the task objects relatively small.
+        - White robot geometry and transparent glass have weak contrast against the bright background.
+        - Cylinder graduations are not legible.
+
+runtime:
+  owner: embodied-eval-os
+  server: GenManip ray_eval_server.py
+  simulator: Isaac Sim 4.1
+  physics: PhysX
+  gpu: NVIDIA GeForce RTX 4090
+  isaac_environment: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310
+  eos_client_environment: /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-py310
+  conda_environment_created_or_installed: false
+  conda_packages_mutated: false
+  package_runtime_root: /tmp/sfgm-final-0713-d
+  package_runtime_root_private: true
+  genmanip_export_method: git_archive
+  genmanip_exported_commit: 6ff55ed7c7bd441825d56f1016a30e03b524ebea
+  collected_package_is_real_private_copy: true
+  shared_base_assets_usage: read_only_by_workflow
+  shared_base_assets_source: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets
+  revisions:
+    scenario_forge_base_commit: f90a259689b8fea35d4781f798bce44adc23d60c
+    scenario_forge_worktree_dirty_during_generation: true
+    genmanip_commit: 6ff55ed7c7bd441825d56f1016a30e03b524ebea
+    eos_runner_commit: a0ccb64b1fcfe5a2c0966b5538b1b3fce6d80930
+    eos_runner_worktree_dirty: true
+    eos_executed_files_tracked_unmodified: true
+    eos_smoke_run_sha256: b76c4c8e7b0ce39b708b29ebb37ac9e91010072af86f12e2944c16289639de0d
+    eos_runtime_probe_sha256: a0e5b8b8adbe28e716562f6ec4fe28908477eb052b1ea5abebf5278caadfe5ec
+    eos_trace_utils_sha256: 3d235c16a4e7af79a5dad9d81b68dbf26424ec1d908eaeabbf834ba695cfd118
+    eos_trace_store_sha256: f8932e705b6a1d983716206cc5201bad383957dc3b04046b395d5d2c243f0451
+    eos_state_trace_sha256: fd3c4f5048e62f45bd797535a011fde166ce2255632d72462c9b944b21a0888d
+    eos_state_world_sha256: 1f3e8a9563fe0c9dbdd7b9ea464be0d6c1ea11b948b15a63cab949f6cac492bf
+    ebench_commit_at_probe: f85b1635efabac7ee831b3435aebff8507c61e7c
+    genmanip_client_commit: d58d76200e07c14bacb6796e516d30506d68b82f
+    genmanip_client_worktree_dirty: true
+    genmanip_client_eval_client_sha256: f2cd10b032758829a1dd86601f4dbeb71c8c9b2c25448cd106142c2535bab5ef
+  curobo_external_source:
+    version_controlled_checkout: false
+    state_py_sha256: 18304737d142b4c9a572c65bc480e812f12cff40eb1a39a68b1bf441f6cc5ffb
+    kinematics_py_sha256: 71c535b8983ff9f3dd41136755c95d65e5e15f1b1ca936ec76f74fcad2d4b6d6
+    kinematics_fused_so_sha256: 1db041a5af8959576e8397ad679176c576a41239d07082f5fc606cb8245ae298
+  client_runtime_overrides:
+    reset_result_poll_timeout_s: 600.0
+    trace_parent_precreated: true
+    source_files_modified: false
+  shutdown:
+    graceful: true
+    port: 18090
+    port_released: true
+    matching_processes_remaining: false
+
+execution:
+  run_id: scenario_forge_bimanual_pour_canary_20260713T103405Z_r5
+  episode_id: scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T103405Z_r5/scenario_forge/scientific_workbench_bimanual_pour/000
+  configured_scene_steps: 1500
+  num_steps_override: 1
+  reset_completed: true
+  reset_time_s: 25.4257
+  initial_observation:
+    instruction_matches_package: true
+    joint_shape: [12]
+    gripper_shape: [4]
+    base_shape: [3]
+    end_effector_count: 2
+    all_numeric_state_finite: true
+    gripper_approximately: [0.044, 0.044, 0.044, 0.044]
+    overlook_camera_jpeg_bytes: 49859
+  action:
+    description: arm_hold_plus_near_open_gripper_neutral_action
+    control_type: joint_position
+    relative_arm_control: true
+    wire_shape:
+      action: [16]
+      base_motion: [3]
+    arm_joint_deltas_all_zero: true
+    left_gripper: [0.04, 0.04]
+    right_gripper: [0.04, 0.04]
+    base_motion: [0.0, 0.0, 0.0]
+    accepted: true
+  step:
+    requested_steps: 1
+    executed_steps: 1
+    stopped_early: false
+    worker_step_count: 1
+    worker_average_step_time_s: 0.0475
+  terminal_result:
+    present: true
+    score: 0.0
+    success_rate: 0.0
+    expected_for_neutral_action: true
+    worker_observation: null
+    eos_observation: {}
+    post_step_stability_established: false
+  trace:
+    written: true
+    step_count: 2
+    record_semantics: reset_record_plus_action_record
+    runtime_status: executed
+  discarded_preflight_attempt:
+    run_id: scenario_forge_bimanual_pour_canary_20260713T102900Z_r5
+    simulator_episode_completed: true
+    accepted_as_final_evidence: false
+    reason: Current EOS TraceStore did not create nested episode-id parent directories before writing JSON.
+
+artifacts:
+  trace:
+    uri: /tmp/sf-bimanual-pour-canary-r5-final-trace/scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T103405Z_r5/scenario_forge/scientific_workbench_bimanual_pour/000.json
+    sha256: b7ff2cbf20752babcd41b525c5afd39ca1fef3cecdc09769fe97ad41c787dd27
+  aggregate_result:
+    uri: /tmp/sfgm-final-0713-d/saved/eval_results/scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T103405Z_r5/result.json
+    sha256: badb22763a9212c3a4177727df502d455adac4c1e651c973f49d584eb63e166f
+  episode_result:
+    uri: /tmp/sfgm-final-0713-d/saved/eval_results/scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T103405Z_r5/scenario_forge/scientific_workbench_bimanual_pour/000/result_info.json
+    sha256: 20e84c4c00f7cbc3e05420eb04ef4bd293a1442d6f7abcf0847ce6b0729afc75
+  server_log:
+    uri: /tmp/sfgm-final-0713-d/logs/scenario_forge_bimanual_pour_canary_20260713T103405Z_r5/server_20260713_183102_804060.log
+    sha256: bbb5deabab805a10d691a5f4fd1b544ad5d83f3c5ea07dea338096b7c3e2e0e3
+  worker_pool_log:
+    uri: /tmp/sfgm-final-0713-d/logs/scenario_forge_bimanual_pour_canary_20260713T103405Z_r5/worker_pool_20260713_183102_807112.log
+    sha256: 512d6898d0f595f9434a388026b8a3c8741c356c57b774bca701cb420ce25431
+  worker_log:
+    uri: /tmp/sfgm-final-0713-d/logs/scenario_forge_bimanual_pour_canary_20260713T103405Z_r5/worker/pool_20260713_183102_807112_worker_0_20260713_183448_916410.log
+    sha256: 5db994e198a0d65bebac1477eb4606880aff9888bf5a5c5ed77cd270de5bef82
+  isaac_stdout:
+    uri: /tmp/sfray-d/ray/session_2026-07-13_18-30-55_080555_900084/logs/worker-7cf580d99845a989a7365c0a56300c87e3b69447319a32619e5f4b3d-01000000-915784.out
+    sha256: fdf7ba057c19c8325851d87287b14d5d9ec1f2c3656ae0b430a846481ae6be3e
+    warning_lines: 44
+    error_or_traceback_lines: 0
+    negative_mass_lines: 7
+    retained_drying_box_lines: 4
+    inactive_context_prim_lines: 0
+    scale_orientation_lines: 0
+    usd_coding_error_lines: 0
+    duplicate_link_lines: 0
+  isaac_stderr:
+    uri: /tmp/sfray-d/ray/session_2026-07-13_18-30-55_080555_900084/logs/worker-7cf580d99845a989a7365c0a56300c87e3b69447319a32619e5f4b3d-01000000-915784.err
+    sha256: f9b51d6635c394cb768971899bb8f52ff5944cfd7a3f3ddf13eedcd7ec8c99a1
+    warning_lines: 2
+    error_or_traceback_lines: 0
+
+comparison_to_full_context_r4:
+  comparable_runtime:
+    genmanip_commit_same: true
+    isaac_environment_same: true
+    eos_client_revision_same: false
+    package_context_inventory_changed: true
+    interpretation: directional_before_after_not_controlled_benchmark
+  isaac_stdout_warning_lines:
+    before: 113
+    after: 44
+  negative_mass_lines:
+    before: 41
+    after: 7
+  scale_orientation_lines:
+    before: 9
+    after: 0
+  usd_coding_error_lines:
+    before: 9
+    after: 0
+  duplicate_link_lines:
+    before: 14
+    after: 0
+
+known_warnings:
+  - The image-only review rated the final pair usable with warnings rather than a visual-quality pass.
+  - DryingBox_03 is deliberately retained as real physics and produces four negative-mass warning lines for its door and handle.
+  - Lift2 produces three negative-mass warning lines for its dummy base links.
+  - The worker-pool memory snapshot timed out during cold startup; the later before-reset and after-reset snapshots succeeded.
+  - The worker pool rebuilt task state before final save, then finalized and wrote both result files normally.
+  - Four structured worker-log ERROR records are tqdm progress bars routed through stderr, not failed operations.
+  - Current EOS still emits legacy task_id, external_task_id, and scenario_pack labels; the native episode ID and frozen hashes establish package linkage.
+  - The terminal GenManip envelope has obs=null, so no post-step robot stability claim is possible.
+  - The one-step neutral action does not exercise cuRobo IK, motion generation, or collision avoidance.
+
+claim_boundary:
+  establishes:
+    - The exact task-ready collected package is found and loaded from a real private copy by GenManip.
+    - Isaac Sim constructs and resets the curated scene with the EBench Lift2 robot.
+    - EOS receives a finite Lift2 reset observation with the expected state shapes.
+    - GenManip accepts one legal 16D dual-arm action plus 3D base motion and advances one native step.
+    - The metric, finalize, aggregate-result, episode-result, and EOS trace paths complete.
+    - Inactive full-context background assets no longer emit runtime warning lines.
+  does_not_establish:
+    - Grasp, alignment, pouring, return-to-start, or full five-step task success.
+    - Auxiliary-arm hold correctness or long-horizon physical stability.
+    - Liquid transfer, transferred volume, or spill behavior.
+    - cuRobo IK, trajectory planning, collision avoidance, or oracle execution.
+    - Wrist-camera or model-input compatibility.
+    - Model quality, official benchmark reproduction, or leaderboard comparability.

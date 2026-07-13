@@ -1,5 +1,10 @@
 # 2026-07-13 Scientific Workbench Bimanual Pour Runtime Canary
 
+> Historical full-context r4 record. The current task-ready scene and its new
+> exact-package evidence are documented in the
+> [r5 runtime Canary](2026-07-13-scientific-workbench-bimanual-pour-task-ready-runtime-canary.md).
+> The hashes below remain valid only for the earlier uncurated package.
+
 ## Decision
 
 The exact generated `scientific_workbench_bimanual_pour` collected package passed a

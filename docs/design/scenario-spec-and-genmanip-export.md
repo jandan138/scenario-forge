@@ -52,6 +52,24 @@ transform as its world transform while the rest of the environment inherits
 `scene.pose`. Other transform stacks are outside this v0.1 contract. This is not a
 general scene-editing pipeline.
 
+## Task-ready context curation
+
+The golden bimanual-pour scenario uses `scene.inactive_prim_paths` as a
+non-destructive task overlay. It keeps the complete source bundle and source
+layout intact, but deactivates whole top-level subtrees for unrelated loose
+glassware, platforms, cabinets, and articulated appliances in both the portable
+scene and the GenManip room reference. This prevents their descendant joints,
+rigid bodies, and colliders from entering the task runtime without teaching the
+compiler any LabUtopia-specific prim names.
+
+`DryingBox_03` is intentionally retained as the single visible laboratory-context
+device in this scenario. It remains a real articulated/physical source prim, not a
+render-only backdrop, and must therefore stay outside the robot workspace and pass
+the same reset/render review as the task package. Scenario Forge does not attempt
+to recursively strip physics APIs from an arbitrary referenced asset. If a future
+scene needs a visually preserved but physics-free device, that task-ready asset
+overlay belongs upstream and enters Scenario Forge as an ordinary USD source.
+
 ## Initial-scene visual evidence
 
 The GenManip export includes an evidence-only render request. The one-shot adapter

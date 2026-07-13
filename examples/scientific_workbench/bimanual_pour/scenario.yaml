@@ -6,7 +6,23 @@ instruction: 辅助臂抓住量筒并保持；操作臂拿起锥形瓶，将瓶�
 scene:
   asset_id: scientific_workbench_environment
   root_prim_path: /World
-  inactive_prim_paths: [/World/Cube]
+  inactive_prim_paths:
+    - /World/Cube
+    - /World/lounge_booth_table
+    - /World/beaker1
+    - /World/beaker2
+    - /World/beaker3
+    - /World/conical_bottle01
+    - /World/conical_bottle02
+    - /World/conical_bottle04
+    - /World/target_plat
+    - /World/target_plat2
+    - /World/DryingBox_01
+    - /World/DryingBox_02
+    - /World/DryingBox_04
+    - /World/MuffleFurnace
+    - /World/Cabinet_01
+    - /World/Cabinet_02
   world_anchored_prim_paths: [/World/CylinderLight, /World/GroundPlane]
   pose:
     xyz: [-9.5, -43.3, 0.0]

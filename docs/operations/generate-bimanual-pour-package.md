@@ -3,6 +3,12 @@
 The golden task uses the scientific-workbench scenario spec, a closed USD scene
 bundle, and the EBench Lift2 profile.
 
+The canonical scenario is task-ready rather than a raw full-context import. Its
+USD overlay deactivates unrelated loose objects and all but one articulated
+appliance subtree while leaving `lab_001.usd` untouched. `DryingBox_03` remains as
+the single visible laboratory-context device and still carries its source physics;
+do not describe it as a visual-only background object.
+
 The checked EOS environments can be reused directly; this workflow does not require
 creating or modifying a conda environment. In the current shared deployment:
 
@@ -33,6 +39,12 @@ The command replaces the managed output directory deterministically and produces
 - a post-reset, pre-action tabletop close-up and scene overview below
   `adapters/ebench/genmanip/evidence/initial_scene/`, with their render manifest,
   runtime log, hashes, and visual-ready gate.
+
+`outputs/` is intentionally Git-ignored, and this package is marked
+non-redistributable until its dependency distribution policy is fully cleared. The
+rendered images and package remain local build artifacts; a fresh clone must run
+the command above to recreate them. Only compact hashes and bounded review/runtime
+records are committed.
 
 Rendering is strict by default: a renderer failure, timeout, missing/stale image,
 source-bundle or request mismatch, runtime-log or image hash mismatch, missing

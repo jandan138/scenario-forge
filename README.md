@@ -114,8 +114,11 @@ close-up plus a whole-scene overview before accepting the package. Use
 `--static-only` only when intentionally producing unrendered static artifacts.
 This example evaluates a kinematic pour sequence; it does not claim real liquid
 transfer. See the [generation runbook](docs/operations/generate-bimanual-pour-package.md).
-The first package-linked reset/action/step Canary is recorded in the
-[runtime evidence note](docs/records/2026-07-13-scientific-workbench-bimanual-pour-runtime-canary.md).
+The current task-ready package-linked reset/action/step Canary is recorded in the
+[task-ready r5 runtime evidence note](docs/records/2026-07-13-scientific-workbench-bimanual-pour-task-ready-runtime-canary.md).
+The earlier
+[full-context r4 record](docs/records/2026-07-13-scientific-workbench-bimanual-pour-runtime-canary.md)
+is retained as historical evidence only.
 
 Developer checks:
 

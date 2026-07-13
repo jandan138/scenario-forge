@@ -162,7 +162,7 @@ def write_genmanip_preview_request(collected_root: str | Path) -> Path:
         "purpose": "evidence_only",
         "affects_policy_observation": False,
         "moment": "post_reset_pre_action",
-        "camera_policy_version": "scenario-forge/task-anchor-fit-v3",
+        "camera_policy_version": "scenario-forge/task-anchor-fit-v4",
         "input_digest": _digest_inputs(package_id, inputs),
         "inputs": inputs,
         "expected_runtime_ids": {
@@ -184,7 +184,7 @@ def write_genmanip_preview_request(collected_root: str | Path) -> Path:
                 "resolution": [1280, 720],
                 "required_runtime_ids": ["lift2", table_ids[0], *task_object_ids],
                 "anchor_runtime_ids": ["lift2", table_ids[0], *task_object_ids],
-                "azimuth_deg": 140.0,
+                "azimuth_deg": -35.0,
                 "elevation_deg": 30.0,
                 "framing_margin": 0.7,
                 "minimum_distance": 1.6,
