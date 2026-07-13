@@ -1,6 +1,17 @@
 schema_version: atomic-skills/v0.1
 domain: scientific_workbench
 robot_profiles:
+  ebench_lift2_r5a_v1:
+    capabilities:
+      - bimanual
+      - reach
+      - grasp
+      - hold
+      - lift
+      - align
+      - tilt
+      - place
+      - release
   franka_panda_tabletop_v1:
     capabilities:
       - reach
@@ -18,6 +29,14 @@ robot_profiles:
       - release
       - place
 skills:
+  grasp_and_hold:
+    required_capabilities: [grasp, hold]
+  lift:
+    required_capabilities: [grasp, lift]
+  align_openings:
+    required_capabilities: [bimanual, align]
+  tilt_pour:
+    required_capabilities: [grasp, tilt]
   move_to_object:
     required_capabilities: [reach]
   grasp:

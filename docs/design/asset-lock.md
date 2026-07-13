@@ -141,7 +141,9 @@ Phase 1 implements these checks:
 - `scenario-forge assets lock <package>` reads `assets/asset_manifest.yaml` and writes
   `locks/asset_lock.yaml`;
 - `scenario-forge assets check <package>` checks lock file shape, license, package-local paths,
-  local asset existence, checksums, and package-local USD references;
+  local asset existence, checksums, and package-local USD references. It also
+  cross-checks each lock entry's canonical path, checksum, and license against the
+  current asset manifest;
 - `scenario-forge package check <package> --require-asset-lock` fails when the lock is missing or
   invalid;
 - missing `asset_lock.yaml` fails when `--require-asset-lock` is set;

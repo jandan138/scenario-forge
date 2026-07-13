@@ -67,6 +67,7 @@ Design documents:
 - [USD Scene Compiler Design](docs/design/usd-scene-compiler.md)
 - [EBench Adapter Design](docs/design/ebench-adapter.md)
 - [Workflow, Layout, Real2Sim, Suite Factory Design](docs/design/workflow-layout-suite-factory.md)
+- [ScenarioSpec and GenManip Export](docs/design/scenario-spec-and-genmanip-export.md)
 
 ## Quick Start
 
@@ -97,6 +98,24 @@ scenario-forge suite generate \
 scenario-forge suite quality --suite /tmp/scenario-forge-suite
 scenario-forge export ebench --suite /tmp/scenario-forge-suite
 ```
+
+Scientific-workbench bimanual-pour example:
+
+```bash
+python scripts/generate_scientific_workbench_bimanual_pour.py \
+  --source-usd /path/to/closed/scientific_workbench_scene.usd \
+  --out outputs/scientific_workbench_bimanual_pour \
+  --isaac-python "$ISAAC_ENV/bin/python" \
+  --genmanip-root "$GENMANIP_ROOT"
+```
+
+The default build resets the exported task in GenManip and renders a tabletop
+close-up plus a whole-scene overview before accepting the package. Use
+`--static-only` only when intentionally producing unrendered static artifacts.
+This example evaluates a kinematic pour sequence; it does not claim real liquid
+transfer. See the [generation runbook](docs/operations/generate-bimanual-pour-package.md).
+The first package-linked reset/action/step Canary is recorded in the
+[runtime evidence note](docs/records/2026-07-13-scientific-workbench-bimanual-pour-runtime-canary.md).
 
 Developer checks:
 
@@ -141,5 +160,8 @@ This repo is a narrow, testable foundation. It supports v0.1 package loading, v0
 package scaffold/load/check behavior, asset manifests and locks, static USDA scene
 compilation, workflow-grounded task artifacts, deterministic layout planning,
 real2sim import/cousin packaging, suite generation, suite quality evidence, and
-static EBench package/suite-index export. It does not run embodied evaluations or
-produce model-performance benchmark reports.
+static EBench package/suite-index export. It now also compiles simulator-neutral
+`ScenarioSpec` inputs into portable packages, exports the EBench/GenManip collected
+package wire format, and can request strict post-reset/pre-action Isaac Sim QA
+renders as package evidence. It does not contain an episode runner, run embodied
+evaluations, or produce model-performance benchmark reports.

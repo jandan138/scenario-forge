@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from pathlib import PurePosixPath
 import re
 from typing import Any
 
@@ -10,7 +11,7 @@ import yaml
 from scenario_forge.artifacts.package_writer import write_yaml_artifact
 from scenario_forge.assets.checksum import compute_sha256
 from scenario_forge.assets.licenses import validate_license
-from scenario_forge.assets.manifest import load_asset_manifest
+from scenario_forge.assets.manifest import AssetManifestError, load_asset_manifest
 
 ASSET_LOCK_SCHEMA_VERSION = "asset-lock/v0.2"
 
@@ -52,6 +53,11 @@ def generate_asset_lock(root: str | Path) -> AssetLock:
     assets: dict[str, AssetLockEntry] = {}
 
     for asset in manifest.assets:
+        if _canonical_asset_path_or_none(package_root, asset.canonical_usd) is None:
+            raise AssetLockError(
+                f"Asset canonical_usd must be a normalized path below assets/: "
+                f"{asset.canonical_usd}"
+            )
         resolved_path = _resolve_package_path(package_root, asset.canonical_usd)
         content_sha256 = compute_sha256(resolved_path)
         assets[asset.asset_id] = AssetLockEntry(
@@ -155,6 +161,48 @@ def check_asset_lock(root: str | Path, scene_paths: tuple[str, ...] = ()) -> Ass
     except AssetLockError as exc:
         return AssetLockReport(ok=False, root=package_root, messages=(str(exc),))
 
+    try:
+        manifest = load_asset_manifest(package_root)
+    except AssetManifestError as exc:
+        manifest = None
+        messages.append(str(exc))
+
+    if manifest is not None:
+        manifest_by_id = {asset.asset_id: asset for asset in manifest.assets}
+        for asset_id, asset in manifest_by_id.items():
+            canonical_path = _canonical_asset_path_or_none(
+                package_root, asset.canonical_usd
+            )
+            if canonical_path is None:
+                messages.append(
+                    "Manifest asset canonical_usd must be a normalized path below "
+                    f"assets/: {asset.canonical_usd}"
+                )
+            elif not canonical_path.is_file():
+                messages.append(
+                    f"Missing manifest asset file: {asset.canonical_usd}"
+                )
+
+            locked = lock.assets.get(asset_id)
+            if locked is None:
+                messages.append(f"Manifest asset is not locked: {asset_id}")
+                continue
+            if locked.resolved_path != asset.canonical_usd:
+                messages.append(
+                    f"Manifest/lock canonical path mismatch for asset {asset_id}"
+                )
+            if locked.content_sha256 != asset.sha256:
+                messages.append(
+                    f"Manifest/lock checksum mismatch for asset {asset_id}"
+                )
+            if locked.license != asset.license:
+                messages.append(
+                    f"Manifest/lock license mismatch for asset {asset_id}"
+                )
+
+        for asset_id in sorted(set(lock.assets).difference(manifest_by_id)):
+            messages.append(f"Locked asset is missing from manifest: {asset_id}")
+
     for asset in lock.assets.values():
         license_error = validate_license(asset.license)
         if license_error is not None:
@@ -220,6 +268,19 @@ def _resolve_package_path_or_none(root: Path, relative_path: str) -> Path | None
     if resolved == package_root or package_root in resolved.parents:
         return resolved
     return None
+
+
+def _canonical_asset_path_or_none(root: Path, relative_path: str) -> Path | None:
+    candidate = PurePosixPath(relative_path)
+    if (
+        candidate.is_absolute()
+        or len(candidate.parts) < 2
+        or candidate.parts[0] != "assets"
+        or any(part in {"", ".", ".."} for part in candidate.parts)
+        or candidate.as_posix() != relative_path
+    ):
+        return None
+    return _resolve_package_path_or_none(root, relative_path)
 
 
 def _require_string(data: dict[str, Any], key: str) -> str:

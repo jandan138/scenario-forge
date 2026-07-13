@@ -1,0 +1,205 @@
+schema_version: scenario-forge-runtime-canary/v0.1
+recorded_at: 2026-07-13T08:14:03Z
+status: passed
+scope: exact_collected_package_reset_neutral_step_terminal
+
+package:
+  package_id: scientific_workbench_bimanual_pour
+  task_name: scenario_forge/scientific_workbench_bimanual_pour
+  episode_seed: "000"
+  robot_id: manip/lift2/R5a
+  source_license: CC-BY-NC-4.0
+  redistributable: false
+  portable_tree:
+    file_count: 123
+    byte_count: 61825747
+    sha256sum_stream_sha256: e995ff44d315e56082d84d8d1a0f6db5f3d07687da9ae2014df0499c98c85991
+  collected_tree:
+    file_count: 61
+    byte_count: 31444430
+    sha256sum_stream_sha256: 75cbb02ea80c504b72277466214872c1a29ca2a0174eb854c0d64665264892f0
+    runtime_copy_matches_source: true
+  frozen_inputs:
+    portable_manifest:
+      sha256: fe352d908cd0c2d6fb7140df1092bd31209b6d5071439ce55c120bbc545937ee
+    portable_scene:
+      sha256: aacbde1b0777f1e07e651d7e3c81c5df0439361c931a5cb02101710dac603732
+      pxr_stage_open: true
+    genmanip_package_manifest:
+      sha256: 1de01eb240a7842180346a61a0a4a21fc7bb8890c8528f27a35bd35f37d8a0bd
+    task_config:
+      sha256: 6d6a75836a49506a38da9435761edba488870b9e38742fcf8dc797dcce1f1e97
+    episode_metadata:
+      sha256: a5788816bee3b0b5cb9fb8abe374c1e7e9a8d10a2a1a63ba26ff314309d5be23
+    meta_info_pickle:
+      sha256: 5b0c8248419f0f4f1fccc53abefa40fb488a607dfddfdf0a284f1af0892cf540
+    scene_usda:
+      sha256: 92eedcc0f1b62ddffb32216cf514343ac95191493e828ed2e66af82a926e0186
+      pxr_stage_open: true
+    source_bundle_tree:
+      sha256: facbfdde33ffce019d96ad0878d141b3656e2bff23412371d745e9487e2193fa
+      path_names: source_bundle_root_relative
+      digest_stream: path_utf8_nul_content_sha256_bytes
+    evaluation_camera:
+      sha256: c6fe59138ebe80d12e97501cb0736363924e66e97064c987b3cf02d3700d4cd2
+  initial_scene_evidence:
+    moment: post_reset_pre_action
+    action_count: 0
+    generated_from_clean_genmanip_checkout: true
+    visual_ready_gate: passed
+    structural_verification_scope: structural_artifact_and_runtime_prim_presence
+    declared_material_signal_scan: passed
+    input_digest: f1266759737a4c2246d83c5e47d396cd2a023eb497ab4d4a1cd1723bb3cacdec
+    render_request_sha256: c2eec81fe35a0b9fcaac2dd6893784f3097b2e1b70a1fefe22c93c50049c7385
+    render_manifest_sha256: 0c7e70388020643f177f79df3638e07b76f3e5ca9b5405953b45aa1ac8827395
+    runtime_log_sha256: cbdd3400d5a66ee4768a861075ee786eeea728d0c5ec5c62e46ed7468ed559de
+    visual_ready_gate_sha256: bcf3542da21e2e83a1f3afbd4c558cb797291b937e2ef93ea9f07b0cf25f3a9f
+    workspace_closeup_sha256: 65c5ca056fdd03cfac5ee17203adda5e78bf275ce5c7292054f057c8f93a9df1
+    scene_overview_sha256: 22fdc0693187f469a27e3b9291bbe1dbffa1339ab752a87635093b0822216d17
+    independent_visual_review:
+      status: warning_usable
+      context: image_only
+      establishes:
+        - Both task vessels, the worktable, Lift2, and surrounding laboratory assets are present in the two views.
+        - No severe missing-mesh, floating-object, z-fighting, or fallback-material failure is visible.
+      limitations:
+        - Graduations are not legible on the transparent cylinder.
+        - Transparent glass and white robot geometry have weak contrast against the bright background.
+        - The overview contains partial arm and laboratory-appliance occlusion.
+
+runtime:
+  owner: embodied-eval-os
+  server: GenManip ray_eval_server.py
+  simulator: Isaac Sim 4.1
+  physics: PhysX
+  gpu: NVIDIA GeForce RTX 4090
+  isaac_environment: /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310
+  eos_client_environment: /cpfs/user/zhuzihou/conda-managed/envs/embodied-eval-os-py310
+  conda_environment_created_or_installed: false
+  conda_packages_mutated: false
+  package_runtime_root: /tmp/sfgm-final-0713-c
+  package_runtime_root_private: true
+  collected_package_is_real_private_copy: true
+  shared_base_assets_usage: read_only_by_workflow
+  shared_base_assets_source: /cpfs/shared/simulation/zhuzihou/dev/_datasets/EBench-Assets/assets
+  revisions:
+    genmanip_commit: 6ff55ed7c7bd441825d56f1016a30e03b524ebea
+    genmanip_checkout_clean_at_launch: true
+    eos_runner_commit: 4096906e396651e674300448409e02f89a39b484
+    eos_runner_worktree_dirty: true
+    eos_smoke_run_sha256: a6414f1adcc407ef9896b25a861311d121b09ba6f79e367bba31eae47e1132ac
+    eos_scenario_forge_package_sha256: 42819a8246420de81475ad854c37f114284af1159a88cab5b7903fee6ddc0d17
+    eos_trace_store_sha256: f1a240b9a7eae9fa0887a49b0780609b5bc1d49e0dc149d05ce178e03dc8b7f0
+    ebench_commit_at_probe: 884a9496700b41cbf9cd4859d7e86f71262f5816
+    ebench_head_observed_after_run: 884a9496700b41cbf9cd4859d7e86f71262f5816
+    genmanip_client_commit: d58d76200e07c14bacb6796e516d30506d68b82f
+    genmanip_client_worktree_dirty: true
+    genmanip_client_eval_client_sha256: f2cd10b032758829a1dd86601f4dbeb71c8c9b2c25448cd106142c2535bab5ef
+  curobo_external_source:
+    version_controlled_checkout: false
+    state_py_sha256: 18304737d142b4c9a572c65bc480e812f12cff40eb1a39a68b1bf441f6cc5ffb
+    kinematics_py_sha256: 71c535b8983ff9f3dd41136755c95d65e5e15f1b1ca936ec76f74fcad2d4b6d6
+    kinematics_fused_so_sha256: 1db041a5af8959576e8397ad679176c576a41239d07082f5fc606cb8245ae298
+  shutdown:
+    graceful: true
+    port_released: true
+    matching_processes_remaining: false
+
+execution:
+  run_id: scenario_forge_bimanual_pour_canary_20260713T080757Z_r4
+  episode_id: scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T080757Z_r4/scenario_forge/scientific_workbench_bimanual_pour/000
+  configured_max_steps: 1500
+  num_steps_override: 1
+  reset_completed: true
+  initial_observation:
+    instruction_matches_package: true
+    joint_shape: [12]
+    gripper_shape: [4]
+    base_shape: [3]
+    end_effector_count: 2
+    all_numeric_state_finite: true
+  action:
+    description: arm_hold_plus_near_open_gripper_neutral_action
+    control_type: joint_position
+    relative_arm_control: true
+    wire_shape:
+      action: [16]
+      base_motion: [3]
+    arm_joint_deltas_all_zero: true
+    left_gripper: [0.04, 0.04]
+    right_gripper: [0.04, 0.04]
+    reset_gripper_approximately: [0.044, 0.044, 0.044, 0.044]
+    base_motion: [0.0, 0.0, 0.0]
+    accepted: true
+  step:
+    requested_steps: 1
+    executed_steps: 1
+    stopped_early: false
+    worker_step_count: 1
+    worker_average_step_time_s: 0.0093
+  terminal_result:
+    present: true
+    score: 0.0
+    success_rate: 0.0
+    expected_for_neutral_action: true
+    worker_observation: null
+    eos_observation: {}
+    post_step_stability_established: false
+
+artifacts:
+  trace:
+    uri: /tmp/sf-bimanual-pour-canary-r4-trace/scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T080757Z_r4/scenario_forge/scientific_workbench_bimanual_pour/000.json
+    sha256: 8ea9f25e41b6e29700a68d8725b62025c0ab1de5c86a8398db93166160d77ca4
+  aggregate_result:
+    uri: /tmp/sfgm-final-0713-c/saved/eval_results/scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T080757Z_r4/result.json
+    sha256: badb22763a9212c3a4177727df502d455adac4c1e651c973f49d584eb63e166f
+  episode_result:
+    uri: /tmp/sfgm-final-0713-c/saved/eval_results/scientific_workbench_bimanual_pour/scenario_forge_bimanual_pour_canary_20260713T080757Z_r4/scenario_forge/scientific_workbench_bimanual_pour/000/result_info.json
+    sha256: f3c497e94db0e66690603deb58e85e54e9930461d59b2ab0d2b82cafd5e0e81f
+  server_log:
+    uri: /tmp/sfgm-final-0713-c/logs/scenario_forge_bimanual_pour_canary_20260713T080757Z_r4/server_20260713_160852_835338.log
+    sha256: b0803471500fc4060fbc60f48c63d98a1458cd44414af7a331399507af749643
+  worker_pool_log:
+    uri: /tmp/sfgm-final-0713-c/logs/scenario_forge_bimanual_pour_canary_20260713T080757Z_r4/worker_pool_20260713_160852_838401.log
+    sha256: db81fc9e97b9f15d65ba9c55cf1316334e8a92b2521df149f9c08f31f58fa31b
+  worker_log:
+    uri: /tmp/sfgm-final-0713-c/logs/scenario_forge_bimanual_pour_canary_20260713T080757Z_r4/worker/pool_20260713_160852_838401_worker_0_20260713_160941_803437.log
+    sha256: 046575b162f5e4f06bd0b99c33483a5e6183100a1d19285960d4bd9e28f51240
+  isaac_stdout:
+    uri: /tmp/sfray-c/ray/session_2026-07-13_16-08-44_909549_650905/logs/worker-15cc8b605f450b5e82648053131ccd2d0578a06f9dcbc95e0d99ecf4-01000000-658668.out
+    sha256: 6d5417acb6480ec3033bd16c80b5eb02a447c6ce5f0232627e2a2f99d87b3111
+    warning_lines: 113
+    error_lines: 0
+    negative_mass_lines: 41
+    scale_orientation_lines: 9
+    usd_coding_error_lines: 9
+    duplicate_link_lines: 14
+  isaac_stderr:
+    uri: /tmp/sfray-c/ray/session_2026-07-13_16-08-44_909549_650905/logs/worker-15cc8b605f450b5e82648053131ccd2d0578a06f9dcbc95e0d99ecf4-01000000-658668.err
+    sha256: f9b51d6635c394cb768971899bb8f52ff5944cfd7a3f3ddf13eedcd7ec8c99a1
+
+known_warnings:
+  - The independent image-only review rated the two images usable with warnings, not a visual-quality pass; cylinder markings, glass contrast, and partial occlusion remain asset/render debt.
+  - Isaac stdout contains negative mass/inertia, unsupported ScaleOrientation, USD Imaging coding, and duplicate articulation-link warnings; it contains no Error or traceback line.
+  - Four structured worker-log ERROR records are tqdm progress-bar stderr lines, not runtime failures.
+  - The worker pool briefly reported unfinished episodes while rebuilding task state, then finalized the episode and saved both result files.
+  - The EOS trace labels task_id as ebench/config, external_task_id as config, and scenario_pack as home_manipulation; those are legacy labels, while the native episode_id and frozen hashes establish linkage.
+  - The trace freezes the observed EBench revision; EBench code was not the package runtime.
+  - package_manifest.json retains validation_scope.simulator_smoke=false because it is a static package declaration; this external Canary record does not mutate the generated package.
+  - The terminal GenManip envelope has obs=null, so no post-step robot stability claim is possible.
+  - The one-step neutral action does not exercise cuRobo IK, motion generation, or collision avoidance.
+
+claim_boundary:
+  establishes:
+    - The exact collected package tree is found and loaded from a real private copy by GenManip.
+    - Isaac Sim constructs and resets the LabUtopia-derived scene with the EBench Lift2 robot.
+    - EOS receives a finite Lift2 reset observation with the expected state shapes.
+    - GenManip accepts one legal 16D dual-arm action plus 3D base motion and advances one native step.
+    - The metric, finalize, aggregate-result, and episode-result paths complete.
+  does_not_establish:
+    - Grasp, alignment, pouring, return-to-start, or full five-step task success.
+    - Auxiliary-arm hold correctness or long-horizon physical stability.
+    - Liquid transfer, transferred volume, or spill behavior.
+    - cuRobo IK, trajectory planning, collision avoidance, or oracle execution.
+    - Wrist-camera or model-input compatibility.
+    - Model quality, official benchmark reproduction, or leaderboard comparability.

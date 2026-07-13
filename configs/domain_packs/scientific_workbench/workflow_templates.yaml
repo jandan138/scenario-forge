@@ -1,6 +1,59 @@
 schema_version: workflow-templates/v0.1
 domain: scientific_workbench
 templates:
+  bimanual_pour:
+    instruction: Hold the target container, pour from the source container, then return the source container.
+    required_assets:
+      - role: source_container
+        asset_type: container
+        affordances: [graspable, pourable]
+      - role: target_container
+        asset_type: container
+        affordances: [graspable, receivable]
+    nodes:
+      - id: grasp_target
+        skill: grasp_and_hold
+        actors: [$auxiliary_arm]
+        object: $target_container
+      - id: lift_source
+        skill: lift
+        actors: [$operating_arm]
+        object: $source_container
+      - id: align_openings
+        skill: align_openings
+        actors: [$auxiliary_arm, $operating_arm]
+        source: $source_container
+        target: $target_container
+      - id: tilt_pour
+        skill: tilt_pour
+        actors: [$operating_arm]
+        object: $source_container
+        target: $target_container
+      - id: place_source
+        skill: place_on_surface
+        actors: [$operating_arm]
+        object: $source_container
+    edges:
+      - from: grasp_target
+        to: lift_source
+      - from: lift_source
+        to: align_openings
+      - from: align_openings
+        to: tilt_pour
+      - from: tilt_pour
+        to: place_source
+    invariants:
+      - type: maintain_grasp
+        actor: $auxiliary_arm
+        object: $target_container
+        from: grasp_target
+        through: tilt_pour
+    success_predicates:
+      - type: kinematic_pour_sequence
+        source: $source_container
+        target: $target_container
+        claim_scope: kinematic_proxy
+        liquid_transfer_claim_allowed: false
   pick_place:
     instruction: Move the object onto the target zone.
     required_assets:

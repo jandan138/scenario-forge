@@ -120,6 +120,36 @@ def test_check_asset_lock_reports_checksum_mismatch(tmp_path: Path) -> None:
     assert "Checksum mismatch for asset sample_bottle_50ml_v1" in report.messages
 
 
+def test_check_asset_lock_rejects_manifest_path_escape_even_if_lock_is_unchanged(
+    tmp_path: Path,
+) -> None:
+    make_asset_manifest_package(tmp_path)
+    write_asset_lock(tmp_path, generate_asset_lock(tmp_path))
+    manifest_path = tmp_path / "assets" / "asset_manifest.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    manifest["assets"][0]["canonical_usd"] = "assets/../../outside.usd"
+    write_yaml(manifest_path, manifest)
+
+    report = check_asset_lock(tmp_path)
+
+    assert not report.ok
+    assert any("canonical" in message.lower() for message in report.messages)
+
+
+def test_check_asset_lock_rejects_manifest_license_mismatch(tmp_path: Path) -> None:
+    make_asset_manifest_package(tmp_path)
+    write_asset_lock(tmp_path, generate_asset_lock(tmp_path))
+    manifest_path = tmp_path / "assets" / "asset_manifest.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    manifest["assets"][0]["license"] = "Apache-2.0"
+    write_yaml(manifest_path, manifest)
+
+    report = check_asset_lock(tmp_path)
+
+    assert not report.ok
+    assert any("license" in message.lower() for message in report.messages)
+
+
 def test_check_asset_lock_reports_missing_local_asset(tmp_path: Path) -> None:
     model = make_asset_manifest_package(tmp_path)
     write_asset_lock(tmp_path, generate_asset_lock(tmp_path))

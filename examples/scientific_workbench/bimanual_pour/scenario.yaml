@@ -1,0 +1,136 @@
+schema_version: scenario-spec/v0.1
+scenario_id: scientific_workbench_bimanual_pour
+domain: scientific_workbench
+task_family: bimanual_pour
+instruction: 辅助臂抓住量筒并保持；操作臂拿起锥形瓶，将瓶口与量筒口对准后倾斜倾倒，最后把锥形瓶放回原位。
+scene:
+  asset_id: scientific_workbench_environment
+  root_prim_path: /World
+  inactive_prim_paths: [/World/Cube]
+  world_anchored_prim_paths: [/World/CylinderLight, /World/GroundPlane]
+  pose:
+    xyz: [-9.5, -43.3, 0.0]
+    wxyz: [0.7933533, 0.0, 0.0, 0.6087614]
+objects:
+  - id: table
+    asset_id: scientific_workbench_environment
+    source_prim_path: /World/table
+    role: table
+    pose:
+      xyz: [0.242788066, 0.0, 0.0]
+      wxyz: [0.0, 1.0, 0.0, 0.0]
+      scale_xyz: [0.003, 0.0035, 0.004]
+    metadata:
+      material_bindings:
+        Bespoke_Booth_Table_Black_Nickel_0/Bespoke_Booth_Table_Black_Nickel_0: Material5_black
+        surface/mesh: Material1_plastic_dark_blue
+  - id: obj_conical_bottle03
+    asset_id: scientific_workbench_environment
+    source_prim_path: /World/conical_bottle03
+    role: source_container
+    pose:
+      xyz: [-0.25, 0.16, 0.81]
+      wxyz: [0.6532815, 0.6532815, 0.2705981, 0.2705981]
+    named_frames:
+      opening:
+        xyz: [0.0, 0.0, 0.18]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+    metadata:
+      material_bindings:
+        mesh: OmniSurface_Glass
+  - id: obj_graduated_cylinder_03
+    asset_id: scientific_workbench_environment
+    source_prim_path: /World/graduated_cylinder_03
+    role: target_container
+    pose:
+      xyz: [-0.25, -0.16, 0.81]
+      wxyz: [0.7071068, 0.7071068, 0.0, 0.0]
+    named_frames:
+      opening:
+        xyz: [0.0, 0.0, 0.20]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+    metadata:
+      material_bindings:
+        mesh: OmniGlass
+robot:
+  profile_ref: manip/lift2/R5a
+  spawn:
+    xyz: [-1.02, 0.0, 0.31]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
+  actors:
+    - id: auxiliary_arm
+      end_effector: left
+      capabilities: [grasp, hold]
+    - id: operating_arm
+      end_effector: right
+      capabilities: [grasp, lift, align, tilt, place, release]
+steps:
+  - id: grasp_target
+    skill: grasp_and_hold
+    actors: [auxiliary_arm]
+    parameters:
+      object: obj_graduated_cylinder_03
+  - id: lift_source
+    skill: lift
+    actors: [operating_arm]
+    parameters:
+      object: obj_conical_bottle03
+    depends_on: [grasp_target]
+  - id: align_openings
+    skill: align_openings
+    actors: [auxiliary_arm, operating_arm]
+    parameters:
+      source_frame: obj_conical_bottle03.opening
+      target_frame: obj_graduated_cylinder_03.opening
+    depends_on: [lift_source]
+  - id: tilt_pour
+    skill: tilt_pour
+    actors: [operating_arm]
+    parameters:
+      object: obj_conical_bottle03
+      min_tilt_deg: 40.0
+    depends_on: [align_openings]
+  - id: place_source
+    skill: place_on_surface
+    actors: [operating_arm]
+    parameters:
+      object: obj_conical_bottle03
+    depends_on: [tilt_pour]
+invariants:
+  - id: target_held_during_pour
+    type: maintain_grasp
+    actor: auxiliary_arm
+    object: obj_graduated_cylinder_03
+    from_step: grasp_target
+    through_step: tilt_pour
+success:
+  operator: all
+  claim_scope: kinematic_proxy
+  predicates:
+    - id: pour_pose_reached
+      type: relative_pose_reached
+      sequence_index: 0
+      parameters:
+        object: obj_conical_bottle03
+        relative_to: obj_graduated_cylinder_03
+        xyz_range:
+          x: [-0.08, 0.08]
+          y: [-0.08, 0.08]
+          z: [0.10, 0.30]
+        axis_alignment:
+          object_axis: y
+          target_axis: y
+          comparison: ">="
+          threshold_deg: 40.0
+    - id: source_returned
+      type: object_at_initial_pose
+      sequence_index: 1
+      parameters:
+        object: obj_conical_bottle03
+        xyz_tolerance: [0.06, 0.06, 0.06]
+        relative_axis_object: obj_graduated_cylinder_03
+        object_axis: y
+        target_axis: y
+        max_axis_error_deg: 15.0
+max_steps: 1500
+seed: "000"
