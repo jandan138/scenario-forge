@@ -9,15 +9,19 @@ assets:
   - asset_role: erlenmeyer_flask
     candidate_identity: LabUtopia:lab_001#/World/conical_bottle03
     context_package_status: passed
-    interactive_affordance_status: pending
+    interactive_affordance_status: blocked
     pending_affordances: [stable_grasp, oracle_lift, oracle_pour]
-    blockers: [Five-stage oracle has not run on the current exact package.]
+    blockers:
+      - GenManip tracks the wrapper prim while RigidBodyAPI and CollisionAPI are on child /mesh.
+      - No source-bound task-ready dynamic package has qualified grasp, lift, and pour behavior.
   - asset_role: graduated_cylinder
     candidate_identity: LabUtopia:lab_001#/World/graduated_cylinder_03
     context_package_status: passed
-    interactive_affordance_status: pending
+    interactive_affordance_status: blocked
     pending_affordances: [stable_grasp, oracle_hold]
-    blockers: [Five-stage oracle has not run on the current exact package.]
+    blockers:
+      - GenManip tracks the wrapper prim while RigidBodyAPI and CollisionAPI are on child /mesh.
+      - No source-bound task-ready dynamic package has qualified grasp and hold behavior.
   - asset_role: drying_box
     candidate_identity: ConvertAsset:DryingBox_03@324ce6e
     context_package_status: passed
@@ -232,9 +236,11 @@ tasks:
   - task_id: wetlab_nonquant_pour_to_cylinder
     compile_status: passed
     runtime_reset_status: passed
-    oracle_status: pending
-    blockers: [Five-stage oracle has not run on the current exact package.]
-    next_action: Freeze the exact package and execute the external EOS/GenManip oracle.
+    oracle_status: blocked
+    blockers:
+      - GenManip wrapper UID and physical rigid-body prim identity are not aligned for either vessel.
+      - The root-range success metric excludes the exact 40-degree opening-frame alignment pose.
+    next_action: Qualify both vessel packages upstream and add a frame-aware GenManip metric before the EOS oracle.
   - task_id: wetlab_glassrod_mix_and_stage
     compile_status: pending
     runtime_reset_status: not_run

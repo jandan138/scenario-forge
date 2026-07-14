@@ -23,7 +23,11 @@ replacements.
 ## Current readiness
 
 `wetlab_nonquant_pour_to_cylinder` is the only task with a compiled package and a
-current exact-package runtime reset. Its five-stage oracle remains pending.
+hash-bound reset of the same runtime-relevant GenManip inputs. Its five-stage
+oracle is now blocked by a concrete preflight result, not merely pending: GenManip
+tracks wrapper Xforms while vessel physics lives on child `/mesh` prims, and the
+root-range pour metric excludes the geometrically correct 40-degree opening-frame
+alignment pose.
 
 The DryingBox_03 source-bound ConvertAsset package is accepted for physical scene
 context. Door opening/closing and start-button state are separate interaction
@@ -43,6 +47,8 @@ bound for the task.
 - Readiness: `docs/records/evidence/2026-07-14-scientific-workbench-task-catalog/readiness.yaml`
 - Readiness schema: `task-readiness-snapshot-v0.1.schema.json`
 
-The next implementation target remains the exact-package five-stage oracle for the
-existing bimanual pour. In parallel, the catalog constrains the design of the thin
-asset-source resolution and compile orchestration entry point.
+The next dependency target is a source-bound task-ready handoff for both vessels
+and a frame-aware GenManip metric. Once those two contracts pass, Scenario Forge
+can regenerate and refreeze the package for an EOS-owned five-stage oracle. In
+parallel, the catalog constrains the design of the thin asset-source resolution
+and compile orchestration entry point.

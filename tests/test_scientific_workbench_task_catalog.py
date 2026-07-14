@@ -109,7 +109,9 @@ def test_readiness_snapshot_does_not_promote_unverified_tasks_or_interactions() 
     current = next(item for item in task_statuses if item["task_id"] == "wetlab_nonquant_pour_to_cylinder")
     assert current["compile_status"] == "passed"
     assert current["runtime_reset_status"] == "passed"
-    assert current["oracle_status"] == "pending"
+    assert current["oracle_status"] == "blocked"
+    assert "wrapper" in " ".join(current["blockers"])
+    assert "opening-frame" in " ".join(current["blockers"])
 
     assert all(
         item["compile_status"] != "passed"
@@ -122,3 +124,10 @@ def test_readiness_snapshot_does_not_promote_unverified_tasks_or_interactions() 
     assert drying_box["interactive_affordance_status"] == "pending"
     assert "door" in drying_box["pending_affordances"]
     assert "start_button" in drying_box["pending_affordances"]
+
+    flask = next(item for item in asset_statuses if item["asset_role"] == "erlenmeyer_flask")
+    cylinder = next(
+        item for item in asset_statuses if item["asset_role"] == "graduated_cylinder"
+    )
+    assert flask["interactive_affordance_status"] == "blocked"
+    assert cylinder["interactive_affordance_status"] == "blocked"

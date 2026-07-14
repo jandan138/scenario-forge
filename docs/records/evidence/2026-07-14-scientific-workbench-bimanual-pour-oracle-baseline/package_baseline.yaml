@@ -1,0 +1,96 @@
+schema_version: scenario-forge-package-baseline/v0.1
+recorded_at: "2026-07-14T09:05:00Z"
+status: frozen_for_oracle_preflight
+
+package:
+  package_id: scientific_workbench_bimanual_pour
+  task_name: scenario_forge/scientific_workbench_bimanual_pour
+  build_mode: static_only
+  output_basename: package
+  file_count: 198
+  file_content_bytes: 120066353
+  sha256sum_stream_sha256: 59d6024db27db865be103fd2ddeb7b9a66672238b0f628149d5a065d77cdebe4
+  digest_algorithm: sha256(sorted sha256sum records for ./ relative regular-file paths)
+  redistributable: false
+  committed_to_git: false
+
+sources:
+  scenario_forge_revision: d481713b5a507d4e4948f359fbdb2271174996d9
+  convert_asset_revision: 324ce6e6d4395ccfda1e59e5ae89de9389cdf225
+  genmanip_target_revision: 6ff55ed7c7bd441825d56f1016a30e03b524ebea
+  eos_target_revision: a0ccb64b1fcfe5a2c0966b5538b1b3fce6d80930
+  labutopia_revision: 06ece24f41d4c5587e269451b90818ca126061d9
+  base_source_uri: LabUtopia:lab_001_localized_20260707
+  base_usd_sha256: b3861b5a17945abe401062a04125969c3a63b0f8a0a5ce0026a461dbdfc935f2
+  convert_asset_manifest_sha256: be988683935c2e107335fff3cbe4b562aee186a0c076d7445a2b907f07412dc9
+  convert_asset_root_usd_sha256: e217cc8857430429648eebd051061a7f2c20bfd94cf43148867327845b73c1cc
+  convert_asset_profile_sha256: 37b1024418fbcfcf3c3148cce9daf96437d0b3cf157f0c4a0a6b4723b24b8940
+
+frozen_artifacts:
+  scenario.yaml: 3a89922880b1f70c938951086ec79ab71aced2d79a70758339d2dbc3096c77bd
+  manifest.yaml: fe352d908cd0c2d6fb7140df1092bd31209b6d5071439ce55c120bbc545937ee
+  asset_lock.yaml: 1a0ba9a19fbd4e42e2bed7d6589ee80bbcdbe6fb54061b50b102d20caeedd955
+  portable_scene: 74aa32c9324c7bed744b86880f8207cdc7cf0f713df88debef553930847a30f9
+  task: 8c329f396598e647ae35fcbc05c5ad66094ae2aac50b21d170ddb6500e9a4644
+  task_graph: 1dab336a1aa3740cd59f05b901b0b09f24545bbc8d8d1f6bf5a309108d7bfbbd
+  predicates: 6a7e526d9d99fb1de9eaf049ebd49353f48f860f5b2444e0a776a9f67daae8c5
+  robot: a2ff8964c558cd9b4a08b2fb39d9563285bbe83d251f3edacb62de41e65f7e7c
+  metrics: ae66e7aee3f59e3017f80a36e23fb529486cbd4fb41ae54635948a6bd91cf5a9
+  genmanip_package_manifest: f7f807b0ad58b89bbb7e197fae28958dcd08bf8af90b1fd679f0b2056bfbfc05
+  genmanip_task_config: 6d6a75836a49506a38da9435761edba488870b9e38742fcf8dc797dcce1f1e97
+  genmanip_episode_metadata: a5788816bee3b0b5cb9fb8abe374c1e7e9a8d10a2a1a63ba26ff314309d5be23
+  genmanip_scene: 19a24e880460e80a2d7264d64503cb60f20c9c78ef453b469a6dff5bf4da0b30
+
+reproduction:
+  generation_script: scripts/generate_scientific_workbench_bimanual_pour.py
+  output_basename_is_identity_relevant: true
+  fresh_second_build_matches_byte_for_byte: true
+  fresh_second_build_tree_sha256: 59d6024db27db865be103fd2ddeb7b9a66672238b0f628149d5a065d77cdebe4
+  note: >-
+    The current asset-lock ID is derived from the output directory basename, so a
+    reproducing build must use an output path ending in package. This coupling is
+    recorded rather than hidden and should be removed in the generic compiler lane.
+
+runtime_handoff:
+  owner: embodied-eval-os
+  simulator_adapter: genmanip
+  private_worktree_required: true
+  source_checkout_mutation_allowed: false
+  package_tree_must_match_before_and_after: true
+  required_stages: [target_grasp_hold, source_pick, mouth_alignment, pour_pose, source_return]
+
+oracle_preflight:
+  status: blocked
+  non_blocking_corrections_applied:
+    - Vessel opening frames now follow mesh local +Y with frame +Z as outward normal.
+    - Lift2 actor roles now use same-side arms instead of cross-midline paths.
+  blocking_findings:
+    - id: runtime_body_identity_mismatch
+      owner: ConvertAsset_and_GenManip
+      evidence: >-
+        Each task UID resolves to a wrapper Xform, but PhysicsRigidBodyAPI,
+        PhysicsCollisionAPI, and PhysicsMassAPI are on child /mesh. GenManip object
+        tracking and metrics read the wrapper.
+      required_gate: >-
+        After warmup and a physical move of at least 0.05 m, wrapper and qualified
+        rigid-root pose deltas must agree within 0.001 m and 0.5 degrees.
+    - id: opening_metric_mismatch
+      owner: GenManip_adapter
+      evidence: >-
+        At 40 degrees with rim centers coincident, the source-root horizontal
+        offset is about 0.12635 m, while the current x/y range permits at most
+        0.11314 m radially and does not read named opening frames.
+      required_gate: >-
+        Evaluate opening-center and opening-normal error directly, then verify
+        full source return pose against the post-warmup baseline.
+  non_blocking_runtime_debt:
+    - GenManip removes colliders recursively below the room prim, including the retained DryingBox context.
+    - Native metrics do not prove grasp, maintain-grasp, specified arm use, table contact, or release.
+
+claim_boundary:
+  static_package_validation: passed
+  repeated_static_generation: passed
+  runtime_reset: not_established_by_this_record
+  five_stage_oracle: blocked_by_preflight
+  fluid_transfer: out_of_scope_kinematic_proxy
+  task_success: not_claimed

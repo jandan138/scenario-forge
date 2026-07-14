@@ -40,6 +40,10 @@ For tasks it distinguishes:
 - downstream runtime reset;
 - full oracle execution.
 
+A successful simulator reset does not promote oracle readiness. Object identity,
+the tracked rigid body, task frames, and downstream metric semantics must agree;
+otherwise `oracle_status` is `blocked` even when package compilation and reset pass.
+
 These states must not be promoted by inference. For example, the source-bound
 DryingBox_03 package is accepted as physical scene context, but that does not prove
 that its door or start button can be manipulated and observed. Dynamic asset repair
