@@ -106,9 +106,14 @@ Scientific-workbench bimanual-pour example:
 ```bash
 python scripts/generate_scientific_workbench_bimanual_pour.py \
   --source-usd /path/to/closed/scientific_workbench_scene.usd \
-  --convert-asset-package /path/to/convertasset/package \
-  --convert-asset-manifest /path/to/convertasset/manifest.json \
-  --convert-asset-revision <convertasset-git-sha> \
+  --convert-asset-package /path/to/dryingbox/package \
+  --convert-asset-manifest /path/to/dryingbox/manifest.json \
+  --source-vessel-package /path/to/conical_bottle03/package \
+  --source-vessel-manifest /path/to/conical_bottle03/manifest.json \
+  --target-vessel-package /path/to/graduated_cylinder_03/package \
+  --target-vessel-manifest /path/to/graduated_cylinder_03/manifest.json \
+  --dryingbox-revision <dryingbox-convertasset-git-sha> \
+  --vessel-revision <vessel-convertasset-git-sha> \
   --out outputs/scientific_workbench_bimanual_pour \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$GENMANIP_ROOT"

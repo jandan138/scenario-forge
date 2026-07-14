@@ -429,15 +429,24 @@ def _scene_composition_asset_ids(scene: Mapping[str, Any]) -> tuple[str, ...]:
 
 def _source_layer_asset_ids(scenario: Mapping[str, Any]) -> tuple[str, ...]:
     scene = _mapping(scenario.get("scene"), "scene")
+    scene_asset_ids = _scene_composition_asset_ids(scene)
     object_asset_ids = [
         _string(item.get("asset_id"), f"objects[{index}].asset_id")
         for index, item in enumerate(
             _mapping_list(scenario.get("objects"), "objects")
         )
     ]
+    # Dedicated object packages may delete or override opinions authored by the
+    # full-scene source (for example a legacy nested rigid body). USD sublayers
+    # are strongest first, so those object-specific layers must precede the
+    # scene overlay/base stack. Objects sourced from the scene itself are
+    # already covered by that stack and must not pull the base layer forward.
+    dedicated_object_asset_ids = [
+        asset_id for asset_id in object_asset_ids if asset_id not in scene_asset_ids
+    ]
     return tuple(
         _dedupe_strings(
-            [*_scene_composition_asset_ids(scene), *object_asset_ids]
+            [*dedicated_object_asset_ids, *scene_asset_ids]
         )
     )
 

@@ -549,5 +549,9 @@ def test_object_only_asset_preserves_legacy_sublayer_composition(
     object_reference = (
         "../assets/standalone_conical_flask/standalone_flask.usda"
     )
+    base_reference = "../assets/scientific_workbench_environment/scene.usda"
     assert f"@{object_reference}@" in sublayer_block
+    assert sublayer_block.index(object_reference) < sublayer_block.index(
+        base_reference
+    )
     assert f"prepend references = @{object_reference}@" not in scene_text

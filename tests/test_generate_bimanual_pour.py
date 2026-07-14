@@ -34,17 +34,39 @@ _TASK_READY_INACTIVE_PRIMS = [
 
 
 def _convert_asset_args(root: Path, source_usd: Path) -> list[str]:
-    _, package_dir, manifest_path, _ = _write_source_bound_handoff(
-        root / "handoff",
+    _, dryingbox_package, dryingbox_manifest, _ = _write_source_bound_handoff(
+        root / "dryingbox_handoff",
         source_usd=source_usd,
+    )
+    _, source_package, source_manifest, _ = _write_source_bound_handoff(
+        root / "source_vessel_handoff",
+        source_usd=source_usd,
+        with_interaction_contract=True,
+        interaction_root="/World/conical_bottle03",
+    )
+    _, target_package, target_manifest, _ = _write_source_bound_handoff(
+        root / "target_vessel_handoff",
+        source_usd=source_usd,
+        with_interaction_contract=True,
+        interaction_root="/World/graduated_cylinder_03",
     )
     return [
         "--convert-asset-package",
-        str(package_dir),
+        str(dryingbox_package),
         "--convert-asset-manifest",
-        str(manifest_path),
-        "--convert-asset-revision",
+        str(dryingbox_manifest),
+        "--source-vessel-package",
+        str(source_package),
+        "--source-vessel-manifest",
+        str(source_manifest),
+        "--target-vessel-package",
+        str(target_package),
+        "--target-vessel-manifest",
+        str(target_manifest),
+        "--dryingbox-revision",
         "324ce6e6d4395ccfda1e59e5ae89de9389cdf225",
+        "--vessel-revision",
+        "vessel-profile-r2",
     ]
 
 
@@ -74,14 +96,19 @@ def test_golden_opening_frames_follow_the_assets_local_positive_y_axis() -> None
     objects = {item["id"]: item for item in scenario["objects"]}
 
     expected = {
-        "obj_conical_bottle03": [0.0, 0.196567, 0.0],
-        "obj_graduated_cylinder_03": [0.0, 0.272294, 0.0],
+        "obj_conical_bottle03": [0.0, 0.1965674179, 0.0],
+        "obj_graduated_cylinder_03": [0.0, 0.2722941904, 0.0],
     }
     for object_id, position in expected.items():
         opening = objects[object_id]["named_frames"]["opening"]
         assert opening["xyz"] == position
         # Opening-frame +Z is the outward normal; the mesh opens along local +Y.
-        assert opening["wxyz"] == [0.7071068, -0.7071068, 0.0, 0.0]
+        assert opening["wxyz"] == [
+            0.7071067811865476,
+            -0.7071067811865475,
+            0.0,
+            0.0,
+        ]
 
 
 def test_golden_actor_roles_use_same_side_arms_instead_of_crossing_midline() -> None:
@@ -122,13 +149,34 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert (overlay_root / "physics/profile.json").is_file()
     assert (overlay_root / "overlays/physics_profile.usda").is_file()
     assert not (overlay_root / "evidence").exists()
+    for asset_id in (
+        "scientific_workbench_conical_bottle03_dynamic",
+        "scientific_workbench_graduated_cylinder_03_dynamic",
+    ):
+        assert (
+            output
+            / "assets"
+            / asset_id
+            / "evidence/interaction_runtime_qualification/report.json"
+        ).is_file()
     assert not (collected / "evidence/initial_scene/visual_ready_gate.yaml").exists()
-    upstream = yaml.safe_load(
+    assets = yaml.safe_load(
         (output / "provenance/provenance.yaml").read_text(encoding="utf-8")
-    )["assets"][0]["upstream_package"]
+    )["assets"]
+    upstream_by_asset = {
+        item["asset_id"]: item["upstream_package"]
+        for item in assets
+        if "upstream_package" in item
+    }
+    upstream = upstream_by_asset["scientific_workbench_dryingbox_03_dynamic"]
     assert upstream["producer"] == "ConvertAsset"
     assert upstream["revision"] == "324ce6e6d4395ccfda1e59e5ae89de9389cdf225"
     assert upstream["metadata"]["quality_tier"] == "provisional_geometry"
+    for asset_id in (
+        "scientific_workbench_conical_bottle03_dynamic",
+        "scientific_workbench_graduated_cylinder_03_dynamic",
+    ):
+        assert upstream_by_asset[asset_id]["revision"] == "vessel-profile-r2"
 
     task_config = yaml.safe_load(
         (collected / "tasks/config.yaml").read_text(encoding="utf-8")
@@ -165,15 +213,21 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         item["scenario_object_id"]: item for item in contract["objects"]
     }
     assert contract_objects["obj_conical_bottle03"]["named_frames"]["opening"] == {
-        "xyz": [0.0, 0.196567, 0.0],
-        "wxyz": [0.7071068, -0.7071068, 0.0, 0.0],
+        "xyz": [0.0, 0.1965674179, 0.0],
+        "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
     }
     assert contract_objects["obj_graduated_cylinder_03"]["named_frames"][
         "opening"
     ] == {
-        "xyz": [0.0, 0.272294, 0.0],
-        "wxyz": [0.7071068, -0.7071068, 0.0, 0.0],
+        "xyz": [0.0, 0.2722941904, 0.0],
+        "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
     }
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.2"
+    )
+    for object_id in ("obj_conical_bottle03", "obj_graduated_cylinder_03"):
+        assert initial_layout[object_id]["add_colliders"] is False
+        assert initial_layout[object_id]["add_rigid_body"] is False
     actors = {item["id"]: item for item in contract["robot"]["actors"]}
     assert actors["operating_arm"]["end_effector"] == "left"
     assert actors["auxiliary_arm"]["end_effector"] == "right"

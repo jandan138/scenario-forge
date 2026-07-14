@@ -9,7 +9,7 @@ import pickle
 import re
 import shutil
 import tempfile
-from typing import Any, Mapping
+from typing import Any, Mapping, cast
 
 import yaml
 
@@ -26,12 +26,19 @@ from scenario_forge.package import (
 
 _GENMANIP_RANGE = "manip/default/sr_based_genmanip_range"
 _GENMANIP_AXIS_ALIGN = "manip/default/sr_based_genmanip_axis_align"
+_GENMANIP_FRAME_AWARE = "manip/default/scenario_forge_runtime_predicate"
 _ROBOT_PROFILE = "manip/lift2/R5a"
 _TABLE_LAYOUT_UID = "00000000000000000000000000000000"
 _USD_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _PICKLE_PROTOCOL = 4
-_RUNTIME_CONTRACT_SCHEMA_VERSION = (
-    "scenario-forge-genmanip-runtime-contract/v0.1"
+_RUNTIME_CONTRACT_SCHEMA_V01 = "scenario-forge-genmanip-runtime-contract/v0.1"
+_RUNTIME_CONTRACT_SCHEMA_V02 = "scenario-forge-genmanip-runtime-contract/v0.2"
+_EXACT_PREDICATE_TYPES = frozenset(
+    {
+        "named_frames_relative_pose_reached",
+        "named_frame_tilt_angle_reached",
+        "object_returned_to_post_warmup_pose",
+    }
 )
 _FRAME_REFERENCE_FIELDS = frozenset(
     {"source_frame", "target_frame", "object_frame", "relative_to_frame"}
@@ -209,7 +216,21 @@ def export_genmanip_collected_package(
                 "scenario scene.root_prim_path"
             )
 
-    goal = _genmanip_goal(success, object_by_id)
+    qualified_object_ids = _qualified_rigid_object_ids(objects, assets_by_id)
+    required_exact_object_ids = _exact_success_object_ids(success)
+    unqualified_exact_objects = sorted(
+        required_exact_object_ids.difference(qualified_object_ids)
+    )
+    if unqualified_exact_objects:
+        raise GenManipExportError(
+            "exact frame success requires qualified rigid object packages for: "
+            + ", ".join(unqualified_exact_objects)
+        )
+    goal = _genmanip_goal(
+        success,
+        object_by_id,
+        qualified_object_ids=qualified_object_ids,
+    )
     seed = _episode_name(scenario.get("seed", "000"))
     task_name = f"scenario_forge/{scenario_id}"
     usd_name = (
@@ -232,6 +253,7 @@ def export_genmanip_collected_package(
         episode_name=seed,
         objects=objects,
         table=table,
+        qualified_object_ids=qualified_object_ids,
     )
     episode = _episode_metadata(
         scenario=scenario,
@@ -242,6 +264,7 @@ def export_genmanip_collected_package(
         table=table,
         goal=goal,
         runtime_contract=runtime_contract,
+        qualified_object_ids=qualified_object_ids,
     )
 
     output_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -420,7 +443,13 @@ def _write_collected_package(
         "success_contract": _json_safe_copy(
             _required_mapping(scenario, "success", "scenario spec")
         ),
-        "success_contract_role": "validated_projection_of_semantic_contract",
+        "success_contract_role": (
+            "authoritative_semantic_contract_with_explicit_diagnostic_projection"
+            if _success_uses_exact_predicates(
+                _required_mapping(scenario, "success", "scenario spec")
+            )
+            else "validated_projection_of_semantic_contract"
+        ),
         "semantic_contract": {
             "authority": "episode_metadata",
             "path": f"tasks/{task_name}/{episode_name}/episode_metadata.json",
@@ -445,7 +474,17 @@ def _write_collected_package(
             "robot_profile": _ROBOT_PROFILE,
             "robot_injection": "config_only",
             "task_dir": f"collected_packages/{scenario_id}/tasks",
-            "registered_metrics": [_GENMANIP_RANGE, _GENMANIP_AXIS_ALIGN],
+            "registered_metrics": [
+                _GENMANIP_RANGE,
+                _GENMANIP_AXIS_ALIGN,
+                *(
+                    [_GENMANIP_FRAME_AWARE]
+                    if _success_uses_exact_predicates(
+                        _required_mapping(scenario, "success", "scenario spec")
+                    )
+                    else []
+                ),
+            ],
             "action_contract": _action_contract(),
         },
         "source_assets": source_assets,
@@ -536,6 +575,7 @@ def _episode_metadata(
     table: Mapping[str, Any],
     goal: list[list[list[dict[str, Any]]]],
     runtime_contract: Mapping[str, Any],
+    qualified_object_ids: set[str],
 ) -> dict[str, Any]:
     initial_layout: dict[str, Any] = {}
     table_id = _required_string(table, "id", "table object")
@@ -559,8 +599,10 @@ def _episode_metadata(
                 f"{object_id}.pose.scale_xyz",
             ),
             "path": "",
-            "add_colliders": True,
-            "add_rigid_body": not binding.is_table,
+            "add_colliders": object_id not in qualified_object_ids,
+            "add_rigid_body": (
+                not binding.is_table and object_id not in qualified_object_ids
+            ),
             "prim_path": binding.state_prim_path,
             "is_articulation_part": False,
         }
@@ -616,6 +658,7 @@ def _runtime_contract(
     episode_name: str,
     objects: list[Mapping[str, Any]],
     table: Mapping[str, Any],
+    qualified_object_ids: set[str],
 ) -> dict[str, Any]:
     table_id = _required_string(table, "id", "table object")
     contract_objects: list[dict[str, Any]] = []
@@ -668,8 +711,7 @@ def _runtime_contract(
             available_frames.add(f"{object_id}.{raw_frame_id}")
 
         pose = _required_mapping(item, "pose", f"scenario object {object_id}")
-        contract_objects.append(
-            {
+        contract_object = {
                 "scenario_object_id": object_id,
                 "role": _required_string(item, "role", f"scenario object {object_id}"),
                 "source_prim_path": _required_string(
@@ -682,7 +724,14 @@ def _runtime_contract(
                 "initial_pose": _runtime_initial_pose(pose, object_id),
                 "named_frames": named_frames,
             }
-        )
+        if object_id in qualified_object_ids:
+            contract_object["physics_authoring"] = {
+                "owner": "convert_asset_package",
+                "local_colliders": False,
+                "local_rigid_body": False,
+                "local_mass": False,
+            }
+        contract_objects.append(contract_object)
 
     robot = _required_mapping(scenario, "robot", "scenario spec")
     raw_actors = robot.get("actors")
@@ -706,8 +755,17 @@ def _runtime_contract(
     success = _required_mapping(scenario, "success", "scenario spec")
     _validate_frame_references(steps, available_frames, "scenario steps")
     _validate_frame_references(success, available_frames, "scenario success")
+    exact_success = _success_uses_exact_predicates(success)
+    if qualified_object_ids and not exact_success:
+        raise GenManipExportError(
+            "qualified rigid objects require the exact ordered success contract"
+        )
     contract = {
-        "schema_version": _RUNTIME_CONTRACT_SCHEMA_VERSION,
+        "schema_version": (
+            _RUNTIME_CONTRACT_SCHEMA_V02
+            if qualified_object_ids or exact_success
+            else _RUNTIME_CONTRACT_SCHEMA_V01
+        ),
         "contract_status": "transport_only",
         "scenario_id": scenario_id,
         "task_name": task_name,
@@ -734,7 +792,7 @@ def _runtime_contract(
         "invariants": invariants,
         "success": _json_safe_copy(success),
     }
-    return _json_safe_copy(contract)
+    return cast(dict[str, Any], _json_safe_copy(contract))
 
 
 def _runtime_initial_pose(
@@ -784,7 +842,10 @@ def _finite_number_list(value: object, length: int, label: str) -> list[float]:
 
 
 def _genmanip_goal(
-    success: Mapping[str, Any], object_by_id: Mapping[str, Mapping[str, Any]]
+    success: Mapping[str, Any],
+    object_by_id: Mapping[str, Mapping[str, Any]],
+    *,
+    qualified_object_ids: set[str],
 ) -> list[list[list[dict[str, Any]]]]:
     operator = _required_string(success, "operator", "scenario success")
     if operator != "all":
@@ -804,6 +865,22 @@ def _genmanip_goal(
     for predicate in predicates:
         predicate_type = _required_string(predicate, "type", "success predicate")
         parameters = _required_mapping(predicate, "parameters", "success predicate")
+        if predicate_type in _EXACT_PREDICATE_TYPES:
+            projection = _required_mapping(
+                parameters,
+                "diagnostic_compatibility_projection",
+                "success predicate",
+            )
+            predicate_type = _required_string(
+                projection,
+                "type",
+                "diagnostic_compatibility_projection",
+            )
+            parameters = _required_mapping(
+                projection,
+                "parameters",
+                "diagnostic_compatibility_projection",
+            )
         if predicate_type == "relative_pose_reached":
             metrics = _relative_pose_metrics(parameters)
         elif predicate_type == "object_at_initial_pose":
@@ -812,8 +889,145 @@ def _genmanip_goal(
             raise GenManipExportError(
                 f"unsupported GenManip success predicate type: {predicate_type}"
             )
+        for metric in metrics:
+            referenced_uids = {
+                metric.get("obj1_uid"),
+                metric.get("obj2_uid"),
+                metric.get("another_obj2_uid"),
+            }
+            if referenced_uids.intersection(qualified_object_ids):
+                metric["not_set_mass"] = True
         stages.append([metrics])
     return stages
+
+
+def _success_uses_exact_predicates(success: Mapping[str, Any]) -> bool:
+    raw_predicates = success.get("predicates")
+    if not isinstance(raw_predicates, list):
+        return False
+    return any(
+        isinstance(predicate, Mapping)
+        and predicate.get("type") in _EXACT_PREDICATE_TYPES
+        for predicate in raw_predicates
+    )
+
+
+def _exact_success_object_ids(success: Mapping[str, Any]) -> set[str]:
+    raw_predicates = success.get("predicates")
+    if not isinstance(raw_predicates, list):
+        return set()
+    result: set[str] = set()
+    for raw_predicate in raw_predicates:
+        if not isinstance(raw_predicate, Mapping):
+            continue
+        predicate_type = raw_predicate.get("type")
+        if predicate_type not in _EXACT_PREDICATE_TYPES:
+            continue
+        parameters = _required_mapping(
+            raw_predicate,
+            "parameters",
+            "exact success predicate",
+        )
+        frame_fields: tuple[str, ...]
+        object_fields: tuple[str, ...]
+        if predicate_type == "named_frames_relative_pose_reached":
+            frame_fields = ("source_frame", "target_frame")
+            object_fields = ()
+        elif predicate_type == "named_frame_tilt_angle_reached":
+            frame_fields = ("object_frame",)
+            object_fields = ()
+        else:
+            frame_fields = ()
+            object_fields = ("object",)
+        for field in frame_fields:
+            frame_ref = parameters.get(field)
+            if not isinstance(frame_ref, str) or "." not in frame_ref:
+                raise GenManipExportError(
+                    f"exact success predicate {field} must be an object frame reference"
+                )
+            result.add(frame_ref.rpartition(".")[0])
+        for field in object_fields:
+            result.add(
+                _required_string(parameters, field, "exact success predicate")
+            )
+    return result
+
+
+def _qualified_rigid_object_ids(
+    objects: list[Mapping[str, Any]],
+    assets_by_id: Mapping[str, AssetManifestEntry],
+) -> set[str]:
+    qualified: set[str] = set()
+    for item in objects:
+        object_id = _required_string(item, "id", "scenario object")
+        asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
+        asset = assets_by_id[asset_id]
+        if asset.role != "rigid_object":
+            continue
+        upstream = _as_mapping(
+            asset.metadata.get("upstream_package"),
+            f"rigid object asset {asset_id}.upstream_package",
+        )
+        if upstream.get("producer") != "ConvertAsset":
+            raise GenManipExportError(
+                f"rigid object asset {asset_id!r} must be owned by ConvertAsset"
+            )
+        upstream_metadata = _required_mapping(
+            upstream,
+            "metadata",
+            f"rigid object asset {asset_id}.upstream_package",
+        )
+        interaction = _required_mapping(
+            upstream_metadata,
+            "interaction_contract",
+            f"rigid object asset {asset_id}",
+        )
+        if interaction.get("schema_version") != "aan.interaction_contract.v1":
+            raise GenManipExportError(
+                f"rigid object asset {asset_id!r} has unsupported interaction_contract"
+            )
+        source_prim = _required_string(
+            item,
+            "source_prim_path",
+            f"scenario object {object_id}",
+        )
+        if interaction.get("asset_entry_prim") != source_prim:
+            raise GenManipExportError(
+                f"scenario object {object_id} source_prim_path must equal its "
+                "interaction_contract asset_entry_prim"
+            )
+        contract_frames = _required_mapping(
+            interaction,
+            "named_frames",
+            f"rigid object asset {asset_id}.interaction_contract",
+        )
+        scenario_frames = _as_mapping(
+            item.get("named_frames", {}),
+            f"scenario object {object_id}.named_frames",
+        )
+        for frame_name, raw_pose in scenario_frames.items():
+            if frame_name not in contract_frames:
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} is not "
+                    "authoritative in its interaction_contract"
+                )
+            contract_frame = _as_mapping(
+                contract_frames[frame_name],
+                f"interaction_contract named frame {frame_name}",
+            )
+            pose = _as_mapping(raw_pose, f"scenario object {object_id}.{frame_name}")
+            if pose.get("xyz") != contract_frame.get("translation_body_local_usd"):
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} translation "
+                    "must match its interaction_contract"
+                )
+            if pose.get("wxyz") != contract_frame.get("rotation_body_local_wxyz"):
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} rotation "
+                    "must match its interaction_contract"
+                )
+        qualified.add(object_id)
+    return qualified
 
 
 def _relative_pose_metrics(parameters: Mapping[str, Any]) -> list[dict[str, Any]]:

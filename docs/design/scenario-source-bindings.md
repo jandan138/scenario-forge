@@ -1,9 +1,10 @@
 # Scenario Source Bindings
 
-`scenario-source-bindings/v0.1` is the local build-input contract between a
+`scenario-source-bindings/v0.2` is the current local build-input contract between a
 portable `ScenarioSpec` and the USD closures used to compile it. It keeps machine
 paths and ConvertAsset delivery locations out of `scenario.yaml` while preserving
-the asset IDs used by the scenario.
+the asset IDs used by the scenario. The resolver continues to accept v0.1 files;
+their ConvertAsset bindings retain the historical `scene_overlay` meaning.
 
 The dependency flow is:
 
@@ -30,7 +31,7 @@ version supports two resolvers.
 source contract:
 
 ```yaml
-schema_version: scenario-source-bindings/v0.1
+schema_version: scenario-source-bindings/v0.2
 bindings:
   scientific_workbench_environment:
     resolver: local_usd
@@ -47,11 +48,13 @@ bindings:
 ```
 
 `convert_asset_package` validates an existing source-bound ConvertAsset delivery
-through the existing inbound adapter, then maps it to a scene-overlay source:
+through the existing inbound adapter. In v0.2 its `usage` explicitly selects the
+neutral role instead of inferring one:
 
 ```yaml
   scientific_workbench_dryingbox_03_dynamic:
     resolver: convert_asset_package
+    usage: scene_overlay
     source_usd: ./lab_001/lab_001.usd
     package_dir: ./convert_asset_delivery/package
     manifest_path: ./convert_asset_delivery/manifest.json
@@ -62,6 +65,32 @@ through the existing inbound adapter, then maps it to a scene-overlay source:
       - Dynamic physics package normalized by ConvertAsset
     redistributable: false
     exclude_relative_paths: [evidence]
+```
+
+`usage: rigid_object` is admitted only when the producer manifest contains a
+task-ready `aan.interaction_contract.v1`. Scenario Forge verifies that the asset
+entry prim is the single active rigid root, all declared colliders and authoritative
+named frames are coherent, the contract/profile/runtime-tree hashes close, and the
+required root-motion, stable-support, gripper-collision, and open-top gates passed.
+Each passing gate must point to a package-relative runtime qualification report;
+Scenario Forge verifies that file and its SHA-256. It then emits a
+`LocalUSDAssetSource` with role `rigid_object`. Do not exclude `evidence/` from a
+rigid-object binding: the compiler retains the qualification report in the asset
+closure and locks it with the rest of the package. A static producer package with
+`not_run` gates remains valid producer evidence, but is rejected for this task-ready
+usage.
+
+```yaml
+  scientific_workbench_conical_bottle03_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ./lab_001/lab_001.usd
+    package_dir: ./conical_bottle03/package
+    manifest_path: ./conical_bottle03/manifest.json
+    producer_revision: <ConvertAsset commit>
+    expected_scope_prims: [/World/conical_bottle03]
+    license: CC-BY-NC-4.0
+    redistributable: false
 ```
 
 The resolver calls `load_convert_asset_package_handoff`; it does not convert USD,

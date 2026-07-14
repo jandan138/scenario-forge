@@ -39,9 +39,9 @@ environment USD. `episode_metadata.json` is the authoritative episode descriptio
 the pickle is a deterministic compatibility encoding of the same JSON-safe data.
 Scenario Forge never loads an external pickle.
 
-The embedded `scenario-forge-genmanip-runtime-contract/v0.1` is the semantic
-handoff for downstream code that needs more than GenManip's native goal projection.
-It carries:
+The embedded runtime contract is the semantic handoff for downstream code that
+needs more than GenManip's native goal projection. Both the legacy
+`scenario-forge-genmanip-runtime-contract/v0.1` and exact v0.2 form carry:
 
 - the real GenManip runtime UID and state prim path for every scenario object,
   including the table's special all-zero layout UID;
@@ -51,13 +51,15 @@ It carries:
 - the normalized ScenarioSpec steps, invariants, and success contract.
 
 `package_manifest.json.semantic_contract` locates this one authoritative copy by
-episode-metadata path and JSON Pointer. There is no duplicate sidecar. The contract
-is currently marked `transport_only`: the existing native `task_data.goal` remains
-a diagnostic compatibility projection, no frame-aware metric is registered, and
-process invariants are not claimed as evaluated. GenManip must explicitly consume
-the embedded contract before a downstream metric can use named frames. The legacy
-manifest `success_contract` field remains only as an explicitly labelled, validated
-projection for old readers; it is not a second semantic authority.
+episode-metadata path and JSON Pointer. There is no duplicate sidecar. In v0.1 the
+native `task_data.goal` is the only executable path and no frame-aware metric is
+activated. In v0.2, qualified ConvertAsset objects and the exact ordered
+align/tilt/return predicates allow the maintained GenManip consumer to register and
+activate `manip/default/scenario_forge_runtime_predicate`; the native goal remains
+an explicitly labelled diagnostic projection. Both versions keep
+`process_invariants_evaluated: false`: pose scoring does not prove target hold or
+contact. The legacy manifest `success_contract` field is only a validated
+projection for old readers, not a second semantic authority.
 
 The room keeps the complete source `/World` reference so backgrounds and the shared
 `Looks` scope remain intact. Task objects are referenced into GenManip wrappers and
@@ -119,18 +121,22 @@ acceptable.
 
 ## Pour claim boundary
 
-The first bimanual-pour task is a `kinematic_proxy`. Its sequential GenManip metrics
-check that the source reaches a relative pour pose and is subsequently returned to
-its initial region. This evaluates the motion contract; it does not prove particle
-transfer, transferred volume, or absence of spills. A later fluid evaluator can
-replace the adapter mapping without changing the task graph or asset bindings.
-For the selected conical flask and graduated cylinder, local `y` is the physical
-upright axis, so the tilt and return metrics compare `y` rather than assuming `z`.
-The embedded runtime contract transports both `opening` frames and the
-`align_openings` step references, but it does not reinterpret the current root
-range as an opening-frame predicate. Center/height/maximum-tilt thresholds beyond
-the declared 40-degree minimum still require an explicit product predicate before
-the frame-aware metric can become primary success evidence.
+The first bimanual-pour task is a `kinematic_proxy`. Its authoritative success
+contract now has three ordered predicates: opening-frame alignment in world XY and
+signed world Z, opening-frame tilt against world Z, and return against the
+post-warmup physical pose. Their inclusive thresholds are respectively 2 cm / 2–5
+cm / 10 degrees, 40–80 degrees, and 6 cm / 15 degrees. This evaluates a motion
+contract; it does not prove particle transfer, transferred volume, or absence of
+spills.
+
+Each exact predicate carries an explicit `diagnostic_compatibility_projection` for
+the legacy GenManip root-range/axis metrics. The exporter never derives that
+approximation implicitly and never labels it exact. The embedded v0.2 runtime
+contract remains `transport_only` with `frame_aware_metric_active: false`; the
+downstream GenManip environment explicitly accepts and activates it and records
+that fact in runtime evidence. Qualified ConvertAsset
+objects additionally disable local collider, rigid-body, and mass authoring in the
+GenManip handoff so recovery cannot overwrite the producer-owned physics package.
 
 ## Asset boundary
 

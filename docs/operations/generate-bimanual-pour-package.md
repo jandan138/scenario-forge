@@ -28,8 +28,10 @@ LABUTOPIA_ROOT=/cpfs/shared/simulation/zhuzihou/dev/LabUtopia
 GENMANIP_SOURCE=/cpfs/shared/simulation/zhuzihou/dev/GenManip
 CUROBO_SRC=/cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src
 CONVERT_ASSET_ROOT=/cpfs/user/zhuzihou/dev/ConvertAsset
-CONVERT_ASSET_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-dryingbox-dynamic-physics-profile"
-CONVERT_ASSET_REVISION=324ce6e6d4395ccfda1e59e5ae89de9389cdf225
+DRYINGBOX_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-dryingbox-dynamic-physics-profile"
+VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-labutopia-vessel-interaction-profile"
+DRYINGBOX_REVISION=324ce6e6d4395ccfda1e59e5ae89de9389cdf225
+VESSEL_REVISION="$(git -C "$CONVERT_ASSET_ROOT" rev-parse HEAD)"
 
 export PYTHONPATH="$PWD/src:$CUROBO_SRC"
 export LD_LIBRARY_PATH="/isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/nvidia/cuda_runtime/lib:$ISAAC_ENV/lib/python3.10/site-packages/torch/lib:${LD_LIBRARY_PATH:-}"
@@ -38,9 +40,14 @@ export ACCEPT_EULA=Y OMNI_KIT_ACCEPT_EULA=YES PYTHONNOUSERSITE=1
 "$TEST_ENV/bin/python" scripts/generate_scientific_workbench_bimanual_pour.py \
   --source-usd "$LABUTOPIA_ROOT/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd" \
   --source-uri "LabUtopia:lab_001_localized_20260707" \
-  --convert-asset-package "$CONVERT_ASSET_DELIVERY/package" \
-  --convert-asset-manifest "$CONVERT_ASSET_DELIVERY/manifest.json" \
-  --convert-asset-revision "$CONVERT_ASSET_REVISION" \
+  --convert-asset-package "$DRYINGBOX_DELIVERY/package" \
+  --convert-asset-manifest "$DRYINGBOX_DELIVERY/manifest.json" \
+  --source-vessel-package "$VESSEL_DELIVERY/conical_bottle03/package" \
+  --source-vessel-manifest "$VESSEL_DELIVERY/conical_bottle03/manifest.json" \
+  --target-vessel-package "$VESSEL_DELIVERY/graduated_cylinder_03/package" \
+  --target-vessel-manifest "$VESSEL_DELIVERY/graduated_cylinder_03/manifest.json" \
+  --dryingbox-revision "$DRYINGBOX_REVISION" \
+  --vessel-revision "$VESSEL_REVISION" \
   --out outputs/scientific_workbench_bimanual_pour \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$GENMANIP_SOURCE"
@@ -48,11 +55,11 @@ export ACCEPT_EULA=Y OMNI_KIT_ACCEPT_EULA=YES PYTHONNOUSERSITE=1
 
 The inbound adapter requires the delivery manifest to match the package's embedded
 manifest, binds it to the exact `lab_001.usd` source hash, and validates the
-declared `/World/DryingBox_03` scope, profile hash, Isaac 4.1 runtime gates, and
-zero scoped PhysX mass/inertia warning count. It then maps the package into the
-generic asset contract; it does not add a Scenario Forge mass/inertia/center-of-mass
-fix or any warning suppressor. The copied runtime closure retains `deps/`,
-`physics/`, and `overlays/` while excluding upstream `evidence/`.
+declared scope, profile hash, Isaac 4.1 runtime gates, and zero scoped PhysX
+mass/inertia warning count. The DryingBox scene-overlay copy excludes upstream
+`evidence/`. Both rigid vessel copies retain their qualification report, and the
+adapter verifies its path and hash before compilation. Scenario Forge does not add
+a mass/inertia/center-of-mass fix, collider repair, or warning suppressor.
 
 When ConvertAsset replaces the provisional-geometry profile with measured
 parameters, point these package and manifest arguments (and their producer revision
@@ -89,7 +96,7 @@ evidence, add `--static-only` and omit the Isaac/GenManip arguments.
 The task-specific script above remains the default path when current Isaac preview
 evidence is required. Its static compile and GenManip export stages can also be
 run through the generic compiler after writing a local
-`scenario-source-bindings/v0.1` file for the base scene and ConvertAsset delivery:
+`scenario-source-bindings/v0.2` file for the base scene and ConvertAsset deliveries:
 
 ```bash
 scenario-forge package compile \
@@ -99,18 +106,17 @@ scenario-forge package compile \
   --export-genmanip
 ```
 
-The bindings file contains `source_usd`, `package_dir`, and `manifest_path` local
-paths. The ScenarioSpec continues to contain only asset IDs and portable task
+The bindings file contains `source_usd`, `package_dir`, `manifest_path`, and the
+explicit ConvertAsset `usage`. The ScenarioSpec continues to contain only asset IDs and portable task
 intent. This command performs no preview render and no oracle rollout; use the
 task-specific script for the former and EOS/GenManip for the latter. See
 [Scenario Source Bindings](../design/scenario-source-bindings.md) for the complete
 binding shape.
 
-The embedded runtime contract is data transport, not a success result. Current
-GenManip does not automatically pass it into the metrics manager, and the selected
-vessels still fail the rigid-root identity preflight. Do not label a package
-frame-metric-ready until those assets, an explicit frame predicate, and the
-downstream metric capability are all present.
+The embedded runtime contract is data transport, not a success result. The
+maintained GenManip consumer registers and activates the exact frame predicate, but
+the generator still fails closed unless both vessel manifests pass their complete
+interaction qualification and the named frames match exactly.
 
 Do not install the package below `$GENMANIP_SOURCE/saved/assets`. In the shared
 deployment that path is a symlink into the shared EBench asset directory, so a

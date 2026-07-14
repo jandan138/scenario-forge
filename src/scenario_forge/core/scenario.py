@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 import re
 from typing import Any, Mapping, TypeAlias
 
@@ -10,6 +11,11 @@ JsonValue: TypeAlias = (
 )
 
 _PACKAGE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+_EXACT_BIMANUAL_PREDICATE_TYPES = (
+    "named_frames_relative_pose_reached",
+    "named_frame_tilt_angle_reached",
+    "object_returned_to_post_warmup_pose",
+)
 
 
 def _mapping(value: object, field: str) -> Mapping[str, Any]:
@@ -44,7 +50,10 @@ def _number_tuple(value: object, field: str, length: int) -> tuple[float, ...]:
         or not all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in value)
     ):
         raise ValueError(f"{field} must contain {length} numbers")
-    return tuple(float(item) for item in value)
+    result = tuple(float(item) for item in value)
+    if not all(math.isfinite(item) for item in result):
+        raise ValueError(f"{field} must contain finite numbers")
+    return result
 
 
 def _json_mapping(value: object, field: str) -> dict[str, JsonValue]:
@@ -73,6 +82,13 @@ class PoseSpec:
         data = _mapping(value, field)
         xyz = _number_tuple(data.get("xyz"), f"{field}.xyz", 3)
         wxyz = _number_tuple(data.get("wxyz"), f"{field}.wxyz", 4)
+        if not math.isclose(
+            sum(component * component for component in wxyz),
+            1.0,
+            rel_tol=0.0,
+            abs_tol=1e-5,
+        ):
+            raise ValueError(f"{field}.wxyz must be a unit quaternion")
         scale = data.get("scale_xyz")
         return cls(
             xyz=(xyz[0], xyz[1], xyz[2]),
@@ -525,6 +541,22 @@ class ScenarioSpec:
             _validate_parameter_references(
                 predicate.parameters, object_ids, self.objects, predicate.predicate_id
             )
+            if predicate.predicate_type in _EXACT_BIMANUAL_PREDICATE_TYPES:
+                projection = _mapping(
+                    predicate.parameters.get("diagnostic_compatibility_projection"),
+                    f"{predicate.predicate_id}.diagnostic_compatibility_projection",
+                )
+                projection_parameters = _mapping(
+                    projection.get("parameters"),
+                    f"{predicate.predicate_id}.diagnostic_compatibility_projection.parameters",
+                )
+                _validate_parameter_references(
+                    projection_parameters,
+                    object_ids,
+                    self.objects,
+                    f"{predicate.predicate_id}.diagnostic_compatibility_projection",
+                )
+        _validate_explicit_bimanual_success(self)
 
     def to_mapping(self) -> dict[str, object]:
         return {
@@ -563,7 +595,7 @@ def _validate_parameter_references(
         value = parameters.get(key)
         if isinstance(value, str) and value not in object_ids:
             raise ValueError(f"{owner} references unknown object {value}")
-    for key in ("source_frame", "target_frame"):
+    for key in ("source_frame", "target_frame", "object_frame", "relative_to_frame"):
         value = parameters.get(key)
         if not isinstance(value, str):
             continue
@@ -573,3 +605,169 @@ def _validate_parameter_references(
         frame_ids = {name for name, _ in object_by_id[object_id].named_frames}
         if frame_id not in frame_ids:
             raise ValueError(f"{owner} references unknown frame {value}")
+
+
+def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:
+    exact = [
+        predicate
+        for predicate in spec.success.predicates
+        if predicate.predicate_type in _EXACT_BIMANUAL_PREDICATE_TYPES
+    ]
+    if not exact:
+        return
+    if spec.schema_version != "scenario-spec/v0.2":
+        raise ValueError("explicit bimanual predicates require scenario-spec/v0.2")
+    if spec.success.operator != "all":
+        raise ValueError("explicit bimanual predicates require success.operator 'all'")
+    if len(exact) != len(spec.success.predicates) or [
+        predicate.predicate_type for predicate in exact
+    ] != list(_EXACT_BIMANUAL_PREDICATE_TYPES):
+        raise ValueError(
+            "explicit bimanual success list order must be align, tilt, then return"
+        )
+    if [predicate.sequence_index for predicate in exact] != [0, 1, 2]:
+        raise ValueError(
+            "explicit bimanual success predicate sequence_index values must be 0, 1, 2"
+        )
+    for predicate in exact:
+        _validate_explicit_predicate(predicate)
+
+
+def _validate_explicit_predicate(predicate: SuccessPredicateSpec) -> None:
+    parameters = predicate.parameters
+    field = f"success predicate {predicate.predicate_id}.parameters"
+    if predicate.predicate_type == "named_frames_relative_pose_reached":
+        _require_exact_fields(
+            parameters,
+            {
+                "source_frame",
+                "target_frame",
+                "horizontal_error_max_m",
+                "signed_height_range_m",
+                "source_normal_axis",
+                "target_normal_axis",
+                "normal_angle_max_deg",
+                "bounds",
+                "diagnostic_compatibility_projection",
+            },
+            field,
+        )
+        _non_negative_finite_number(
+            parameters.get("horizontal_error_max_m"),
+            f"{field}.horizontal_error_max_m",
+        )
+        _ordered_finite_range(
+            parameters.get("signed_height_range_m"),
+            f"{field}.signed_height_range_m",
+        )
+        _require_value(parameters.get("source_normal_axis"), "z", f"{field}.source_normal_axis")
+        _require_value(parameters.get("target_normal_axis"), "z", f"{field}.target_normal_axis")
+        _bounded_angle(
+            parameters.get("normal_angle_max_deg"),
+            f"{field}.normal_angle_max_deg",
+        )
+    elif predicate.predicate_type == "named_frame_tilt_angle_reached":
+        _require_exact_fields(
+            parameters,
+            {
+                "object_frame",
+                "world_axis",
+                "angle_range_deg",
+                "bounds",
+                "diagnostic_compatibility_projection",
+            },
+            field,
+        )
+        _require_value(parameters.get("world_axis"), "z", f"{field}.world_axis")
+        angle_range = _ordered_finite_range(
+            parameters.get("angle_range_deg"),
+            f"{field}.angle_range_deg",
+        )
+        if angle_range[0] < 0.0 or angle_range[1] > 180.0:
+            raise ValueError(f"{field}.angle_range_deg must remain within [0, 180]")
+    else:
+        _require_exact_fields(
+            parameters,
+            {
+                "object",
+                "translation_error_max_m",
+                "rotation_error_max_deg",
+                "bounds",
+                "diagnostic_compatibility_projection",
+            },
+            field,
+        )
+        _non_negative_finite_number(
+            parameters.get("translation_error_max_m"),
+            f"{field}.translation_error_max_m",
+        )
+        _bounded_angle(
+            parameters.get("rotation_error_max_deg"),
+            f"{field}.rotation_error_max_deg",
+        )
+    _require_value(parameters.get("bounds"), "inclusive", f"{field}.bounds")
+    _validate_diagnostic_projection(
+        parameters.get("diagnostic_compatibility_projection"),
+        f"{field}.diagnostic_compatibility_projection",
+    )
+
+
+def _validate_diagnostic_projection(value: object, field: str) -> None:
+    projection = _mapping(value, field)
+    _require_exact_fields(projection, {"type", "parameters"}, field)
+    projection_type = _string(projection.get("type"), f"{field}.type")
+    if projection_type not in {"relative_pose_reached", "object_at_initial_pose"}:
+        raise ValueError(
+            f"{field}.type must be a supported diagnostic compatibility predicate"
+        )
+    _json_mapping(projection.get("parameters"), f"{field}.parameters")
+
+
+def _require_exact_fields(
+    value: Mapping[str, object], expected: set[str], field: str
+) -> None:
+    actual = set(value)
+    missing = sorted(expected - actual)
+    unexpected = sorted(actual - expected)
+    if missing:
+        raise ValueError(f"{field} is missing field(s): {', '.join(missing)}")
+    if unexpected:
+        raise ValueError(f"{field} contains unexpected field(s): {', '.join(unexpected)}")
+
+
+def _finite_number(value: object, field: str) -> float:
+    if (
+        not isinstance(value, (int, float))
+        or isinstance(value, bool)
+        or not math.isfinite(value)
+    ):
+        raise ValueError(f"{field} must be a finite number")
+    return float(value)
+
+
+def _non_negative_finite_number(value: object, field: str) -> float:
+    result = _finite_number(value, field)
+    if result < 0.0:
+        raise ValueError(f"{field} must be non-negative")
+    return result
+
+
+def _ordered_finite_range(value: object, field: str) -> tuple[float, float]:
+    if not isinstance(value, list) or len(value) != 2:
+        raise ValueError(f"{field} must contain two finite numbers")
+    result = (_finite_number(value[0], field), _finite_number(value[1], field))
+    if result[0] > result[1]:
+        raise ValueError(f"{field} lower bound must not exceed upper bound")
+    return result
+
+
+def _bounded_angle(value: object, field: str) -> float:
+    result = _finite_number(value, field)
+    if result < 0.0 or result > 180.0:
+        raise ValueError(f"{field} must be within [0, 180]")
+    return result
+
+
+def _require_value(value: object, expected: object, field: str) -> None:
+    if value != expected:
+        raise ValueError(f"{field} must be {expected!r}")

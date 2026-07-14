@@ -9,7 +9,10 @@ from scenario_forge.adapters.convert_asset import load_convert_asset_package_han
 from scenario_forge.assets.source import LocalUSDAssetSource
 
 
-SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.1"
+SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.2"
+SUPPORTED_SOURCE_BINDINGS_SCHEMA_VERSIONS = frozenset(
+    {"scenario-source-bindings/v0.1", SOURCE_BINDINGS_SCHEMA_VERSION}
+)
 _TOP_LEVEL_FIELDS = frozenset({"schema_version", "bindings"})
 _LOCAL_USD_FIELDS = frozenset(
     {
@@ -41,6 +44,7 @@ _CONVERT_ASSET_FIELDS = frozenset(
         "expected_runtime_profile",
     }
 )
+_CONVERT_ASSET_V02_FIELDS = _CONVERT_ASSET_FIELDS | {"usage"}
 
 
 class ScenarioSourceBindingError(ValueError):
@@ -71,10 +75,11 @@ def resolve_scenario_source_bindings(
     data = _mapping(raw_data, "source bindings")
     _reject_unknown_fields(data, _TOP_LEVEL_FIELDS, "source bindings")
     schema_version = _required_string(data, "schema_version", "source bindings")
-    if schema_version != SOURCE_BINDINGS_SCHEMA_VERSION:
+    if schema_version not in SUPPORTED_SOURCE_BINDINGS_SCHEMA_VERSIONS:
         raise ScenarioSourceBindingError(
             "unsupported source bindings schema_version "
-            f"{schema_version!r}; expected {SOURCE_BINDINGS_SCHEMA_VERSION!r}"
+            f"{schema_version!r}; expected one of "
+            f"{sorted(SUPPORTED_SOURCE_BINDINGS_SCHEMA_VERSIONS)!r}"
         )
 
     raw_bindings = _mapping(data.get("bindings"), "source bindings.bindings")
@@ -96,12 +101,25 @@ def resolve_scenario_source_bindings(
                 _reject_unknown_fields(binding, _LOCAL_USD_FIELDS, field)
                 source = _resolve_local_usd(raw_asset_id, binding, base_dir, field)
             elif resolver == "convert_asset_package":
-                _reject_unknown_fields(binding, _CONVERT_ASSET_FIELDS, field)
+                _reject_unknown_fields(
+                    binding,
+                    (
+                        _CONVERT_ASSET_V02_FIELDS
+                        if schema_version == SOURCE_BINDINGS_SCHEMA_VERSION
+                        else _CONVERT_ASSET_FIELDS
+                    ),
+                    field,
+                )
                 source = _resolve_convert_asset_package(
                     raw_asset_id,
                     binding,
                     base_dir,
                     field,
+                    usage=(
+                        _required_usage(binding, field)
+                        if schema_version == SOURCE_BINDINGS_SCHEMA_VERSION
+                        else "scene_overlay"
+                    ),
                 )
             else:
                 raise ScenarioSourceBindingError(
@@ -152,6 +170,7 @@ def _resolve_convert_asset_package(
     binding: Mapping[str, Any],
     base_dir: Path,
     field: str,
+    usage: str,
 ) -> LocalUSDAssetSource:
     handoff = load_convert_asset_package_handoff(
         _local_path(binding, "package_dir", base_dir, field),
@@ -172,6 +191,7 @@ def _resolve_convert_asset_package(
             f"{field}.expected_runtime_profile",
         )
         or "isaac41",
+        usage=usage,
     )
     return handoff.to_local_usd_asset_source(
         asset_id=asset_id,
@@ -186,6 +206,15 @@ def _resolve_convert_asset_package(
             f"{field}.exclude_relative_paths",
         ),
     )
+
+
+def _required_usage(data: Mapping[str, Any], field: str) -> str:
+    usage = _required_string(data, "usage", field)
+    if usage not in {"scene_overlay", "rigid_object"}:
+        raise ScenarioSourceBindingError(
+            f"{field}.usage must be 'scene_overlay' or 'rigid_object'"
+        )
+    return usage
 
 
 def _local_path(

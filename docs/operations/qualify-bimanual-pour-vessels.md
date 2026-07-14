@@ -57,15 +57,15 @@ validation evidence. In addition to the normal scoped PhysX-warning gate, report
 
 Bind each object UID and metric lookup to the qualified rigid-root prim. Consume
 `episode_metadata.task_data.scenario_forge_runtime_contract`, which Scenario Forge
-now exports as a normalized, transport-only mapping. The evaluator must explicitly
-make that mapping available to the frame-aware runtime metric; current GenManip
-only sends `task_data.goal` to its metrics manager. The following values are
-proposed acceptance gates and are not yet declared product thresholds:
+exports as a normalized, transport-only mapping. The maintained GenManip consumer
+imports the Scenario Forge metric registration before constructing its metrics
+manager, makes the contract available to that metric, and activates the exact
+three-predicate scorer for v0.2 episodes. The ScenarioSpec declares the following
+inclusive kinematic-proxy thresholds:
 
 - opening-center horizontal error below 2 cm;
 - source opening 2–5 cm above the target rim before tilt;
-- source opening-normal tilt from the declared 40-degree minimum to a proposed
-  80-degree maximum;
+- source opening-normal tilt from 40 to 80 degrees;
 - full source return pose against the post-warmup physical baseline.
 
 The native root-range metric may remain as diagnostic compatibility output, but it
@@ -80,15 +80,18 @@ changed. It does not block the vessel-only oracle.
 
 ## Scenario Forge follow-up
 
-Scenario Forge has completed the named-frame transport: the embedded runtime
-contract includes runtime UID/state-prim mappings, named frames, actor bindings,
-steps, invariants, and the existing success predicates. It deliberately reports
-`frame_aware_metric_active: false` and does not invent the proposed thresholds.
+Scenario Forge has completed the versioned named-frame transport: the embedded
+runtime contract includes runtime UID/state-prim mappings, named frames, actor
+bindings, steps, invariants, and the three explicit ordered success predicates. It
+deliberately reports `frame_aware_metric_active: false` because a compiled transport
+artifact cannot claim that a runtime actually evaluated it. The GenManip runtime
+records activation and predicate results in runtime evidence instead of rewriting
+the immutable input contract.
 
-After the two asset packages arrive, Scenario Forge will consume them through
-source bindings, regenerate the package, verify the rigid-root contract in the
-exported scene, and freeze a new complete-tree digest. If the proposed thresholds
-are accepted, they must enter as an explicit ScenarioSpec predicate rather than an
-adapter-only reinterpretation. GenManip owns the runtime metric that consumes this
-handoff. EOS owns rollout execution and episode evidence. The runner and trajectory
-planner are not added to this repository.
+The two asset packages enter through `scenario-source-bindings/v0.2` with
+`usage: rigid_object`. Admission verifies their interaction and complete-tree
+digests, all task-ready runtime gates, and the package-relative qualification
+report hashes. The qualification report remains in the copied asset closure.
+GenManip owns the runtime metric that
+consumes this handoff. EOS owns rollout execution and episode evidence. The runner
+and trajectory planner are not added to this repository.

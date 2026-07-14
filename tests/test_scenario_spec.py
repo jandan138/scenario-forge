@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from jsonschema import Draft202012Validator
 
 from scenario_forge.core.scenario import ScenarioSpec
 
@@ -210,6 +211,93 @@ def _scenario_mapping_v02(
     return data
 
 
+def _exact_bimanual_success() -> dict[str, object]:
+    return {
+        "operator": "all",
+        "claim_scope": "kinematic_proxy",
+        "predicates": [
+            {
+                "id": "openings_aligned",
+                "type": "named_frames_relative_pose_reached",
+                "sequence_index": 0,
+                "parameters": {
+                    "source_frame": "obj_conical_bottle03.opening",
+                    "target_frame": "obj_graduated_cylinder_03.opening",
+                    "horizontal_error_max_m": 0.02,
+                    "signed_height_range_m": [0.02, 0.05],
+                    "source_normal_axis": "z",
+                    "target_normal_axis": "z",
+                    "normal_angle_max_deg": 10.0,
+                    "bounds": "inclusive",
+                    "diagnostic_compatibility_projection": {
+                        "type": "relative_pose_reached",
+                        "parameters": {
+                            "object": "obj_conical_bottle03",
+                            "relative_to": "obj_graduated_cylinder_03",
+                            "xyz_range": {
+                                "x": [-0.08, 0.08],
+                                "y": [-0.08, 0.08],
+                                "z": [0.10, 0.30],
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                "id": "source_tilted",
+                "type": "named_frame_tilt_angle_reached",
+                "sequence_index": 1,
+                "parameters": {
+                    "object_frame": "obj_conical_bottle03.opening",
+                    "world_axis": "z",
+                    "angle_range_deg": [40.0, 80.0],
+                    "bounds": "inclusive",
+                    "diagnostic_compatibility_projection": {
+                        "type": "relative_pose_reached",
+                        "parameters": {
+                            "object": "obj_conical_bottle03",
+                            "relative_to": "obj_graduated_cylinder_03",
+                            "xyz_range": {
+                                "x": [-0.08, 0.08],
+                                "y": [-0.08, 0.08],
+                                "z": [0.10, 0.30],
+                            },
+                            "axis_alignment": {
+                                "object_axis": "y",
+                                "target_axis": "y",
+                                "comparison": ">=",
+                                "threshold_deg": 40.0,
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                "id": "source_returned",
+                "type": "object_returned_to_post_warmup_pose",
+                "sequence_index": 2,
+                "parameters": {
+                    "object": "obj_conical_bottle03",
+                    "translation_error_max_m": 0.06,
+                    "rotation_error_max_deg": 15.0,
+                    "bounds": "inclusive",
+                    "diagnostic_compatibility_projection": {
+                        "type": "object_at_initial_pose",
+                        "parameters": {
+                            "object": "obj_conical_bottle03",
+                            "xyz_tolerance": [0.06, 0.06, 0.06],
+                            "relative_axis_object": "obj_graduated_cylinder_03",
+                            "object_axis": "y",
+                            "target_axis": "y",
+                            "max_axis_error_deg": 15.0,
+                        },
+                    },
+                },
+            },
+        ],
+    }
+
+
 def test_scenario_spec_round_trips_bimanual_roles_and_invariant() -> None:
     spec = ScenarioSpec.from_mapping(_scenario_mapping())
 
@@ -380,3 +468,158 @@ def test_golden_bimanual_pour_example_is_a_valid_scenario_spec() -> None:
     assert spec.scenario_id == "scientific_workbench_bimanual_pour"
     assert len(spec.steps) == 5
     assert spec.invariants[0].invariant_type == "maintain_grasp"
+
+
+def test_v02_round_trips_explicit_ordered_bimanual_success_contract() -> None:
+    data = _scenario_mapping_v02([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    data["success"] = _exact_bimanual_success()
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert [predicate.predicate_type for predicate in spec.success.predicates] == [
+        "named_frames_relative_pose_reached",
+        "named_frame_tilt_angle_reached",
+        "object_returned_to_post_warmup_pose",
+    ]
+    assert [predicate.sequence_index for predicate in spec.success.predicates] == [0, 1, 2]
+    assert spec.to_mapping() == data
+
+
+@pytest.mark.parametrize(
+    ("predicate_index", "field", "value", "message"),
+    [
+        (0, "horizontal_error_max_m", -0.01, "horizontal_error_max_m"),
+        (0, "signed_height_range_m", [0.05, 0.02], "signed_height_range_m"),
+        (0, "normal_angle_max_deg", 181.0, "normal_angle_max_deg"),
+        (0, "source_normal_axis", "world_z", "source_normal_axis"),
+        (1, "world_axis", "y", "world_axis"),
+        (1, "angle_range_deg", [80.0, 40.0], "angle_range_deg"),
+        (2, "translation_error_max_m", -0.01, "translation_error_max_m"),
+        (2, "rotation_error_max_deg", 181.0, "rotation_error_max_deg"),
+        (2, "bounds", "exclusive", "bounds"),
+    ],
+)
+def test_v02_rejects_invalid_explicit_bimanual_predicate_bounds(
+    predicate_index: int,
+    field: str,
+    value: object,
+    message: str,
+) -> None:
+    data = _scenario_mapping_v02([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = _exact_bimanual_success()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    predicate = dict(predicates[predicate_index])
+    parameters = dict(predicate["parameters"])  # type: ignore[arg-type]
+    parameters[field] = value
+    predicate["parameters"] = parameters
+    predicates[predicate_index] = predicate
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match=message):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_explicit_bimanual_predicates_require_v02_and_contiguous_sequence() -> None:
+    data = _scenario_mapping()
+    success = _exact_bimanual_success()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    predicates[1] = {**predicates[1], "sequence_index": 3}  # type: ignore[dict-item]
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="scenario-spec/v0.2|sequence_index"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_explicit_bimanual_predicates_require_list_order_to_match_sequence() -> None:
+    data = _scenario_mapping_v02([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = _exact_bimanual_success()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    success["predicates"] = [predicates[1], predicates[0], predicates[2]]
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="list order|sequence_index"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v02_json_schema_validates_exact_predicate_parameter_shapes() -> None:
+    data = _scenario_mapping_v02([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    data["success"] = _exact_bimanual_success()
+    schema_path = (
+        REPO_ROOT
+        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
+    )
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema)
+
+    validator.validate(data)
+    invalid = json.loads(json.dumps(data))
+    invalid["success"]["predicates"][0]["parameters"]["unexpected"] = True
+    errors = list(validator.iter_errors(invalid))
+    assert errors
+    assert any(
+        nested.validator == "additionalProperties"
+        for error in errors
+        for nested in error.context
+    )
+
+
+def test_v02_json_schema_rejects_reordered_exact_success_and_accepts_legacy() -> None:
+    schema_path = (
+        REPO_ROOT
+        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
+    )
+    validator = Draft202012Validator(
+        json.loads(schema_path.read_text(encoding="utf-8"))
+    )
+    legacy = _scenario_mapping_v02([])
+    legacy_scene = dict(legacy["scene"])  # type: ignore[arg-type]
+    legacy_scene.pop("overlay_asset_ids", None)
+    legacy["scene"] = legacy_scene
+
+    validator.validate(legacy)
+
+    reordered = json.loads(json.dumps(legacy))
+    reordered["success"] = _exact_bimanual_success()
+    predicates = reordered["success"]["predicates"]
+    predicates[0], predicates[1] = predicates[1], predicates[0]
+
+    assert list(validator.iter_errors(reordered))
+
+
+@pytest.mark.parametrize(
+    "wxyz",
+    [
+        [2.0, 0.0, 0.0, 0.0],
+        [float("nan"), 0.0, 0.0, 0.0],
+    ],
+)
+def test_scenario_spec_rejects_runtime_incompatible_pose_quaternions(
+    wxyz: list[float],
+) -> None:
+    data = _scenario_mapping()
+    objects = [dict(item) for item in data["objects"]]  # type: ignore[index]
+    source = dict(objects[1])
+    named_frames = dict(source["named_frames"])
+    opening = dict(named_frames["opening"])
+    opening["wxyz"] = wxyz
+    named_frames["opening"] = opening
+    source["named_frames"] = named_frames
+    objects[1] = source
+    data["objects"] = objects
+
+    with pytest.raises(ValueError, match="wxyz.*unit quaternion|finite"):
+        ScenarioSpec.from_mapping(data)

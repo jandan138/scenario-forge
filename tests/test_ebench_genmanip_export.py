@@ -13,11 +13,14 @@ from scenario_forge.adapters.ebench.genmanip import (
     GenManipExportError,
     export_genmanip_collected_package,
 )
+from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from tests.test_scenario_package_compiler import _write_source_scene
 from tests.test_scenario_spec import _scenario_mapping
+from tests.test_scenario_spec import _exact_bimanual_success
+from tests.test_convert_asset_adapter import _write_source_bound_handoff
 
 
 _OVERLAY_ASSET_ID = "dryingbox_03_dynamic"
@@ -25,6 +28,11 @@ _RUNTIME_CONTRACT_SCHEMA = (
     Path(__file__).resolve().parents[1]
     / "src/scenario_forge/schemas/jsonschema"
     / "scenario-forge-genmanip-runtime-contract-v0.1.schema.json"
+)
+_RUNTIME_CONTRACT_V02_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "src/scenario_forge/schemas/jsonschema"
+    / "scenario-forge-genmanip-runtime-contract-v0.2.schema.json"
 )
 
 
@@ -43,6 +51,90 @@ def _build_package(tmp_path: Path) -> Path:
                 attribution=("Example scientific workbench asset",),
                 redistributable=False,
             )
+        },
+        package_root,
+    )
+    return package_root
+
+
+def _build_qualified_object_package(
+    tmp_path: Path, *, exact_success: bool = True
+) -> Path:
+    source_usd = _write_source_scene(tmp_path)
+    _, source_package_dir, source_manifest_path, _ = _write_source_bound_handoff(
+        tmp_path / "source_handoff",
+        source_usd=source_usd,
+        with_interaction_contract=True,
+        interaction_root="/World/conical_bottle03",
+    )
+    source_handoff = load_convert_asset_package_handoff(
+        source_package_dir,
+        source_manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/conical_bottle03",),
+        producer_revision="324ce6e",
+        usage="rigid_object",
+    )
+    rigid_source = source_handoff.to_local_usd_asset_source(
+        asset_id="qualified_source_vessel",
+        license="CC-BY-NC-4.0",
+        redistributable=False,
+    )
+    _, target_package_dir, target_manifest_path, _ = _write_source_bound_handoff(
+        tmp_path / "target_handoff",
+        source_usd=source_usd,
+        with_interaction_contract=True,
+        interaction_root="/World/graduated_cylinder_03",
+    )
+    target_handoff = load_convert_asset_package_handoff(
+        target_package_dir,
+        target_manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/graduated_cylinder_03",),
+        producer_revision="324ce6e",
+        usage="rigid_object",
+    )
+    rigid_target = target_handoff.to_local_usd_asset_source(
+        asset_id="qualified_target_vessel",
+        license="CC-BY-NC-4.0",
+        redistributable=False,
+    )
+    scenario = _scenario_mapping()
+    scenario["schema_version"] = "scenario-spec/v0.2"
+    objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
+    objects[1]["asset_id"] = "qualified_source_vessel"
+    objects[1]["named_frames"] = {
+        "opening": {
+            "xyz": [0.0, 0.1965674179, 0.0],
+            "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+        }
+    }
+    objects[1].pop("metadata", None)
+    objects[2]["asset_id"] = "qualified_target_vessel"
+    objects[2]["named_frames"] = {
+        "opening": {
+            "xyz": [0.0, 0.2722941904, 0.0],
+            "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+        }
+    }
+    objects[2].pop("metadata", None)
+    scenario["objects"] = objects
+    if exact_success:
+        scenario["success"] = _exact_bimanual_success()
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            ),
+            "qualified_source_vessel": rigid_source,
+            "qualified_target_vessel": rigid_target,
         },
         package_root,
     )
@@ -353,6 +445,147 @@ def test_genmanip_runtime_contract_matches_its_json_schema(tmp_path: Path) -> No
     assert any(error.validator == "additionalProperties" for error in validator.iter_errors(invalid))
 
 
+def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_qualified_object_package(tmp_path)
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    config = yaml.safe_load((output / "tasks" / "config.yaml").read_text(encoding="utf-8"))
+    goal = config["evaluation_configs"][0]["generation_config"]["goal"]
+    episode_path = (
+        output
+        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+    )
+    episode = json.loads(episode_path.read_text(encoding="utf-8"))
+    layout = episode["task_data"]["initial_layout"]
+    contract = episode["task_data"]["scenario_forge_runtime_contract"]
+
+    assert len(goal) == 3
+    qualified_object_ids = {
+        "obj_conical_bottle03",
+        "obj_graduated_cylinder_03",
+    }
+    qualified_metrics = [
+        metric
+        for stage in goal
+        for alternative in stage
+        for metric in alternative
+        if qualified_object_ids
+        & {
+            metric.get("obj1_uid"),
+            metric.get("obj2_uid"),
+            metric.get("another_obj2_uid"),
+        }
+    ]
+    assert qualified_metrics
+    assert all(metric["not_set_mass"] is True for metric in qualified_metrics)
+    assert layout["obj_conical_bottle03"]["add_colliders"] is False
+    assert layout["obj_conical_bottle03"]["add_rigid_body"] is False
+    assert layout["obj_graduated_cylinder_03"]["add_colliders"] is False
+    assert layout["obj_graduated_cylinder_03"]["add_rigid_body"] is False
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.2"
+    )
+    assert contract["contract_status"] == "transport_only"
+    assert contract["execution"]["frame_aware_metric_active"] is False
+    assert contract["execution"]["process_invariants_evaluated"] is False
+    qualified = next(
+        item
+        for item in contract["objects"]
+        if item["scenario_object_id"] == "obj_conical_bottle03"
+    )
+    assert qualified["physics_authoring"] == {
+        "owner": "convert_asset_package",
+        "local_colliders": False,
+        "local_rigid_body": False,
+        "local_mass": False,
+    }
+    assert contract["success"] == _exact_bimanual_success()
+    manifest = json.loads((output / "package_manifest.json").read_text(encoding="utf-8"))
+    assert "manip/default/scenario_forge_runtime_predicate" in manifest[
+        "runtime_requirements"
+    ]["registered_metrics"]
+    schema = json.loads(_RUNTIME_CONTRACT_V02_SCHEMA.read_text(encoding="utf-8"))
+    Draft202012Validator(schema).validate(contract)
+
+
+def test_v02_runtime_contract_schema_rejects_reordered_exact_success(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_qualified_object_package(tmp_path)
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode_path = (
+        output
+        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+    )
+    contract = json.loads(episode_path.read_text(encoding="utf-8"))[
+        "task_data"
+    ]["scenario_forge_runtime_contract"]
+    predicates = contract["success"]["predicates"]
+    predicates[0], predicates[1] = predicates[1], predicates[0]
+    schema = json.loads(_RUNTIME_CONTRACT_V02_SCHEMA.read_text(encoding="utf-8"))
+
+    assert list(Draft202012Validator(schema).iter_errors(contract))
+
+
+def test_exact_success_export_rejects_missing_explicit_diagnostic_projection(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_qualified_object_package(tmp_path)
+    scenario_path = package_root / "scenario.yaml"
+    scenario = yaml.safe_load(scenario_path.read_text(encoding="utf-8"))
+    scenario["success"]["predicates"][0]["parameters"].pop(
+        "diagnostic_compatibility_projection"
+    )
+    scenario_path.write_text(yaml.safe_dump(scenario, sort_keys=False), encoding="utf-8")
+
+    with pytest.raises(
+        GenManipExportError,
+        match="diagnostic_compatibility_projection",
+    ):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_qualified_rigid_object_never_emits_v02_with_legacy_success_semantics(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_qualified_object_package(tmp_path, exact_success=False)
+
+    with pytest.raises(GenManipExportError, match="qualified.*exact|exact.*success"):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_exact_frame_success_requires_every_referenced_vessel_to_be_qualified(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    scenario["schema_version"] = "scenario-spec/v0.2"
+    scenario["success"] = _exact_bimanual_success()
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            )
+        },
+        package_root,
+    )
+
+    with pytest.raises(
+        GenManipExportError,
+        match="exact.*qualified|qualified.*obj_conical_bottle03.*obj_graduated_cylinder_03",
+    ):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
 def test_runtime_contract_schema_accepts_actor_ids_allowed_by_scenario_spec(
     tmp_path: Path,
 ) -> None:
@@ -471,17 +704,15 @@ def test_genmanip_export_rejects_unknown_named_frame_without_replacing_output(
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [
-        ("wxyz", [0.0, 0.0, 0.0, 0.0], "non-zero quaternion"),
+        ("wxyz", [0.0, 0.0, 0.0, 0.0], "unit quaternion"),
         ("xyz", [float("inf"), 0.0, 0.0], "finite numbers"),
     ],
 )
-def test_genmanip_export_rejects_invalid_named_frame_pose(
-    tmp_path: Path,
+def test_scenario_spec_rejects_invalid_named_frame_pose(
     field: str,
     value: list[float],
     message: str,
 ) -> None:
-    source_usd = _write_source_scene(tmp_path)
     scenario = _scenario_mapping()
     objects = list(scenario["objects"])  # type: ignore[arg-type]
     flask = dict(objects[1])
@@ -492,28 +723,11 @@ def test_genmanip_export_rejects_invalid_named_frame_pose(
     flask["named_frames"] = frames
     objects[1] = flask
     scenario["objects"] = objects
-    package_root = tmp_path / "package"
-    compile_scenario_package(
-        ScenarioSpec.from_mapping(scenario),
-        {"scientific_workbench_environment": LocalUSDAssetSource(
-            asset_id="scientific_workbench_environment",
-            source_usd=source_usd,
-            role="environment",
-            license="CC-BY-NC-4.0",
-            source_uri="example://scientific-workbench-scene",
-            redistributable=False,
-        )},
-        package_root,
-    )
-
-    with pytest.raises(GenManipExportError, match=message):
-        export_genmanip_collected_package(package_root, tmp_path / "collected")
+    with pytest.raises(ValueError, match=message):
+        ScenarioSpec.from_mapping(scenario)
 
 
-def test_genmanip_export_rejects_zero_object_initial_quaternion(
-    tmp_path: Path,
-) -> None:
-    source_usd = _write_source_scene(tmp_path)
+def test_scenario_spec_rejects_zero_object_initial_quaternion() -> None:
     scenario = _scenario_mapping()
     objects = list(scenario["objects"])  # type: ignore[arg-type]
     flask = dict(objects[1])
@@ -522,24 +736,8 @@ def test_genmanip_export_rejects_zero_object_initial_quaternion(
     flask["pose"] = pose
     objects[1] = flask
     scenario["objects"] = objects
-    package_root = tmp_path / "package"
-    compile_scenario_package(
-        ScenarioSpec.from_mapping(scenario),
-        {
-            "scientific_workbench_environment": LocalUSDAssetSource(
-                asset_id="scientific_workbench_environment",
-                source_usd=source_usd,
-                role="environment",
-                license="CC-BY-NC-4.0",
-                source_uri="example://scientific-workbench-scene",
-                redistributable=False,
-            )
-        },
-        package_root,
-    )
-
-    with pytest.raises(GenManipExportError, match="initial pose.*non-zero quaternion"):
-        export_genmanip_collected_package(package_root, tmp_path / "collected")
+    with pytest.raises(ValueError, match="pose.wxyz.*unit quaternion"):
+        ScenarioSpec.from_mapping(scenario)
 
 
 def test_genmanip_export_rejects_dotted_named_frame_ids(

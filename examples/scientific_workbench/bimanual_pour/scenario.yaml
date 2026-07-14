@@ -43,7 +43,7 @@ objects:
         Bespoke_Booth_Table_Black_Nickel_0/Bespoke_Booth_Table_Black_Nickel_0: Material5_black
         surface/mesh: Material1_plastic_dark_blue
   - id: obj_conical_bottle03
-    asset_id: scientific_workbench_environment
+    asset_id: scientific_workbench_conical_bottle03_dynamic
     source_prim_path: /World/conical_bottle03
     role: source_container
     pose:
@@ -51,13 +51,10 @@ objects:
       wxyz: [0.6532815, 0.6532815, 0.2705981, 0.2705981]
     named_frames:
       opening:
-        xyz: [0.0, 0.196567, 0.0]
-        wxyz: [0.7071068, -0.7071068, 0.0, 0.0]
-    metadata:
-      material_bindings:
-        mesh: OmniSurface_Glass
+        xyz: [0.0, 0.1965674179, 0.0]
+        wxyz: [0.7071067811865476, -0.7071067811865475, 0.0, 0.0]
   - id: obj_graduated_cylinder_03
-    asset_id: scientific_workbench_environment
+    asset_id: scientific_workbench_graduated_cylinder_03_dynamic
     source_prim_path: /World/graduated_cylinder_03
     role: target_container
     pose:
@@ -65,11 +62,8 @@ objects:
       wxyz: [0.7071068, 0.7071068, 0.0, 0.0]
     named_frames:
       opening:
-        xyz: [0.0, 0.272294, 0.0]
-        wxyz: [0.7071068, -0.7071068, 0.0, 0.0]
-    metadata:
-      material_bindings:
-        mesh: OmniGlass
+        xyz: [0.0, 0.2722941904, 0.0]
+        wxyz: [0.7071067811865476, -0.7071067811865475, 0.0, 0.0]
 robot:
   profile_ref: manip/lift2/R5a
   spawn:
@@ -125,30 +119,65 @@ success:
   operator: all
   claim_scope: kinematic_proxy
   predicates:
-    - id: pour_pose_reached
-      type: relative_pose_reached
+    - id: openings_aligned
+      type: named_frames_relative_pose_reached
       sequence_index: 0
       parameters:
-        object: obj_conical_bottle03
-        relative_to: obj_graduated_cylinder_03
-        xyz_range:
-          x: [-0.08, 0.08]
-          y: [-0.08, 0.08]
-          z: [0.10, 0.30]
-        axis_alignment:
-          object_axis: y
-          target_axis: y
-          comparison: ">="
-          threshold_deg: 40.0
-    - id: source_returned
-      type: object_at_initial_pose
+        source_frame: obj_conical_bottle03.opening
+        target_frame: obj_graduated_cylinder_03.opening
+        horizontal_error_max_m: 0.02
+        signed_height_range_m: [0.02, 0.05]
+        source_normal_axis: z
+        target_normal_axis: z
+        normal_angle_max_deg: 10.0
+        bounds: inclusive
+        diagnostic_compatibility_projection:
+          type: relative_pose_reached
+          parameters:
+            object: obj_conical_bottle03
+            relative_to: obj_graduated_cylinder_03
+            xyz_range:
+              x: [-0.08, 0.08]
+              y: [-0.08, 0.08]
+              z: [0.10, 0.30]
+    - id: source_tilted
+      type: named_frame_tilt_angle_reached
       sequence_index: 1
       parameters:
+        object_frame: obj_conical_bottle03.opening
+        world_axis: z
+        angle_range_deg: [40.0, 80.0]
+        bounds: inclusive
+        diagnostic_compatibility_projection:
+          type: relative_pose_reached
+          parameters:
+            object: obj_conical_bottle03
+            relative_to: obj_graduated_cylinder_03
+            xyz_range:
+              x: [-0.08, 0.08]
+              y: [-0.08, 0.08]
+              z: [0.10, 0.30]
+            axis_alignment:
+              object_axis: y
+              target_axis: y
+              comparison: ">="
+              threshold_deg: 40.0
+    - id: source_returned
+      type: object_returned_to_post_warmup_pose
+      sequence_index: 2
+      parameters:
         object: obj_conical_bottle03
-        xyz_tolerance: [0.06, 0.06, 0.06]
-        relative_axis_object: obj_graduated_cylinder_03
-        object_axis: y
-        target_axis: y
-        max_axis_error_deg: 15.0
+        translation_error_max_m: 0.06
+        rotation_error_max_deg: 15.0
+        bounds: inclusive
+        diagnostic_compatibility_projection:
+          type: object_at_initial_pose
+          parameters:
+            object: obj_conical_bottle03
+            xyz_tolerance: [0.06, 0.06, 0.06]
+            relative_axis_object: obj_graduated_cylinder_03
+            object_axis: y
+            target_axis: y
+            max_axis_error_deg: 15.0
 max_steps: 1500
 seed: "000"

@@ -18,12 +18,17 @@ from tests.test_scenario_package_compiler import _write_source_scene
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _write_bindings(path: Path, bindings: dict[str, object]) -> Path:
+def _write_bindings(
+    path: Path,
+    bindings: dict[str, object],
+    *,
+    schema_version: str = "scenario-source-bindings/v0.1",
+) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         yaml.safe_dump(
             {
-                "schema_version": "scenario-source-bindings/v0.1",
+                "schema_version": schema_version,
                 "bindings": bindings,
             },
             sort_keys=False,
@@ -49,6 +54,29 @@ def test_source_bindings_schema_artifact_exists_and_declares_two_resolvers() -> 
     assert {
         variant["properties"]["resolver"]["const"] for variant in resolver_variants
     } == {"local_usd", "convert_asset_package"}
+
+
+def test_source_bindings_v02_schema_requires_explicit_convert_asset_usage() -> None:
+    schema_path = (
+        REPO_ROOT
+        / "src/scenario_forge/schemas/jsonschema/scenario-source-bindings-v0.2.schema.json"
+    )
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+    assert schema["properties"]["schema_version"]["const"] == (
+        "scenario-source-bindings/v0.2"
+    )
+    convert_asset = next(
+        variant
+        for variant in schema["$defs"]["binding"]["oneOf"]
+        if variant["properties"]["resolver"]["const"] == "convert_asset_package"
+    )
+    assert "usage" in convert_asset["required"]
+    assert convert_asset["properties"]["usage"]["enum"] == [
+        "scene_overlay",
+        "rigid_object",
+    ]
 
 
 def test_local_usd_binding_resolves_paths_relative_to_the_binding_file(
@@ -130,6 +158,71 @@ def test_convert_asset_binding_uses_the_existing_source_bound_handoff_adapter(
     assert source.upstream_package.metadata["scope_prims"] == [
         "/World/DryingBox_03"
     ]
+
+
+def test_v02_convert_asset_rigid_object_binding_requires_task_ready_interaction(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    _, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path / "handoff",
+        source_usd=source_usd,
+        with_interaction_contract=True,
+    )
+    bindings_path = _write_bindings(
+        tmp_path / "bindings.yaml",
+        {
+            "qualified_vessel": {
+                "resolver": "convert_asset_package",
+                "usage": "rigid_object",
+                "source_usd": source_usd.relative_to(tmp_path).as_posix(),
+                "package_dir": package_dir.relative_to(tmp_path).as_posix(),
+                "manifest_path": manifest_path.relative_to(tmp_path).as_posix(),
+                "producer_revision": "324ce6e",
+                "expected_scope_prims": ["/World/DryingBox_03"],
+                "license": "CC-BY-NC-4.0",
+                "redistributable": False,
+            }
+        },
+        schema_version="scenario-source-bindings/v0.2",
+    )
+
+    source = resolve_scenario_source_bindings(bindings_path)["qualified_vessel"]
+
+    assert source.role == "rigid_object"
+    assert source.exclude_relative_paths == ()
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["interaction_contract"][
+        "asset_entry_prim"
+    ] == "/World/DryingBox_03"
+
+
+def test_v01_convert_asset_binding_remains_scene_overlay_without_usage(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    _, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path / "handoff",
+        source_usd=source_usd,
+    )
+    bindings_path = _write_bindings(
+        tmp_path / "bindings.yaml",
+        {
+            "legacy_overlay": {
+                "resolver": "convert_asset_package",
+                "source_usd": source_usd.relative_to(tmp_path).as_posix(),
+                "package_dir": package_dir.relative_to(tmp_path).as_posix(),
+                "manifest_path": manifest_path.relative_to(tmp_path).as_posix(),
+                "producer_revision": "324ce6e",
+                "expected_scope_prims": ["/World/DryingBox_03"],
+                "license": "CC-BY-NC-4.0",
+            }
+        },
+    )
+
+    assert resolve_scenario_source_bindings(bindings_path)["legacy_overlay"].role == (
+        "scene_overlay"
+    )
 
 
 @pytest.mark.parametrize(

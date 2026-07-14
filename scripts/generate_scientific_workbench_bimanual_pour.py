@@ -22,6 +22,10 @@ DEFAULT_SPEC = REPO_ROOT / "examples/scientific_workbench/bimanual_pour/scenario
 DEFAULT_RENDERER = REPO_ROOT / "scripts/ebench/render_genmanip_initial_preview.py"
 DRYINGBOX_OVERLAY_ASSET_ID = "scientific_workbench_dryingbox_03_dynamic"
 DRYINGBOX_SCOPE = "/World/DryingBox_03"
+SOURCE_VESSEL_ASSET_ID = "scientific_workbench_conical_bottle03_dynamic"
+SOURCE_VESSEL_SCOPE = "/World/conical_bottle03"
+TARGET_VESSEL_ASSET_ID = "scientific_workbench_graduated_cylinder_03_dynamic"
+TARGET_VESSEL_SCOPE = "/World/graduated_cylinder_03"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -34,13 +38,22 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-usd", type=Path, required=True)
     parser.add_argument("--convert-asset-package", type=Path, required=True)
     parser.add_argument("--convert-asset-manifest", type=Path, required=True)
+    parser.add_argument("--source-vessel-package", type=Path, required=True)
+    parser.add_argument("--source-vessel-manifest", type=Path, required=True)
+    parser.add_argument("--target-vessel-package", type=Path, required=True)
+    parser.add_argument("--target-vessel-manifest", type=Path, required=True)
     parser.add_argument(
-        "--convert-asset-revision",
+        "--dryingbox-revision",
         required=True,
         help=(
-            "Producer revision recorded as delivery provenance; package identity "
-            "is still verified by content hashes."
+            "ConvertAsset revision for the retained DryingBox delivery; package "
+            "identity is still verified by content hashes."
         ),
+    )
+    parser.add_argument(
+        "--vessel-revision",
+        required=True,
+        help="ConvertAsset revision shared by the source and target vessel deliveries.",
     )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
@@ -85,13 +98,34 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise ValueError(
             "Golden spec must declare exactly the DryingBox_03 dynamic scene overlay"
         )
-    handoff = load_convert_asset_package_handoff(
+    dryingbox_handoff = load_convert_asset_package_handoff(
         args.convert_asset_package,
         args.convert_asset_manifest,
         args.source_usd,
         expected_scope_prims=(DRYINGBOX_SCOPE,),
-        producer_revision=args.convert_asset_revision,
+        producer_revision=args.dryingbox_revision,
     )
+    source_vessel_handoff = load_convert_asset_package_handoff(
+        args.source_vessel_package,
+        args.source_vessel_manifest,
+        args.source_usd,
+        expected_scope_prims=(SOURCE_VESSEL_SCOPE,),
+        producer_revision=args.vessel_revision,
+        usage="rigid_object",
+    )
+    target_vessel_handoff = load_convert_asset_package_handoff(
+        args.target_vessel_package,
+        args.target_vessel_manifest,
+        args.source_usd,
+        expected_scope_prims=(TARGET_VESSEL_SCOPE,),
+        producer_revision=args.vessel_revision,
+        usage="rigid_object",
+    )
+    object_asset_ids = {item.object_id: item.asset_id for item in spec.objects}
+    if object_asset_ids.get("obj_conical_bottle03") != SOURCE_VESSEL_ASSET_ID:
+        raise ValueError("Golden source container must use its qualified object package")
+    if object_asset_ids.get("obj_graduated_cylinder_03") != TARGET_VESSEL_ASSET_ID:
+        raise ValueError("Golden target container must use its qualified object package")
     source = LocalUSDAssetSource(
         asset_id=spec.scene.asset_id,
         source_usd=args.source_usd,
@@ -105,9 +139,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         redistributable=False,
         exclude_relative_paths=("_reports",),
         root_prim_path=spec.scene.root_prim_path,
-        expected_sha256=f"sha256:{handoff.source_sha256}",
+        expected_sha256=f"sha256:{dryingbox_handoff.source_sha256}",
     )
-    dryingbox_overlay = handoff.to_local_usd_asset_source(
+    dryingbox_overlay = dryingbox_handoff.to_local_usd_asset_source(
         asset_id=DRYINGBOX_OVERLAY_ASSET_ID,
         license="CC-BY-NC-4.0",
         attribution=(
@@ -118,11 +152,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         redistributable=False,
         exclude_relative_paths=("evidence",),
     )
+    source_vessel = source_vessel_handoff.to_local_usd_asset_source(
+        asset_id=SOURCE_VESSEL_ASSET_ID,
+        license="CC-BY-NC-4.0",
+        attribution=(
+            "LabUtopia data assets: CC BY-NC 4.0",
+            "Interaction-qualified package normalized by ConvertAsset",
+            "Bundled NVIDIA/Omniverse dependencies retain their upstream terms",
+        ),
+        redistributable=False,
+    )
+    target_vessel = target_vessel_handoff.to_local_usd_asset_source(
+        asset_id=TARGET_VESSEL_ASSET_ID,
+        license="CC-BY-NC-4.0",
+        attribution=(
+            "LabUtopia data assets: CC BY-NC 4.0",
+            "Interaction-qualified package normalized by ConvertAsset",
+            "Bundled NVIDIA/Omniverse dependencies retain their upstream terms",
+        ),
+        redistributable=False,
+    )
     package = compile_scenario_package(
         spec,
         {
             source.asset_id: source,
             dryingbox_overlay.asset_id: dryingbox_overlay,
+            source_vessel.asset_id: source_vessel,
+            target_vessel.asset_id: target_vessel,
         },
         args.out,
     )

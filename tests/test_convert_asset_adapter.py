@@ -18,10 +18,22 @@ def _digest(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
 
 
+def _canonical_json_digest(value: object) -> str:
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    ).encode("utf-8")
+    return sha256(payload).hexdigest()
+
+
 def _write_source_bound_handoff(
     root: Path,
     *,
     source_usd: Path | None = None,
+    with_interaction_contract: bool = False,
+    interaction_root: str = "/World/DryingBox_03",
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     if source_usd is None:
         source_usd = root / "source" / "lab_001.usd"
@@ -41,6 +53,24 @@ def Xform "World" {}
             encoding="utf-8",
         )
     source_sha = _digest(source_usd)
+    interaction_root_name = interaction_root.rpartition("/")[2]
+    if not interaction_root.startswith("/World/") or not interaction_root_name:
+        raise ValueError("interaction_root must be a direct child of /World")
+    package_stem = (
+        "dryingbox03"
+        if interaction_root_name == "DryingBox_03"
+        else interaction_root_name.lower()
+    )
+    opening_pose = {
+        "conical_bottle03": (
+            [0.0, 0.1965674179, 0.0],
+            [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+        ),
+        "graduated_cylinder_03": (
+            [0.0, 0.2722941904, 0.0],
+            [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+        ),
+    }.get(interaction_root_name, ([0.0, 0.0, 0.2], [1.0, 0.0, 0.0, 0.0]))
 
     package_dir = root / "convert_asset_package"
     profile = package_dir / "physics" / "profile.json"
@@ -53,7 +83,7 @@ def Xform "World" {}
     overlay.write_text(
         """#usda 1.0
 over "World" {
-    over "DryingBox_03" {
+    over "__INTERACTION_ROOT__" {
         over "body" {
             float physics:mass = 12
             float3 physics:diagonalInertia = (1, 2, 3)
@@ -62,7 +92,7 @@ over "World" {
         }
     }
 }
-""",
+""".replace("__INTERACTION_ROOT__", interaction_root_name),
         encoding="utf-8",
     )
     scoped = package_dir / "deps" / "usd" / "scoped_source.usda"
@@ -71,9 +101,9 @@ over "World" {
         """#usda 1.0
 def Xform "World" {
     def Scope "Looks" { def Material "DryingBoxMaterial" {} }
-    def Xform "DryingBox_03" { def Xform "body" { float physics:mass = -1 } }
+    def Xform "__INTERACTION_ROOT__" { def Xform "body" { float physics:mass = -1 } }
 }
-""",
+""".replace("__INTERACTION_ROOT__", interaction_root_name),
         encoding="utf-8",
     )
     root_usd = package_dir / "asset.usd"
@@ -92,6 +122,184 @@ def Xform "World" {
         encoding="utf-8",
     )
     root_sha = _digest(root_usd)
+
+    interaction_contract: dict[str, object] | None = None
+    if with_interaction_contract:
+        qualification_report = (
+            package_dir
+            / "evidence"
+            / "interaction_runtime_qualification"
+            / "report.json"
+        )
+        qualification_report.parent.mkdir(parents=True, exist_ok=True)
+        qualification_report.write_text(
+            json.dumps(
+                {
+                    "schema_version": "aan.interaction_runtime_qualification.v1",
+                    "status": "pass",
+                },
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        qualification_report_sha = _digest(qualification_report)
+
+        def qualification_evidence(
+            probe_id: str,
+            *,
+            claim_boundary: str | None = None,
+        ) -> dict[str, object]:
+            evidence: dict[str, object] = {
+                "status": "pass",
+                "probe_id": probe_id,
+                "report_path": (
+                    "evidence/interaction_runtime_qualification/report.json"
+                ),
+                "report_sha256": qualification_report_sha,
+                "observations": [{"probe": probe_id, "status": "pass"}],
+                "errors": [],
+                "prequalification_contract_payload_sha256": "1" * 64,
+            }
+            if claim_boundary is not None:
+                evidence["claim_boundary"] = claim_boundary
+            return evidence
+
+        interaction_profile = package_dir / "interaction" / "profile.json"
+        interaction_profile.parent.mkdir(parents=True)
+        interaction_profile.write_text(
+            '{"schema_version":"aan.object_interaction_profile.v1"}\n',
+            encoding="utf-8",
+        )
+        interaction_overlay = package_dir / "overlays" / "interaction.usda"
+        interaction_overlay.write_text(
+            '#usda 1.0\nover "World" { over "__INTERACTION_ROOT__" {} }\n'.replace(
+                "__INTERACTION_ROOT__", interaction_root_name
+            ),
+            encoding="utf-8",
+        )
+        rigid_root = interaction_root
+        interaction_contract = {
+            "schema_version": "aan.interaction_contract.v1",
+            "status": "pass",
+            "profile": {
+                "schema_version": "aan.object_interaction_profile.v1",
+                "profile_id": "dryingbox.interaction",
+                "revision": "r1",
+                "source_sha256": source_sha,
+                "profile_sha256": _digest(interaction_profile),
+                "package_path": "interaction/profile.json",
+                "overlay_path": "overlays/interaction.usda",
+            },
+            "asset_entry_prim": rigid_root,
+            "runtime_identity": {
+                "rigid_root_prim": rigid_root,
+                "exactly_one_active_rigid_body": True,
+                "active_rigid_body_prims": [rigid_root],
+            },
+            "disabled_source_rigid_bodies": [
+                {
+                    "prim_path": f"{rigid_root}/body",
+                    "rigid_body_api_removed": True,
+                    "rigid_body_disabled": True,
+                    "mass_api_removed": True,
+                }
+            ],
+            "collider_prims": [
+                {
+                    "prim_path": f"{rigid_root}/body",
+                    "mode": "preserve",
+                    "collision_enabled": True,
+                    "purpose": ["simulation", "grasp"],
+                    "requested_approximation": None,
+                    "observed_approximation": "convexDecomposition",
+                }
+            ],
+            "open_top": {
+                "required": True,
+                "axis_body_local": [0.0, 0.0, 1.0],
+                "aperture_frame": "opening",
+                "status": "pass",
+                "evidence": qualification_evidence("open_top"),
+            },
+            "named_frames": {
+                "opening": {
+                    "prim_path": f"{rigid_root}/frames/opening",
+                    "parent_prim": rigid_root,
+                    "translation_body_local_usd": opening_pose[0],
+                    "rotation_body_local_wxyz": opening_pose[1],
+                    "authoritative": True,
+                },
+                "grasp": {
+                    "prim_path": f"{rigid_root}/frames/grasp",
+                    "parent_prim": rigid_root,
+                    "translation_body_local_usd": [0.0, 0.0, 0.1],
+                    "rotation_body_local_wxyz": [1.0, 0.0, 0.0, 0.0],
+                    "authoritative": True,
+                },
+                "support": {
+                    "prim_path": f"{rigid_root}/frames/support",
+                    "parent_prim": rigid_root,
+                    "translation_body_local_usd": [0.0, 0.0, 0.0],
+                    "rotation_body_local_wxyz": [1.0, 0.0, 0.0, 0.0],
+                    "authoritative": True,
+                },
+            },
+            "root_motion_gate": {
+                "status": "pass",
+                "required": True,
+                "min_translation_m": 0.05,
+                "evidence": qualification_evidence("root_motion"),
+            },
+            "stable_support_gate": {
+                "status": "pass",
+                "required": True,
+                "evidence": qualification_evidence("stable_support"),
+            },
+            "gripper_collision_gate": {
+                "status": "pass",
+                "required": True,
+                "evidence": qualification_evidence(
+                    "gripper_collision",
+                    claim_boundary=(
+                        "Collision-proxy qualification only; no grasp-success claim."
+                    ),
+                ),
+            },
+        }
+        artifact_paths = [
+            "asset.usd",
+            "deps/usd/scoped_source.usda",
+            "interaction/profile.json",
+            "overlays/interaction.usda",
+            "overlays/physics_profile.usda",
+            "physics/profile.json",
+        ]
+        artifacts = [
+            {"path": path, "sha256": _digest(package_dir / path)}
+            for path in sorted(artifact_paths)
+        ]
+        contract_payload = {
+            key: interaction_contract[key]
+            for key in (
+                "schema_version",
+                "asset_entry_prim",
+                "runtime_identity",
+                "disabled_source_rigid_bodies",
+                "collider_prims",
+                "open_top",
+                "named_frames",
+            )
+        }
+        interaction_contract["closure"] = {
+            "status": "pass",
+            "digest_algorithm": "sha256",
+            "contract_encoding": "canonical_json_interaction_payload_v1",
+            "contract_payload_sha256": _canonical_json_digest(contract_payload),
+            "tree_encoding": "canonical_json_artifact_list_v1",
+            "runtime_tree_sha256": _canonical_json_digest(artifacts),
+            "artifacts": artifacts,
+        }
     metrics = {
         "meters_per_unit": 1.0,
         "kilograms_per_unit": 1.0,
@@ -99,11 +307,11 @@ def Xform "World" {
         "time_codes_per_second": 60.0,
         "frames_per_second": 24.0,
     }
-    scope = "/World/DryingBox_03"
+    scope = interaction_root
     manifest: dict[str, object] = {
         "schema_version": "asset_application_normalizer.v1",
-        "package_id": "dryingbox03_dynamic_package",
-        "asset_id": "upstream_dryingbox03_dynamic",
+        "package_id": f"{package_stem}_dynamic_package",
+        "asset_id": f"upstream_{package_stem}_dynamic",
         "asset_role": "dynamic",
         "overall_status": "pass",
         "source": {"path": "/producer/source/lab_001.usd", "sha256": source_sha},
@@ -187,9 +395,11 @@ def Xform "World" {
         "tool_version": "convert_asset.asset_application_normalizer.v1",
         "git_commit": None,
     }
+    if interaction_contract is not None:
+        manifest["interaction_contract"] = interaction_contract
     manifest_path = root / "manifest.json"
     embedded_manifest = package_dir / "evidence" / "manifest.json"
-    embedded_manifest.parent.mkdir(parents=True)
+    embedded_manifest.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     manifest_path.write_text(payload, encoding="utf-8")
     embedded_manifest.write_text(payload, encoding="utf-8")
@@ -300,6 +510,179 @@ def test_load_source_bound_handoff_maps_verified_package_to_neutral_asset_source
     assert source.upstream_package.metadata["claims_forbidden"] == [
         "Measured, BOM, CAD, or real-world physical-parameter parity is verified."
     ]
+
+
+def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repair(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/DryingBox_03",),
+        producer_revision="324ce6e",
+        usage="rigid_object",
+    )
+    source = handoff.to_local_usd_asset_source(
+        asset_id="qualified_rigid_object",
+        license="CC-BY-NC-4.0",
+    )
+
+    assert handoff.interaction_contract is not None
+    assert handoff.interaction_contract.asset_entry_prim == "/World/DryingBox_03"
+    assert handoff.interaction_contract.rigid_root_prim == "/World/DryingBox_03"
+    assert handoff.interaction_contract.active_rigid_body_prims == (
+        "/World/DryingBox_03",
+    )
+    assert handoff.interaction_contract.task_ready is True
+    assert source.role == "rigid_object"
+    assert source.upstream_package is not None
+    interaction = source.upstream_package.metadata["interaction_contract"]
+    assert interaction["asset_entry_prim"] == "/World/DryingBox_03"
+    assert interaction["runtime_identity"]["rigid_root_prim"] == (
+        "/World/DryingBox_03"
+    )
+    assert interaction["closure"]["tree_encoding"] == (
+        "canonical_json_artifact_list_v1"
+    )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("entry_root_mismatch", "asset_entry_prim"),
+        ("multiple_rigid_bodies", "exactly one|active_rigid_body_prims"),
+        ("non_authoritative_frame", "authoritative"),
+        ("missing_collider", "collider_prims"),
+        ("runtime_gate_not_run", "task-ready|root_motion_gate"),
+        ("payload_digest_mismatch", "contract_payload_sha256"),
+    ],
+)
+def test_rigid_object_handoff_rejects_incomplete_interaction_contract(
+    tmp_path: Path,
+    mutation: str,
+    message: str,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    interaction = manifest["interaction_contract"]
+    assert isinstance(interaction, dict)
+    if mutation == "entry_root_mismatch":
+        interaction["asset_entry_prim"] = "/World/Other"
+    elif mutation == "multiple_rigid_bodies":
+        identity = interaction["runtime_identity"]
+        assert isinstance(identity, dict)
+        identity["active_rigid_body_prims"] = [
+            "/World/DryingBox_03",
+            "/World/DryingBox_03/body",
+        ]
+    elif mutation == "non_authoritative_frame":
+        frames = interaction["named_frames"]
+        assert isinstance(frames, dict)
+        opening = frames["opening"]
+        assert isinstance(opening, dict)
+        opening["authoritative"] = False
+    elif mutation == "missing_collider":
+        interaction["collider_prims"] = []
+    elif mutation == "runtime_gate_not_run":
+        gate = interaction["root_motion_gate"]
+        assert isinstance(gate, dict)
+        gate["status"] = "not_run"
+    else:
+        closure = interaction["closure"]
+        assert isinstance(closure, dict)
+        closure["contract_payload_sha256"] = "0" * 64
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    with pytest.raises(ConvertAssetHandoffError, match=message):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/DryingBox_03",),
+            producer_revision="324ce6e",
+            usage="rigid_object",
+        )
+
+
+def test_rigid_object_handoff_rejects_runtime_closure_artifact_tampering(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    (package_dir / "overlays" / "interaction.usda").write_text(
+        "#usda 1.0\n# tampered\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConvertAssetHandoffError, match="artifact.*sha256|closure"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/DryingBox_03",),
+            producer_revision="324ce6e",
+            usage="rigid_object",
+        )
+
+
+@pytest.mark.parametrize("mutation", ["missing", "tampered"])
+def test_rigid_object_handoff_verifies_runtime_qualification_report(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    report = package_dir / "evidence/interaction_runtime_qualification/report.json"
+    if mutation == "missing":
+        report.unlink()
+    else:
+        report.write_text('{"status":"tampered"}\n', encoding="utf-8")
+
+    with pytest.raises(ConvertAssetHandoffError, match="report_path|report_sha256"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/DryingBox_03",),
+            producer_revision="324ce6e",
+            usage="rigid_object",
+        )
+
+
+def test_rigid_object_source_cannot_exclude_qualification_report(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/DryingBox_03",),
+        producer_revision="324ce6e",
+        usage="rigid_object",
+    )
+
+    with pytest.raises(ValueError, match="qualification report"):
+        handoff.to_local_usd_asset_source(
+            asset_id="qualified_rigid_object",
+            license="CC-BY-NC-4.0",
+            exclude_relative_paths=("evidence",),
+        )
 
 
 def test_load_source_bound_handoff_rejects_source_hash_mismatch(tmp_path: Path) -> None:
