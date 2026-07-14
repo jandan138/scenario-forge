@@ -477,6 +477,27 @@ def test_scene_overlay_source_must_use_scene_overlay_role(tmp_path: Path) -> Non
         )
 
 
+def test_scene_overlay_role_cannot_be_used_as_the_base_scene(tmp_path: Path) -> None:
+    source_usd = _write_source_scene(tmp_path)
+
+    with pytest.raises(ValueError, match="scene_overlay.*scene.overlay_asset_ids"):
+        compile_scenario_package(
+            ScenarioSpec.from_mapping(_scenario_mapping()),
+            {
+                "scientific_workbench_environment": LocalUSDAssetSource(
+                    asset_id="scientific_workbench_environment",
+                    source_usd=source_usd,
+                    root_prim_path="/World",
+                    role="scene_overlay",
+                    license="CC-BY-NC-4.0",
+                    source_uri="convert-asset://misbound-overlay",
+                    redistributable=False,
+                ),
+            },
+            tmp_path / "package",
+        )
+
+
 def test_package_compiler_rejects_missing_scene_overlay_source(tmp_path: Path) -> None:
     base_usd = _write_source_scene(tmp_path)
     spec = _scenario_with_overlays("missing_overlay")

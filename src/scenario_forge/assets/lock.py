@@ -47,8 +47,14 @@ class AssetLockReport:
     messages: tuple[str, ...]
 
 
-def generate_asset_lock(root: str | Path) -> AssetLock:
+def generate_asset_lock(
+    root: str | Path,
+    *,
+    lock_id: str | None = None,
+) -> AssetLock:
     package_root = Path(root)
+    if lock_id is not None and (not isinstance(lock_id, str) or not lock_id):
+        raise AssetLockError("lock_id must be a non-empty string when provided")
     manifest = load_asset_manifest(package_root)
     assets: dict[str, AssetLockEntry] = {}
 
@@ -71,10 +77,14 @@ def generate_asset_lock(root: str | Path) -> AssetLock:
             metadata={},
         )
 
-    lock_id = f"{package_root.name or 'scenario_package'}_asset_lock"
+    resolved_lock_id = (
+        lock_id
+        if lock_id is not None
+        else f"{package_root.name or 'scenario_package'}_asset_lock"
+    )
     return AssetLock(
         schema_version=ASSET_LOCK_SCHEMA_VERSION,
-        lock_id=lock_id,
+        lock_id=resolved_lock_id,
         created_by="scenario-forge",
         assets=assets,
     )

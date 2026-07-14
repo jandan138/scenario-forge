@@ -78,6 +78,9 @@ assets:
 
 Rules:
 
+- Package compilers should provide a stable `lock_id` derived from package
+  identity, not from the output directory name. The low-level lock generator keeps
+  the output-basename-derived ID only as a backwards-compatible default.
 - Every locked asset must have a checksum.
 - Every locked asset must have a license.
 - External assets must include source URI, version or immutable digest, resolver

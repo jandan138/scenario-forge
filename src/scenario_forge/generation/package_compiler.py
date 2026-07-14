@@ -60,7 +60,11 @@ def compile_scenario_package(
         root / "assets" / "asset_manifest.yaml",
         {"schema_version": "asset-manifest/v0.2", "assets": asset_entries},
     )
-    write_asset_lock(root, generate_asset_lock(root))
+    scenario_id = _string(scenario.get("scenario_id"), "scenario_id")
+    write_asset_lock(
+        root,
+        generate_asset_lock(root, lock_id=f"{scenario_id}_asset_lock"),
+    )
     write_yaml_artifact(
         root / "provenance" / "provenance.yaml",
         _provenance(scenario, asset_entries),
@@ -123,6 +127,17 @@ def _required_sources(
                     f"asset source {asset_id!r} canonical USD checksum mismatch"
                 )
         sources.append(source)
+    misplaced_overlay_sources = [
+        source.asset_id
+        for source in sources
+        if source.role == "scene_overlay" and source.asset_id not in overlay_asset_ids
+    ]
+    if misplaced_overlay_sources:
+        raise ValueError(
+            "scene_overlay asset sources must be listed in "
+            "scene.overlay_asset_ids: "
+            + ", ".join(misplaced_overlay_sources)
+        )
     scene_root_prim_path = _string(
         scene.get("root_prim_path"),
         "scene.root_prim_path",

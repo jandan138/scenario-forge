@@ -1,12 +1,23 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
+import tempfile
 from pathlib import Path
+from typing import Mapping
+
+import yaml
 
 from scenario_forge.assets.lock import AssetLockError, check_asset_lock, generate_asset_lock, write_asset_lock
 from scenario_forge.assets.manifest import AssetManifestError
-from scenario_forge.adapters.ebench import EBenchExportError, export_ebench_package, export_ebench_suite
+from scenario_forge.assets.source import LocalUSDAssetSource
+from scenario_forge.adapters.ebench import (
+    EBenchExportError,
+    export_ebench_package,
+    export_ebench_suite,
+    export_genmanip_collected_package,
+)
 from scenario_forge.adapters.real2sim import Real2SimImportError, import_real2sim_result
 from scenario_forge.generation.layout.layout_planner import LayoutPlanError, plan_layout_artifacts
 from scenario_forge.generation.cousins.cousin_generator import (
@@ -53,6 +64,9 @@ from scenario_forge.generation.image_grounded import (
     Phase13ImageTaskError,
     generate_image_grounded_task_package,
 )
+from scenario_forge.core.scenario import ScenarioSpec
+from scenario_forge.generation.package_compiler import compile_scenario_package
+from scenario_forge.generation.source_resolver import resolve_scenario_source_bindings
 from scenario_forge.package import PackageError, load_package_manifest, validate_package
 from scenario_forge.scaffold import scaffold_starter_package
 from scenario_forge.scene.usd_compiler import USDSceneCompilerError, compile_usd_scene
@@ -76,6 +90,23 @@ def build_parser() -> argparse.ArgumentParser:
 
     scaffold_parser = package_subparsers.add_parser("scaffold", help="Create a starter package")
     scaffold_parser.add_argument("--out", required=True, help="Output package directory")
+
+    package_compile_parser = package_subparsers.add_parser(
+        "compile",
+        help="Compile a ScenarioSpec using external local source bindings",
+    )
+    package_compile_parser.add_argument("--spec", required=True, help="ScenarioSpec YAML")
+    package_compile_parser.add_argument(
+        "--source-bindings",
+        required=True,
+        help="scenario-source-bindings/v0.1 YAML",
+    )
+    package_compile_parser.add_argument("--out", required=True, help="Output package directory")
+    package_compile_parser.add_argument(
+        "--export-genmanip",
+        action="store_true",
+        help="Also write the existing GenManip collected-package adapter export",
+    )
 
     check_parser = package_subparsers.add_parser("check", help="Validate a scenario package")
     check_parser.add_argument("package_dir", help="Package directory containing manifest.yaml")
@@ -497,6 +528,25 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "package" and args.package_command == "scaffold":
         out_dir = scaffold_starter_package(Path(args.out))
         print(f"Created starter package: {out_dir}")
+        return 0
+
+    if args.command == "package" and args.package_command == "compile":
+        try:
+            raw_spec = yaml.safe_load(Path(args.spec).read_text(encoding="utf-8"))
+            spec = ScenarioSpec.from_mapping(raw_spec)
+            sources = resolve_scenario_source_bindings(Path(args.source_bindings))
+            package_root, genmanip_root = _compile_package_command(
+                spec=spec,
+                sources=sources,
+                output_dir=Path(args.out),
+                export_genmanip=args.export_genmanip,
+            )
+        except (OSError, yaml.YAMLError, ValueError) as exc:
+            print(exc)
+            return 1
+        print(f"Portable package: {package_root}")
+        if genmanip_root is not None:
+            print(f"GenManip collected package: {genmanip_root}")
         return 0
 
     if args.command == "package" and args.package_command == "check":
@@ -929,6 +979,67 @@ def _package_scene_paths(package_dir: Path) -> tuple[str, ...]:
         return ()
     scene_path = manifest.scene_path
     return (scene_path,) if scene_path is not None else ()
+
+
+def _compile_package_command(
+    *,
+    spec: ScenarioSpec,
+    sources: Mapping[str, LocalUSDAssetSource],
+    output_dir: Path,
+    export_genmanip: bool,
+) -> tuple[Path, Path | None]:
+    if not output_dir.name:
+        raise ValueError("package compile --out must name a package directory")
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    staging_dir = Path(
+        tempfile.mkdtemp(
+            prefix=f".{output_dir.name}.staging-",
+            dir=output_dir.parent,
+        )
+    )
+    try:
+        package = compile_scenario_package(spec, sources, staging_dir)
+        if export_genmanip:
+            export_genmanip_collected_package(package.package_root)
+        _publish_staged_directory(staging_dir, output_dir)
+    except Exception:
+        if staging_dir.exists() or staging_dir.is_symlink():
+            _remove_path(staging_dir)
+        raise
+    genmanip_root = (
+        output_dir / "adapters" / "ebench" / "genmanip"
+        if export_genmanip
+        else None
+    )
+    return output_dir, genmanip_root
+
+
+def _publish_staged_directory(staging_dir: Path, output_dir: Path) -> None:
+    if not output_dir.exists() and not output_dir.is_symlink():
+        staging_dir.rename(output_dir)
+        return
+
+    backup_dir = Path(
+        tempfile.mkdtemp(
+            prefix=f".{output_dir.name}.backup-",
+            dir=output_dir.parent,
+        )
+    )
+    backup_dir.rmdir()
+    output_dir.rename(backup_dir)
+    try:
+        staging_dir.rename(output_dir)
+    except Exception:
+        backup_dir.rename(output_dir)
+        raise
+    _remove_path(backup_dir)
+
+
+def _remove_path(path: Path) -> None:
+    if path.is_symlink() or path.is_file():
+        path.unlink()
+    elif path.exists():
+        shutil.rmtree(path)
 
 
 def _package_root_from_asset_lock(asset_lock_path: Path) -> Path:

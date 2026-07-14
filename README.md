@@ -68,6 +68,7 @@ Design documents:
 - [EBench Adapter Design](docs/design/ebench-adapter.md)
 - [Workflow, Layout, Real2Sim, Suite Factory Design](docs/design/workflow-layout-suite-factory.md)
 - [ScenarioSpec and GenManip Export](docs/design/scenario-spec-and-genmanip-export.md)
+- [Scenario Source Bindings](docs/design/scenario-source-bindings.md)
 - [Task Catalog and Readiness](docs/design/task-catalog-and-readiness.md)
 
 ## Quick Start
@@ -112,6 +113,21 @@ python scripts/generate_scientific_workbench_bimanual_pour.py \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$GENMANIP_ROOT"
 ```
+
+For a static build, the same portable compiler is available for any ScenarioSpec
+through a separate local source-binding file:
+
+```bash
+scenario-forge package compile \
+  --spec examples/scientific_workbench/bimanual_pour/scenario.yaml \
+  --source-bindings /path/to/scenario_source_bindings.yaml \
+  --out outputs/scientific_workbench_bimanual_pour \
+  --export-genmanip
+```
+
+The bindings file holds local USD and ConvertAsset delivery paths; those paths do
+not become part of the ScenarioSpec or generated package provenance. This command
+does not start Isaac Sim or execute a rollout.
 
 The default build resets the exported task in GenManip and renders a tabletop
 close-up plus a whole-scene overview before accepting the package. Use

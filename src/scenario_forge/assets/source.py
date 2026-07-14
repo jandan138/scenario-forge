@@ -126,7 +126,11 @@ class LocalUSDAssetSource:
         """Return provenance that never embeds an absolute local build path."""
 
         value = self.source_uri.strip()
-        if value and not Path(value).is_absolute() and not value.startswith("file:///"):
+        if (
+            value
+            and not Path(value).is_absolute()
+            and not value.lower().startswith("file:")
+        ):
             return value
         return f"local-source://{self.asset_id}/{self.source_usd.name}"
 
