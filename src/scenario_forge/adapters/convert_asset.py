@@ -711,9 +711,15 @@ def _load_interaction_contract(
             raise ConvertAssetHandoffError(f"{field}.prim_path must be unique")
         collider_paths.append(prim_path)
         mode = _required_string(item, "mode", field)
-        if mode not in {"preserve", "author"}:
-            raise ConvertAssetHandoffError(f"{field}.mode must be 'preserve' or 'author'")
-        _require_value(item, "collision_enabled", True, field)
+        if mode not in {"preserve", "author", "disable"}:
+            raise ConvertAssetHandoffError(
+                f"{field}.mode must be 'preserve', 'author', or 'disable'"
+            )
+        collision_enabled = _required_bool(item, "collision_enabled", field)
+        if collision_enabled != (mode != "disable"):
+            raise ConvertAssetHandoffError(
+                f"{field}.collision_enabled must be false only when mode is 'disable'"
+            )
         _string_list(item.get("purpose"), f"{field}.purpose")
         for key in ("requested_approximation", "observed_approximation"):
             approximation = item.get(key)

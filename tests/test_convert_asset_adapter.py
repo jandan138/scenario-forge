@@ -33,6 +33,7 @@ def _write_source_bound_handoff(
     *,
     source_usd: Path | None = None,
     with_interaction_contract: bool = False,
+    with_disabled_source_collider: bool = False,
     interaction_root: str = "/World/DryingBox_03",
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     if source_usd is None:
@@ -179,6 +180,27 @@ def Xform "World" {
             encoding="utf-8",
         )
         rigid_root = interaction_root
+        collider_prims = [
+            {
+                "prim_path": f"{rigid_root}/body",
+                "mode": "preserve",
+                "collision_enabled": True,
+                "purpose": ["simulation", "grasp"],
+                "requested_approximation": None,
+                "observed_approximation": "convexDecomposition",
+            }
+        ]
+        if with_disabled_source_collider:
+            collider_prims.append(
+                {
+                    "prim_path": f"{rigid_root}/source_mesh",
+                    "mode": "disable",
+                    "collision_enabled": False,
+                    "purpose": [],
+                    "requested_approximation": None,
+                    "observed_approximation": None,
+                }
+            )
         interaction_contract = {
             "schema_version": "aan.interaction_contract.v1",
             "status": "pass",
@@ -205,16 +227,7 @@ def Xform "World" {
                     "mass_api_removed": True,
                 }
             ],
-            "collider_prims": [
-                {
-                    "prim_path": f"{rigid_root}/body",
-                    "mode": "preserve",
-                    "collision_enabled": True,
-                    "purpose": ["simulation", "grasp"],
-                    "requested_approximation": None,
-                    "observed_approximation": "convexDecomposition",
-                }
-            ],
+            "collider_prims": collider_prims,
             "open_top": {
                 "required": True,
                 "axis_body_local": [0.0, 0.0, 1.0],
@@ -550,6 +563,28 @@ def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repai
     assert interaction["closure"]["tree_encoding"] == (
         "canonical_json_artifact_list_v1"
     )
+
+
+def test_task_ready_interaction_handoff_accepts_disabled_source_collider(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+        with_disabled_source_collider=True,
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/DryingBox_03",),
+        producer_revision="324ce6e",
+        usage="rigid_object",
+    )
+
+    assert handoff.interaction_contract is not None
+    assert handoff.interaction_contract.task_ready is True
 
 
 @pytest.mark.parametrize(

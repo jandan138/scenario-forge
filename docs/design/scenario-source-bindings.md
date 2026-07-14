@@ -72,6 +72,9 @@ task-ready `aan.interaction_contract.v1`. Scenario Forge verifies that the asset
 entry prim is the single active rigid root, all declared colliders and authoritative
 named frames are coherent, the contract/profile/runtime-tree hashes close, and the
 required root-motion, stable-support, gripper-collision, and open-top gates passed.
+Collider records may preserve or author an enabled collider, or explicitly disable
+a source collider that has been replaced by package-owned geometry; the declared
+`collision_enabled` value must agree with that mode.
 Each passing gate must point to a package-relative runtime qualification report;
 Scenario Forge verifies that file and its SHA-256. It then emits a
 `LocalUSDAssetSource` with role `rigid_object`. Do not exclude `evidence/` from a
