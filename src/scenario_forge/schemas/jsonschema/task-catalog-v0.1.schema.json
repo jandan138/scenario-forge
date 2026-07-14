@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/task-catalog-v0.1.schema.json",
+  "title": "Scenario Forge Task Catalog v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "catalog_id",
+    "domain",
+    "source",
+    "identity_reconciliation",
+    "tasks"
+  ],
+  "properties": {
+    "schema_version": {"const": "task-catalog/v0.1"},
+    "catalog_id": {"$ref": "#/$defs/id"},
+    "domain": {"$ref": "#/$defs/id"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "filename", "sha256", "captured_at", "table_pages"],
+      "properties": {
+        "uri": {"type": "string", "minLength": 1},
+        "filename": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "captured_at": {"type": "string", "format": "date"},
+        "table_pages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "integer", "minimum": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "identity_reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "declared_task_count",
+        "observed_candidate_row_count",
+        "note"
+      ],
+      "properties": {
+        "status": {"enum": ["unresolved", "resolved"]},
+        "declared_task_count": {"type": "integer", "minimum": 1},
+        "observed_candidate_row_count": {"type": "integer", "minimum": 1},
+        "note": {"type": "string", "minLength": 1}
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/task"}
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonEmptyString": {"type": "string", "minLength": 1},
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "source_id",
+        "title_zh",
+        "level",
+        "execution_mode",
+        "step_count",
+        "goal_zh",
+        "atomic_skills",
+        "required_asset_roles",
+        "claim_scope",
+        "success_evidence_zh"
+      ],
+      "properties": {
+        "task_id": {"$ref": "#/$defs/id"},
+        "source_id": {"type": "string", "pattern": "^[0-9]+[a-z]?$"},
+        "title_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "level": {"enum": ["basic", "long_horizon"]},
+        "execution_mode": {"enum": ["joint", "simulation", "real"]},
+        "step_count": {"type": "integer", "minimum": 1, "maximum": 20},
+        "goal_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "atomic_skills": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "grasp",
+              "pick",
+              "place",
+              "pour",
+              "stir",
+              "shake",
+              "press",
+              "pull",
+              "push",
+              "insert",
+              "turn",
+              "twist",
+              "handover",
+              "align",
+              "scoop"
+            ]
+          }
+        },
+        "required_asset_roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "claim_scope": {"enum": ["kinematic_proxy", "state_proxy"]},
+        "success_evidence_zh": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    }
+  }
+}

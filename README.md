@@ -68,6 +68,7 @@ Design documents:
 - [EBench Adapter Design](docs/design/ebench-adapter.md)
 - [Workflow, Layout, Real2Sim, Suite Factory Design](docs/design/workflow-layout-suite-factory.md)
 - [ScenarioSpec and GenManip Export](docs/design/scenario-spec-and-genmanip-export.md)
+- [Task Catalog and Readiness](docs/design/task-catalog-and-readiness.md)
 
 ## Quick Start
 

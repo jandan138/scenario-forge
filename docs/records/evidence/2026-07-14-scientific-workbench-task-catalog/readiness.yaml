@@ -1,0 +1,345 @@
+schema_version: task-readiness-snapshot/v0.1
+snapshot_id: scientific_workbench_phase1_20260714
+captured_at: "2026-07-14"
+catalog_source:
+  catalog_id: scientific_workbench_phase1
+  catalog_path: configs/task_catalogs/scientific_workbench_phase1.yaml
+  source_sha256: sha256:3b7ebb2592a8dd612f37e0e934aa052284de772fd0e7fb80b7359afa57d82eca
+assets:
+  - asset_role: erlenmeyer_flask
+    candidate_identity: LabUtopia:lab_001#/World/conical_bottle03
+    context_package_status: passed
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, oracle_lift, oracle_pour]
+    blockers: [Five-stage oracle has not run on the current exact package.]
+  - asset_role: graduated_cylinder
+    candidate_identity: LabUtopia:lab_001#/World/graduated_cylinder_03
+    context_package_status: passed
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, oracle_hold]
+    blockers: [Five-stage oracle has not run on the current exact package.]
+  - asset_role: drying_box
+    candidate_identity: ConvertAsset:DryingBox_03@324ce6e
+    context_package_status: passed
+    interactive_affordance_status: pending
+    pending_affordances: [door, start_button]
+    blockers: [Door manipulation and button-state affordances have not been validated.]
+  - asset_role: beaker
+    candidate_identity: LabUtopia:lab_001#/World/beaker1
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, stable_support, stir_contact]
+    blockers: [Candidate exists in the source scene but has no task-ready handoff.]
+  - asset_role: glass_rod
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, stir_contact]
+    blockers: [No source-bound task-ready candidate has been selected.]
+  - asset_role: target_region
+    candidate_identity: scenario_forge:semantic_target_region
+    context_package_status: not_required
+    interactive_affordance_status: not_required
+    pending_affordances: []
+    blockers: []
+  - asset_role: start_button
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [press, observable_state]
+    blockers: [The role must be bound to an instrument-specific button prim.]
+  - asset_role: sample_container_a
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, pour]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: sample_container_b
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, pour]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: source_beaker
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, pour]
+    blockers: [Source and collection beaker identities have not been bound.]
+  - asset_role: collection_beaker
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_support, receive, stir_contact]
+    blockers: [Source and collection beaker identities have not been bound.]
+  - asset_role: reagent_container
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, stable_support]
+    blockers: [No task-ready candidate and target-region binding have been selected.]
+  - asset_role: test_tube
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [precision_grasp, insert, handover]
+    blockers: [No source-bound task-ready candidate has been selected.]
+  - asset_role: centrifuge
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [door, tube_socket, start_button, observable_state]
+    blockers: [No task-ready dynamic package is available.]
+  - asset_role: centrifuge_door
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [open, close, observable_state]
+    blockers: [No task-ready centrifuge package is available.]
+  - asset_role: stoppered_reagent_bottle
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, pour, stopper_socket]
+    blockers: [No non-threaded task-ready bottle candidate has been selected.]
+  - asset_role: stopper
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [precision_grasp, pull, insert]
+    blockers: [No non-threaded task-ready stopper candidate has been selected.]
+  - asset_role: balance
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [weighing_region, tare_button, observable_state]
+    blockers: [No task-ready balance package is available.]
+  - asset_role: weighing_container
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_support, receive_sample]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: spatula
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [precision_grasp, scoop_proxy]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: sample_container
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, pour, scoop_source]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: source_container
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, pour]
+    blockers: [Generalization candidates and split policy have not been selected.]
+  - asset_role: target_container
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_support, opening_frame]
+    blockers: [Generalization candidates and split policy have not been selected.]
+  - asset_role: heating_plate
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [heating_region, control_knob, start_button, observable_state]
+    blockers: [No task-ready dynamic package is available.]
+  - asset_role: control_knob
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [turn, observable_angle]
+    blockers: [The role must be bound to an instrument-specific knob prim.]
+  - asset_role: vortex_oscillator
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [tube_work_position, control, observable_state]
+    blockers: [No task-ready dynamic package is available.]
+  - asset_role: tube_rack
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_support, indexed_sockets]
+    blockers: [No task-ready rack and socket contract is available.]
+  - asset_role: handover_region
+    candidate_identity: scenario_forge:semantic_handover_region
+    context_package_status: not_required
+    interactive_affordance_status: not_required
+    pending_affordances: []
+    blockers: []
+  - asset_role: funnel
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [precision_grasp, insert, opening_frame]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: rotary_evaporator
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [flask_interface, lift, rotation, vacuum_control, observable_state]
+    blockers: [No task-ready dynamic package is available.]
+  - asset_role: round_bottom_flask
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [stable_grasp, instrument_interface]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: receiving_flask
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [instrument_interface]
+    blockers: [No task-ready candidate has been selected.]
+  - asset_role: water_bath
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [relative_position, lift_clearance]
+    blockers: [No task-ready rotary-evaporator assembly is available.]
+  - asset_role: clamp
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [attach, detach, observable_state]
+    blockers: [No task-ready rotary-evaporator assembly is available.]
+  - asset_role: chromatography_column
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [inlet, outlet, stable_mount]
+    blockers: [No task-ready column package is available.]
+  - asset_role: column_stand
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [stable_mount, collection_alignment]
+    blockers: [No task-ready column package is available.]
+  - asset_role: collection_tube
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: pending
+    pending_affordances: [precision_grasp, stable_support]
+    blockers: [No task-ready candidate has been selected.]
+tasks:
+  - task_id: wetlab_nonquant_pour_to_cylinder
+    compile_status: passed
+    runtime_reset_status: passed
+    oracle_status: pending
+    blockers: [Five-stage oracle has not run on the current exact package.]
+    next_action: Freeze the exact package and execute the external EOS/GenManip oracle.
+  - task_id: wetlab_glassrod_mix_and_stage
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Glass rod and beaker task-ready handoffs are missing.]
+    next_action: Select and qualify glass-rod and beaker candidates.
+  - task_id: wetlab_dryingbox_beaker_load_start
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [DryingBox door and start-button affordances are not validated.]
+    next_action: Request an upstream interactive DryingBox handoff.
+  - task_id: wetlab_two_sample_add_and_swirl
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Two source containers and a target beaker are not qualified.]
+    next_action: Select the three container candidates and qualify grasp/pour behavior.
+  - task_id: wetlab_decant_motion_and_mix
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Two beakers and a glass rod are not qualified.]
+    next_action: Qualify the container pair and glass-rod contact behavior.
+  - task_id: wetlab_tabletop_reagent_delivery
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [A stable container candidate and target-region binding are not frozen.]
+    next_action: Audit whether the current flask can support a distinct transfer task.
+  - task_id: wetlab_centrifuge_tube_load_start_no_wait
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Centrifuge, door, socket and button package is missing.]
+    next_action: Request a task-ready centrifuge package from the asset owner.
+  - task_id: wetlab_stoppered_bottle_pour_reseal
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Non-threaded bottle and stopper candidates are not qualified.]
+    next_action: Select a bottle/stopper pair and define insertion state evidence.
+  - task_id: wetlab_weighing_prepare_and_sample
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Balance controls and sample-transfer proxy assets are missing.]
+    next_action: Request balance and sampling-tool task-ready packages.
+  - task_id: wetlab_pour_contact_point_generalization
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Candidate set and train/eval split policy are unresolved.]
+    next_action: Define the target-container candidate set after the generic compiler exists.
+  - task_id: wetlab_heating_plate_knob_set
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Heating plate controls and observable state are missing.]
+    next_action: Request a task-ready heating-plate package.
+  - task_id: wetlab_vortex_tube_contact_start
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Vortex oscillator controls and tube work-position contract are missing.]
+    next_action: Request a task-ready vortex-oscillator package.
+  - task_id: wetlab_bimanual_hold_rack_insert_tube
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Test tube and indexed tube-rack socket contract are missing.]
+    next_action: Select a tube/rack pair and qualify insertion depth evidence.
+  - task_id: wetlab_bimanual_tube_handover
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Test tube, rack and handover execution evidence are missing.]
+    next_action: Reuse a qualified tube/rack pair after insertion readiness passes.
+  - task_id: wetlab_simplified_extraction_mix
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Funnel and stopper candidates are not qualified.]
+    next_action: Qualify the funnel/socket and stopper/socket pairs.
+  - task_id: wetlab_filter_setup_and_pour_motion
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Funnel insertion and sample-container candidates are not qualified.]
+    next_action: Qualify a funnel, flask and source-container combination.
+  - task_id: wetlab_centrifuge_tube_unload
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [Centrifuge and tube-rack packages are missing.]
+    next_action: Reuse the centrifuge handoff after the load/start task is qualified.
+  - task_id: wetlab_rotary_evaporation_workflow
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [No task-ready rotary-evaporator assembly or control contract exists.]
+    next_action: Request an upstream assembly-level asset and interaction handoff.
+  - task_id: wetlab_column_chromatography_setup_and_collection
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers: [No task-ready chromatography column assembly exists.]
+    next_action: Request an upstream column/stand/collection package and interaction contract.
