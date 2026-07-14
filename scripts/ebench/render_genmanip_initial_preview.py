@@ -120,7 +120,6 @@ def _render_initial_scene(
     simulation_app = SimulationApp(
         {
             "headless": True,
-            "fast_shutdown": False,
             "renderer": "RayTracedLighting",
             "anti_aliasing": 4,
             "multi_gpu": False,

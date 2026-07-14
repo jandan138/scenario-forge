@@ -7,7 +7,6 @@ from pathlib import Path
 import stat
 import sys
 import textwrap
-import types
 
 import pytest
 import yaml
@@ -122,6 +121,76 @@ def test_preview_orchestration_nonzero_invalidates_old_pass_gate(
             timeout_seconds=5.0,
         )
 
+    assert not (collected_root / GATE_PATH).exists()
+
+
+def test_preview_orchestration_rejects_nonzero_even_after_manifest_commit(
+    tmp_path: Path,
+) -> None:
+    collected_root = _build_collected_package(tmp_path / "package")
+    request = _load_yaml(collected_root / "evidence/render_request.yaml")
+    preset = collected_root / "fake preset evidence"
+    _write_passing_preview_evidence(collected_root, request).rename(preset)
+    isaac_python = _write_python_forwarder(tmp_path / "runtime" / "isaac-python")
+    renderer_script = _write_fake_renderer(
+        tmp_path / "renderer" / "nonzero-after-commit.py",
+        mode="nonzero_after_success",
+    )
+    genmanip_root = tmp_path / "GenManip"
+    genmanip_root.mkdir()
+
+    with pytest.raises(_preview_error_type(), match="exit status 23"):
+        _run_preview(
+            collected_root,
+            isaac_python=isaac_python,
+            renderer_script=renderer_script,
+            genmanip_root=genmanip_root,
+            timeout_seconds=5.0,
+        )
+
+    assert (collected_root / EVIDENCE_DIR / "render_manifest.json").is_file()
+    assert not (collected_root / GATE_PATH).exists()
+
+
+def test_preview_orchestration_reports_latest_staging_failure_after_zero_exit(
+    tmp_path: Path,
+) -> None:
+    collected_root = _build_collected_package(tmp_path / "package")
+    stale_staging = (
+        collected_root / "evidence" / ".initial_scene.staging-000-stale"
+    )
+    stale_staging.mkdir()
+    (stale_staging / "runtime.log").write_text(
+        "render_status=failed\nexception=stale renderer failure\n",
+        encoding="utf-8",
+    )
+    old_gate = collected_root / GATE_PATH
+    old_gate.parent.mkdir()
+    old_gate.write_text("status: passed\n", encoding="utf-8")
+    isaac_python = _write_python_forwarder(tmp_path / "runtime" / "isaac-python")
+    renderer_script = _write_fake_renderer(
+        tmp_path / "renderer" / "fast-shutdown-failure.py",
+        mode="zero_failed_staging",
+    )
+    genmanip_root = tmp_path / "GenManip"
+    genmanip_root.mkdir()
+
+    with pytest.raises(_preview_error_type()) as exc_info:
+        _run_preview(
+            collected_root,
+            isaac_python=isaac_python,
+            renderer_script=renderer_script,
+            genmanip_root=genmanip_root,
+            timeout_seconds=5.0,
+        )
+
+    message = str(exc_info.value)
+    assert "exited with status 0" in message
+    assert "render_status=failed" in message
+    assert "Empty typeName" in message
+    assert "lift2.physxArticulation:solverPositionIterationCount" in message
+    assert "stale renderer failure" not in message
+    assert "missing preview render manifest" not in message
     assert not (collected_root / GATE_PATH).exists()
 
 
@@ -260,51 +329,6 @@ def test_isaac_renderer_has_deferred_sdk_imports_and_only_resets_then_renders() 
         assert "action" not in ast.unparse(loop.test).lower()
 
 
-def test_isaac_renderer_disables_fast_shutdown_so_python_failures_escape(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    spec = importlib.util.spec_from_file_location(
-        "scenario_forge_preview_renderer_shutdown", ISAAC_RENDERER
-    )
-    assert spec is not None and spec.loader is not None
-    renderer = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(renderer)
-
-    launch_config: dict[str, object] = {}
-    closed = False
-
-    class FakeSimulationApp:
-        def __init__(self, config: dict[str, object]) -> None:
-            launch_config.update(config)
-
-        def close(self) -> None:
-            nonlocal closed
-            closed = True
-
-    fake_isaacsim = types.ModuleType("isaacsim")
-    fake_isaacsim.SimulationApp = FakeSimulationApp  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, "isaacsim", fake_isaacsim)
-    monkeypatch.setitem(sys.modules, "genmanip", None)
-    monkeypatch.setattr(sys, "path", list(sys.path))
-    staging_dir = tmp_path / "staging"
-    staging_dir.mkdir()
-
-    with pytest.raises(ModuleNotFoundError, match="genmanip"):
-        renderer._render_initial_scene(
-            collected_root=tmp_path,
-            genmanip_root=tmp_path,
-            request={},
-            request_sha256="0" * 64,
-            staging_dir=staging_dir,
-            evidence_dir=tmp_path / "evidence",
-        )
-
-    assert launch_config["fast_shutdown"] is False
-    assert closed is True
-    assert "render_status=failed" in (staging_dir / "runtime.log").read_text(encoding="utf-8")
-
-
 def test_isaac_renderer_resolves_lift2_end_effectors_as_camera_anchors() -> None:
     spec = importlib.util.spec_from_file_location("scenario_forge_preview_renderer", ISAAC_RENDERER)
     assert spec is not None and spec.loader is not None
@@ -434,6 +458,21 @@ def _write_fake_renderer(path: Path, *, mode: str) -> Path:
             if mode == "timeout":
                 time.sleep(10)
                 raise SystemExit(0)
+            if mode == "zero_failed_staging":
+                staging = (
+                    args.collected_root
+                    / "evidence"
+                    / ".initial_scene.staging-zzz-current"
+                )
+                staging.mkdir()
+                (staging / "runtime.log").write_text(
+                    "render_status=failed\\n"
+                    "exception_type=ErrorException\\n"
+                    "exception=Empty typeName for </World/task/lift2."
+                    "physxArticulation:solverPositionIterationCount>\\n",
+                    encoding="utf-8",
+                )
+                raise SystemExit(0)
             if mode == "blocking_log":
                 print("Failed to create MDL shade node", file=sys.stderr)
             preset = args.collected_root / "fake preset evidence"
@@ -441,6 +480,8 @@ def _write_fake_renderer(path: Path, *, mode: str) -> Path:
             if output.exists():
                 shutil.rmtree(output)
             shutil.copytree(preset, output)
+            if mode == "nonzero_after_success":
+                raise SystemExit(23)
             """
         ),
         encoding="utf-8",

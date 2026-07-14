@@ -113,6 +113,20 @@ def run_genmanip_initial_preview(
         raise GenManipPreviewError(
             f"GenManip initial preview failed with exit status {completed.returncode}{suffix}"
         )
+    manifest_path = _safe_package_path(
+        root,
+        PREVIEW_EVIDENCE_DIR / "render_manifest.json",
+        "preview render manifest",
+    )
+    if not manifest_path.is_file():
+        detail = _latest_staging_failure(root)
+        if detail is None:
+            detail = (completed.stderr or completed.stdout).strip() or None
+        suffix = f": {detail[-4000:]}" if detail else ""
+        raise GenManipPreviewError(
+            "GenManip initial preview exited with status 0 without committing "
+            f"render manifest{suffix}"
+        )
     _finalize_runtime_log_scan(root, completed.stdout, completed.stderr)
     return validate_genmanip_preview_evidence(root)
 
@@ -405,6 +419,27 @@ def _digest_inputs(package_id: str, inputs: Mapping[str, Any]) -> str:
         separators=(",", ":"),
     ).encode("utf-8")
     return "sha256:" + sha256(payload).hexdigest()
+
+
+def _latest_staging_failure(root: Path) -> str | None:
+    evidence_root = _safe_package_path(
+        root, PREVIEW_EVIDENCE_DIR.parent, "preview evidence root"
+    )
+    candidates = [
+        path
+        for path in evidence_root.glob(
+            f".{PREVIEW_EVIDENCE_DIR.name}.staging-*/runtime.log"
+        )
+        if path.is_file()
+    ]
+    if not candidates:
+        return None
+    latest = max(
+        candidates,
+        key=lambda path: (path.stat().st_mtime_ns, path.as_posix()),
+    )
+    detail = latest.read_text(encoding="utf-8", errors="replace").strip()
+    return detail if "render_status=failed" in detail else None
 
 
 def _finalize_runtime_log_scan(root: Path, stdout: str, stderr: str) -> None:
