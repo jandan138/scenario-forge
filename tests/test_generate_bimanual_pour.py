@@ -84,6 +84,16 @@ def test_golden_opening_frames_follow_the_assets_local_positive_y_axis() -> None
         assert opening["wxyz"] == [0.7071068, -0.7071068, 0.0, 0.0]
 
 
+def test_golden_actor_roles_use_same_side_arms_instead_of_crossing_midline() -> None:
+    scenario = yaml.safe_load(generator.DEFAULT_SPEC.read_text(encoding="utf-8"))
+    actors = {item["id"]: item for item in scenario["robot"]["actors"]}
+
+    # Lift2's left arm is on +Y beside the +Y source; its right arm is beside
+    # the -Y target. The role assignment should not force both arms to cross.
+    assert actors["operating_arm"]["end_effector"] == "left"
+    assert actors["auxiliary_arm"]["end_effector"] == "right"
+
+
 def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_reports(
     tmp_path: Path,
 ) -> None:

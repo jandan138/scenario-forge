@@ -77,10 +77,10 @@ robot:
     wxyz: [1.0, 0.0, 0.0, 0.0]
   actors:
     - id: auxiliary_arm
-      end_effector: left
+      end_effector: right
       capabilities: [grasp, hold]
     - id: operating_arm
-      end_effector: right
+      end_effector: left
       capabilities: [grasp, lift, align, tilt, place, release]
 steps:
   - id: grasp_target
