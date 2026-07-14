@@ -1,0 +1,91 @@
+schema_version: scientific-workbench-bimanual-pour-integration-evidence/v0.1
+status: passed_with_visual_warning
+package_id: scientific_workbench_bimanual_pour
+revisions:
+  scenario_forge_package_producer: 0afccde633cadceef11b813717561984f690cf30
+  convert_asset: ba4ac8ccbf3c32f257abdbb68a554a74a90003f1
+  genmanip_live_canary: 00fd8dc96be5cf9cd919be9af4da723dc619ba73
+  genmanip_render_producer: 17c82e023764f7754097e46cffd8418236d595cc
+  embodied_eval_os: e6a3d17d2c9fc3c608d6c1c19ed86820ef90203e
+  dryingbox_convert_asset: 324ce6e6d4395ccfda1e59e5ae89de9389cdf225
+source:
+  uri: LabUtopia:lab_001_localized_20260707
+  sha256: b3861b5a17945abe401062a04125969c3a63b0f8a0a5ce0026a461dbdfc935f2
+packages:
+  portable:
+    path: outputs/scientific_workbench_bimanual_pour
+    file_count: 401
+    byte_count: 214360291
+    tree_sha256: 78851ace500cf71271ba6558e96ef6c732ca6599a628890241d5b060f2e01d33
+    asset_lock_check: passed
+  genmanip_collected:
+    path: outputs/scientific_workbench_bimanual_pour/adapters/ebench/genmanip
+    file_count: 200
+    byte_count: 107667227
+    tree_sha256: 6d06c202196ef140075d85654c3a941e787d3f89a4deb9a6bb5da6529bdbe164
+    usd_reference_audit: passed
+assets:
+  obj_conical_bottle03:
+    runtime_tree_sha256: 8865c06c5915227d4807d38641d46acd3450bbcedf414699ad2ee1d3603aa584
+    contract_payload_sha256: 7a8efec731676cfe3a1b1ff55fd0c911a616ff045455b9bbbfa5dadd82b33923
+    interaction_report_sha256: b5ec7d721294c544d7be23cbac4044063dfa78bc087cf65175cc3b12d72100fc
+    collider: qualified_sdf
+  obj_graduated_cylinder_03:
+    runtime_tree_sha256: 2540ecd80cfdbd26cb31ba1d772ddf451206d3b3f49161f108ec67d5d52cab0d
+    contract_payload_sha256: 4e88bb016013c9a84196a40380908c168394d3ddf755c25bcdac7772ec582967
+    interaction_report_sha256: 2109713e3cb5788da5bf9b9dcc8b4f316505e3fccff5dc8e6a741822ec4271aa
+    collider: qualified_13_cube_open_top_proxy
+render:
+  status: passed_with_visual_warning
+  workspace_closeup:
+    verdict: passed
+    sha256: 556b54d98c66bf71ab3027eb99312031e4cdd6c14ab92699793e0056637d3e3f
+  scene_overview:
+    verdict: warn
+    sha256: 5b681f2511e995a09cfce677114e8f69869f01f5ca10c72ffaca0e3ae43ee90a
+  render_manifest_sha256: 27b77e77bdfcaf89fb866ad31a793771d04d94f5a20a96ff2fee01ecc042ea27
+  runtime_log_sha256: 43db4020a11d31afa9f654bd324f80768ef8099bbef696bae37662fe0413eecc
+  visual_ready_gate_sha256: fd8bf0cd19c846d437b5d08f87cc7e92fb112dd1ea64216f51c82b97d2f565a1
+  blind_review: usable_initial_scene_evidence
+genmanip_live_canary:
+  status: passed
+  evidence_path: /tmp/scenario-forge-final-runtime-canary.8yXC32/evidence.json
+  evidence_sha256: 78966b4d8661fc71170bc81d280b9dd55e06a7475518786983f7424890d1b309
+  reset_completed: true
+  v0_2_contract_activated: true
+  unique_rigid_root_preflight: true
+  robot_joint_micro_motion_observed: true
+  robot_joint_recovery_observed: true
+  object_pose_mutation_used: false
+eos_oracle_dry_run:
+  status: dry_run_planned
+  output_path: /tmp/eos-bimanual-final.K2Yiiq
+  package_digest_unchanged: true
+  evidence_envelope_sha256: 5f5fc3aeeadf9b655c790d3f4edfac11526b9f3f97480e7dbaab74a404259809
+  oracle_plan_sha256: d7ef10f1818300af3734d1af59b9eb4576aeaced2fffbb2824c9312af0ab89b5
+  render_canary_metadata_sha256: c66a90bab82c8f31f4b9ef0f41faab693e8ebbd2282fb1860e6098255615d58c
+  stages:
+    - target_grasp_hold
+    - source_pick
+    - mouth_alignment
+    - pour_pose
+    - source_return
+  rollout_started: false
+  contact_evidence_status: not_evaluated
+  process_invariants_evaluated: false
+claims:
+  package_compilation: true
+  initial_scene_rendered: true
+  runtime_binding_smoke: true
+  grasp_evaluated: false
+  contact_evaluated: false
+  stable_hold_evaluated: false
+  liquid_transfer_evaluated: false
+  five_stage_rollout_executed: false
+  task_success_claimed: false
+  policy_success_claimed: false
+  model_score_claimed: false
+  leaderboard_comparable: false
+claim_boundary: >-
+  Package, render, and runtime-binding evidence only. The EOS oracle output is a
+  five-stage dry-run plan; it is not an executed trajectory or task-success result.
