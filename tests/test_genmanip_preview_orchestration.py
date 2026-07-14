@@ -7,6 +7,7 @@ from pathlib import Path
 import stat
 import sys
 import textwrap
+import types
 
 import pytest
 import yaml
@@ -257,6 +258,51 @@ def test_isaac_renderer_has_deferred_sdk_imports_and_only_resets_then_renders() 
         assert "action" not in iterator_text
     for loop in (node for node in ast.walk(tree) if isinstance(node, ast.While)):
         assert "action" not in ast.unparse(loop.test).lower()
+
+
+def test_isaac_renderer_disables_fast_shutdown_so_python_failures_escape(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spec = importlib.util.spec_from_file_location(
+        "scenario_forge_preview_renderer_shutdown", ISAAC_RENDERER
+    )
+    assert spec is not None and spec.loader is not None
+    renderer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(renderer)
+
+    launch_config: dict[str, object] = {}
+    closed = False
+
+    class FakeSimulationApp:
+        def __init__(self, config: dict[str, object]) -> None:
+            launch_config.update(config)
+
+        def close(self) -> None:
+            nonlocal closed
+            closed = True
+
+    fake_isaacsim = types.ModuleType("isaacsim")
+    fake_isaacsim.SimulationApp = FakeSimulationApp  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "isaacsim", fake_isaacsim)
+    monkeypatch.setitem(sys.modules, "genmanip", None)
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    staging_dir = tmp_path / "staging"
+    staging_dir.mkdir()
+
+    with pytest.raises(ModuleNotFoundError, match="genmanip"):
+        renderer._render_initial_scene(
+            collected_root=tmp_path,
+            genmanip_root=tmp_path,
+            request={},
+            request_sha256="0" * 64,
+            staging_dir=staging_dir,
+            evidence_dir=tmp_path / "evidence",
+        )
+
+    assert launch_config["fast_shutdown"] is False
+    assert closed is True
+    assert "render_status=failed" in (staging_dir / "runtime.log").read_text(encoding="utf-8")
 
 
 def test_isaac_renderer_resolves_lift2_end_effectors_as_camera_anchors() -> None:
