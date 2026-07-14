@@ -17,6 +17,7 @@ def test_exact_oracle_baseline_is_hash_bound_and_reproducible() -> None:
     baseline = yaml.safe_load(BASELINE_PATH.read_text(encoding="utf-8"))
 
     assert baseline["schema_version"] == "scenario-forge-package-baseline/v0.1"
+    assert baseline["recorded_at"] == "2026-07-14T09:15:35Z"
     assert baseline["status"] == "frozen_for_oracle_preflight"
     assert baseline["package"]["package_id"] == "scientific_workbench_bimanual_pour"
     assert baseline["package"]["file_count"] == 198
@@ -25,7 +26,11 @@ def test_exact_oracle_baseline_is_hash_bound_and_reproducible() -> None:
         "59d6024db27db865be103fd2ddeb7b9a66672238b0f628149d5a065d77cdebe4"
     )
     assert baseline["package"]["digest_algorithm"] == (
-        "sha256(sorted sha256sum records for ./ relative regular-file paths)"
+        "sha256(path-sorted sha256sum stream for ./ relative regular-file paths)"
+    )
+    assert baseline["package"]["canonical_digest_command"] == (
+        "(cd package && LC_ALL=C find . -type f -print0 | LC_ALL=C sort -z | "
+        "xargs -0 sha256sum) | sha256sum"
     )
 
     sources = baseline["sources"]
@@ -64,4 +69,18 @@ def test_exact_oracle_baseline_is_hash_bound_and_reproducible() -> None:
     assert {item["id"] for item in blockers} == {
         "runtime_body_identity_mismatch",
         "opening_metric_mismatch",
+    }
+    opening_blocker = next(
+        item for item in blockers if item["id"] == "opening_metric_mismatch"
+    )
+    assert opening_blocker["owner"] == "Scenario_Forge_and_GenManip"
+    assert opening_blocker["contract_handoff"] == {
+        "scenario_forge": (
+            "Export named object frames and predicate inputs in the GenManip "
+            "collected package."
+        ),
+        "genmanip": (
+            "Consume that adapter contract in a frame-aware runtime metric."
+        ),
+        "eos": "Execute the rollout and preserve the metric evidence.",
     }

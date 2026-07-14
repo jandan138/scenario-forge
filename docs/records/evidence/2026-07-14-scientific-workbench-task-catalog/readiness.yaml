@@ -25,9 +25,11 @@ assets:
   - asset_role: drying_box
     candidate_identity: ConvertAsset:DryingBox_03@324ce6e
     context_package_status: passed
-    interactive_affordance_status: pending
+    interactive_affordance_status: blocked
     pending_affordances: [door, start_button]
-    blockers: [Door manipulation and button-state affordances have not been validated.]
+    blockers:
+      - GenManip removes colliders recursively below the room prim, so the current placement is not collision-active.
+      - Door manipulation and button-state affordances have not been validated; DB03 also is not the selected DB01 interaction target.
   - asset_role: beaker
     candidate_identity: LabUtopia:lab_001#/World/beaker1
     context_package_status: pending

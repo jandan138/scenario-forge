@@ -29,9 +29,12 @@ tracks wrapper Xforms while vessel physics lives on child `/mesh` prims, and the
 root-range pour metric excludes the geometrically correct 40-degree opening-frame
 alignment pose.
 
-The DryingBox_03 source-bound ConvertAsset package is accepted for physical scene
-context. Door opening/closing and start-button state are separate interaction
-affordances and remain pending. Centrifuge, heating plate, vortex oscillator,
+The DryingBox_03 source-bound ConvertAsset package is accepted at the portable
+overlay/context-package boundary. Current GenManip initialization removes
+colliders recursively below `room`, so this placement is visible context rather
+than collision-active interaction evidence. Door opening/closing and start-button
+state are blocked until an interaction-qualified device is exported outside that
+policy (the selected follow-up is DB01). Centrifuge, heating plate, vortex oscillator,
 rotary evaporator, chromatography column, balance, stopper, tube/rack, funnel, and
 other task-specific assets remain blocked or pending according to the snapshot.
 
@@ -47,8 +50,9 @@ bound for the task.
 - Readiness: `docs/records/evidence/2026-07-14-scientific-workbench-task-catalog/readiness.yaml`
 - Readiness schema: `task-readiness-snapshot-v0.1.schema.json`
 
-The next dependency target is a source-bound task-ready handoff for both vessels
-and a frame-aware GenManip metric. Once those two contracts pass, Scenario Forge
-can regenerate and refreeze the package for an EOS-owned five-stage oracle. In
-parallel, the catalog constrains the design of the thin asset-source resolution
-and compile orchestration entry point.
+The next dependency target is a source-bound task-ready handoff for both vessels,
+a Scenario Forge named-frame/predicate adapter export, and a frame-aware GenManip
+metric that consumes it. Once those contracts pass, Scenario Forge can regenerate
+and refreeze the package for an EOS-owned five-stage oracle. In parallel, the
+catalog constrains the design of the thin asset-source resolution and compile
+orchestration entry point.

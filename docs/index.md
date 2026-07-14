@@ -20,6 +20,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Image-Grounded Task Factory Design](design/image-grounded-task-factory.md)
 - [ScenarioSpec and GenManip Export](design/scenario-spec-and-genmanip-export.md)
 - [Scene Asset Overlays](design/scene-asset-overlays.md)
+- [Scenario Source Bindings](design/scenario-source-bindings.md)
 - [Task Catalog and Readiness](design/task-catalog-and-readiness.md)
 
 ## Operations
@@ -41,4 +42,5 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-14 DryingBox_03 Source-Bound Package Integration](records/2026-07-14-scientific-workbench-dryingbox-source-bound-integration.md)
 - [2026-07-14 Scientific Workbench Task Catalog and Readiness](records/2026-07-14-scientific-workbench-task-catalog-readiness.md)
 - [2026-07-14 Bimanual Pour Oracle Baseline](records/2026-07-14-scientific-workbench-bimanual-pour-oracle-baseline.md)
+- [2026-07-14 Scientific Workbench Next-task Selection](records/2026-07-14-scientific-workbench-next-task-selection.md)
 - [2026-07-06 Phase 13 S2D-12 Soap-to-Dish Static Candidate Evidence](records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/generated_package_summary.yaml)

@@ -20,6 +20,15 @@ evidence for the uncurated full-context scene; its package and image hashes must
 be reused for this task-ready package. The compact machine-readable record is
 [`runtime_canary.yaml`](evidence/2026-07-13-scientific-workbench-bimanual-pour-task-ready-canary/runtime_canary.yaml).
 
+## 2026-07-14 runtime clarification
+
+Later inspection of the frozen GenManip revision found that scene initialization
+recursively removes colliders below `/World/<uuid>/room`. The statement below that
+DB03 physics “remain active” describes the authored/static USD composition, not a
+post-initialization collision-active guarantee. This canary proves load/reset and
+visual presence; it must not be used as door-contact or appliance-interaction
+evidence.
+
 ## What changed from the full-context scene
 
 The source `lab_001.usd` and its closed source bundle remain untouched. The scenario
@@ -28,11 +37,11 @@ platforms, the lounge table, cabinets, the muffle furnace, and three of the four
 drying boxes. Deactivating the whole subtree also removes its descendant rigid
 bodies, colliders, joints, and articulations from this task runtime.
 
-`DryingBox_03` is the sole retained laboratory-context device. It is not a
-visual-only prop: its original articulation and physics remain active. That choice
-keeps the laboratory setting legible without adding simulator-specific physics
-stripping to Scenario Forge. Its door and handle still account for four known
-negative-mass warning lines.
+`DryingBox_03` is the sole retained laboratory-context device. Its authored USD
+retains the original articulation and physics APIs, which accounts for four known
+door/handle negative-mass warnings during scene construction. As clarified above,
+GenManip later removes room-subtree colliders, so the runtime claim is visual
+context and reset coverage rather than collision-active interaction.
 
 ## Frozen package and initial images
 

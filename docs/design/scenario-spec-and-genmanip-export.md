@@ -63,12 +63,12 @@ rigid bodies, and colliders from entering the task runtime without teaching the
 compiler any LabUtopia-specific prim names.
 
 `DryingBox_03` is intentionally retained as the single visible laboratory-context
-device in this scenario. It remains a real articulated/physical source prim, not a
-render-only backdrop, and must therefore stay outside the robot workspace and pass
-the same reset/render review as the task package. Scenario Forge does not attempt
-to recursively strip physics APIs from an arbitrary referenced asset. If a future
-scene needs a visually preserved but physics-free device, that task-ready asset
-overlay belongs upstream and enters Scenario Forge as an ordinary USD source.
+device in this scenario. Its portable USD still composes the source-bound
+articulation/physics APIs; Scenario Forge does not strip them. Current GenManip
+initialization separately removes colliders recursively below the `room` prim, so
+the post-initialization adapter runtime cannot claim DB03 is collision-active. A
+future task that manipulates an appliance must export it through an interaction
+path outside that room policy and qualify the relevant affordances.
 
 ## Initial-scene visual evidence
 

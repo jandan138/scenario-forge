@@ -6,9 +6,11 @@ bundle, and the EBench Lift2 profile.
 The canonical scenario is task-ready rather than a raw full-context import. Its
 USD overlay deactivates unrelated loose objects and all but one articulated
 appliance subtree while leaving `lab_001.usd` untouched. `DryingBox_03` remains as
-the single visible laboratory-context device, but its dynamic physics now comes
-from the source-bound ConvertAsset package rather than from unqualified raw-source
-physics. It is still a physical scene asset, not a visual-only background object.
+the single visible laboratory-context device. Its portable USD composition uses
+the source-bound ConvertAsset physics package rather than unqualified raw-source
+physics. Current GenManip initialization then removes colliders recursively below
+the `room` prim, so in that adapter runtime DB03 must be treated as visible context,
+not as a collision-active appliance.
 
 The golden spec uses `scenario-spec/v0.2` `scene.overlay_asset_ids`. Entries are
 ordered strongest to weakest, followed by the base environment; every overlay must
@@ -78,6 +80,28 @@ required runtime prim, or declared known blocking material signal rejects the
 build. Validation always compares the request with inputs freshly derived from the
 current package. For a static-only inspection that intentionally provides no visual
 evidence, add `--static-only` and omit the Isaac/GenManip arguments.
+
+## Generic static compiler
+
+The task-specific script above remains the default path when current Isaac preview
+evidence is required. Its static compile and GenManip export stages can also be
+run through the generic compiler after writing a local
+`scenario-source-bindings/v0.1` file for the base scene and ConvertAsset delivery:
+
+```bash
+scenario-forge package compile \
+  --spec examples/scientific_workbench/bimanual_pour/scenario.yaml \
+  --source-bindings /path/to/scenario_source_bindings.yaml \
+  --out outputs/scientific_workbench_bimanual_pour \
+  --export-genmanip
+```
+
+The bindings file contains `source_usd`, `package_dir`, and `manifest_path` local
+paths. The ScenarioSpec continues to contain only asset IDs and portable task
+intent. This command performs no preview render and no oracle rollout; use the
+task-specific script for the former and EOS/GenManip for the latter. See
+[Scenario Source Bindings](../design/scenario-source-bindings.md) for the complete
+binding shape.
 
 Do not install the package below `$GENMANIP_SOURCE/saved/assets`. In the shared
 deployment that path is a symlink into the shared EBench asset directory, so a

@@ -1,5 +1,5 @@
 schema_version: scenario-forge-package-baseline/v0.1
-recorded_at: "2026-07-14T09:05:00Z"
+recorded_at: "2026-07-14T09:15:35Z"
 status: frozen_for_oracle_preflight
 
 package:
@@ -10,7 +10,10 @@ package:
   file_count: 198
   file_content_bytes: 120066353
   sha256sum_stream_sha256: 59d6024db27db865be103fd2ddeb7b9a66672238b0f628149d5a065d77cdebe4
-  digest_algorithm: sha256(sorted sha256sum records for ./ relative regular-file paths)
+  digest_algorithm: sha256(path-sorted sha256sum stream for ./ relative regular-file paths)
+  canonical_digest_command: >-
+    (cd package && LC_ALL=C find . -type f -print0 | LC_ALL=C sort -z |
+    xargs -0 sha256sum) | sha256sum
   redistributable: false
   committed_to_git: false
 
@@ -75,13 +78,20 @@ oracle_preflight:
         After warmup and a physical move of at least 0.05 m, wrapper and qualified
         rigid-root pose deltas must agree within 0.001 m and 0.5 degrees.
     - id: opening_metric_mismatch
-      owner: GenManip_adapter
+      owner: Scenario_Forge_and_GenManip
       evidence: >-
         At 40 degrees with rim centers coincident, the source-root horizontal
         offset is about 0.12635 m, while the current x/y range permits at most
         0.11314 m radially and does not read named opening frames.
+      contract_handoff:
+        scenario_forge: >-
+          Export named object frames and predicate inputs in the GenManip
+          collected package.
+        genmanip: Consume that adapter contract in a frame-aware runtime metric.
+        eos: Execute the rollout and preserve the metric evidence.
       required_gate: >-
-        Evaluate opening-center and opening-normal error directly, then verify
+        After the frame-aware predicate thresholds are explicitly accepted,
+        evaluate opening-center and opening-normal error directly, then verify
         full source return pose against the post-warmup baseline.
   non_blocking_runtime_debt:
     - GenManip removes colliders recursively below the room prim, including the retained DryingBox context.

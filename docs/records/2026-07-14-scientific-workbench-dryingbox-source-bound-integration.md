@@ -8,6 +8,11 @@ LabUtopia `lab_001.usd` remains unchanged. Scenario Forge composes the copied
 package as a strong scene overlay and does not author mass, diagonal inertia,
 center of mass, principal axes, `PhysicsMassAPI`, or a warning suppressor.
 
+This establishes the portable/source-bound composition and DB03-scoped warning
+gate. Current GenManip initialization recursively removes colliders below the
+`room` prim, so the retained DB03 is visible but is not claimed collision-active
+in that adapter runtime. Door or button interaction was never established here.
+
 This is a source-bound `provisional_geometry` integration. It is not evidence of
 measured, BOM-derived, CAD-derived, or calibrated real-world physics.
 

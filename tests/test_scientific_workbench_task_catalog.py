@@ -121,9 +121,10 @@ def test_readiness_snapshot_does_not_promote_unverified_tasks_or_interactions() 
 
     drying_box = next(item for item in asset_statuses if item["asset_role"] == "drying_box")
     assert drying_box["context_package_status"] == "passed"
-    assert drying_box["interactive_affordance_status"] == "pending"
+    assert drying_box["interactive_affordance_status"] == "blocked"
     assert "door" in drying_box["pending_affordances"]
     assert "start_button" in drying_box["pending_affordances"]
+    assert "removes colliders" in " ".join(drying_box["blockers"])
 
     flask = next(item for item in asset_statuses if item["asset_role"] == "erlenmeyer_flask")
     cylinder = next(

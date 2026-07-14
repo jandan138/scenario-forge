@@ -7,11 +7,20 @@ complete regular-file tree digest before the downstream five-stage oracle run. T
 machine-readable record is
 [`package_baseline.yaml`](evidence/2026-07-14-scientific-workbench-bimanual-pour-oracle-baseline/package_baseline.yaml).
 
-The package has 198 files and 120,066,353 bytes of regular-file content. Its sorted
-`sha256sum` stream, including `./` relative paths, hashes to:
+The package has 198 files and 120,066,353 bytes of regular-file content. Its
+path-sorted `sha256sum` stream, including `./` relative paths, hashes to:
 
 ```text
 59d6024db27db865be103fd2ddeb7b9a66672238b0f628149d5a065d77cdebe4
+```
+
+The canonical command is:
+
+```bash
+(cd package && LC_ALL=C find . -type f -print0 \
+  | LC_ALL=C sort -z \
+  | xargs -0 sha256sum) \
+  | sha256sum
 ```
 
 A second clean static build with the same inputs and an output directory ending in
@@ -41,14 +50,19 @@ exact GenManip scene and runtime code:
 1. GenManip binds each task UID to a wrapper Xform, while the actual rigid body,
    collision, and mass APIs are on its child `/mesh`. Object tracking and native
    metrics read the wrapper.
-2. The native pour predicate reads object roots rather than named opening frames.
+2. The native pour predicate reads object roots rather than named opening frames,
+   and the GenManip collected package does not yet carry those named frames.
    With the rim centers actually aligned and the flask tilted 40 degrees, the
    required root offset falls outside the current success range.
 
-The first requires task-ready vessel packages plus correct GenManip UID binding;
-the second requires a frame-aware GenManip metric. An action schedule cannot repair
-either contract, so the five-stage rollout is blocked at preflight rather than
-reported as a failed policy experiment.
+The first requires task-ready vessel packages plus correct GenManip UID binding.
+For the second, Scenario Forge must export named-frame and predicate inputs in its
+GenManip adapter handoff, GenManip must consume them in a frame-aware metric, and
+EOS must execute and preserve the resulting evidence. An action schedule cannot
+repair either contract, so the five-stage rollout is blocked at preflight rather
+than reported as a failed policy experiment. Concrete center/height/maximum-tilt
+thresholds beyond the existing 40-degree minimum remain proposed gates, not
+declared task requirements.
 
 ## Claim boundary
 

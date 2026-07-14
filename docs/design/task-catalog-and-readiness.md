@@ -45,9 +45,12 @@ the tracked rigid body, task frames, and downstream metric semantics must agree;
 otherwise `oracle_status` is `blocked` even when package compilation and reset pass.
 
 These states must not be promoted by inference. For example, the source-bound
-DryingBox_03 package is accepted as physical scene context, but that does not prove
-that its door or start button can be manipulated and observed. Dynamic asset repair
-and interaction-ready packaging remain upstream asset-owner responsibilities.
+DryingBox_03 package is accepted at the portable overlay/context-package boundary,
+but current GenManip initialization recursively removes colliders below the
+`room` prim. In that adapter placement it is visible context, not evidence of a
+collision-active device, and it does not prove that a door or start button can be
+manipulated and observed. Dynamic asset repair and interaction-ready packaging
+remain upstream asset-owner responsibilities.
 
 Snapshots are dated records, not mutable project-management truth. The current
 snapshot lives under
