@@ -69,6 +69,21 @@ def _write_task_ready_source_scene(root: Path) -> Path:
     return source
 
 
+def test_golden_opening_frames_follow_the_assets_local_positive_y_axis() -> None:
+    scenario = yaml.safe_load(generator.DEFAULT_SPEC.read_text(encoding="utf-8"))
+    objects = {item["id"]: item for item in scenario["objects"]}
+
+    expected = {
+        "obj_conical_bottle03": [0.0, 0.196567, 0.0],
+        "obj_graduated_cylinder_03": [0.0, 0.272294, 0.0],
+    }
+    for object_id, position in expected.items():
+        opening = objects[object_id]["named_frames"]["opening"]
+        assert opening["xyz"] == position
+        # Opening-frame +Z is the outward normal; the mesh opens along local +Y.
+        assert opening["wxyz"] == [0.7071068, -0.7071068, 0.0, 0.0]
+
+
 def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_reports(
     tmp_path: Path,
 ) -> None:
