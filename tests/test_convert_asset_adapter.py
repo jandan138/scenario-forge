@@ -34,6 +34,7 @@ def _write_source_bound_handoff(
     source_usd: Path | None = None,
     with_interaction_contract: bool = False,
     with_disabled_source_collider: bool = False,
+    observed_collider_approximation: str = "convexDecomposition",
     interaction_root: str = "/World/DryingBox_03",
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     if source_usd is None:
@@ -187,7 +188,7 @@ def Xform "World" {
                 "collision_enabled": True,
                 "purpose": ["simulation", "grasp"],
                 "requested_approximation": None,
-                "observed_approximation": "convexDecomposition",
+                "observed_approximation": observed_collider_approximation,
             }
         ]
         if with_disabled_source_collider:

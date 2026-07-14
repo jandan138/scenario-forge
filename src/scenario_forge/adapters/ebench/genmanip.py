@@ -216,7 +216,10 @@ def export_genmanip_collected_package(
                 "scenario scene.root_prim_path"
             )
 
-    qualified_object_ids = _qualified_rigid_object_ids(objects, assets_by_id)
+    qualified_object_ids, requires_gpu_dynamics = _qualified_rigid_requirements(
+        objects,
+        assets_by_id,
+    )
     required_exact_object_ids = _exact_success_object_ids(success)
     unqualified_exact_objects = sorted(
         required_exact_object_ids.difference(qualified_object_ids)
@@ -245,6 +248,7 @@ def export_genmanip_collected_package(
         objects=objects,
         table=table,
         goal=goal,
+        requires_gpu_dynamics=requires_gpu_dynamics,
     )
     runtime_contract = _runtime_contract(
         scenario=scenario,
@@ -508,6 +512,7 @@ def _task_config(
     objects: list[Mapping[str, Any]],
     table: Mapping[str, Any],
     goal: list[list[list[dict[str, Any]]]],
+    requires_gpu_dynamics: bool,
 ) -> dict[str, Any]:
     robot = _required_mapping(scenario, "robot", "scenario spec")
     spawn = _required_mapping(robot, "spawn", "scenario robot")
@@ -562,6 +567,8 @@ def _task_config(
         "instruction": _required_string(scenario, "instruction", "scenario spec"),
         "action_contract": _action_contract(),
     }
+    if requires_gpu_dynamics:
+        evaluation["physics_scene_config"] = {"EnableGPUDynamics": True}
     return {"demonstration_configs": [], "evaluation_configs": [evaluation]}
 
 
@@ -953,11 +960,12 @@ def _exact_success_object_ids(success: Mapping[str, Any]) -> set[str]:
     return result
 
 
-def _qualified_rigid_object_ids(
+def _qualified_rigid_requirements(
     objects: list[Mapping[str, Any]],
     assets_by_id: Mapping[str, AssetManifestEntry],
-) -> set[str]:
+) -> tuple[set[str], bool]:
     qualified: set[str] = set()
+    requires_gpu_dynamics = False
     for item in objects:
         object_id = _required_string(item, "id", "scenario object")
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
@@ -986,6 +994,8 @@ def _qualified_rigid_object_ids(
             raise GenManipExportError(
                 f"rigid object asset {asset_id!r} has unsupported interaction_contract"
             )
+        if _interaction_requires_gpu_dynamics(interaction, asset_id):
+            requires_gpu_dynamics = True
         source_prim = _required_string(
             item,
             "source_prim_path",
@@ -1027,7 +1037,30 @@ def _qualified_rigid_object_ids(
                     "must match its interaction_contract"
                 )
         qualified.add(object_id)
-    return qualified
+    return qualified, requires_gpu_dynamics
+
+
+def _interaction_requires_gpu_dynamics(
+    interaction: Mapping[str, Any],
+    asset_id: str,
+) -> bool:
+    raw_colliders = interaction.get("collider_prims")
+    if not isinstance(raw_colliders, list):
+        raise GenManipExportError(
+            f"rigid object asset {asset_id}.interaction_contract.collider_prims "
+            "must be a list"
+        )
+    return any(
+        collider.get("collision_enabled") is True
+        and collider.get("observed_approximation") == "sdf"
+        for collider in (
+            _as_mapping(
+                raw_collider,
+                f"rigid object asset {asset_id}.interaction_contract.collider_prims",
+            )
+            for raw_collider in raw_colliders
+        )
+    )
 
 
 def _relative_pose_metrics(parameters: Mapping[str, Any]) -> list[dict[str, Any]]:

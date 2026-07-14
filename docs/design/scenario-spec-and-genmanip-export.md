@@ -137,6 +137,9 @@ downstream GenManip environment explicitly accepts and activates it and records
 that fact in runtime evidence. Qualified ConvertAsset
 objects additionally disable local collider, rigid-body, and mass authoring in the
 GenManip handoff so recovery cannot overwrite the producer-owned physics package.
+If an enabled collider in that qualified interaction contract reports `sdf` as its
+observed approximation, the task config enables GenManip GPU dynamics, as required
+by PhysX for rigid SDF actors.
 
 ## Asset boundary
 

@@ -58,13 +58,17 @@ def _build_package(tmp_path: Path) -> Path:
 
 
 def _build_qualified_object_package(
-    tmp_path: Path, *, exact_success: bool = True
+    tmp_path: Path,
+    *,
+    exact_success: bool = True,
+    source_collider_approximation: str = "sdf",
 ) -> Path:
     source_usd = _write_source_scene(tmp_path)
     _, source_package_dir, source_manifest_path, _ = _write_source_bound_handoff(
         tmp_path / "source_handoff",
         source_usd=source_usd,
         with_interaction_contract=True,
+        observed_collider_approximation=source_collider_approximation,
         interaction_root="/World/conical_bottle03",
     )
     source_handoff = load_convert_asset_package_handoff(
@@ -452,6 +456,9 @@ def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags
 
     output = export_genmanip_collected_package(package_root).output_dir
     config = yaml.safe_load((output / "tasks" / "config.yaml").read_text(encoding="utf-8"))
+    assert config["evaluation_configs"][0]["physics_scene_config"] == {
+        "EnableGPUDynamics": True
+    }
     goal = config["evaluation_configs"][0]["generation_config"]["goal"]
     episode_path = (
         output
@@ -508,6 +515,20 @@ def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags
     ]["registered_metrics"]
     schema = json.loads(_RUNTIME_CONTRACT_V02_SCHEMA.read_text(encoding="utf-8"))
     Draft202012Validator(schema).validate(contract)
+
+
+def test_qualified_non_sdf_objects_do_not_force_gpu_dynamics(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_qualified_object_package(
+        tmp_path,
+        source_collider_approximation="convexDecomposition",
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    config = yaml.safe_load((output / "tasks/config.yaml").read_text(encoding="utf-8"))
+
+    assert "physics_scene_config" not in config["evaluation_configs"][0]
 
 
 def test_v02_runtime_contract_schema_rejects_reordered_exact_success(

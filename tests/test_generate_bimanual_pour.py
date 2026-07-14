@@ -42,6 +42,7 @@ def _convert_asset_args(root: Path, source_usd: Path) -> list[str]:
         root / "source_vessel_handoff",
         source_usd=source_usd,
         with_interaction_contract=True,
+        observed_collider_approximation="sdf",
         interaction_root="/World/conical_bottle03",
     )
     _, target_package, target_manifest, _ = _write_source_bound_handoff(
@@ -181,6 +182,9 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     task_config = yaml.safe_load(
         (collected / "tasks/config.yaml").read_text(encoding="utf-8")
     )
+    assert task_config["evaluation_configs"][0]["physics_scene_config"] == {
+        "EnableGPUDynamics": True
+    }
     assert task_config["evaluation_configs"][0]["robots"] == [
         {"type": "manip/lift2/R5a", "position": [-1.02, 0.0, 0.31]}
     ]
