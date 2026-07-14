@@ -81,13 +81,26 @@ def _required_sources(
 ) -> tuple[LocalUSDAssetSource, ...]:
     scene = _mapping(scenario.get("scene"), "scene")
     objects = _mapping_list(scenario.get("objects"), "objects")
+    base_asset_id = _string(scene.get("asset_id"), "scene.asset_id")
+    overlay_asset_ids = _string_list(
+        scene.get("overlay_asset_ids", []),
+        "scene.overlay_asset_ids",
+    )
+    object_asset_ids = [
+        _string(item.get("asset_id"), f"objects[{index}].asset_id")
+        for index, item in enumerate(objects)
+    ]
+    overlay_object_conflicts = sorted(set(overlay_asset_ids).intersection(object_asset_ids))
+    if overlay_object_conflicts:
+        raise ValueError(
+            "scene overlay assets cannot also be object assets: "
+            + ", ".join(overlay_object_conflicts)
+        )
     required_ids = _dedupe_strings(
         [
-            _string(scene.get("asset_id"), "scene.asset_id"),
-            *[
-                _string(item.get("asset_id"), f"objects[{index}].asset_id")
-                for index, item in enumerate(objects)
-            ],
+            *overlay_asset_ids,
+            base_asset_id,
+            *object_asset_ids,
         ]
     )
 
@@ -103,7 +116,28 @@ def _required_sources(
                 f"asset source key {asset_id!r} does not match source asset_id "
                 f"{source.asset_id!r}"
             )
+        if source.expected_sha256 is not None:
+            actual_sha256 = compute_sha256(source.source_usd)
+            if actual_sha256 != source.expected_sha256:
+                raise ValueError(
+                    f"asset source {asset_id!r} canonical USD checksum mismatch"
+                )
         sources.append(source)
+    scene_root_prim_path = _string(
+        scene.get("root_prim_path"),
+        "scene.root_prim_path",
+    )
+    for overlay_asset_id in overlay_asset_ids:
+        overlay = asset_sources[overlay_asset_id]
+        if overlay.role != "scene_overlay":
+            raise ValueError(
+                f"overlay asset {overlay_asset_id!r} role must be 'scene_overlay'"
+            )
+        if overlay.root_prim_path != scene_root_prim_path:
+            raise ValueError(
+                f"overlay asset {overlay_asset_id!r} root_prim_path must match "
+                "scene.root_prim_path"
+            )
     return tuple(sources)
 
 
@@ -143,6 +177,14 @@ def _copy_asset_closures(
             ignore=_copy_ignore(source),
         )
         canonical_path = destination / source.source_usd.name
+        canonical_sha256 = compute_sha256(canonical_path)
+        if (
+            source.expected_sha256 is not None
+            and canonical_sha256 != source.expected_sha256
+        ):
+            raise ValueError(
+                f"copied asset {source.asset_id!r} canonical USD checksum mismatch"
+            )
         canonical_usd = canonical_path.relative_to(root).as_posix()
         entries.append(
             {
@@ -151,13 +193,31 @@ def _copy_asset_closures(
                 "asset_type": "usd_scene",
                 "canonical_usd": canonical_usd,
                 "license": source.license,
-                "sha256": compute_sha256(canonical_path),
-                "source_kind": "local_usd_directory",
+                "sha256": canonical_sha256,
+                "source_kind": (
+                    "external_usd_package"
+                    if source.upstream_package is not None
+                    else "local_usd_directory"
+                ),
                 "source_uri": source.portable_source_uri(),
-                "resolver_version": "scenario-forge/local-usd-source-v1",
+                "resolver_version": (
+                    "scenario-forge/upstream-usd-package-v1"
+                    if source.upstream_package is not None
+                    else "scenario-forge/local-usd-source-v1"
+                ),
                 "attribution": list(source.attribution),
                 "redistributable": source.redistributable,
                 "closure_root": destination.relative_to(root).as_posix(),
+                **(
+                    {"root_prim_path": source.root_prim_path}
+                    if source.root_prim_path is not None
+                    else {}
+                ),
+                **(
+                    {"upstream_package": source.upstream_package.to_mapping()}
+                    if source.upstream_package is not None
+                    else {}
+                ),
                 **(
                     {"excluded_relative_paths": list(source.exclude_relative_paths)}
                     if source.exclude_relative_paths
@@ -192,8 +252,16 @@ def _compile_scene_usda(
         "scene.root_prim_path",
     )
     objects = _mapping_list(scenario.get("objects"), "objects")
+    sources_by_id = {source.asset_id: source for source in sources}
+    source_layer_asset_ids = _source_layer_asset_ids(scenario)
 
-    references = [f"../assets/{source.asset_id}/{source.source_usd.name}" for source in sources]
+    references = [
+        (
+            f"../assets/{asset_id}/"
+            f"{sources_by_id[asset_id].source_usd.name}"
+        )
+        for asset_id in source_layer_asset_ids
+    ]
     lines = [
         "#usda 1.0",
         "(",
@@ -296,14 +364,13 @@ def _render_prim_override(
     lines: list[str], name: str, node: _PrimOverride, indentation: int
 ) -> None:
     indent = "    " * indentation
+    metadata: list[str] = []
     if node.active is False:
-        lines.extend(
-            [
-                f'{indent}over "{_usd_escape(name)}" (',
-                f"{indent}    active = false",
-                f"{indent})",
-            ]
-        )
+        metadata.append("active = false")
+    if metadata:
+        lines.append(f'{indent}over "{_usd_escape(name)}" (')
+        lines.extend(f"{indent}    {item}" for item in metadata)
+        lines.append(f"{indent})")
     else:
         lines.append(f'{indent}over "{_usd_escape(name)}"')
     lines.append(f"{indent}{{")
@@ -335,6 +402,29 @@ def _render_prim_override(
         if child_index < len(node.children) - 1:
             lines.append("")
     lines.append(f"{indent}}}")
+
+
+def _scene_composition_asset_ids(scene: Mapping[str, Any]) -> tuple[str, ...]:
+    overlays = _string_list(
+        scene.get("overlay_asset_ids", []),
+        "scene.overlay_asset_ids",
+    )
+    return tuple([*overlays, _string(scene.get("asset_id"), "scene.asset_id")])
+
+
+def _source_layer_asset_ids(scenario: Mapping[str, Any]) -> tuple[str, ...]:
+    scene = _mapping(scenario.get("scene"), "scene")
+    object_asset_ids = [
+        _string(item.get("asset_id"), f"objects[{index}].asset_id")
+        for index, item in enumerate(
+            _mapping_list(scenario.get("objects"), "objects")
+        )
+    ]
+    return tuple(
+        _dedupe_strings(
+            [*_scene_composition_asset_ids(scene), *object_asset_ids]
+        )
+    )
 
 
 def _scene_instances(scenario: Mapping[str, Any]) -> dict[str, Any]:
@@ -441,7 +531,13 @@ def _generation_plan(
             for source in sources
         ]
         + [
-            {"type": "compose_source_layers", "output": "scene/main.usda"},
+            {
+                "type": "compose_source_layers",
+                "output": "scene/main.usda",
+                "source_layer_asset_ids_strongest_first": list(
+                    _source_layer_asset_ids(scenario)
+                ),
+            },
             {"type": "compile_portable_contracts"},
         ],
     }
@@ -464,6 +560,16 @@ def _provenance(
                 "redistributable": entry["redistributable"],
                 "canonical_usd": entry["canonical_usd"],
                 "sha256": entry["sha256"],
+                **(
+                    {"root_prim_path": entry["root_prim_path"]}
+                    if "root_prim_path" in entry
+                    else {}
+                ),
+                **(
+                    {"upstream_package": entry["upstream_package"]}
+                    if "upstream_package" in entry
+                    else {}
+                ),
                 **(
                     {"excluded_relative_paths": entry["excluded_relative_paths"]}
                     if "excluded_relative_paths" in entry

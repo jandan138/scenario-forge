@@ -9,6 +9,7 @@ from pathlib import Path
 
 import yaml
 
+from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
 from scenario_forge.assets.source import LocalUSDAssetSource
@@ -19,6 +20,8 @@ from scenario_forge.generation.package_compiler import compile_scenario_package
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SPEC = REPO_ROOT / "examples/scientific_workbench/bimanual_pour/scenario.yaml"
 DEFAULT_RENDERER = REPO_ROOT / "scripts/ebench/render_genmanip_initial_preview.py"
+DRYINGBOX_OVERLAY_ASSET_ID = "scientific_workbench_dryingbox_03_dynamic"
+DRYINGBOX_SCOPE = "/World/DryingBox_03"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -29,6 +32,16 @@ def build_parser() -> argparse.ArgumentParser:
         )
     )
     parser.add_argument("--source-usd", type=Path, required=True)
+    parser.add_argument("--convert-asset-package", type=Path, required=True)
+    parser.add_argument("--convert-asset-manifest", type=Path, required=True)
+    parser.add_argument(
+        "--convert-asset-revision",
+        required=True,
+        help=(
+            "Producer revision recorded as delivery provenance; package identity "
+            "is still verified by content hashes."
+        ),
+    )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
     parser.add_argument(
@@ -68,6 +81,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not isinstance(raw_spec, dict):
         raise ValueError(f"Scenario spec must be a mapping: {args.spec}")
     spec = ScenarioSpec.from_mapping(raw_spec)
+    if spec.scene.overlay_asset_ids != (DRYINGBOX_OVERLAY_ASSET_ID,):
+        raise ValueError(
+            "Golden spec must declare exactly the DryingBox_03 dynamic scene overlay"
+        )
+    handoff = load_convert_asset_package_handoff(
+        args.convert_asset_package,
+        args.convert_asset_manifest,
+        args.source_usd,
+        expected_scope_prims=(DRYINGBOX_SCOPE,),
+        producer_revision=args.convert_asset_revision,
+    )
     source = LocalUSDAssetSource(
         asset_id=spec.scene.asset_id,
         source_usd=args.source_usd,
@@ -80,8 +104,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
         redistributable=False,
         exclude_relative_paths=("_reports",),
+        root_prim_path=spec.scene.root_prim_path,
+        expected_sha256=f"sha256:{handoff.source_sha256}",
     )
-    package = compile_scenario_package(spec, {source.asset_id: source}, args.out)
+    dryingbox_overlay = handoff.to_local_usd_asset_source(
+        asset_id=DRYINGBOX_OVERLAY_ASSET_ID,
+        license="CC-BY-NC-4.0",
+        attribution=(
+            "LabUtopia data assets: CC BY-NC 4.0",
+            "Dynamic physics package normalized by ConvertAsset",
+            "Bundled NVIDIA/Omniverse dependencies retain their upstream terms",
+        ),
+        redistributable=False,
+        exclude_relative_paths=("evidence",),
+    )
+    package = compile_scenario_package(
+        spec,
+        {
+            source.asset_id: source,
+            dryingbox_overlay.asset_id: dryingbox_overlay,
+        },
+        args.out,
+    )
     export = export_genmanip_collected_package(package.package_root)
     if not args.static_only:
         run_genmanip_initial_preview(

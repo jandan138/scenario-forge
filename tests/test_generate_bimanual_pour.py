@@ -7,6 +7,7 @@ import pytest
 import yaml
 
 from scripts import generate_scientific_workbench_bimanual_pour as generator
+from tests.test_convert_asset_adapter import _write_source_bound_handoff
 from tests.test_scenario_package_compiler import _write_source_scene
 
 
@@ -30,6 +31,21 @@ _TASK_READY_INACTIVE_PRIMS = [
     "/World/Cabinet_01",
     "/World/Cabinet_02",
 ]
+
+
+def _convert_asset_args(root: Path, source_usd: Path) -> list[str]:
+    _, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        root / "handoff",
+        source_usd=source_usd,
+    )
+    return [
+        "--convert-asset-package",
+        str(package_dir),
+        "--convert-asset-manifest",
+        str(manifest_path),
+        "--convert-asset-revision",
+        "324ce6e6d4395ccfda1e59e5ae89de9389cdf225",
+    ]
 
 
 def _write_task_ready_source_scene(root: Path) -> Path:
@@ -66,6 +82,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         [
             "--source-usd",
             str(source_usd),
+            *_convert_asset_args(tmp_path, source_usd),
             "--out",
             str(output),
             "--static-only",
@@ -76,7 +93,17 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     collected = output / "adapters/ebench/genmanip"
     assert (collected / "evidence/render_request.yaml").is_file()
     assert not (output / "assets/scientific_workbench_environment/_reports").exists()
+    overlay_root = output / "assets/scientific_workbench_dryingbox_03_dynamic"
+    assert (overlay_root / "physics/profile.json").is_file()
+    assert (overlay_root / "overlays/physics_profile.usda").is_file()
+    assert not (overlay_root / "evidence").exists()
     assert not (collected / "evidence/initial_scene/visual_ready_gate.yaml").exists()
+    upstream = yaml.safe_load(
+        (output / "provenance/provenance.yaml").read_text(encoding="utf-8")
+    )["assets"][0]["upstream_package"]
+    assert upstream["producer"] == "ConvertAsset"
+    assert upstream["revision"] == "324ce6e6d4395ccfda1e59e5ae89de9389cdf225"
+    assert upstream["metadata"]["quality_tier"] == "provisional_geometry"
 
     task_config = yaml.safe_load(
         (collected / "tasks/config.yaml").read_text(encoding="utf-8")
@@ -118,6 +145,14 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert 'over "Cabinet_02" (' in scene_text
     assert 'over "CylinderLight"' in scene_text
     assert 'over "GroundPlane"' in scene_text
+    for local_physics_token in (
+        "physics:mass",
+        "physics:diagonalInertia",
+        "physics:centerOfMass",
+        "physics:principalAxes",
+        "PhysicsMassAPI",
+    ):
+        assert local_physics_token not in scene_text
 
 
 def test_golden_generator_default_build_runs_genmanip_preview(
@@ -159,6 +194,7 @@ def test_golden_generator_default_build_runs_genmanip_preview(
         [
             "--source-usd",
             str(source_usd),
+            *_convert_asset_args(tmp_path, source_usd),
             "--out",
             str(output),
             "--isaac-python",
@@ -195,6 +231,7 @@ def test_golden_task_ready_overlay_removes_unrelated_dynamic_context_in_both_sce
         [
             "--source-usd",
             str(source_usd),
+            *_convert_asset_args(tmp_path, source_usd),
             "--out",
             str(output),
             "--static-only",
@@ -245,6 +282,52 @@ def test_golden_task_ready_overlay_removes_unrelated_dynamic_context_in_both_sce
         if prim.IsActive() and prim.GetTypeName() == "PhysicsScene"
     ]
     assert active_physics_scenes == ["/physicsScene"]
+
+    portable_mass = portable.GetPrimAtPath(
+        "/World/DryingBox_03/body"
+    ).GetAttribute("physics:mass")
+    assert portable_mass.Get() == pytest.approx(12.0)
+    assert portable_mass.GetPropertyStack()[0].layer.realPath.endswith(
+        "/assets/scientific_workbench_dryingbox_03_dynamic/"
+        "overlays/physics_profile.usda"
+    )
+    collected_mass = collected.GetPrimAtPath(
+        f"{room}/DryingBox_03/body"
+    ).GetAttribute("physics:mass")
+    assert collected_mass.Get() == pytest.approx(12.0)
+    assert collected_mass.GetPropertyStack()[0].layer.realPath.endswith(
+        "/source_bundle/scientific_workbench_dryingbox_03_dynamic/"
+        "overlays/physics_profile.usda"
+    )
+
+
+def test_golden_generator_validates_handoff_before_replacing_output(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    handoff_args = _convert_asset_args(tmp_path, source_usd)
+    source_usd.write_text(
+        source_usd.read_text(encoding="utf-8") + "\n# changed after handoff\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "output"
+    output.mkdir()
+    marker = output / "keep.txt"
+    marker.write_text("existing output", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="source SHA-256"):
+        generator.main(
+            [
+                "--source-usd",
+                str(source_usd),
+                *handoff_args,
+                "--out",
+                str(output),
+                "--static-only",
+            ]
+        )
+
+    assert marker.read_text(encoding="utf-8") == "existing output"
 
 
 def test_runbook_stages_canary_in_a_private_genmanip_workspace() -> None:

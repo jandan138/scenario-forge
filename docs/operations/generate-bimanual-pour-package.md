@@ -6,8 +6,15 @@ bundle, and the EBench Lift2 profile.
 The canonical scenario is task-ready rather than a raw full-context import. Its
 USD overlay deactivates unrelated loose objects and all but one articulated
 appliance subtree while leaving `lab_001.usd` untouched. `DryingBox_03` remains as
-the single visible laboratory-context device and still carries its source physics;
-do not describe it as a visual-only background object.
+the single visible laboratory-context device, but its dynamic physics now comes
+from the source-bound ConvertAsset package rather than from unqualified raw-source
+physics. It is still a physical scene asset, not a visual-only background object.
+
+The golden spec uses `scenario-spec/v0.2` `scene.overlay_asset_ids`. Entries are
+ordered strongest to weakest, followed by the base environment; every overlay must
+have the same `/World` root as the base. Scenario Forge's task layer is stronger
+than both, so its scene pose and inactive-prim curation still win. The configured
+`manip/lift2/R5a` dual-arm robot and GenManip injection path are unchanged.
 
 The checked EOS environments can be reused directly; this workflow does not require
 creating or modifying a conda environment. In the current shared deployment:
@@ -18,6 +25,9 @@ ISAAC_ENV=/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-
 LABUTOPIA_ROOT=/cpfs/shared/simulation/zhuzihou/dev/LabUtopia
 GENMANIP_SOURCE=/cpfs/shared/simulation/zhuzihou/dev/GenManip
 CUROBO_SRC=/cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src
+CONVERT_ASSET_ROOT=/cpfs/user/zhuzihou/dev/ConvertAsset
+CONVERT_ASSET_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-dryingbox-dynamic-physics-profile"
+CONVERT_ASSET_REVISION=324ce6e6d4395ccfda1e59e5ae89de9389cdf225
 
 export PYTHONPATH="$PWD/src:$CUROBO_SRC"
 export LD_LIBRARY_PATH="/isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/nvidia/cuda_runtime/lib:$ISAAC_ENV/lib/python3.10/site-packages/torch/lib:${LD_LIBRARY_PATH:-}"
@@ -26,10 +36,26 @@ export ACCEPT_EULA=Y OMNI_KIT_ACCEPT_EULA=YES PYTHONNOUSERSITE=1
 "$TEST_ENV/bin/python" scripts/generate_scientific_workbench_bimanual_pour.py \
   --source-usd "$LABUTOPIA_ROOT/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd" \
   --source-uri "LabUtopia:lab_001_localized_20260707" \
+  --convert-asset-package "$CONVERT_ASSET_DELIVERY/package" \
+  --convert-asset-manifest "$CONVERT_ASSET_DELIVERY/manifest.json" \
+  --convert-asset-revision "$CONVERT_ASSET_REVISION" \
   --out outputs/scientific_workbench_bimanual_pour \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$GENMANIP_SOURCE"
 ```
+
+The inbound adapter requires the delivery manifest to match the package's embedded
+manifest, binds it to the exact `lab_001.usd` source hash, and validates the
+declared `/World/DryingBox_03` scope, profile hash, Isaac 4.1 runtime gates, and
+zero scoped PhysX mass/inertia warning count. It then maps the package into the
+generic asset contract; it does not add a Scenario Forge mass/inertia/center-of-mass
+fix or any warning suppressor. The copied runtime closure retains `deps/`,
+`physics/`, and `overlays/` while excluding upstream `evidence/`.
+
+When ConvertAsset replaces the provisional-geometry profile with measured
+parameters, point these package and manifest arguments (and their producer revision
+provenance) at the new delivery. Do not edit the scenario to author local physics,
+and do not modify the original LabUtopia USD.
 
 The command replaces the managed output directory deterministically and produces:
 
@@ -42,9 +68,9 @@ The command replaces the managed output directory deterministically and produces
 
 `outputs/` is intentionally Git-ignored, and this package is marked
 non-redistributable until its dependency distribution policy is fully cleared. The
-rendered images and package remain local build artifacts; a fresh clone must run
-the command above to recreate them. Only compact hashes and bounded review/runtime
-records are committed.
+rendered images and package remain local build artifacts and must not be committed;
+a fresh clone must run the command above to recreate them. Only compact hashes and
+bounded review/runtime records are committed.
 
 Rendering is strict by default: a renderer failure, timeout, missing/stale image,
 source-bundle or request mismatch, runtime-log or image hash mismatch, missing

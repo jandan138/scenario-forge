@@ -98,16 +98,41 @@ class PoseSpec:
 class SceneSourceSpec:
     asset_id: str
     root_prim_path: str
+    overlay_asset_ids: tuple[str, ...] = ()
     inactive_prim_paths: tuple[str, ...] = ()
     world_anchored_prim_paths: tuple[str, ...] = ()
     pose: PoseSpec | None = None
 
     @classmethod
-    def from_mapping(cls, value: object) -> SceneSourceSpec:
+    def from_mapping(
+        cls,
+        value: object,
+        *,
+        schema_version: str = "scenario-spec/v0.1",
+    ) -> SceneSourceSpec:
         data = _mapping(value, "scene")
+        raw_overlays = data.get("overlay_asset_ids")
+        if schema_version == "scenario-spec/v0.1" and raw_overlays is not None:
+            raise ValueError(
+                "scene.overlay_asset_ids requires scenario-spec/v0.2"
+            )
+        overlay_asset_ids: tuple[str, ...] = ()
+        if raw_overlays is not None:
+            overlay_asset_ids = _string_tuple(
+                raw_overlays,
+                "scene.overlay_asset_ids",
+            )
+            if not overlay_asset_ids:
+                raise ValueError("scene.overlay_asset_ids must not be empty when present")
+            if len(set(overlay_asset_ids)) != len(overlay_asset_ids):
+                raise ValueError("scene.overlay_asset_ids must contain unique asset ids")
+        asset_id = _string(data.get("asset_id"), "scene.asset_id")
+        if asset_id in overlay_asset_ids:
+            raise ValueError("scene.overlay_asset_ids must not contain scene.asset_id")
         return cls(
-            asset_id=_string(data.get("asset_id"), "scene.asset_id"),
+            asset_id=asset_id,
             root_prim_path=_string(data.get("root_prim_path"), "scene.root_prim_path"),
+            overlay_asset_ids=overlay_asset_ids,
             inactive_prim_paths=_string_tuple(
                 data.get("inactive_prim_paths", []), "scene.inactive_prim_paths"
             ),
@@ -127,6 +152,8 @@ class SceneSourceSpec:
             "asset_id": self.asset_id,
             "root_prim_path": self.root_prim_path,
         }
+        if self.overlay_asset_ids:
+            result["overlay_asset_ids"] = list(self.overlay_asset_ids)
         if self.inactive_prim_paths:
             result["inactive_prim_paths"] = list(self.inactive_prim_paths)
         if self.world_anchored_prim_paths:
@@ -393,7 +420,8 @@ class ScenarioSpec:
     @classmethod
     def from_mapping(cls, value: object) -> ScenarioSpec:
         data = _mapping(value, "scenario spec")
-        if data.get("schema_version") != "scenario-spec/v0.1":
+        schema_version = data.get("schema_version")
+        if schema_version not in {"scenario-spec/v0.1", "scenario-spec/v0.2"}:
             raise ValueError("unsupported scenario spec schema_version")
         raw_objects = data.get("objects")
         raw_steps = data.get("steps")
@@ -432,12 +460,15 @@ class ScenarioSpec:
             seed = _package_segment(seed, "seed")
 
         spec = cls(
-            schema_version="scenario-spec/v0.1",
+            schema_version=schema_version,
             scenario_id=_package_segment(data.get("scenario_id"), "scenario_id"),
             domain=_string(data.get("domain"), "domain"),
             task_family=_string(data.get("task_family"), "task_family"),
             instruction=_string(data.get("instruction"), "instruction"),
-            scene=SceneSourceSpec.from_mapping(data.get("scene")),
+            scene=SceneSourceSpec.from_mapping(
+                data.get("scene"),
+                schema_version=schema_version,
+            ),
             objects=objects,
             robot=robot,
             steps=steps,

@@ -104,6 +104,9 @@ Scientific-workbench bimanual-pour example:
 ```bash
 python scripts/generate_scientific_workbench_bimanual_pour.py \
   --source-usd /path/to/closed/scientific_workbench_scene.usd \
+  --convert-asset-package /path/to/convertasset/package \
+  --convert-asset-manifest /path/to/convertasset/manifest.json \
+  --convert-asset-revision <convertasset-git-sha> \
   --out outputs/scientific_workbench_bimanual_pour \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$GENMANIP_ROOT"

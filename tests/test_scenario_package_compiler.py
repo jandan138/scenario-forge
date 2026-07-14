@@ -109,6 +109,68 @@ def _tree_hash(root: Path) -> str:
     return digest.hexdigest()
 
 
+def _scenario_with_overlays(*overlay_asset_ids: str) -> ScenarioSpec:
+    scenario = _scenario_mapping()
+    scenario["schema_version"] = "scenario-spec/v0.2"
+    scene = dict(scenario["scene"])  # type: ignore[arg-type]
+    scene["overlay_asset_ids"] = list(overlay_asset_ids)
+    scenario["scene"] = scene
+    return ScenarioSpec.from_mapping(scenario)
+
+
+def _write_scene_overlay(
+    root: Path,
+    *,
+    root_prim_name: str = "World",
+    marker_value: str = "overlay",
+) -> Path:
+    overlay = root / "overlay" / "overlay.usda"
+    overlay.parent.mkdir(parents=True)
+    overlay.write_text(
+        f'''#usda 1.0
+(
+    defaultPrim = "{root_prim_name}"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+over "{root_prim_name}"
+{{
+    over "background_fixture"
+    {{
+        string scenarioForge:layerOrigin = "{marker_value}"
+    }}
+}}
+''',
+        encoding="utf-8",
+    )
+    return overlay
+
+
+def _write_object_only_asset(root: Path) -> Path:
+    source = root / "object" / "standalone_flask.usda"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        '''#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def Xform "conical_bottle03"
+    {
+        string scenarioForge:assetOrigin = "object-only"
+    }
+}
+''',
+        encoding="utf-8",
+    )
+    return source
+
+
 def test_package_compiler_builds_portable_v02_package_from_scenario_spec(tmp_path: Path) -> None:
     source_usd = _write_source_scene(tmp_path)
     spec = ScenarioSpec.from_mapping(_scenario_mapping())
@@ -294,3 +356,177 @@ def test_local_usd_asset_source_rejects_unsafe_or_canonical_exclusions(
             source_usd,
             exclude_relative_paths=exclude_relative_paths,
         )
+
+
+def test_scene_overlays_compose_strongest_first_and_win_conflicting_opinions(
+    tmp_path: Path,
+) -> None:
+    Usd = pytest.importorskip("pxr.Usd")
+    base_usd = _write_source_scene(tmp_path / "base")
+    base_usd.write_text(
+        base_usd.read_text(encoding="utf-8").replace(
+            '    def Xform "background_fixture"\n    {',
+            (
+                '    def Xform "background_fixture"\n'
+                "    {\n"
+                '        string scenarioForge:layerOrigin = "base"\n'
+            ),
+        ),
+        encoding="utf-8",
+    )
+    overlay_usd = _write_scene_overlay(tmp_path)
+    spec = _scenario_with_overlays("scientific_workbench_dryingbox_overlay")
+    package_root = tmp_path / "package"
+
+    compile_scenario_package(
+        spec,
+        {
+            "scientific_workbench_environment": _asset_source(base_usd),
+            "scientific_workbench_dryingbox_overlay": LocalUSDAssetSource(
+                asset_id="scientific_workbench_dryingbox_overlay",
+                source_usd=overlay_usd,
+                root_prim_path="/World",
+                role="scene_overlay",
+                license="CC-BY-NC-4.0",
+                source_uri="convert-asset://dryingbox-03/profile-r1",
+                redistributable=False,
+            ),
+        },
+        package_root,
+    )
+
+    scene_path = package_root / "scene" / "main.usda"
+    scene_text = scene_path.read_text(encoding="utf-8")
+    overlay_reference = (
+        "@../assets/scientific_workbench_dryingbox_overlay/overlay.usda@"
+    )
+    base_reference = (
+        "@../assets/scientific_workbench_environment/scene.usda@"
+    )
+    assert scene_text.index(overlay_reference) < scene_text.index(base_reference)
+
+    stage = Usd.Stage.Open(str(scene_path))
+    assert stage
+    marker = stage.GetPrimAtPath("/World/background_fixture").GetAttribute(
+        "scenarioForge:layerOrigin"
+    )
+    assert marker.Get() == "overlay"
+    property_stack = marker.GetPropertyStack()
+    assert property_stack
+    strongest_layer = Path(property_stack[0].layer.realPath)
+    copied_overlay = (
+        package_root
+        / "assets"
+        / "scientific_workbench_dryingbox_overlay"
+        / "overlay.usda"
+    )
+    assert strongest_layer.resolve() == copied_overlay.resolve()
+
+
+def test_scene_overlay_root_prim_must_match_scene_root(tmp_path: Path) -> None:
+    base_usd = _write_source_scene(tmp_path / "base")
+    overlay_usd = _write_scene_overlay(
+        tmp_path,
+        root_prim_name="Asset",
+    )
+    spec = _scenario_with_overlays("mismatched_overlay")
+
+    with pytest.raises(
+        ValueError,
+        match=r"overlay.*root_prim_path|root_prim_path.*scene\.root_prim_path",
+    ):
+        compile_scenario_package(
+            spec,
+            {
+                "scientific_workbench_environment": _asset_source(base_usd),
+                "mismatched_overlay": LocalUSDAssetSource(
+                    asset_id="mismatched_overlay",
+                    source_usd=overlay_usd,
+                    root_prim_path="/Asset",
+                    role="scene_overlay",
+                    license="CC-BY-NC-4.0",
+                    source_uri="convert-asset://mismatched-overlay",
+                    redistributable=False,
+                ),
+            },
+            tmp_path / "package",
+        )
+
+
+def test_scene_overlay_source_must_use_scene_overlay_role(tmp_path: Path) -> None:
+    base_usd = _write_source_scene(tmp_path / "base")
+    overlay_usd = _write_scene_overlay(tmp_path)
+    spec = _scenario_with_overlays("wrong_role_overlay")
+
+    with pytest.raises(ValueError, match="role.*scene_overlay"):
+        compile_scenario_package(
+            spec,
+            {
+                "scientific_workbench_environment": _asset_source(base_usd),
+                "wrong_role_overlay": LocalUSDAssetSource(
+                    asset_id="wrong_role_overlay",
+                    source_usd=overlay_usd,
+                    root_prim_path="/World",
+                    role="object",
+                    license="CC-BY-NC-4.0",
+                    source_uri="convert-asset://wrong-role-overlay",
+                    redistributable=False,
+                ),
+            },
+            tmp_path / "package",
+        )
+
+
+def test_package_compiler_rejects_missing_scene_overlay_source(tmp_path: Path) -> None:
+    base_usd = _write_source_scene(tmp_path)
+    spec = _scenario_with_overlays("missing_overlay")
+
+    with pytest.raises(
+        ValueError,
+        match=r"missing local USD asset source.*missing_overlay",
+    ):
+        compile_scenario_package(
+            spec,
+            {"scientific_workbench_environment": _asset_source(base_usd)},
+            tmp_path / "package",
+        )
+
+
+def test_object_only_asset_preserves_legacy_sublayer_composition(
+    tmp_path: Path,
+) -> None:
+    base_usd = _write_source_scene(tmp_path / "base")
+    object_usd = _write_object_only_asset(tmp_path)
+    scenario = _scenario_mapping()
+    objects = list(scenario["objects"])  # type: ignore[arg-type]
+    standalone_object = dict(objects[1])  # type: ignore[arg-type]
+    standalone_object["asset_id"] = "standalone_conical_flask"
+    objects[1] = standalone_object
+    scenario["objects"] = objects
+    package_root = tmp_path / "package"
+
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": _asset_source(base_usd),
+            "standalone_conical_flask": LocalUSDAssetSource(
+                asset_id="standalone_conical_flask",
+                source_usd=object_usd,
+                role="object",
+                license="CC-BY-NC-4.0",
+                source_uri="example://standalone-conical-flask",
+                redistributable=False,
+            ),
+        },
+        package_root,
+    )
+
+    scene_text = (package_root / "scene" / "main.usda").read_text(
+        encoding="utf-8"
+    )
+    sublayer_block = scene_text.split("]", maxsplit=1)[0]
+    object_reference = (
+        "../assets/standalone_conical_flask/standalone_flask.usda"
+    )
+    assert f"@{object_reference}@" in sublayer_block
+    assert f"prepend references = @{object_reference}@" not in scene_text

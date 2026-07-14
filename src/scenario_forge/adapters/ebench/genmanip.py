@@ -92,6 +92,11 @@ def export_genmanip_collected_package(
 
     manifest = _validated_manifest(package_root)
     scenario = _load_mapping(package_root / "scenario.yaml", "scenario spec")
+    scenario_schema_version = _required_string(
+        scenario,
+        "schema_version",
+        "scenario spec",
+    )
     scenario_id = _required_string(scenario, "scenario_id", "scenario spec")
     _require_usd_identifier(scenario_id, "scenario_id")
     if manifest.package_id != scenario_id:
@@ -116,6 +121,35 @@ def export_genmanip_collected_package(
     source_root_prim = _required_string(
         scene_source, "root_prim_path", "scenario scene"
     )
+    raw_overlay_asset_ids = scene_source.get("overlay_asset_ids", [])
+    if not isinstance(raw_overlay_asset_ids, list) or not all(
+        isinstance(asset_id, str) and asset_id for asset_id in raw_overlay_asset_ids
+    ):
+        raise GenManipExportError(
+            "scenario scene.overlay_asset_ids must be a list of non-empty strings"
+        )
+    overlay_asset_ids = list(raw_overlay_asset_ids)
+    if len(set(overlay_asset_ids)) != len(overlay_asset_ids):
+        raise GenManipExportError("scenario scene.overlay_asset_ids must be unique")
+    if source_asset_id in overlay_asset_ids:
+        raise GenManipExportError(
+            "scenario scene.overlay_asset_ids must not contain scene.asset_id"
+        )
+    if overlay_asset_ids and scenario_schema_version != "scenario-spec/v0.2":
+        raise GenManipExportError(
+            "scenario scene overlays require scenario-spec/v0.2"
+        )
+    object_asset_ids = {
+        _required_string(item, "asset_id", "scenario object") for item in objects
+    }
+    overlay_object_conflicts = sorted(
+        set(overlay_asset_ids).intersection(object_asset_ids)
+    )
+    if overlay_object_conflicts:
+        raise GenManipExportError(
+            "scene overlay assets cannot also be object assets: "
+            + ", ".join(overlay_object_conflicts)
+        )
     raw_inactive_source_prims = scene_source.get("inactive_prim_paths", [])
     if not isinstance(raw_inactive_source_prims, list) or not all(
         isinstance(path, str) and path for path in raw_inactive_source_prims
@@ -140,7 +174,19 @@ def export_genmanip_collected_package(
     asset_manifest = load_asset_manifest(package_root)
     _validate_asset_provenance(package_root, manifest, asset_manifest.assets)
     assets_by_id = {asset.asset_id: asset for asset in asset_manifest.assets}
-    _require_assets(objects, source_asset_id, assets_by_id)
+    _require_assets(objects, source_asset_id, overlay_asset_ids, assets_by_id)
+    for overlay_asset_id in overlay_asset_ids:
+        overlay_asset = assets_by_id[overlay_asset_id]
+        if overlay_asset.role != "scene_overlay":
+            raise GenManipExportError(
+                f"overlay asset {overlay_asset_id!r} role must be 'scene_overlay'"
+            )
+        overlay_root = overlay_asset.metadata.get("root_prim_path")
+        if overlay_root != source_root_prim:
+            raise GenManipExportError(
+                f"overlay asset {overlay_asset_id!r} root_prim_path must match "
+                "scenario scene.root_prim_path"
+            )
 
     goal = _genmanip_goal(success, object_by_id)
     seed = _episode_name(scenario.get("seed", "000"))
@@ -182,6 +228,7 @@ def export_genmanip_collected_package(
             scenario=scenario,
             scenario_id=scenario_id,
             source_asset_id=source_asset_id,
+            overlay_asset_ids=overlay_asset_ids,
             source_root_prim=source_root_prim,
             inactive_source_prims=inactive_source_prims,
             world_anchored_source_prims=world_anchored_source_prims,
@@ -269,6 +316,7 @@ def _write_collected_package(
     scenario: Mapping[str, Any],
     scenario_id: str,
     source_asset_id: str,
+    overlay_asset_ids: list[str],
     source_root_prim: str,
     inactive_source_prims: list[str],
     world_anchored_source_prims: list[str],
@@ -295,6 +343,7 @@ def _write_collected_package(
     scene_text = _scene_usda(
         scenario_id=scenario_id,
         source_asset_id=source_asset_id,
+        overlay_asset_ids=overlay_asset_ids,
         source_root_prim=source_root_prim,
         inactive_source_prims=inactive_source_prims,
         world_anchored_source_prims=world_anchored_source_prims,
@@ -323,6 +372,11 @@ def _write_collected_package(
             "sha256": asset.sha256,
             "license": asset.license,
             "redistributable": bool(asset.metadata.get("redistributable", False)),
+            **(
+                {"upstream_package": asset.metadata["upstream_package"]}
+                if "upstream_package" in asset.metadata
+                else {}
+            ),
         }
         for asset in sorted(assets_by_id.values(), key=lambda item: item.asset_id)
     ]
@@ -630,6 +684,7 @@ def _scene_usda(
     *,
     scenario_id: str,
     source_asset_id: str,
+    overlay_asset_ids: list[str],
     source_root_prim: str,
     inactive_source_prims: list[str],
     world_anchored_source_prims: list[str],
@@ -638,7 +693,10 @@ def _scene_usda(
     objects: list[Mapping[str, Any]],
 ) -> str:
     _require_usd_identifier(scenario_id, "scenario_id")
-    source_reference = _asset_reference(assets_by_id[source_asset_id])
+    scene_asset_ids = [*overlay_asset_ids, source_asset_id]
+    source_references = [
+        _asset_reference(assets_by_id[asset_id]) for asset_id in scene_asset_ids
+    ]
     source_override_tree: dict[str, Any] = {}
     for item in objects:
         source_prim = _required_string(item, "source_prim_path", "scenario object")
@@ -671,7 +729,12 @@ def _scene_usda(
         f'    def Xform "{scenario_id}"',
         "    {",
         '        def Xform "room" (',
-        f"            prepend references = @{source_reference}@<{source_root_prim}>",
+        "            prepend references = [",
+        *[
+            f"                @{reference}@<{source_root_prim}>,"
+            for reference in source_references
+        ],
+        "            ]",
         "        )",
         "        {",
     ]
@@ -923,9 +986,10 @@ def _asset_reference(asset: AssetManifestEntry) -> str:
 def _require_assets(
     objects: list[Mapping[str, Any]],
     source_asset_id: str,
+    overlay_asset_ids: list[str],
     assets_by_id: Mapping[str, AssetManifestEntry],
 ) -> None:
-    required = {source_asset_id}
+    required = {source_asset_id, *overlay_asset_ids}
     required.update(_required_string(item, "asset_id", "scenario object") for item in objects)
     missing = sorted(required.difference(assets_by_id))
     if missing:

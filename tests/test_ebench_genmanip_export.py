@@ -19,6 +19,9 @@ from tests.test_scenario_package_compiler import _write_source_scene
 from tests.test_scenario_spec import _scenario_mapping
 
 
+_OVERLAY_ASSET_ID = "dryingbox_03_dynamic"
+
+
 def _build_package(tmp_path: Path) -> Path:
     source_usd = _write_source_scene(tmp_path)
     package_root = tmp_path / "package"
@@ -38,6 +41,105 @@ def _build_package(tmp_path: Path) -> Path:
         package_root,
     )
     return package_root
+
+
+def _write_overlay_base_scene(root: Path) -> Path:
+    source_usd = _write_source_scene(root)
+    source_text = source_usd.read_text(encoding="utf-8")
+    closing_world = source_text.rfind("\n}")
+    assert closing_world >= 0
+    source_usd.write_text(
+        source_text[:closing_world]
+        + """
+    def Xform "DryingBox_03"
+    {
+        custom string scenarioForge:compositionWinner = "base"
+    }
+"""
+        + source_text[closing_world:],
+        encoding="utf-8",
+    )
+    return source_usd
+
+
+def _write_scene_overlay(root: Path) -> Path:
+    overlay_usd = root / "overlay-source" / "asset.usda"
+    overlay_usd.parent.mkdir(parents=True)
+    overlay_usd.write_text(
+        """#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def Xform "DryingBox_03"
+    {
+        custom string scenarioForge:compositionWinner = "overlay"
+        float physics:mass = 1
+        float3 physics:diagonalInertia = (1, 1, 1)
+        point3f physics:centerOfMass = (0, 0, 0)
+        quatf physics:principalAxes = (1, 0, 0, 0)
+    }
+}
+""",
+        encoding="utf-8",
+    )
+    return overlay_usd
+
+
+def _overlay_scenario_mapping() -> dict[str, object]:
+    scenario = _scenario_mapping()
+    scenario["schema_version"] = "scenario-spec/v0.2"
+    scene = dict(scenario["scene"])  # type: ignore[arg-type]
+    scene["overlay_asset_ids"] = [_OVERLAY_ASSET_ID]
+    scenario["scene"] = scene
+    return scenario
+
+
+def _build_overlay_package(tmp_path: Path) -> Path:
+    source_usd = _write_overlay_base_scene(tmp_path)
+    overlay_usd = _write_scene_overlay(tmp_path)
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(_overlay_scenario_mapping()),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                attribution=("Example scientific workbench asset",),
+                redistributable=False,
+            ),
+            _OVERLAY_ASSET_ID: LocalUSDAssetSource(
+                asset_id=_OVERLAY_ASSET_ID,
+                source_usd=overlay_usd,
+                role="scene_overlay",
+                license="CC-BY-NC-4.0",
+                source_uri="example://dryingbox-03-dynamic",
+                attribution=("Example source-bound dynamic package",),
+                redistributable=False,
+                root_prim_path="/World",
+            ),
+        },
+        package_root,
+    )
+    return package_root
+
+
+def _room_references(scene_path: Path) -> list[object]:
+    Sdf = pytest.importorskip("pxr.Sdf")
+    layer = Sdf.Layer.FindOrOpen(str(scene_path))
+    assert layer
+    room = layer.GetPrimAtPath(
+        "/World/scientific_workbench_bimanual_pour/room"
+    )
+    assert room
+    return list(room.referenceList.GetAddedOrExplicitItems())
 
 
 def _tree_hash(root: Path) -> str:
@@ -163,6 +265,144 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
     assert "liquid_transfer_claim_allowed" not in manifest
     assert manifest["validation_scope"]["liquid_transfer"] is False
     assert manifest["runtime_requirements"]["robot_profile"] == "manip/lift2/R5a"
+
+
+def test_genmanip_export_composes_scene_overlay_before_base_without_local_physics(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_overlay_package(tmp_path)
+
+    result = export_genmanip_collected_package(package_root)
+
+    scene_path = (
+        result.output_dir
+        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+    )
+    references = _room_references(scene_path)
+    assert [reference.assetPath for reference in references] == [
+        f"source_bundle/{_OVERLAY_ASSET_ID}/asset.usda",
+        "source_bundle/scientific_workbench_environment/scene.usda",
+    ]
+    assert [str(reference.primPath) for reference in references] == [
+        "/World",
+        "/World",
+    ]
+
+    Usd = pytest.importorskip("pxr.Usd")
+    stage = Usd.Stage.Open(str(scene_path))
+    assert stage
+    drying_box_path = (
+        "/World/scientific_workbench_bimanual_pour/room/DryingBox_03"
+    )
+    drying_box = stage.GetPrimAtPath(drying_box_path)
+    assert drying_box and drying_box.IsActive()
+    assert [
+        prim.GetPath().pathString
+        for prim in stage.Traverse()
+        if prim.IsActive() and prim.GetName() == "DryingBox_03"
+    ] == [drying_box_path]
+
+    winner = drying_box.GetAttribute("scenarioForge:compositionWinner")
+    assert winner.Get() == "overlay"
+    property_stack = winner.GetPropertyStack()
+    assert len(property_stack) == 2
+    assert Path(property_stack[0].layer.realPath).as_posix().endswith(
+        f"/source_bundle/{_OVERLAY_ASSET_ID}/asset.usda"
+    )
+    assert Path(property_stack[1].layer.realPath).as_posix().endswith(
+        "/source_bundle/scientific_workbench_environment/scene.usda"
+    )
+    assert drying_box.GetAttribute("physics:mass").Get() == pytest.approx(1.0)
+
+    scene_text = scene_path.read_text(encoding="utf-8")
+    for locally_forbidden_physics_token in (
+        "physics:mass",
+        "physics:diagonalInertia",
+        "physics:centerOfMass",
+        "physics:principalAxes",
+        "PhysicsMassAPI",
+    ):
+        assert locally_forbidden_physics_token not in scene_text
+
+
+def test_genmanip_export_rejects_overlay_missing_from_asset_manifest(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_package(tmp_path)
+    scenario_path = package_root / "scenario.yaml"
+    scenario = yaml.safe_load(scenario_path.read_text(encoding="utf-8"))
+    scenario["schema_version"] = "scenario-spec/v0.2"
+    scenario["scene"]["overlay_asset_ids"] = [_OVERLAY_ASSET_ID]
+    scenario_path.write_text(
+        yaml.safe_dump(scenario, sort_keys=False),
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "collected"
+
+    with pytest.raises(
+        GenManipExportError,
+        match=rf"asset manifest.*{_OVERLAY_ASSET_ID}|overlay.*{_OVERLAY_ASSET_ID}",
+    ):
+        export_genmanip_collected_package(package_root, output_dir)
+
+    assert not output_dir.exists()
+
+
+def test_genmanip_export_rejects_v01_scenario_with_overlay(tmp_path: Path) -> None:
+    package_root = _build_overlay_package(tmp_path)
+    scenario_path = package_root / "scenario.yaml"
+    scenario = yaml.safe_load(scenario_path.read_text(encoding="utf-8"))
+    scenario["schema_version"] = "scenario-spec/v0.1"
+    scenario_path.write_text(yaml.safe_dump(scenario, sort_keys=False), encoding="utf-8")
+
+    with pytest.raises(GenManipExportError, match="scenario-spec/v0.2"):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_genmanip_export_rejects_overlay_asset_with_wrong_role(tmp_path: Path) -> None:
+    package_root = _build_overlay_package(tmp_path)
+    manifest_path = package_root / "assets/asset_manifest.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    overlay = next(
+        item for item in manifest["assets"] if item["asset_id"] == _OVERLAY_ASSET_ID
+    )
+    overlay["role"] = "object"
+    manifest_path.write_text(
+        yaml.safe_dump(manifest, sort_keys=False),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(GenManipExportError, match="role.*scene_overlay"):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_genmanip_export_rejects_overlay_reused_as_object_asset(tmp_path: Path) -> None:
+    package_root = _build_overlay_package(tmp_path)
+    scenario_path = package_root / "scenario.yaml"
+    scenario = yaml.safe_load(scenario_path.read_text(encoding="utf-8"))
+    scenario["objects"][0]["asset_id"] = _OVERLAY_ASSET_ID
+    scenario_path.write_text(yaml.safe_dump(scenario, sort_keys=False), encoding="utf-8")
+
+    with pytest.raises(GenManipExportError, match="overlay.*object"):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_genmanip_export_without_overlays_keeps_single_base_reference(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_package(tmp_path)
+
+    result = export_genmanip_collected_package(package_root)
+
+    scene_path = (
+        result.output_dir
+        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+    )
+    references = _room_references(scene_path)
+    assert [reference.assetPath for reference in references] == [
+        "source_bundle/scientific_workbench_environment/scene.usda"
+    ]
+    assert [str(reference.primPath) for reference in references] == ["/World"]
 
 
 def test_genmanip_export_is_deterministic_and_removes_stale_files(tmp_path: Path) -> None:

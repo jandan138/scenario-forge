@@ -1,4 +1,4 @@
-schema_version: scenario-spec/v0.1
+schema_version: scenario-spec/v0.2
 scenario_id: scientific_workbench_bimanual_pour
 domain: scientific_workbench
 task_family: bimanual_pour
@@ -6,6 +6,8 @@ instruction: 辅助臂抓住量筒并保持；操作臂拿起锥形瓶，将瓶�
 scene:
   asset_id: scientific_workbench_environment
   root_prim_path: /World
+  overlay_asset_ids:
+    - scientific_workbench_dryingbox_03_dynamic
   inactive_prim_paths:
     - /World/Cube
     - /World/lounge_booth_table

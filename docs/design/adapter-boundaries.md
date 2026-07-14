@@ -51,7 +51,9 @@ Adoption gate:
 
 ## ConvertAsset
 
-ConvertAsset integration uses command plans for its public CLI.
+ConvertAsset remains the owner of USD/MDL/mesh conversion and asset-level physics
+normalization. Scenario Forge supports both an outbound command-plan boundary and
+an inbound package boundary; neither imports ConvertAsset implementation code.
 
 Preferred high-level path:
 
@@ -60,6 +62,30 @@ ConvertAsset/scripts/isaac_python.sh ConvertAsset/main.py normalize-asset <sourc
 ```
 
 Low-level commands such as `no-mdl`, `mesh-faces`, and `usd-to-glb` remain ConvertAsset-owned.
+
+For an inbound normalized USD package, the ConvertAsset adapter validates and maps
+the producer's package/manifest contract into a Scenario Forge
+`LocalUSDAssetSource` plus portable `UpstreamPackageRef` provenance. In particular,
+it checks that the package is bound to the exact source USD hash, that the external
+and embedded manifests agree, that entry points and scoped prims are safe and
+expected, and that the declared profile and runtime gates passed. It does not
+author mass, inertia, center of mass, collision, or rigid-body opinions; delete
+physics APIs; suppress warnings; or otherwise repair the USD locally.
+
+The consuming package retains the runtime closure needed by the normalized root
+USD, including `deps/`, `physics/`, and `overlays/`. Producer-side `evidence/` is
+excluded from the copied runtime closure. Its manifest is consumed at compile time
+and represented by a portable URI, content hash, producer revision, and bounded
+handoff metadata in Scenario Forge manifests/provenance rather than by vendoring
+the upstream evidence tree.
+
+Scene packages can compose such a source-bound package with a base environment
+through `scenario-spec/v0.2` `scene.overlay_asset_ids`. Overlay ordering and
+strength are defined in
+[Scene Asset Overlays](scene-asset-overlays.md). A later calibrated profile is an
+upstream package replacement: Scenario Forge consumes the replacement
+package/manifest and updates provenance, without gaining a second physics-repair
+implementation.
 
 ## Isaac
 

@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/scenario-spec-v0.2.schema.json",
+  "title": "Scenario Forge Scenario Spec v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scenario_id",
+    "domain",
+    "task_family",
+    "instruction",
+    "scene",
+    "objects",
+    "robot",
+    "steps",
+    "invariants",
+    "success",
+    "max_steps",
+    "seed"
+  ],
+  "properties": {
+    "schema_version": {"const": "scenario-spec/v0.2"},
+    "scenario_id": {"$ref": "#/$defs/packageSegment"},
+    "domain": {"$ref": "#/$defs/nonEmptyString"},
+    "task_family": {"$ref": "#/$defs/nonEmptyString"},
+    "instruction": {"$ref": "#/$defs/nonEmptyString"},
+    "scene": {"$ref": "#/$defs/sceneSource"},
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/objectBinding"}
+    },
+    "robot": {"$ref": "#/$defs/robot"},
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/taskStep"}
+    },
+    "invariants": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/invariant"}
+    },
+    "success": {"$ref": "#/$defs/success"},
+    "max_steps": {"type": "integer", "minimum": 1},
+    "seed": {
+      "oneOf": [
+        {"$ref": "#/$defs/packageSegment"},
+        {"type": "integer", "minimum": 0}
+      ]
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packageSegment": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "quaternion": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"type": "number"}
+    },
+    "pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xyz", "wxyz"],
+      "properties": {
+        "xyz": {"$ref": "#/$defs/vector3"},
+        "wxyz": {"$ref": "#/$defs/quaternion"},
+        "scale_xyz": {"$ref": "#/$defs/vector3"}
+      }
+    },
+    "sceneSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "root_prim_path"],
+      "properties": {
+        "asset_id": {"$ref": "#/$defs/nonEmptyString"},
+        "root_prim_path": {"$ref": "#/$defs/nonEmptyString"},
+        "overlay_asset_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "inactive_prim_paths": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "world_anchored_prim_paths": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "pose": {"$ref": "#/$defs/pose"}
+      }
+    },
+    "objectBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "asset_id", "source_prim_path", "role", "pose"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "asset_id": {"$ref": "#/$defs/nonEmptyString"},
+        "source_prim_path": {"$ref": "#/$defs/nonEmptyString"},
+        "role": {"$ref": "#/$defs/nonEmptyString"},
+        "pose": {"$ref": "#/$defs/pose"},
+        "named_frames": {
+          "type": "object",
+          "propertyNames": {"minLength": 1},
+          "additionalProperties": {"$ref": "#/$defs/pose"}
+        },
+        "metadata": {"type": "object"}
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "end_effector", "capabilities"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "end_effector": {"$ref": "#/$defs/nonEmptyString"},
+        "capabilities": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "robot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_ref", "spawn", "actors"],
+      "properties": {
+        "profile_ref": {"$ref": "#/$defs/nonEmptyString"},
+        "spawn": {"$ref": "#/$defs/pose"},
+        "actors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/actor"}
+        }
+      }
+    },
+    "taskStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "skill", "actors", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "skill": {"$ref": "#/$defs/nonEmptyString"},
+        "actors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "parameters": {"type": "object"},
+        "depends_on": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "actor", "object", "from_step", "through_step"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"$ref": "#/$defs/nonEmptyString"},
+        "actor": {"$ref": "#/$defs/nonEmptyString"},
+        "object": {"$ref": "#/$defs/nonEmptyString"},
+        "from_step": {"$ref": "#/$defs/nonEmptyString"},
+        "through_step": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    },
+    "successPredicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"$ref": "#/$defs/nonEmptyString"},
+        "sequence_index": {"type": "integer", "minimum": 0},
+        "parameters": {"type": "object"}
+      }
+    },
+    "success": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "claim_scope",
+        "predicates"
+      ],
+      "properties": {
+        "operator": {"enum": ["all", "any"]},
+        "claim_scope": {"$ref": "#/$defs/nonEmptyString"},
+        "predicates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/successPredicate"}
+        }
+      }
+    }
+  }
+}
