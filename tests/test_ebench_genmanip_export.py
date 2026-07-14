@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from jsonschema import Draft202012Validator
 
 from scenario_forge.adapters.ebench.genmanip import (
     GenManipExportError,
@@ -20,6 +21,11 @@ from tests.test_scenario_spec import _scenario_mapping
 
 
 _OVERLAY_ASSET_ID = "dryingbox_03_dynamic"
+_RUNTIME_CONTRACT_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "src/scenario_forge/schemas/jsonschema"
+    / "scenario-forge-genmanip-runtime-contract-v0.1.schema.json"
+)
 
 
 def _build_package(tmp_path: Path) -> Path:
@@ -260,11 +266,315 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
     assert initial_layout["lift2"]["type"] == "robot"
     assert len(initial_layout["lift2"]["joint_positions"]) == 16
 
+    contract = episode_json["task_data"]["scenario_forge_runtime_contract"]
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.1"
+    )
+    assert contract["contract_status"] == "transport_only"
+    assert contract["coordinate_convention"] == {
+        "translation_unit": "meter",
+        "quaternion_order": "wxyz",
+        "named_frame_pose_relative_to": "state_prim_path",
+        "transform_direction": "state_prim_from_named_frame",
+        "frame_scale_allowed": False,
+    }
+    assert contract["execution"] == {
+        "native_goal_role": "diagnostic_compatibility_projection",
+        "frame_aware_metric_active": False,
+        "process_invariants_evaluated": False,
+    }
+    assert contract["robot"] == {
+        "profile_ref": "manip/lift2/R5a",
+        "robot_index": 0,
+        "actors": _scenario_mapping()["robot"]["actors"],  # type: ignore[index]
+    }
+    objects_by_id = {
+        item["scenario_object_id"]: item for item in contract["objects"]
+    }
+    for contract_object in contract["objects"]:
+        runtime_uid = contract_object["runtime_uid"]
+        assert runtime_uid in initial_layout
+        assert contract_object["state_prim_path"] == initial_layout[runtime_uid][
+            "prim_path"
+        ]
+        assert stage.GetPrimAtPath(contract_object["state_prim_path"])
+    assert objects_by_id["table"]["runtime_uid"] == (
+        "00000000000000000000000000000000"
+    )
+    assert objects_by_id["table"]["state_prim_path"] == (
+        f"{scene_uid}/obj_table"
+    )
+    assert objects_by_id["table"]["named_frames"] == {}
+    flask = objects_by_id["obj_conical_bottle03"]
+    assert flask["runtime_uid"] == "obj_conical_bottle03"
+    assert flask["state_prim_path"] == f"{scene_uid}/obj_obj_conical_bottle03"
+    assert flask["named_frames"]["opening"] == {
+        "xyz": [0.0, 0.0, 0.18],
+        "wxyz": [1.0, 0.0, 0.0, 0.0],
+    }
+    assert contract["steps"] == _scenario_mapping()["steps"]
+    assert contract["invariants"] == _scenario_mapping()["invariants"]
+    assert contract["success"] == _scenario_mapping()["success"]
+
     manifest = json.loads((output / "package_manifest.json").read_text(encoding="utf-8"))
     assert manifest["claim_scope"] == "kinematic_proxy"
     assert "liquid_transfer_claim_allowed" not in manifest
     assert manifest["validation_scope"]["liquid_transfer"] is False
     assert manifest["runtime_requirements"]["robot_profile"] == "manip/lift2/R5a"
+    assert manifest["success_contract"] == contract["success"]
+    assert manifest["success_contract_role"] == (
+        "validated_projection_of_semantic_contract"
+    )
+    assert manifest["semantic_contract"] == {
+        "authority": "episode_metadata",
+        "path": (
+            "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
+            "episode_metadata.json"
+        ),
+        "json_pointer": "/task_data/scenario_forge_runtime_contract",
+    }
+
+
+def test_genmanip_runtime_contract_matches_its_json_schema(tmp_path: Path) -> None:
+    package_root = _build_package(tmp_path)
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode_path = (
+        output
+        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+    )
+    contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
+        "scenario_forge_runtime_contract"
+    ]
+    schema = json.loads(_RUNTIME_CONTRACT_SCHEMA.read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema)
+
+    validator.validate(contract)
+    invalid = {**contract, "unexpected": True}
+    assert any(error.validator == "additionalProperties" for error in validator.iter_errors(invalid))
+
+
+def test_runtime_contract_schema_accepts_actor_ids_allowed_by_scenario_spec(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    robot = dict(scenario["robot"])  # type: ignore[arg-type]
+    actors = [dict(actor) for actor in robot["actors"]]  # type: ignore[union-attr]
+    actors[0]["id"] = "auxiliary arm"
+    robot["actors"] = actors
+    scenario["robot"] = robot
+    steps = []
+    for raw_step in scenario["steps"]:  # type: ignore[union-attr]
+        step = dict(raw_step)
+        step["actors"] = [
+            "auxiliary arm" if actor == "auxiliary_arm" else actor
+            for actor in step["actors"]  # type: ignore[union-attr]
+        ]
+        steps.append(step)
+    scenario["steps"] = steps
+    invariants = [dict(item) for item in scenario["invariants"]]  # type: ignore[union-attr]
+    invariants[0]["actor"] = "auxiliary arm"
+    scenario["invariants"] = invariants
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            )
+        },
+        package_root,
+    )
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode = json.loads(
+        (
+            output
+            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        ).read_text(encoding="utf-8")
+    )
+    contract = episode["task_data"]["scenario_forge_runtime_contract"]
+    schema = json.loads(_RUNTIME_CONTRACT_SCHEMA.read_text(encoding="utf-8"))
+
+    Draft202012Validator(schema).validate(contract)
+
+
+def test_genmanip_runtime_contract_supports_tasks_without_named_frames_or_invariants(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    objects = []
+    for raw_object in scenario["objects"]:  # type: ignore[union-attr]
+        item = dict(raw_object)
+        item.pop("named_frames", None)
+        objects.append(item)
+    scenario["objects"] = objects
+    scenario["steps"] = [scenario["steps"][0]]  # type: ignore[index]
+    scenario["invariants"] = []
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {"scientific_workbench_environment": LocalUSDAssetSource(
+            asset_id="scientific_workbench_environment",
+            source_usd=source_usd,
+            role="environment",
+            license="CC-BY-NC-4.0",
+            source_uri="example://scientific-workbench-scene",
+            redistributable=False,
+        )},
+        package_root,
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode = json.loads(
+        (
+            output
+            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        ).read_text(encoding="utf-8")
+    )
+    contract = episode["task_data"]["scenario_forge_runtime_contract"]
+
+    assert all(item["named_frames"] == {} for item in contract["objects"])
+    assert contract["invariants"] == []
+
+
+def test_genmanip_export_rejects_unknown_named_frame_without_replacing_output(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_package(tmp_path)
+    scenario_path = package_root / "scenario.yaml"
+    scenario = yaml.safe_load(scenario_path.read_text(encoding="utf-8"))
+    steps = list(scenario["steps"])  # type: ignore[arg-type]
+    align = dict(steps[2])
+    parameters = dict(align["parameters"])  # type: ignore[arg-type]
+    parameters["source_frame"] = "obj_conical_bottle03.missing"
+    align["parameters"] = parameters
+    steps[2] = align
+    scenario["steps"] = steps
+    scenario_path.write_text(yaml.safe_dump(scenario, sort_keys=False), encoding="utf-8")
+    output = tmp_path / "collected"
+    output.mkdir()
+    marker = output / "keep.txt"
+    marker.write_text("existing", encoding="utf-8")
+
+    with pytest.raises(GenManipExportError, match="unknown frame"):
+        export_genmanip_collected_package(package_root, output)
+
+    assert marker.read_text(encoding="utf-8") == "existing"
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("wxyz", [0.0, 0.0, 0.0, 0.0], "non-zero quaternion"),
+        ("xyz", [float("inf"), 0.0, 0.0], "finite numbers"),
+    ],
+)
+def test_genmanip_export_rejects_invalid_named_frame_pose(
+    tmp_path: Path,
+    field: str,
+    value: list[float],
+    message: str,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    objects = list(scenario["objects"])  # type: ignore[arg-type]
+    flask = dict(objects[1])
+    frames = dict(flask["named_frames"])  # type: ignore[arg-type]
+    opening = dict(frames["opening"])  # type: ignore[arg-type]
+    opening[field] = value
+    frames["opening"] = opening
+    flask["named_frames"] = frames
+    objects[1] = flask
+    scenario["objects"] = objects
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {"scientific_workbench_environment": LocalUSDAssetSource(
+            asset_id="scientific_workbench_environment",
+            source_usd=source_usd,
+            role="environment",
+            license="CC-BY-NC-4.0",
+            source_uri="example://scientific-workbench-scene",
+            redistributable=False,
+        )},
+        package_root,
+    )
+
+    with pytest.raises(GenManipExportError, match=message):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_genmanip_export_rejects_zero_object_initial_quaternion(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    objects = list(scenario["objects"])  # type: ignore[arg-type]
+    flask = dict(objects[1])
+    pose = dict(flask["pose"])  # type: ignore[arg-type]
+    pose["wxyz"] = [0.0, 0.0, 0.0, 0.0]
+    flask["pose"] = pose
+    objects[1] = flask
+    scenario["objects"] = objects
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            )
+        },
+        package_root,
+    )
+
+    with pytest.raises(GenManipExportError, match="initial pose.*non-zero quaternion"):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_genmanip_export_rejects_dotted_named_frame_ids(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    objects = list(scenario["objects"])  # type: ignore[arg-type]
+    flask = dict(objects[1])
+    frames = dict(flask["named_frames"])  # type: ignore[arg-type]
+    frames["rim.inner"] = {
+        "xyz": [0.0, 0.0, 0.17],
+        "wxyz": [1.0, 0.0, 0.0, 0.0],
+    }
+    flask["named_frames"] = frames
+    objects[1] = flask
+    scenario["objects"] = objects
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            )
+        },
+        package_root,
+    )
+
+    with pytest.raises(GenManipExportError, match="frame id.*must not contain"):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
 
 
 def test_genmanip_export_composes_scene_overlay_before_base_without_local_physics(

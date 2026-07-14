@@ -242,7 +242,7 @@ tasks:
     blockers:
       - GenManip wrapper UID and physical rigid-body prim identity are not aligned for either vessel.
       - The root-range success metric excludes the exact 40-degree opening-frame alignment pose.
-    next_action: Qualify both vessel packages upstream and add a frame-aware GenManip metric before the EOS oracle.
+    next_action: Qualify both vessel packages upstream, accept an explicit frame predicate, and add its GenManip metric before the EOS oracle.
   - task_id: wetlab_glassrod_mix_and_stage
     compile_status: pending
     runtime_reset_status: not_run

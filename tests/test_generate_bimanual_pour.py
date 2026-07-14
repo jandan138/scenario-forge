@@ -159,6 +159,24 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         -0.16,
         0.81,
     ]
+    contract = episode["task_data"]["scenario_forge_runtime_contract"]
+    assert contract["contract_status"] == "transport_only"
+    contract_objects = {
+        item["scenario_object_id"]: item for item in contract["objects"]
+    }
+    assert contract_objects["obj_conical_bottle03"]["named_frames"]["opening"] == {
+        "xyz": [0.0, 0.196567, 0.0],
+        "wxyz": [0.7071068, -0.7071068, 0.0, 0.0],
+    }
+    assert contract_objects["obj_graduated_cylinder_03"]["named_frames"][
+        "opening"
+    ] == {
+        "xyz": [0.0, 0.272294, 0.0],
+        "wxyz": [0.7071068, -0.7071068, 0.0, 0.0],
+    }
+    actors = {item["id"]: item for item in contract["robot"]["actors"]}
+    assert actors["operating_arm"]["end_effector"] == "left"
+    assert actors["auxiliary_arm"]["end_effector"] == "right"
     scene_text = (
         collected
         / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"

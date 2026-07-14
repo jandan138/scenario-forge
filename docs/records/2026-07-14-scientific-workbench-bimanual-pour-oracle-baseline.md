@@ -64,6 +64,12 @@ than reported as a failed policy experiment. Concrete center/height/maximum-tilt
 thresholds beyond the existing 40-degree minimum remain proposed gates, not
 declared task requirements.
 
+Subsequent Scenario Forge work now embeds a transport-only runtime contract in the
+GenManip episode metadata, so named-frame data is no longer missing from the
+adapter subtree. This historical baseline remains blocked because the vessel
+rigid-root packages, an explicit frame predicate, and the consuming GenManip metric
+are still absent; its frozen tree digest is not rewritten.
+
 ## Claim boundary
 
 This record establishes exact static package identity and repeated static-build

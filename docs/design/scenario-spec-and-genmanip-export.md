@@ -26,6 +26,7 @@ The GenManip adapter consumes the compiled package and emits its wire format:
 adapters/ebench/genmanip/
   tasks/config.yaml
   tasks/<task_name>/000/episode_metadata.json
+    task_data.scenario_forge_runtime_contract
   tasks/<task_name>/000/meta_info.pkl
   cameras/fixed_camera_lift2.yml
   assets/scene_usds/scenario_forge/<scenario_id>/scene.usda
@@ -37,6 +38,26 @@ The adapter scene has one child below `/World`, immediate `obj_*` wrappers, and 
 environment USD. `episode_metadata.json` is the authoritative episode description;
 the pickle is a deterministic compatibility encoding of the same JSON-safe data.
 Scenario Forge never loads an external pickle.
+
+The embedded `scenario-forge-genmanip-runtime-contract/v0.1` is the semantic
+handoff for downstream code that needs more than GenManip's native goal projection.
+It carries:
+
+- the real GenManip runtime UID and state prim path for every scenario object,
+  including the table's special all-zero layout UID;
+- object-local named-frame poses in meters with `wxyz` quaternions, expressed as
+  `state_prim_from_named_frame` and never silently normalized;
+- the Lift2 actor-to-end-effector mapping;
+- the normalized ScenarioSpec steps, invariants, and success contract.
+
+`package_manifest.json.semantic_contract` locates this one authoritative copy by
+episode-metadata path and JSON Pointer. There is no duplicate sidecar. The contract
+is currently marked `transport_only`: the existing native `task_data.goal` remains
+a diagnostic compatibility projection, no frame-aware metric is registered, and
+process invariants are not claimed as evaluated. GenManip must explicitly consume
+the embedded contract before a downstream metric can use named frames. The legacy
+manifest `success_contract` field remains only as an explicitly labelled, validated
+projection for old readers; it is not a second semantic authority.
 
 The room keeps the complete source `/World` reference so backgrounds and the shared
 `Looks` scope remain intact. Task objects are referenced into GenManip wrappers and
@@ -105,6 +126,11 @@ transfer, transferred volume, or absence of spills. A later fluid evaluator can
 replace the adapter mapping without changing the task graph or asset bindings.
 For the selected conical flask and graduated cylinder, local `y` is the physical
 upright axis, so the tilt and return metrics compare `y` rather than assuming `z`.
+The embedded runtime contract transports both `opening` frames and the
+`align_openings` step references, but it does not reinterpret the current root
+range as an opening-frame predicate. Center/height/maximum-tilt thresholds beyond
+the declared 40-degree minimum still require an explicit product predicate before
+the frame-aware metric can become primary success evidence.
 
 ## Asset boundary
 

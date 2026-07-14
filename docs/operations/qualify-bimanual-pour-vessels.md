@@ -56,9 +56,11 @@ validation evidence. In addition to the normal scoped PhysX-warning gate, report
 ## GenManip adapter request
 
 Bind each object UID and metric lookup to the qualified rigid-root prim. Consume
-the named-frame/predicate handoff exported by Scenario Forge in a frame-aware
-runtime metric. The following values are proposed acceptance gates and are not yet
-declared product thresholds:
+`episode_metadata.task_data.scenario_forge_runtime_contract`, which Scenario Forge
+now exports as a normalized, transport-only mapping. The evaluator must explicitly
+make that mapping available to the frame-aware runtime metric; current GenManip
+only sends `task_data.goal` to its metrics manager. The following values are
+proposed acceptance gates and are not yet declared product thresholds:
 
 - opening-center horizontal error below 2 cm;
 - source opening 2–5 cm above the target rim before tilt;
@@ -78,9 +80,15 @@ changed. It does not block the vessel-only oracle.
 
 ## Scenario Forge follow-up
 
-Scenario Forge will consume the two packages and manifests through asset-source
-bindings, regenerate the package, verify the rigid-root contract in the exported
-scene, serialize the ScenarioSpec named frames and predicate inputs into the
-GenManip adapter handoff, and freeze a new complete-tree digest. GenManip owns the
-runtime metric that consumes this handoff. EOS owns rollout execution and episode
-evidence. The runner and trajectory planner are not added to this repository.
+Scenario Forge has completed the named-frame transport: the embedded runtime
+contract includes runtime UID/state-prim mappings, named frames, actor bindings,
+steps, invariants, and the existing success predicates. It deliberately reports
+`frame_aware_metric_active: false` and does not invent the proposed thresholds.
+
+After the two asset packages arrive, Scenario Forge will consume them through
+source bindings, regenerate the package, verify the rigid-root contract in the
+exported scene, and freeze a new complete-tree digest. If the proposed thresholds
+are accepted, they must enter as an explicit ScenarioSpec predicate rather than an
+adapter-only reinterpretation. GenManip owns the runtime metric that consumes this
+handoff. EOS owns rollout execution and episode evidence. The runner and trajectory
+planner are not added to this repository.

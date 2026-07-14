@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import math
 from pathlib import Path
 from pathlib import PurePosixPath
 import pickle
@@ -14,6 +15,7 @@ import yaml
 
 from scenario_forge.adapters.ebench.preview import write_genmanip_preview_request
 from scenario_forge.assets.manifest import AssetManifestEntry, load_asset_manifest
+from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.package import (
     PackageError,
     PackageManifest,
@@ -28,6 +30,12 @@ _ROBOT_PROFILE = "manip/lift2/R5a"
 _TABLE_LAYOUT_UID = "00000000000000000000000000000000"
 _USD_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _PICKLE_PROTOCOL = 4
+_RUNTIME_CONTRACT_SCHEMA_VERSION = (
+    "scenario-forge-genmanip-runtime-contract/v0.1"
+)
+_FRAME_REFERENCE_FIELDS = frozenset(
+    {"source_frame", "target_frame", "object_frame", "relative_to_frame"}
+)
 
 
 class GenManipExportError(ValueError):
@@ -38,6 +46,15 @@ class GenManipExportError(ValueError):
 class GenManipExportResult:
     output_dir: Path
     artifacts: tuple[Path, ...]
+
+
+@dataclass(frozen=True)
+class _RuntimeObjectBinding:
+    scenario_object_id: str
+    runtime_uid: str
+    wrapper_name: str
+    state_prim_path: str
+    is_table: bool
 
 
 def export_genmanip_collected_package(
@@ -91,7 +108,11 @@ def export_genmanip_collected_package(
         )
 
     manifest = _validated_manifest(package_root)
-    scenario = _load_mapping(package_root / "scenario.yaml", "scenario spec")
+    raw_scenario = _load_mapping(package_root / "scenario.yaml", "scenario spec")
+    try:
+        scenario = ScenarioSpec.from_mapping(raw_scenario).to_mapping()
+    except ValueError as exc:
+        raise GenManipExportError(f"invalid scenario spec: {exc}") from exc
     scenario_schema_version = _required_string(
         scenario,
         "schema_version",
@@ -204,6 +225,14 @@ def export_genmanip_collected_package(
         table=table,
         goal=goal,
     )
+    runtime_contract = _runtime_contract(
+        scenario=scenario,
+        scenario_id=scenario_id,
+        task_name=task_name,
+        episode_name=seed,
+        objects=objects,
+        table=table,
+    )
     episode = _episode_metadata(
         scenario=scenario,
         scenario_id=scenario_id,
@@ -212,6 +241,7 @@ def export_genmanip_collected_package(
         objects=objects,
         table=table,
         goal=goal,
+        runtime_contract=runtime_contract,
     )
 
     output_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -364,7 +394,6 @@ def _write_collected_package(
 
     _write_yaml(staging_dir / "cameras" / "fixed_camera_lift2.yml", _camera_config())
 
-    success = _required_mapping(scenario, "success", "scenario spec")
     source_assets = [
         {
             "asset_id": asset.asset_id,
@@ -388,7 +417,15 @@ def _write_collected_package(
             "package_id": scenario_id,
         },
         "claim_scope": claim_scope,
-        "success_contract": _json_safe_copy(success),
+        "success_contract": _json_safe_copy(
+            _required_mapping(scenario, "success", "scenario spec")
+        ),
+        "success_contract_role": "validated_projection_of_semantic_contract",
+        "semantic_contract": {
+            "authority": "episode_metadata",
+            "path": f"tasks/{task_name}/{episode_name}/episode_metadata.json",
+            "json_pointer": "/task_data/scenario_forge_runtime_contract",
+        },
         "entrypoints": {
             "task_config": "tasks/config.yaml",
             "episode_metadata": (
@@ -498,16 +535,19 @@ def _episode_metadata(
     objects: list[Mapping[str, Any]],
     table: Mapping[str, Any],
     goal: list[list[list[dict[str, Any]]]],
+    runtime_contract: Mapping[str, Any],
 ) -> dict[str, Any]:
     initial_layout: dict[str, Any] = {}
     table_id = _required_string(table, "id", "table object")
     for item in objects:
-        object_id = _required_string(item, "id", "scenario object")
+        binding = _runtime_object_binding(
+            scenario_id=scenario_id,
+            item=item,
+            table_id=table_id,
+        )
+        object_id = binding.scenario_object_id
         pose = _required_mapping(item, "pose", f"scenario object {object_id}")
-        is_table = object_id == table_id
-        layout_uid = _TABLE_LAYOUT_UID if is_table else object_id
-        wrapper_name = "obj_table" if is_table else f"obj_{object_id}"
-        initial_layout[layout_uid] = {
+        initial_layout[binding.runtime_uid] = {
             "type": "object",
             "position": _number_list(pose.get("xyz"), 3, f"{object_id}.pose.xyz"),
             "orientation": _number_list(
@@ -520,8 +560,8 @@ def _episode_metadata(
             ),
             "path": "",
             "add_colliders": True,
-            "add_rigid_body": not is_table,
-            "prim_path": f"/World/{scenario_id}/{wrapper_name}",
+            "add_rigid_body": not binding.is_table,
+            "prim_path": binding.state_prim_path,
             "is_articulation_part": False,
         }
 
@@ -544,8 +584,203 @@ def _episode_metadata(
             "goal": goal,
             "initial_scene_graph": None,
             "initial_layout": initial_layout,
+            "scenario_forge_runtime_contract": _json_safe_copy(runtime_contract),
         },
     }
+
+
+def _runtime_object_binding(
+    *,
+    scenario_id: str,
+    item: Mapping[str, Any],
+    table_id: str,
+) -> _RuntimeObjectBinding:
+    object_id = _required_string(item, "id", "scenario object")
+    is_table = object_id == table_id
+    wrapper_name = "obj_table" if is_table else f"obj_{object_id}"
+    _require_usd_identifier(wrapper_name, f"wrapper for {object_id}")
+    return _RuntimeObjectBinding(
+        scenario_object_id=object_id,
+        runtime_uid=_TABLE_LAYOUT_UID if is_table else object_id,
+        wrapper_name=wrapper_name,
+        state_prim_path=f"/World/{scenario_id}/{wrapper_name}",
+        is_table=is_table,
+    )
+
+
+def _runtime_contract(
+    *,
+    scenario: Mapping[str, Any],
+    scenario_id: str,
+    task_name: str,
+    episode_name: str,
+    objects: list[Mapping[str, Any]],
+    table: Mapping[str, Any],
+) -> dict[str, Any]:
+    table_id = _required_string(table, "id", "table object")
+    contract_objects: list[dict[str, Any]] = []
+    available_frames: set[str] = set()
+    for item in objects:
+        binding = _runtime_object_binding(
+            scenario_id=scenario_id,
+            item=item,
+            table_id=table_id,
+        )
+        object_id = binding.scenario_object_id
+        raw_frames = item.get("named_frames", {})
+        frames_mapping = _as_mapping(
+            raw_frames,
+            f"scenario object {object_id}.named_frames",
+        )
+        named_frames: dict[str, dict[str, list[float]]] = {}
+        for raw_frame_id, raw_pose in frames_mapping.items():
+            if not isinstance(raw_frame_id, str) or not raw_frame_id:
+                raise GenManipExportError(
+                    f"scenario object {object_id}.named_frames keys must be non-empty strings"
+                )
+            if "." in raw_frame_id:
+                raise GenManipExportError(
+                    f"named frame id {raw_frame_id!r} must not contain '.'"
+                )
+            pose = _as_mapping(
+                raw_pose,
+                f"scenario object {object_id}.named_frames.{raw_frame_id}",
+            )
+            if "scale_xyz" in pose:
+                raise GenManipExportError(
+                    f"named frame {object_id}.{raw_frame_id} must not declare scale_xyz"
+                )
+            xyz = _finite_number_list(
+                pose.get("xyz"),
+                3,
+                f"named frame {object_id}.{raw_frame_id}.xyz",
+            )
+            wxyz = _finite_number_list(
+                pose.get("wxyz"),
+                4,
+                f"named frame {object_id}.{raw_frame_id}.wxyz",
+            )
+            if sum(value * value for value in wxyz) == 0.0:
+                raise GenManipExportError(
+                    f"named frame {object_id}.{raw_frame_id} must use a non-zero quaternion"
+                )
+            named_frames[raw_frame_id] = {"xyz": xyz, "wxyz": wxyz}
+            available_frames.add(f"{object_id}.{raw_frame_id}")
+
+        pose = _required_mapping(item, "pose", f"scenario object {object_id}")
+        contract_objects.append(
+            {
+                "scenario_object_id": object_id,
+                "role": _required_string(item, "role", f"scenario object {object_id}"),
+                "source_prim_path": _required_string(
+                    item,
+                    "source_prim_path",
+                    f"scenario object {object_id}",
+                ),
+                "runtime_uid": binding.runtime_uid,
+                "state_prim_path": binding.state_prim_path,
+                "initial_pose": _runtime_initial_pose(pose, object_id),
+                "named_frames": named_frames,
+            }
+        )
+
+    robot = _required_mapping(scenario, "robot", "scenario spec")
+    raw_actors = robot.get("actors")
+    if not isinstance(raw_actors, list) or not raw_actors:
+        raise GenManipExportError("scenario robot.actors must be a non-empty list")
+    actors = [
+        _json_safe_copy(_as_mapping(actor, "scenario robot actor"))
+        for actor in raw_actors
+    ]
+    raw_steps = scenario.get("steps")
+    if not isinstance(raw_steps, list) or not raw_steps:
+        raise GenManipExportError("scenario steps must be a non-empty list")
+    steps = [_json_safe_copy(_as_mapping(step, "scenario step")) for step in raw_steps]
+    raw_invariants = scenario.get("invariants", [])
+    if not isinstance(raw_invariants, list):
+        raise GenManipExportError("scenario invariants must be a list")
+    invariants = [
+        _json_safe_copy(_as_mapping(invariant, "scenario invariant"))
+        for invariant in raw_invariants
+    ]
+    success = _required_mapping(scenario, "success", "scenario spec")
+    _validate_frame_references(steps, available_frames, "scenario steps")
+    _validate_frame_references(success, available_frames, "scenario success")
+    contract = {
+        "schema_version": _RUNTIME_CONTRACT_SCHEMA_VERSION,
+        "contract_status": "transport_only",
+        "scenario_id": scenario_id,
+        "task_name": task_name,
+        "episode_name": episode_name,
+        "coordinate_convention": {
+            "translation_unit": "meter",
+            "quaternion_order": "wxyz",
+            "named_frame_pose_relative_to": "state_prim_path",
+            "transform_direction": "state_prim_from_named_frame",
+            "frame_scale_allowed": False,
+        },
+        "execution": {
+            "native_goal_role": "diagnostic_compatibility_projection",
+            "frame_aware_metric_active": False,
+            "process_invariants_evaluated": False,
+        },
+        "robot": {
+            "profile_ref": _required_string(robot, "profile_ref", "scenario robot"),
+            "robot_index": 0,
+            "actors": actors,
+        },
+        "objects": contract_objects,
+        "steps": steps,
+        "invariants": invariants,
+        "success": _json_safe_copy(success),
+    }
+    return _json_safe_copy(contract)
+
+
+def _runtime_initial_pose(
+    pose: Mapping[str, Any], object_id: str
+) -> dict[str, list[float]]:
+    label = f"scenario object {object_id} initial pose"
+    xyz = _finite_number_list(pose.get("xyz"), 3, f"{label}.xyz")
+    wxyz = _finite_number_list(pose.get("wxyz"), 4, f"{label}.wxyz")
+    if sum(value * value for value in wxyz) == 0.0:
+        raise GenManipExportError(
+            f"{label} must use a non-zero quaternion"
+        )
+    result = {"xyz": xyz, "wxyz": wxyz}
+    if "scale_xyz" in pose:
+        result["scale_xyz"] = _finite_number_list(
+            pose.get("scale_xyz"),
+            3,
+            f"{label}.scale_xyz",
+        )
+    return result
+
+
+def _validate_frame_references(
+    value: object,
+    available_frames: set[str],
+    label: str,
+) -> None:
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            child_label = f"{label}.{key}"
+            if key in _FRAME_REFERENCE_FIELDS:
+                if not isinstance(item, str) or item not in available_frames:
+                    raise GenManipExportError(
+                        f"{child_label} references unknown named frame {item!r}"
+                    )
+            _validate_frame_references(item, available_frames, child_label)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            _validate_frame_references(item, available_frames, f"{label}[{index}]")
+
+
+def _finite_number_list(value: object, length: int, label: str) -> list[float]:
+    result = _number_list(value, length, label)
+    if not all(math.isfinite(item) for item in result):
+        raise GenManipExportError(f"{label} must contain finite numbers")
+    return result
 
 
 def _genmanip_goal(
@@ -766,15 +1001,15 @@ def _scene_usda(
     lines.extend(_source_override_lines(source_override_tree, indent=12))
     lines.extend(["        }", ""])
 
-    table_seen = False
+    table_id = _required_string(_table_object(objects), "id", "table object")
     for item in objects:
-        object_id = _required_string(item, "id", "scenario object")
-        role = _required_string(item, "role", f"scenario object {object_id}")
-        is_table = role == "table" or object_id == "table"
-        wrapper_name = "obj_table" if is_table else f"obj_{object_id}"
-        if is_table:
-            table_seen = True
-        _require_usd_identifier(wrapper_name, f"wrapper for {object_id}")
+        binding = _runtime_object_binding(
+            scenario_id=scenario_id,
+            item=item,
+            table_id=table_id,
+        )
+        object_id = binding.scenario_object_id
+        wrapper_name = binding.wrapper_name
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
         source_prim = _required_string(
             item, "source_prim_path", f"scenario object {object_id}"
@@ -817,8 +1052,6 @@ def _scene_usda(
             )
         )
         lines.extend(["        }", ""])
-    if not table_seen:
-        raise GenManipExportError("scenario requires one table object for GenManip export")
     lines.extend(
         [
             "    }",

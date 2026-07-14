@@ -50,9 +50,9 @@ bound for the task.
 - Readiness: `docs/records/evidence/2026-07-14-scientific-workbench-task-catalog/readiness.yaml`
 - Readiness schema: `task-readiness-snapshot-v0.1.schema.json`
 
-The next dependency target is a source-bound task-ready handoff for both vessels,
-a Scenario Forge named-frame/predicate adapter export, and a frame-aware GenManip
-metric that consumes it. Once those contracts pass, Scenario Forge can regenerate
-and refreeze the package for an EOS-owned five-stage oracle. In parallel, the
-catalog constrains the design of the thin asset-source resolution and compile
-orchestration entry point.
+Scenario Forge now exports the named frames and normalized task semantics through
+an embedded, transport-only GenManip runtime contract. The remaining dependency
+target is a source-bound task-ready handoff for both vessels, an accepted explicit
+frame predicate, and a frame-aware GenManip metric that consumes the contract.
+Once those contracts pass, Scenario Forge can regenerate and refreeze the package
+for an EOS-owned five-stage oracle.

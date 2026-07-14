@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/scenario-forge-genmanip-runtime-contract-v0.1.schema.json",
+  "title": "Scenario Forge GenManip Runtime Contract v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_status",
+    "scenario_id",
+    "task_name",
+    "episode_name",
+    "coordinate_convention",
+    "execution",
+    "robot",
+    "objects",
+    "steps",
+    "invariants",
+    "success"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "scenario-forge-genmanip-runtime-contract/v0.1"
+    },
+    "contract_status": {"const": "transport_only"},
+    "scenario_id": {"$ref": "#/$defs/usdIdentifier"},
+    "task_name": {"type": "string", "minLength": 1},
+    "episode_name": {"$ref": "#/$defs/portableId"},
+    "coordinate_convention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "translation_unit",
+        "quaternion_order",
+        "named_frame_pose_relative_to",
+        "transform_direction",
+        "frame_scale_allowed"
+      ],
+      "properties": {
+        "translation_unit": {"const": "meter"},
+        "quaternion_order": {"const": "wxyz"},
+        "named_frame_pose_relative_to": {"const": "state_prim_path"},
+        "transform_direction": {"const": "state_prim_from_named_frame"},
+        "frame_scale_allowed": {"const": false}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "native_goal_role",
+        "frame_aware_metric_active",
+        "process_invariants_evaluated"
+      ],
+      "properties": {
+        "native_goal_role": {"const": "diagnostic_compatibility_projection"},
+        "frame_aware_metric_active": {"const": false},
+        "process_invariants_evaluated": {"const": false}
+      }
+    },
+    "robot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_ref", "robot_index", "actors"],
+      "properties": {
+        "profile_ref": {"type": "string", "minLength": 1},
+        "robot_index": {"const": 0},
+        "actors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/actor"}
+        }
+      }
+    },
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/object"}
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/step"}
+    },
+    "invariants": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/invariant"}
+    },
+    "success": {"$ref": "#/$defs/success"}
+  },
+  "$defs": {
+    "portableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "usdIdentifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "number3": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "quaternion": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4,
+      "not": {"const": [0, 0, 0, 0]}
+    },
+    "pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xyz", "wxyz"],
+      "properties": {
+        "xyz": {"$ref": "#/$defs/number3"},
+        "wxyz": {"$ref": "#/$defs/quaternion"},
+        "scale_xyz": {"$ref": "#/$defs/number3"}
+      }
+    },
+    "framePose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xyz", "wxyz"],
+      "properties": {
+        "xyz": {"$ref": "#/$defs/number3"},
+        "wxyz": {"$ref": "#/$defs/quaternion"}
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "end_effector", "capabilities"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "end_effector": {"type": "string", "minLength": 1},
+        "capabilities": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "object": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_object_id",
+        "role",
+        "source_prim_path",
+        "runtime_uid",
+        "state_prim_path",
+        "initial_pose",
+        "named_frames"
+      ],
+      "properties": {
+        "scenario_object_id": {"$ref": "#/$defs/usdIdentifier"},
+        "role": {"type": "string", "minLength": 1},
+        "source_prim_path": {"type": "string", "pattern": "^/"},
+        "runtime_uid": {"type": "string", "minLength": 1},
+        "state_prim_path": {"type": "string", "pattern": "^/World/"},
+        "initial_pose": {"$ref": "#/$defs/pose"},
+        "named_frames": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^.]+$"
+          },
+          "additionalProperties": {"$ref": "#/$defs/framePose"}
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "skill", "actors", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "skill": {"type": "string", "minLength": 1},
+        "actors": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"}
+        },
+        "parameters": {"type": "object"},
+        "depends_on": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"}
+        }
+      }
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "actor", "object", "from_step", "through_step"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"type": "string", "minLength": 1},
+        "actor": {"$ref": "#/$defs/nonEmptyString"},
+        "object": {"$ref": "#/$defs/nonEmptyString"},
+        "from_step": {"$ref": "#/$defs/nonEmptyString"},
+        "through_step": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    },
+    "predicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"type": "string", "minLength": 1},
+        "sequence_index": {"type": "integer", "minimum": 0},
+        "parameters": {"type": "object"}
+      }
+    },
+    "success": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operator", "claim_scope", "predicates"],
+      "properties": {
+        "operator": {"enum": ["all", "any"]},
+        "claim_scope": {"type": "string", "minLength": 1},
+        "predicates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/predicate"}
+        }
+      }
+    }
+  }
+}

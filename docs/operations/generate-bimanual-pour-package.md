@@ -64,6 +64,9 @@ The command replaces the managed output directory deterministically and produces
 - the portable package at `outputs/scientific_workbench_bimanual_pour`;
 - a GenManip collected package below
   `outputs/scientific_workbench_bimanual_pour/adapters/ebench/genmanip`.
+- an embedded, transport-only Scenario Forge runtime contract under the episode
+  metadata `task_data`, carrying runtime object IDs, state prim paths, named
+  frames, actor bindings, steps, invariants, and success semantics;
 - a post-reset, pre-action tabletop close-up and scene overview below
   `adapters/ebench/genmanip/evidence/initial_scene/`, with their render manifest,
   runtime log, hashes, and visual-ready gate.
@@ -102,6 +105,12 @@ intent. This command performs no preview render and no oracle rollout; use the
 task-specific script for the former and EOS/GenManip for the latter. See
 [Scenario Source Bindings](../design/scenario-source-bindings.md) for the complete
 binding shape.
+
+The embedded runtime contract is data transport, not a success result. Current
+GenManip does not automatically pass it into the metrics manager, and the selected
+vessels still fail the rigid-root identity preflight. Do not label a package
+frame-metric-ready until those assets, an explicit frame predicate, and the
+downstream metric capability are all present.
 
 Do not install the package below `$GENMANIP_SOURCE/saved/assets`. In the shared
 deployment that path is a symlink into the shared EBench asset directory, so a
