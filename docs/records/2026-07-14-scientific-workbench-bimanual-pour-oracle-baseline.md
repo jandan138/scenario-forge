@@ -5,7 +5,7 @@
 The current `scientific_workbench_bimanual_pour` static package is frozen by its
 complete regular-file tree digest before the downstream five-stage oracle run. The
 machine-readable record is
-[`package_baseline.yaml`](evidence/2026-07-14-scientific-workbench-bimanual-pour-oracle-baseline/package_baseline.yaml).
+[`package_baseline.yaml`](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-14-scientific-workbench-bimanual-pour-oracle-baseline/package_baseline.yaml).
 
 The package has 198 files and 120,066,353 bytes of regular-file content. Its
 path-sorted `sha256sum` stream, including `./` relative paths, hashes to:

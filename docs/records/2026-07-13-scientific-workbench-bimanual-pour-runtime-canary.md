@@ -25,7 +25,7 @@ integration for the frozen package tree. It does not establish that the robot
 performed the five-step pour task.
 
 The compact evidence record is
-[`runtime_canary.yaml`](evidence/2026-07-13-scientific-workbench-bimanual-pour-canary/runtime_canary.yaml).
+[`runtime_canary.yaml`](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-13-scientific-workbench-bimanual-pour-canary/runtime_canary.yaml).
 
 ## Frozen package and initial images
 

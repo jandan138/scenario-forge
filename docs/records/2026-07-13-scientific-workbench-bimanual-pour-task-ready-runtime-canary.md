@@ -18,7 +18,7 @@ private exact-package copy
 This is the current r5 runtime record. The earlier r4 record remains historical
 evidence for the uncurated full-context scene; its package and image hashes must not
 be reused for this task-ready package. The compact machine-readable record is
-[`runtime_canary.yaml`](evidence/2026-07-13-scientific-workbench-bimanual-pour-task-ready-canary/runtime_canary.yaml).
+[`runtime_canary.yaml`](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-13-scientific-workbench-bimanual-pour-task-ready-canary/runtime_canary.yaml).
 
 ## 2026-07-14 runtime clarification
 

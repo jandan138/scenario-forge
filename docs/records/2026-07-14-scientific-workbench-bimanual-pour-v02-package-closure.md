@@ -16,7 +16,7 @@ stable hold, liquid transfer, task success, model score, or leaderboard result i
 claimed.
 
 The compact machine-readable summary is
-[`evidence.yaml`](evidence/2026-07-14-scientific-workbench-bimanual-pour-v02-integration/evidence.yaml).
+[`evidence.yaml`](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-14-scientific-workbench-bimanual-pour-v02-integration/evidence.yaml).
 
 ## Frozen producers and sources
 
