@@ -51,9 +51,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--vessel-revision",
+        "--source-vessel-revision",
         required=True,
-        help="ConvertAsset revision shared by the source and target vessel deliveries.",
+        help="ConvertAsset producer revision for the source-vessel delivery.",
+    )
+    parser.add_argument(
+        "--target-vessel-revision",
+        required=True,
+        help="ConvertAsset producer revision for the target-vessel delivery.",
     )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
@@ -110,7 +115,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.source_vessel_manifest,
         args.source_usd,
         expected_scope_prims=(SOURCE_VESSEL_SCOPE,),
-        producer_revision=args.vessel_revision,
+        producer_revision=args.source_vessel_revision,
         usage="rigid_object",
     )
     target_vessel_handoff = load_convert_asset_package_handoff(
@@ -118,7 +123,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.target_vessel_manifest,
         args.source_usd,
         expected_scope_prims=(TARGET_VESSEL_SCOPE,),
-        producer_revision=args.vessel_revision,
+        producer_revision=args.target_vessel_revision,
         usage="rigid_object",
     )
     object_asset_ids = {item.object_id: item.asset_id for item in spec.objects}

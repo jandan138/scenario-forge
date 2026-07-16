@@ -113,7 +113,8 @@ python scripts/generate_scientific_workbench_bimanual_pour.py \
   --target-vessel-package /path/to/graduated_cylinder_03/package \
   --target-vessel-manifest /path/to/graduated_cylinder_03/manifest.json \
   --dryingbox-revision <dryingbox-convertasset-git-sha> \
-  --vessel-revision <vessel-convertasset-git-sha> \
+  --source-vessel-revision <source-vessel-convertasset-git-sha> \
+  --target-vessel-revision <target-vessel-convertasset-git-sha> \
   --out outputs/scientific_workbench_bimanual_pour \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$GENMANIP_ROOT"

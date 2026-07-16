@@ -29,29 +29,71 @@ GENMANIP_SOURCE=/cpfs/shared/simulation/zhuzihou/dev/GenManip
 CUROBO_SRC=/cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src
 CONVERT_ASSET_ROOT=/cpfs/user/zhuzihou/dev/ConvertAsset
 DRYINGBOX_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-dryingbox-dynamic-physics-profile"
-VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-labutopia-vessel-interaction-profile"
+SOURCE_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-labutopia-vessel-interaction-profile/conical_bottle03"
+TARGET_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-15-aan-graduated-cylinder-r3-grasp-section/graduated_cylinder_03"
 DRYINGBOX_REVISION=324ce6e6d4395ccfda1e59e5ae89de9389cdf225
-VESSEL_REVISION="$(git -C "$CONVERT_ASSET_ROOT" rev-parse HEAD)"
+SOURCE_VESSEL_REVISION=ba4ac8ccbf3c32f257abdbb68a554a74a90003f1
+TARGET_VESSEL_REVISION=4bb541161a652cc4e5dd63253adffba018f17137
+GENMANIP_REVISION=014bf5435a373df9b3bcf5a69aa7fe22d17f613d
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+CANONICAL="$PWD/outputs/scientific_workbench_bimanual_pour"
+CANDIDATE="$PWD/outputs/.scientific_workbench_bimanual_pour.candidate-$RUN_ID"
+BACKUP="$PWD/outputs/.scientific_workbench_bimanual_pour.backup-$RUN_ID"
+CANARY_ROOT="${TMPDIR:-/tmp}/scenario-forge-genmanip-canary-$RUN_ID"
+BASE_ASSETS="$(readlink -f "$GENMANIP_SOURCE/saved/assets")"
+
+test ! -e "$CANDIDATE"
+test ! -e "$BACKUP"
+test ! -e "$CANARY_ROOT"
+git clone --no-hardlinks "$GENMANIP_SOURCE" "$CANARY_ROOT"
+git -C "$CANARY_ROOT" checkout --detach "$GENMANIP_REVISION"
+test -z "$(git -C "$CANARY_ROOT" status --porcelain)"
+mkdir -p "$CANARY_ROOT/saved/assets"
+for name in mesh_data miscs object_usds robot_usds scene_usds; do
+  ln -s "$BASE_ASSETS/$name" "$CANARY_ROOT/saved/assets/$name"
+done
+
+RUNTIME_STATE="$CANARY_ROOT/.scenario-forge-runtime"
+mkdir -p "$RUNTIME_STATE/home" "$RUNTIME_STATE/cache" "$RUNTIME_STATE/tmp" \
+  "$RUNTIME_STATE/pycache"
 
 export PYTHONPATH="$PWD/src:$CUROBO_SRC"
 export LD_LIBRARY_PATH="/isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/nvidia/cuda_runtime/lib:$ISAAC_ENV/lib/python3.10/site-packages/torch/lib:${LD_LIBRARY_PATH:-}"
 export ACCEPT_EULA=Y OMNI_KIT_ACCEPT_EULA=YES PYTHONNOUSERSITE=1
+export HOME="$RUNTIME_STATE/home"
+export XDG_CACHE_HOME="$RUNTIME_STATE/cache"
+export TMPDIR="$RUNTIME_STATE/tmp"
+export PYTHONPYCACHEPREFIX="$RUNTIME_STATE/pycache"
 
 "$TEST_ENV/bin/python" scripts/generate_scientific_workbench_bimanual_pour.py \
   --source-usd "$LABUTOPIA_ROOT/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd" \
   --source-uri "LabUtopia:lab_001_localized_20260707" \
   --convert-asset-package "$DRYINGBOX_DELIVERY/package" \
   --convert-asset-manifest "$DRYINGBOX_DELIVERY/manifest.json" \
-  --source-vessel-package "$VESSEL_DELIVERY/conical_bottle03/package" \
-  --source-vessel-manifest "$VESSEL_DELIVERY/conical_bottle03/manifest.json" \
-  --target-vessel-package "$VESSEL_DELIVERY/graduated_cylinder_03/package" \
-  --target-vessel-manifest "$VESSEL_DELIVERY/graduated_cylinder_03/manifest.json" \
+  --source-vessel-package "$SOURCE_VESSEL_DELIVERY/package" \
+  --source-vessel-manifest "$SOURCE_VESSEL_DELIVERY/manifest.json" \
+  --target-vessel-package "$TARGET_VESSEL_DELIVERY/package" \
+  --target-vessel-manifest "$TARGET_VESSEL_DELIVERY/manifest.json" \
   --dryingbox-revision "$DRYINGBOX_REVISION" \
-  --vessel-revision "$VESSEL_REVISION" \
-  --out outputs/scientific_workbench_bimanual_pour \
+  --source-vessel-revision "$SOURCE_VESSEL_REVISION" \
+  --target-vessel-revision "$TARGET_VESSEL_REVISION" \
+  --out "$CANDIDATE" \
   --isaac-python "$ISAAC_ENV/bin/python" \
-  --genmanip-root "$GENMANIP_SOURCE"
+  --genmanip-root "$CANARY_ROOT"
+
+PYTHONPATH=src "$TEST_ENV/bin/python" -m scenario_forge.cli \
+  package check "$CANDIDATE" --require-asset-lock
+"$TEST_ENV/bin/python" -c \
+  'import sys; from scenario_forge.adapters.ebench.preview import validate_genmanip_preview_evidence; validate_genmanip_preview_evidence(sys.argv[1])' \
+  "$CANDIDATE/adapters/ebench/genmanip"
 ```
+
+The source and target vessels intentionally carry independent producer revisions:
+the conical bottle remains bound to its qualified r1 delivery, while the graduated
+cylinder consumes the source-bound r3 interaction package. The producer revisions
+above are Git commits; the r1/r3 interaction revisions remain separate manifest
+metadata. Do not replace these commits with the current ConvertAsset `HEAD` or with
+labels such as `r3-final-uncommitted-*`.
 
 The inbound adapter requires the delivery manifest to match the package's embedded
 manifest, binds it to the exact `lab_001.usd` source hash, and validates the
@@ -66,11 +108,12 @@ parameters, point these package and manifest arguments (and their producer revis
 provenance) at the new delivery. Do not edit the scenario to author local physics,
 and do not modify the original LabUtopia USD.
 
-The command replaces the managed output directory deterministically and produces:
+The command builds a fresh candidate without touching the current canonical package.
+It produces:
 
-- the portable package at `outputs/scientific_workbench_bimanual_pour`;
+- a portable package at the unique `$CANDIDATE` path;
 - a GenManip collected package below
-  `outputs/scientific_workbench_bimanual_pour/adapters/ebench/genmanip`.
+  `$CANDIDATE/adapters/ebench/genmanip`;
 - an embedded, transport-only Scenario Forge runtime contract under the episode
   metadata `task_data`, carrying runtime object IDs, state prim paths, named
   frames, actor bindings, steps, invariants, and success semantics;
@@ -83,6 +126,31 @@ non-redistributable until its dependency distribution policy is fully cleared. T
 rendered images and package remain local build artifacts and must not be committed;
 a fresh clone must run the command above to recreate them. Only compact hashes and
 bounded review/runtime records are committed.
+
+Perform the clean-room visual review against the two candidate PNGs before
+promotion. During promotion, stop concurrent consumers because directory rename
+does not provide a zero-window exchange between two nonempty directories. Keep the
+old canonical as a backup until the downstream runtime accepts the new digest:
+
+```bash
+test -d "$CANONICAL"
+test -d "$CANDIDATE"
+test ! -e "$BACKUP"
+mv "$CANONICAL" "$BACKUP"
+if ! mv "$CANDIDATE" "$CANONICAL"; then
+  mv "$BACKUP" "$CANONICAL"
+  exit 1
+fi
+if ! PYTHONPATH=src "$TEST_ENV/bin/python" -m scenario_forge.cli \
+  package check "$CANONICAL" --require-asset-lock; then
+  mv "$CANONICAL" "${CANDIDATE}.failed-after-promotion"
+  mv "$BACKUP" "$CANONICAL"
+  exit 1
+fi
+"$TEST_ENV/bin/python" -c \
+  'import sys; from scenario_forge.adapters.ebench.preview import validate_genmanip_preview_evidence; validate_genmanip_preview_evidence(sys.argv[1])' \
+  "$CANONICAL/adapters/ebench/genmanip"
+```
 
 Rendering is strict by default: a renderer failure, timeout, missing/stale image,
 source-bundle or request mismatch, runtime-log or image hash mismatch, missing
@@ -121,23 +189,16 @@ interaction qualification and the named frames match exactly.
 Do not install the package below `$GENMANIP_SOURCE/saved/assets`. In the shared
 deployment that path is a symlink into the shared EBench asset directory, so a
 seemingly local overwrite would mutate shared data. Stage runtime inputs in a new
-private workspace instead. The following example exports the clean GenManip `HEAD`,
-links the base-asset directories for read-only use, and copies this package into a
-real private `collected_packages` directory:
+private workspace instead. The generation block already created a clean, detached
+GenManip checkout at the qualified revision and linked the base-asset directories
+for read-only use. Copy the promoted package into a real private
+`collected_packages` directory:
 
 ```bash
 PACKAGE_ID=scientific_workbench_bimanual_pour
-COLLECTED="$PWD/outputs/scientific_workbench_bimanual_pour/adapters/ebench/genmanip"
-CANARY_ROOT="${TMPDIR:-/tmp}/scenario-forge-genmanip-canary-$(date -u +%Y%m%dT%H%M%SZ)"
-BASE_ASSETS="$(readlink -f "$GENMANIP_SOURCE/saved/assets")"
+COLLECTED="$CANONICAL/adapters/ebench/genmanip"
 
-test ! -e "$CANARY_ROOT"
-mkdir -p "$CANARY_ROOT"
-git -C "$GENMANIP_SOURCE" archive HEAD | tar -x -C "$CANARY_ROOT"
 mkdir -p "$CANARY_ROOT/saved/assets/collected_packages"
-for name in mesh_data miscs object_usds robot_usds scene_usds; do
-  ln -s "$BASE_ASSETS/$name" "$CANARY_ROOT/saved/assets/$name"
-done
 
 target="$CANARY_ROOT/saved/assets/collected_packages/$PACKAGE_ID"
 test ! -e "$target"

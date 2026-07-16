@@ -33,7 +33,13 @@ _TASK_READY_INACTIVE_PRIMS = [
 ]
 
 
-def _convert_asset_args(root: Path, source_usd: Path) -> list[str]:
+def _convert_asset_args(
+    root: Path,
+    source_usd: Path,
+    *,
+    source_vessel_revision: str = "source-vessel-profile-r1",
+    target_vessel_revision: str = "target-vessel-profile-r3",
+) -> list[str]:
     _, dryingbox_package, dryingbox_manifest, _ = _write_source_bound_handoff(
         root / "dryingbox_handoff",
         source_usd=source_usd,
@@ -66,8 +72,10 @@ def _convert_asset_args(root: Path, source_usd: Path) -> list[str]:
         str(target_manifest),
         "--dryingbox-revision",
         "324ce6e6d4395ccfda1e59e5ae89de9389cdf225",
-        "--vessel-revision",
-        "vessel-profile-r2",
+        "--source-vessel-revision",
+        source_vessel_revision,
+        "--target-vessel-revision",
+        target_vessel_revision,
     ]
 
 
@@ -173,11 +181,40 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert upstream["producer"] == "ConvertAsset"
     assert upstream["revision"] == "324ce6e6d4395ccfda1e59e5ae89de9389cdf225"
     assert upstream["metadata"]["quality_tier"] == "provisional_geometry"
-    for asset_id in (
-        "scientific_workbench_conical_bottle03_dynamic",
-        "scientific_workbench_graduated_cylinder_03_dynamic",
-    ):
-        assert upstream_by_asset[asset_id]["revision"] == "vessel-profile-r2"
+    expected_vessel_revisions = {
+        "scientific_workbench_conical_bottle03_dynamic": "source-vessel-profile-r1",
+        "scientific_workbench_graduated_cylinder_03_dynamic": "target-vessel-profile-r3",
+    }
+    assert {
+        asset_id: upstream_by_asset[asset_id]["revision"]
+        for asset_id in expected_vessel_revisions
+    } == expected_vessel_revisions
+
+    asset_manifest = yaml.safe_load(
+        (output / "assets/asset_manifest.yaml").read_text(encoding="utf-8")
+    )
+    asset_manifest_upstream = {
+        item["asset_id"]: item["upstream_package"]["revision"]
+        for item in asset_manifest["assets"]
+        if "upstream_package" in item
+    }
+    assert {
+        asset_id: asset_manifest_upstream[asset_id]
+        for asset_id in expected_vessel_revisions
+    } == expected_vessel_revisions
+
+    collected_manifest = json.loads(
+        (collected / "package_manifest.json").read_text(encoding="utf-8")
+    )
+    collected_upstream = {
+        item["asset_id"]: item["upstream_package"]["revision"]
+        for item in collected_manifest["source_assets"]
+        if "upstream_package" in item
+    }
+    assert {
+        asset_id: collected_upstream[asset_id]
+        for asset_id in expected_vessel_revisions
+    } == expected_vessel_revisions
 
     task_config = yaml.safe_load(
         (collected / "tasks/config.yaml").read_text(encoding="utf-8")
@@ -232,6 +269,12 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     for object_id in ("obj_conical_bottle03", "obj_graduated_cylinder_03"):
         assert initial_layout[object_id]["add_colliders"] is False
         assert initial_layout[object_id]["add_rigid_body"] is False
+        assert contract_objects[object_id]["physics_authoring"] == {
+            "local_colliders": False,
+            "local_mass": False,
+            "local_rigid_body": False,
+            "owner": "convert_asset_package",
+        }
     actors = {item["id"]: item for item in contract["robot"]["actors"]}
     assert actors["operating_arm"]["end_effector"] == "left"
     assert actors["auxiliary_arm"]["end_effector"] == "right"
@@ -247,6 +290,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert 'over "CylinderLight"' in scene_text
     assert 'over "GroundPlane"' in scene_text
     for local_physics_token in (
+        "__aan_collision_proxy",
         "physics:mass",
         "physics:diagonalInertia",
         "physics:centerOfMass",
@@ -439,6 +483,27 @@ def test_runbook_stages_canary_in_a_private_genmanip_workspace() -> None:
     assert "LABUTOPIA_ROOT=" in runbook
     assert "GENMANIP_SOURCE=" in runbook
     assert "CANARY_ROOT=" in runbook
-    assert 'git -C "$GENMANIP_SOURCE" archive HEAD' in runbook
+    assert "CANDIDATE=" in runbook
+    assert "CANONICAL=" in runbook
+    assert "BACKUP=" in runbook
+    assert '--out "$CANDIDATE"' in runbook
+    assert 'mv "$CANDIDATE" "$CANONICAL"' in runbook
+    assert 'package check "$CANDIDATE" --require-asset-lock' in runbook
+    assert 'git clone --no-hardlinks "$GENMANIP_SOURCE" "$CANARY_ROOT"' in runbook
+    assert 'git -C "$CANARY_ROOT" checkout --detach "$GENMANIP_REVISION"' in runbook
+    assert "GENMANIP_REVISION=014bf5435a373df9b3bcf5a69aa7fe22d17f613d" in runbook
+    assert 'git -C "$GENMANIP_SOURCE" archive HEAD' not in runbook
     assert 'rm -rf "$target"' not in runbook
     assert "shared EBench asset directory" in runbook
+    assert "--source-vessel-revision" in runbook
+    assert "--target-vessel-revision" in runbook
+    assert (
+        "SOURCE_VESSEL_REVISION=ba4ac8ccbf3c32f257abdbb68a554a74a90003f1"
+        in runbook
+    )
+    assert (
+        "TARGET_VESSEL_REVISION=4bb541161a652cc4e5dd63253adffba018f17137"
+        in runbook
+    )
+    assert "2026-07-15-aan-graduated-cylinder-r3-grasp-section" in runbook
+    assert 'VESSEL_REVISION="$(git -C "$CONVERT_ASSET_ROOT" rev-parse HEAD)"' not in runbook
