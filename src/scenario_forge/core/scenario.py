@@ -11,10 +11,18 @@ JsonValue: TypeAlias = (
 )
 
 _PACKAGE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
-_EXACT_BIMANUAL_PREDICATE_TYPES = (
+_V02_EXACT_BIMANUAL_PREDICATE_TYPES = (
     "named_frames_relative_pose_reached",
     "named_frame_tilt_angle_reached",
     "object_returned_to_post_warmup_pose",
+)
+_V03_EXACT_BIMANUAL_PREDICATE_TYPES = (
+    "named_frames_relative_pose_reached",
+    "named_frames_relative_pose_reached",
+    "object_returned_to_post_warmup_pose",
+)
+_EXACT_BIMANUAL_PREDICATE_TYPES = frozenset(
+    (*_V02_EXACT_BIMANUAL_PREDICATE_TYPES, *_V03_EXACT_BIMANUAL_PREDICATE_TYPES)
 )
 
 
@@ -437,7 +445,11 @@ class ScenarioSpec:
     def from_mapping(cls, value: object) -> ScenarioSpec:
         data = _mapping(value, "scenario spec")
         schema_version = data.get("schema_version")
-        if schema_version not in {"scenario-spec/v0.1", "scenario-spec/v0.2"}:
+        if schema_version not in {
+            "scenario-spec/v0.1",
+            "scenario-spec/v0.2",
+            "scenario-spec/v0.3",
+        }:
             raise ValueError("unsupported scenario spec schema_version")
         raw_objects = data.get("objects")
         raw_steps = data.get("steps")
@@ -614,14 +626,24 @@ def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:
         if predicate.predicate_type in _EXACT_BIMANUAL_PREDICATE_TYPES
     ]
     if not exact:
+        if spec.schema_version == "scenario-spec/v0.3":
+            raise ValueError(
+                "scenario-spec/v0.3 requires the exact ordered bimanual success contract"
+            )
         return
-    if spec.schema_version != "scenario-spec/v0.2":
-        raise ValueError("explicit bimanual predicates require scenario-spec/v0.2")
+    if spec.schema_version == "scenario-spec/v0.2":
+        expected_types = _V02_EXACT_BIMANUAL_PREDICATE_TYPES
+    elif spec.schema_version == "scenario-spec/v0.3":
+        expected_types = _V03_EXACT_BIMANUAL_PREDICATE_TYPES
+    else:
+        raise ValueError(
+            "explicit bimanual predicates require scenario-spec/v0.2 or v0.3"
+        )
     if spec.success.operator != "all":
         raise ValueError("explicit bimanual predicates require success.operator 'all'")
     if len(exact) != len(spec.success.predicates) or [
         predicate.predicate_type for predicate in exact
-    ] != list(_EXACT_BIMANUAL_PREDICATE_TYPES):
+    ] != list(expected_types):
         raise ValueError(
             "explicit bimanual success list order must be align, tilt, then return"
         )
@@ -630,43 +652,56 @@ def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:
             "explicit bimanual success predicate sequence_index values must be 0, 1, 2"
         )
     for predicate in exact:
-        _validate_explicit_predicate(predicate)
+        _validate_explicit_predicate(predicate, schema_version=spec.schema_version)
+    if spec.schema_version == "scenario-spec/v0.3":
+        _validate_v03_bimanual_relationships(exact)
 
 
-def _validate_explicit_predicate(predicate: SuccessPredicateSpec) -> None:
+def _validate_explicit_predicate(
+    predicate: SuccessPredicateSpec,
+    *,
+    schema_version: str,
+) -> None:
     parameters = predicate.parameters
     field = f"success predicate {predicate.predicate_id}.parameters"
     if predicate.predicate_type == "named_frames_relative_pose_reached":
-        _require_exact_fields(
-            parameters,
-            {
-                "source_frame",
-                "target_frame",
-                "horizontal_error_max_m",
-                "signed_height_range_m",
-                "source_normal_axis",
-                "target_normal_axis",
-                "normal_angle_max_deg",
-                "bounds",
-                "diagnostic_compatibility_projection",
-            },
-            field,
-        )
-        _non_negative_finite_number(
-            parameters.get("horizontal_error_max_m"),
-            f"{field}.horizontal_error_max_m",
-        )
-        _ordered_finite_range(
-            parameters.get("signed_height_range_m"),
-            f"{field}.signed_height_range_m",
-        )
+        if schema_version == "scenario-spec/v0.2":
+            _require_exact_fields(
+                parameters,
+                {
+                    "source_frame",
+                    "target_frame",
+                    "horizontal_error_max_m",
+                    "signed_height_range_m",
+                    "source_normal_axis",
+                    "target_normal_axis",
+                    "normal_angle_max_deg",
+                    "bounds",
+                    "diagnostic_compatibility_projection",
+                },
+                field,
+            )
+            _non_negative_finite_number(
+                parameters.get("horizontal_error_max_m"),
+                f"{field}.horizontal_error_max_m",
+            )
+            _ordered_finite_range(
+                parameters.get("signed_height_range_m"),
+                f"{field}.signed_height_range_m",
+            )
+            _bounded_angle(
+                parameters.get("normal_angle_max_deg"),
+                f"{field}.normal_angle_max_deg",
+            )
+        else:
+            _validate_v03_relative_pose_parameters(parameters, field)
         _require_value(parameters.get("source_normal_axis"), "z", f"{field}.source_normal_axis")
         _require_value(parameters.get("target_normal_axis"), "z", f"{field}.target_normal_axis")
-        _bounded_angle(
-            parameters.get("normal_angle_max_deg"),
-            f"{field}.normal_angle_max_deg",
-        )
     elif predicate.predicate_type == "named_frame_tilt_angle_reached":
+        if schema_version != "scenario-spec/v0.2":
+            raise ValueError(
+                "named_frame_tilt_angle_reached is only valid in scenario-spec/v0.2"
+            )
         _require_exact_fields(
             parameters,
             {
@@ -710,6 +745,138 @@ def _validate_explicit_predicate(predicate: SuccessPredicateSpec) -> None:
         parameters.get("diagnostic_compatibility_projection"),
         f"{field}.diagnostic_compatibility_projection",
     )
+
+
+def _validate_v03_relative_pose_parameters(
+    parameters: Mapping[str, object],
+    field: str,
+) -> None:
+    _require_exact_fields(
+        parameters,
+        {
+            "source_frame",
+            "target_frame",
+            "target_frame_from_source_frame_nominal_pose",
+            "source_origin_in_target_frame_range_m",
+            "source_normal_axis",
+            "target_normal_axis",
+            "source_normal_polar_angle_range_deg",
+            "source_normal_azimuth_range_deg",
+            "bounds",
+            "diagnostic_compatibility_projection",
+        },
+        field,
+    )
+    nominal_mapping = _mapping(
+        parameters.get("target_frame_from_source_frame_nominal_pose"),
+        f"{field}.target_frame_from_source_frame_nominal_pose",
+    )
+    _require_exact_fields(
+        nominal_mapping,
+        {"xyz", "wxyz"},
+        f"{field}.target_frame_from_source_frame_nominal_pose",
+    )
+    nominal = PoseSpec.from_mapping(
+        nominal_mapping,
+        f"{field}.target_frame_from_source_frame_nominal_pose",
+    )
+    translation_ranges = _mapping(
+        parameters.get("source_origin_in_target_frame_range_m"),
+        f"{field}.source_origin_in_target_frame_range_m",
+    )
+    _require_exact_fields(
+        translation_ranges,
+        {"x", "y", "z"},
+        f"{field}.source_origin_in_target_frame_range_m",
+    )
+    ordered_translation_ranges = tuple(
+        _ordered_finite_range(
+            translation_ranges.get(axis),
+            f"{field}.source_origin_in_target_frame_range_m.{axis}",
+        )
+        for axis in ("x", "y", "z")
+    )
+    polar_range = _ordered_finite_range(
+        parameters.get("source_normal_polar_angle_range_deg"),
+        f"{field}.source_normal_polar_angle_range_deg",
+    )
+    if polar_range[0] < 0.0 or polar_range[1] > 180.0:
+        raise ValueError(
+            f"{field}.source_normal_polar_angle_range_deg must remain within [0, 180]"
+        )
+    azimuth_range = _ordered_finite_range(
+        parameters.get("source_normal_azimuth_range_deg"),
+        f"{field}.source_normal_azimuth_range_deg",
+    )
+    if azimuth_range[0] < -180.0 or azimuth_range[1] > 180.0:
+        raise ValueError(
+            f"{field}.source_normal_azimuth_range_deg must remain within [-180, 180]"
+        )
+    for axis, value, bounds in zip(
+        ("x", "y", "z"),
+        nominal.xyz,
+        ordered_translation_ranges,
+    ):
+        _require_inside(
+            value,
+            bounds,
+            f"{field} nominal {axis} translation",
+        )
+    normal = _rotate_local_z_by_quaternion(nominal.wxyz)
+    horizontal_norm = math.hypot(normal[0], normal[1])
+    if horizontal_norm <= 1e-9:
+        raise ValueError(
+            f"{field} nominal source normal must have a defined target-frame azimuth"
+        )
+    polar = math.degrees(math.atan2(horizontal_norm, normal[2]))
+    azimuth = math.degrees(math.atan2(normal[1], normal[0]))
+    _require_inside(
+        polar,
+        polar_range,
+        f"{field} nominal source-normal polar angle",
+    )
+    _require_inside(
+        azimuth,
+        azimuth_range,
+        f"{field} nominal source-normal azimuth",
+    )
+
+
+def _validate_v03_bimanual_relationships(
+    predicates: list[SuccessPredicateSpec],
+) -> None:
+    pre_pour = predicates[0].parameters
+    pour = predicates[1].parameters
+    if (
+        pre_pour.get("source_frame") != pour.get("source_frame")
+        or pre_pour.get("target_frame") != pour.get("target_frame")
+    ):
+        raise ValueError("v0.3 pre-pour and pour predicates must use the same frames")
+    source_frame = _string(pre_pour.get("source_frame"), "v0.3 source_frame")
+    source_object_id = source_frame.rpartition(".")[0]
+    return_object = predicates[2].parameters.get("object")
+    if return_object != source_object_id:
+        raise ValueError("v0.3 return object must match the source frame object")
+
+
+def _rotate_local_z_by_quaternion(
+    wxyz: tuple[float, float, float, float],
+) -> tuple[float, float, float]:
+    w, x, y, z = wxyz
+    return (
+        2.0 * (x * z + w * y),
+        2.0 * (y * z - w * x),
+        1.0 - 2.0 * (x * x + y * y),
+    )
+
+
+def _require_inside(
+    value: float,
+    bounds: tuple[float, float],
+    field: str,
+) -> None:
+    if value < bounds[0] or value > bounds[1]:
+        raise ValueError(f"{field} must remain inside its success range")
 
 
 def _validate_diagnostic_projection(value: object, field: str) -> None:

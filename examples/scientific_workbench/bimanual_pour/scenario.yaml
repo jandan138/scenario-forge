@@ -1,4 +1,4 @@
-schema_version: scenario-spec/v0.2
+schema_version: scenario-spec/v0.3
 scenario_id: scientific_workbench_bimanual_pour
 domain: scientific_workbench
 task_family: bimanual_pour
@@ -100,7 +100,7 @@ steps:
     actors: [operating_arm]
     parameters:
       object: obj_conical_bottle03
-      min_tilt_deg: 40.0
+      min_tilt_deg: 70.0
     depends_on: [align_openings]
   - id: place_source
     skill: place_on_surface
@@ -119,17 +119,23 @@ success:
   operator: all
   claim_scope: kinematic_proxy
   predicates:
-    - id: openings_aligned
+    - id: opening_prepour_pose_reached
       type: named_frames_relative_pose_reached
       sequence_index: 0
       parameters:
         source_frame: obj_conical_bottle03.opening
         target_frame: obj_graduated_cylinder_03.opening
-        horizontal_error_max_m: 0.02
-        signed_height_range_m: [0.02, 0.05]
+        target_frame_from_source_frame_nominal_pose:
+          xyz: [0.0, 0.0175, 0.0425]
+          wxyz: [0.8746197071393957, 0.48480962024633706, 0.0, 0.0]
+        source_origin_in_target_frame_range_m:
+          x: [-0.005, 0.005]
+          y: [0.015, 0.02]
+          z: [0.035, 0.05]
         source_normal_axis: z
         target_normal_axis: z
-        normal_angle_max_deg: 10.0
+        source_normal_polar_angle_range_deg: [55.0, 60.0]
+        source_normal_azimuth_range_deg: [-95.0, -85.0]
         bounds: inclusive
         diagnostic_compatibility_projection:
           type: relative_pose_reached
@@ -140,13 +146,23 @@ success:
               x: [-0.08, 0.08]
               y: [-0.08, 0.08]
               z: [0.10, 0.30]
-    - id: source_tilted
-      type: named_frame_tilt_angle_reached
+    - id: opening_pour_pose_reached
+      type: named_frames_relative_pose_reached
       sequence_index: 1
       parameters:
-        object_frame: obj_conical_bottle03.opening
-        world_axis: z
-        angle_range_deg: [40.0, 80.0]
+        source_frame: obj_conical_bottle03.opening
+        target_frame: obj_graduated_cylinder_03.opening
+        target_frame_from_source_frame_nominal_pose:
+          xyz: [0.0, 0.0175, 0.0425]
+          wxyz: [0.7933533402912352, 0.6087614290087207, 0.0, 0.0]
+        source_origin_in_target_frame_range_m:
+          x: [-0.005, 0.005]
+          y: [0.015, 0.02]
+          z: [0.035, 0.05]
+        source_normal_axis: z
+        target_normal_axis: z
+        source_normal_polar_angle_range_deg: [70.0, 80.0]
+        source_normal_azimuth_range_deg: [-95.0, -85.0]
         bounds: inclusive
         diagnostic_compatibility_projection:
           type: relative_pose_reached
@@ -161,7 +177,7 @@ success:
               object_axis: y
               target_axis: y
               comparison: ">="
-              threshold_deg: 40.0
+              threshold_deg: 70.0
     - id: source_returned
       type: object_returned_to_post_warmup_pose
       sequence_index: 2

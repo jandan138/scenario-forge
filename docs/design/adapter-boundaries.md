@@ -80,7 +80,7 @@ handoff metadata in Scenario Forge manifests/provenance rather than by vendoring
 the upstream evidence tree.
 
 Scene packages can compose such a source-bound package with a base environment
-through `scenario-spec/v0.2` `scene.overlay_asset_ids`. Overlay ordering and
+through `scene.overlay_asset_ids` in `scenario-spec/v0.2` and later. Overlay ordering and
 strength are defined in
 [Scene Asset Overlays](scene-asset-overlays.md). A later calibrated profile is an
 upstream package replacement: Scenario Forge consumes the replacement

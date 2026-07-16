@@ -264,8 +264,17 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
     }
     assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.2"
+        "scenario-forge-genmanip-runtime-contract/v0.3"
     )
+    assert [predicate["sequence_index"] for predicate in contract["success"]["predicates"]] == [
+        0,
+        1,
+        2,
+    ]
+    assert [predicate["type"] for predicate in contract["success"]["predicates"][:2]] == [
+        "named_frames_relative_pose_reached",
+        "named_frames_relative_pose_reached",
+    ]
     for object_id in ("obj_conical_bottle03", "obj_graduated_cylinder_03"):
         assert initial_layout[object_id]["add_colliders"] is False
         assert initial_layout[object_id]["add_rigid_body"] is False

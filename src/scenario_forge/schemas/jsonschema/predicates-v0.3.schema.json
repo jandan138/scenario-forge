@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/predicates-v0.3.schema.json",
+  "title": "Scenario Forge Predicates v0.3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "success_predicates"],
+  "properties": {
+    "schema_version": {"const": "predicates/v0.3"},
+    "success_predicates": {
+      "type": "array",
+      "prefixItems": [
+        {"$ref": "#/$defs/namedFramesRelativePosePredicateSequence0"},
+        {"$ref": "#/$defs/namedFramesRelativePosePredicateSequence1"},
+        {"$ref": "#/$defs/postWarmupReturnPredicate"}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "vector3": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "quaternion": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "framePose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xyz", "wxyz"],
+      "properties": {
+        "xyz": {"$ref": "#/$defs/vector3"},
+        "wxyz": {"$ref": "#/$defs/quaternion"}
+      }
+    },
+    "numberRange": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "polarAngleRange": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number", "minimum": 0, "maximum": 180},
+        {"type": "number", "minimum": 0, "maximum": 180}
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "azimuthAngleRange": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number", "minimum": -180, "maximum": 180},
+        {"type": "number", "minimum": -180, "maximum": 180}
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "sourceOriginRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": {"$ref": "#/$defs/numberRange"},
+        "y": {"$ref": "#/$defs/numberRange"},
+        "z": {"$ref": "#/$defs/numberRange"}
+      }
+    },
+    "diagnosticCompatibilityProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "parameters"],
+      "properties": {
+        "type": {"enum": ["relative_pose_reached", "object_at_initial_pose"]},
+        "parameters": {"type": "object"}
+      }
+    },
+    "relativePoseParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_frame",
+        "target_frame",
+        "target_frame_from_source_frame_nominal_pose",
+        "source_origin_in_target_frame_range_m",
+        "source_normal_axis",
+        "target_normal_axis",
+        "source_normal_polar_angle_range_deg",
+        "source_normal_azimuth_range_deg",
+        "bounds",
+        "diagnostic_compatibility_projection"
+      ],
+      "properties": {
+        "source_frame": {"$ref": "#/$defs/nonEmptyString"},
+        "target_frame": {"$ref": "#/$defs/nonEmptyString"},
+        "target_frame_from_source_frame_nominal_pose": {
+          "$ref": "#/$defs/framePose"
+        },
+        "source_origin_in_target_frame_range_m": {
+          "$ref": "#/$defs/sourceOriginRange"
+        },
+        "source_normal_axis": {"const": "z"},
+        "target_normal_axis": {"const": "z"},
+        "source_normal_polar_angle_range_deg": {
+          "$ref": "#/$defs/polarAngleRange"
+        },
+        "source_normal_azimuth_range_deg": {
+          "$ref": "#/$defs/azimuthAngleRange"
+        },
+        "bounds": {"const": "inclusive"},
+        "diagnostic_compatibility_projection": {
+          "$ref": "#/$defs/diagnosticCompatibilityProjection"
+        }
+      }
+    },
+    "namedFramesRelativePosePredicateSequence0": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"const": "named_frames_relative_pose_reached"},
+        "sequence_index": {"const": 0},
+        "parameters": {"$ref": "#/$defs/relativePoseParameters"}
+      }
+    },
+    "namedFramesRelativePosePredicateSequence1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"const": "named_frames_relative_pose_reached"},
+        "sequence_index": {"const": 1},
+        "parameters": {"$ref": "#/$defs/relativePoseParameters"}
+      }
+    },
+    "postWarmupReturnPredicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"const": "object_returned_to_post_warmup_pose"},
+        "sequence_index": {"const": 2},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "object",
+            "translation_error_max_m",
+            "rotation_error_max_deg",
+            "bounds",
+            "diagnostic_compatibility_projection"
+          ],
+          "properties": {
+            "object": {"$ref": "#/$defs/nonEmptyString"},
+            "translation_error_max_m": {"type": "number", "minimum": 0},
+            "rotation_error_max_deg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 180
+            },
+            "bounds": {"const": "inclusive"},
+            "diagnostic_compatibility_projection": {
+              "$ref": "#/$defs/diagnosticCompatibilityProjection"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,6 +11,7 @@ from jsonschema import Draft202012Validator
 
 from scenario_forge.adapters.ebench.genmanip import (
     GenManipExportError,
+    _exact_success_object_ids,
     export_genmanip_collected_package,
 )
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
@@ -19,7 +20,9 @@ from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from tests.test_scenario_package_compiler import _write_source_scene
 from tests.test_scenario_spec import _scenario_mapping
+from tests.test_scenario_spec import _scenario_mapping_v03
 from tests.test_scenario_spec import _exact_bimanual_success
+from tests.test_scenario_spec import _exact_bimanual_success_v03
 from tests.test_convert_asset_adapter import _write_source_bound_handoff
 
 
@@ -33,6 +36,11 @@ _RUNTIME_CONTRACT_V02_SCHEMA = (
     Path(__file__).resolve().parents[1]
     / "src/scenario_forge/schemas/jsonschema"
     / "scenario-forge-genmanip-runtime-contract-v0.2.schema.json"
+)
+_RUNTIME_CONTRACT_V03_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "src/scenario_forge/schemas/jsonschema"
+    / "scenario-forge-genmanip-runtime-contract-v0.3.schema.json"
 )
 
 
@@ -62,8 +70,14 @@ def _build_qualified_object_package(
     *,
     exact_success: bool = True,
     source_collider_approximation: str = "sdf",
+    scenario_mapping: dict[str, object] | None = None,
+    with_overlay: bool = False,
 ) -> Path:
-    source_usd = _write_source_scene(tmp_path)
+    source_usd = (
+        _write_overlay_base_scene(tmp_path)
+        if with_overlay
+        else _write_source_scene(tmp_path)
+    )
     _, source_package_dir, source_manifest_path, _ = _write_source_bound_handoff(
         tmp_path / "source_handoff",
         source_usd=source_usd,
@@ -103,8 +117,13 @@ def _build_qualified_object_package(
         license="CC-BY-NC-4.0",
         redistributable=False,
     )
-    scenario = _scenario_mapping()
-    scenario["schema_version"] = "scenario-spec/v0.2"
+    scenario = (
+        _scenario_mapping()
+        if scenario_mapping is None
+        else scenario_mapping
+    )
+    if scenario_mapping is None:
+        scenario["schema_version"] = "scenario-spec/v0.2"
     objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
     objects[1]["asset_id"] = "qualified_source_vessel"
     objects[1]["named_frames"] = {
@@ -123,23 +142,36 @@ def _build_qualified_object_package(
     }
     objects[2].pop("metadata", None)
     scenario["objects"] = objects
-    if exact_success:
+    if exact_success and scenario_mapping is None:
         scenario["success"] = _exact_bimanual_success()
     package_root = tmp_path / "package"
+    assets = {
+        "scientific_workbench_environment": LocalUSDAssetSource(
+            asset_id="scientific_workbench_environment",
+            source_usd=source_usd,
+            role="environment",
+            license="CC-BY-NC-4.0",
+            source_uri="example://scientific-workbench-scene",
+            redistributable=False,
+        ),
+        "qualified_source_vessel": rigid_source,
+        "qualified_target_vessel": rigid_target,
+    }
+    if with_overlay:
+        overlay_usd = _write_scene_overlay(tmp_path)
+        assets[_OVERLAY_ASSET_ID] = LocalUSDAssetSource(
+            asset_id=_OVERLAY_ASSET_ID,
+            source_usd=overlay_usd,
+            role="scene_overlay",
+            license="CC-BY-NC-4.0",
+            source_uri="example://dryingbox-03-dynamic",
+            attribution=("Example source-bound dynamic package",),
+            redistributable=False,
+            root_prim_path="/World",
+        )
     compile_scenario_package(
         ScenarioSpec.from_mapping(scenario),
-        {
-            "scientific_workbench_environment": LocalUSDAssetSource(
-                asset_id="scientific_workbench_environment",
-                source_usd=source_usd,
-                role="environment",
-                license="CC-BY-NC-4.0",
-                source_uri="example://scientific-workbench-scene",
-                redistributable=False,
-            ),
-            "qualified_source_vessel": rigid_source,
-            "qualified_target_vessel": rigid_target,
-        },
+        assets,
         package_root,
     )
     return package_root
@@ -197,6 +229,20 @@ def _overlay_scenario_mapping() -> dict[str, object]:
     scenario["schema_version"] = "scenario-spec/v0.2"
     scene = dict(scenario["scene"])  # type: ignore[arg-type]
     scene["overlay_asset_ids"] = [_OVERLAY_ASSET_ID]
+    scenario["scene"] = scene
+    return scenario
+
+
+def _qualified_v03_scenario_mapping(
+    *,
+    overlay_asset_ids: tuple[str, ...] = (),
+) -> dict[str, object]:
+    scenario = _scenario_mapping_v03()
+    scene = dict(scenario["scene"])  # type: ignore[arg-type]
+    if overlay_asset_ids:
+        scene["overlay_asset_ids"] = list(overlay_asset_ids)
+    else:
+        scene.pop("overlay_asset_ids", None)
     scenario["scene"] = scene
     return scenario
 
@@ -515,6 +561,65 @@ def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags
     ]["registered_metrics"]
     schema = json.loads(_RUNTIME_CONTRACT_V02_SCHEMA.read_text(encoding="utf-8"))
     Draft202012Validator(schema).validate(contract)
+
+
+def test_v03_exact_runtime_contract_preserves_repeated_relative_predicates_in_sequence(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_qualified_object_package(
+        tmp_path,
+        scenario_mapping=_qualified_v03_scenario_mapping(),
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode_path = (
+        output
+        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+    )
+    contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
+        "scenario_forge_runtime_contract"
+    ]
+    predicates = contract["success"]["predicates"]
+
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.3"
+    )
+    assert [predicate["id"] for predicate in predicates] == [
+        "opening_prepour_pose_reached",
+        "opening_pour_pose_reached",
+        "source_returned",
+    ]
+    assert [predicate["type"] for predicate in predicates] == [
+        "named_frames_relative_pose_reached",
+        "named_frames_relative_pose_reached",
+        "object_returned_to_post_warmup_pose",
+    ]
+    assert [predicate["sequence_index"] for predicate in predicates] == [0, 1, 2]
+    assert contract["success"] == _exact_bimanual_success_v03()
+    schema = json.loads(_RUNTIME_CONTRACT_V03_SCHEMA.read_text(encoding="utf-8"))
+    Draft202012Validator(schema).validate(contract)
+
+
+def test_exact_success_object_ids_collects_frames_from_each_repeated_relative_predicate() -> None:
+    success = _exact_bimanual_success_v03()
+    predicates = success["predicates"]
+    assert isinstance(predicates, list)
+    first_parameters = predicates[0]["parameters"]
+    second_parameters = predicates[1]["parameters"]
+    returned_parameters = predicates[2]["parameters"]
+    first_parameters["source_frame"] = "prepour_source.opening"
+    first_parameters["target_frame"] = "prepour_target.opening"
+    second_parameters["source_frame"] = "pour_source.opening"
+    second_parameters["target_frame"] = "pour_target.opening"
+    returned_parameters["object"] = "returned_source"
+
+    assert _exact_success_object_ids(success) == {
+        "prepour_source",
+        "prepour_target",
+        "pour_source",
+        "pour_target",
+        "returned_source",
+    }
 
 
 def test_qualified_non_sdf_objects_do_not_force_gpu_dynamics(
@@ -852,6 +957,37 @@ def test_genmanip_export_composes_scene_overlay_before_base_without_local_physic
         "PhysicsMassAPI",
     ):
         assert locally_forbidden_physics_token not in scene_text
+
+
+def test_genmanip_export_allows_scene_overlays_for_v03_contracts(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_qualified_object_package(
+        tmp_path,
+        scenario_mapping=_qualified_v03_scenario_mapping(
+            overlay_asset_ids=(_OVERLAY_ASSET_ID,),
+        ),
+        with_overlay=True,
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    scene_path = (
+        output
+        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+    )
+    references = _room_references(scene_path)
+    episode_path = (
+        output
+        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+    )
+    contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
+        "scenario_forge_runtime_contract"
+    ]
+
+    assert len(references) == 2
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.3"
+    )
 
 
 def test_genmanip_export_rejects_overlay_missing_from_asset_manifest(

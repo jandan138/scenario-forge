@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -211,6 +212,26 @@ def _scenario_mapping_v02(
     return data
 
 
+def _scenario_mapping_v03(
+    overlay_asset_ids: object = (
+        "drying_box_03_dynamic_profile",
+        "scientific_workbench_material_overlay",
+    ),
+) -> dict[str, object]:
+    data = _scenario_mapping_v02(overlay_asset_ids)
+    data["schema_version"] = "scenario-spec/v0.3"
+    steps = [dict(step) for step in data["steps"]]  # type: ignore[index]
+    tilt = dict(steps[3])
+    tilt["parameters"] = {
+        **dict(tilt["parameters"]),
+        "min_tilt_deg": 70.0,
+    }
+    steps[3] = tilt
+    data["steps"] = steps
+    data["success"] = _exact_bimanual_success_v03()
+    return data
+
+
 def _exact_bimanual_success() -> dict[str, object]:
     return {
         "operator": "all",
@@ -272,6 +293,94 @@ def _exact_bimanual_success() -> dict[str, object]:
                     },
                 },
             },
+            {
+                "id": "source_returned",
+                "type": "object_returned_to_post_warmup_pose",
+                "sequence_index": 2,
+                "parameters": {
+                    "object": "obj_conical_bottle03",
+                    "translation_error_max_m": 0.06,
+                    "rotation_error_max_deg": 15.0,
+                    "bounds": "inclusive",
+                    "diagnostic_compatibility_projection": {
+                        "type": "object_at_initial_pose",
+                        "parameters": {
+                            "object": "obj_conical_bottle03",
+                            "xyz_tolerance": [0.06, 0.06, 0.06],
+                            "relative_axis_object": "obj_graduated_cylinder_03",
+                            "object_axis": "y",
+                            "target_axis": "y",
+                            "max_axis_error_deg": 15.0,
+                        },
+                    },
+                },
+            },
+        ],
+    }
+
+
+def _v03_relative_pose_predicate(
+    *,
+    predicate_id: str,
+    sequence_index: int,
+    nominal_angle_deg: float,
+    polar_angle_range_deg: list[float],
+) -> dict[str, object]:
+    half_angle = math.radians(nominal_angle_deg) / 2.0
+    return {
+        "id": predicate_id,
+        "type": "named_frames_relative_pose_reached",
+        "sequence_index": sequence_index,
+        "parameters": {
+            "source_frame": "obj_conical_bottle03.opening",
+            "target_frame": "obj_graduated_cylinder_03.opening",
+            "target_frame_from_source_frame_nominal_pose": {
+                "xyz": [0.0, 0.0175, 0.0425],
+                "wxyz": [math.cos(half_angle), math.sin(half_angle), 0.0, 0.0],
+            },
+            "source_origin_in_target_frame_range_m": {
+                "x": [-0.005, 0.005],
+                "y": [0.015, 0.020],
+                "z": [0.035, 0.050],
+            },
+            "source_normal_axis": "z",
+            "target_normal_axis": "z",
+            "source_normal_polar_angle_range_deg": polar_angle_range_deg,
+            "source_normal_azimuth_range_deg": [-95.0, -85.0],
+            "bounds": "inclusive",
+            "diagnostic_compatibility_projection": {
+                "type": "relative_pose_reached",
+                "parameters": {
+                    "object": "obj_conical_bottle03",
+                    "relative_to": "obj_graduated_cylinder_03",
+                    "xyz_range": {
+                        "x": [-0.08, 0.08],
+                        "y": [-0.08, 0.08],
+                        "z": [0.10, 0.30],
+                    },
+                },
+            },
+        },
+    }
+
+
+def _exact_bimanual_success_v03() -> dict[str, object]:
+    return {
+        "operator": "all",
+        "claim_scope": "kinematic_proxy",
+        "predicates": [
+            _v03_relative_pose_predicate(
+                predicate_id="opening_prepour_pose_reached",
+                sequence_index=0,
+                nominal_angle_deg=58.0,
+                polar_angle_range_deg=[55.0, 60.0],
+            ),
+            _v03_relative_pose_predicate(
+                predicate_id="opening_pour_pose_reached",
+                sequence_index=1,
+                nominal_angle_deg=75.0,
+                polar_angle_range_deg=[70.0, 80.0],
+            ),
             {
                 "id": "source_returned",
                 "type": "object_returned_to_post_warmup_pose",
@@ -465,9 +574,23 @@ def test_golden_bimanual_pour_example_is_a_valid_scenario_spec() -> None:
 
     spec = ScenarioSpec.from_mapping(data)
 
+    assert spec.schema_version == "scenario-spec/v0.3"
     assert spec.scenario_id == "scientific_workbench_bimanual_pour"
     assert len(spec.steps) == 5
     assert spec.invariants[0].invariant_type == "maintain_grasp"
+    assert spec.steps[3].parameters["min_tilt_deg"] == 70.0
+    predicates = spec.success.predicates
+    assert [predicate.predicate_type for predicate in predicates] == [
+        "named_frames_relative_pose_reached",
+        "named_frames_relative_pose_reached",
+        "object_returned_to_post_warmup_pose",
+    ]
+    assert predicates[0].parameters[
+        "source_normal_polar_angle_range_deg"
+    ] == [55.0, 60.0]
+    assert predicates[1].parameters[
+        "source_normal_polar_angle_range_deg"
+    ] == [70.0, 80.0]
 
 
 def test_v02_round_trips_explicit_ordered_bimanual_success_contract() -> None:
@@ -486,6 +609,169 @@ def test_v02_round_trips_explicit_ordered_bimanual_success_contract() -> None:
     ]
     assert [predicate.sequence_index for predicate in spec.success.predicates] == [0, 1, 2]
     assert spec.to_mapping() == data
+
+
+def test_v03_round_trips_two_ordered_relative_pose_stages() -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.schema_version == "scenario-spec/v0.3"
+    assert [predicate.predicate_type for predicate in spec.success.predicates] == [
+        "named_frames_relative_pose_reached",
+        "named_frames_relative_pose_reached",
+        "object_returned_to_post_warmup_pose",
+    ]
+    assert [predicate.sequence_index for predicate in spec.success.predicates] == [0, 1, 2]
+    assert spec.to_mapping() == data
+
+
+@pytest.mark.parametrize(
+    ("predicate_index", "field", "value", "message"),
+    [
+        (
+            0,
+            "source_normal_polar_angle_range_deg",
+            [60.0, 55.0],
+            "source_normal_polar_angle_range_deg",
+        ),
+        (
+            0,
+            "source_normal_azimuth_range_deg",
+            [-181.0, -85.0],
+            "source_normal_azimuth_range_deg",
+        ),
+        (
+            0,
+            "source_origin_in_target_frame_range_m",
+            {"x": [0.005, -0.005], "y": [0.015, 0.020], "z": [0.035, 0.050]},
+            "source_origin_in_target_frame_range_m.x",
+        ),
+        (
+            0,
+            "normal_angle_max_deg",
+            10.0,
+            "unexpected field|normal_angle_max_deg",
+        ),
+    ],
+)
+def test_v03_rejects_invalid_relative_pose_contract_fields(
+    predicate_index: int,
+    field: str,
+    value: object,
+    message: str,
+) -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = _exact_bimanual_success_v03()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    predicate = dict(predicates[predicate_index])
+    parameters = dict(predicate["parameters"])  # type: ignore[arg-type]
+    parameters[field] = value
+    predicate["parameters"] = parameters
+    predicates[predicate_index] = predicate
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match=message):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v03_rejects_nominal_pose_outside_success_range() -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = _exact_bimanual_success_v03()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    predicate = dict(predicates[0])
+    parameters = dict(predicate["parameters"])  # type: ignore[arg-type]
+    nominal = dict(parameters["target_frame_from_source_frame_nominal_pose"])  # type: ignore[arg-type]
+    nominal["xyz"] = [0.0, 0.021, 0.0425]
+    parameters["target_frame_from_source_frame_nominal_pose"] = nominal
+    predicate["parameters"] = parameters
+    predicates[0] = predicate
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="nominal.*inside"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v03_rejects_legacy_success_shape() -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    data["success"] = _scenario_mapping()["success"]
+
+    with pytest.raises(ValueError, match="v0.3.*exact ordered bimanual"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v03_rejects_return_object_that_differs_from_relative_pose_source() -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = _exact_bimanual_success_v03()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    returned = dict(predicates[2])
+    parameters = dict(returned["parameters"])  # type: ignore[arg-type]
+    parameters["object"] = "obj_graduated_cylinder_03"
+    returned["parameters"] = parameters
+    predicates[2] = returned
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="return object.*source frame object"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v03_rejects_mismatched_relative_pose_frames_between_stages() -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = _exact_bimanual_success_v03()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    pour = dict(predicates[1])
+    parameters = dict(pour["parameters"])  # type: ignore[arg-type]
+    parameters["target_frame"] = "obj_conical_bottle03.opening"
+    pour["parameters"] = parameters
+    predicates[1] = pour
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="pre-pour and pour predicates.*same frames"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v03_rejects_nominal_orientation_outside_normal_gate() -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = _exact_bimanual_success_v03()
+    predicates = list(success["predicates"])  # type: ignore[arg-type]
+    pre_pour = dict(predicates[0])
+    parameters = dict(pre_pour["parameters"])  # type: ignore[arg-type]
+    nominal = dict(parameters["target_frame_from_source_frame_nominal_pose"])  # type: ignore[arg-type]
+    half_angle = math.radians(45.0) / 2.0
+    nominal["wxyz"] = [math.cos(half_angle), math.sin(half_angle), 0.0, 0.0]
+    parameters["target_frame_from_source_frame_nominal_pose"] = nominal
+    pre_pour["parameters"] = parameters
+    predicates[0] = pre_pour
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="nominal source-normal polar angle.*inside"):
+        ScenarioSpec.from_mapping(data)
 
 
 @pytest.mark.parametrize(

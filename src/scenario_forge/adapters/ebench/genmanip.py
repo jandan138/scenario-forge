@@ -33,6 +33,7 @@ _USD_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _PICKLE_PROTOCOL = 4
 _RUNTIME_CONTRACT_SCHEMA_V01 = "scenario-forge-genmanip-runtime-contract/v0.1"
 _RUNTIME_CONTRACT_SCHEMA_V02 = "scenario-forge-genmanip-runtime-contract/v0.2"
+_RUNTIME_CONTRACT_SCHEMA_V03 = "scenario-forge-genmanip-runtime-contract/v0.3"
 _EXACT_PREDICATE_TYPES = frozenset(
     {
         "named_frames_relative_pose_reached",
@@ -163,9 +164,12 @@ def export_genmanip_collected_package(
         raise GenManipExportError(
             "scenario scene.overlay_asset_ids must not contain scene.asset_id"
         )
-    if overlay_asset_ids and scenario_schema_version != "scenario-spec/v0.2":
+    if overlay_asset_ids and scenario_schema_version not in {
+        "scenario-spec/v0.2",
+        "scenario-spec/v0.3",
+    }:
         raise GenManipExportError(
-            "scenario scene overlays require scenario-spec/v0.2"
+            "scenario scene overlays require scenario-spec/v0.2 or scenario-spec/v0.3"
         )
     object_asset_ids = {
         _required_string(item, "asset_id", "scenario object") for item in objects
@@ -767,9 +771,19 @@ def _runtime_contract(
         raise GenManipExportError(
             "qualified rigid objects require the exact ordered success contract"
         )
+    scenario_schema_version = _required_string(
+        scenario,
+        "schema_version",
+        "scenario spec",
+    )
+    exact_runtime_contract_schema = (
+        _RUNTIME_CONTRACT_SCHEMA_V03
+        if scenario_schema_version == "scenario-spec/v0.3"
+        else _RUNTIME_CONTRACT_SCHEMA_V02
+    )
     contract = {
         "schema_version": (
-            _RUNTIME_CONTRACT_SCHEMA_V02
+            exact_runtime_contract_schema
             if qualified_object_ids or exact_success
             else _RUNTIME_CONTRACT_SCHEMA_V01
         ),

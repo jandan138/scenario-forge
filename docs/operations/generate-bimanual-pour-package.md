@@ -12,7 +12,8 @@ physics. Current GenManip initialization then removes colliders recursively belo
 the `room` prim, so in that adapter runtime DB03 must be treated as visible context,
 not as a collision-active appliance.
 
-The golden spec uses `scenario-spec/v0.2` `scene.overlay_asset_ids`. Entries are
+The golden spec uses `scenario-spec/v0.3`; it retains the `scene.overlay_asset_ids`
+capability introduced in v0.2. Entries are
 ordered strongest to weakest, followed by the base environment; every overlay must
 have the same `/World` root as the base. Scenario Forge's task layer is stronger
 than both, so its scene pose and inactive-prim curation still win. The configured
@@ -185,6 +186,15 @@ The embedded runtime contract is data transport, not a success result. The
 maintained GenManip consumer registers and activates the exact frame predicate, but
 the generator still fails closed unless both vessel manifests pass their complete
 interaction qualification and the named frames match exactly.
+
+The current v0.3 contract contains two ordered target-frame relative-pose stages.
+The pre-pour nominal transform places the source opening at `(0, 0.0175, 0.0425)`
+meters in the target opening frame with polar/azimuth `(58, -90)` degrees. The pour
+nominal keeps the same opening location and uses `(75, -90)` degrees. These are
+absolute `T_target_source` poses, not incremental rotations. A real oracle must
+retain the target, table, environment, and opposite arm as collision obstacles,
+attach a covering representation of the held source to the operating arm, and
+check the complete path before reporting either stage passed.
 
 Do not install the package below `$GENMANIP_SOURCE/saved/assets`. In the shared
 deployment that path is a symlink into the shared EBench asset directory, so a

@@ -40,8 +40,8 @@ the pickle is a deterministic compatibility encoding of the same JSON-safe data.
 Scenario Forge never loads an external pickle.
 
 The embedded runtime contract is the semantic handoff for downstream code that
-needs more than GenManip's native goal projection. Both the legacy
-`scenario-forge-genmanip-runtime-contract/v0.1` and exact v0.2 form carry:
+needs more than GenManip's native goal projection. The legacy v0.1, exact v0.2,
+and target-frame-relative v0.3 forms all carry:
 
 - the real GenManip runtime UID and state prim path for every scenario object,
   including the table's special all-zero layout UID;
@@ -53,10 +53,10 @@ needs more than GenManip's native goal projection. Both the legacy
 `package_manifest.json.semantic_contract` locates this one authoritative copy by
 episode-metadata path and JSON Pointer. There is no duplicate sidecar. In v0.1 the
 native `task_data.goal` is the only executable path and no frame-aware metric is
-activated. In v0.2, qualified ConvertAsset objects and the exact ordered
-align/tilt/return predicates allow the maintained GenManip consumer to register and
-activate `manip/default/scenario_forge_runtime_predicate`; the native goal remains
-an explicitly labelled diagnostic projection. Both versions keep
+activated. In v0.2 and v0.3, qualified ConvertAsset objects and an exact ordered
+three-stage success contract allow the maintained GenManip consumer to register
+and activate `manip/default/scenario_forge_runtime_predicate`; the native goal
+remains an explicitly labelled diagnostic projection. All versions keep
 `process_invariants_evaluated: false`: pose scoring does not prove target hold or
 contact. The legacy manifest `success_contract` field is only a validated
 projection for old readers, not a second semantic authority.
@@ -122,16 +122,33 @@ acceptable.
 ## Pour claim boundary
 
 The first bimanual-pour task is a `kinematic_proxy`. Its authoritative success
-contract now has three ordered predicates: opening-frame alignment in world XY and
-signed world Z, opening-frame tilt against world Z, and return against the
-post-warmup physical pose. Their inclusive thresholds are respectively 2 cm / 2–5
-cm / 10 degrees, 40–80 degrees, and 6 cm / 15 degrees. This evaluates a motion
-contract; it does not prove particle transfer, transferred volume, or absence of
-spills.
+contract has three ordered predicates: a position-aligned pre-pour pose, a deeper
+pour pose, and return against the post-warmup physical pose. v0.3 uses the same
+generic `named_frames_relative_pose_reached` predicate for the first two stages and
+binds them by `sequence_index`, so consumers must not collapse predicates by type.
+
+For each relative-pose stage, `target_frame_from_source_frame_nominal_pose` is the
+nominal transform `T_target_source`: the source opening frame expressed in the
+target opening frame. `source_origin_in_target_frame_range_m` bounds that same
+translation direction. The source opening +Z axis is expressed in the target frame
+and measured as polar angle from target +Z and azimuth `atan2(n_y, n_x)`.
+
+The current canonical pre-pour envelope is X `[-5, 5]` mm, Y `[15, 20]` mm, Z
+`[35, 50]` mm, polar `[55, 60]` degrees, and azimuth `[-95, -85]` degrees. Its
+nominal target is `(0, 17.5, 42.5)` mm with polar 58 degrees and azimuth -90
+degrees. The pour envelope retains the same opening-position bounds and azimuth,
+with polar `[70, 80]` degrees and a nominal 75-degree pose. Both are absolute
+target-frame poses; the pour angle is not added on top of the pre-pour angle.
+
+The return tolerance remains 6 cm / 15 degrees. This evaluates a motion contract;
+it does not prove particle transfer, transferred volume, absence of spills, or
+collision-free execution. A downstream oracle must separately establish that its
+held-object representation covers the active source collider, retains the target,
+table, environment, and opposite arm as obstacles, and checks the complete path.
 
 Each exact predicate carries an explicit `diagnostic_compatibility_projection` for
 the legacy GenManip root-range/axis metrics. The exporter never derives that
-approximation implicitly and never labels it exact. The embedded v0.2 runtime
+approximation implicitly and never labels it exact. The embedded v0.3 runtime
 contract remains `transport_only` with `frame_aware_metric_active: false`; the
 downstream GenManip environment explicitly accepts and activates it and records
 that fact in runtime evidence. Qualified ConvertAsset

@@ -470,7 +470,11 @@ def _task_contract(scenario: Mapping[str, Any]) -> dict[str, Any]:
     robot = _mapping(scenario.get("robot"), "robot")
     actors = _mapping_list(robot.get("actors"), "robot.actors")
     return {
-        "schema_version": "task/v0.2",
+        "schema_version": (
+            "task/v0.3"
+            if scenario.get("schema_version") == "scenario-spec/v0.3"
+            else "task/v0.2"
+        ),
         "task_id": scenario["scenario_id"],
         "task_family": scenario["task_family"],
         "instruction": scenario["instruction"],
@@ -508,7 +512,14 @@ def _predicates(scenario: Mapping[str, Any]) -> dict[str, Any]:
     predicates = success.get("predicates")
     if not isinstance(predicates, list):
         raise ValueError("success.predicates must be a list")
-    return {"schema_version": "predicates/v0.2", "success_predicates": predicates}
+    return {
+        "schema_version": (
+            "predicates/v0.3"
+            if scenario.get("schema_version") == "scenario-spec/v0.3"
+            else "predicates/v0.2"
+        ),
+        "success_predicates": predicates,
+    }
 
 
 def _robot_contract(scenario: Mapping[str, Any]) -> dict[str, Any]:

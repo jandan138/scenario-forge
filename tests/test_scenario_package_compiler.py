@@ -10,7 +10,7 @@ from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from scenario_forge.package import validate_package
-from tests.test_scenario_spec import _scenario_mapping
+from tests.test_scenario_spec import _scenario_mapping, _scenario_mapping_v03
 
 
 def _write_source_scene(root: Path) -> Path:
@@ -209,6 +209,45 @@ def test_package_compiler_builds_portable_v02_package_from_scenario_spec(tmp_pat
     )["assets"][0]
     assert asset["redistributable"] is False
     assert not Path(asset["source_uri"]).is_absolute()
+
+
+def test_package_compiler_emits_v03_task_and_predicate_artifacts(tmp_path: Path) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    package_root = tmp_path / "package"
+
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(data),
+        {"scientific_workbench_environment": _asset_source(source_usd)},
+        package_root,
+    )
+
+    task = yaml.safe_load((package_root / "task/task.yaml").read_text(encoding="utf-8"))
+    predicates = yaml.safe_load(
+        (package_root / "task/predicates.yaml").read_text(encoding="utf-8")
+    )
+    graph = yaml.safe_load((package_root / "task/graph.yaml").read_text(encoding="utf-8"))
+    metrics = yaml.safe_load(
+        (package_root / "metrics/metrics.yaml").read_text(encoding="utf-8")
+    )
+    manifest = yaml.safe_load((package_root / "manifest.yaml").read_text(encoding="utf-8"))
+    assert task["schema_version"] == "task/v0.3"
+    assert predicates["schema_version"] == "predicates/v0.3"
+    assert graph["schema_version"] == "task-graph/v0.2"
+    assert metrics["schema_version"] == "metrics/v0.2"
+    assert manifest["schema_version"] == "scenario-package/v0.2"
+    assert [item["sequence_index"] for item in predicates["success_predicates"]] == [
+        0,
+        1,
+        2,
+    ]
+    assert [item["type"] for item in predicates["success_predicates"][:2]] == [
+        "named_frames_relative_pose_reached",
+        "named_frames_relative_pose_reached",
+    ]
 
 
 def test_portable_scene_is_valid_usd_and_world_anchor_keeps_standard_trs(
