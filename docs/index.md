@@ -30,6 +30,10 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Generate the Bimanual Pour Package](operations/generate-bimanual-pour-package.md)
 - [Qualify the Bimanual Pour Vessel Assets](operations/qualify-bimanual-pour-vessels.md)
 
+## Reference
+
+- [Wetlab Embodied Manipulation Task Design (external, self-contained HTML)](reference/wetlab-task-design.html) — upstream Feishu requirements doc; refresh via `python scripts/extract_wetlab_task_design_doc.py`
+
 ## Records
 
 - [2026-07-03 Bootstrap Decisions](records/2026-07-03-bootstrap-decisions.md)
