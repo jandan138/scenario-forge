@@ -264,7 +264,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
     }
     assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.3"
+        "scenario-forge-genmanip-runtime-contract/v0.4"
     )
     assert [predicate["sequence_index"] for predicate in contract["success"]["predicates"]] == [
         0,

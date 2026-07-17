@@ -24,6 +24,14 @@ _V03_EXACT_BIMANUAL_PREDICATE_TYPES = (
 _EXACT_BIMANUAL_PREDICATE_TYPES = frozenset(
     (*_V02_EXACT_BIMANUAL_PREDICATE_TYPES, *_V03_EXACT_BIMANUAL_PREDICATE_TYPES)
 )
+_PROGRESS_RUBRIC_CONDITION_TYPES = frozenset(
+    {
+        "object_lifted",
+        "pose_while_grasped",
+        "object_released_on_support",
+        "liquid_transfer_ratio",
+    }
+)
 
 
 def _mapping(value: object, field: str) -> Mapping[str, Any]:
@@ -392,10 +400,149 @@ class SuccessPredicateSpec:
 
 
 @dataclass(frozen=True)
+class ProgressRubricItemSpec:
+    item_id: str
+    weight: float
+    active: bool
+    requires: tuple[str, ...]
+    temporal: dict[str, JsonValue]
+    condition: dict[str, JsonValue]
+    source_ref: dict[str, JsonValue]
+
+    @classmethod
+    def from_mapping(cls, value: object) -> ProgressRubricItemSpec:
+        data = _mapping(value, "progress rubric item")
+        item_id = _string(data.get("id"), "progress rubric item.id")
+        weight = data.get("weight")
+        if (
+            not isinstance(weight, (int, float))
+            or isinstance(weight, bool)
+            or not math.isfinite(weight)
+            or weight <= 0.0
+            or weight > 1.0
+        ):
+            raise ValueError("progress rubric item.weight must be a finite number in (0, 1]")
+        active = data.get("active", True)
+        if not isinstance(active, bool):
+            raise ValueError("progress rubric item.active must be a boolean")
+        requires = data.get("requires", [])
+        temporal = dict(
+            _json_mapping(data.get("temporal"), f"progress rubric item {item_id}.temporal")
+        )
+        kind = temporal.get("kind")
+        if kind not in {"instant", "sustained", "terminal"}:
+            raise ValueError(
+                f"progress rubric item {item_id}.temporal.kind must be instant, "
+                "sustained, or terminal"
+            )
+        if kind == "sustained":
+            window = _mapping(
+                temporal.get("window"), f"progress rubric item {item_id}.temporal.window"
+            )
+            _string(window.get("from_step"), f"progress rubric item {item_id}.window.from_step")
+            _string(
+                window.get("through_step"),
+                f"progress rubric item {item_id}.window.through_step",
+            )
+        elif "window" in temporal:
+            raise ValueError(
+                f"progress rubric item {item_id}.temporal.window is only valid when "
+                "kind is sustained"
+            )
+        condition = dict(
+            _json_mapping(data.get("condition"), f"progress rubric item {item_id}.condition")
+        )
+        condition_type = condition.get("type")
+        if condition_type not in _PROGRESS_RUBRIC_CONDITION_TYPES:
+            raise ValueError(
+                f"progress rubric item {item_id}.condition.type must be one of "
+                + ", ".join(sorted(_PROGRESS_RUBRIC_CONDITION_TYPES))
+            )
+        _mapping(
+            condition.get("parameters"),
+            f"progress rubric item {item_id}.condition.parameters",
+        )
+        source_ref = dict(
+            _json_mapping(data.get("source_ref", {}), f"progress rubric item {item_id}.source_ref")
+        )
+        return cls(
+            item_id=item_id,
+            weight=float(weight),
+            active=active,
+            requires=tuple(_string_tuple(requires, f"progress rubric item {item_id}.requires")),
+            temporal=temporal,
+            condition=condition,
+            source_ref=source_ref,
+        )
+
+    def to_mapping(self) -> dict[str, object]:
+        result: dict[str, object] = {
+            "id": self.item_id,
+            "weight": self.weight,
+            "active": self.active,
+            "temporal": _copy_json(self.temporal, "temporal"),
+            "condition": _copy_json(self.condition, "condition"),
+            "source_ref": _copy_json(self.source_ref, "source_ref"),
+        }
+        if self.requires:
+            result["requires"] = list(self.requires)
+        return result
+
+
+@dataclass(frozen=True)
+class ProgressRubricSpec:
+    aggregation: dict[str, JsonValue]
+    items: tuple[ProgressRubricItemSpec, ...]
+
+    @classmethod
+    def from_mapping(cls, value: object) -> ProgressRubricSpec:
+        data = _mapping(value, "success.progress_rubric")
+        aggregation = dict(
+            _json_mapping(data.get("aggregation"), "success.progress_rubric.aggregation")
+        )
+        if aggregation.get("type") != "weighted_progress_score":
+            raise ValueError(
+                "success.progress_rubric.aggregation.type must be weighted_progress_score"
+            )
+        if aggregation.get("normalization") not in {
+            "declared_sum",
+            "active_subset_renormalize",
+        }:
+            raise ValueError(
+                "success.progress_rubric.aggregation.normalization must be "
+                "declared_sum or active_subset_renormalize"
+            )
+        if aggregation.get("inactive_treatment") not in {"zero", "exclude"}:
+            raise ValueError(
+                "success.progress_rubric.aggregation.inactive_treatment must be "
+                "zero or exclude"
+            )
+        raw_items = data.get("items")
+        if not isinstance(raw_items, list) or not raw_items:
+            raise ValueError("success.progress_rubric.items must be a non-empty list")
+        items = tuple(ProgressRubricItemSpec.from_mapping(item) for item in raw_items)
+        _require_unique((item.item_id for item in items), "progress rubric item")
+        weight_sum = sum(item.weight for item in items)
+        if not math.isclose(weight_sum, 1.0, rel_tol=0.0, abs_tol=1e-6):
+            raise ValueError(
+                "success.progress_rubric item weights must sum to 1.0, "
+                f"got {weight_sum:.6f}"
+            )
+        return cls(aggregation=aggregation, items=items)
+
+    def to_mapping(self) -> dict[str, object]:
+        return {
+            "aggregation": _copy_json(self.aggregation, "aggregation"),
+            "items": [item.to_mapping() for item in self.items],
+        }
+
+
+@dataclass(frozen=True)
 class SuccessSpec:
     operator: str
     claim_scope: str
     predicates: tuple[SuccessPredicateSpec, ...]
+    progress_rubric: ProgressRubricSpec | None = None
 
     @classmethod
     def from_mapping(cls, value: object) -> SuccessSpec:
@@ -411,18 +558,25 @@ class SuccessSpec:
         operator = _string(data.get("operator"), "success.operator")
         if operator not in {"all", "any"}:
             raise ValueError("success.operator must be 'all' or 'any'")
+        raw_rubric = data.get("progress_rubric")
         return cls(
             operator=operator,
             claim_scope=_string(data.get("claim_scope"), "success.claim_scope"),
             predicates=predicates,
+            progress_rubric=(
+                None if raw_rubric is None else ProgressRubricSpec.from_mapping(raw_rubric)
+            ),
         )
 
     def to_mapping(self) -> dict[str, object]:
-        return {
+        result: dict[str, object] = {
             "operator": self.operator,
             "claim_scope": self.claim_scope,
             "predicates": [predicate.to_mapping() for predicate in self.predicates],
         }
+        if self.progress_rubric is not None:
+            result["progress_rubric"] = self.progress_rubric.to_mapping()
+        return result
 
 
 @dataclass(frozen=True)
@@ -449,6 +603,7 @@ class ScenarioSpec:
             "scenario-spec/v0.1",
             "scenario-spec/v0.2",
             "scenario-spec/v0.3",
+            "scenario-spec/v0.4",
         }:
             raise ValueError("unsupported scenario spec schema_version")
         raw_objects = data.get("objects")
@@ -568,6 +723,7 @@ class ScenarioSpec:
                     self.objects,
                     f"{predicate.predicate_id}.diagnostic_compatibility_projection",
                 )
+        _validate_progress_rubric_references(self, actor_ids, object_ids, step_positions)
         _validate_explicit_bimanual_success(self)
 
     def to_mapping(self) -> dict[str, object]:
@@ -619,6 +775,84 @@ def _validate_parameter_references(
             raise ValueError(f"{owner} references unknown frame {value}")
 
 
+def _validate_progress_rubric_references(
+    spec: ScenarioSpec,
+    actor_ids: set[str],
+    object_ids: set[str],
+    step_positions: dict[str, int],
+) -> None:
+    rubric = spec.success.progress_rubric
+    if rubric is None:
+        return
+    if spec.schema_version != "scenario-spec/v0.4":
+        raise ValueError(
+            "success.progress_rubric requires scenario-spec/v0.4, "
+            f"got {spec.schema_version}"
+        )
+    grasp_windows: list[tuple[str, str, str, str, str]] = []
+    for item in rubric.items:
+        owner = f"progress rubric item {item.item_id}"
+        temporal = item.temporal
+        if temporal["kind"] == "sustained":
+            window = temporal["window"]
+            from_step = window["from_step"]
+            through_step = window["through_step"]
+            for step_id in (from_step, through_step):
+                if step_id not in step_positions:
+                    raise ValueError(f"{owner} references unknown step {step_id}")
+            if step_positions[from_step] > step_positions[through_step]:
+                raise ValueError(f"{owner} window ends before it starts")
+        parameters = item.condition.get("parameters")
+        if not isinstance(parameters, Mapping):
+            raise ValueError(f"{owner}.condition.parameters must be a mapping")
+        _validate_parameter_references(parameters, object_ids, spec.objects, owner)
+        for key in ("object", "source", "target", "support_surface"):
+            value = parameters.get(key)
+            if isinstance(value, str) and value not in object_ids:
+                raise ValueError(f"{owner} references unknown object {value}")
+        if item.condition["type"] == "pose_while_grasped":
+            grasp = _mapping(parameters.get("grasp"), f"{owner}.grasp")
+            actor = _string(grasp.get("actor"), f"{owner}.grasp.actor")
+            grasp_object = _string(grasp.get("object"), f"{owner}.grasp.object")
+            if actor not in actor_ids:
+                raise ValueError(f"{owner} references unknown actor {actor}")
+            if grasp_object not in object_ids:
+                raise ValueError(f"{owner} references unknown object {grasp_object}")
+            nested = _mapping(parameters.get("predicate"), f"{owner}.predicate")
+            _string(nested.get("type"), f"{owner}.predicate.type")
+            _validate_parameter_references(
+                _mapping(nested.get("parameters"), f"{owner}.predicate.parameters"),
+                object_ids,
+                spec.objects,
+                f"{owner}.predicate",
+            )
+            if temporal["kind"] == "sustained":
+                grasp_windows.append(
+                    (
+                        actor,
+                        grasp_object,
+                        str(temporal["window"]["from_step"]),
+                        str(temporal["window"]["through_step"]),
+                        item.item_id,
+                    )
+                )
+    for invariant in spec.invariants:
+        if invariant.invariant_type != "maintain_grasp":
+            continue
+        for actor, grasp_object, from_step, through_step, item_id in grasp_windows:
+            if (
+                invariant.actor == actor
+                and invariant.object_id == grasp_object
+                and step_positions[invariant.from_step] <= step_positions[through_step]
+                and step_positions[from_step] <= step_positions[invariant.through_step]
+            ):
+                raise ValueError(
+                    f"invariant {invariant.invariant_id} duplicates progress rubric "
+                    f"item {item_id}: a grasp condition may be a hard gate or a "
+                    "scored rubric item, not both"
+                )
+
+
 def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:
     exact = [
         predicate
@@ -626,18 +860,18 @@ def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:
         if predicate.predicate_type in _EXACT_BIMANUAL_PREDICATE_TYPES
     ]
     if not exact:
-        if spec.schema_version == "scenario-spec/v0.3":
+        if spec.schema_version in {"scenario-spec/v0.3", "scenario-spec/v0.4"}:
             raise ValueError(
-                "scenario-spec/v0.3 requires the exact ordered bimanual success contract"
+                f"{spec.schema_version} requires the exact ordered bimanual success contract"
             )
         return
     if spec.schema_version == "scenario-spec/v0.2":
         expected_types = _V02_EXACT_BIMANUAL_PREDICATE_TYPES
-    elif spec.schema_version == "scenario-spec/v0.3":
+    elif spec.schema_version in {"scenario-spec/v0.3", "scenario-spec/v0.4"}:
         expected_types = _V03_EXACT_BIMANUAL_PREDICATE_TYPES
     else:
         raise ValueError(
-            "explicit bimanual predicates require scenario-spec/v0.2 or v0.3"
+            "explicit bimanual predicates require scenario-spec/v0.2 or later"
         )
     if spec.success.operator != "all":
         raise ValueError("explicit bimanual predicates require success.operator 'all'")
@@ -653,7 +887,7 @@ def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:
         )
     for predicate in exact:
         _validate_explicit_predicate(predicate, schema_version=spec.schema_version)
-    if spec.schema_version == "scenario-spec/v0.3":
+    if spec.schema_version in {"scenario-spec/v0.3", "scenario-spec/v0.4"}:
         _validate_v03_bimanual_relationships(exact)
 
 

@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 from hashlib import sha256
+import json
 from pathlib import Path
 
 import pytest
 import yaml
+from jsonschema import Draft202012Validator
 
 from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from scenario_forge.package import validate_package
 from tests.test_scenario_spec import _scenario_mapping, _scenario_mapping_v03
+from tests.test_scenario_spec import _scenario_mapping_v04
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _write_source_scene(root: Path) -> Path:
@@ -594,3 +599,73 @@ def test_object_only_asset_preserves_legacy_sublayer_composition(
         base_reference
     )
     assert f"prepend references = @{object_reference}@" not in scene_text
+
+
+def test_package_compiler_emits_v04_task_and_rubric_metrics(tmp_path: Path) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    data = _scenario_mapping_v04()
+    package_root = tmp_path / "package"
+
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(data),
+        {"scientific_workbench_environment": _asset_source(source_usd)},
+        package_root,
+    )
+
+    task = yaml.safe_load((package_root / "task/task.yaml").read_text(encoding="utf-8"))
+    predicates = yaml.safe_load(
+        (package_root / "task/predicates.yaml").read_text(encoding="utf-8")
+    )
+    metrics = yaml.safe_load(
+        (package_root / "metrics/metrics.yaml").read_text(encoding="utf-8")
+    )
+    assert task["schema_version"] == "task/v0.4"
+    assert predicates["schema_version"] == "predicates/v0.3"
+    assert metrics["schema_version"] == "metrics/v0.3"
+    assert metrics["aggregation"] == {
+        "type": "weighted_progress_score",
+        "normalization": "declared_sum",
+        "inactive_treatment": "zero",
+        "primary_metric_id": "openings_aligned_while_grasped",
+    }
+    by_id = {item["id"]: item for item in metrics["metrics"]}
+    assert set(by_id) == {
+        "source_lifted",
+        "openings_aligned_while_grasped",
+        "liquid_transfer_majority",
+        "liquid_transfer_complete",
+        "source_returned_released",
+    }
+    assert by_id["source_lifted"]["role"] == "progress_component"
+    assert by_id["source_lifted"]["weight"] == 0.20
+    assert by_id["source_lifted"]["active"] is True
+    assert by_id["liquid_transfer_majority"]["active"] is False
+    assert by_id["liquid_transfer_majority"]["requires"] == [
+        "liquid_sim.contained_volume_ratio"
+    ]
+    assert by_id["openings_aligned_while_grasped"]["temporal"]["kind"] == "sustained"
+    assert by_id["source_returned_released"]["condition"]["type"] == (
+        "object_released_on_support"
+    )
+    assert "progress_rubric" in task["success"]
+
+
+def test_metrics_v03_file_matches_its_json_schema(tmp_path: Path) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(_scenario_mapping_v04()),
+        {"scientific_workbench_environment": _asset_source(source_usd)},
+        package_root,
+    )
+    metrics = yaml.safe_load(
+        (package_root / "metrics/metrics.yaml").read_text(encoding="utf-8")
+    )
+    schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/scenario_forge/schemas/jsonschema/metrics-v0.3.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    Draft202012Validator(schema).validate(metrics)

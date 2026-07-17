@@ -495,3 +495,22 @@ def test_v03_addition_does_not_mutate_v02_wire_schemas() -> None:
         filename: sha256((schema_dir / filename).read_bytes()).hexdigest()
         for filename in expected
     } == expected
+
+
+def test_metrics_v03_and_v04_contract_schema_artifacts_exist_and_parse() -> None:
+    expected = {
+        "metrics-v0.3.schema.json": "metrics/v0.3",
+        "scenario-spec-v0.4.schema.json": "scenario-spec/v0.4",
+        "task-v0.4.schema.json": "task/v0.4",
+        "scenario-forge-genmanip-runtime-contract-v0.4.schema.json": (
+            "scenario-forge-genmanip-runtime-contract/v0.4"
+        ),
+    }
+    for filename, schema_version in expected.items():
+        schema_path = REPO_ROOT / "src" / "scenario_forge" / "schemas" / "jsonschema" / filename
+
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+        assert schema["type"] == "object"
+        assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+        assert schema["properties"]["schema_version"]["const"] == schema_version

@@ -158,6 +158,20 @@ If an enabled collider in that qualified interaction contract reports `sdf` as i
 observed approximation, the task config enables GenManip GPU dynamics, as required
 by PhysX for rigid SDF actors.
 
+## Progress rubric transport (v0.4)
+
+`scenario-spec/v0.4` carries an optional `success.progress_rubric` next to the
+exact predicates; see [Progress Rubric](progress-rubric.md). The runtime contract
+becomes `scenario-forge-genmanip-runtime-contract/v0.4` and transports the rubric
+inside `success` unchanged. Because the native GenManip goals evaluate only the
+diagnostic projections of the exact predicates, every rubric item is declared
+under `execution.progress_rubric.unevaluated_metric_ids` with
+`scored_here: false`; `contract_status` remains `transport_only`. Capability-gated
+items (for example the two inactive liquid-transfer items) are transported with
+their `requires` and `active: false` flags so the downstream environment can
+feature-gate scoring explicitly rather than silently computing a different
+denominator.
+
 ## Asset boundary
 
 The compiler accepts an already usable USD bundle and copies it into a fat package.

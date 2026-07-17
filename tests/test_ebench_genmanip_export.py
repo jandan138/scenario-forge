@@ -1235,3 +1235,51 @@ def test_genmanip_export_rejects_unsafe_path_segments_before_writing(
         export_genmanip_collected_package(package_root, tmp_path / "collected")
 
     assert not escaped.exists()
+
+
+_RUNTIME_CONTRACT_V04_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "src/scenario_forge/schemas/jsonschema"
+    / "scenario-forge-genmanip-runtime-contract-v0.4.schema.json"
+)
+
+
+def test_v04_export_transports_progress_rubric_as_unevaluated(tmp_path: Path) -> None:
+    from tests.test_scenario_spec import _scenario_mapping_v04
+
+    package_root = _build_qualified_object_package(
+        tmp_path, scenario_mapping=_scenario_mapping_v04()
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode_path = (
+        output
+        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+    )
+    contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
+        "scenario_forge_runtime_contract"
+    ]
+
+    assert contract["schema_version"] == "scenario-forge-genmanip-runtime-contract/v0.4"
+    rubric = contract["success"]["progress_rubric"]
+    assert rubric["aggregation"]["normalization"] == "declared_sum"
+    assert [item["id"] for item in rubric["items"]] == [
+        "source_lifted",
+        "openings_aligned_while_grasped",
+        "liquid_transfer_majority",
+        "liquid_transfer_complete",
+        "source_returned_released",
+    ]
+    execution_rubric = contract["execution"]["progress_rubric"]
+    assert execution_rubric["scored_here"] is False
+    assert execution_rubric["unevaluated_metric_ids"] == [
+        "source_lifted",
+        "openings_aligned_while_grasped",
+        "liquid_transfer_majority",
+        "liquid_transfer_complete",
+        "source_returned_released",
+    ]
+    validator = Draft202012Validator(
+        json.loads(_RUNTIME_CONTRACT_V04_SCHEMA.read_text(encoding="utf-8"))
+    )
+    validator.validate(contract)

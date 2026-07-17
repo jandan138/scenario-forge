@@ -471,9 +471,13 @@ def _task_contract(scenario: Mapping[str, Any]) -> dict[str, Any]:
     actors = _mapping_list(robot.get("actors"), "robot.actors")
     return {
         "schema_version": (
-            "task/v0.3"
-            if scenario.get("schema_version") == "scenario-spec/v0.3"
-            else "task/v0.2"
+            "task/v0.4"
+            if scenario.get("schema_version") == "scenario-spec/v0.4"
+            else (
+                "task/v0.3"
+                if scenario.get("schema_version") == "scenario-spec/v0.3"
+                else "task/v0.2"
+            )
         ),
         "task_id": scenario["scenario_id"],
         "task_family": scenario["task_family"],
@@ -515,7 +519,7 @@ def _predicates(scenario: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": (
             "predicates/v0.3"
-            if scenario.get("schema_version") == "scenario-spec/v0.3"
+            if scenario.get("schema_version") in {"scenario-spec/v0.3", "scenario-spec/v0.4"}
             else "predicates/v0.2"
         ),
         "success_predicates": predicates,
@@ -529,6 +533,9 @@ def _robot_contract(scenario: Mapping[str, Any]) -> dict[str, Any]:
 
 def _metrics(scenario: Mapping[str, Any]) -> dict[str, Any]:
     success = _mapping(scenario.get("success"), "success")
+    raw_rubric = success.get("progress_rubric")
+    if isinstance(raw_rubric, Mapping):
+        return _rubric_metrics(raw_rubric)
     predicates = _mapping_list(success.get("predicates"), "success.predicates")
     metrics: list[dict[str, Any]] = []
     for index, predicate in enumerate(predicates):
@@ -543,6 +550,31 @@ def _metrics(scenario: Mapping[str, Any]) -> dict[str, Any]:
             }
         )
     return {"schema_version": "metrics/v0.2", "metrics": metrics}
+
+
+def _rubric_metrics(rubric: Mapping[str, Any]) -> dict[str, Any]:
+    items = _mapping_list(rubric.get("items"), "success.progress_rubric.items")
+    metrics: list[dict[str, Any]] = []
+    for item in items:
+        metric: dict[str, Any] = {
+            "id": item["id"],
+            "type": "rubric_condition",
+            "role": "progress_component",
+            "weight": item["weight"],
+            "active": item.get("active", True),
+            "temporal": item["temporal"],
+            "condition": item["condition"],
+        }
+        if item.get("requires"):
+            metric["requires"] = item["requires"]
+        if item.get("source_ref"):
+            metric["source_ref"] = item["source_ref"]
+        metrics.append(metric)
+    return {
+        "schema_version": "metrics/v0.3",
+        "aggregation": rubric["aggregation"],
+        "metrics": metrics,
+    }
 
 
 def _generation_plan(

@@ -34,6 +34,7 @@ _PICKLE_PROTOCOL = 4
 _RUNTIME_CONTRACT_SCHEMA_V01 = "scenario-forge-genmanip-runtime-contract/v0.1"
 _RUNTIME_CONTRACT_SCHEMA_V02 = "scenario-forge-genmanip-runtime-contract/v0.2"
 _RUNTIME_CONTRACT_SCHEMA_V03 = "scenario-forge-genmanip-runtime-contract/v0.3"
+_RUNTIME_CONTRACT_SCHEMA_V04 = "scenario-forge-genmanip-runtime-contract/v0.4"
 _EXACT_PREDICATE_TYPES = frozenset(
     {
         "named_frames_relative_pose_reached",
@@ -167,9 +168,10 @@ def export_genmanip_collected_package(
     if overlay_asset_ids and scenario_schema_version not in {
         "scenario-spec/v0.2",
         "scenario-spec/v0.3",
+        "scenario-spec/v0.4",
     }:
         raise GenManipExportError(
-            "scenario scene overlays require scenario-spec/v0.2 or scenario-spec/v0.3"
+            "scenario scene overlays require scenario-spec/v0.2 or later"
         )
     object_asset_ids = {
         _required_string(item, "asset_id", "scenario object") for item in objects
@@ -777,10 +779,31 @@ def _runtime_contract(
         "scenario spec",
     )
     exact_runtime_contract_schema = (
-        _RUNTIME_CONTRACT_SCHEMA_V03
-        if scenario_schema_version == "scenario-spec/v0.3"
-        else _RUNTIME_CONTRACT_SCHEMA_V02
+        _RUNTIME_CONTRACT_SCHEMA_V04
+        if scenario_schema_version == "scenario-spec/v0.4"
+        else (
+            _RUNTIME_CONTRACT_SCHEMA_V03
+            if scenario_schema_version == "scenario-spec/v0.3"
+            else _RUNTIME_CONTRACT_SCHEMA_V02
+        )
     )
+    execution: dict[str, Any] = {
+        "native_goal_role": "diagnostic_compatibility_projection",
+        "frame_aware_metric_active": False,
+        "process_invariants_evaluated": False,
+    }
+    raw_rubric = success.get("progress_rubric")
+    if isinstance(raw_rubric, Mapping):
+        rubric_items = raw_rubric.get("items")
+        if isinstance(rubric_items, list):
+            execution["progress_rubric"] = {
+                "scored_here": False,
+                "unevaluated_metric_ids": [
+                    str(item["id"])
+                    for item in rubric_items
+                    if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+                ],
+            }
     contract = {
         "schema_version": (
             exact_runtime_contract_schema
@@ -798,11 +821,7 @@ def _runtime_contract(
             "transform_direction": "state_prim_from_named_frame",
             "frame_scale_allowed": False,
         },
-        "execution": {
-            "native_goal_role": "diagnostic_compatibility_projection",
-            "frame_aware_metric_active": False,
-            "process_invariants_evaluated": False,
-        },
+        "execution": execution,
         "robot": {
             "profile_ref": _required_string(robot, "profile_ref", "scenario robot"),
             "robot_index": 0,

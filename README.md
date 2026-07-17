@@ -193,5 +193,8 @@ real2sim import/cousin packaging, suite generation, suite quality evidence, and
 static EBench package/suite-index export. It now also compiles simulator-neutral
 `ScenarioSpec` inputs into portable packages, exports the EBench/GenManip collected
 package wire format, and can request strict post-reset/pre-action Isaac Sim QA
-renders as package evidence. It does not contain an episode runner, run embodied
+renders as package evidence. `scenario-spec/v0.4` adds a weighted progress-score
+rubric (aligned with the upstream wetlab task-design Progress Score) that is
+transported with explicit activation and capability semantics — rubric items are
+declared, not runtime-evaluated. It does not contain an episode runner, run embodied
 evaluations, or produce model-performance benchmark reports.

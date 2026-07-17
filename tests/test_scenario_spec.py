@@ -407,6 +407,123 @@ def _exact_bimanual_success_v03() -> dict[str, object]:
     }
 
 
+def _progress_rubric() -> dict[str, object]:
+    return {
+        "aggregation": {
+            "type": "weighted_progress_score",
+            "normalization": "declared_sum",
+            "inactive_treatment": "zero",
+            "primary_metric_id": "openings_aligned_while_grasped",
+        },
+        "items": [
+            {
+                "id": "source_lifted",
+                "weight": 0.20,
+                "temporal": {"kind": "instant"},
+                "condition": {
+                    "type": "object_lifted",
+                    "parameters": {
+                        "object": "obj_conical_bottle03",
+                        "support_surface": "table",
+                        "min_clearance_m": 0.01,
+                        "held_by": "operating_arm",
+                    },
+                },
+                "source_ref": {"item": "时序1"},
+            },
+            {
+                "id": "openings_aligned_while_grasped",
+                "weight": 0.30,
+                "temporal": {
+                    "kind": "sustained",
+                    "window": {"from_step": "align_openings", "through_step": "tilt_pour"},
+                },
+                "condition": {
+                    "type": "pose_while_grasped",
+                    "parameters": {
+                        "grasp": {"actor": "operating_arm", "object": "obj_conical_bottle03"},
+                        "predicate": {
+                            "type": "named_frames_relative_pose_reached",
+                            "parameters": {
+                                "source_frame": "obj_conical_bottle03.opening",
+                                "target_frame": "obj_graduated_cylinder_03.opening",
+                            },
+                        },
+                    },
+                },
+                "source_ref": {"item": "时序2"},
+            },
+            {
+                "id": "liquid_transfer_majority",
+                "weight": 0.20,
+                "active": False,
+                "requires": ["liquid_sim.contained_volume_ratio"],
+                "temporal": {"kind": "terminal"},
+                "condition": {
+                    "type": "liquid_transfer_ratio",
+                    "parameters": {
+                        "source": "obj_conical_bottle03",
+                        "target": "obj_graduated_cylinder_03",
+                        "ratio_threshold": 0.5,
+                        "measurement": "containment_ledger",
+                        "initial_snapshot": "episode_start",
+                    },
+                },
+                "source_ref": {"item": "终帧-转移比例过半"},
+            },
+            {
+                "id": "liquid_transfer_complete",
+                "weight": 0.20,
+                "active": False,
+                "requires": ["liquid_sim.contained_volume_ratio"],
+                "temporal": {"kind": "terminal"},
+                "condition": {
+                    "type": "liquid_transfer_ratio",
+                    "parameters": {
+                        "source": "obj_conical_bottle03",
+                        "target": "obj_graduated_cylinder_03",
+                        "ratio_threshold": 0.9,
+                        "measurement": "containment_ledger",
+                        "initial_snapshot": "episode_start",
+                    },
+                },
+                "source_ref": {"item": "终帧-转移比例达全阈值"},
+            },
+            {
+                "id": "source_returned_released",
+                "weight": 0.10,
+                "temporal": {"kind": "terminal"},
+                "condition": {
+                    "type": "object_released_on_support",
+                    "parameters": {
+                        "object": "obj_conical_bottle03",
+                        "support_surface": "table",
+                        "upright_max_tilt_deg": 15.0,
+                        "region": {
+                            "center": [0.32, 0.12, 0.81],
+                            "half_extents": [0.06, 0.06, 0.06],
+                        },
+                        "released": True,
+                    },
+                },
+                "source_ref": {"item": "终帧-归还并释放"},
+            },
+        ],
+    }
+
+
+def _scenario_mapping_v04() -> dict[str, object]:
+    data = _scenario_mapping_v03([])
+    data["schema_version"] = "scenario-spec/v0.4"
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = dict(data["success"])  # type: ignore[arg-type]
+    success["progress_rubric"] = _progress_rubric()
+    data["success"] = success
+    return data
+
+
 def test_scenario_spec_round_trips_bimanual_roles_and_invariant() -> None:
     spec = ScenarioSpec.from_mapping(_scenario_mapping())
 
@@ -574,7 +691,7 @@ def test_golden_bimanual_pour_example_is_a_valid_scenario_spec() -> None:
 
     spec = ScenarioSpec.from_mapping(data)
 
-    assert spec.schema_version == "scenario-spec/v0.3"
+    assert spec.schema_version == "scenario-spec/v0.4"
     assert spec.scenario_id == "scientific_workbench_bimanual_pour"
     assert len(spec.steps) == 5
     assert spec.invariants[0].invariant_type == "maintain_grasp"
@@ -591,6 +708,21 @@ def test_golden_bimanual_pour_example_is_a_valid_scenario_spec() -> None:
     assert predicates[1].parameters[
         "source_normal_polar_angle_range_deg"
     ] == [70.0, 80.0]
+    rubric = spec.success.progress_rubric
+    assert rubric is not None
+    assert rubric.aggregation["normalization"] == "declared_sum"
+    weights = {item.item_id: item.weight for item in rubric.items}
+    assert weights == {
+        "source_lifted": 0.20,
+        "openings_aligned_while_grasped": 0.30,
+        "liquid_transfer_majority": 0.20,
+        "liquid_transfer_complete": 0.20,
+        "source_returned_released": 0.10,
+    }
+    inactive = {item.item_id for item in rubric.items if not item.active}
+    assert inactive == {"liquid_transfer_majority", "liquid_transfer_complete"}
+    for item in rubric.items:
+        assert item.source_ref["document_revision"] == 1549
 
 
 def test_v02_round_trips_explicit_ordered_bimanual_success_contract() -> None:
@@ -909,3 +1041,185 @@ def test_scenario_spec_rejects_runtime_incompatible_pose_quaternions(
 
     with pytest.raises(ValueError, match="wxyz.*unit quaternion|finite"):
         ScenarioSpec.from_mapping(data)
+
+
+def test_v04_round_trips_progress_rubric() -> None:
+    data = _scenario_mapping_v04()
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.schema_version == "scenario-spec/v0.4"
+    rubric = spec.success.progress_rubric
+    assert rubric is not None
+    assert rubric.aggregation["normalization"] == "declared_sum"
+    assert rubric.aggregation["inactive_treatment"] == "zero"
+    assert [item.item_id for item in rubric.items] == [
+        "source_lifted",
+        "openings_aligned_while_grasped",
+        "liquid_transfer_majority",
+        "liquid_transfer_complete",
+        "source_returned_released",
+    ]
+    assert rubric.items[2].active is False
+    assert rubric.items[2].requires == ("liquid_sim.contained_volume_ratio",)
+    assert rubric.items[1].temporal["kind"] == "sustained"
+    assert spec.to_mapping()["success"]["progress_rubric"]["items"][0]["weight"] == 0.20
+
+
+def test_v04_without_rubric_keeps_exact_success_only() -> None:
+    data = _scenario_mapping_v04()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    success.pop("progress_rubric")
+    data["success"] = success
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.success.progress_rubric is None
+
+
+def test_v03_rejects_progress_rubric() -> None:
+    data = _scenario_mapping_v03([])
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids", None)
+    data["scene"] = scene
+    success = dict(data["success"])  # type: ignore[arg-type]
+    success["progress_rubric"] = _progress_rubric()
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="progress_rubric"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v04_rejects_weight_sum_not_one() -> None:
+    data = _scenario_mapping_v04()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    rubric = dict(success["progress_rubric"])
+    items = [dict(item) for item in rubric["items"]]
+    items[0]["weight"] = 0.10
+    rubric["items"] = items
+    success["progress_rubric"] = rubric
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="weight"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v04_rejects_duplicate_rubric_ids() -> None:
+    data = _scenario_mapping_v04()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    rubric = dict(success["progress_rubric"])
+    items = [dict(item) for item in rubric["items"]]
+    items[1]["id"] = "source_lifted"
+    rubric["items"] = items
+    success["progress_rubric"] = rubric
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="duplicate"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v04_rejects_unknown_temporal_kind() -> None:
+    data = _scenario_mapping_v04()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    rubric = dict(success["progress_rubric"])
+    items = [dict(item) for item in rubric["items"]]
+    items[0]["temporal"] = {"kind": "periodic"}
+    rubric["items"] = items
+    success["progress_rubric"] = rubric
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="temporal"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v04_sustained_window_must_reference_known_steps_in_order() -> None:
+    for window, match in (
+        ({"from_step": "missing", "through_step": "tilt_pour"}, "unknown step"),
+        ({"from_step": "tilt_pour", "through_step": "align_openings"}, "ends before"),
+    ):
+        data = _scenario_mapping_v04()
+        success = dict(data["success"])  # type: ignore[arg-type]
+        rubric = dict(success["progress_rubric"])
+        items = [dict(item) for item in rubric["items"]]
+        items[1]["temporal"] = {"kind": "sustained", "window": window}
+        rubric["items"] = items
+        success["progress_rubric"] = rubric
+        data["success"] = success
+
+        with pytest.raises(ValueError, match=match):
+            ScenarioSpec.from_mapping(data)
+
+
+def test_v04_rejects_unknown_condition_object_and_actor() -> None:
+    data = _scenario_mapping_v04()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    rubric = dict(success["progress_rubric"])
+    items = [dict(item) for item in rubric["items"]]
+    lifted = dict(items[0])
+    condition = dict(lifted["condition"])
+    parameters = dict(condition["parameters"])
+    parameters["object"] = "obj_missing"
+    condition["parameters"] = parameters
+    lifted["condition"] = condition
+    items[0] = lifted
+    grasped = dict(items[1])
+    grasped_condition = dict(grasped["condition"])
+    grasped_parameters = dict(grasped_condition["parameters"])
+    grasped_parameters["grasp"] = {"actor": "missing_arm", "object": "obj_conical_bottle03"}
+    grasped_condition["parameters"] = grasped_parameters
+    grasped["condition"] = grasped_condition
+    items[1] = grasped
+    rubric["items"] = items
+    success["progress_rubric"] = rubric
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="unknown object"):
+        ScenarioSpec.from_mapping(data)
+
+    items[0] = _progress_rubric()["items"][0]
+    rubric["items"] = items
+
+    with pytest.raises(ValueError, match="unknown actor"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v04_rejects_grasp_condition_duplicated_by_invariant() -> None:
+    data = _scenario_mapping_v04()
+    invariants = [dict(data["invariants"][0])]  # type: ignore[index]
+    invariants.append(
+        {
+            "id": "source_held_during_pour",
+            "type": "maintain_grasp",
+            "actor": "operating_arm",
+            "object": "obj_conical_bottle03",
+            "from_step": "lift_source",
+            "through_step": "tilt_pour",
+        }
+    )
+    data["invariants"] = invariants
+
+    with pytest.raises(ValueError, match="progress rubric"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v04_json_schema_validates_rubric_and_rejects_bad_weight() -> None:
+    schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.4.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    validator = Draft202012Validator(schema)
+
+    assert not list(validator.iter_errors(_scenario_mapping_v04()))
+
+    bad = _scenario_mapping_v04()
+    success = dict(bad["success"])  # type: ignore[arg-type]
+    rubric = dict(success["progress_rubric"])
+    items = [dict(item) for item in rubric["items"]]
+    items[0]["weight"] = 1.5
+    rubric["items"] = items
+    success["progress_rubric"] = rubric
+    bad["success"] = success
+
+    assert list(validator.iter_errors(bad))

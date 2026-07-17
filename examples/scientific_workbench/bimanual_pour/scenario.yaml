@@ -1,4 +1,4 @@
-schema_version: scenario-spec/v0.3
+schema_version: scenario-spec/v0.4
 scenario_id: scientific_workbench_bimanual_pour
 domain: scientific_workbench
 task_family: bimanual_pour
@@ -195,5 +195,125 @@ success:
             object_axis: y
             target_axis: y
             max_axis_error_deg: 15.0
+  progress_rubric:
+    aggregation:
+      type: weighted_progress_score
+      normalization: declared_sum
+      inactive_treatment: zero
+      primary_metric_id: openings_aligned_while_grasped
+    items:
+      - id: source_lifted
+        weight: 0.20
+        temporal:
+          kind: instant
+        condition:
+          type: object_lifted
+          parameters:
+            object: obj_conical_bottle03
+            support_surface: table
+            min_clearance_m: 0.01
+            held_by: operating_arm
+        source_ref:
+          document_url: https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab
+          document_revision: 1549
+          sheet_revision: 564
+          extracted_on: "2026-07-17"
+          item: 时序1
+      - id: openings_aligned_while_grasped
+        weight: 0.30
+        temporal:
+          kind: sustained
+          window:
+            from_step: align_openings
+            through_step: tilt_pour
+        condition:
+          type: pose_while_grasped
+          parameters:
+            grasp:
+              actor: operating_arm
+              object: obj_conical_bottle03
+            predicate:
+              type: named_frames_relative_pose_reached
+              parameters:
+                source_frame: obj_conical_bottle03.opening
+                target_frame: obj_graduated_cylinder_03.opening
+                target_frame_from_source_frame_nominal_pose:
+                  xyz: [0.0, 0.0175, 0.0425]
+                  wxyz: [0.8746197071393957, 0.48480962024633706, 0.0, 0.0]
+                source_origin_in_target_frame_range_m:
+                  x: [-0.005, 0.005]
+                  y: [0.015, 0.02]
+                  z: [0.035, 0.05]
+                source_normal_axis: z
+                target_normal_axis: z
+                source_normal_polar_angle_range_deg: [55.0, 60.0]
+                source_normal_azimuth_range_deg: [-95.0, -85.0]
+                bounds: inclusive
+        source_ref:
+          document_url: https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab
+          document_revision: 1549
+          sheet_revision: 564
+          extracted_on: "2026-07-17"
+          item: 时序2
+      - id: liquid_transfer_majority
+        weight: 0.20
+        active: false
+        requires: [liquid_sim.contained_volume_ratio]
+        temporal:
+          kind: terminal
+        condition:
+          type: liquid_transfer_ratio
+          parameters:
+            source: obj_conical_bottle03
+            target: obj_graduated_cylinder_03
+            ratio_threshold: 0.5
+            measurement: containment_ledger
+            initial_snapshot: episode_start
+        source_ref:
+          document_url: https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab
+          document_revision: 1549
+          sheet_revision: 564
+          extracted_on: "2026-07-17"
+          item: 终帧-转移比例过半
+      - id: liquid_transfer_complete
+        weight: 0.20
+        active: false
+        requires: [liquid_sim.contained_volume_ratio]
+        temporal:
+          kind: terminal
+        condition:
+          type: liquid_transfer_ratio
+          parameters:
+            source: obj_conical_bottle03
+            target: obj_graduated_cylinder_03
+            ratio_threshold: 0.9
+            measurement: containment_ledger
+            initial_snapshot: episode_start
+        source_ref:
+          document_url: https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab
+          document_revision: 1549
+          sheet_revision: 564
+          extracted_on: "2026-07-17"
+          item: 终帧-转移比例达全阈值
+      - id: source_returned_released
+        weight: 0.10
+        temporal:
+          kind: terminal
+        condition:
+          type: object_released_on_support
+          parameters:
+            object: obj_conical_bottle03
+            support_surface: table
+            upright_max_tilt_deg: 15.0
+            region:
+              center: [-0.25, 0.16, 0.81]
+              half_extents: [0.06, 0.06, 0.06]
+            released: true
+        source_ref:
+          document_url: https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab
+          document_revision: 1549
+          sheet_revision: 564
+          extracted_on: "2026-07-17"
+          item: 终帧-归还并释放
 max_steps: 1500
 seed: "000"

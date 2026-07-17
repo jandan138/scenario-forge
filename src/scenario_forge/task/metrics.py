@@ -38,4 +38,11 @@ def find_primary_success_metric(metrics_path: str | Path) -> dict[str, Any] | No
     for metric in raw_metrics:
         if isinstance(metric, dict) and metric.get("role") == "primary_success":
             return metric
+    aggregation = data.get("aggregation")
+    if isinstance(aggregation, dict):
+        primary_id = aggregation.get("primary_metric_id")
+        if isinstance(primary_id, str):
+            for metric in raw_metrics:
+                if isinstance(metric, dict) and metric.get("id") == primary_id:
+                    return metric
     return None
