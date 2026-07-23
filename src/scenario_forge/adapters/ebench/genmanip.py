@@ -222,6 +222,7 @@ def export_genmanip_collected_package(
                 "scenario scene.root_prim_path"
             )
 
+    _validate_visual_static_object_requirements(objects, assets_by_id, table)
     qualified_object_ids, requires_gpu_dynamics = _qualified_rigid_requirements(
         objects,
         assets_by_id,
@@ -272,6 +273,7 @@ def export_genmanip_collected_package(
         episode_name=seed,
         objects=objects,
         table=table,
+        assets_by_id=assets_by_id,
         goal=goal,
         runtime_contract=runtime_contract,
         qualified_object_ids=qualified_object_ids,
@@ -402,6 +404,16 @@ def _write_collected_package(
     scene_dir.mkdir(parents=True, exist_ok=True)
     source_bundle = scene_dir / "source_bundle"
     shutil.copytree(package_root / "assets", source_bundle)
+    table = _table_object(objects)
+    table_asset_id = _required_string(table, "asset_id", "table object")
+    table_asset = assets_by_id[table_asset_id]
+    if table_asset.role == "static_object":
+        runtime_dir = source_bundle / "scenario_forge_runtime"
+        runtime_dir.mkdir()
+        (runtime_dir / "table.usd").write_text(
+            _runtime_table_preload_usda(table_asset, table),
+            encoding="utf-8",
+        )
 
     scene_text = _scene_usda(
         scenario_id=scenario_id,
@@ -586,6 +598,7 @@ def _episode_metadata(
     episode_name: str,
     objects: list[Mapping[str, Any]],
     table: Mapping[str, Any],
+    assets_by_id: Mapping[str, AssetManifestEntry],
     goal: list[list[list[dict[str, Any]]]],
     runtime_contract: Mapping[str, Any],
     qualified_object_ids: set[str],
@@ -599,6 +612,8 @@ def _episode_metadata(
             table_id=table_id,
         )
         object_id = binding.scenario_object_id
+        asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
+        asset = assets_by_id[asset_id]
         pose = _required_mapping(item, "pose", f"scenario object {object_id}")
         initial_layout[binding.runtime_uid] = {
             "type": "object",
@@ -611,7 +626,11 @@ def _episode_metadata(
                 3,
                 f"{object_id}.pose.scale_xyz",
             ),
-            "path": "",
+            "path": (
+                _genmanip_collected_table_preload_path(scenario_id)
+                if binding.is_table and asset.role == "static_object"
+                else ""
+            ),
             "add_colliders": object_id not in qualified_object_ids,
             "add_rigid_body": (
                 not binding.is_table and object_id not in qualified_object_ids
@@ -1073,6 +1092,37 @@ def _qualified_rigid_requirements(
     return qualified, requires_gpu_dynamics
 
 
+def _validate_visual_static_object_requirements(
+    objects: list[Mapping[str, Any]],
+    assets_by_id: Mapping[str, AssetManifestEntry],
+    table: Mapping[str, Any],
+) -> None:
+    """Route a visual-static table through GenManip's native static-table path.
+
+    GenManip gives non-table objects generic colliders and a generic rigid body.
+    A ConvertAsset ``visual_static_object`` is intentionally nonphysical, so this
+    adapter supports it only for the declared table.  The collected scene leaves
+    that table uninstantiated so ``recovery_scene`` preloads the package root,
+    preserves its dependency scope, and applies GenManip's existing static-table
+    collider policy without adding a rigid body.
+    """
+
+    table_id = _required_string(table, "id", "table object")
+    for item in objects:
+        object_id = _required_string(item, "id", "scenario object")
+        asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
+        asset = assets_by_id[asset_id]
+        if asset.role == "static_object" and object_id != table_id:
+            raise GenManipExportError(
+                "visual_static_object asset "
+                f"{asset_id!r} may only be bound to the declared table "
+                f"{table_id!r}; non-table objects would receive GenManip's "
+                "default rigid-body behavior"
+            )
+        if asset.role == "static_object":
+            _runtime_table_preload_usda(asset, item)
+
+
 def _interaction_requires_gpu_dynamics(
     interaction: Mapping[str, Any],
     asset_id: str,
@@ -1291,6 +1341,8 @@ def _scene_usda(
         object_id = binding.scenario_object_id
         wrapper_name = binding.wrapper_name
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
+        if binding.is_table and assets_by_id[asset_id].role == "static_object":
+            continue
         source_prim = _required_string(
             item, "source_prim_path", f"scenario object {object_id}"
         )
@@ -1494,6 +1546,81 @@ def _asset_reference(asset: AssetManifestEntry) -> str:
         )
     relative = PurePosixPath(*path.parts[1:])
     return (PurePosixPath("source_bundle") / relative).as_posix()
+
+
+def _genmanip_collected_table_preload_path(scenario_id: str) -> str:
+    return (
+        PurePosixPath("collected_packages")
+        / scenario_id
+        / "assets"
+        / "scene_usds"
+        / "scenario_forge"
+        / scenario_id
+        / "source_bundle"
+        / "scenario_forge_runtime"
+        / "table.usd"
+    ).as_posix()
+
+
+def _runtime_table_preload_usda(
+    asset: AssetManifestEntry,
+    table: Mapping[str, Any],
+) -> str:
+    root_prim = asset.metadata.get("root_prim_path")
+    if not isinstance(root_prim, str) or not root_prim:
+        raise GenManipExportError(
+            f"visual-static table asset {asset.asset_id!r} is missing root_prim_path"
+        )
+    source_prim = _required_string(table, "source_prim_path", "table object")
+    scope_parts = _relative_prim_parts(root_prim, source_prim)
+    source_reference = PurePosixPath(_asset_reference(asset))
+    relative_reference = PurePosixPath("..", *source_reference.parts[1:])
+    lines = [
+        "#usda 1.0",
+        "(",
+        '    defaultPrim = "Asset"',
+        "    metersPerUnit = 1",
+        '    upAxis = "Z"',
+        ")",
+        "",
+        'def Xform "Asset" (',
+        (
+            "    prepend references = "
+            f"@{relative_reference.as_posix()}@<{root_prim}>"
+        ),
+        ")",
+        "{",
+        "    uniform token[] xformOpOrder = []",
+        "",
+        *_runtime_preload_scope_reset_lines(scope_parts, indent=4),
+        "}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def _runtime_preload_scope_reset_lines(
+    parts: tuple[str, ...],
+    *,
+    indent: int,
+) -> list[str]:
+    if not parts:
+        return []
+    name = parts[0]
+    _require_usd_identifier(name, "runtime preload scope component")
+    prefix = " " * indent
+    lines = [
+        f'{prefix}over "{name}"',
+        f"{prefix}{{",
+        f"{prefix}    uniform token[] xformOpOrder = []",
+    ]
+    if len(parts) > 1:
+        lines.append("")
+        lines.extend(
+            _runtime_preload_scope_reset_lines(parts[1:], indent=indent + 4)
+        )
+    lines.append(f"{prefix}}}")
+    return lines
 
 
 def _require_assets(

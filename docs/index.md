@@ -52,4 +52,5 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-14 GenManip Runtime-contract Transport](records/2026-07-14-genmanip-runtime-contract-transport.md)
 - [2026-07-14 Bimanual Pour v0.2 Package Closure](records/2026-07-14-scientific-workbench-bimanual-pour-v02-package-closure.md)
 - [2026-07-17 Progress Rubric v0.4 (M1, transport_only)](records/2026-07-17-progress-rubric-v04-m1.md)
+- [2026-07-23 Scene1_hard Visual Context for EBench Bimanual Pour](records/2026-07-23-scene1-hard-ebench-bimanual-pour-context.md)
 - [2026-07-06 Phase 13 S2D-12 Soap-to-Dish Static Candidate Evidence](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/generated_package_summary.yaml)

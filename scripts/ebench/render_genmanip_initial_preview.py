@@ -160,6 +160,11 @@ def _render_initial_scene(
         task_config = _load_mapping(task_config_path, "task config")
         episode = _load_json_mapping(episode_path, "episode metadata")
         task_name = _required_string(request, "task_name", "render request")
+        package_id = _required_string(request, "package_id", "render request")
+        task_data = _required_mapping(episode, "task_data", "episode metadata")
+        _resolve_collected_asset_paths_for_preview(
+            task_data, collected_root, package_id
+        )
         evaluation = _select_evaluation(task_config, task_name)
         evaluation["usd_name"] = str(scene_path.with_suffix(""))
         domain = _required_mapping(evaluation, "domain_randomization", "evaluation")
@@ -188,7 +193,6 @@ def _render_initial_scene(
         _flush_runtime_log(staging_dir, log_lines)
         scene.post_initialize()
         reset_scene(scene)
-        task_data = _required_mapping(episode, "task_data", "episode metadata")
         recovery_scene(scene, copy.deepcopy(task_data), task_name, default_config)
         for _ in range(WARMUP_STEPS):
             scene.world.step(render=False)
@@ -384,6 +388,34 @@ def _render_initial_scene(
         simulation_app.close()
 
 
+def _resolve_collected_asset_paths_for_preview(
+    task_data: Mapping[str, Any],
+    collected_root: Path,
+    package_id: str,
+) -> None:
+    """Resolve installed-package paths without mutating the collected package."""
+
+    initial_layout = _required_mapping(
+        task_data, "initial_layout", "episode task_data"
+    )
+    prefix = f"collected_packages/{package_id}/"
+    resolved_root = collected_root.resolve()
+    for runtime_id, raw_item in initial_layout.items():
+        item = _as_mapping(raw_item, f"initial_layout.{runtime_id}")
+        raw_path = item.get("path")
+        if not isinstance(raw_path, str) or not raw_path.startswith(prefix):
+            continue
+        relative = Path(raw_path.removeprefix(prefix))
+        resolved = (resolved_root / relative).resolve()
+        if resolved_root not in resolved.parents or not resolved.is_file():
+            raise ValueError(
+                f"collected asset path is unavailable for {runtime_id}: {raw_path}"
+            )
+        if not isinstance(raw_item, dict):
+            raise ValueError(f"initial_layout.{runtime_id} must be mutable")
+        raw_item["path"] = str(resolved)
+
+
 def _camera_config(
     view_name: str, request_views: Mapping[str, Any]
 ) -> dict[str, Any]:
@@ -453,6 +485,8 @@ def _fit_camera(
 
 
 def _runtime_prims(stage: Any, scene: Any, runtime_id: str) -> list[Any]:
+    if runtime_id == "scene_room":
+        return [stage.GetPrimAtPath(f"/World/{scene.uuid}/room")]
     if runtime_id == "lift2_end_effectors":
         root = f"/World/{scene.uuid}/lift2/lift2/lift2"
         return [

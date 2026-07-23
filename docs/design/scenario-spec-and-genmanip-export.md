@@ -30,14 +30,20 @@ adapters/ebench/genmanip/
   tasks/<task_name>/000/meta_info.pkl
   cameras/fixed_camera_lift2.yml
   assets/scene_usds/scenario_forge/<scenario_id>/scene.usda
+  assets/scene_usds/scenario_forge/<scenario_id>/
+    source_bundle/scenario_forge_runtime/table.usd
   package_manifest.json
 ```
 
-The adapter scene has one child below `/World`, immediate `obj_*` wrappers, and an
-`obj_table`. The Lift2 robot is injected by GenManip and is not authored into the
-environment USD. `episode_metadata.json` is the authoritative episode description;
-the pickle is a deterministic compatibility encoding of the same JSON-safe data.
-Scenario Forge never loads an external pickle.
+The adapter scene has one child below `/World` and immediate wrappers for embedded
+task objects. A ConvertAsset `visual_static_object` table is deliberately not
+pre-embedded: its episode layout points to the adapter-owned `table.usd` runtime
+composition layer so GenManip's existing recovery path can create `obj_table` and
+apply `add_colliders: true`, `add_rigid_body: false`. The Lift2 robot is likewise
+injected by GenManip and is not authored into the environment USD.
+`episode_metadata.json` is the authoritative episode description; the pickle is a
+deterministic compatibility encoding of the same JSON-safe data. Scenario Forge
+never loads an external pickle.
 
 The embedded runtime contract is the semantic handoff for downstream code that
 needs more than GenManip's native goal projection. The legacy v0.1, exact v0.2,
@@ -77,21 +83,37 @@ general scene-editing pipeline.
 
 ## Task-ready context curation
 
-The golden bimanual-pour scenario uses `scene.inactive_prim_paths` as a
-non-destructive task overlay. It keeps the complete source bundle and source
-layout intact, but deactivates whole top-level subtrees for unrelated loose
-glassware, platforms, cabinets, and articulated appliances in both the portable
-scene and the GenManip room reference. This prevents their descendant joints,
-rigid bodies, and colliders from entering the task runtime without teaching the
-compiler any LabUtopia-specific prim names.
+`scene.inactive_prim_paths` remains a generic, non-destructive way to suppress
+source subtrees that would duplicate task objects. The current golden bimanual-pour
+task does not use it for laboratory cleanup. Instead, it consumes two
+ConvertAsset-owned visual-static deliveries:
 
-`DryingBox_03` is intentionally retained as the single visible laboratory-context
-device in this scenario. Its portable USD still composes the source-bound
-articulation/physics APIs; Scenario Forge does not strip them. Current GenManip
-initialization separately removes colliders recursively below the `room` prim, so
-the post-initialization adapter runtime cannot claim DB03 is collision-active. A
-future task that manipulates an appliance must export it through an interaction
-path outside that room policy and qualify the relevant affordances.
+- `Scene1_hard.usd:/World/lab_015` is the complete visual laboratory room under
+  the GenManip `room` prim, with its parent-composed units and transform retained;
+- `lab_001.usd:/World/table` is the `visual_static_object` task table, placed with
+  the existing EBench workspace transform and coordinate protocol.
+
+The split removes Clean Beaker's task clutter by construction rather than by a
+Scenario Forge list of LabUtopia-specific prim names. Both producer deliveries must
+have no active physics residue. The normal GenManip table layout still creates its
+generic support collider; this adapter permits a `visual_static_object` only for
+that declared table and rejects a non-table one before it could receive GenManip's
+generic rigid-body defaults. Scenario Forge neither authors nor repairs asset physics.
+
+GenManip can only apply that native collider policy when the table is absent from
+the initial scene. The adapter therefore emits a thin `.usd` preload entry under
+`source_bundle/scenario_forge_runtime/`. It references the complete ConvertAsset
+root so sibling `Looks` materials remain in scope, then clears only the composed
+`xformOpOrder` on the referenced root and declared table-scope chain. The original
+transform attributes remain present as provenance, while the episode wrapper owns
+the effective table pose and scale. The layer contains no mesh, material, collider,
+rigid-body, mass, or inertia authoring. Because it lives below `source_bundle`, the
+preview's existing tree digest covers both this composition glue and every
+referenced USD/MDL/texture dependency.
+
+The source and target vessels remain interaction-qualified dynamic ConvertAsset
+packages. A future appliance task must use its own interaction-qualified object
+package rather than turning a visual context scope into a dynamic object.
 
 ## Initial-scene visual evidence
 
@@ -100,8 +122,8 @@ runtime performs the normal GenManip scene construction, reset, and recovery, ta
 no policy action, then creates temporary QA cameras for:
 
 - `workspace_closeup`: task objects, both Lift2 end effectors, and the work surface;
-- `scene_overview`: the whole worktable, Lift2 robot, task objects, and surrounding
-  scene context.
+- `scene_overview`: the complete GenManip `room` bound, Lift2 robot, worktable,
+  and task objects.
 
 The images, runtime manifest, runtime log, and `visual_ready_gate.yaml` live below
 `adapters/ebench/genmanip/evidence/initial_scene/`. Input hashes and the render-request

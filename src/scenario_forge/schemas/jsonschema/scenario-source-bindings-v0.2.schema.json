@@ -65,7 +65,14 @@
           ],
           "properties": {
             "resolver": {"const": "convert_asset_package"},
-            "usage": {"enum": ["scene_overlay", "rigid_object"]},
+            "usage": {
+              "enum": [
+                "scene_overlay",
+                "rigid_object",
+                "visual_static_environment",
+                "visual_static_object"
+              ]
+            },
             "source_usd": {"type": "string", "minLength": 1},
             "package_dir": {"type": "string", "minLength": 1},
             "manifest_path": {"type": "string", "minLength": 1},

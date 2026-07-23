@@ -7,61 +7,69 @@ import pytest
 import yaml
 
 from scripts import generate_scientific_workbench_bimanual_pour as generator
-from tests.test_convert_asset_adapter import _write_source_bound_handoff
+from tests.test_convert_asset_adapter import (
+    _write_source_bound_handoff,
+    _write_visual_static_handoff,
+)
 from tests.test_scenario_package_compiler import _write_source_scene
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-_TASK_READY_INACTIVE_PRIMS = [
-    "/World/Cube",
-    "/World/lounge_booth_table",
-    "/World/beaker1",
-    "/World/beaker2",
-    "/World/beaker3",
-    "/World/conical_bottle01",
-    "/World/conical_bottle02",
-    "/World/conical_bottle04",
-    "/World/target_plat",
-    "/World/target_plat2",
-    "/World/DryingBox_01",
-    "/World/DryingBox_02",
-    "/World/DryingBox_04",
-    "/World/MuffleFurnace",
-    "/World/Cabinet_01",
-    "/World/Cabinet_02",
-]
+# The package must retain Scene1_hard's parent-layer placement, units, and
+# rotation for the lab_015 payload; ConvertAsset extracts this exact scope.
+_SCENE1_ENVIRONMENT_SCOPE = "/World/lab_015"
+_EBENCH_TABLE_SCOPE = "/World/table"
 
 
 def _convert_asset_args(
     root: Path,
-    source_usd: Path,
+    scene1_source_usd: Path,
+    vessel_source_usd: Path,
     *,
+    scene1_environment_revision: str = "54ff5660937c08cf3784c44a3f500757ab4eed78",
+    table_revision: str = "54ff5660937c08cf3784c44a3f500757ab4eed78",
     source_vessel_revision: str = "source-vessel-profile-r1",
     target_vessel_revision: str = "target-vessel-profile-r3",
 ) -> list[str]:
-    _, dryingbox_package, dryingbox_manifest, _ = _write_source_bound_handoff(
-        root / "dryingbox_handoff",
-        source_usd=source_usd,
+    _, environment_package, environment_manifest, _ = _write_visual_static_handoff(
+        root / "scene1_environment_handoff",
+        source_usd=scene1_source_usd,
+        scope=_SCENE1_ENVIRONMENT_SCOPE,
+    )
+    _, table_package, table_manifest, _ = _write_visual_static_handoff(
+        root / "table_handoff",
+        source_usd=vessel_source_usd,
+        scope=_EBENCH_TABLE_SCOPE,
     )
     _, source_package, source_manifest, _ = _write_source_bound_handoff(
         root / "source_vessel_handoff",
-        source_usd=source_usd,
+        source_usd=vessel_source_usd,
         with_interaction_contract=True,
         observed_collider_approximation="sdf",
         interaction_root="/World/conical_bottle03",
     )
     _, target_package, target_manifest, _ = _write_source_bound_handoff(
         root / "target_vessel_handoff",
-        source_usd=source_usd,
+        source_usd=vessel_source_usd,
         with_interaction_contract=True,
         interaction_root="/World/graduated_cylinder_03",
     )
     return [
-        "--convert-asset-package",
-        str(dryingbox_package),
-        "--convert-asset-manifest",
-        str(dryingbox_manifest),
+        "--scene1-source-usd",
+        str(scene1_source_usd),
+        "--table-source-usd",
+        str(vessel_source_usd),
+        "--vessel-source-usd",
+        str(vessel_source_usd),
+        "--scene1-environment-package",
+        str(environment_package),
+        "--scene1-environment-manifest",
+        str(environment_manifest),
+        "--table-package",
+        str(table_package),
+        "--table-manifest",
+        str(table_manifest),
         "--source-vessel-package",
         str(source_package),
         "--source-vessel-manifest",
@@ -70,8 +78,10 @@ def _convert_asset_args(
         str(target_package),
         "--target-vessel-manifest",
         str(target_manifest),
-        "--dryingbox-revision",
-        "324ce6e6d4395ccfda1e59e5ae89de9389cdf225",
+        "--scene1-environment-revision",
+        scene1_environment_revision,
+        "--table-revision",
+        table_revision,
         "--source-vessel-revision",
         source_vessel_revision,
         "--target-vessel-revision",
@@ -79,22 +89,22 @@ def _convert_asset_args(
     ]
 
 
-def _write_task_ready_source_scene(root: Path) -> Path:
-    source = _write_source_scene(root)
-    text = source.read_text(encoding="utf-8")
-    insertion = "\n".join(
-        f'    def Xform "{name}" {{}}'
-        for name in [
-            *(Path(path).name for path in _TASK_READY_INACTIVE_PRIMS),
-            "DryingBox_03",
-            "CylinderLight",
-            "GroundPlane",
-        ]
-    )
-    closing_brace = text.rfind("\n}")
-    assert closing_brace > 0
+def _write_scene1_hard_environment_source(root: Path) -> Path:
+    source = root / "scene1-hard" / "Scene1_hard.usda"
+    source.parent.mkdir(parents=True)
     source.write_text(
-        text[:closing_brace] + "\n" + insertion + text[closing_brace:],
+        """#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+def Xform "World"
+{
+    def Xform "lab_015" {}
+    def Xform "table_hard" {}
+}
+""",
         encoding="utf-8",
     )
     return source
@@ -133,17 +143,13 @@ def test_golden_actor_roles_use_same_side_arms_instead_of_crossing_midline() -> 
 def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_reports(
     tmp_path: Path,
 ) -> None:
-    source_usd = _write_source_scene(tmp_path)
-    reports = source_usd.parent / "_reports"
-    reports.mkdir()
-    (reports / "old.png").write_bytes(b"old render")
+    scene1_source_usd = _write_scene1_hard_environment_source(tmp_path)
+    vessel_source_usd = _write_source_scene(tmp_path / "vessel-source")
     output = tmp_path / "output"
 
     result = generator.main(
         [
-            "--source-usd",
-            str(source_usd),
-            *_convert_asset_args(tmp_path, source_usd),
+            *_convert_asset_args(tmp_path, scene1_source_usd, vessel_source_usd),
             "--out",
             str(output),
             "--static-only",
@@ -153,11 +159,12 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert result == 0
     collected = output / "adapters/ebench/genmanip"
     assert (collected / "evidence/render_request.yaml").is_file()
-    assert not (output / "assets/scientific_workbench_environment/_reports").exists()
-    overlay_root = output / "assets/scientific_workbench_dryingbox_03_dynamic"
-    assert (overlay_root / "physics/profile.json").is_file()
-    assert (overlay_root / "overlays/physics_profile.usda").is_file()
-    assert not (overlay_root / "evidence").exists()
+    for asset_id in (
+        "scientific_workbench_scene1_hard_environment",
+        "scientific_workbench_ebench_table",
+    ):
+        assert (output / "assets" / asset_id / "asset.usd").is_file()
+        assert not (output / "assets" / asset_id / "evidence").exists()
     for asset_id in (
         "scientific_workbench_conical_bottle03_dynamic",
         "scientific_workbench_graduated_cylinder_03_dynamic",
@@ -177,18 +184,26 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         for item in assets
         if "upstream_package" in item
     }
-    upstream = upstream_by_asset["scientific_workbench_dryingbox_03_dynamic"]
-    assert upstream["producer"] == "ConvertAsset"
-    assert upstream["revision"] == "324ce6e6d4395ccfda1e59e5ae89de9389cdf225"
-    assert upstream["metadata"]["quality_tier"] == "provisional_geometry"
-    expected_vessel_revisions = {
+    expected_revisions = {
+        "scientific_workbench_scene1_hard_environment": (
+            "54ff5660937c08cf3784c44a3f500757ab4eed78"
+        ),
+        "scientific_workbench_ebench_table": (
+            "54ff5660937c08cf3784c44a3f500757ab4eed78"
+        ),
         "scientific_workbench_conical_bottle03_dynamic": "source-vessel-profile-r1",
         "scientific_workbench_graduated_cylinder_03_dynamic": "target-vessel-profile-r3",
     }
     assert {
         asset_id: upstream_by_asset[asset_id]["revision"]
-        for asset_id in expected_vessel_revisions
-    } == expected_vessel_revisions
+        for asset_id in expected_revisions
+    } == expected_revisions
+    assert upstream_by_asset["scientific_workbench_scene1_hard_environment"][
+        "metadata"
+    ]["consumer_usage"] == "visual_static_environment"
+    assert upstream_by_asset["scientific_workbench_ebench_table"][
+        "metadata"
+    ]["consumer_usage"] == "visual_static_object"
 
     asset_manifest = yaml.safe_load(
         (output / "assets/asset_manifest.yaml").read_text(encoding="utf-8")
@@ -200,8 +215,8 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     }
     assert {
         asset_id: asset_manifest_upstream[asset_id]
-        for asset_id in expected_vessel_revisions
-    } == expected_vessel_revisions
+        for asset_id in expected_revisions
+    } == expected_revisions
 
     collected_manifest = json.loads(
         (collected / "package_manifest.json").read_text(encoding="utf-8")
@@ -213,8 +228,8 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     }
     assert {
         asset_id: collected_upstream[asset_id]
-        for asset_id in expected_vessel_revisions
-    } == expected_vessel_revisions
+        for asset_id in expected_revisions
+    } == expected_revisions
 
     task_config = yaml.safe_load(
         (collected / "tasks/config.yaml").read_text(encoding="utf-8")
@@ -237,11 +252,16 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         0.31,
     ]
     initial_layout = episode["task_data"]["initial_layout"]
-    assert initial_layout["00000000000000000000000000000000"]["scale"] == [
-        0.003,
-        0.0035,
-        0.004,
-    ]
+    table_layout = initial_layout["00000000000000000000000000000000"]
+    assert table_layout["position"] == [0.242788066, 0.0, 0.0]
+    assert table_layout["scale"] == [0.003, 0.0035, 0.004]
+    assert table_layout["path"] == (
+        "collected_packages/scientific_workbench_bimanual_pour/"
+        "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/"
+        "source_bundle/scenario_forge_runtime/table.usd"
+    )
+    assert table_layout["add_colliders"] is True
+    assert table_layout["add_rigid_body"] is False
     assert initial_layout["obj_conical_bottle03"]["position"] == [-0.25, 0.16, 0.81]
     assert initial_layout["obj_graduated_cylinder_03"]["position"] == [
         -0.25,
@@ -291,13 +311,12 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         collected
         / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
     ).read_text(encoding="utf-8")
-    assert 'over "Cube" (' in scene_text
-    assert "active = false" in scene_text
-    assert "double3 xformOp:translate = (-9.5, -43.3, 0)" in scene_text
-    assert "quatd xformOp:orient = (0.7933533, 0, 0, 0.6087614)" in scene_text
-    assert 'over "Cabinet_02" (' in scene_text
-    assert 'over "CylinderLight"' in scene_text
-    assert 'over "GroundPlane"' in scene_text
+    assert "scientific_workbench_scene1_hard_environment" in scene_text
+    assert "scientific_workbench_ebench_table" not in scene_text
+    assert 'def Xform "obj_table"' not in scene_text
+    assert 'over "table" (' in scene_text
+    assert "double3 xformOp:translate = (0.621309, 0.462547, 0.061353)" in scene_text
+    assert "scientific_workbench_dryingbox_03_dynamic" not in scene_text
     for local_physics_token in (
         "__aan_collision_proxy",
         "physics:mass",
@@ -308,12 +327,46 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     ):
         assert local_physics_token not in scene_text
 
+    runtime_table_path = (
+        collected
+        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/"
+        "source_bundle/scenario_forge_runtime/table.usd"
+    )
+    runtime_table_text = runtime_table_path.read_text(encoding="utf-8")
+    assert 'defaultPrim = "Asset"' in runtime_table_text
+    assert (
+        "prepend references = "
+        "@../scientific_workbench_ebench_table/asset.usd@</World>"
+    ) in runtime_table_text
+    assert runtime_table_text.count("uniform token[] xformOpOrder = []") == 2
+    for forbidden_token in (
+        "PhysicsCollisionAPI",
+        "PhysicsRigidBodyAPI",
+        "PhysicsMassAPI",
+        "physics:mass",
+        "physics:diagonalInertia",
+    ):
+        assert forbidden_token not in runtime_table_text
+
+    Usd = pytest.importorskip("pxr.Usd")
+    runtime_table_stage = Usd.Stage.Open(str(runtime_table_path))
+    assert runtime_table_stage
+    assert runtime_table_stage.GetDefaultPrim().GetPath().pathString == "/Asset"
+    assert runtime_table_stage.GetPrimAtPath("/Asset/table").IsActive()
+    assert (
+        runtime_table_stage.GetPrimAtPath("/Asset/table")
+        .GetAttribute("xformOpOrder")
+        .Get()
+        == []
+    )
+
 
 def test_golden_generator_default_build_runs_genmanip_preview(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    source_usd = _write_source_scene(tmp_path)
+    scene1_source_usd = _write_scene1_hard_environment_source(tmp_path)
+    vessel_source_usd = _write_source_scene(tmp_path / "vessel-source")
     output = tmp_path / "output"
     isaac_python = tmp_path / "isaac python"
     renderer_script = tmp_path / "renderer.py"
@@ -346,9 +399,7 @@ def test_golden_generator_default_build_runs_genmanip_preview(
 
     result = generator.main(
         [
-            "--source-usd",
-            str(source_usd),
-            *_convert_asset_args(tmp_path, source_usd),
+            *_convert_asset_args(tmp_path, scene1_source_usd, vessel_source_usd),
             "--out",
             str(output),
             "--isaac-python",
@@ -374,18 +425,17 @@ def test_golden_generator_default_build_runs_genmanip_preview(
     ]
 
 
-def test_golden_task_ready_overlay_removes_unrelated_dynamic_context_in_both_scenes(
+def test_scene1_environment_and_table_scopes_are_composed_in_both_scenes(
     tmp_path: Path,
 ) -> None:
     Usd = pytest.importorskip("pxr.Usd")
-    source_usd = _write_task_ready_source_scene(tmp_path)
+    scene1_source_usd = _write_scene1_hard_environment_source(tmp_path)
+    vessel_source_usd = _write_source_scene(tmp_path / "vessel-source")
     output = tmp_path / "output"
 
     result = generator.main(
         [
-            "--source-usd",
-            str(source_usd),
-            *_convert_asset_args(tmp_path, source_usd),
+            *_convert_asset_args(tmp_path, scene1_source_usd, vessel_source_usd),
             "--out",
             str(output),
             "--static-only",
@@ -394,21 +444,22 @@ def test_golden_task_ready_overlay_removes_unrelated_dynamic_context_in_both_sce
 
     assert result == 0
     scenario = yaml.safe_load((output / "scenario.yaml").read_text(encoding="utf-8"))
-    assert scenario["scene"]["inactive_prim_paths"] == _TASK_READY_INACTIVE_PRIMS
+    assert scenario["scene"]["asset_id"] == "scientific_workbench_scene1_hard_environment"
+    assert "overlay_asset_ids" not in scenario["scene"]
+    table = next(item for item in scenario["objects"] if item["id"] == "table")
+    assert table["asset_id"] == "scientific_workbench_ebench_table"
+    assert table["source_prim_path"] == _EBENCH_TABLE_SCOPE
 
     portable = Usd.Stage.Open(str(output / "scene/main.usda"))
     assert portable
-    for path in _TASK_READY_INACTIVE_PRIMS:
-        assert not portable.GetPrimAtPath(path).IsActive(), path
     for path in [
-        "/World/table",
+        _SCENE1_ENVIRONMENT_SCOPE,
+        _EBENCH_TABLE_SCOPE,
         "/World/conical_bottle03",
         "/World/graduated_cylinder_03",
-        "/World/DryingBox_03",
-        "/World/CylinderLight",
-        "/World/GroundPlane",
     ]:
         assert portable.GetPrimAtPath(path).IsActive(), path
+    assert not portable.GetPrimAtPath("/World/DryingBox_03").IsValid()
 
     collected = Usd.Stage.Open(
         str(
@@ -419,13 +470,12 @@ def test_golden_task_ready_overlay_removes_unrelated_dynamic_context_in_both_sce
     )
     assert collected
     room = "/World/scientific_workbench_bimanual_pour/room"
-    for path in _TASK_READY_INACTIVE_PRIMS:
-        assert not collected.GetPrimAtPath(room + path.removeprefix("/World")).IsActive(), path
+    assert collected.GetPrimAtPath(f"{room}/lab_015").IsActive()
+    assert not collected.GetPrimAtPath(f"{room}/table").IsActive()
+    assert not collected.GetPrimAtPath(
+        "/World/scientific_workbench_bimanual_pour/obj_table"
+    ).IsValid()
     for path in [
-        f"{room}/DryingBox_03",
-        f"{room}/CylinderLight",
-        f"{room}/GroundPlane",
-        "/World/scientific_workbench_bimanual_pour/obj_table",
         "/World/scientific_workbench_bimanual_pour/obj_obj_conical_bottle03",
         "/World/scientific_workbench_bimanual_pour/obj_obj_graduated_cylinder_03",
     ]:
@@ -437,31 +487,15 @@ def test_golden_task_ready_overlay_removes_unrelated_dynamic_context_in_both_sce
     ]
     assert active_physics_scenes == ["/physicsScene"]
 
-    portable_mass = portable.GetPrimAtPath(
-        "/World/DryingBox_03/body"
-    ).GetAttribute("physics:mass")
-    assert portable_mass.Get() == pytest.approx(12.0)
-    assert portable_mass.GetPropertyStack()[0].layer.realPath.endswith(
-        "/assets/scientific_workbench_dryingbox_03_dynamic/"
-        "overlays/physics_profile.usda"
-    )
-    collected_mass = collected.GetPrimAtPath(
-        f"{room}/DryingBox_03/body"
-    ).GetAttribute("physics:mass")
-    assert collected_mass.Get() == pytest.approx(12.0)
-    assert collected_mass.GetPropertyStack()[0].layer.realPath.endswith(
-        "/source_bundle/scientific_workbench_dryingbox_03_dynamic/"
-        "overlays/physics_profile.usda"
-    )
-
 
 def test_golden_generator_validates_handoff_before_replacing_output(
     tmp_path: Path,
 ) -> None:
-    source_usd = _write_source_scene(tmp_path)
-    handoff_args = _convert_asset_args(tmp_path, source_usd)
-    source_usd.write_text(
-        source_usd.read_text(encoding="utf-8") + "\n# changed after handoff\n",
+    scene1_source_usd = _write_scene1_hard_environment_source(tmp_path)
+    vessel_source_usd = _write_source_scene(tmp_path / "vessel-source")
+    handoff_args = _convert_asset_args(tmp_path, scene1_source_usd, vessel_source_usd)
+    scene1_source_usd.write_text(
+        scene1_source_usd.read_text(encoding="utf-8") + "\n# changed after handoff\n",
         encoding="utf-8",
     )
     output = tmp_path / "output"
@@ -472,8 +506,6 @@ def test_golden_generator_validates_handoff_before_replacing_output(
     with pytest.raises(ValueError, match="source SHA-256"):
         generator.main(
             [
-                "--source-usd",
-                str(source_usd),
                 *handoff_args,
                 "--out",
                 str(output),
@@ -504,6 +536,8 @@ def test_runbook_stages_canary_in_a_private_genmanip_workspace() -> None:
     assert 'git -C "$GENMANIP_SOURCE" archive HEAD' not in runbook
     assert 'rm -rf "$target"' not in runbook
     assert "shared EBench asset directory" in runbook
+    assert "--scene1-environment-revision" in runbook
+    assert "--table-revision" in runbook
     assert "--source-vessel-revision" in runbook
     assert "--target-vessel-revision" in runbook
     assert (
@@ -514,5 +548,8 @@ def test_runbook_stages_canary_in_a_private_genmanip_workspace() -> None:
         "TARGET_VESSEL_REVISION=4bb541161a652cc4e5dd63253adffba018f17137"
         in runbook
     )
+    assert "Scene1_hard.usd" in runbook
+    assert "Scene1_hard.usd:/World/lab_015" in runbook
+    assert "/World/table" in runbook
     assert "2026-07-15-aan-graduated-cylinder-r3-grasp-section" in runbook
     assert 'VESSEL_REVISION="$(git -C "$CONVERT_ASSET_ROOT" rev-parse HEAD)"' not in runbook

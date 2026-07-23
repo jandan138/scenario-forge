@@ -58,7 +58,7 @@ an inbound package boundary; neither imports ConvertAsset implementation code.
 Preferred high-level path:
 
 ```text
-ConvertAsset/scripts/isaac_python.sh ConvertAsset/main.py normalize-asset <source.usd> --package-dir <out>
+ConvertAsset/scripts/isaac_python.sh ConvertAsset/main.py normalize-asset <source.usd> --out <package-dir>
 ```
 
 Low-level commands such as `no-mdl`, `mesh-faces`, and `usd-to-glb` remain ConvertAsset-owned.

@@ -49,22 +49,55 @@ bindings:
 
 `convert_asset_package` validates an existing source-bound ConvertAsset delivery
 through the existing inbound adapter. In v0.2 its `usage` explicitly selects the
-neutral role instead of inferring one:
+neutral role instead of inferring one. The available values are `scene_overlay`,
+`rigid_object`, `visual_static_environment`, and `visual_static_object`.
+
+The two `visual_static_*` values require a ConvertAsset `asset_role:
+visual_static` manifest. Scenario Forge verifies the exact source and scope hashes,
+the passing visual-preservation fingerprint and runtime render gate, the preserved
+source/package physical frame and scoped world bounds, and zero active rigid body,
+collision, joint, or articulation residue. They map respectively to
+the neutral `environment` and `static_object` roles; neither may be used to smuggle
+asset-specific physics into a package.
+
+The current EBench/GenManip adapter accepts a `static_object` only for the scenario's
+declared table. It leaves that table out of the initial scene and supplies a thin
+runtime composition entry in the collected package, allowing GenManip recovery to
+use its existing static-table support policy (`add_colliders: true`,
+`add_rigid_body: false`). The entry preserves the producer package and complete
+material scope while neutralizing only the source scope's composed transform order;
+it does not add asset physics. A non-table visual-static object is rejected before
+export rather than falling through to GenManip's generic rigid-object defaults.
+Supporting visual-static fixtures later requires an explicit adapter policy, not a
+per-asset exception.
 
 ```yaml
-  scientific_workbench_dryingbox_03_dynamic:
+  scientific_workbench_scene1_hard_environment:
     resolver: convert_asset_package
-    usage: scene_overlay
-    source_usd: ./lab_001/lab_001.usd
-    package_dir: ./convert_asset_delivery/package
-    manifest_path: ./convert_asset_delivery/manifest.json
-    producer_revision: 324ce6e6d4395ccfda1e59e5ae89de9389cdf225
-    expected_scope_prims: [/World/DryingBox_03]
+    usage: visual_static_environment
+    source_usd: ./Scene1_hard.usd
+    package_dir: ./scene1_environment/package
+    manifest_path: ./scene1_environment/manifest.json
+    producer_revision: <ConvertAsset commit>
+    expected_scope_prims: [/World/lab_015]
     license: CC-BY-NC-4.0
     attribution:
-      - Dynamic physics package normalized by ConvertAsset
+      - Scene1_hard parent-composed lab_015 visual room normalized by ConvertAsset
     redistributable: false
     exclude_relative_paths: [evidence]
+
+  scientific_workbench_ebench_table:
+    resolver: convert_asset_package
+    usage: visual_static_object
+    source_usd: ./lab_001.usd
+    package_dir: ./ebench_table/package
+    manifest_path: ./ebench_table/manifest.json
+    producer_revision: <ConvertAsset commit>
+    expected_scope_prims: [/World/table]
+    license: CC-BY-NC-4.0
+    attribution:
+      - EBench-compatible task table normalized by ConvertAsset
+    redistributable: false
 ```
 
 `usage: rigid_object` is admitted only when the producer manifest contains a

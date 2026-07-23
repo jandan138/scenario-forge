@@ -389,6 +389,49 @@ def test_isaac_renderer_validates_source_bundle_tree_digest(tmp_path: Path) -> N
         renderer._validate_request(collected_root, request)
 
 
+def test_isaac_renderer_resolves_installed_collected_asset_paths_in_memory(
+    tmp_path: Path,
+) -> None:
+    spec = importlib.util.spec_from_file_location(
+        "scenario_forge_preview_renderer_paths", ISAAC_RENDERER
+    )
+    assert spec is not None and spec.loader is not None
+    renderer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(renderer)
+    package_id = "scientific_workbench_bimanual_pour"
+    collected_root = tmp_path / "collected"
+    table_asset = (
+        collected_root
+        / "assets/scene_usds/scenario_forge"
+        / package_id
+        / "source_bundle/scenario_forge_runtime/table.usd"
+    )
+    table_asset.parent.mkdir(parents=True)
+    table_asset.write_text("#usda 1.0\n", encoding="utf-8")
+    task_data = {
+        "initial_layout": {
+            "00000000000000000000000000000000": {
+                "type": "object",
+                "path": (
+                    f"collected_packages/{package_id}/"
+                    f"{table_asset.relative_to(collected_root).as_posix()}"
+                ),
+            },
+            "embedded_object": {"type": "object", "path": ""},
+            "lift2": {"type": "robot"},
+        }
+    }
+
+    renderer._resolve_collected_asset_paths_for_preview(
+        task_data, collected_root, package_id
+    )
+
+    assert task_data["initial_layout"][
+        "00000000000000000000000000000000"
+    ]["path"] == str(table_asset.resolve())
+    assert task_data["initial_layout"]["embedded_object"]["path"] == ""
+
+
 def _build_collected_package(workspace: Path) -> Path:
     workspace.mkdir(parents=True)
     package_root = _build_package(workspace)

@@ -54,7 +54,7 @@ class NormalizeAssetCommandPlan:
             str(root / "main.py"),
             "normalize-asset",
             self.source_usd,
-            "--package-dir",
+            "--out",
             self.package_dir,
         )
 
@@ -64,10 +64,16 @@ class ConvertAssetHandoffError(ValueError):
 
 
 _SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
-_INTERACTION_USAGE_ROLES = {
+_USAGE_ROLES = {
     "scene_overlay": "scene_overlay",
     "rigid_object": "rigid_object",
+    "visual_static_environment": "environment",
+    "visual_static_object": "static_object",
 }
+_DYNAMIC_USAGES = frozenset({"scene_overlay", "rigid_object"})
+_VISUAL_STATIC_USAGES = frozenset(
+    {"visual_static_environment", "visual_static_object"}
+)
 
 
 @dataclass(frozen=True)
@@ -104,12 +110,12 @@ class ConvertAssetPackageHandoff:
     scope_prims: tuple[str, ...]
     runtime_profile: str
     consumer_profile: str
-    quality_tier: str
-    profile_id: str
-    profile_revision: str
-    profile_sha256: str
-    claim_boundary: str
-    replacement_contract: str
+    quality_tier: str | None
+    profile_id: str | None
+    profile_revision: str | None
+    profile_sha256: str | None
+    claim_boundary: str | None
+    replacement_contract: str | None
     claims_forbidden: tuple[str, ...]
     scoped_physics_warning_count: int
     usage: str
@@ -135,6 +141,33 @@ class ConvertAssetPackageHandoff:
                     raise ValueError(
                         "rigid_object source cannot exclude its qualification report"
                     )
+        upstream_metadata: dict[str, Any] = {
+            "producer_asset_id": self.producer_asset_id,
+            "producer_asset_role": self.producer_asset_role,
+            "source_sha256": f"sha256:{self.source_sha256}",
+            "root_usd_sha256": f"sha256:{self.root_usd_sha256}",
+            "scope_prims": list(self.scope_prims),
+            "runtime_profile": self.runtime_profile,
+            "consumer_profile": self.consumer_profile,
+            "consumer_usage": self.usage,
+            "claims_forbidden": list(self.claims_forbidden),
+            "scoped_physics_warning_count": self.scoped_physics_warning_count,
+        }
+        if self.quality_tier is not None:
+            upstream_metadata.update(
+                {
+                    "quality_tier": self.quality_tier,
+                    "profile_id": self.profile_id,
+                    "profile_revision": self.profile_revision,
+                    "profile_sha256": f"sha256:{self.profile_sha256}",
+                    "claim_boundary": self.claim_boundary,
+                    "replacement_contract": self.replacement_contract,
+                }
+            )
+        if self.interaction_contract is not None:
+            upstream_metadata["interaction_contract"] = (
+                self.interaction_contract.to_mapping()
+            )
         upstream = UpstreamPackageRef(
             producer="ConvertAsset",
             schema_version=self.manifest_schema_version,
@@ -145,33 +178,12 @@ class ConvertAssetPackageHandoff:
                 f"sha256:{self.manifest_sha256}"
             ),
             manifest_sha256=f"sha256:{self.manifest_sha256}",
-            metadata={
-                "producer_asset_id": self.producer_asset_id,
-                "producer_asset_role": self.producer_asset_role,
-                "source_sha256": f"sha256:{self.source_sha256}",
-                "root_usd_sha256": f"sha256:{self.root_usd_sha256}",
-                "scope_prims": list(self.scope_prims),
-                "runtime_profile": self.runtime_profile,
-                "consumer_profile": self.consumer_profile,
-                "quality_tier": self.quality_tier,
-                "profile_id": self.profile_id,
-                "profile_revision": self.profile_revision,
-                "profile_sha256": f"sha256:{self.profile_sha256}",
-                "claim_boundary": self.claim_boundary,
-                "replacement_contract": self.replacement_contract,
-                "claims_forbidden": list(self.claims_forbidden),
-                "scoped_physics_warning_count": self.scoped_physics_warning_count,
-                **(
-                    {"interaction_contract": self.interaction_contract.to_mapping()}
-                    if self.interaction_contract is not None
-                    else {}
-                ),
-            },
+            metadata=upstream_metadata,
         )
         return LocalUSDAssetSource(
             asset_id=asset_id,
             source_usd=self.root_usd,
-            role=_INTERACTION_USAGE_ROLES[self.usage],
+            role=_USAGE_ROLES[self.usage],
             license=license,
             source_uri=(
                 f"convert-asset://{self.package_id}/asset/"
@@ -216,9 +228,10 @@ def load_convert_asset_package_handoff(
         raise ConvertAssetHandoffError("producer_revision must be a non-empty string")
     if not expected_scope_prims:
         raise ConvertAssetHandoffError("expected_scope_prims must not be empty")
-    if usage not in _INTERACTION_USAGE_ROLES:
+    if usage not in _USAGE_ROLES:
         raise ConvertAssetHandoffError(
-            "usage must be 'scene_overlay' or 'rigid_object'"
+            "usage must be 'scene_overlay', 'rigid_object', "
+            "'visual_static_environment', or 'visual_static_object'"
         )
 
     manifest_bytes = external_manifest.read_bytes()
@@ -246,8 +259,11 @@ def load_convert_asset_package_handoff(
     package_id = _required_string(manifest, "package_id", "manifest")
     producer_asset_id = _required_string(manifest, "asset_id", "manifest")
     producer_asset_role = _required_string(manifest, "asset_role", "manifest")
-    if producer_asset_role != "dynamic":
-        raise ConvertAssetHandoffError("manifest.asset_role must be 'dynamic'")
+    expected_asset_role = "dynamic" if usage in _DYNAMIC_USAGES else "visual_static"
+    if producer_asset_role != expected_asset_role:
+        raise ConvertAssetHandoffError(
+            f"manifest.asset_role must be {expected_asset_role!r} for usage {usage!r}"
+        )
 
     expected_scopes = _validated_scope_tuple(
         expected_scope_prims,
@@ -329,7 +345,6 @@ def load_convert_asset_package_handoff(
 
     physics = _required_mapping(manifest, "physics_closure", "manifest")
     _require_value(physics, "status", "pass", "manifest.physics_closure")
-    _require_value(physics, "role", "dynamic", "manifest.physics_closure")
     physics_scope = _required_mapping(
         physics,
         "scope",
@@ -341,93 +356,137 @@ def load_convert_asset_package_handoff(
         expected_scopes,
         "physics_closure.scope",
     )
-    admission = _required_mapping(
-        physics,
-        "profile_admission",
-        "manifest.physics_closure",
-    )
-    _require_value(admission, "status", "pass", "profile_admission")
-    source_binding = _required_mapping(
-        admission,
-        "source_binding",
-        "profile_admission",
-    )
-    source_hash_fields.update(
-        {
-            "profile_admission.source_binding.sha256": _required_string(
-                source_binding,
-                "sha256",
-                "profile_admission.source_binding",
-            ),
-            "profile_admission.source_sha256": _required_string(
-                admission,
-                "source_sha256",
-                "profile_admission",
-            ),
-        }
-    )
+
+    quality_tier: str | None = None
+    profile_id: str | None = None
+    profile_revision: str | None = None
+    profile_sha: str | None = None
+    claim_boundary: str | None = None
+    replacement_contract: str | None = None
+    source_binding: Mapping[str, Any] | None = None
+    interaction_contract: ConvertAssetInteractionContract | None = None
+
+    if usage in _DYNAMIC_USAGES:
+        _require_value(physics, "role", "dynamic", "manifest.physics_closure")
+        admission = _required_mapping(
+            physics,
+            "profile_admission",
+            "manifest.physics_closure",
+        )
+        _require_value(admission, "status", "pass", "profile_admission")
+        source_binding = _required_mapping(
+            admission,
+            "source_binding",
+            "profile_admission",
+        )
+        source_hash_fields.update(
+            {
+                "profile_admission.source_binding.sha256": _required_string(
+                    source_binding,
+                    "sha256",
+                    "profile_admission.source_binding",
+                ),
+                "profile_admission.source_sha256": _required_string(
+                    admission,
+                    "source_sha256",
+                    "profile_admission",
+                ),
+            }
+        )
+        for field_name in (
+            "unmatched_rigid_bodies",
+            "ambiguous_rigid_bodies",
+            "invalid_body_rules",
+            "errors",
+        ):
+            if admission.get(field_name) != []:
+                raise ConvertAssetHandoffError(
+                    f"profile_admission.{field_name} must be empty"
+                )
+        resolved_body_count = admission.get("resolved_body_count")
+        if (
+            not isinstance(resolved_body_count, int)
+            or isinstance(resolved_body_count, bool)
+            or resolved_body_count <= 0
+        ):
+            raise ConvertAssetHandoffError(
+                "profile_admission.resolved_body_count must be positive"
+            )
+        profile_path = _safe_package_file(
+            package_root,
+            _required_string(admission, "package_profile_path", "profile_admission"),
+            "package_profile_path",
+        )
+        _safe_package_file(
+            package_root,
+            _required_string(admission, "overlay_path", "profile_admission"),
+            "overlay_path",
+        )
+        profile_sha = _required_string(
+            admission,
+            "profile_sha256",
+            "profile_admission",
+        )
+        packaged_profile_sha = _required_string(
+            admission,
+            "packaged_profile_sha256",
+            "profile_admission",
+        )
+        if (
+            profile_sha != packaged_profile_sha
+            or _file_sha256(profile_path) != profile_sha
+        ):
+            raise ConvertAssetHandoffError(
+                "profile SHA-256 does not match packaged profile"
+            )
+        quality_tier = _required_string(
+            admission,
+            "quality_tier",
+            "profile_admission",
+        )
+        profile_id = _required_string(admission, "profile_id", "profile_admission")
+        profile_revision = _required_string(
+            admission,
+            "revision",
+            "profile_admission",
+        )
+        profile_evidence = _required_mapping(
+            admission,
+            "evidence",
+            "profile_admission",
+        )
+        claim_boundary = _required_string(
+            profile_evidence,
+            "claim_boundary",
+            "profile_admission.evidence",
+        )
+        replacement_contract = _required_string(
+            profile_evidence,
+            "replacement_contract",
+            "profile_admission.evidence",
+        )
+        interaction_contract = _load_interaction_contract(
+            manifest.get("interaction_contract"),
+            package_root=package_root,
+            source_sha256=source_digest,
+            asset_entry_prim=entry_scope,
+            required=usage == "rigid_object",
+        )
+    else:
+        _require_value(
+            physics,
+            "role",
+            "visual_static",
+            "manifest.physics_closure",
+        )
+        _validate_visual_static_admission(manifest, expected_scopes)
+        _validate_visual_static_physical_frame(physics, expected_scopes)
+
     for field_name, digest in source_hash_fields.items():
         if digest != source_digest:
             raise ConvertAssetHandoffError(
                 f"source SHA-256 mismatch at {field_name}"
             )
-    for field_name in (
-        "unmatched_rigid_bodies",
-        "ambiguous_rigid_bodies",
-        "invalid_body_rules",
-        "errors",
-    ):
-        if admission.get(field_name) != []:
-            raise ConvertAssetHandoffError(
-                f"profile_admission.{field_name} must be empty"
-            )
-    resolved_body_count = admission.get("resolved_body_count")
-    if (
-        not isinstance(resolved_body_count, int)
-        or isinstance(resolved_body_count, bool)
-        or resolved_body_count <= 0
-    ):
-        raise ConvertAssetHandoffError(
-            "profile_admission.resolved_body_count must be positive"
-        )
-    profile_path = _safe_package_file(
-        package_root,
-        _required_string(admission, "package_profile_path", "profile_admission"),
-        "package_profile_path",
-    )
-    _safe_package_file(
-        package_root,
-        _required_string(admission, "overlay_path", "profile_admission"),
-        "overlay_path",
-    )
-    profile_sha = _required_string(admission, "profile_sha256", "profile_admission")
-    packaged_profile_sha = _required_string(
-        admission,
-        "packaged_profile_sha256",
-        "profile_admission",
-    )
-    if profile_sha != packaged_profile_sha or _file_sha256(profile_path) != profile_sha:
-        raise ConvertAssetHandoffError("profile SHA-256 does not match packaged profile")
-    quality_tier = _required_string(admission, "quality_tier", "profile_admission")
-    profile_evidence = _required_mapping(admission, "evidence", "profile_admission")
-    claim_boundary = _required_string(
-        profile_evidence,
-        "claim_boundary",
-        "profile_admission.evidence",
-    )
-    replacement_contract = _required_string(
-        profile_evidence,
-        "replacement_contract",
-        "profile_admission.evidence",
-    )
-
-    interaction_contract = _load_interaction_contract(
-        manifest.get("interaction_contract"),
-        package_root=package_root,
-        source_sha256=source_digest,
-        asset_entry_prim=entry_scope,
-        required=usage == "rigid_object",
-    )
 
     runtime = _required_mapping(manifest, "runtime_evidence", "manifest")
     _require_value(runtime, "status", "pass", "runtime_evidence")
@@ -437,7 +496,10 @@ def load_convert_asset_package_handoff(
         expected_runtime_profile,
         "runtime_evidence",
     )
-    for gate_name in ("cold_load", "physics_step", "reset"):
+    runtime_gate_names = ["cold_load", "physics_step", "reset"]
+    if usage in _VISUAL_STATIC_USAGES:
+        runtime_gate_names.append("render_readback")
+    for gate_name in runtime_gate_names:
         gate = _required_mapping(runtime, gate_name, "runtime_evidence")
         _require_value(gate, "status", "pass", f"runtime_evidence.{gate_name}")
     root_sha = _file_sha256(root_usd)
@@ -482,9 +544,17 @@ def load_convert_asset_package_handoff(
         raise ConvertAssetHandoffError(
             "physics_warning_gate.summary.scoped_event_count must be 0"
         )
+    if (
+        usage in _VISUAL_STATIC_USAGES
+        and summary.get("unattributed_event_count") != 0
+    ):
+        raise ConvertAssetHandoffError(
+            "physics_warning_gate.summary.unattributed_event_count must be 0"
+        )
 
     _validate_retained_scope(manifest, expected_scopes)
-    _validate_stage_metrics(manifest, source_binding)
+    if source_binding is not None:
+        _validate_stage_metrics(manifest, source_binding)
     claims_forbidden = _required_string_tuple(
         manifest,
         "claims_forbidden",
@@ -507,8 +577,8 @@ def load_convert_asset_package_handoff(
         runtime_profile=runtime_profile,
         consumer_profile=consumer_profile,
         quality_tier=quality_tier,
-        profile_id=_required_string(admission, "profile_id", "profile_admission"),
-        profile_revision=_required_string(admission, "revision", "profile_admission"),
+        profile_id=profile_id,
+        profile_revision=profile_revision,
         profile_sha256=profile_sha,
         claim_boundary=claim_boundary,
         replacement_contract=replacement_contract,
@@ -1317,6 +1387,133 @@ def _validate_retained_scope(
             "scope_extraction.retained_subtree_prims contains undeclared scene prims: "
             + ", ".join(unexpected)
         )
+
+
+def _validate_visual_static_admission(
+    manifest: Mapping[str, Any], expected_scopes: tuple[str, ...]
+) -> None:
+    admission = _required_mapping(manifest, "output_role_admission", "manifest")
+    _require_value(admission, "status", "pass", "output_role_admission")
+    _require_scopes(admission, "scope", expected_scopes, "output_role_admission")
+    if admission.get("residue") != []:
+        raise ConvertAssetHandoffError(
+            "output_role_admission.residue must be empty"
+        )
+    summary = _required_mapping(
+        admission,
+        "summary",
+        "output_role_admission",
+    )
+    for count_name in (
+        "active_articulation_root_count",
+        "active_collision_count",
+        "active_joint_count",
+        "active_rigid_body_count",
+    ):
+        if summary.get(count_name) != 0:
+            raise ConvertAssetHandoffError(
+                f"output_role_admission.summary.{count_name} must be 0"
+            )
+    fingerprint = _required_mapping(
+        manifest,
+        "visual_preservation_fingerprint",
+        "manifest",
+    )
+    _require_value(
+        fingerprint,
+        "status",
+        "pass",
+        "visual_preservation_fingerprint",
+    )
+
+
+def _validate_visual_static_physical_frame(
+    physics: Mapping[str, Any], expected_scopes: tuple[str, ...]
+) -> None:
+    """Require the producer to preserve the source's composed spatial frame."""
+
+    frame = _required_mapping(
+        physics,
+        "physical_frame",
+        "manifest.physics_closure",
+    )
+    _require_value(frame, "status", "pass", "physics_closure.physical_frame")
+    source_frame = _required_mapping(
+        frame,
+        "source",
+        "physics_closure.physical_frame",
+    )
+    package_frame = _required_mapping(
+        frame,
+        "package",
+        "physics_closure.physical_frame",
+    )
+    for field_name in (
+        "meters_per_unit",
+        "kilograms_per_unit",
+        "up_axis",
+        "time_codes_per_second",
+        "frames_per_second",
+        "start_time_code",
+        "end_time_code",
+    ):
+        if source_frame.get(field_name) != package_frame.get(field_name):
+            raise ConvertAssetHandoffError(
+                "physics_closure.physical_frame "
+                f"{field_name} must match between source and package"
+            )
+    if frame.get("metric_mismatches") != []:
+        raise ConvertAssetHandoffError(
+            "physics_closure.physical_frame.metric_mismatches must be empty"
+        )
+    if frame.get("blocked_scope_prims") != []:
+        raise ConvertAssetHandoffError(
+            "physics_closure.physical_frame.blocked_scope_prims must be empty"
+        )
+    raw_scope_bounds = frame.get("scope_bounds")
+    if not isinstance(raw_scope_bounds, list):
+        raise ConvertAssetHandoffError(
+            "physics_closure.physical_frame.scope_bounds must be a list"
+        )
+    bounds_by_path: dict[str, Mapping[str, Any]] = {}
+    for raw_bound in raw_scope_bounds:
+        bound = _mapping(raw_bound, "physics_closure.physical_frame.scope_bounds")
+        path = _required_string(
+            bound,
+            "path",
+            "physics_closure.physical_frame.scope_bounds",
+        )
+        if path in bounds_by_path:
+            raise ConvertAssetHandoffError(
+                "physics_closure.physical_frame.scope_bounds must not repeat paths"
+            )
+        bounds_by_path[path] = bound
+    if set(bounds_by_path) != set(expected_scopes):
+        raise ConvertAssetHandoffError(
+            "physics_closure.physical_frame.scope_bounds must match expected scopes"
+        )
+    for path in expected_scopes:
+        bound = bounds_by_path[path]
+        _require_value(
+            bound,
+            "status",
+            "pass",
+            f"physics_closure.physical_frame.scope_bounds[{path}]",
+        )
+        source_bounds = _required_mapping(
+            bound,
+            "source_world_bound_m",
+            f"physics_closure.physical_frame.scope_bounds[{path}]",
+        )
+        package_bounds = _required_mapping(
+            bound,
+            "package_world_bound_m",
+            f"physics_closure.physical_frame.scope_bounds[{path}]",
+        )
+        if source_bounds != package_bounds:
+            raise ConvertAssetHandoffError(
+                "physics_closure.physical_frame source and package bounds must match"
+            )
 
 
 def _validate_stage_metrics(

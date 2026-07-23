@@ -4,44 +4,20 @@ domain: scientific_workbench
 task_family: bimanual_pour
 instruction: 辅助臂抓住量筒并保持；操作臂拿起锥形瓶，将瓶口与量筒口对准后倾斜倾倒，最后把锥形瓶放回原位。
 scene:
-  asset_id: scientific_workbench_environment
+  asset_id: scientific_workbench_scene1_hard_environment
   root_prim_path: /World
-  overlay_asset_ids:
-    - scientific_workbench_dryingbox_03_dynamic
-  inactive_prim_paths:
-    - /World/Cube
-    - /World/lounge_booth_table
-    - /World/beaker1
-    - /World/beaker2
-    - /World/beaker3
-    - /World/conical_bottle01
-    - /World/conical_bottle02
-    - /World/conical_bottle04
-    - /World/target_plat
-    - /World/target_plat2
-    - /World/DryingBox_01
-    - /World/DryingBox_02
-    - /World/DryingBox_04
-    - /World/MuffleFurnace
-    - /World/Cabinet_01
-    - /World/Cabinet_02
-  world_anchored_prim_paths: [/World/CylinderLight, /World/GroundPlane]
   pose:
-    xyz: [-9.5, -43.3, 0.0]
-    wxyz: [0.7933533, 0.0, 0.0, 0.6087614]
+    xyz: [0.621309, 0.462547, 0.061353]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
 objects:
   - id: table
-    asset_id: scientific_workbench_environment
+    asset_id: scientific_workbench_ebench_table
     source_prim_path: /World/table
     role: table
     pose:
       xyz: [0.242788066, 0.0, 0.0]
       wxyz: [0.0, 1.0, 0.0, 0.0]
       scale_xyz: [0.003, 0.0035, 0.004]
-    metadata:
-      material_bindings:
-        Bespoke_Booth_Table_Black_Nickel_0/Bespoke_Booth_Table_Black_Nickel_0: Material5_black
-        surface/mesh: Material1_plastic_dark_blue
   - id: obj_conical_bottle03
     asset_id: scientific_workbench_conical_bottle03_dynamic
     source_prim_path: /World/conical_bottle03

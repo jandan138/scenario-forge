@@ -12,7 +12,6 @@ import yaml
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
-from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 
@@ -20,8 +19,12 @@ from scenario_forge.generation.package_compiler import compile_scenario_package
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SPEC = REPO_ROOT / "examples/scientific_workbench/bimanual_pour/scenario.yaml"
 DEFAULT_RENDERER = REPO_ROOT / "scripts/ebench/render_genmanip_initial_preview.py"
-DRYINGBOX_OVERLAY_ASSET_ID = "scientific_workbench_dryingbox_03_dynamic"
-DRYINGBOX_SCOPE = "/World/DryingBox_03"
+SCENE1_ENVIRONMENT_ASSET_ID = "scientific_workbench_scene1_hard_environment"
+# ConvertAsset must extract this parent-layer scope so the package retains the
+# paper scene's meters-per-unit, placement, and rotation for the lab_015 payload.
+SCENE1_ENVIRONMENT_SCOPE = "/World/lab_015"
+EBENCH_TABLE_ASSET_ID = "scientific_workbench_ebench_table"
+EBENCH_TABLE_SCOPE = "/World/table"
 SOURCE_VESSEL_ASSET_ID = "scientific_workbench_conical_bottle03_dynamic"
 SOURCE_VESSEL_SCOPE = "/World/conical_bottle03"
 TARGET_VESSEL_ASSET_ID = "scientific_workbench_graduated_cylinder_03_dynamic"
@@ -31,24 +34,32 @@ TARGET_VESSEL_SCOPE = "/World/graduated_cylinder_03"
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Compile the golden conical-flask-to-graduated-cylinder task and its "
+            "Compile the Scene1_hard laboratory bimanual-pour task and its "
             "GenManip collected-package export."
         )
     )
-    parser.add_argument("--source-usd", type=Path, required=True)
-    parser.add_argument("--convert-asset-package", type=Path, required=True)
-    parser.add_argument("--convert-asset-manifest", type=Path, required=True)
+    parser.add_argument("--scene1-source-usd", type=Path, required=True)
+    parser.add_argument("--table-source-usd", type=Path, required=True)
+    parser.add_argument("--vessel-source-usd", type=Path, required=True)
+    parser.add_argument("--scene1-environment-package", type=Path, required=True)
+    parser.add_argument("--scene1-environment-manifest", type=Path, required=True)
+    parser.add_argument("--table-package", type=Path, required=True)
+    parser.add_argument("--table-manifest", type=Path, required=True)
     parser.add_argument("--source-vessel-package", type=Path, required=True)
     parser.add_argument("--source-vessel-manifest", type=Path, required=True)
     parser.add_argument("--target-vessel-package", type=Path, required=True)
     parser.add_argument("--target-vessel-manifest", type=Path, required=True)
     parser.add_argument(
-        "--dryingbox-revision",
+        "--scene1-environment-revision",
         required=True,
         help=(
-            "ConvertAsset revision for the retained DryingBox delivery; package "
-            "identity is still verified by content hashes."
+            "ConvertAsset revision for the source-bound Scene1_hard room delivery."
         ),
+    )
+    parser.add_argument(
+        "--table-revision",
+        required=True,
+        help="ConvertAsset revision for the source-bound EBench table delivery.",
     )
     parser.add_argument(
         "--source-vessel-revision",
@@ -62,11 +73,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
-    parser.add_argument(
-        "--source-uri",
-        default="LabUtopia:lab_001_localized",
-        help="Portable provenance identifier; do not pass a machine-local absolute path.",
-    )
     parser.add_argument(
         "--static-only",
         action="store_true",
@@ -99,21 +105,32 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not isinstance(raw_spec, dict):
         raise ValueError(f"Scenario spec must be a mapping: {args.spec}")
     spec = ScenarioSpec.from_mapping(raw_spec)
-    if spec.scene.overlay_asset_ids != (DRYINGBOX_OVERLAY_ASSET_ID,):
+    if spec.scene.asset_id != SCENE1_ENVIRONMENT_ASSET_ID:
         raise ValueError(
-            "Golden spec must declare exactly the DryingBox_03 dynamic scene overlay"
+            "Golden spec must declare the source-bound Scene1_hard environment"
         )
-    dryingbox_handoff = load_convert_asset_package_handoff(
-        args.convert_asset_package,
-        args.convert_asset_manifest,
-        args.source_usd,
-        expected_scope_prims=(DRYINGBOX_SCOPE,),
-        producer_revision=args.dryingbox_revision,
+    if spec.scene.overlay_asset_ids:
+        raise ValueError("Golden Scene1_hard spec must not declare scene overlays")
+    scene1_environment_handoff = load_convert_asset_package_handoff(
+        args.scene1_environment_package,
+        args.scene1_environment_manifest,
+        args.scene1_source_usd,
+        expected_scope_prims=(SCENE1_ENVIRONMENT_SCOPE,),
+        producer_revision=args.scene1_environment_revision,
+        usage="visual_static_environment",
+    )
+    table_handoff = load_convert_asset_package_handoff(
+        args.table_package,
+        args.table_manifest,
+        args.table_source_usd,
+        expected_scope_prims=(EBENCH_TABLE_SCOPE,),
+        producer_revision=args.table_revision,
+        usage="visual_static_object",
     )
     source_vessel_handoff = load_convert_asset_package_handoff(
         args.source_vessel_package,
         args.source_vessel_manifest,
-        args.source_usd,
+        args.vessel_source_usd,
         expected_scope_prims=(SOURCE_VESSEL_SCOPE,),
         producer_revision=args.source_vessel_revision,
         usage="rigid_object",
@@ -121,37 +138,35 @@ def main(argv: Sequence[str] | None = None) -> int:
     target_vessel_handoff = load_convert_asset_package_handoff(
         args.target_vessel_package,
         args.target_vessel_manifest,
-        args.source_usd,
+        args.vessel_source_usd,
         expected_scope_prims=(TARGET_VESSEL_SCOPE,),
         producer_revision=args.target_vessel_revision,
         usage="rigid_object",
     )
     object_asset_ids = {item.object_id: item.asset_id for item in spec.objects}
+    if object_asset_ids.get("table") != EBENCH_TABLE_ASSET_ID:
+        raise ValueError("Golden table must use the source-bound EBench table package")
     if object_asset_ids.get("obj_conical_bottle03") != SOURCE_VESSEL_ASSET_ID:
         raise ValueError("Golden source container must use its qualified object package")
     if object_asset_ids.get("obj_graduated_cylinder_03") != TARGET_VESSEL_ASSET_ID:
         raise ValueError("Golden target container must use its qualified object package")
-    source = LocalUSDAssetSource(
-        asset_id=spec.scene.asset_id,
-        source_usd=args.source_usd,
-        role="environment",
+    scene1_environment = scene1_environment_handoff.to_local_usd_asset_source(
+        asset_id=SCENE1_ENVIRONMENT_ASSET_ID,
         license="CC-BY-NC-4.0",
-        source_uri=args.source_uri,
         attribution=(
             "LabUtopia data assets: CC BY-NC 4.0",
+            "Scene1_hard room scope normalized by ConvertAsset",
             "Bundled NVIDIA/Omniverse dependencies retain their upstream terms",
         ),
         redistributable=False,
-        exclude_relative_paths=("_reports",),
-        root_prim_path=spec.scene.root_prim_path,
-        expected_sha256=f"sha256:{dryingbox_handoff.source_sha256}",
+        exclude_relative_paths=("_reports", "evidence"),
     )
-    dryingbox_overlay = dryingbox_handoff.to_local_usd_asset_source(
-        asset_id=DRYINGBOX_OVERLAY_ASSET_ID,
+    table = table_handoff.to_local_usd_asset_source(
+        asset_id=EBENCH_TABLE_ASSET_ID,
         license="CC-BY-NC-4.0",
         attribution=(
             "LabUtopia data assets: CC BY-NC 4.0",
-            "Dynamic physics package normalized by ConvertAsset",
+            "EBench task-table scope normalized by ConvertAsset",
             "Bundled NVIDIA/Omniverse dependencies retain their upstream terms",
         ),
         redistributable=False,
@@ -180,8 +195,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     package = compile_scenario_package(
         spec,
         {
-            source.asset_id: source,
-            dryingbox_overlay.asset_id: dryingbox_overlay,
+            scene1_environment.asset_id: scene1_environment,
+            table.asset_id: table,
             source_vessel.asset_id: source_vessel,
             target_vessel.asset_id: target_vessel,
         },

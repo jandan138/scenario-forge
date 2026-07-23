@@ -105,14 +105,19 @@ Scientific-workbench bimanual-pour example:
 
 ```bash
 python scripts/generate_scientific_workbench_bimanual_pour.py \
-  --source-usd /path/to/closed/scientific_workbench_scene.usd \
-  --convert-asset-package /path/to/dryingbox/package \
-  --convert-asset-manifest /path/to/dryingbox/manifest.json \
+  --scene1-source-usd /path/to/hard_task/Scene1_hard.usd \
+  --table-source-usd /path/to/lab_001.usd \
+  --vessel-source-usd /path/to/lab_001.usd \
+  --scene1-environment-package /path/to/scene1_environment/package \
+  --scene1-environment-manifest /path/to/scene1_environment/manifest.json \
+  --table-package /path/to/ebench_table/package \
+  --table-manifest /path/to/ebench_table/manifest.json \
   --source-vessel-package /path/to/conical_bottle03/package \
   --source-vessel-manifest /path/to/conical_bottle03/manifest.json \
   --target-vessel-package /path/to/graduated_cylinder_03/package \
   --target-vessel-manifest /path/to/graduated_cylinder_03/manifest.json \
-  --dryingbox-revision <dryingbox-convertasset-git-sha> \
+  --scene1-environment-revision <convertasset-git-sha> \
+  --table-revision <convertasset-git-sha> \
   --source-vessel-revision <source-vessel-convertasset-git-sha> \
   --target-vessel-revision <target-vessel-convertasset-git-sha> \
   --out outputs/scientific_workbench_bimanual_pour \
@@ -136,7 +141,7 @@ not become part of the ScenarioSpec or generated package provenance. This comman
 does not start Isaac Sim or execute a rollout.
 
 The default build resets the exported task in GenManip and renders a tabletop
-close-up plus a whole-scene overview before accepting the package. Use
+close-up plus a full Scene1_hard laboratory overview before accepting the package. Use
 `--static-only` only when intentionally producing unrendered static artifacts.
 This example evaluates a kinematic pour sequence; it does not claim real liquid
 transfer. See the [generation runbook](docs/operations/generate-bimanual-pour-package.md).

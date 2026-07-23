@@ -37,7 +37,7 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
     assert request["purpose"] == "evidence_only"
     assert request["affects_policy_observation"] is False
     assert request["moment"] == "post_reset_pre_action"
-    assert request["camera_policy_version"] == "scenario-forge/task-anchor-fit-v5"
+    assert request["camera_policy_version"] == "scenario-forge/task-anchor-fit-v6"
     assert request["input_digest"] == compute_preview_input_digest(collected_package)
     assert request["expected_runtime_ids"] == {
         "robot": "lift2",
@@ -82,9 +82,15 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
         _TABLE_RUNTIME_ID,
         *_TASK_RUNTIME_IDS,
     ]
+    assert request["views"]["scene_overview"]["anchor_runtime_ids"] == [
+        "scene_room",
+        "lift2",
+        _TABLE_RUNTIME_ID,
+        *_TASK_RUNTIME_IDS,
+    ]
     assert request["views"]["scene_overview"]["azimuth_deg"] == -125.0
     assert request["views"]["scene_overview"]["elevation_deg"] == 38.0
-    assert request["views"]["scene_overview"]["framing_margin"] == 0.62
+    assert request["views"]["scene_overview"]["framing_margin"] == 1.05
     assert request["views"]["scene_overview"]["minimum_distance"] == 1.6
 
     camera_path = collected_package / request["inputs"]["evaluation_camera"]["path"]

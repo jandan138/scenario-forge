@@ -210,9 +210,15 @@ def _resolve_convert_asset_package(
 
 def _required_usage(data: Mapping[str, Any], field: str) -> str:
     usage = _required_string(data, "usage", field)
-    if usage not in {"scene_overlay", "rigid_object"}:
+    if usage not in {
+        "scene_overlay",
+        "rigid_object",
+        "visual_static_environment",
+        "visual_static_object",
+    }:
         raise ScenarioSourceBindingError(
-            f"{field}.usage must be 'scene_overlay' or 'rigid_object'"
+            f"{field}.usage must be 'scene_overlay', 'rigid_object', "
+            "'visual_static_environment', or 'visual_static_object'"
         )
     return usage
 

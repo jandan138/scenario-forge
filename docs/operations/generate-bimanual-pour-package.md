@@ -1,26 +1,69 @@
-# Generate the Bimanual Pour Package
+# Generate the Scene1_hard Bimanual Pour Package
 
-The golden task uses the scientific-workbench scenario spec, a closed USD scene
-bundle, and the EBench Lift2 profile.
+This task puts the paper's complete `Scene1_hard.usd` laboratory behind the
+unchanged EBench Lift2 dual-arm pouring workspace. It deliberately uses three
+separate producer-owned inputs:
 
-The canonical scenario is task-ready rather than a raw full-context import. Its
-USD overlay deactivates unrelated loose objects and all but one articulated
-appliance subtree while leaving `lab_001.usd` untouched. `DryingBox_03` remains as
-the single visible laboratory-context device. Its portable USD composition uses
-the source-bound ConvertAsset physics package rather than unqualified raw-source
-physics. Current GenManip initialization then removes colliders recursively below
-the `room` prim, so in that adapter runtime DB03 must be treated as visible context,
-not as a collision-active appliance.
+| Layer | Exact source | Package role |
+| --- | --- | --- |
+| Complete visual room | `Scene1_hard.usd:/World/lab_015` | ConvertAsset `visual_static_environment` |
+| EBench worktable | `lab_001.usd:/World/table` | ConvertAsset `visual_static_object` |
+| Flask and cylinder | existing `lab_001` source-bound packages | dynamic manipulation objects |
 
-The golden spec uses `scenario-spec/v0.3`; it retains the `scene.overlay_asset_ids`
-capability introduced in v0.2. Entries are
-ordered strongest to weakest, followed by the base environment; every overlay must
-have the same `/World` root as the base. Scenario Forge's task layer is stronger
-than both, so its scene pose and inactive-prim curation still win. The configured
-`manip/lift2/R5a` dual-arm robot and GenManip injection path are unchanged.
+`/World/lab_015` is the one complete room payload under `Scene1_hard.usd`.
+ConvertAsset must extract that exact parent-layer scope: it retains the paper
+scene's meters-per-unit, rotation, translation, and scale while excluding Clean
+Beaker's root-level beakers, buttons, and task markers. Directly normalizing
+`SubUSDs/lab_015.usd` is not valid: without its parent composition context the
+same geometry evaluates at roughly 8 mm × 22 mm × 4 mm instead of roughly 8 m ×
+22 m × 4 m.
 
-The checked EOS environments can be reused directly; this workflow does not require
-creating or modifying a conda environment. In the current shared deployment:
+The table intentionally comes from the existing EBench-compatible `lab_001`
+source, not `Scene1_hard:/World/table_hard`. The current main Scene1 table has
+five unresolved material dependencies, and the historical source revision that
+claimed to repair it cannot be materialized here because its Git LFS object is
+404. That is an upstream asset-delivery problem, not a reason to add local
+textures, MDL fallbacks, or table-specific physics in Scenario Forge.
+
+Both visual-static packages must have zero package-authored rigid bodies,
+colliders, joints, or articulations. GenManip's ordinary table layout remains
+responsible for its generic support collider (`add_colliders: true`,
+`add_rigid_body: false`). Scenario Forge does not author mass, inertia, colliders,
+PhysX-warning suppression, or material repairs for these inputs.
+
+The collected scene intentionally does not pre-instantiate this visual-static
+table. Its episode layout instead points to
+`source_bundle/scenario_forge_runtime/table.usd`, a thin adapter composition layer
+that loads the complete table package for material closure while preserving the
+existing EBench episode pose and scale. This is what lets unmodified GenManip
+recovery execute its native static-table collider path.
+
+## Locked producer delivery
+
+ConvertAsset `main@73a84d3c2cfc8378cd5c255cf2282a20da017b8f`
+closed both producer blockers and delivered the exact source-bound packages used
+by this runbook:
+
+| Input | Package | Manifest |
+| --- | --- | --- |
+| Scene1 room | `outputs/convertasset-scene1-hard-lab015-room-20260723` | `evidence/manifest.json` |
+| EBench table | `outputs/convertasset-lab001-table-visual-static-20260723` | `evidence/manifest.json` |
+
+Both manifests have `overall_status: pass`, seven passing stage gates, no blocked
+reasons, no active physics residue, and zero scoped or unattributed PhysX warning
+events. The visual-static reset subgate is correctly `not_applicable` for the
+empty rigid-body set while the scope reset still passes. Dependency admission is
+scope-first: unresolved `table_hard` dependencies remain recorded as out of scope
+and are not part of either consumer claim.
+
+Do not rerun ConvertAsset from this workflow or reconstruct an external manifest.
+The package's own `evidence/manifest.json` is the delivered manifest consumed
+below.
+
+## Build inputs and isolated runtime
+
+Use the checked EOS environments directly; this workflow neither creates nor
+modifies a conda environment. Run from the Scenario Forge repository root.
 
 ```bash
 TEST_ENV=/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-newton-ebench-experimental-py310
@@ -29,13 +72,24 @@ LABUTOPIA_ROOT=/cpfs/shared/simulation/zhuzihou/dev/LabUtopia
 GENMANIP_SOURCE=/cpfs/shared/simulation/zhuzihou/dev/GenManip
 CUROBO_SRC=/cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src
 CONVERT_ASSET_ROOT=/cpfs/user/zhuzihou/dev/ConvertAsset
-DRYINGBOX_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-dryingbox-dynamic-physics-profile"
-SOURCE_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-labutopia-vessel-interaction-profile/conical_bottle03"
-TARGET_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-15-aan-graduated-cylinder-r3-grasp-section/graduated_cylinder_03"
-DRYINGBOX_REVISION=324ce6e6d4395ccfda1e59e5ae89de9389cdf225
+
+CONVERT_ASSET_REVISION=73a84d3c2cfc8378cd5c255cf2282a20da017b8f
 SOURCE_VESSEL_REVISION=ba4ac8ccbf3c32f257abdbb68a554a74a90003f1
 TARGET_VESSEL_REVISION=4bb541161a652cc4e5dd63253adffba018f17137
 GENMANIP_REVISION=014bf5435a373df9b3bcf5a69aa7fe22d17f613d
+
+SCENE1_HARD_ROOT="$LABUTOPIA_ROOT/assets/chemistry_lab/hard_task/Scene1_hard.usd"
+SCENE1_ENVIRONMENT_SOURCE="$SCENE1_HARD_ROOT"
+SCENE1_ENVIRONMENT_SCOPE=/World/lab_015
+TABLE_SOURCE="$LABUTOPIA_ROOT/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd"
+VESSEL_SOURCE="$TABLE_SOURCE"
+SOURCE_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-labutopia-vessel-interaction-profile/conical_bottle03"
+TARGET_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-15-aan-graduated-cylinder-r3-grasp-section/graduated_cylinder_03"
+SCENE1_ENVIRONMENT_PACKAGE="$PWD/outputs/convertasset-scene1-hard-lab015-room-20260723"
+SCENE1_ENVIRONMENT_MANIFEST="$SCENE1_ENVIRONMENT_PACKAGE/evidence/manifest.json"
+TABLE_PACKAGE="$PWD/outputs/convertasset-lab001-table-visual-static-20260723"
+TABLE_MANIFEST="$TABLE_PACKAGE/evidence/manifest.json"
+
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
 CANONICAL="$PWD/outputs/scientific_workbench_bimanual_pour"
 CANDIDATE="$PWD/outputs/.scientific_workbench_bimanual_pour.candidate-$RUN_ID"
@@ -43,6 +97,13 @@ BACKUP="$PWD/outputs/.scientific_workbench_bimanual_pour.backup-$RUN_ID"
 CANARY_ROOT="${TMPDIR:-/tmp}/scenario-forge-genmanip-canary-$RUN_ID"
 BASE_ASSETS="$(readlink -f "$GENMANIP_SOURCE/saved/assets")"
 
+test -f "$SCENE1_HARD_ROOT"
+test -f "$SCENE1_ENVIRONMENT_SOURCE"
+test -f "$TABLE_SOURCE"
+test -f "$SCENE1_ENVIRONMENT_PACKAGE/asset.usd"
+test -f "$SCENE1_ENVIRONMENT_MANIFEST"
+test -f "$TABLE_PACKAGE/asset.usd"
+test -f "$TABLE_MANIFEST"
 test ! -e "$CANDIDATE"
 test ! -e "$BACKUP"
 test ! -e "$CANARY_ROOT"
@@ -57,7 +118,6 @@ done
 RUNTIME_STATE="$CANARY_ROOT/.scenario-forge-runtime"
 mkdir -p "$RUNTIME_STATE/home" "$RUNTIME_STATE/cache" "$RUNTIME_STATE/tmp" \
   "$RUNTIME_STATE/pycache"
-
 export PYTHONPATH="$PWD/src:$CUROBO_SRC"
 export LD_LIBRARY_PATH="/isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/nvidia/cuda_runtime/lib:$ISAAC_ENV/lib/python3.10/site-packages/torch/lib:${LD_LIBRARY_PATH:-}"
 export ACCEPT_EULA=Y OMNI_KIT_ACCEPT_EULA=YES PYTHONNOUSERSITE=1
@@ -65,17 +125,35 @@ export HOME="$RUNTIME_STATE/home"
 export XDG_CACHE_HOME="$RUNTIME_STATE/cache"
 export TMPDIR="$RUNTIME_STATE/tmp"
 export PYTHONPYCACHEPREFIX="$RUNTIME_STATE/pycache"
+```
 
+The canary uses the shared EBench asset directory read-only through links. It
+never installs anything there.
+
+## Verify the source-bound deliveries
+
+The generator performs the strict handoff validation. It checks the source hash,
+exact scope, runtime and consumer profiles, visual-preservation fingerprint,
+physical frame, zero-physics admission, runtime gates, warning counts, and package
+closure before copying either asset.
+
+## Compile, render, and validate
+
+```bash
 "$TEST_ENV/bin/python" scripts/generate_scientific_workbench_bimanual_pour.py \
-  --source-usd "$LABUTOPIA_ROOT/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd" \
-  --source-uri "LabUtopia:lab_001_localized_20260707" \
-  --convert-asset-package "$DRYINGBOX_DELIVERY/package" \
-  --convert-asset-manifest "$DRYINGBOX_DELIVERY/manifest.json" \
+  --scene1-source-usd "$SCENE1_ENVIRONMENT_SOURCE" \
+  --table-source-usd "$TABLE_SOURCE" \
+  --vessel-source-usd "$VESSEL_SOURCE" \
+  --scene1-environment-package "$SCENE1_ENVIRONMENT_PACKAGE" \
+  --scene1-environment-manifest "$SCENE1_ENVIRONMENT_MANIFEST" \
+  --table-package "$TABLE_PACKAGE" \
+  --table-manifest "$TABLE_MANIFEST" \
   --source-vessel-package "$SOURCE_VESSEL_DELIVERY/package" \
   --source-vessel-manifest "$SOURCE_VESSEL_DELIVERY/manifest.json" \
   --target-vessel-package "$TARGET_VESSEL_DELIVERY/package" \
   --target-vessel-manifest "$TARGET_VESSEL_DELIVERY/manifest.json" \
-  --dryingbox-revision "$DRYINGBOX_REVISION" \
+  --scene1-environment-revision "$CONVERT_ASSET_REVISION" \
+  --table-revision "$CONVERT_ASSET_REVISION" \
   --source-vessel-revision "$SOURCE_VESSEL_REVISION" \
   --target-vessel-revision "$TARGET_VESSEL_REVISION" \
   --out "$CANDIDATE" \
@@ -89,49 +167,21 @@ PYTHONPATH=src "$TEST_ENV/bin/python" -m scenario_forge.cli \
   "$CANDIDATE/adapters/ebench/genmanip"
 ```
 
-The source and target vessels intentionally carry independent producer revisions:
-the conical bottle remains bound to its qualified r1 delivery, while the graduated
-cylinder consumes the source-bound r3 interaction package. The producer revisions
-above are Git commits; the r1/r3 interaction revisions remain separate manifest
-metadata. Do not replace these commits with the current ConvertAsset `HEAD` or with
-labels such as `r3-final-uncommitted-*`.
+The renderer writes two post-reset, pre-action images:
 
-The inbound adapter requires the delivery manifest to match the package's embedded
-manifest, binds it to the exact `lab_001.usd` source hash, and validates the
-declared scope, profile hash, Isaac 4.1 runtime gates, and zero scoped PhysX
-mass/inertia warning count. The DryingBox scene-overlay copy excludes upstream
-`evidence/`. Both rigid vessel copies retain their qualification report, and the
-adapter verifies its path and hash before compilation. Scenario Forge does not add
-a mass/inertia/center-of-mass fix, collider repair, or warning suppressor.
+- `workspace_closeup.png`: two vessels, both Lift2 end effectors, and work surface.
+- `scene_overview.png`: complete Scene1 room, robot, EBench table, and vessels.
 
-When ConvertAsset replaces the provisional-geometry profile with measured
-parameters, point these package and manifest arguments (and their producer revision
-provenance) at the new delivery. Do not edit the scenario to author local physics,
-and do not modify the original LabUtopia USD.
+They verify scene composition only. They do not establish an oracle rollout,
+grasp success, full physics fidelity, policy success, or liquid transfer. Reject a
+candidate with missing/pink materials, an empty room, or a table/robot visibly
+outside the laboratory.
 
-The command builds a fresh candidate without touching the current canonical package.
-It produces:
+## Promotion and runtime handoff
 
-- a portable package at the unique `$CANDIDATE` path;
-- a GenManip collected package below
-  `$CANDIDATE/adapters/ebench/genmanip`;
-- an embedded, transport-only Scenario Forge runtime contract under the episode
-  metadata `task_data`, carrying runtime object IDs, state prim paths, named
-  frames, actor bindings, steps, invariants, and success semantics;
-- a post-reset, pre-action tabletop close-up and scene overview below
-  `adapters/ebench/genmanip/evidence/initial_scene/`, with their render manifest,
-  runtime log, hashes, and visual-ready gate.
-
-`outputs/` is intentionally Git-ignored, and this package is marked
-non-redistributable until its dependency distribution policy is fully cleared. The
-rendered images and package remain local build artifacts and must not be committed;
-a fresh clone must run the command above to recreate them. Only compact hashes and
-bounded review/runtime records are committed.
-
-Perform the clean-room visual review against the two candidate PNGs before
-promotion. During promotion, stop concurrent consumers because directory rename
-does not provide a zero-window exchange between two nonempty directories. Keep the
-old canonical as a backup until the downstream runtime accepts the new digest:
+`outputs/` is Git-ignored. Do not install the candidate below
+`$GENMANIP_SOURCE/saved/assets`: that path is a link into the shared EBench asset
+directory. Copy a promoted package only into the private `CANARY_ROOT` workspace.
 
 ```bash
 test -d "$CANONICAL"
@@ -148,68 +198,10 @@ if ! PYTHONPATH=src "$TEST_ENV/bin/python" -m scenario_forge.cli \
   mv "$BACKUP" "$CANONICAL"
   exit 1
 fi
-"$TEST_ENV/bin/python" -c \
-  'import sys; from scenario_forge.adapters.ebench.preview import validate_genmanip_preview_evidence; validate_genmanip_preview_evidence(sys.argv[1])' \
-  "$CANONICAL/adapters/ebench/genmanip"
-```
 
-Rendering is strict by default: a renderer failure, timeout, missing/stale image,
-source-bundle or request mismatch, runtime-log or image hash mismatch, missing
-required runtime prim, or declared known blocking material signal rejects the
-build. Validation always compares the request with inputs freshly derived from the
-current package. For a static-only inspection that intentionally provides no visual
-evidence, add `--static-only` and omit the Isaac/GenManip arguments.
-
-## Generic static compiler
-
-The task-specific script above remains the default path when current Isaac preview
-evidence is required. Its static compile and GenManip export stages can also be
-run through the generic compiler after writing a local
-`scenario-source-bindings/v0.2` file for the base scene and ConvertAsset deliveries:
-
-```bash
-scenario-forge package compile \
-  --spec examples/scientific_workbench/bimanual_pour/scenario.yaml \
-  --source-bindings /path/to/scenario_source_bindings.yaml \
-  --out outputs/scientific_workbench_bimanual_pour \
-  --export-genmanip
-```
-
-The bindings file contains `source_usd`, `package_dir`, `manifest_path`, and the
-explicit ConvertAsset `usage`. The ScenarioSpec continues to contain only asset IDs and portable task
-intent. This command performs no preview render and no oracle rollout; use the
-task-specific script for the former and EOS/GenManip for the latter. See
-[Scenario Source Bindings](../design/scenario-source-bindings.md) for the complete
-binding shape.
-
-The embedded runtime contract is data transport, not a success result. The
-maintained GenManip consumer registers and activates the exact frame predicate, but
-the generator still fails closed unless both vessel manifests pass their complete
-interaction qualification and the named frames match exactly.
-
-The current v0.3 contract contains two ordered target-frame relative-pose stages.
-The pre-pour nominal transform places the source opening at `(0, 0.0175, 0.0425)`
-meters in the target opening frame with polar/azimuth `(58, -90)` degrees. The pour
-nominal keeps the same opening location and uses `(75, -90)` degrees. These are
-absolute `T_target_source` poses, not incremental rotations. A real oracle must
-retain the target, table, environment, and opposite arm as collision obstacles,
-attach a covering representation of the held source to the operating arm, and
-check the complete path before reporting either stage passed.
-
-Do not install the package below `$GENMANIP_SOURCE/saved/assets`. In the shared
-deployment that path is a symlink into the shared EBench asset directory, so a
-seemingly local overwrite would mutate shared data. Stage runtime inputs in a new
-private workspace instead. The generation block already created a clean, detached
-GenManip checkout at the qualified revision and linked the base-asset directories
-for read-only use. Copy the promoted package into a real private
-`collected_packages` directory:
-
-```bash
 PACKAGE_ID=scientific_workbench_bimanual_pour
 COLLECTED="$CANONICAL/adapters/ebench/genmanip"
-
 mkdir -p "$CANARY_ROOT/saved/assets/collected_packages"
-
 target="$CANARY_ROOT/saved/assets/collected_packages/$PACKAGE_ID"
 test ! -e "$target"
 cp -a "$COLLECTED" "$target"
@@ -217,22 +209,6 @@ test "$(realpath "$target")" = "$target"
 diff -qr "$COLLECTED" "$target"
 ```
 
-Then submit the collected-package ID `scientific_workbench_bimanual_pour` through
-the normal GenManip evaluation entry point with `CANARY_ROOT` as its workspace. The
-runtime must already provide the `manip/lift2/R5a` robot, its robot assets, and its
-planner configuration. Never replace or delete an existing target during a Canary;
-use a new workspace and run ID. Keep Ray's temporary root short (for example,
-`/tmp/sf-ray-<timestamp>`); Unix-domain socket paths have a platform length limit.
-
-## What this verifies
-
-Static package generation verifies the asset copy, USD composition, object UID
-mapping, material rebinding, task config, episode metadata, registered proxy
-metrics, and package contracts. The default render additionally verifies that
-GenManip can initialize/reset the scene and produce current evidence for both QA
-views without taking an action. Neither check establishes policy success, task
-success, physics fidelity, or real liquid transfer.
-
-The source data is non-commercial and includes third-party dependencies. Generated
-packages are marked non-redistributable until every bundled dependency has a cleared
-distribution policy.
+The generated package remains non-redistributable until every bundled dependency
+has a cleared distribution policy. Replace a producer input only with a new
+passing package, manifest, and producer revision.

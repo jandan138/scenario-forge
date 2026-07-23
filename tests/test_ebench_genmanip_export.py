@@ -477,6 +477,48 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
     }
 
 
+def test_genmanip_export_rejects_non_table_visual_static_object(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
+    objects[1]["asset_id"] = "visual_static_fixture"
+    scenario["objects"] = objects
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            ),
+            "visual_static_fixture": LocalUSDAssetSource(
+                asset_id="visual_static_fixture",
+                source_usd=source_usd,
+                role="static_object",
+                license="CC-BY-NC-4.0",
+                source_uri="example://visual-static-fixture",
+                redistributable=False,
+            ),
+        },
+        package_root,
+    )
+    output = tmp_path / "collected"
+    output.mkdir()
+    marker = output / "keep.txt"
+    marker.write_text("existing", encoding="utf-8")
+
+    with pytest.raises(GenManipExportError, match="visual_static_object.*table"):
+        export_genmanip_collected_package(package_root, output)
+
+    assert marker.read_text(encoding="utf-8") == "existing"
+
+
 def test_genmanip_runtime_contract_matches_its_json_schema(tmp_path: Path) -> None:
     package_root = _build_package(tmp_path)
     output = export_genmanip_collected_package(package_root).output_dir

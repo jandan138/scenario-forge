@@ -11,7 +11,10 @@ from scenario_forge.generation.source_resolver import (
     ScenarioSourceBindingError,
     resolve_scenario_source_bindings,
 )
-from tests.test_convert_asset_adapter import _write_source_bound_handoff
+from tests.test_convert_asset_adapter import (
+    _write_source_bound_handoff,
+    _write_visual_static_handoff,
+)
 from tests.test_scenario_package_compiler import _write_source_scene
 
 
@@ -76,6 +79,8 @@ def test_source_bindings_v02_schema_requires_explicit_convert_asset_usage() -> N
     assert convert_asset["properties"]["usage"]["enum"] == [
         "scene_overlay",
         "rigid_object",
+        "visual_static_environment",
+        "visual_static_object",
     ]
 
 
@@ -195,6 +200,39 @@ def test_v02_convert_asset_rigid_object_binding_requires_task_ready_interaction(
     assert source.upstream_package.metadata["interaction_contract"][
         "asset_entry_prim"
     ] == "/World/DryingBox_03"
+
+
+def test_v02_convert_asset_visual_static_binding_keeps_it_nonphysical(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_visual_static_handoff(
+        tmp_path / "handoff"
+    )
+    bindings_path = _write_bindings(
+        tmp_path / "bindings.yaml",
+        {
+            "scene1_hard_environment": {
+                "resolver": "convert_asset_package",
+                "usage": "visual_static_environment",
+                "source_usd": source_usd.relative_to(tmp_path).as_posix(),
+                "package_dir": package_dir.relative_to(tmp_path).as_posix(),
+                "manifest_path": manifest_path.relative_to(tmp_path).as_posix(),
+                "producer_revision": "f81e953",
+                "expected_scope_prims": ["/World/lab_015"],
+                "license": "CC-BY-NC-4.0",
+                "redistributable": False,
+            }
+        },
+        schema_version="scenario-source-bindings/v0.2",
+    )
+
+    source = resolve_scenario_source_bindings(bindings_path)["scene1_hard_environment"]
+
+    assert source.role == "environment"
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["consumer_usage"] == (
+        "visual_static_environment"
+    )
 
 
 def test_v01_convert_asset_binding_remains_scene_overlay_without_usage(

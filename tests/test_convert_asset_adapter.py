@@ -101,9 +101,21 @@ over "World" {
     scoped.parent.mkdir(parents=True)
     scoped.write_text(
         """#usda 1.0
-def Xform "World" {
-    def Scope "Looks" { def Material "DryingBoxMaterial" {} }
-    def Xform "__INTERACTION_ROOT__" { def Xform "body" { float physics:mass = -1 } }
+def Xform "World"
+{
+    def Scope "Looks"
+    {
+        def Material "DryingBoxMaterial"
+        {
+        }
+    }
+    def Xform "__INTERACTION_ROOT__"
+    {
+        def Xform "body"
+        {
+            float physics:mass = -1
+        }
+    }
 }
 """.replace("__INTERACTION_ROOT__", interaction_root_name),
         encoding="utf-8",
@@ -420,6 +432,184 @@ def Xform "World" {
     return source_usd, package_dir, manifest_path, manifest
 
 
+def _write_visual_static_handoff(
+    root: Path,
+    *,
+    source_usd: Path | None = None,
+    scope: str = "/World/lab_015",
+) -> tuple[Path, Path, Path, dict[str, object]]:
+    """Write the minimal ConvertAsset visual-static consumer handoff."""
+
+    if source_usd is None:
+        source_usd = root / "source" / "Scene1_hard.usd"
+        source_usd.parent.mkdir(parents=True)
+        source_usd.write_text(
+            '#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n'
+            '    upAxis = "Z"\n)\ndef Xform "World" {}\n',
+            encoding="utf-8",
+        )
+    source_sha = _digest(source_usd)
+    package_dir = root / "visual_static_package"
+    scoped = package_dir / "deps" / "usd" / "scoped_source.usda"
+    scoped.parent.mkdir(parents=True)
+    scope_name = scope.rpartition("/")[2]
+    scoped_body = (
+        '    def Xform "complete_room"\n'
+        '    {\n'
+        '    }\n'
+        if scope == "/World"
+        else (
+            f'    def Xform "{scope_name}"\n'
+            '    {\n'
+            '    }\n'
+        )
+    )
+    scoped.write_text(
+        f'''#usda 1.0
+def Xform "World"
+{{
+{scoped_body}}}
+''',
+        encoding="utf-8",
+    )
+    root_usd = package_dir / "asset.usd"
+    root_usd.write_text(
+        '#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n'
+        '    upAxis = "Z"\n    subLayers = [@deps/usd/scoped_source.usda@]\n)\n',
+        encoding="utf-8",
+    )
+    root_sha = _digest(root_usd)
+    manifest: dict[str, object] = {
+        "schema_version": "asset_application_normalizer.v1",
+        "package_id": "scene1_hard_visual_static_package",
+        "asset_id": "LabUtopia_Scene1_hard_visual_static",
+        "asset_role": "visual_static",
+        "overall_status": "pass",
+        "source": {"path": "/producer/source/Scene1_hard.usd", "sha256": source_sha},
+        "target": {
+            "target_runtime_profile": "isaac41",
+            "target_benchmark_profile": "scenario-forge",
+        },
+        "entrypoints": {
+            "root_usd": "asset.usd",
+            "default_prim": "World",
+            "asset_entry_prim": scope,
+            "asset_scope_prims": [scope],
+            "consumer_profile": "scenario-forge",
+        },
+        "asset_scope_prim_paths": [scope],
+        "source_integrity": {
+            "sha256_before": source_sha,
+            "sha256_after": source_sha,
+            "unchanged": True,
+        },
+        "dependency_closure": {
+            "scope_extraction": {
+                "status": "pass",
+                "retained_subtree_prims": [scope],
+                "retained_material_prims": [],
+                "preserved_stage_metadata": {
+                    "meters_per_unit": 1.0,
+                    "up_axis": "Z",
+                },
+            }
+        },
+        "physics_closure": {
+            "status": "pass",
+            "role": "visual_static",
+            "scope": {"mode": "asset_scope_prims", "asset_scope_prims": [scope]},
+            "physical_frame": {
+                "status": "pass",
+                "source": {
+                    "meters_per_unit": 1.0,
+                    "kilograms_per_unit": 1.0,
+                    "up_axis": "Z",
+                    "time_codes_per_second": 60.0,
+                    "frames_per_second": 24.0,
+                    "start_time_code": 0.0,
+                    "end_time_code": 100.0,
+                },
+                "package": {
+                    "meters_per_unit": 1.0,
+                    "kilograms_per_unit": 1.0,
+                    "up_axis": "Z",
+                    "time_codes_per_second": 60.0,
+                    "frames_per_second": 24.0,
+                    "start_time_code": 0.0,
+                    "end_time_code": 100.0,
+                },
+                "metric_mismatches": [],
+                "scope_bounds": [
+                    {
+                        "path": scope,
+                        "source_world_bound_m": {
+                            "min": [0.0, 0.0, 0.0],
+                            "max": [1.0, 1.0, 1.0],
+                        },
+                        "package_world_bound_m": {
+                            "min": [0.0, 0.0, 0.0],
+                            "max": [1.0, 1.0, 1.0],
+                        },
+                        "status": "pass",
+                    }
+                ],
+                "blocked_scope_prims": [],
+            },
+        },
+        "output_role_admission": {
+            "status": "pass",
+            "scope": [scope],
+            "summary": {
+                "active_articulation_root_count": 0,
+                "active_collision_count": 0,
+                "active_joint_count": 0,
+                "active_rigid_body_count": 0,
+            },
+            "residue": [],
+        },
+        "visual_preservation_fingerprint": {"status": "pass"},
+        "runtime_evidence": {
+            "status": "pass",
+            "runtime_profile": "isaac41",
+            "expected_root_usd_sha256": root_sha,
+            "root_usd_sha256": root_sha,
+            "cold_load": {"status": "pass"},
+            "render_readback": {"status": "pass"},
+            "physics_step": {"status": "pass"},
+            "reset": {"status": "pass"},
+            "physics_warning_gate": {
+                "status": "pass",
+                "scope_prims": [scope],
+                "scope_validation": {
+                    "status": "pass",
+                    "scope_prims": [scope],
+                    "errors": [],
+                },
+                "binding_validation": {
+                    "status": "pass",
+                    "mapping_kind": "identity",
+                    "errors": [],
+                },
+                "summary": {
+                    "scoped_event_count": 0,
+                    "out_of_scope_event_count": 0,
+                    "unattributed_event_count": 0,
+                },
+            },
+        },
+        "claims_forbidden": [
+            "The visual_static asset is dynamic-physics-ready."
+        ],
+    }
+    manifest_path = root / "visual_static_manifest.json"
+    embedded_manifest = package_dir / "evidence" / "manifest.json"
+    embedded_manifest.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    manifest_path.write_text(payload, encoding="utf-8")
+    embedded_manifest.write_text(payload, encoding="utf-8")
+    return source_usd, package_dir, manifest_path, manifest
+
+
 def test_convert_asset_plan_builds_command_without_executing_conversion() -> None:
     plan = ConvertAssetCommandPlan(
         convert_asset_root="/tools/ConvertAsset",
@@ -458,7 +648,7 @@ def test_normalize_asset_plan_uses_convert_asset_public_cli_boundary() -> None:
         "/tools/ConvertAsset/main.py",
         "normalize-asset",
         "/data/raw/beaker.usd",
-        "--package-dir",
+        "--out",
         "/tmp/normalized/beaker",
     )
 
@@ -524,6 +714,89 @@ def test_load_source_bound_handoff_maps_verified_package_to_neutral_asset_source
     assert source.upstream_package.metadata["claims_forbidden"] == [
         "Measured, BOM, CAD, or real-world physical-parameter parity is verified."
     ]
+
+
+@pytest.mark.parametrize(
+    ("usage", "expected_role"),
+    [
+        ("visual_static_environment", "environment"),
+        ("visual_static_object", "static_object"),
+    ],
+)
+def test_visual_static_handoff_maps_to_nonphysical_scene_sources(
+    tmp_path: Path,
+    usage: str,
+    expected_role: str,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_visual_static_handoff(tmp_path)
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/lab_015",),
+        producer_revision="f81e953cd2652d6e0552187d5d732e86ae1e76ac",
+        usage=usage,
+    )
+    source = handoff.to_local_usd_asset_source(
+        asset_id=f"scene1_{expected_role}",
+        license="CC-BY-NC-4.0",
+    )
+
+    assert handoff.producer_asset_role == "visual_static"
+    assert handoff.interaction_contract is None
+    assert source.role == expected_role
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["producer_asset_role"] == "visual_static"
+    assert source.upstream_package.metadata["consumer_usage"] == usage
+
+
+def test_visual_static_handoff_rejects_physics_residue(tmp_path: Path) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_visual_static_handoff(
+        tmp_path
+    )
+    admission = manifest["output_role_admission"]
+    assert isinstance(admission, dict)
+    summary = admission["summary"]
+    assert isinstance(summary, dict)
+    summary["active_collision_count"] = 1
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    with pytest.raises(ConvertAssetHandoffError, match="active_collision_count"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/lab_015",),
+            producer_revision="f81e953",
+            usage="visual_static_environment",
+        )
+
+
+def test_visual_static_handoff_rejects_physical_frame_mismatch(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_visual_static_handoff(
+        tmp_path
+    )
+    physics = manifest["physics_closure"]
+    assert isinstance(physics, dict)
+    frame = physics["physical_frame"]
+    assert isinstance(frame, dict)
+    package_frame = frame["package"]
+    assert isinstance(package_frame, dict)
+    package_frame["meters_per_unit"] = 0.001
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    with pytest.raises(ConvertAssetHandoffError, match="physical_frame"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/lab_015",),
+            producer_revision="f81e953",
+            usage="visual_static_environment",
+        )
 
 
 def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repair(
