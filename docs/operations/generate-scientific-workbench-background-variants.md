@@ -80,8 +80,8 @@ The current profile-enabled set is:
 | `scientific_environment_084` | `/World/group_078` | approved: the clear workcell overview is the current recommended delivery |
 | `scientific_environment_059` | `/World/group_063` + `064` + `073` + `241` | mapping received; integrated render complete, visual QA pending |
 | `scientific_environment_066` | `/World/group_111` | mapping received; integrated render complete, visual QA pending; old envelope-fit render remains rejected |
-| `scientific_environment_067` | `/World/group_205` + `206` | corrected mapping received (37365.6 units/m); integrated render complete, camera retake/QA in progress |
-| `scientific_environment_083` | `/World/group_025` + `026` + `027` | mapping received; closeup passes, overview is visual FAIL because the source wall occludes the task; optional floor-drain prims remain active by default |
+| `scientific_environment_067` | `/World/group_205` + `206` | corrected mapping received (37365.6 units/m); closeup passes, combined overview remains visual FAIL because the fixed workspace is against a blank wall and target vessels are not readable |
+| `scientific_environment_083` | `/World/group_025` + `026` + `027` | mapping received; a reviewed +90° visual composition yaw and authored-camera-direction retarget now produce a passing combined overview; optional floor-drain prims remain active by default |
 
 `081` and `085` are explicit `not_applicable` results: `081` needs anonymous
 loose-mesh masks around dense bench rows, while `085` has no island large
@@ -143,12 +143,16 @@ evidence-only view the renderer temporarily hides the visual-static room, so a
 room wall or floor cannot mask the fixed table, robot, or vessels. It is not
 proof that the task has been embedded well in the room.
 `scene_overview.png` restores the room but, for an anchored replacement,
-centres its temporary evidence camera from the **post-reset GenManip runtime
-objects**: Lift2, runtime table, conical bottle, and graduated cylinder. This
-matters because GenManip creates/recovery-places its own runtime table and
-robot; a compiler-USD tabletop coordinate is not a safe overview target. The
-camera uses one consistent high three-quarter eBench view so the fixed task is
-visible while the room remains context.
+centres its temporary evidence camera at the fixed eBench workspace. When the
+admitted package carries a source Perspective camera, Scenario Forge preserves
+that camera's direction and retargets it to the unchanged workspace; this
+avoids aiming at a source-only wall or object. Candidate `083` additionally
+uses a reviewed +90° instance-layer yaw around its source anchor so the room
+row sits behind the workcell. Candidate `067` still fails this visual gate and
+must not be described as a combined room/workspace overview until ConvertAsset
+provides a better source-bound placement/profile. These are composition-layer
+choices only: the source USD, table, robot, task objects, and dynamic semantics
+are unchanged.
 
 The visibility override and camera provenance are recorded in
 `render_manifest.json` and `render_request.yaml`; neither changes the packaged
@@ -169,10 +173,12 @@ with a fixed eBench workspace and valid package/asset locks. A
 `visual_ready_gate.yaml` proves only that Isaac/GenManip constructed the scene
 and required runtime prims existed; it is not composition acceptance. The
 ConvertAsset source-side comparison images prove profile coverage, not final
-eBench framing or visual quality. `084` remains the only visually approved
-integrated delivery. The old 066 post-reset render is retained as a rejected
-diagnostic: it used the package-stage `metersPerUnit`, compressed the audited
-clearance, and showed the room shell over the workcell.
+eBench framing or visual quality. `084` and the retaken `083` are the visually
+accepted integrated deliveries in the current clean-room review. `067` is
+retained as a structural package and closeup-only diagnostic, not as a combined
+overview. The old 066 post-reset render is retained as a rejected diagnostic:
+it used the package-stage `metersPerUnit`, compressed the audited clearance,
+and showed the room shell over the workcell.
 
 None of these artifacts prove that a background is dynamically interactable,
 that the table or room has calibrated physics, that an arm can grasp either

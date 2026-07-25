@@ -62,6 +62,10 @@ RUNTIME_WORKSPACE_OVERVIEW_ANCHORS = (
     "obj_graduated_cylinder_03",
 )
 RUNTIME_CONTEXT_CAMERA_DISTANCE_M = 2.8
+# A room-context view needs a little more working distance than the task-only
+# overview.  The direction comes from the producer's authored Perspective
+# camera; only its target is moved to the fixed eBench workspace.
+AUTHORED_CONTEXT_CAMERA_DISTANCE_M = 4.0
 # Same high three-quarter direction as the task-only evidence view.  It is a
 # task-camera policy rather than a producer-room camera, so every accepted
 # room proves the same robot/table/vessel arrangement.
@@ -159,6 +163,20 @@ _WORKSPACE_ANCHORS: dict[str, WorkspaceAnchor] = {
         camera_mode="workspace_focus",
     ),
 }
+
+# Review-only visual composition choices.  These are instance-layer poses,
+# not producer asset edits or dynamic-placement claims.  083's source row is
+# coherent after a quarter-turn around its reviewed anchor; the fixed eBench
+# table and robot remain unchanged.
+_WORKSPACE_COMPOSITION_YAW_DEG: dict[str, float] = {
+    "scientific_environment_083": 90.0,
+}
+
+
+def workspace_composition_yaw_deg(candidate: BackgroundCandidate) -> float:
+    """Return the clean-room-reviewed visual yaw for a background instance."""
+
+    return _WORKSPACE_COMPOSITION_YAW_DEG.get(candidate.candidate_id, 0.0)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -814,6 +832,38 @@ def select_workspace_candidates(
     return tuple(selected), excluded
 
 
+def _rotate_z(
+    vector: tuple[float, float, float], yaw_deg: float
+) -> tuple[float, float, float]:
+    radians = math.radians(yaw_deg)
+    cosine = math.cos(radians)
+    sine = math.sin(radians)
+    return (
+        cosine * vector[0] - sine * vector[1],
+        sine * vector[0] + cosine * vector[1],
+        vector[2],
+    )
+
+
+def _yaw_quaternion(yaw_deg: float) -> tuple[float, float, float, float]:
+    half_angle = math.radians(yaw_deg) / 2.0
+    return (math.cos(half_angle), 0.0, 0.0, math.sin(half_angle))
+
+
+def _quat_multiply(
+    left: tuple[float, float, float, float],
+    right: tuple[float, float, float, float],
+) -> tuple[float, float, float, float]:
+    lw, lx, ly, lz = left
+    rw, rx, ry, rz = right
+    return (
+        lw * rw - lx * rx - ly * ry - lz * rz,
+        lw * rx + lx * rw + ly * rz - lz * ry,
+        lw * ry - lx * rz + ly * rw + lz * rx,
+        lw * rz + lx * ry - ly * rx + lz * rw,
+    )
+
+
 def background_placement(
     spec: ScenarioSpec,
     candidate: BackgroundCandidate,
@@ -862,36 +912,56 @@ def background_placement(
         fit_factor = target_extent / max_extent
     effective_scale = unit_scale * fit_factor
     authored_scale = tuple(effective_scale * candidate.root_scale_xyz[index] for index in range(3))
+    composition_yaw_deg = workspace_composition_yaw_deg(candidate)
     center = tuple((lower[index] + upper[index]) / 2.0 for index in range(3))
     base_xyz = spec.scene.pose.xyz
     if anchor is None:
-        scene_xyz = tuple(
-            base_xyz[index]
-            - fit_factor * center[index]
-            + effective_scale * candidate.root_translate_xyz[index]
+        source_offset = tuple(
+            fit_factor * center[index]
+            - effective_scale * candidate.root_translate_xyz[index]
             for index in range(3)
         )
+        rotated_offset = _rotate_z(source_offset, composition_yaw_deg)
+        scene_xyz = tuple(base_xyz[index] - rotated_offset[index] for index in range(3))
         placement_mode = "envelope_center"
-        camera_origin_xyz = [base_xyz[index] - fit_factor * center[index] for index in range(3)]
+        camera_origin_xyz = [
+            scene_xyz[index]
+            - _rotate_z(
+                tuple(effective_scale * value for value in candidate.root_translate_xyz),
+                composition_yaw_deg,
+            )[index]
+            for index in range(3)
+        ]
     else:
         # ``source_anchor_xyz_m`` is the producer-composed anchor after the
         # declared source-coordinate-to-metre conversion.  The generated
         # scene layer replaces that root transform with the instance pose, so
         # fold the source-root translation back out when solving the pose.
-        scene_xyz = tuple(
-            anchor.target_xyz[index]
-            - fit_factor * anchor.source_anchor_xyz_m[index]
-            + effective_scale * candidate.root_translate_xyz[index]
+        source_offset = tuple(
+            fit_factor * anchor.source_anchor_xyz_m[index]
+            - effective_scale * candidate.root_translate_xyz[index]
             for index in range(3)
+        )
+        rotated_offset = _rotate_z(source_offset, composition_yaw_deg)
+        scene_xyz = tuple(
+            anchor.target_xyz[index] - rotated_offset[index] for index in range(3)
         )
         placement_mode = "workspace_anchor"
         camera_origin_xyz = [
-            scene_xyz[index] - effective_scale * candidate.root_translate_xyz[index]
+            scene_xyz[index]
+            - _rotate_z(
+                tuple(effective_scale * value for value in candidate.root_translate_xyz),
+                composition_yaw_deg,
+            )[index]
             for index in range(3)
         ]
+    scene_wxyz = _quat_multiply(
+        _yaw_quaternion(composition_yaw_deg),
+        tuple(spec.scene.pose.wxyz),
+    )
     scene_pose = {
         "xyz": list(scene_xyz),
-        "wxyz": list(spec.scene.pose.wxyz),
+        "wxyz": list(scene_wxyz),
         "scale_xyz": list(authored_scale),
     }
     return {
@@ -901,6 +971,7 @@ def background_placement(
         "source_bounds_m": [list(lower), list(upper)],
         "fit_factor": fit_factor,
         "effective_scale": effective_scale,
+        "composition_yaw_deg": composition_yaw_deg,
         "authored_scale_xyz": list(authored_scale),
         "scale_policy": scale_policy,
         "placement_mode": placement_mode,
@@ -944,6 +1015,30 @@ def _configure_background_preview(
     if anchor is None:
         anchor = workspace_anchor_for(candidate)
     if anchor is not None and anchor.camera_mode == "workspace_focus":
+        authored_pose = _authored_workspace_camera_pose(
+            candidate,
+            yaw_deg=float(placement.get("composition_yaw_deg", 0.0)),
+        )
+        if authored_pose is not None:
+            target, position = authored_pose
+            overview["target_xyz"] = list(target)
+            overview["position_xyz"] = list(position)
+            overview.pop("runtime_target_direction_xyz", None)
+            overview.pop("runtime_target_distance_m", None)
+            overview.pop("azimuth_deg", None)
+            overview.pop("elevation_deg", None)
+            overview["camera_source"] = (
+                "scenario-forge source authored Perspective direction retargeted "
+                "to fixed eBench workspace"
+            )
+            request["camera_policy_version"] = (
+                "scenario-forge/runtime-workspace-context-v8"
+            )
+            request_path.write_text(
+                yaml.safe_dump(dict(request), sort_keys=False),
+                encoding="utf-8",
+            )
+            return
         # GenManip creates the table and robot during post-reset recovery.  A
         # compiler-USD tabletop coordinate is therefore not a reliable camera
         # target for the runtime workcell.  Fit the evidence camera from the
@@ -1000,6 +1095,41 @@ def _configure_background_preview(
         yaml.safe_dump(dict(request), sort_keys=False),
         encoding="utf-8",
     )
+
+
+def _authored_workspace_camera_pose(
+    candidate: BackgroundCandidate,
+    *,
+    yaw_deg: float = 0.0,
+) -> tuple[tuple[float, float, float], tuple[float, float, float]] | None:
+    """Retarget a source room's authored view without moving the workspace.
+
+    ConvertAsset's source-root camera is useful for the *direction* of a room
+    view, but its target can point at a source-only object or even outside the
+    admitted scope.  Preserve that direction, place the target at the fixed
+    eBench anchor, and use a bounded room-context distance.  This remains a
+    composition-layer camera choice; it does not edit the source USD.
+    """
+
+    if candidate.authored_camera is None:
+        return None
+    camera_position, camera_target = candidate.authored_camera
+    direction = tuple(
+        camera_target[index] - camera_position[index] for index in range(3)
+    )
+    norm = math.sqrt(sum(value * value for value in direction))
+    if not math.isfinite(norm) or norm <= 1e-9:
+        return None
+    unit_direction = _rotate_z(
+        tuple(value / norm for value in direction),
+        yaw_deg,
+    )
+    target = EBENCH_WORKSPACE_TARGET_XYZ
+    position = tuple(
+        target[index] - AUTHORED_CONTEXT_CAMERA_DISTANCE_M * unit_direction[index]
+        for index in range(3)
+    )
+    return target, position
 
 
 def _source_authored_camera(
@@ -1200,6 +1330,13 @@ def _assert_fixed_workspace(
         raise ValueError("background variant changed a scene field other than asset_id")
     for field in ("wxyz",):
         if variant_pose.get(field) != base_pose.get(field):
+            if variant_mapping["scene"].get("asset_id", "").startswith(
+                "scientific_environment_"
+            ):
+                # A reviewed visual-static background may rotate as an
+                # instance around its source anchor.  The eBench table,
+                # robot, objects, and task pose remain in their fixed fields.
+                continue
             raise ValueError(
                 "background placement changed the baseline scene anchor "
                 f"{field}; only background instance fitting is allowed"

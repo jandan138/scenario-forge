@@ -25,12 +25,14 @@ task success, physics fidelity, or liquid transfer.
 Evidence locations are, for each candidate,
 `adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png` and
 `workspace_closeup.png`. The closeups consistently show the fixed dual-arm
-workspace and both vessels. The overview images for 059, 066, 067, and 084 show
-useful room context at different quality levels. Candidate 083's room shell can
-occlude the task from the overview camera because the profiled replacement row
-is behind the source wall; its closeup is usable, but the overview remains a
-visual FAIL and should not be described as a complete combined room/workspace
-view without a later producer-side placement or camera decision.
+workspace and both vessels. The overview images for 059, 066, 084, and the
+retaken 083 show useful room context at different quality levels. Candidate
+083 now uses a reviewed +90° composition-layer yaw and source-authored camera
+direction retarget, so its closeup and combined overview are visually
+accepted. Candidate 067's closeup is usable, but its combined overview remains
+a visual FAIL: the fixed workspace is against a blank wall and the target
+vessels are not readable. Do not describe 067 as a complete room/workspace view
+until ConvertAsset provides a better source-bound placement/profile.
 
 No GenManip source or ConvertAsset asset was modified. No dynamic task rollout,
 metric score, grasp success, or pour success is claimed by this record.

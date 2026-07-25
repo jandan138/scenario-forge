@@ -315,13 +315,15 @@ def test_workspace_profile_uses_declared_source_composed_metric_scale(
     spec = module.load_scenario_spec(BASE_SPEC)
     placement = module.background_placement(spec, candidate, anchor=profile.anchor)
     raw_anchor = profile.raw_anchor_xyz_m
+    rotated_anchor = module._rotate_z(tuple(raw_anchor), placement["composition_yaw_deg"])
     mapped = [
         placement["scene_pose"]["xyz"][index]
         + placement["scene_pose"]["scale_xyz"][index]
-        * raw_anchor[index]
+        * rotated_anchor[index]
         / candidate.root_scale_xyz[index]
         for index in range(3)
     ]
+    assert placement["composition_yaw_deg"] == pytest.approx(90.0)
     assert mapped == pytest.approx(list(module.EBENCH_WORKSPACE_TARGET_XYZ))
 
 
@@ -559,6 +561,70 @@ def test_workspace_focus_preview_uses_post_reset_runtime_workspace_bounds(
     assert overview["runtime_target_distance_m"] == pytest.approx(2.8)
     assert "target_xyz" not in overview
     assert "position_xyz" not in overview
+
+
+def test_workspace_focus_preview_retargets_authored_room_direction_to_workspace(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    collected_root = tmp_path / "collected"
+    request_path = collected_root / "evidence" / "render_request.yaml"
+    request_path.parent.mkdir(parents=True)
+    request_path.write_text(
+        yaml.safe_dump(
+            {
+                "views": {
+                    "scene_overview": {
+                        "anchor_runtime_ids": ["lift2"],
+                        "runtime_target_direction_xyz": [1.0, 0.0, 0.0],
+                        "runtime_target_distance_m": 2.8,
+                    }
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    candidate = module.BackgroundCandidate(
+        candidate_id="scientific_environment_083",
+        package_dir=Path("/tmp/package"),
+        manifest_path=Path("/tmp/manifest.json"),
+        source_usd=Path("/tmp/source.usd"),
+        source_sha256="a" * 64,
+        source_scope="/World",
+        producer_revision="r1",
+        meters_per_unit=1.0,
+        root_scale_xyz=(1.0, 1.0, 1.0),
+        root_translate_xyz=(0.0, 0.0, 0.0),
+        physical_bounds_m=((-1.0, -1.0, 0.0), (1.0, 1.0, 2.0)),
+        authored_camera=((0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+    )
+
+    module._configure_background_preview(
+        collected_root,
+        {"camera_origin_xyz": [0.0, 0.0, 0.0], "effective_scale": 1.0},
+        candidate,
+        anchor=module.WorkspaceAnchor(
+            source_prim_path="/World/group_026",
+            source_anchor_xyz_m=(0.0, 0.0, 0.0),
+            camera_mode="workspace_focus",
+        ),
+    )
+
+    configured = yaml.safe_load(request_path.read_text(encoding="utf-8"))
+    overview = configured["views"]["scene_overview"]
+    target = module.EBENCH_WORKSPACE_TARGET_XYZ
+    assert configured["camera_policy_version"] == (
+        "scenario-forge/runtime-workspace-context-v8"
+    )
+    assert overview["target_xyz"] == pytest.approx(list(target))
+    assert overview["position_xyz"] == pytest.approx(
+        [target[0], target[1] - module.AUTHORED_CONTEXT_CAMERA_DISTANCE_M, target[2]]
+    )
+    assert overview["camera_source"].startswith(
+        "scenario-forge source authored Perspective direction"
+    )
+    assert "runtime_target_direction_xyz" not in overview
 
 
 def test_source_root_camera_is_consumed_for_scene_overview(tmp_path: Path) -> None:
