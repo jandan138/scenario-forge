@@ -437,6 +437,8 @@ def _write_visual_static_handoff(
     *,
     source_usd: Path | None = None,
     scope: str = "/World/lab_015",
+    producer_asset_role: str = "visual_static",
+    physics_role: str = "visual_static",
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     """Write the minimal ConvertAsset visual-static consumer handoff."""
 
@@ -483,7 +485,7 @@ def Xform "World"
         "schema_version": "asset_application_normalizer.v1",
         "package_id": "scene1_hard_visual_static_package",
         "asset_id": "LabUtopia_Scene1_hard_visual_static",
-        "asset_role": "visual_static",
+        "asset_role": producer_asset_role,
         "overall_status": "pass",
         "source": {"path": "/producer/source/Scene1_hard.usd", "sha256": source_sha},
         "target": {
@@ -516,7 +518,7 @@ def Xform "World"
         },
         "physics_closure": {
             "status": "pass",
-            "role": "visual_static",
+            "role": physics_role,
             "scope": {"mode": "asset_scope_prims", "asset_scope_prims": [scope]},
             "physical_frame": {
                 "status": "pass",
@@ -749,6 +751,33 @@ def test_visual_static_handoff_maps_to_nonphysical_scene_sources(
     assert source.upstream_package is not None
     assert source.upstream_package.metadata["producer_asset_role"] == "visual_static"
     assert source.upstream_package.metadata["consumer_usage"] == usage
+
+
+def test_visual_static_environment_producer_role_is_accepted(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_visual_static_handoff(
+        tmp_path,
+        scope="/World",
+        producer_asset_role="visual_static_environment",
+        physics_role="visual_static_environment",
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World",),
+        producer_revision="2026-07-24-producer-source-fix-2",
+        usage="visual_static_environment",
+    )
+
+    assert handoff.producer_asset_role == "visual_static_environment"
+    source = handoff.to_local_usd_asset_source(
+        asset_id="scientific_environment_081",
+        license="CC-BY-NC-4.0",
+    )
+    assert source.role == "environment"
 
 
 def test_visual_static_handoff_rejects_physics_residue(tmp_path: Path) -> None:

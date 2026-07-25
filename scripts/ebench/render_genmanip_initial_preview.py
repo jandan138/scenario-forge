@@ -230,6 +230,14 @@ def _render_initial_scene(
             [UsdGeom.Tokens.default_, UsdGeom.Tokens.render],
             useExtentsHint=True,
         )
+        room_prim = stage.GetPrimAtPath(f"/World/{scene.uuid}/room")
+        if room_prim is None or not room_prim.IsValid():
+            raise RuntimeError("scene_room prim is unavailable for preview isolation")
+        room_imageable = UsdGeom.Imageable(room_prim)
+        room_visibility_attr = room_imageable.GetVisibilityAttr()
+        original_room_visibility = room_visibility_attr.Get()
+        if not original_room_visibility:
+            original_room_visibility = UsdGeom.Tokens.inherited
 
         camera_records: dict[str, dict[str, Any]] = {}
         for view_name in VIEW_NAMES:
@@ -248,14 +256,29 @@ def _render_initial_scene(
                 np=np,
             )
             focal_length = float(camera_data[view_name]["focal_length"])
-            target, distance = _fit_camera(bounds, view_request, focal_length, np)
+            explicit = _explicit_camera(view_request, np)
+            if explicit is None:
+                target, distance = _fit_camera(bounds, view_request, focal_length, np)
+                runtime_target_camera = _runtime_target_camera(
+                    view_request,
+                    target,
+                    distance,
+                    np,
+                )
+                if runtime_target_camera is None:
+                    elevation = float(view_request["elevation_deg"])
+                    azimuth = float(view_request["azimuth_deg"])
+                else:
+                    target, distance, elevation, azimuth = runtime_target_camera
+            else:
+                target, distance, elevation, azimuth = explicit
             camera = preview_cameras[view_name]
             set_camera_look_at(
                 camera,
                 target,
                 distance=distance,
-                elevation=float(view_request["elevation_deg"]),
-                azimuth=float(view_request["azimuth_deg"]),
+                elevation=elevation,
+                azimuth=azimuth,
             )
             position, _ = camera.get_world_pose()
             camera_records[view_name] = {
@@ -265,11 +288,21 @@ def _render_initial_scene(
                 "focal_length": focal_length,
             }
 
-        for _ in range(RENDER_STEPS):
-            scene.world.step(render=True)
-
         manifest_views: dict[str, Any] = {}
         for view_name in VIEW_NAMES:
+            # Keep the task-focused image stable across room packages.  Some
+            # admitted rooms contain a floor/wall that intersects the fixed
+            # eBench camera after a visual-only fit.  The closeup is therefore
+            # an intentional workspace-isolation view; the following overview
+            # restores the room and proves the substituted background renders.
+            if view_name == "workspace_closeup":
+                room_visibility_attr.Set(UsdGeom.Tokens.invisible)
+                visibility_mode = "scene_room_invisible_workspace_isolation"
+            else:
+                room_visibility_attr.Set(original_room_visibility)
+                visibility_mode = "scene_room_inherited"
+            for _ in range(RENDER_STEPS):
+                scene.world.step(render=True)
             camera = preview_cameras[view_name]
             rgb = get_src(camera, "rgb")
             attempts = 0
@@ -303,6 +336,7 @@ def _render_initial_scene(
                 "sha256": _file_sha256(image_path),
                 "resolution": list(resolution),
                 "present_runtime_ids": present_ids,
+                "scene_visibility": visibility_mode,
                 "camera": {
                     "position": _float_list(record["position"]),
                     "look_at": _float_list(record["target"]),
@@ -312,6 +346,10 @@ def _render_initial_scene(
                     "temporary_evidence_camera": True,
                 },
             }
+
+        # Do not leave an evidence-only visibility override on the live stage
+        # while the cleanup path runs.
+        room_visibility_attr.Set(original_room_visibility)
 
         log_lines.extend(
             [
@@ -482,6 +520,71 @@ def _fit_camera(
     distance = radius / math.tan(vertical_fov / 2.0) * margin
     minimum = float(view.get("minimum_distance", 0.85))
     return target, max(distance, minimum)
+
+
+def _explicit_camera(
+    view: Mapping[str, Any], np: Any
+) -> tuple[Any, float, float, float] | None:
+    """Return a request-supplied camera pose as target/distance/orbit angles.
+
+    Background packages sometimes carry a useful authored camera while their
+    scene bounds include distant utility geometry.  The explicit pose keeps
+    visual evidence aimed at the authored laboratory rather than at a giant
+    outlier bounding box.  Both fields must be supplied together.
+    """
+
+    raw_target = view.get("target_xyz")
+    raw_position = view.get("position_xyz")
+    if raw_target is None and raw_position is None:
+        return None
+    if not isinstance(raw_target, list) or not isinstance(raw_position, list):
+        raise ValueError("target_xyz and position_xyz must be supplied together")
+    if len(raw_target) != 3 or len(raw_position) != 3:
+        raise ValueError("target_xyz and position_xyz must contain three numbers")
+    target = np.asarray([float(item) for item in raw_target], dtype=float)
+    position = np.asarray([float(item) for item in raw_position], dtype=float)
+    if not np.all(np.isfinite(target)) or not np.all(np.isfinite(position)):
+        raise ValueError("explicit camera pose must be finite")
+    offset = position - target
+    distance = float(np.linalg.norm(offset))
+    if distance <= 1e-6:
+        raise ValueError("explicit camera position must differ from target")
+    azimuth = math.degrees(math.atan2(float(offset[1]), float(offset[0])))
+    elevation = math.degrees(math.asin(float(offset[2]) / distance))
+    return target, distance, elevation, azimuth
+
+
+def _runtime_target_camera(
+    view: Mapping[str, Any],
+    target: Any,
+    fallback_distance: float,
+    np: Any,
+) -> tuple[Any, float, float, float] | None:
+    """Aim at post-reset bounds from a reviewed laboratory-view direction."""
+
+    raw_direction = view.get("runtime_target_direction_xyz")
+    if raw_direction is None:
+        return None
+    if not isinstance(raw_direction, list) or len(raw_direction) != 3:
+        raise ValueError("runtime_target_direction_xyz must contain three numbers")
+    direction = np.asarray([float(item) for item in raw_direction], dtype=float)
+    if not np.all(np.isfinite(direction)):
+        raise ValueError("runtime_target_direction_xyz must be finite")
+    direction_norm = float(np.linalg.norm(direction))
+    if direction_norm <= 1e-6:
+        raise ValueError("runtime_target_direction_xyz must be non-zero")
+    raw_distance = view.get("runtime_target_distance_m", fallback_distance)
+    if not isinstance(raw_distance, (int, float)) or isinstance(raw_distance, bool):
+        raise ValueError("runtime_target_distance_m must be numeric")
+    distance = float(raw_distance)
+    if not math.isfinite(distance) or distance <= 1e-6:
+        raise ValueError("runtime_target_distance_m must be positive")
+    unit_direction = direction / direction_norm
+    azimuth = math.degrees(
+        math.atan2(float(unit_direction[1]), float(unit_direction[0]))
+    )
+    elevation = math.degrees(math.asin(float(unit_direction[2])))
+    return target, distance, elevation, azimuth
 
 
 def _runtime_prims(stage: Any, scene: Any, runtime_id: str) -> list[Any]:

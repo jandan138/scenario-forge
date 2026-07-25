@@ -74,6 +74,12 @@ _DYNAMIC_USAGES = frozenset({"scene_overlay", "rigid_object"})
 _VISUAL_STATIC_USAGES = frozenset(
     {"visual_static_environment", "visual_static_object"}
 )
+_VISUAL_STATIC_PRODUCER_ROLES = {
+    "visual_static_environment": frozenset(
+        {"visual_static", "visual_static_environment"}
+    ),
+    "visual_static_object": frozenset({"visual_static", "visual_static_object"}),
+}
 
 
 @dataclass(frozen=True)
@@ -259,10 +265,14 @@ def load_convert_asset_package_handoff(
     package_id = _required_string(manifest, "package_id", "manifest")
     producer_asset_id = _required_string(manifest, "asset_id", "manifest")
     producer_asset_role = _required_string(manifest, "asset_role", "manifest")
-    expected_asset_role = "dynamic" if usage in _DYNAMIC_USAGES else "visual_static"
-    if producer_asset_role != expected_asset_role:
+    if usage in _DYNAMIC_USAGES:
+        accepted_asset_roles = frozenset({"dynamic"})
+    else:
+        accepted_asset_roles = _VISUAL_STATIC_PRODUCER_ROLES[usage]
+    if producer_asset_role not in accepted_asset_roles:
+        accepted = ", ".join(sorted(accepted_asset_roles))
         raise ConvertAssetHandoffError(
-            f"manifest.asset_role must be {expected_asset_role!r} for usage {usage!r}"
+            f"manifest.asset_role must be one of {{{accepted}}} for usage {usage!r}"
         )
 
     expected_scopes = _validated_scope_tuple(
@@ -473,12 +483,18 @@ def load_convert_asset_package_handoff(
             required=usage == "rigid_object",
         )
     else:
-        _require_value(
+        physics_role = _required_string(
             physics,
             "role",
-            "visual_static",
             "manifest.physics_closure",
         )
+        accepted_physics_roles = frozenset({"visual_static", usage})
+        if physics_role not in accepted_physics_roles:
+            accepted = ", ".join(sorted(accepted_physics_roles))
+            raise ConvertAssetHandoffError(
+                "manifest.physics_closure.role must be one of "
+                f"{{{accepted}}} for usage {usage!r}"
+            )
         _validate_visual_static_admission(manifest, expected_scopes)
         _validate_visual_static_physical_frame(physics, expected_scopes)
 

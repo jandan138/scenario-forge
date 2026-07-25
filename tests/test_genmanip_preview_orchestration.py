@@ -65,6 +65,53 @@ def test_preview_orchestration_uses_argv_and_supports_paths_with_spaces(
     assert (collected_root / EVIDENCE_DIR / "scene_overview.png").is_file()
 
 
+def test_renderer_accepts_explicit_camera_pose() -> None:
+    module = _load_isaac_renderer_module()
+    import numpy as np
+
+    target, distance, elevation, azimuth = module._explicit_camera(
+        {
+            "target_xyz": [0.0, 0.0, 0.0],
+            "position_xyz": [1.0, -1.0, 1.0],
+        },
+        np,
+    )
+
+    assert target.tolist() == [0.0, 0.0, 0.0]
+    assert distance == pytest.approx(3.0**0.5)
+    assert elevation == pytest.approx(35.2643897)
+    assert azimuth == pytest.approx(-45.0)
+
+
+def test_renderer_orients_runtime_target_camera_from_declared_direction() -> None:
+    module = _load_isaac_renderer_module()
+    import numpy as np
+
+    target, distance, elevation, azimuth = module._runtime_target_camera(
+        {
+            "runtime_target_direction_xyz": [1.0, -1.0, 1.0],
+            "runtime_target_distance_m": 2.5,
+        },
+        np.asarray([0.25, 0.0, 0.9]),
+        4.0,
+        np,
+    )
+
+    assert target.tolist() == [0.25, 0.0, 0.9]
+    assert distance == pytest.approx(2.5)
+    assert elevation == pytest.approx(35.2643897)
+    assert azimuth == pytest.approx(-45.0)
+
+
+def test_renderer_isolates_workspace_closeup_and_restores_background_overview() -> None:
+    source = ISAAC_RENDERER.read_text(encoding="utf-8")
+
+    assert "scene_room_invisible_workspace_isolation" in source
+    assert "scene_room_inherited" in source
+    assert "UsdGeom.Tokens.invisible" in source
+    assert "room_visibility_attr.Set(original_room_visibility)" in source
+
+
 def test_preview_orchestration_resolves_package_before_changing_runtime_cwd(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -561,6 +608,16 @@ def _load_yaml(path: Path) -> dict[str, object]:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     assert isinstance(data, dict)
     return data
+
+
+def _load_isaac_renderer_module() -> object:
+    spec = importlib.util.spec_from_file_location(
+        "scenario_forge_genmanip_initial_preview", ISAAC_RENDERER
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _write_passing_preview_evidence(
