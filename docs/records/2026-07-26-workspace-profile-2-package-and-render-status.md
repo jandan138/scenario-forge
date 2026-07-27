@@ -1,9 +1,9 @@
 # Workspace profile-2 package and render status (2026-07-26)
 
-> Historical profile-2 snapshot. Candidate 067 was regenerated against
-> ConvertAsset profile-3 afterward; see
-> `docs/records/2026-07-26-workspace-profile-3-067-validation.md` for the
-> current result. The profile-2 facts below remain unchanged as historical
+> Historical profile-2 snapshot. Candidate 067 was subsequently regenerated
+> against profile-3 and then formally marked profile-4 `not_applicable`; see
+> `docs/records/2026-07-27-workspace-profile-4-067-closure.md` for the final
+> disposition. The profile-2 facts below remain unchanged as historical
 > evidence.
 
 ConvertAsset profile-2 is consumed from

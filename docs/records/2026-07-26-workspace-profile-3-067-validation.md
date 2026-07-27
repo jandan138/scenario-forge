@@ -1,5 +1,10 @@
 # Workspace profile-3 candidate 067 validation (2026-07-26)
 
+> Historical profile-3 validation. ConvertAsset subsequently supplied
+> profile-4, which marks 067 `not_applicable` after measuring every
+> rule-compliant placement option. See
+> `docs/records/2026-07-27-workspace-profile-4-067-closure.md` for closure.
+
 Scenario Forge regenerated only `scientific_environment_067` after consuming
 the ConvertAsset profile-3 sidecar from producer revision
 `2026-07-26-workspace-integration-profile-3`

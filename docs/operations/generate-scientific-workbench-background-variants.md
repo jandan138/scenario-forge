@@ -80,13 +80,14 @@ The current profile-enabled set is:
 | `scientific_environment_084` | `/World/group_078` | approved: the clear workcell overview is the current recommended delivery |
 | `scientific_environment_059` | `/World/group_063` + `064` + `073` + `241` | mapping received; integrated render complete, visual QA pending |
 | `scientific_environment_066` | `/World/group_111` | mapping received; integrated render complete, visual QA pending; old envelope-fit render remains rejected |
-| `scientific_environment_067` | `/World/group_223` + `225` | profile-3 mapping received (37365.6 units/m); closeup and structural gate pass, but the combined overview remains visual FAIL because the north-wall hood geometry critically occludes the fixed workcell |
+| `scientific_environment_067` | not applicable | profile-4 final disposition: no rule-compliant placement exists for the fixed 2.345 × 2.645 m eBench workbench; excluded before package generation |
 | `scientific_environment_083` | `/World/group_025` + `026` + `027` | mapping received; a reviewed +90° visual composition yaw and authored-camera-direction retarget now produce a passing combined overview; optional floor-drain prims remain active by default |
 
-`081` and `085` are explicit `not_applicable` results: `081` needs anonymous
-loose-mesh masks around dense bench rows, while `085` has no island large
-enough for the fixed eBench footprint. They are excluded from the
-profile-enabled output rather than silently becoming envelope-centred variants.
+`067`, `081`, and `085` are explicit `not_applicable` results. `067` has no
+rule-compliant placement for the fixed eBench footprint; `081` needs anonymous
+loose-mesh masks around dense bench rows; and `085` has no island large enough
+for the fixed footprint. They are excluded from the profile-enabled output
+rather than silently becoming envelope-centred variants.
 
 The anchor is recorded in `background_variants_manifest.json` under
 `background_placement.workspace_anchor`, while `workspace_integration` records
@@ -99,14 +100,12 @@ not infer one from an arbitrary mesh.
 
 The generated root is Git-ignored because it contains the complete source
 closures needed by GenManip. The current workspace-profile mapping sidecar is
-consumed; it
-contains these five integrated packages:
+consumed; it contains these four integrated packages:
 
 ```text
 outputs/scientific_workbench_workspace_profiled_variants_20260726/
   scientific_environment_059/
   scientific_environment_066/
-  scientific_environment_067/
   scientific_environment_083/
   scientific_environment_084/
   background_variants_manifest.json
@@ -149,10 +148,9 @@ admitted package carries a source Perspective camera, Scenario Forge preserves
 that camera's direction and retargets it to the unchanged workspace; this
 avoids aiming at a source-only wall or object. Candidate `083` additionally
 uses a reviewed +90° instance-layer yaw around its source anchor so the room
-row sits behind the workcell. Candidate `067` profile-3 still fails this visual
-gate because the retained north-wall hood geometry is a foreground occluder.
-It must not be described as a combined room/workspace overview until
-ConvertAsset provides a better source-bound placement/profile. These are
+row sits behind the workcell. Candidate `067` is profile-4 `not_applicable`:
+the producer's measured room geometry has no rule-compliant placement for the
+fixed eBench workcell, so the generator excludes it before rendering. These are
 composition-layer choices only: the source USD, table, robot, task objects, and
 dynamic semantics are unchanged.
 
@@ -176,10 +174,10 @@ with a fixed eBench workspace and valid package/asset locks. A
 and required runtime prims existed; it is not composition acceptance. The
 ConvertAsset source-side comparison images prove profile coverage, not final
 eBench framing or visual quality. `084` and the retaken `083` are the visually
-accepted integrated deliveries in the current clean-room review. `067`
-profile-3 is retained as a structural package and closeup-only diagnostic, not
-as a combined overview. The old 066 post-reset render is retained as a rejected
-diagnostic:
+accepted integrated deliveries in the current clean-room review. The old `067`
+profile-3 package is retained only as a historical structural/closeup
+diagnostic; profile-4 excludes 067 from current generation. The old 066
+post-reset render is retained as a rejected diagnostic:
 it used the package-stage `metersPerUnit`, compressed the audited clearance,
 and showed the room shell over the workcell.
 
