@@ -83,6 +83,57 @@ def test_renderer_accepts_explicit_camera_pose() -> None:
     assert azimuth == pytest.approx(-45.0)
 
 
+def test_renderer_reuses_recovered_workspace_camera_for_room_overview() -> None:
+    module = _load_isaac_renderer_module()
+    import numpy as np
+
+    target, distance, elevation, azimuth = module._referenced_camera(
+        {
+            "camera_reference_view": "workspace_closeup",
+            "camera_distance_multiplier": 1.15,
+        },
+        {
+            "workspace_closeup": {
+                "target": np.asarray([0.25, 0.0, 0.9]),
+                "position": np.asarray([1.0, -1.0, 2.0]),
+            }
+        },
+        np,
+    )
+
+    assert target.tolist() == [0.25, 0.0, 0.9]
+    assert distance == pytest.approx(1.15 * (0.75**2 + 1.0 + 1.1**2) ** 0.5)
+    assert elevation == pytest.approx(41.347777)
+    assert azimuth == pytest.approx(-53.130102)
+
+
+def test_renderer_forces_room_visible_only_for_context_overview() -> None:
+    module = _load_isaac_renderer_module()
+
+    assert module._preview_room_visibility_token(
+        "workspace_closeup", "invisible", "inherited"
+    ) == "invisible"
+    assert module._preview_room_visibility_token(
+        "scene_overview", "invisible", "inherited"
+    ) == "inherited"
+
+
+def test_renderer_keeps_profiled_camera_position_and_uses_runtime_target() -> None:
+    module = _load_isaac_renderer_module()
+    import numpy as np
+
+    target, distance, elevation, azimuth = module._runtime_target_position_camera(
+        {"position_xyz": [1.0, -1.0, 2.0]},
+        np.asarray([0.25, 0.0, 0.9]),
+        np,
+    )
+
+    assert target.tolist() == [0.25, 0.0, 0.9]
+    assert distance == pytest.approx((0.75**2 + 1.0 + 1.1**2) ** 0.5)
+    assert elevation == pytest.approx(41.347777)
+    assert azimuth == pytest.approx(-53.130102)
+
+
 def test_renderer_orients_runtime_target_camera_from_declared_direction() -> None:
     module = _load_isaac_renderer_module()
     import numpy as np

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from hashlib import sha256
 import json
+import math
 from pathlib import Path
 import struct
 import subprocess
@@ -326,6 +327,12 @@ def validate_genmanip_preview_evidence(
         view = _as_mapping(manifest_views.get(view_name), f"evidence view {view_name}")
         if view.get("status") != "pass":
             raise GenManipPreviewError(f"preview view {view_name} status must be pass")
+        expected_visibility = _expected_preview_visibility(view_name)
+        if view.get("scene_visibility") != expected_visibility:
+            raise GenManipPreviewError(
+                f"preview view {view_name} scene_visibility must be "
+                f"{expected_visibility}"
+            )
         image_path = _safe_relative_path(
             evidence_dir,
             _required_string(view, "image_path", f"evidence view {view_name}"),
@@ -352,6 +359,12 @@ def validate_genmanip_preview_evidence(
             raise GenManipPreviewError(
                 f"preview view {view_name} is missing runtime ids: {', '.join(missing_ids)}"
             )
+        _validate_camera_reference(
+            view_name,
+            view_request,
+            view,
+            manifest_views,
+        )
         gate_views[view_name] = {
             "image_path": image_path.relative_to(evidence_dir).as_posix(),
             "sha256": actual_hash,
@@ -368,7 +381,9 @@ def validate_genmanip_preview_evidence(
         "runtime_log_sha256": runtime_log_sha256,
         "moment": "post_reset_pre_action",
         "views": gate_views,
-        "verification_scope": "structural_artifact_and_runtime_prim_presence",
+        "verification_scope": (
+            "structural_artifact_runtime_prim_and_camera_composition_metadata"
+        ),
         "next_stage": "clean_room_visual_review",
         "claim_boundary": (
             "Structural initial-scene evidence readiness only; does not verify "
@@ -383,6 +398,104 @@ def validate_genmanip_preview_evidence(
         gate_path=gate_path,
         status="passed",
     )
+
+
+def _expected_preview_visibility(view_name: str) -> str:
+    if view_name == "workspace_closeup":
+        return "scene_room_invisible_workspace_isolation"
+    if view_name == "scene_overview":
+        return "scene_room_inherited"
+    raise GenManipPreviewError(f"unsupported preview view: {view_name}")
+
+
+def _validate_camera_reference(
+    view_name: str,
+    view_request: Mapping[str, Any],
+    view: Mapping[str, Any],
+    manifest_views: Mapping[str, Any],
+) -> None:
+    """Validate a requested post-reset camera reuse in the evidence manifest."""
+
+    reference_view_name = view_request.get("camera_reference_view")
+    if reference_view_name is None:
+        return
+    if not isinstance(reference_view_name, str) or not reference_view_name:
+        raise GenManipPreviewError(
+            f"preview view {view_name} camera_reference_view must be a non-empty string"
+        )
+    if reference_view_name == view_name:
+        raise GenManipPreviewError(
+            f"preview view {view_name} camera reference cannot refer to itself"
+        )
+    reference_view = _as_mapping(
+        manifest_views.get(reference_view_name),
+        f"referenced evidence view {reference_view_name}",
+    )
+    multiplier = _positive_finite_number(
+        view_request.get("camera_distance_multiplier", 1.0),
+        f"preview view {view_name} camera_distance_multiplier",
+    )
+    camera = _required_mapping(view, "camera", f"evidence view {view_name}")
+    reference_camera = _required_mapping(
+        reference_view,
+        "camera",
+        f"referenced evidence view {reference_view_name}",
+    )
+    look_at = _camera_vector(camera.get("look_at"), f"evidence view {view_name}")
+    reference_look_at = _camera_vector(
+        reference_camera.get("look_at"),
+        f"referenced evidence view {reference_view_name}",
+    )
+    if not all(
+        math.isclose(value, expected, rel_tol=1e-6, abs_tol=1e-6)
+        for value, expected in zip(look_at, reference_look_at, strict=True)
+    ):
+        raise GenManipPreviewError(
+            f"preview view {view_name} camera reference look_at does not match "
+            f"{reference_view_name}"
+        )
+    distance = _positive_finite_number(
+        camera.get("distance_m"), f"evidence view {view_name} camera.distance_m"
+    )
+    reference_distance = _positive_finite_number(
+        reference_camera.get("distance_m"),
+        f"referenced evidence view {reference_view_name} camera.distance_m",
+    )
+    if not math.isclose(
+        distance,
+        multiplier * reference_distance,
+        rel_tol=1e-6,
+        abs_tol=1e-6,
+    ):
+        raise GenManipPreviewError(
+            f"preview view {view_name} camera reference distance does not match "
+            f"{reference_view_name}"
+        )
+
+
+def _camera_vector(value: object, label: str) -> tuple[float, float, float]:
+    if not isinstance(value, list) or len(value) != 3:
+        raise GenManipPreviewError(f"{label} camera.look_at must contain three numbers")
+    result: list[float] = []
+    for item in value:
+        result.append(_finite_number(item, f"{label} camera.look_at"))
+    return result[0], result[1], result[2]
+
+
+def _positive_finite_number(value: object, label: str) -> float:
+    result = _finite_number(value, label)
+    if result <= 0.0:
+        raise GenManipPreviewError(f"{label} must be positive")
+    return result
+
+
+def _finite_number(value: object, label: str) -> float:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise GenManipPreviewError(f"{label} must be numeric")
+    result = float(value)
+    if not math.isfinite(result):
+        raise GenManipPreviewError(f"{label} must be finite")
+    return result
 
 
 def _current_preview_inputs(

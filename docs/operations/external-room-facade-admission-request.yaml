@@ -1,0 +1,58 @@
+schema_version: scenario-forge-convertasset-facade-admission-request/v0.1
+request_id: scientific_environment_3fo4k5c9jd44_facade_admission
+background_asset_id: scientific_environment_3fo4k5c9jd44
+target:
+  asset_role: visual_static_environment
+  consumer_profile: scenario-forge
+  runtime_profile: isaac41
+  task_id: scientific_workbench_bimanual_pour
+source:
+  restricted_intake_reference: restricted/external-room/3FO4K5C9JD44
+  archive_sha256: 396608472548b545ffe1cf0c4d403a125590ac7398b669d1a6cd3436a6972e25
+  extracted_tree_sha256: a3bea79c8a25cb4b3f8ed9715ee9a63e91c291924462c14c86e33121debc8346
+  source_usd_relative_path: world.usda
+  source_usd_sha256: 03aa64f29a20517e33e47c75620cd4326f70e39963b8880750a36f6988de45bd
+  raw_stage:
+    default_prim: /world
+    top_level_namespaces: [/world, /Root, /Render]
+    room_geometry_namespace: /Root
+    material_namespace: /world/Looks
+    known_cross_namespace_binding: /Root -> /world/Looks
+    hdr_dependency: limpopo_golf_course_4k.hdr
+consumer_facade:
+  default_prim: World
+  asset_entry_prim: /World
+  asset_scope_prims: [/World]
+  requirements:
+    - Preserve the complete visual room; do not select raw /world alone.
+    - Preserve /Root geometry and lighting with effective material bindings from /world/Looks.
+    - Keep the raw USD and its source tree immutable; producer-owned facade layers are allowed.
+    - Make all USD, MDL, texture, HDR, and render-setting dependencies package-local.
+    - Do not add dynamic, collision, rigid-body, mass, inertia, or PhysX semantics.
+manifest_requirements:
+  entrypoints:
+    root_usd: asset.usd
+    default_prim: World
+    asset_entry_prim: /World
+    asset_scope_prims: [/World]
+    consumer_profile: scenario-forge
+  source_provenance:
+    record_raw_root_to_consumer_facade_mapping: true
+    preserve_source_usd_sha256: 03aa64f29a20517e33e47c75620cd4326f70e39963b8880750a36f6988de45bd
+  visual_preservation_fingerprint:
+    require_package_after_role_scope_world_transform: /World
+  runtime_evidence:
+    require_isaac41_smoke: true
+    require_render_showing_complete_room: true
+zone_profile_request:
+  schema_version: scenario-forge-convertasset-workspace-zone-profile-manifest/v0.2
+  profile_scope: /World
+  desired_visual_candidates: 3-5
+  selection_rules:
+    - Each zone retains the complete room; do not crop the USD.
+    - Use only complete source assembly roots for inactivation.
+    - Record source-composed anchor, calibrated metres-per-unit, clearance AABB, and yaw.
+    - Return not_applicable with a measured reason for every rejected zone.
+claim_boundary:
+  - The result is visual_static_environment only.
+  - It must not claim task success, liquid transfer, or background interaction physics.

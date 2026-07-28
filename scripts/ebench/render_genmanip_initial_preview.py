@@ -244,34 +244,48 @@ def _render_initial_scene(
             view_request = _as_mapping(
                 request_views.get(view_name), f"render request view {view_name}"
             )
-            anchor_ids = _string_list(
-                view_request.get("anchor_runtime_ids"),
-                f"{view_name}.anchor_runtime_ids",
-            )
-            bounds = _runtime_bounds(
-                stage=stage,
-                scene=scene,
-                runtime_ids=anchor_ids,
-                bbox_cache=bbox_cache,
-                np=np,
-            )
             focal_length = float(camera_data[view_name]["focal_length"])
-            explicit = _explicit_camera(view_request, np)
-            if explicit is None:
-                target, distance = _fit_camera(bounds, view_request, focal_length, np)
-                runtime_target_camera = _runtime_target_camera(
-                    view_request,
-                    target,
-                    distance,
-                    np,
-                )
-                if runtime_target_camera is None:
-                    elevation = float(view_request["elevation_deg"])
-                    azimuth = float(view_request["azimuth_deg"])
-                else:
-                    target, distance, elevation, azimuth = runtime_target_camera
+            referenced = _referenced_camera(view_request, camera_records, np)
+            if referenced is not None:
+                target, distance, elevation, azimuth = referenced
             else:
-                target, distance, elevation, azimuth = explicit
+                anchor_ids = _string_list(
+                    view_request.get("anchor_runtime_ids"),
+                    f"{view_name}.anchor_runtime_ids",
+                )
+                bounds = _runtime_bounds(
+                    stage=stage,
+                    scene=scene,
+                    runtime_ids=anchor_ids,
+                    bbox_cache=bbox_cache,
+                    np=np,
+                )
+                explicit = _explicit_camera(view_request, np)
+                if explicit is None:
+                    target, distance = _fit_camera(bounds, view_request, focal_length, np)
+                    runtime_target_position_camera = _runtime_target_position_camera(
+                        view_request,
+                        target,
+                        np,
+                    )
+                    if runtime_target_position_camera is not None:
+                        target, distance, elevation, azimuth = (
+                            runtime_target_position_camera
+                        )
+                    else:
+                        runtime_target_camera = _runtime_target_camera(
+                            view_request,
+                            target,
+                            distance,
+                            np,
+                        )
+                        if runtime_target_camera is None:
+                            elevation = float(view_request["elevation_deg"])
+                            azimuth = float(view_request["azimuth_deg"])
+                        else:
+                            target, distance, elevation, azimuth = runtime_target_camera
+                else:
+                    target, distance, elevation, azimuth = explicit
             camera = preview_cameras[view_name]
             set_camera_look_at(
                 camera,
@@ -296,10 +310,22 @@ def _render_initial_scene(
             # an intentional workspace-isolation view; the following overview
             # restores the room and proves the substituted background renders.
             if view_name == "workspace_closeup":
-                room_visibility_attr.Set(UsdGeom.Tokens.invisible)
+                room_visibility_attr.Set(
+                    _preview_room_visibility_token(
+                        view_name,
+                        UsdGeom.Tokens.invisible,
+                        UsdGeom.Tokens.inherited,
+                    )
+                )
                 visibility_mode = "scene_room_invisible_workspace_isolation"
             else:
-                room_visibility_attr.Set(original_room_visibility)
+                room_visibility_attr.Set(
+                    _preview_room_visibility_token(
+                        view_name,
+                        UsdGeom.Tokens.invisible,
+                        UsdGeom.Tokens.inherited,
+                    )
+                )
                 visibility_mode = "scene_room_inherited"
             for _ in range(RENDER_STEPS):
                 scene.world.step(render=True)
@@ -530,12 +556,18 @@ def _explicit_camera(
     Background packages sometimes carry a useful authored camera while their
     scene bounds include distant utility geometry.  The explicit pose keeps
     visual evidence aimed at the authored laboratory rather than at a giant
-    outlier bounding box.  Both fields must be supplied together.
+    outlier bounding box.  Both fields must be supplied together.  A position
+    without a target is handled separately so a profile can constrain the
+    camera to its cleared volume while retaining a post-reset task target.
     """
 
     raw_target = view.get("target_xyz")
     raw_position = view.get("position_xyz")
     if raw_target is None and raw_position is None:
+        return None
+    if raw_target is None:
+        if not isinstance(raw_position, list) or len(raw_position) != 3:
+            raise ValueError("position_xyz must contain three numbers")
         return None
     if not isinstance(raw_target, list) or not isinstance(raw_position, list):
         raise ValueError("target_xyz and position_xyz must be supplied together")
@@ -549,6 +581,92 @@ def _explicit_camera(
     distance = float(np.linalg.norm(offset))
     if distance <= 1e-6:
         raise ValueError("explicit camera position must differ from target")
+    azimuth = math.degrees(math.atan2(float(offset[1]), float(offset[0])))
+    elevation = math.degrees(math.asin(float(offset[2]) / distance))
+    return target, distance, elevation, azimuth
+
+
+def _referenced_camera(
+    view: Mapping[str, Any], camera_records: Mapping[str, Mapping[str, Any]], np: Any
+) -> tuple[Any, float, float, float] | None:
+    """Reuse an already recovered runtime camera for a contextual view.
+
+    A workspace-only camera can be fitted from the actual post-reset eBench
+    robot, table, and vessels.  A later overview may reuse that proven pose
+    while restoring the visual room, instead of trying to map a source-room
+    camera through a different workcell layout.  This is evidence-only: it
+    changes neither scene geometry nor task state.
+    """
+
+    raw_reference = view.get("camera_reference_view")
+    if raw_reference is None:
+        return None
+    if not isinstance(raw_reference, str) or not raw_reference:
+        raise ValueError("camera_reference_view must be a non-empty string")
+    record = camera_records.get(raw_reference)
+    if record is None:
+        raise ValueError(
+            "camera_reference_view must name an already configured preview view"
+        )
+    raw_multiplier = view.get("camera_distance_multiplier", 1.0)
+    if not isinstance(raw_multiplier, (int, float)) or isinstance(raw_multiplier, bool):
+        raise ValueError("camera_distance_multiplier must be numeric")
+    multiplier = float(raw_multiplier)
+    if not math.isfinite(multiplier) or multiplier <= 0.0:
+        raise ValueError("camera_distance_multiplier must be positive")
+    target = np.asarray(record["target"], dtype=float)
+    position = np.asarray(record["position"], dtype=float)
+    if target.shape != (3,) or position.shape != (3,):
+        raise ValueError("referenced camera record must be three-dimensional")
+    if not np.all(np.isfinite(target)) or not np.all(np.isfinite(position)):
+        raise ValueError("referenced camera record must be finite")
+    offset = position - target
+    distance = float(np.linalg.norm(offset))
+    if distance <= 1e-6:
+        raise ValueError("referenced camera position must differ from target")
+    offset *= multiplier
+    distance = float(np.linalg.norm(offset))
+    azimuth = math.degrees(math.atan2(float(offset[1]), float(offset[0])))
+    elevation = math.degrees(math.asin(float(offset[2]) / distance))
+    return target, distance, elevation, azimuth
+
+
+def _preview_room_visibility_token(
+    view_name: str, invisible_token: Any, inherited_token: Any
+) -> Any:
+    """Return the evidence-only room visibility for one preview view."""
+
+    if view_name == "workspace_closeup":
+        return invisible_token
+    if view_name == "scene_overview":
+        return inherited_token
+    raise ValueError(f"unsupported preview view: {view_name}")
+
+
+def _runtime_target_position_camera(
+    view: Mapping[str, Any], target: Any, np: Any
+) -> tuple[Any, float, float, float] | None:
+    """Keep a reviewed camera position while aiming at recovered task bounds."""
+
+    if view.get("target_xyz") is not None:
+        return None
+    raw_position = view.get("position_xyz")
+    if raw_position is None:
+        return None
+    if view.get("runtime_target_direction_xyz") is not None:
+        raise ValueError(
+            "position_xyz without target_xyz cannot combine with "
+            "runtime_target_direction_xyz"
+        )
+    if not isinstance(raw_position, list) or len(raw_position) != 3:
+        raise ValueError("position_xyz must contain three numbers")
+    position = np.asarray([float(item) for item in raw_position], dtype=float)
+    if not np.all(np.isfinite(position)):
+        raise ValueError("position_xyz must be finite")
+    offset = position - target
+    distance = float(np.linalg.norm(offset))
+    if distance <= 1e-6:
+        raise ValueError("position_xyz must differ from runtime camera target")
     azimuth = math.degrees(math.atan2(float(offset[1]), float(offset[0])))
     elevation = math.degrees(math.asin(float(offset[2]) / distance))
     return target, distance, elevation, azimuth

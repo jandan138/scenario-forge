@@ -5,9 +5,14 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import pytest
 import yaml
+
+from scenario_forge.assets.source import LocalUSDAssetSource
+from scenario_forge.core.scenario import ScenarioSpec
+from tests.test_scenario_spec import _scenario_mapping
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +84,7 @@ def test_load_admitted_backgrounds_requires_pass_visual_static_packages(
         "source": {"sha256": source_sha.removeprefix("sha256:")},
         "entrypoints": {
             "root_usd": "asset.usd",
+            "default_prim": "World",
             "asset_entry_prim": "/World",
             "asset_scope_prims": ["/World"],
             "consumer_profile": "scenario-forge",
@@ -97,7 +103,7 @@ def test_load_admitted_backgrounds_requires_pass_visual_static_packages(
             }
         },
         "visual_preservation_fingerprint": {
-            "raw_source": {
+            "package_after_role": {
                 "scope_world_transforms": {
                     "/World": [
                         [1.0, 0.0, 0.0, 0.0],
@@ -142,6 +148,162 @@ def test_load_admitted_backgrounds_requires_pass_visual_static_packages(
     assert candidates[0].source_usd == source
     assert candidates[0].meters_per_unit == pytest.approx(0.001)
     assert candidates[0].physical_bounds_m == ((-1.0, -1.0, 0.0), (1.0, 1.0, 2.0))
+
+
+def test_consumer_facade_transform_uses_package_not_raw_source(tmp_path: Path) -> None:
+    module = _load_module()
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "visual_preservation_fingerprint": {
+                    "raw_source": {
+                        "scope_world_transforms": {
+                            "/world": [
+                                [1.0, 0.0, 0.0, 0.0],
+                                [0.0, 1.0, 0.0, 0.0],
+                                [0.0, 0.0, 1.0, 0.0],
+                                [100.0, 200.0, 300.0, 1.0],
+                            ]
+                        }
+                    },
+                    "package_after_role": {
+                        "scope_world_transforms": {
+                            "/World": [
+                                [0.5, 0.0, 0.0, 0.0],
+                                [0.0, 0.5, 0.0, 0.0],
+                                [0.0, 0.0, 0.5, 0.0],
+                                [1.0, 2.0, 3.0, 1.0],
+                            ]
+                        }
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert module._source_root_transform(
+        manifest_path,
+        candidate_id="scientific_environment_3fo4k5c9jd44",
+    ) == ((0.5, 0.5, 0.5), (1.0, 2.0, 3.0))
+
+
+def test_world_facade_survives_real_package_and_genmanip_export(tmp_path: Path) -> None:
+    module = _load_module()
+    facade_asset_id = "scientific_environment_facade"
+    facade_usd = tmp_path / "facade" / "asset.usda"
+    facade_usd.parent.mkdir()
+    facade_usd.write_text(
+        '''#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def Scope "Looks"
+    {
+        def Material "TableMat" {}
+        def Material "GlassFlask" {}
+        def Material "GlassCylinder" {}
+    }
+    def Xform "table" {}
+    def Xform "conical_bottle03" {}
+    def Xform "graduated_cylinder_03" {}
+    def Xform "background_fixture" {}
+    def Xform "facade_room_geometry"
+    {
+        custom string scenarioForge:facade = "complete-room"
+    }
+}
+''',
+        encoding="utf-8",
+    )
+    base = ScenarioSpec.from_mapping(_scenario_mapping())
+    variant = module.make_variant_spec(base, facade_asset_id)
+    source = LocalUSDAssetSource(
+        asset_id=facade_asset_id,
+        source_usd=facade_usd,
+        role="environment",
+        license="LicenseRef-Internal-Restricted",
+        source_uri="restricted-environment://restricted/test/facade",
+        redistributable=False,
+    )
+    # The small source fixture also satisfies the legacy fixture objects; this
+    # keeps the test focused on the scene reference path rather than physics.
+    compiled = module.compile_scenario_package(
+        variant,
+        {
+            facade_asset_id: source,
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=facade_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://legacy-fixture",
+                redistributable=False,
+            ),
+        },
+        tmp_path / "package",
+    )
+
+    exported = module.export_genmanip_collected_package(compiled.package_root)
+    scene = (
+        exported.output_dir
+        / "assets"
+        / "scene_usds"
+        / "scenario_forge"
+        / variant.scenario_id
+        / "scene.usda"
+    ).read_text(encoding="utf-8")
+    facade_copy = (
+        exported.output_dir
+        / "assets"
+        / "scene_usds"
+        / "scenario_forge"
+        / variant.scenario_id
+        / "source_bundle"
+        / facade_asset_id
+        / "asset.usda"
+    )
+
+    assert f"source_bundle/{facade_asset_id}/asset.usda@</World>" in scene
+    assert 'def Xform "facade_room_geometry"' in facade_copy.read_text(encoding="utf-8")
+
+
+def test_non_world_source_scope_requires_convertasset_consumer_facade(tmp_path: Path) -> None:
+    module = _load_module()
+    source = tmp_path / "world.usda"
+    source.write_text("#usda 1.0\n", encoding="utf-8")
+    request_path = tmp_path / "admission.yaml"
+    request_path.write_text(
+        yaml.safe_dump(
+            {
+                "target": {
+                    "runtime_profile": "isaac41",
+                    "asset_role": "visual_static_environment",
+                },
+                "producer_source_updates": {"revision": "r1"},
+                "items": [
+                    {
+                        "candidate_id": "scientific_environment_3fo4k5c9jd44",
+                        "source_usd": str(source),
+                        "source_sha256": module.file_sha256(source).removeprefix("sha256:"),
+                        "source_scope": "/world",
+                        "required_return": {"overall_status": "pass"},
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="consumer facade scope /World"):
+        module.load_admitted_backgrounds(request_path, tmp_path / "packages")
 
 
 def test_background_placement_is_instance_only_and_fits_visual_envelope() -> None:
@@ -405,6 +567,677 @@ def test_workspace_profile_rejects_missing_machine_readable_coordinate_mapping(
         module.load_workspace_profiles(manifest_path, (candidate,))
 
 
+def test_workspace_zone_profiles_reuse_one_background_asset_for_multiple_packages(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    # The raw external source uses multiple top-level namespaces. ConvertAsset
+    # must expose its admitted consolidated consumer facade at ``/World``;
+    # profiles are intentionally written against that facade, not raw `/world`.
+    candidate = _workspace_profile_candidate(
+        "scientific_environment_3fo4k5c9jd44",
+    )
+    manifest_path = _write_workspace_zone_profile_handoff(
+        tmp_path,
+        candidate,
+        zones={
+            "north_island": {
+                "status": "profiled",
+                "anchor_xyz_su": (12.0, -3.0, 1.2),
+                "inactive_roots": ("/World/group_north",),
+                "optional_inactive_paths": ("/World/prop_north",),
+                "yaw_deg": 0.0,
+            },
+            "south_bench": {
+                "status": "profiled",
+                "anchor_xyz_su": (-8.0, 4.0, 1.2),
+                "inactive_roots": ("/World/group_south",),
+                "optional_inactive_paths": ("/World/prop_south_a", "/World/prop_south_b"),
+                "yaw_deg": 90.0,
+            },
+            "blocked_corner": {
+                "status": "not_applicable",
+                "not_applicable_reason": "clearance intersects loose source props",
+            },
+        },
+    )
+
+    zones = module.load_workspace_zone_profiles(manifest_path, (candidate,))
+    selected, excluded = module.select_workspace_zone_variants((candidate,), zones)
+
+    assert [item.variant_id for item in selected] == [
+        "scientific_environment_3fo4k5c9jd44__north_island",
+        "scientific_environment_3fo4k5c9jd44__south_bench",
+    ]
+    assert all(item.candidate.candidate_id == candidate.candidate_id for item in selected)
+    assert selected[0].anchor is not None
+    assert selected[0].anchor.hide_prim_paths == ("/World/group_north",)
+    assert selected[0].zone.optional_inactive_prim_paths == ("/World/prop_north",)
+    assert selected[1].composition_yaw_deg == pytest.approx(90.0)
+    assert excluded == {
+        "scientific_environment_3fo4k5c9jd44__blocked_corner": (
+            "clearance intersects loose source props"
+        )
+    }
+
+    spec = module.load_scenario_spec(BASE_SPEC)
+    variant = module.make_variant_spec(
+        spec,
+        candidate.candidate_id,
+        scenario_suffix="3fo4k5c9jd44_zone_north_island",
+        inactive_prim_paths=selected[0].anchor.hide_prim_paths,
+    )
+    assert variant.scene.asset_id == candidate.candidate_id
+    assert variant.scenario_id == (
+        "scientific_workbench_bimanual_pour_env_3fo4k5c9jd44_zone_north_island"
+    )
+    assert variant.objects == spec.objects
+    assert variant.robot == spec.robot
+    assert variant.steps == spec.steps
+
+
+def test_external_room_facade_and_zone_profile_v02_are_consumed_separately(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Keep the raw intake binding distinct from ConvertAsset's facade binding.
+
+    The producer-owned facade is the source of the package, while the original
+    multi-root room remains the source bound by restricted intake and zone
+    profiles.  A consumer must verify both rather than pretending their hashes
+    are interchangeable.
+    """
+
+    module = _load_module()
+    asset_id = "scientific_environment_3fo4k5c9jd44"
+    delivery_root = tmp_path / "external_room"
+    raw_source = delivery_root / "source" / "3FO4K5C9JD44" / "world.usda"
+    facade_source = delivery_root / "facade" / "facade.usda"
+    raw_source.parent.mkdir(parents=True)
+    facade_source.parent.mkdir(parents=True)
+    raw_source.write_text("#usda 1.0\n# raw multi-root room\n", encoding="utf-8")
+    facade_source.write_text("#usda 1.0\n# producer-owned facade\n", encoding="utf-8")
+    raw_sha = module.file_sha256(raw_source).removeprefix("sha256:")
+    facade_sha = module.file_sha256(facade_source).removeprefix("sha256:")
+
+    package = delivery_root / "package"
+    (package / "evidence").mkdir(parents=True)
+    (package / "asset.usd").write_text("#usda 1.0\n", encoding="utf-8")
+    (package / "evidence" / "manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "asset_application_normalizer.v1",
+                "package_id": f"{asset_id}_scenario-forge_isaac41",
+                "asset_id": asset_id,
+                "asset_role": "visual_static_environment",
+                "overall_status": "pass",
+                "blocked_reasons": [],
+                "source": {"sha256": facade_sha},
+                "entrypoints": {
+                    "root_usd": "asset.usd",
+                    "default_prim": "World",
+                    "asset_entry_prim": "/World",
+                    "asset_scope_prims": ["/World"],
+                    "consumer_profile": "scenario-forge",
+                },
+                "physics_closure": {
+                    "physical_frame": {
+                        "package": {"meters_per_unit": 1.0},
+                        "scope_bounds": [
+                            {
+                                "package_world_bound_m": {
+                                    "min": [-6.0, -7.0, -0.2],
+                                    "max": [10.0, 4.0, 3.5],
+                                }
+                            }
+                        ],
+                    }
+                },
+                "visual_preservation_fingerprint": {
+                    "package_after_role": {
+                        "scope_world_transforms": {
+                            "/World": [
+                                [1.0, 0.0, 0.0, 0.0],
+                                [0.0, 1.0, 0.0, 0.0],
+                                [0.0, 0.0, 1.0, 0.0],
+                                [0.0, 0.0, 0.0, 1.0],
+                            ]
+                        }
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (package / "evidence" / "facade_provenance.json").write_text(
+        json.dumps(
+            {
+                "raw_source_default_prim": "/world",
+                "raw_source_namespaces": ["/world", "/Root", "/Render"],
+                "facade_default_prim": "World",
+                "facade_scope": "/World",
+                "namespace_mapping": {
+                    "/world": "/World/world",
+                    "/Root": "/World/Root",
+                    "/Render": "/World/Render",
+                },
+                "raw_source_usd_relative_path": "world.usda",
+                "raw_source_usd_sha256": raw_sha,
+            }
+        ),
+        encoding="utf-8",
+    )
+    admission = delivery_root / "consumer_admission.yaml"
+    admission.write_text(
+        yaml.safe_dump(
+            {
+                "request_id": "external-room-facade-consumer-test",
+                "target": {
+                    "runtime_profile": "isaac41",
+                    "asset_role": "visual_static_environment",
+                },
+                "producer_source_updates": {"revision": "facade-r1"},
+                "items": [
+                    {
+                        "candidate_id": asset_id,
+                        "source_usd": "source/3FO4K5C9JD44/world.usda",
+                        "source_sha256": raw_sha,
+                        "package_source_usd": "facade/facade.usda",
+                        "package_source_sha256": facade_sha,
+                        "package_dir": "package",
+                        "source_scope": "/World",
+                        "required_return": {"overall_status": "pass"},
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    candidates = module.load_admitted_backgrounds(admission, delivery_root)
+
+    assert len(candidates) == 1
+    candidate = candidates[0]
+    assert candidate.source_usd == raw_source
+    assert candidate.source_sha256 == raw_sha
+    assert candidate.package_source_usd == facade_source
+    assert candidate.package_source_sha256 == facade_sha
+    assert candidate.facade_provenance_path == package / "evidence" / "facade_provenance.json"
+
+    zone_root = delivery_root / "zone_profiles"
+    zone_root.mkdir()
+    profile_path = zone_root / f"{asset_id}__north_bench_workspace_zone.yaml"
+    profile_path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "scenario-forge-convertasset-workspace-zone-profile/v0.2",
+                "background_asset_id": asset_id,
+                "zone_id": "north_bench",
+                "status": "profiled",
+                "source": {
+                    "source_usd_sha256": raw_sha,
+                    "consumer_facade_scope": "/World",
+                    "package_manifest": "../package/evidence/manifest.json",
+                    "facade_provenance": "../package/evidence/facade_provenance.json",
+                },
+                "producer": {
+                    "repo": "ConvertAsset",
+                    "revision": "zone-r1",
+                    "git_commit": "a" * 40,
+                },
+                "coordinate_mapping": {
+                    "frame": "source_composed",
+                    "source_composed_meters_per_unit": 1.0,
+                },
+                "assembly": {
+                    "replaceable_assembly_roots": ["/World/Root/bench"],
+                    "anchor_prim": "/World/Root/bench",
+                    "anchor_xyz_m": [0.1, 2.6, 0.9],
+                },
+                "inactivation": {
+                    "inactive_prim_root_paths": ["/World/Root/bench"],
+                },
+                "workspace": {
+                    "clearance_aabb_m": {
+                        "min": [-1.2, 1.2, 0.0],
+                        "max": [1.3, 4.0, 2.2],
+                    }
+                },
+                "yaw": {
+                    "reviewed_yaw_deg": 90.0,
+                    "rotation_convention": "usd_z_up_right_handed_ccw",
+                },
+                "evidence_camera": {
+                    "position_xyz": [0.1, 1.1, 1.5],
+                    "target_xyz": [0.1, 2.6, 0.85],
+                    "frame_convention": "usd_z_up_right_handed_ccw",
+                    "sight_line_validation": "camera and target are clear",
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    zone_manifest = zone_root / "zone_profile_manifest.json"
+    zone_manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "scenario-forge-convertasset-workspace-zone-profile-manifest/v0.2",
+                "background_asset_id": asset_id,
+                "source": {
+                    "source_usd_sha256": raw_sha,
+                    "consumer_facade_scope": "/World",
+                    "package_manifest": "../package/evidence/manifest.json",
+                },
+                "producer": {"repo": "ConvertAsset", "revision": "zone-r1", "git_commit": "a" * 40},
+                "zones": {
+                    "north_bench": {"status": "profiled", "profile": profile_path.name},
+                    "east_bench": {
+                        "status": "not_applicable",
+                        "reason": "clearance intersects retained complete furniture",
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    zones = module.load_workspace_zone_profiles(zone_manifest, candidates)
+    selected, excluded = module.select_workspace_zone_variants(candidates, zones)
+    assert [item.variant_id for item in selected] == [f"{asset_id}__north_bench"]
+    assert selected[0].anchor is not None
+    assert selected[0].anchor.source_anchor_xyz_m == pytest.approx((0.1, 2.6, 0.9))
+    assert selected[0].composition_yaw_deg == pytest.approx(90.0)
+    assert selected[0].zone.evidence_camera_position_xyz_su == pytest.approx(
+        (0.1, 1.1, 1.5)
+    )
+    assert selected[0].zone.evidence_camera_target_xyz_su == pytest.approx(
+        (0.1, 2.6, 0.85)
+    )
+    assert excluded == {
+        f"{asset_id}__east_bench": "clearance intersects retained complete furniture"
+    }
+
+    captured: dict[str, Path] = {}
+
+    class _Handoff:
+        def to_local_usd_asset_source(self, **_: object) -> object:
+            return object()
+
+    def _fake_load_handoff(
+        _package_dir: Path,
+        _manifest_path: Path,
+        source_usd: Path,
+        **_: object,
+    ) -> _Handoff:
+        captured["source_usd"] = source_usd
+        return _Handoff()
+
+    monkeypatch.setattr(module, "load_convert_asset_package_handoff", _fake_load_handoff)
+    module._load_background_source(candidate)
+    assert captured["source_usd"] == facade_source
+
+
+def test_external_room_facade_provenance_must_bind_raw_source_hash(tmp_path: Path) -> None:
+    module = _load_module()
+    asset_id = "scientific_environment_3fo4k5c9jd44"
+    root = tmp_path / "delivery"
+    source = root / "source.usda"
+    facade = root / "facade.usda"
+    source.parent.mkdir()
+    source.write_text("raw", encoding="utf-8")
+    facade.write_text("facade", encoding="utf-8")
+    package = root / "package"
+    (package / "evidence").mkdir(parents=True)
+    (package / "asset.usd").write_text("#usda 1.0\n", encoding="utf-8")
+    facade_sha = module.file_sha256(facade).removeprefix("sha256:")
+    (package / "evidence" / "manifest.json").write_text(
+        json.dumps(
+            {
+                "asset_id": asset_id,
+                "asset_role": "visual_static_environment",
+                "overall_status": "pass",
+                "blocked_reasons": [],
+                "source": {"sha256": facade_sha},
+                "entrypoints": {
+                    "root_usd": "asset.usd",
+                    "default_prim": "World",
+                    "asset_entry_prim": "/World",
+                    "asset_scope_prims": ["/World"],
+                    "consumer_profile": "scenario-forge",
+                },
+                "physics_closure": {
+                    "physical_frame": {
+                        "package": {"meters_per_unit": 1.0},
+                        "scope_bounds": [
+                            {"package_world_bound_m": {"min": [-1, -1, 0], "max": [1, 1, 2]}}
+                        ],
+                    }
+                },
+                "visual_preservation_fingerprint": {
+                    "package_after_role": {
+                        "scope_world_transforms": {
+                            "/World": [
+                                [1.0, 0.0, 0.0, 0.0],
+                                [0.0, 1.0, 0.0, 0.0],
+                                [0.0, 0.0, 1.0, 0.0],
+                                [0.0, 0.0, 0.0, 1.0],
+                            ]
+                        }
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (package / "evidence" / "facade_provenance.json").write_text(
+        json.dumps(
+            {
+                "facade_default_prim": "World",
+                "facade_scope": "/World",
+                "raw_source_usd_sha256": "b" * 64,
+            }
+        ),
+        encoding="utf-8",
+    )
+    admission = root / "admission.yaml"
+    admission.write_text(
+        yaml.safe_dump(
+            {
+                "target": {
+                    "runtime_profile": "isaac41",
+                    "asset_role": "visual_static_environment",
+                },
+                "producer_source_updates": {"revision": "r1"},
+                "items": [
+                    {
+                        "candidate_id": asset_id,
+                        "source_usd": "source.usda",
+                        "source_sha256": module.file_sha256(source).removeprefix("sha256:"),
+                        "package_source_usd": "facade.usda",
+                        "package_source_sha256": facade_sha,
+                        "package_dir": "package",
+                        "source_scope": "/World",
+                        "required_return": {"overall_status": "pass"},
+                    }
+                ],
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="facade provenance raw source hash disagrees"):
+        module.load_admitted_backgrounds(admission, root)
+
+
+def test_zone_selection_rejects_conflicting_asset_and_variant_filters(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate("scientific_environment_901")
+    other_candidate = _workspace_profile_candidate("scientific_environment_902")
+    manifest_path = _write_workspace_zone_profile_handoff(
+        tmp_path,
+        candidate,
+        zones={
+            "north_island": {
+                "status": "profiled",
+                "anchor_xyz_su": (12.0, -3.0, 1.2),
+                "inactive_roots": ("/World/group_north",),
+                "yaw_deg": 0.0,
+            },
+        },
+    )
+    zones = module.load_workspace_zone_profiles(manifest_path, (candidate, other_candidate))
+
+    with pytest.raises(ValueError, match="does not belong to background asset"):
+        module.select_workspace_zone_variants(
+            (candidate, other_candidate),
+            zones,
+            background_asset_id=other_candidate.candidate_id,
+            variant_id="scientific_environment_901__north_island",
+        )
+
+
+def test_explicit_zone_asset_selection_rejects_no_eligible_zones(tmp_path: Path) -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate("scientific_environment_901")
+    manifest_path = _write_workspace_zone_profile_handoff(
+        tmp_path,
+        candidate,
+        zones={
+            "blocked_corner": {
+                "status": "not_applicable",
+                "not_applicable_reason": "clearance intersects retained source furniture",
+            },
+        },
+    )
+    zones = module.load_workspace_zone_profiles(manifest_path, (candidate,))
+
+    with pytest.raises(ValueError, match="has no eligible workspace zones"):
+        module.select_workspace_zone_variants(
+            (candidate,),
+            zones,
+            background_asset_id=candidate.candidate_id,
+        )
+
+
+def test_workspace_zone_quarantines_ambiguous_nonzero_v02_yaw(tmp_path: Path) -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate("scientific_environment_901")
+    manifest_path = _write_workspace_zone_profile_handoff(
+        tmp_path,
+        candidate,
+        zones={
+            "north_bench": {
+                "status": "profiled",
+                "anchor_xyz_su": (1.0, 2.0, 0.9),
+                "inactive_roots": ("/World/north_bench",),
+                "yaw_deg": 90.0,
+            },
+        },
+    )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    profile_path = manifest_path.parent / manifest["zones"]["north_bench"]["profile"]
+    profile = yaml.safe_load(profile_path.read_text(encoding="utf-8"))
+    profile.pop("composition")
+    profile["yaw"] = {"reviewed_yaw_deg": 90.0}
+    profile_path.write_text(yaml.safe_dump(profile, sort_keys=False), encoding="utf-8")
+
+    zones = module.load_workspace_zone_profiles(manifest_path, (candidate,))
+    selected, excluded = module.select_workspace_zone_variants((candidate,), zones)
+
+    assert selected == ()
+    assert excluded == {
+        "scientific_environment_901__north_bench": (
+            "non-zero reviewed yaw lacks explicit USD +Z right-handed convention"
+        )
+    }
+
+
+@pytest.mark.parametrize(
+    ("candidate_id", "expected"),
+    [
+        ("scientific_environment_084", True),
+        ("scientific_environment_3fo4k5c9jd44", True),
+        ("scientific_environment_room-a", False),
+        ("scientific_environment_3fo4k5c9jd44__north_island", False),
+        ("scientific_environment_", False),
+    ],
+)
+def test_background_asset_id_validation_allows_safe_external_room_ids(
+    candidate_id: str,
+    expected: bool,
+) -> None:
+    module = _load_module()
+
+    assert module.is_background_asset_id(candidate_id) is expected
+
+
+def test_external_intake_replaces_legacy_background_provenance(tmp_path: Path) -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate("scientific_environment_3fo4k5c9jd44")
+    intake_path = tmp_path / "intake.yaml"
+    intake_path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": "scenario-forge-external-environment-intake/v0.1",
+                "asset_id": candidate.candidate_id,
+                "asset_role": "visual_static_environment",
+                "license": "LicenseRef-Internal-Restricted",
+                "redistributable": False,
+                "attribution": ["Restricted external environment source."],
+                "source": {
+                    "usd_sha256": candidate.source_sha256,
+                    "tree_sha256": "b" * 64,
+                },
+                "archive": {"sha256": "c" * 64},
+                "provenance": {
+                    "visibility": "restricted",
+                    "internal_reference": "restricted/room/3FO4K5C9JD44",
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    attached = module.apply_external_environment_intake((candidate,), intake_path)
+
+    assert attached[0].candidate_id == candidate.candidate_id
+    assert attached[0].license == "LicenseRef-Internal-Restricted"
+    assert attached[0].redistributable is False
+    assert attached[0].attribution == (
+        "Restricted external environment source.",
+        "Restricted extracted source tree SHA-256: " + "b" * 64 + ".",
+        "Restricted source archive SHA-256: " + "c" * 64 + ".",
+    )
+    assert attached[0].source_uri == "restricted-environment://restricted/room/3FO4K5C9JD44"
+    assert attached[0].external_tree_sha256 == "b" * 64
+    assert attached[0].external_archive_sha256 == "c" * 64
+    assert attached[0].restricted_provenance_reference == "restricted/room/3FO4K5C9JD44"
+
+
+def test_nonlegacy_background_requires_restricted_intake_before_generation() -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate("scientific_environment_3fo4k5c9jd44")
+
+    with pytest.raises(ValueError, match="restricted external intake"):
+        module.validate_generation_background_provenance((candidate,))
+
+    module.validate_generation_background_provenance(
+        (
+            module.replace(
+                candidate,
+                license="LicenseRef-Internal-Restricted",
+                attribution=("Restricted external environment source.",),
+                redistributable=False,
+                source_uri="restricted-environment://restricted/room/3FO4K5C9JD44",
+                external_tree_sha256="b" * 64,
+                external_archive_sha256="c" * 64,
+                restricted_provenance_reference="restricted/room/3FO4K5C9JD44",
+            ),
+        )
+    )
+
+
+def test_main_generates_independent_packages_for_profiled_zones(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate("scientific_environment_901")
+    zone_manifest = _write_workspace_zone_profile_handoff(
+        tmp_path / "profiles",
+        candidate,
+        zones={
+            "north_island": {
+                "status": "profiled",
+                "anchor_xyz_su": (12.0, -3.0, 1.2),
+                "inactive_roots": ("/World/group_north",),
+                "optional_inactive_paths": ("/World/prop_north",),
+                "yaw_deg": 0.0,
+            },
+            "south_bench": {
+                "status": "profiled",
+                "anchor_xyz_su": (-8.0, 4.0, 1.2),
+                "inactive_roots": ("/World/group_south",),
+                "optional_inactive_paths": ("/World/prop_south_a", "/World/prop_south_b"),
+                "yaw_deg": 90.0,
+            },
+            "blocked_corner": {
+                "status": "not_applicable",
+                "not_applicable_reason": "clearance intersects loose source props",
+            },
+        },
+    )
+    compiled_specs = []
+
+    def fake_compile(spec, sources, package_root):
+        del sources
+        package_root.mkdir(parents=True)
+        compiled_specs.append(spec)
+        return SimpleNamespace(package_root=package_root)
+
+    monkeypatch.setattr(module, "load_admitted_backgrounds", lambda *_: (candidate,))
+    monkeypatch.setattr(module, "load_existing_package_sources", lambda *_: {})
+    monkeypatch.setattr(module, "_validate_base_inputs", lambda *_: None)
+    monkeypatch.setattr(module, "_load_background_source", lambda *_: object())
+    monkeypatch.setattr(module, "compile_scenario_package", fake_compile)
+    monkeypatch.setattr(
+        module,
+        "export_genmanip_collected_package",
+        lambda package_root: SimpleNamespace(output_dir=package_root),
+    )
+    monkeypatch.setattr(module, "_configure_background_preview", lambda *_args, **_kwargs: None)
+
+    output_root = tmp_path / "variants"
+    assert (
+        module.main(
+            [
+                "--base-package",
+                str(tmp_path / "base"),
+                "--admission",
+                str(tmp_path / "admission.yaml"),
+                "--background-root",
+                str(tmp_path / "packages"),
+                "--workspace-zone-profiles",
+                str(zone_manifest),
+                "--out",
+                str(output_root),
+            ]
+        )
+        == 0
+    )
+
+    generated = json.loads((output_root / "background_variants_manifest.json").read_text())
+    assert generated["schema_version"] == (
+        "scenario-forge-scientific-workbench-background-variants/v0.2"
+    )
+    assert generated["variant_count"] == 2
+    assert generated["candidate_count"] == 1
+    assert [entry["variant_id"] for entry in generated["variants"]] == [
+        "scientific_environment_901__north_island",
+        "scientific_environment_901__south_bench",
+    ]
+    assert generated["excluded_workspace_variants"] == {
+        "scientific_environment_901__blocked_corner": (
+            "clearance intersects loose source props"
+        )
+    }
+    assert [spec.scene.asset_id for spec in compiled_specs] == [candidate.candidate_id] * 2
+    assert [spec.scene.inactive_prim_paths for spec in compiled_specs] == [
+        ("/World/group_north", "/World/prop_north"),
+        ("/World/group_south", "/World/prop_south_a", "/World/prop_south_b"),
+    ]
+    assert [spec.scenario_id for spec in compiled_specs] == [
+        "scientific_workbench_bimanual_pour_env_901_zone_north_island",
+        "scientific_workbench_bimanual_pour_env_901_zone_south_bench",
+    ]
+
+
 def test_workspace_profiles_override_legacy_anchor_and_exclude_not_applicable(
     tmp_path: Path,
 ) -> None:
@@ -549,14 +1382,13 @@ def test_workspace_focus_preview_uses_post_reset_runtime_workspace_bounds(
     overview = configured["views"]["scene_overview"]
     assert configured["camera_policy_version"] == ("scenario-forge/runtime-workspace-context-v7")
     assert overview["anchor_runtime_ids"] == [
-        "lift2",
-        "00000000000000000000000000000000",
+        "lift2_end_effectors",
         "obj_conical_bottle03",
         "obj_graduated_cylinder_03",
     ]
     assert overview["camera_source"] == "GenManip post-reset runtime workspace bounds"
     assert overview["runtime_target_direction_xyz"] == pytest.approx(
-        [0.679108, -0.475516, 0.559193]
+        [-0.679108, -0.475516, 0.559193]
     )
     assert overview["runtime_target_distance_m"] == pytest.approx(2.8)
     assert "target_xyz" not in overview
@@ -625,6 +1457,179 @@ def test_workspace_focus_preview_retargets_authored_room_direction_to_workspace(
         "scenario-forge source authored Perspective direction"
     )
     assert "runtime_target_direction_xyz" not in overview
+
+
+def test_workspace_zone_preview_reuses_post_reset_workspace_camera(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    collected_root = tmp_path / "collected"
+    request_path = collected_root / "evidence" / "render_request.yaml"
+    request_path.parent.mkdir(parents=True)
+    request_path.write_text(
+        yaml.safe_dump(
+            {
+                "views": {
+                    "scene_overview": {
+                        "anchor_runtime_ids": ["lift2"],
+                        "runtime_target_direction_xyz": [1.0, 0.0, 0.0],
+                        "runtime_target_distance_m": 2.8,
+                    }
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    candidate = module.BackgroundCandidate(
+        candidate_id="scientific_environment_3fo4k5c9jd44",
+        package_dir=Path("/tmp/package"),
+        manifest_path=Path("/tmp/manifest.json"),
+        source_usd=Path("/tmp/source.usd"),
+        source_sha256="a" * 64,
+        source_scope="/World",
+        producer_revision="r1",
+        meters_per_unit=1.0,
+        root_scale_xyz=(1.0, 1.0, 1.0),
+        root_translate_xyz=(0.0, 0.0, 0.0),
+        physical_bounds_m=((-6.0, -7.0, 0.0), (10.0, 4.0, 3.3)),
+        authored_camera=None,
+    )
+    anchor = module.WorkspaceAnchor(
+        source_prim_path="/World/Root/Meshes/Assets/Table/Actor_0002",
+        source_anchor_xyz_m=(-0.351, -4.275, 0.77),
+        source_composed_meters_per_unit=1.0,
+        preserve_workspace_metric=True,
+        camera_mode="workspace_focus",
+    )
+    zone = module.WorkspaceZoneProfile(
+        background_asset_id=candidate.candidate_id,
+        zone_id="south_table_b",
+        status="profiled",
+        profile_path=Path("/tmp/south_table_b.yaml"),
+        producer_revision="r1",
+        producer_git_commit="a" * 40,
+        anchor=anchor,
+        raw_anchor_xyz_su=(-0.351, -4.275, 0.77),
+        source_composed_meters_per_unit=1.0,
+        raw_clearance_aabb_su=((-1.58, -5.65, 0.0), (0.87, -2.9, 2.2)),
+        composition_yaw_deg=0.0,
+    )
+
+    module._configure_background_preview(
+        collected_root,
+        {
+            "scene_pose": {"xyz": [0.5966705, 4.2680945, 0.002761]},
+            "fit_factor": 1.0,
+            "effective_scale": 1.0,
+            "composition_yaw_deg": 0.0,
+        },
+        candidate,
+        anchor=anchor,
+        workspace_zone=zone,
+    )
+
+    configured = yaml.safe_load(request_path.read_text(encoding="utf-8"))
+    overview = configured["views"]["scene_overview"]
+    assert configured["camera_policy_version"] == (
+        "scenario-forge/runtime-workspace-camera-reference-v10"
+    )
+    assert overview["camera_reference_view"] == "workspace_closeup"
+    assert overview["camera_distance_multiplier"] == pytest.approx(1.15)
+    assert overview["camera_source"] == (
+        "GenManip post-reset workspace camera with room context"
+    )
+    assert "position_xyz" not in overview
+    assert "target_xyz" not in overview
+    assert "runtime_target_direction_xyz" not in overview
+
+
+def test_workspace_zone_preview_reuses_post_reset_workspace_camera_when_source_camera_is_recorded(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    collected_root = tmp_path / "collected"
+    request_path = collected_root / "evidence" / "render_request.yaml"
+    request_path.parent.mkdir(parents=True)
+    request_path.write_text(
+        yaml.safe_dump(
+            {
+                "views": {
+                    "scene_overview": {
+                        "anchor_runtime_ids": ["lift2"],
+                        "runtime_target_direction_xyz": [1.0, 0.0, 0.0],
+                        "runtime_target_distance_m": 2.8,
+                    }
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    candidate = module.BackgroundCandidate(
+        candidate_id="scientific_environment_3fo4k5c9jd44",
+        package_dir=Path("/tmp/package"),
+        manifest_path=Path("/tmp/manifest.json"),
+        source_usd=Path("/tmp/source.usd"),
+        source_sha256="a" * 64,
+        source_scope="/World",
+        producer_revision="r1",
+        meters_per_unit=1.0,
+        root_scale_xyz=(1.0, 1.0, 1.0),
+        root_translate_xyz=(0.0, 0.0, 0.0),
+        physical_bounds_m=((-6.0, -7.0, 0.0), (10.0, 4.0, 3.3)),
+        authored_camera=None,
+    )
+    anchor = module.WorkspaceAnchor(
+        source_prim_path="/World/Root/Meshes/Assets/LaboratoryEquipment/Actor_0003",
+        source_anchor_xyz_m=(0.0, 2.6, 0.9),
+        source_composed_meters_per_unit=1.0,
+        preserve_workspace_metric=True,
+        camera_mode="workspace_focus",
+    )
+    zone = module.WorkspaceZoneProfile(
+        background_asset_id=candidate.candidate_id,
+        zone_id="north_bench_pair_east",
+        status="profiled",
+        profile_path=Path("/tmp/north_bench_pair_east.yaml"),
+        producer_revision="r3",
+        producer_git_commit="a" * 40,
+        anchor=anchor,
+        raw_anchor_xyz_su=(0.0, 2.6, 0.9),
+        source_composed_meters_per_unit=1.0,
+        raw_clearance_aabb_su=((-1.2, 1.2, 0.0), (1.3, 4.0, 2.2)),
+        composition_yaw_deg=-90.0,
+        evidence_camera_position_xyz_su=(0.0, 2.0, 1.5),
+        evidence_camera_target_xyz_su=(0.0, 3.0, 0.85),
+    )
+
+    module._configure_background_preview(
+        collected_root,
+        {
+            "scene_pose": {"xyz": [0.2456705, -0.0069055, 0.772761]},
+            "fit_factor": 1.0,
+            "effective_scale": 1.0,
+            "composition_yaw_deg": -90.0,
+        },
+        candidate,
+        anchor=anchor,
+        workspace_zone=zone,
+    )
+
+    configured = yaml.safe_load(request_path.read_text(encoding="utf-8"))
+    overview = configured["views"]["scene_overview"]
+    assert configured["camera_policy_version"] == (
+        "scenario-forge/runtime-workspace-camera-reference-v10"
+    )
+    assert overview["camera_reference_view"] == "workspace_closeup"
+    assert overview["camera_distance_multiplier"] == pytest.approx(1.15)
+    assert overview["camera_source"] == (
+        "GenManip post-reset workspace camera with room context"
+    )
+    assert "position_xyz" not in overview
+    assert "target_xyz" not in overview
+    assert "runtime_target_direction_xyz" not in overview
+    assert "runtime_target_distance_m" not in overview
 
 
 def test_source_root_camera_is_consumed_for_scene_overview(tmp_path: Path) -> None:
@@ -716,6 +1721,7 @@ def _workspace_profile_candidate(
     *,
     meters_per_unit: float = 1.0,
     root_scale_xyz: tuple[float, float, float] = (1.0, 1.0, 1.0),
+    source_scope: str = "/World",
     physical_bounds_m: tuple[tuple[float, float, float], tuple[float, float, float]] = (
         (-100.0, -100.0, -10.0),
         (100.0, 100.0, 100.0),
@@ -728,7 +1734,7 @@ def _workspace_profile_candidate(
         manifest_path=Path("/tmp/manifest.json"),
         source_usd=Path(f"/tmp/{candidate_id}.usd"),
         source_sha256="a" * 64,
-        source_scope="/World",
+        source_scope=source_scope,
         producer_revision="r1",
         meters_per_unit=meters_per_unit,
         root_scale_xyz=root_scale_xyz,
@@ -814,6 +1820,85 @@ def _write_workspace_profile_handoff(
                         "profile": profile_name,
                     }
                 },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return manifest_path
+
+
+def _write_workspace_zone_profile_handoff(
+    root: Path,
+    candidate,
+    *,
+    zones: dict[str, dict[str, object]],
+) -> Path:
+    root.mkdir(parents=True, exist_ok=True)
+    manifest_zones: dict[str, dict[str, str]] = {}
+    for zone_id, zone in zones.items():
+        profile_name = f"{candidate.candidate_id}__{zone_id}_workspace_zone.yaml"
+        profile_path = root / profile_name
+        status = str(zone["status"])
+        profile: dict[str, object] = {
+            "schema_version": "scenario-forge-convertasset-workspace-zone-profile/v0.2",
+            "background_asset_id": candidate.candidate_id,
+            "zone_id": zone_id,
+            "status": status,
+            "source": {
+                "source_usd": str(candidate.source_usd),
+                "source_sha256": candidate.source_sha256,
+                "scope": candidate.source_scope,
+            },
+            "producer": {
+                "repo": "ConvertAsset",
+                "git_commit": "a" * 40,
+                "revision": "zone-profile-r1",
+            },
+        }
+        if status == "profiled":
+            inactive_roots = tuple(zone["inactive_roots"])
+            anchor_xyz_su = tuple(zone["anchor_xyz_su"])
+            profile.update(
+                {
+                    "coordinate_mapping": {
+                        "frame": "source_composed",
+                        "source_composed_meters_per_unit": 1.0,
+                    },
+                    "assembly": {
+                        "replaceable_assembly_roots": list(inactive_roots),
+                        "anchor_prim": inactive_roots[0],
+                        "anchor_xyz_su": list(anchor_xyz_su),
+                    },
+                    "inactivation": {
+                        "inactive_prim_root_paths": list(inactive_roots),
+                        "optional_inactive_prim_paths": list(
+                            zone.get("optional_inactive_paths", ())
+                        ),
+                    },
+                    "workspace": {
+                        "clearance_aabb_su": {
+                            "min": [-20.0, -20.0, -2.0],
+                            "max": [20.0, 20.0, 4.0],
+                        }
+                    },
+                    "composition": {"yaw_deg": float(zone["yaw_deg"])},
+                }
+            )
+        else:
+            profile["not_applicable_reason"] = zone["not_applicable_reason"]
+        profile_path.write_text(yaml.safe_dump(profile, sort_keys=False), encoding="utf-8")
+        manifest_zones[zone_id] = {"status": status, "profile": profile_name}
+
+    manifest_path = root / "workspace_zone_profiles_manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "schema_version": (
+                    "scenario-forge-convertasset-workspace-zone-profile-manifest/v0.2"
+                ),
+                "background_asset_id": candidate.candidate_id,
+                "producer": {"repo": "ConvertAsset", "revision": "zone-profile-r1"},
+                "zones": manifest_zones,
             }
         ),
         encoding="utf-8",

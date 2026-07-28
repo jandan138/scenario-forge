@@ -120,9 +120,52 @@ def test_preview_evidence_with_matching_digest_writes_visual_ready_gate(
     assert gate["input_digest"] == request["input_digest"]
     assert set(gate["views"]) == {"workspace_closeup", "scene_overview"}
     assert gate["next_stage"] == "clean_room_visual_review"
-    assert gate["verification_scope"] == "structural_artifact_and_runtime_prim_presence"
+    assert gate["verification_scope"] == (
+        "structural_artifact_runtime_prim_and_camera_composition_metadata"
+    )
     assert "on-camera visibility" in gate["claim_boundary"]
     assert "task success" in gate["claim_boundary"]
+
+
+def test_preview_evidence_requires_room_visibility_and_honors_camera_reference(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(_build_package(tmp_path)).output_dir
+    request_path = collected_package / "evidence" / "render_request.yaml"
+    request = _load_yaml(request_path)
+    views = request["views"]
+    assert isinstance(views, dict)
+    overview = views["scene_overview"]
+    assert isinstance(overview, dict)
+    overview["camera_reference_view"] = "workspace_closeup"
+    overview["camera_distance_multiplier"] = 1.15
+    request_path.write_text(yaml.safe_dump(request, sort_keys=False), encoding="utf-8")
+    evidence_dir = _write_passing_evidence(collected_package, request)
+
+    validate_genmanip_preview_evidence(collected_package)
+
+    manifest_path = evidence_dir / "render_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["views"]["scene_overview"]["scene_visibility"] = (
+        "scene_room_invisible_workspace_isolation"
+    )
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(GenManipPreviewError, match="scene_room_inherited"):
+        validate_genmanip_preview_evidence(collected_package)
+
+    manifest["views"]["scene_overview"]["scene_visibility"] = "scene_room_inherited"
+    manifest["views"]["scene_overview"]["camera"]["distance_m"] = 99.0
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(GenManipPreviewError, match="camera reference"):
+        validate_genmanip_preview_evidence(collected_package)
 
 
 def test_preview_evidence_validation_accepts_relative_collected_root(
@@ -320,18 +363,38 @@ def _write_passing_evidence(
         _write_rgb_png(image_path, width=1280, height=720, color=color)
         view_request = request_views[view_name]
         assert isinstance(view_request, dict)
+        distance_m = 1.4 + index
         views[view_name] = {
             "status": "pass",
             "image_path": image_path.name,
             "sha256": _file_sha256(image_path),
             "resolution": [1280, 720],
             "present_runtime_ids": view_request["required_runtime_ids"],
+            "scene_visibility": (
+                "scene_room_invisible_workspace_isolation"
+                if view_name == "workspace_closeup"
+                else "scene_room_inherited"
+            ),
             "camera": {
                 "position": [0.3 + index, -0.8, 1.4],
                 "look_at": [0.3, 0.0, 0.8],
                 "focal_length_mm": 24.0,
+                "distance_m": distance_m,
             },
         }
+
+    overview_request = request_views["scene_overview"]
+    assert isinstance(overview_request, dict)
+    reference_view = overview_request.get("camera_reference_view")
+    if reference_view is not None:
+        assert reference_view == "workspace_closeup"
+        multiplier = float(overview_request.get("camera_distance_multiplier", 1.0))
+        reference_camera = views[reference_view]["camera"]
+        assert isinstance(reference_camera, dict)
+        overview_camera = views["scene_overview"]["camera"]
+        assert isinstance(overview_camera, dict)
+        overview_camera["look_at"] = list(reference_camera["look_at"])
+        overview_camera["distance_m"] = multiplier * float(reference_camera["distance_m"])
 
     runtime_log = evidence_dir / "runtime.log"
     runtime_log.write_text("GenManip initial preview render completed\n", encoding="utf-8")

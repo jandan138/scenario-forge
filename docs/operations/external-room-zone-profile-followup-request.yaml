@@ -1,0 +1,37 @@
+schema_version: scenario-forge-convertasset-zone-profile-followup/v0.1
+request_id: scientific_environment_3fo4k5c9jd44_zone_profile_v03_followup
+background_asset_id: scientific_environment_3fo4k5c9jd44
+source_binding:
+  raw_world_usda_sha256: 03aa64f29a20517e33e47c75620cd4326f70e39963b8880750a36f6988de45bd
+  facade_sha256: 48770c5be9100266336663b67a7554455218f4ee24df5d5e33dbb96f672d5503
+  consumer_facade_scope: /World
+consumer_context:
+  fixed_task: scientific_workbench_bimanual_pour
+  fixed_robot: ebench_lift2
+  fixed_workbench: ebench_table
+  runtime_profile: isaac41_genmanip
+requested_profile_revision: v0.3
+required_updates:
+  north_bench_pair_east:
+    - Declare yaw.rotation_convention: usd_z_up_right_handed_ccw.
+    - Reverify the yaw sign against the unchanged fixed eBench robot, table, and vessels.
+    - Return the corrected reviewed_yaw_deg or an equivalent room-to-eBench quaternion.
+    - Supply an Isaac 4.1 overlay render proving the robot base and evidence camera are inside the room, not outside the north wall.
+  north_bench_pair_west:
+    - Declare yaw.rotation_convention: usd_z_up_right_handed_ccw.
+    - Reverify the yaw sign against the unchanged fixed eBench robot, table, and vessels.
+    - Return the corrected reviewed_yaw_deg or an equivalent room-to-eBench quaternion.
+    - Supply an Isaac 4.1 overlay render proving the robot base and evidence camera are inside the room, not outside the north wall.
+  every_profiled_zone:
+    - Add evidence_camera in source_composed coordinates with position_xyz, target_xyz, and camera frame convention.
+    - Validate the camera position and its sight line against room shell geometry as well as actor geometry.
+    - Include one source-side Isaac 4.1 render with the unchanged eBench workcell overlay and complete retained room context.
+constraints:
+  - Do not modify raw world.usda, USD mesh data, textures, MDL, physics, robot, table, vessel, or task poses.
+  - Keep the facade package visual_static_environment; no rigid bodies, colliders, mass, inertia, or PhysX-warning suppression.
+  - Use only complete actor roots for required or optional inactivation lists.
+acceptance:
+  - The returned profile is source-bound to the hashes above.
+  - A non-zero yaw is unambiguous under the declared USD +Z right-handed convention.
+  - Fixed eBench robot/table/vessel overlay is inside the room and outside retained source furniture.
+  - The submitted overview shows robot, table, flask, cylinder, and recognizable laboratory context in one unobstructed frame.

@@ -4,7 +4,15 @@ This workflow answers one narrow question: can the scientific workbench task
 keep the eBench table, Lift2 robot, two vessels, poses, and task contract fixed
 while swapping only the visual laboratory background? The answer is yes, when
 the replacement is an admitted ConvertAsset `visual_static_environment`
-package with the same `/World` scope contract.
+package with the eBench `/World` consumer-scope contract. An authored source
+with a different or multi-root namespace must first receive a source-bound
+ConvertAsset facade; Scenario Forge does not rename or merge USD roots.
+
+For one complete external room that needs multiple independently selectable
+workcells, use the v0.2 zone-profile workflow in
+[`generate-external-room-zone-variants.md`](generate-external-room-zone-variants.md).
+It keeps one immutable room asset and creates several packages keyed by
+`variant_id`; it does not crop the USD or introduce a GenManip runtime switch.
 
 ## Inputs
 
