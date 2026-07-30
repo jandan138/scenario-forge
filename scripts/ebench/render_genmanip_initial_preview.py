@@ -42,6 +42,21 @@ WARMUP_STEPS = 50
 RENDER_STEPS = 50
 
 
+def _task_data_with_preserved_articulation_parts(
+    task_data: Mapping[str, Any],
+    articulation_part_ids: Sequence[str],
+) -> dict[str, Any]:
+    """Keep GenManip recovery from deactivating already-loaded joint parts."""
+
+    recovered = copy.deepcopy(dict(task_data))
+    layout = recovered.get("initial_layout")
+    if not isinstance(layout, dict):
+        raise ValueError("episode task_data.initial_layout must be a mapping")
+    for part_id in articulation_part_ids:
+        layout.setdefault(part_id, {"type": "articulation_part"})
+    return recovered
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Render post-reset, pre-action GenManip initial-scene evidence."
@@ -193,7 +208,16 @@ def _render_initial_scene(
         _flush_runtime_log(staging_dir, log_lines)
         scene.post_initialize()
         reset_scene(scene)
-        recovery_scene(scene, copy.deepcopy(task_data), task_name, default_config)
+        preserved_articulation_parts = tuple(scene.articulation_part_list)
+        recovery_scene(
+            scene,
+            _task_data_with_preserved_articulation_parts(
+                task_data,
+                preserved_articulation_parts,
+            ),
+            task_name,
+            default_config,
+        )
         for _ in range(WARMUP_STEPS):
             scene.world.step(render=False)
         log_lines.extend(
@@ -203,6 +227,8 @@ def _render_initial_scene(
                 "genmanip_scene_initialized=true",
                 "genmanip_reset_scene=true",
                 "genmanip_recovery_scene=true",
+                "genmanip_recovery_preserved_articulation_parts="
+                + ",".join(preserved_articulation_parts),
                 f"zero_action_warmup_steps={WARMUP_STEPS}",
             ]
         )
@@ -229,6 +255,13 @@ def _render_initial_scene(
             Usd.TimeCode.Default(),
             [UsdGeom.Tokens.default_, UsdGeom.Tokens.render],
             useExtentsHint=True,
+        )
+        runtime_geometry = _runtime_geometry_record(
+            request=request,
+            stage=stage,
+            scene=scene,
+            bbox_cache=bbox_cache,
+            np=np,
         )
         room_prim = stage.GetPrimAtPath(f"/World/{scene.uuid}/room")
         if room_prim is None or not room_prim.IsValid():
@@ -417,6 +450,7 @@ def _render_initial_scene(
                 "blocking_signal_count": 0,
                 "blocking_signals": [],
             },
+            "runtime_geometry": runtime_geometry,
             "views": manifest_views,
             "claim_boundary": (
                 "Initial-scene visual evidence only; not task success, policy success, "
@@ -532,6 +566,58 @@ def _runtime_bounds(
     return np.min(np.stack(lower_points), axis=0), np.max(
         np.stack(upper_points), axis=0
     )
+
+
+def _runtime_geometry_record(
+    *,
+    request: Mapping[str, Any],
+    stage: Any,
+    scene: Any,
+    bbox_cache: Any,
+    np: Any,
+) -> dict[str, Any]:
+    expected_ids = _required_mapping(
+        request,
+        "expected_runtime_ids",
+        "render request",
+    )
+    table_runtime_id = _required_string(
+        expected_ids,
+        "table",
+        "render request.expected_runtime_ids",
+    )
+    task_runtime_ids = _string_list(
+        expected_ids.get("task_objects"),
+        "render request.expected_runtime_ids.task_objects",
+    )
+
+    def record(runtime_id: str) -> dict[str, Any]:
+        lower, upper = _runtime_bounds(
+            stage=stage,
+            scene=scene,
+            runtime_ids=[runtime_id],
+            bbox_cache=bbox_cache,
+            np=np,
+        )
+        extent = upper - lower
+        return {
+            "runtime_id": runtime_id,
+            "world_bound_m": {
+                "min": _float_list(lower),
+                "max": _float_list(upper),
+            },
+            "extent_m": _float_list(extent),
+        }
+
+    return {
+        "status": "pass",
+        "sample_moment": "post_reset_zero_action_warmup",
+        "table": record(table_runtime_id),
+        "task_objects": {
+            runtime_id: record(runtime_id)
+            for runtime_id in task_runtime_ids
+        },
+    }
 
 
 def _fit_camera(
@@ -722,7 +808,10 @@ def _runtime_prim(stage: Any, scene: Any, runtime_id: str) -> Any | None:
     if runtime_id == "lift2":
         return stage.GetPrimAtPath(f"/World/{scene.uuid}/lift2")
     scene_object = scene.object_list.get(runtime_id)
-    return None if scene_object is None else scene_object.prim
+    if scene_object is not None:
+        return scene_object.prim
+    articulation = scene.articulation_list.get(runtime_id)
+    return None if articulation is None else articulation.prim
 
 
 def _present_runtime_ids(
@@ -805,6 +894,11 @@ def _validate_request(root: Path, request: Mapping[str, Any]) -> None:
     views = _required_mapping(request, "views", "render request")
     if set(views) != set(VIEW_NAMES):
         raise ValueError("render request must contain both preview views")
+    _required_mapping(
+        request,
+        "expected_runtime_geometry",
+        "render request",
+    )
 
 
 def _input_path(root: Path, inputs: Mapping[str, Any], role: str) -> Path:

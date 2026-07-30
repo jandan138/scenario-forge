@@ -4,11 +4,16 @@ import json
 from hashlib import sha256
 from pathlib import Path
 import struct
+from types import SimpleNamespace
 import zlib
 
 import pytest
 import yaml
 
+from scripts.ebench.render_genmanip_initial_preview import (
+    _runtime_prim,
+    _task_data_with_preserved_articulation_parts,
+)
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
 from scenario_forge.adapters.ebench.preview import (
     GenManipPreviewError,
@@ -17,11 +22,56 @@ from scenario_forge.adapters.ebench.preview import (
     validate_genmanip_preview_evidence,
     write_genmanip_preview_request,
 )
-from tests.test_ebench_genmanip_export import _build_package
+from tests.test_ebench_genmanip_export import (
+    _build_articulated_object_package,
+    _build_package,
+    _build_qualified_object_package,
+)
 
 
 _TABLE_RUNTIME_ID = "00000000000000000000000000000000"
 _TASK_RUNTIME_IDS = ["obj_conical_bottle03", "obj_graduated_cylinder_03"]
+
+
+def test_preview_recovery_keeps_genmanip_articulation_parts_active() -> None:
+    task_data = {
+        "initial_layout": {
+            "centrifuge": {"type": "articulation"},
+            "test_tube": {"type": "object"},
+        }
+    }
+
+    recovered = _task_data_with_preserved_articulation_parts(
+        task_data,
+        ("centrifuge_lid", "centrifuge_rotor", "centrifuge_start_button"),
+    )
+
+    assert task_data["initial_layout"] == {
+        "centrifuge": {"type": "articulation"},
+        "test_tube": {"type": "object"},
+    }
+    assert recovered["initial_layout"]["centrifuge_lid"] == {
+        "type": "articulation_part"
+    }
+    assert recovered["initial_layout"]["centrifuge_rotor"] == {
+        "type": "articulation_part"
+    }
+    assert recovered["initial_layout"]["centrifuge_start_button"] == {
+        "type": "articulation_part"
+    }
+
+
+def test_preview_runtime_prim_resolves_articulation_root() -> None:
+    articulation_prim = object()
+    scene = SimpleNamespace(
+        uuid="scene",
+        object_list={},
+        articulation_list={
+            "centrifuge": SimpleNamespace(prim=articulation_prim),
+        },
+    )
+
+    assert _runtime_prim(None, scene, "centrifuge") is articulation_prim
 
 
 def test_export_writes_evidence_only_preview_request_without_changing_policy_cameras(
@@ -103,6 +153,49 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
     assert b"qa_camera" not in camera_bytes.lower()
 
 
+def test_preview_request_requires_articulated_task_objects_in_both_views(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(
+        _build_articulated_object_package(tmp_path)
+    ).output_dir
+
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    articulated_id = "obj_graduated_cylinder_03"
+
+    assert articulated_id in request["expected_runtime_ids"]["task_objects"]
+    for view_name in ("workspace_closeup", "scene_overview"):
+        assert articulated_id in request["views"][view_name]["required_runtime_ids"]
+        assert articulated_id in request["views"][view_name]["anchor_runtime_ids"]
+
+
+def test_preview_request_carries_convertasset_expected_task_geometry(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(
+        _build_qualified_object_package(tmp_path)
+    ).output_dir
+
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    expected = request["expected_runtime_geometry"]
+
+    assert set(expected) == {
+        "obj_conical_bottle03",
+        "obj_graduated_cylinder_03",
+    }
+    for runtime_id, item in expected.items():
+        assert item["schema_version"] == (
+            "scenario-forge-task-interactive-geometry/v0.1"
+        )
+        assert item["asset_entry_prim"] in {
+            "/World/conical_bottle03",
+            "/World/graduated_cylinder_03",
+        }
+        assert item["extent_m"] == [0.32, 0.35, 0.226]
+        assert item["max_extent_relative_error"] == 0.05
+        assert item["runtime_id"] == runtime_id
+
+
 def test_preview_evidence_with_matching_digest_writes_visual_ready_gate(
     tmp_path: Path,
 ) -> None:
@@ -121,10 +214,54 @@ def test_preview_evidence_with_matching_digest_writes_visual_ready_gate(
     assert set(gate["views"]) == {"workspace_closeup", "scene_overview"}
     assert gate["next_stage"] == "clean_room_visual_review"
     assert gate["verification_scope"] == (
-        "structural_artifact_runtime_prim_and_camera_composition_metadata"
+        "structural_runtime_geometry_and_camera_composition_metadata"
     )
+    assert gate["runtime_geometry"]["status"] == "passed"
     assert "on-camera visibility" in gate["claim_boundary"]
     assert "task success" in gate["claim_boundary"]
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("oversized", "extent"),
+        ("off_table", "tabletop XY"),
+        ("floating", "support gap"),
+    ],
+)
+def test_preview_geometry_gate_rejects_bad_runtime_task_placement(
+    tmp_path: Path,
+    mutation: str,
+    message: str,
+) -> None:
+    collected_package = export_genmanip_collected_package(
+        _build_qualified_object_package(tmp_path)
+    ).output_dir
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    evidence_dir = _write_passing_evidence(collected_package, request)
+    manifest_path = evidence_dir / "render_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    runtime_id = sorted(request["expected_runtime_geometry"])[0]
+    runtime_bound = manifest["runtime_geometry"]["task_objects"][runtime_id][
+        "world_bound_m"
+    ]
+    if mutation == "oversized":
+        runtime_bound["max"][0] += 1.0
+    elif mutation == "off_table":
+        runtime_bound["min"][0] += 3.0
+        runtime_bound["max"][0] += 3.0
+    else:
+        runtime_bound["min"][2] += 0.2
+        runtime_bound["max"][2] += 0.2
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(GenManipPreviewError, match=message):
+        validate_genmanip_preview_evidence(collected_package)
+
+    assert not (evidence_dir / "visual_ready_gate.yaml").exists()
 
 
 def test_preview_evidence_requires_room_visibility_and_honors_camera_reference(
@@ -398,6 +535,32 @@ def _write_passing_evidence(
 
     runtime_log = evidence_dir / "runtime.log"
     runtime_log.write_text("GenManip initial preview render completed\n", encoding="utf-8")
+    table_bound = {
+        "min": [-1.0, -1.0, 0.0],
+        "max": [1.0, 1.0, 0.8],
+    }
+    expected_geometry = request.get("expected_runtime_geometry", {})
+    assert isinstance(expected_geometry, dict)
+    expected_runtime_ids = request["expected_runtime_ids"]
+    assert isinstance(expected_runtime_ids, dict)
+    task_runtime_ids = expected_runtime_ids["task_objects"]
+    assert isinstance(task_runtime_ids, list)
+    task_bounds: dict[str, object] = {}
+    for index, runtime_id in enumerate(task_runtime_ids):
+        expected = expected_geometry.get(runtime_id, {})
+        assert isinstance(expected, dict)
+        extent = expected.get("extent_m", [0.1, 0.1, 0.1])
+        assert isinstance(extent, list) and len(extent) == 3
+        lower = [-0.7 + 0.5 * index, -0.2, 0.805]
+        upper = [
+            lower[0] + float(extent[0]),
+            lower[1] + float(extent[1]),
+            lower[2] + float(extent[2]),
+        ]
+        task_bounds[str(runtime_id)] = {
+            "world_bound_m": {"min": lower, "max": upper},
+            "extent_m": [float(value) for value in extent],
+        }
     manifest = {
         "schema_version": "scenario-forge-genmanip-preview-evidence/v0.1",
         "package_id": request["package_id"],
@@ -421,6 +584,16 @@ def _write_passing_evidence(
             "scanned_streams": ["renderer_runtime_log", "subprocess_stdout", "subprocess_stderr"],
             "blocking_signal_count": 0,
             "blocking_signals": [],
+        },
+        "runtime_geometry": {
+            "status": "pass",
+            "sample_moment": "post_reset_zero_action_warmup",
+            "table": {
+                "runtime_id": expected_runtime_ids["table"],
+                "world_bound_m": table_bound,
+                "extent_m": [2.0, 2.0, 0.8],
+            },
+            "task_objects": task_bounds,
         },
         "views": views,
         "claim_boundary": (

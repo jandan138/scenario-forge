@@ -1,0 +1,56 @@
+request_id: scientific_workbench_tube_rack_final_qualification_20260730
+consumer: scenario-forge
+consumer_task:
+  scenario_id: wetlab_bimanual_hold_rack_insert_tube
+  background: scientific_environment_code_room_example4_v1
+  workspace_profile: center_open_floor
+
+qualified_counterpart:
+  test_tube_package: outputs/tube_task_assets_20260729/uniform_scale_k0365/test_tube/package
+  manifest_sha256: cfd16533c9dbc4abfadc048d2eef6789c3c82fc0ded47fd1045e51aa293b286d
+  asset_usd_sha256: 7877f65af3d71bfdc51e6ec2a40fce7f7a199be8f70d3c19755ec3aa4650e794
+  note: This is the exact tube package referenced by the promoted r7 centrifuge runtime report.
+
+current_rack_candidate:
+  package: outputs/tube_task_assets_20260729/uniform_scale_k0365/tube_rack/package
+  source_facade_sha256: 91bf94219ffee4a9121b73057db870a02015117907737d9317c2cb74183423ad
+  manifest_sha256: a20be4d714c28e697167c0e800f71f8e1c5c08e200670a5fd83cde5fe335520f
+  passing_gates: [root_motion_gate, stable_support_gate]
+  blocked_gates: [gripper_collision_gate, open_top]
+  observed_errors:
+    - positive gripper proxy starts inside or too near the collider
+    - first axial hit is too shallow and may be a virtual cap
+    - positive sidewall did not block the probe
+
+required_delivery:
+  usage: rigid_object
+  asset_entry_prim: /World/TubeRack
+  interaction_contract_status: pass
+  named_frames:
+    - rack_grasp
+    - socket_0_aperture
+    - socket_0_inserted_bottom
+  required_gates:
+    root_motion_gate: pass
+    stable_support_gate: pass
+    gripper_collision_gate: pass
+    open_top: pass
+  insertion_probe:
+    tube_package_manifest_sha256: cfd16533c9dbc4abfadc048d2eef6789c3c82fc0ded47fd1045e51aa293b286d
+    target_frame: socket_0_inserted_bottom
+    must_reach_without_virtual_cap_or_sidewall_block: true
+  package_scoped_physx_warning_count: 0
+  promotion:
+    package_manifest: package/evidence/manifest.json
+    runtime_report_must_be_package_local_and_hash_bound: true
+
+scale_lineage_clarification:
+  runtime_evidence_path: outputs/tube_task_assets_20260729/centrifuge_proxy_parent_local_r7/package/evidence/articulation_runtime_qualification/report.json
+  runtime_evidence_observed_path_component: uniform_scale_k0365
+  later_human_summary_value: 0.565
+  required_resolution: ConvertAsset must declare the authoritative scale lineage in the returned manifest; Scenario Forge will not guess or add a local scale correction.
+
+ownership_boundary:
+  - Do not modify the original source USD.
+  - Do not ask Scenario Forge to add rack-specific colliders, mass, inertia, scale, or warning suppression.
+  - This request does not ask for robot-policy or benchmark success.

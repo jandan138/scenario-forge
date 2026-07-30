@@ -32,7 +32,10 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Generate the Bimanual Pour Package](operations/generate-bimanual-pour-package.md)
 - [Qualify the Bimanual Pour Vessel Assets](operations/qualify-bimanual-pour-vessels.md)
 - [Intake an External Visual Environment](operations/intake-external-environment.md)
+- [Intake a Generated Blender Environment](operations/intake-generated-blender-environment.md)
 - [Generate External-Room Zone Variants](operations/generate-external-room-zone-variants.md)
+- [Generate Scientific Workbench Tube Tasks 7 and 11](operations/generate-scientific-workbench-tube-tasks.md)
+- [Tube-task ConvertAsset Admission Request](operations/scientific-workbench-tube-task-asset-admission-request.yaml)
 
 ## Reference
 
@@ -56,4 +59,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-17 Progress Rubric v0.4 (M1, transport_only)](records/2026-07-17-progress-rubric-v04-m1.md)
 - [2026-07-23 Scene1_hard Visual Context for EBench Bimanual Pour](records/2026-07-23-scene1-hard-ebench-bimanual-pour-context.md)
 - [2026-07-27 External Room Zone-Background Implementation](records/2026-07-27-external-room-zone-background-implementation.md)
+- [2026-07-29 Scientific Workbench Tube-task Foundation](records/2026-07-29-scientific-workbench-tube-task-foundation.md)
+- [2026-07-30 Code-as-Room Generated Environment Integration](records/2026-07-30-code-as-room-generated-environment-integration.md)
+- [2026-07-30 Centrifuge Proxy Parent-Local Requalification](records/2026-07-30-centrifuge-proxy-parent-local-requalification.md)
 - [2026-07-06 Phase 13 S2D-12 Soap-to-Dish Static Candidate Evidence](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/generated_package_summary.yaml)

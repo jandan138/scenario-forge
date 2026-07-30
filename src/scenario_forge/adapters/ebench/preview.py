@@ -39,6 +39,9 @@ _BLOCKING_LOG_SIGNALS = (
     "References an asset that can not be found",
     "wasn't resolved properly",
 )
+_MAX_EXTENT_RELATIVE_ERROR = 0.05
+_TABLETOP_XY_TOLERANCE_M = 0.01
+_TABLETOP_SUPPORT_TOLERANCE_M = 0.01
 
 
 class GenManipPreviewError(ValueError):
@@ -160,7 +163,7 @@ def write_genmanip_preview_request(collected_root: str | Path) -> Path:
         str(runtime_id)
         for runtime_id, item in initial_layout.items()
         if isinstance(item, Mapping)
-        and item.get("type") == "object"
+        and item.get("type") in {"object", "articulation"}
         and str(runtime_id) not in table_ids
     ]
     if robot_ids != ["lift2"] or len(table_ids) != 1 or not task_object_ids:
@@ -169,6 +172,11 @@ def write_genmanip_preview_request(collected_root: str | Path) -> Path:
         )
 
     inputs = _current_preview_inputs(root, package_manifest)
+    expected_runtime_geometry = _expected_runtime_geometry(
+        package_manifest,
+        task_data,
+        task_object_ids,
+    )
     request = {
         "schema_version": PREVIEW_REQUEST_SCHEMA_VERSION,
         "package_id": package_id,
@@ -185,6 +193,7 @@ def write_genmanip_preview_request(collected_root: str | Path) -> Path:
             "table": table_ids[0],
             "task_objects": task_object_ids,
         },
+        "expected_runtime_geometry": expected_runtime_geometry,
         "views": {
             "workspace_closeup": {
                 "resolution": [1280, 720],
@@ -270,6 +279,39 @@ def validate_genmanip_preview_evidence(
     if _digest_inputs(package_id, request_inputs) != request_digest:
         raise GenManipPreviewError("preview request input digest does not match request inputs")
     _validate_request_inputs(root, request)
+    expected_runtime_ids = _required_mapping(
+        request,
+        "expected_runtime_ids",
+        "preview request",
+    )
+    task_object_ids = _string_list(
+        expected_runtime_ids.get("task_objects"),
+        "preview request.expected_runtime_ids.task_objects",
+    )
+    entrypoints = _required_mapping(
+        package_manifest,
+        "entrypoints",
+        "package manifest",
+    )
+    episode = _load_json(
+        _entrypoint_path(root, entrypoints, "episode_metadata"),
+        "episode metadata",
+    )
+    task_data = _required_mapping(episode, "task_data", "episode metadata")
+    current_expected_geometry = _expected_runtime_geometry(
+        package_manifest,
+        task_data,
+        task_object_ids,
+    )
+    request_expected_geometry = _required_mapping(
+        request,
+        "expected_runtime_geometry",
+        "preview request",
+    )
+    if request_expected_geometry != current_expected_geometry:
+        raise GenManipPreviewError(
+            "preview request expected runtime geometry is stale"
+        )
 
     manifest = _load_json(evidence_dir / "render_manifest.json", "preview render manifest")
     if manifest.get("schema_version") != PREVIEW_EVIDENCE_SCHEMA_VERSION:
@@ -316,6 +358,7 @@ def validate_genmanip_preview_evidence(
                 f"preview runtime log contains blocking material signal: {signal}"
             )
 
+    runtime_geometry = _validate_runtime_geometry(request, manifest)
     request_views = _required_mapping(request, "views", "preview request")
     manifest_views = _required_mapping(manifest, "views", "preview render manifest")
     if set(manifest_views) != set(PREVIEW_VIEW_NAMES):
@@ -381,8 +424,9 @@ def validate_genmanip_preview_evidence(
         "runtime_log_sha256": runtime_log_sha256,
         "moment": "post_reset_pre_action",
         "views": gate_views,
+        "runtime_geometry": runtime_geometry,
         "verification_scope": (
-            "structural_artifact_runtime_prim_and_camera_composition_metadata"
+            "structural_runtime_geometry_and_camera_composition_metadata"
         ),
         "next_stage": "clean_room_visual_review",
         "claim_boundary": (
@@ -398,6 +442,317 @@ def validate_genmanip_preview_evidence(
         gate_path=gate_path,
         status="passed",
     )
+
+
+def _expected_runtime_geometry(
+    package_manifest: Mapping[str, Any],
+    task_data: Mapping[str, Any],
+    task_object_ids: list[str],
+) -> dict[str, dict[str, Any]]:
+    """Map runtime ids to producer-authored interactive entry geometry."""
+
+    runtime_contract = task_data.get("scenario_forge_runtime_contract_v05")
+    if not isinstance(runtime_contract, Mapping):
+        runtime_contract = task_data.get("scenario_forge_runtime_contract")
+    if not isinstance(runtime_contract, Mapping):
+        return {}
+    raw_objects = runtime_contract.get("objects")
+    if not isinstance(raw_objects, list):
+        raise GenManipPreviewError(
+            "runtime contract objects must be a list for geometry mapping"
+        )
+    objects_by_runtime_id: dict[str, Mapping[str, Any]] = {}
+    for index, raw_object in enumerate(raw_objects):
+        item = _as_mapping(raw_object, f"runtime contract objects[{index}]")
+        runtime_id = _required_string(
+            item,
+            "runtime_uid",
+            f"runtime contract objects[{index}]",
+        )
+        if runtime_id in objects_by_runtime_id:
+            raise GenManipPreviewError(
+                f"runtime contract repeats runtime_uid {runtime_id!r}"
+            )
+        objects_by_runtime_id[runtime_id] = item
+
+    raw_assets = package_manifest.get("source_assets")
+    if not isinstance(raw_assets, list):
+        raise GenManipPreviewError("package manifest source_assets must be a list")
+    geometry_sources: list[tuple[str, Mapping[str, Any]]] = []
+    for index, raw_asset in enumerate(raw_assets):
+        asset = _as_mapping(raw_asset, f"package source_assets[{index}]")
+        upstream = asset.get("upstream_package")
+        if not isinstance(upstream, Mapping):
+            continue
+        metadata = upstream.get("metadata")
+        if not isinstance(metadata, Mapping):
+            continue
+        geometry = metadata.get("task_interactive_geometry")
+        if geometry is None:
+            continue
+        geometry_mapping = _as_mapping(
+            geometry,
+            f"package source_assets[{index}].task_interactive_geometry",
+        )
+        if geometry_mapping.get("schema_version") != (
+            "scenario-forge-task-interactive-geometry/v0.1"
+        ):
+            raise GenManipPreviewError(
+                "unsupported task-interactive geometry schema_version"
+            )
+        geometry_sources.append(
+            (
+                _required_string(
+                    asset,
+                    "asset_id",
+                    f"package source_assets[{index}]",
+                ),
+                geometry_mapping,
+            )
+        )
+
+    result: dict[str, dict[str, Any]] = {}
+    for runtime_id in task_object_ids:
+        runtime_object = objects_by_runtime_id.get(runtime_id)
+        if runtime_object is None:
+            continue
+        source_prim = _required_string(
+            runtime_object,
+            "source_prim_path",
+            f"runtime object {runtime_id}",
+        )
+        matches = [
+            (asset_id, geometry)
+            for asset_id, geometry in geometry_sources
+            if geometry.get("asset_entry_prim") == source_prim
+        ]
+        if not matches:
+            continue
+        if len(matches) != 1:
+            raise GenManipPreviewError(
+                f"runtime object {runtime_id!r} has ambiguous producer geometry"
+            )
+        asset_id, geometry = matches[0]
+        bound = _required_mapping(
+            geometry,
+            "package_world_bound_m",
+            f"runtime object {runtime_id} producer geometry",
+        )
+        lower, upper, extent = _world_bound(
+            bound,
+            f"runtime object {runtime_id} producer geometry",
+        )
+        declared_extent = _number_vector(
+            geometry.get("extent_m"),
+            f"runtime object {runtime_id} producer geometry.extent_m",
+        )
+        if any(
+            not math.isclose(actual, declared, rel_tol=0.0, abs_tol=1e-9)
+            for actual, declared in zip(extent, declared_extent, strict=True)
+        ):
+            raise GenManipPreviewError(
+                f"runtime object {runtime_id!r} producer extent does not match bound"
+            )
+        result[runtime_id] = {
+            "schema_version": geometry["schema_version"],
+            "runtime_id": runtime_id,
+            "asset_id": asset_id,
+            "asset_entry_prim": source_prim,
+            "package_world_bound_m": {
+                "min": list(lower),
+                "max": list(upper),
+            },
+            "extent_m": list(extent),
+            "max_extent_relative_error": _MAX_EXTENT_RELATIVE_ERROR,
+        }
+    return result
+
+
+def _validate_runtime_geometry(
+    request: Mapping[str, Any],
+    manifest: Mapping[str, Any],
+) -> dict[str, Any]:
+    expected = _required_mapping(
+        request,
+        "expected_runtime_geometry",
+        "preview request",
+    )
+    geometry = _required_mapping(
+        manifest,
+        "runtime_geometry",
+        "preview render manifest",
+    )
+    if geometry.get("status") != "pass":
+        raise GenManipPreviewError("preview runtime geometry status must be pass")
+    if geometry.get("sample_moment") != "post_reset_zero_action_warmup":
+        raise GenManipPreviewError(
+            "preview runtime geometry must be sampled after zero-action warmup"
+        )
+    expected_ids = _required_mapping(
+        request,
+        "expected_runtime_ids",
+        "preview request",
+    )
+    table_runtime_id = _required_string(
+        expected_ids,
+        "table",
+        "preview request.expected_runtime_ids",
+    )
+    table = _required_mapping(
+        geometry,
+        "table",
+        "preview render manifest.runtime_geometry",
+    )
+    if table.get("runtime_id") != table_runtime_id:
+        raise GenManipPreviewError(
+            "preview runtime geometry table id does not match request"
+        )
+    table_lower, table_upper, table_extent = _world_bound(
+        _required_mapping(
+            table,
+            "world_bound_m",
+            "preview runtime geometry table",
+        ),
+        "preview runtime geometry table",
+    )
+    _require_recorded_extent(table, table_extent, "preview runtime geometry table")
+
+    task_objects = _required_mapping(
+        geometry,
+        "task_objects",
+        "preview render manifest.runtime_geometry",
+    )
+    gate_objects: dict[str, Any] = {}
+    for runtime_id, raw_expected in expected.items():
+        if not isinstance(runtime_id, str) or not runtime_id:
+            raise GenManipPreviewError(
+                "preview expected runtime geometry keys must be runtime ids"
+            )
+        expected_item = _as_mapping(
+            raw_expected,
+            f"preview expected runtime geometry {runtime_id}",
+        )
+        actual_item = _as_mapping(
+            task_objects.get(runtime_id),
+            f"preview runtime geometry task object {runtime_id}",
+        )
+        actual_lower, actual_upper, actual_extent = _world_bound(
+            _required_mapping(
+                actual_item,
+                "world_bound_m",
+                f"preview runtime geometry task object {runtime_id}",
+            ),
+            f"preview runtime geometry task object {runtime_id}",
+        )
+        _require_recorded_extent(
+            actual_item,
+            actual_extent,
+            f"preview runtime geometry task object {runtime_id}",
+        )
+        expected_extent = _number_vector(
+            expected_item.get("extent_m"),
+            f"preview expected runtime geometry {runtime_id}.extent_m",
+        )
+        tolerance = _positive_finite_number(
+            expected_item.get("max_extent_relative_error"),
+            f"preview expected runtime geometry {runtime_id} extent tolerance",
+        )
+        expected_sorted = sorted(expected_extent)
+        actual_sorted = sorted(actual_extent)
+        relative_errors = [
+            abs(actual_value - expected_value) / expected_value
+            for expected_value, actual_value in zip(
+                expected_sorted,
+                actual_sorted,
+                strict=True,
+            )
+        ]
+        if any(error > tolerance for error in relative_errors):
+            raise GenManipPreviewError(
+                f"preview runtime extent mismatch for {runtime_id}"
+            )
+
+        for axis_index in (0, 1):
+            if (
+                actual_lower[axis_index]
+                < table_lower[axis_index] - _TABLETOP_XY_TOLERANCE_M
+                or actual_upper[axis_index]
+                > table_upper[axis_index] + _TABLETOP_XY_TOLERANCE_M
+            ):
+                raise GenManipPreviewError(
+                    f"preview runtime object {runtime_id} is outside tabletop XY"
+                )
+        support_gap = actual_lower[2] - table_upper[2]
+        if not (
+            -_TABLETOP_SUPPORT_TOLERANCE_M
+            <= support_gap
+            <= _TABLETOP_SUPPORT_TOLERANCE_M
+        ):
+            raise GenManipPreviewError(
+                f"preview runtime support gap exceeds tolerance for {runtime_id}"
+            )
+        gate_objects[runtime_id] = {
+            "status": "passed",
+            "expected_extent_m": expected_extent,
+            "actual_extent_m": list(actual_extent),
+            "extent_relative_error_sorted": relative_errors,
+            "support_gap_m": support_gap,
+            "tabletop_xy_contained": True,
+        }
+    return {
+        "status": "passed",
+        "sample_moment": "post_reset_zero_action_warmup",
+        "table_runtime_id": table_runtime_id,
+        "table_world_bound_m": {
+            "min": list(table_lower),
+            "max": list(table_upper),
+        },
+        "thresholds": {
+            "max_extent_relative_error": _MAX_EXTENT_RELATIVE_ERROR,
+            "tabletop_xy_tolerance_m": _TABLETOP_XY_TOLERANCE_M,
+            "tabletop_support_tolerance_m": _TABLETOP_SUPPORT_TOLERANCE_M,
+        },
+        "task_objects": gate_objects,
+    }
+
+
+def _world_bound(
+    value: Mapping[str, Any],
+    label: str,
+) -> tuple[
+    tuple[float, float, float],
+    tuple[float, float, float],
+    tuple[float, float, float],
+]:
+    lower = _number_vector(value.get("min"), f"{label}.min")
+    upper = _number_vector(value.get("max"), f"{label}.max")
+    extent = tuple(
+        maximum - minimum
+        for minimum, maximum in zip(lower, upper, strict=True)
+    )
+    if any(value <= 0.0 for value in extent):
+        raise GenManipPreviewError(f"{label} must have positive extent")
+    return lower, upper, extent
+
+
+def _require_recorded_extent(
+    record: Mapping[str, Any],
+    computed: tuple[float, float, float],
+    label: str,
+) -> None:
+    recorded = _number_vector(record.get("extent_m"), f"{label}.extent_m")
+    if any(
+        not math.isclose(value, expected, rel_tol=0.0, abs_tol=1e-9)
+        for value, expected in zip(recorded, computed, strict=True)
+    ):
+        raise GenManipPreviewError(f"{label} recorded extent does not match bound")
+
+
+def _number_vector(value: object, label: str) -> tuple[float, float, float]:
+    if not isinstance(value, list) or len(value) != 3:
+        raise GenManipPreviewError(f"{label} must contain three finite numbers")
+    result = tuple(_finite_number(item, label) for item in value)
+    return result[0], result[1], result[2]
 
 
 def _expected_preview_visibility(view_name: str) -> str:

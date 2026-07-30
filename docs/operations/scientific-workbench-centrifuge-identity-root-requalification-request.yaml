@@ -1,0 +1,101 @@
+request_id: scientific_workbench_centrifuge_identity_root_r8_20260730
+consumer: scenario-forge
+consumer_task:
+  scenario_id: wetlab_centrifuge_tube_load_start_no_wait
+  usage: articulated_object
+  background: scientific_environment_code_room_example4_v1
+  workspace_profile: center_open_floor
+
+superseded_delivery:
+  status: rejected_for_task_composition
+  package: outputs/tube_task_assets_20260729/centrifuge_proxy_parent_local_r7/package
+  manifest_sha256: 7948fff535514227b7e6cce636dc9be63145837bc783802b1f4ce63658233598
+  asset_usd_sha256: 3573bb0eb474b80f842ea4d70dd2be2c2b5019a181d604bc1e17d4c7b7754926
+  device_profile_sha256: 8f53e05548b8681a8332d08c2442f7049d6c360c3e2352c342b4f4ca3961784d
+  runtime_report_sha256: 10b5c31f856b9258e832487abdbf08f38801cea6fb28d6ab5d7e249bcb1c54bf
+  promotion_receipt_sha256: 3c3d92bcf84cb16a55552c6138089248c11f19c11c88269b65778cb282d560dc
+  source_facade_sha256: 04135987bf22cb1b63515726ff78bf4be341bc9f1400eccad59a5a6d371f9149
+  rejection_reason:
+    code: task_interactive_entry_transform_non_identity
+    asset_entry_prim: /World/Centrifuge
+    package_before_physics_profile_world_transform:
+      - [0.0, 0.175, 0.0, 0.0]
+      - [0.0, 0.0, 0.175, 0.0]
+      - [0.175, 0.0, 0.0, 0.0]
+      - [0.0, 0.0, 0.103633, 1.0]
+    explanation: >-
+      The eBench task wrapper authors its own pose on the referenced entry prim.
+      USD composition therefore replaces this source root transform and expands
+      the composed device from the admitted 0.321 x 0.350 x 0.226 m envelope to
+      approximately 2.000 x 1.291 x 1.836 m with the wrong orientation.
+
+required_delivery:
+  requested_revision: r8-identity-root
+  package_kind: source_bound
+  usage: articulated_object
+  asset_entry_prim: /World/Centrifuge
+  source_facade_sha256_must_remain: 04135987bf22cb1b63515726ff78bf4be341bc9f1400eccad59a5a6d371f9149
+  entry_transform_contract:
+    matrix_convention: usd_row_vector_4x4
+    required_world_transform:
+      - [1.0, 0.0, 0.0, 0.0]
+      - [0.0, 1.0, 0.0, 0.0]
+      - [0.0, 0.0, 1.0, 0.0]
+      - [0.0, 0.0, 0.0, 1.0]
+    absolute_tolerance: 1.0e-6
+    requirement: >-
+      /World/Centrifuge must carry no effective root translate, rotate, orient,
+      scale, pivot, or non-identity transform order. Move the canonicalization
+      below the entry root producer-side; do not ask Scenario Forge to compensate.
+  physical_frame_contract:
+    package_world_extent_m_approx: [0.3212296432, 0.349999994, 0.225965511]
+    package_world_bound_min_z_m_approx: 0.0
+    extent_relative_tolerance: 0.05
+    scope_bounds_path: /World/Centrifuge
+    manifest_evidence:
+      - visual_preservation_fingerprint.package_before_physics_profile.scope_world_transforms
+      - physics_closure.physical_frame.scope_bounds
+  named_frame_contract:
+    requirement: >-
+      Re-express every authoritative named frame in the identity-root canonical
+      frame and bind the updated device profile and runtime report by hash.
+    critical_frame: tube_socket_0_inserted_bottom_parked_root
+    parent_prim: /World/Centrifuge
+    translation_parent_local_m_approx: [-0.0635, -0.0482, 0.105]
+    rotation_parent_local_wxyz_approx: [1.0, 0.0, 0.0, 0.0]
+    translation_absolute_tolerance_m: 1.0e-4
+    quaternion_component_absolute_tolerance: 1.0e-6
+  retained_runtime_gates:
+    socket_insertion_clearance: pass
+    lid_contact_cycle: pass
+    button_contact_cycle: pass
+    button_reset_stability: pass
+    rotor_reset_stability: pass
+  scoped_physx_warning_count: 0
+  promotion:
+    package_manifest: package/evidence/manifest.json
+    device_profile_must_be_package_local_and_hash_bound: true
+    runtime_report_must_be_package_local_and_hash_bound: true
+    promotion_receipt_must_bind_final_manifest_and_asset: true
+
+scenario_forge_acceptance:
+  handoff_gate:
+    identity_transform_tolerance: 1.0e-6
+    consumer_specific_transform_repair: forbidden
+  task_placement:
+    table_top_z_m: 0.7727606155
+    spawn_clearance_m: 0.01
+    task_scale: [1.0, 1.0, 1.0]
+    device_front: world_negative_x
+  initial_scene_runtime_geometry:
+    max_extent_relative_error: 0.05
+    tabletop_xy_tolerance_m: 0.01
+    support_gap_tolerance_m: 0.01
+  output_root_after_acceptance: outputs/scientific_workbench_tube_tasks_code_room_center_identity_root_r8_20260730
+  clean_room_visual_review_required: true
+
+ownership_boundary:
+  - Do not modify the original source USD.
+  - Do not add a consumer-specific wrapper transform to the returned entry prim.
+  - Do not ask Scenario Forge to add centrifuge-specific collider, mass, inertia, scale, joint-drive, or warning-suppression logic.
+  - Requalification proves the specified asset and articulation gates only; it does not claim robot-policy or benchmark success.

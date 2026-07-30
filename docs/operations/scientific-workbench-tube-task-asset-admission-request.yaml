@@ -1,0 +1,317 @@
+schema_version: scenario-forge-convertasset-tube-task-admission-request/v0.2
+request_id: scientific_workbench_tube_tasks_7_11_20260729
+consumer:
+  project: scenario-forge
+  runtime_profile: isaac41
+  task_ids:
+    - wetlab_centrifuge_tube_load_start_no_wait
+    - wetlab_bimanual_hold_rack_insert_tube
+  license: LicenseRef-Internal-Restricted
+  redistributable: false
+
+producer_boundary:
+  raw_source_files_must_remain_unchanged: true
+  # These three raw USDs have incorrect authored physical frames.  Do not ask
+  # AAN to hide that mismatch.  First create a producer-owned canonical facade,
+  # then admit a package source-bound to the facade hash.
+  canonical_facade_required_before_dynamic_admission: true
+  facade_requirements:
+    up_axis: Z
+    meters_per_unit: 1.0
+    uniform_geometry_scale_only: true
+    support_origin: true
+    raw_to_facade_hash_provenance_required: true
+    raw_to_facade_affine_mapping_required: true
+    facade_world_bound_evidence_required: true
+  package_dependencies_must_be_local: true
+  scenario_forge_physics_repairs_forbidden: true
+  required_manifest_schema: asset_application_normalizer.v1
+  required_consumer_profile: scenario-forge
+  required_scoped_physx_warning_count: 0
+
+deliveries:
+  - asset_id: scientific_workbench_hci955350_centrifuge_dynamic
+    usage: articulated_object
+    source:
+      path: external_artifacts/incoming/离心机-14条/HCI955350812560602-1/HCI955350812560602-1.usd
+      sha256: e7f8d015989a83edeb805549bb8b5461099f91cbc4b3686b76147e20c479d83c
+      default_prim: /root_Centrifuge
+      up_axis: Y
+      meters_per_unit: 0.01
+      observed_authored_bbox_m: [0.02, 0.0118435597, 0.0183559799]
+    producer_facade:
+      required: true
+      source_identity_for_package: facade_sha256
+      raw_sha256_is_provenance_only: true
+      source_prim_mapping:
+        /root_Centrifuge: /World/Centrifuge
+      calibrated_bbox_ranges_m:
+        x: [0.32, 0.38]
+        y: [0.27, 0.35]
+        z: [0.18, 0.30]
+    package:
+      asset_role: dynamic
+      default_prim: World
+      asset_entry_prim: /World/Centrifuge
+      asset_scope_prims: [/World/Centrifuge]
+      source_to_package_prim_mapping:
+        /World/Centrifuge: /World/Centrifuge
+      canonical_frame:
+        up_axis: Z
+        front_axis: +X
+        origin: support_plane_center
+    articulation:
+      contract_schema: aan.articulation_contract.v1
+      profile_schema: aan.articulated_device_profile.v1
+      handoff_requirements:
+        packaged_profile:
+          package_path: articulation/device_profile.json
+          schema_version: aan.articulated_device_profile.v1
+        passing_runtime_report:
+          package_path: evidence/articulation_runtime_qualification/report.json
+          schema_version: aan.articulation_runtime_qualification.v1
+          status: pass
+        promotion_receipt:
+          package_path: evidence/articulation_runtime_qualification/promotion.json
+          schema_version: aan.articulation_package_promotion.v1
+          status: pass
+        bound_identity:
+          report_inputs_device_profile_schema_version: must_equal_packaged_profile_schema_version
+          report_inputs_device_profile_profile_sha256: must_equal_packaged_profile_sha256
+          report_inputs_device_profile_source_sha256: must_equal_packaged_profile_and_manifest_source_sha256
+          promotion_profile_sha256: must_equal_packaged_profile_sha256
+          promotion_runtime_report_sha256: must_equal_packaged_runtime_report_sha256
+      articulation_root_prim: /World/Centrifuge
+      runtime_units:
+        revolute: radian
+        prismatic: meter
+      producer_filled_profile_fields:
+        - semantic_joints.*.dof_index
+      required_runtime_task_gates:
+        - lid_contact_cycle
+        - button_contact_cycle
+        - button_reset_stability
+        - rotor_reset_stability
+        - socket_insertion_clearance
+      source_topology:
+        fixed_base_joint: /root_Centrifuge/group_0/FixedJoint
+        dof_joints:
+          lid: /root_Centrifuge/group_23/RevoluteJoint
+          rotor: /root_Centrifuge/group_6/RevoluteJoint
+          start_button: /root_Centrifuge/group_2/PrismaticJoint
+        source_limits:
+          lid_degrees: [-89.1323471069, 0.0]
+          rotor_degrees: [-180.0, 0.0]
+          start_button_source_units: [-0.0346639045, 0.0]
+      semantic_joints:
+        lid:
+          joint_prim: /World/Centrifuge/group_23/RevoluteJoint
+          part_prim: /World/Centrifuge/group_23
+          dof_index: null
+          reset_state: open
+          runtime_reset_value: -1.5556521049
+          states:
+            open: [-1.5556521049, -1.45]
+            closed: [-0.0872664626, 0.0]
+        rotor:
+          joint_prim: /World/Centrifuge/group_6/RevoluteJoint
+          part_prim: /World/Centrifuge/group_6
+          dof_index: null
+          reset_state: parked
+          runtime_reset_value: 0.0
+          states:
+            parked: [-0.05, 0.0]
+        start_button:
+          joint_prim: /World/Centrifuge/group_2/PrismaticJoint
+          part_prim: /World/Centrifuge/group_2
+          dof_index: null
+          reset_state: released
+          runtime_reset_value: 0.0
+          states:
+            released: [-0.0005, 0.0]
+            pressed: [-0.0055, -0.0045]
+      named_frame_requirements:
+        # ConvertAsset owns these measured values.  Do not copy the former
+        # Scenario Forge estimates into the delivered profile.
+        tube_socket_0_aperture:
+          parent_prim: /World/Centrifuge/group_6
+          measurement: empty rotor-hole aperture center and insertion axis
+          authoritative: true
+        tube_socket_0_inserted_bottom_parked_root:
+          parent_prim: /World/Centrifuge
+          measurement: test-tube bottom-center target at qualified insertion depth
+          derived_at_state: {rotor: parked}
+          authoritative: true
+        lid_close_contact:
+          parent_prim: /World/Centrifuge/group_23
+          measurement: reachable grasp/contact frame on the moving lid
+          authoritative: true
+        start_button_press:
+          parent_prim: /World/Centrifuge/group_2
+          measurement: button-face center with quaternion aligned to press axis
+          authoritative: true
+      runtime_report_required_fields:
+        runtime_dof_mapping:
+          item_fields: [dof_index, dof_name, joint_prim]
+          source: Isaac articulation view runtime order
+          must_match_articulation_closure: true
+        task_gates:
+          required_pass_records:
+            - lid_contact_cycle
+            - button_contact_cycle
+            - button_reset_stability
+            - rotor_reset_stability
+            - socket_insertion_clearance
+    runtime_qualification:
+      - Isaac Sim 4.1 load, render, step, and reset pass.
+      - Exactly one articulation root and three contiguous, uniquely mapped DOFs.
+      - The runtime report records Isaac's actual DOF vector order and matches each closure joint at the same index.
+      - The fixed joint is recorded as the fixed base and is not exported as a DOF.
+      - Lid open -> closed -> open direct control passes without body separation.
+      - Start button released -> pressed -> released direct control passes repeatedly.
+      - With no external force after reset and warmup, the start button remains released.
+      - A controlled contact probe, not only direct state assignment, can close the lid and press the start button.
+      - The report declares whether the button is latching or momentary; for momentary behavior it returns to released after contact withdrawal.
+      - Rotor stays parked at reset and does not move spontaneously.
+      - A delivered test tube crosses tube_socket_0_aperture and reaches tube_socket_0_inserted_bottom_parked_root without a collider wall blocking the hole.
+      - With that tube at the inserted target, the lid still reaches the declared closed state without visible or collider interpenetration.
+      - The package-scoped PhysX warning count is zero.
+    consumer_semantics:
+      # GenManip evaluates ordered stages and retains completed-stage credit.
+      # "pressed" is therefore observed while contact is active; it is not a
+      # claim that a momentary button remains depressed after hand retreat.
+      start_button_pressed_is_ordered_reached_stage: true
+      momentary_button_is_acceptable: true
+
+  - asset_id: scientific_workbench_test_tube_dynamic
+    usage: rigid_object
+    source:
+      path: external_artifacts/incoming/tube_balabal/test tube/taoyuan10k_commercial-others-other-2bc8eaee1dff16ddca7759438f850572.usd
+      sha256: 21e914360da54c67b27edc89afff4c6606270fe25f6a5b319dffc7e8afd49d98
+      default_prim: /World
+      up_axis: Y
+      meters_per_unit: 0.01
+      observed_authored_bbox_m: [0.3019811721, 2.0000000086, 0.3009393190]
+    producer_facade:
+      required: true
+      source_identity_for_package: facade_sha256
+      raw_sha256_is_provenance_only: true
+      source_prim_mapping:
+        /World: /World/TestTube
+      calibrated_bbox_ranges_m:
+        diameter: [0.015, 0.020]
+        height: [0.10, 0.13]
+    package:
+      asset_role: dynamic
+      default_prim: World
+      asset_entry_prim: /World/TestTube
+      asset_scope_prims: [/World/TestTube]
+      source_to_package_prim_mapping:
+        /World/TestTube: /World/TestTube
+      canonical_frame:
+        up_axis: Z
+        long_axis: +Z
+        origin: bottom_center
+    interaction:
+      contract_schema: aan.interaction_contract.v1
+      exactly_one_active_rigid_body: true
+      named_frame_requirements:
+        support:
+          measurement: bottom support center
+          authoritative: true
+        grasp:
+          measurement: collision-safe grasp section on the delivered tube
+          authoritative: true
+        opening:
+          measurement: delivered visual opening center, not a fixed guessed height
+          authoritative: true
+      required_gates:
+        root_motion: true
+        stable_support: true
+        gripper_collision: true
+        open_top: false
+    runtime_qualification:
+      - Stable on the eBench table after warmup.
+      - Lift and hold from the grasp-height collision section.
+      - Collider diameter permits insertion into the delivered centrifuge and rack sockets.
+      - Root pose and physical rigid-body pose remain the same runtime identity.
+      - The package-scoped PhysX warning count is zero.
+
+  - asset_id: scientific_workbench_tube_rack_dynamic
+    usage: rigid_object
+    source:
+      path: external_artifacts/incoming/tube_balabal/test tube rack with tubes/blenderkit_430fa8f380684f458a57fd7775ccd2d3.usd
+      sha256: b215ca32ded8830d9600ab59aab8aba89ff040fb9209631882edf1942c02e385
+      default_prim: /World
+      up_axis: Y
+      meters_per_unit: 0.01
+      observed_authored_bbox_m: [2.0, 1.0000002289, 0.6685201263]
+    producer_facade:
+      required: true
+      source_identity_for_package: facade_sha256
+      raw_sha256_is_provenance_only: true
+      source_prim_mapping:
+        /World: /World/TubeRack
+      # A uniform scale preserves the round sockets.  The raw proportions yield
+      # roughly 0.20 x 0.067 x 0.10 m; do not stretch Y to the old 0.12 m hint.
+      calibrated_bbox_ranges_m:
+        x: [0.20, 0.24]
+        y: [0.066, 0.081]
+        z: [0.10, 0.12]
+    package:
+      asset_role: dynamic
+      default_prim: World
+      asset_entry_prim: /World/TubeRack
+      asset_scope_prims: [/World/TubeRack]
+      source_to_package_prim_mapping:
+        /World/TubeRack: /World/TubeRack
+      canonical_frame:
+        up_axis: Z
+        origin: support_plane_center
+    interaction:
+      contract_schema: aan.interaction_contract.v1
+      exactly_one_active_rigid_body: true
+      named_frame_requirements:
+        rack_grasp:
+          measurement: collision-safe grasp frame on the delivered rack
+          authoritative: true
+        socket_0_aperture:
+          measurement: center and insertion axis of the one visually empty socket
+          authoritative: true
+        socket_0_inserted_bottom:
+          measurement: test-tube bottom-center target 30-40 mm below socket_0_aperture
+          authoritative: true
+      required_gates:
+        root_motion: true
+        stable_support: true
+        gripper_collision: true
+        open_top: true
+        aperture_frame: socket_0_aperture
+    runtime_qualification:
+      - One visually empty socket is bound to socket_0_aperture.
+      - The decorative fixed tubes remain part of the rack; no anonymous mesh masking is used to fake an empty socket.
+      - The delivered test tube reaches the producer-measured 30-40 mm insertion depth without colliding with the lower support plate.
+      - The complete rack behaves as one rigid runtime identity during grasp, lift, hold, and placement.
+      - The package-scoped PhysX warning count is zero.
+
+handoff:
+  each_delivery_must_include:
+    - package/asset.usd
+    - package/evidence/manifest.json
+    - package-local runtime qualification evidence referenced by hash
+  articulated_delivery_requires_bound_profile_report_and_promotion: true
+  articulated_delivery_must_include:
+    - package/articulation/device_profile.json
+    - package/evidence/articulation_runtime_qualification/report.json
+    - package/evidence/articulation_runtime_qualification/promotion.json
+    - matching packaged-profile, runtime-report, and promotion-receipt SHA-256 identities
+  source_binding_requirements:
+    centrifuge_usage: articulated_object
+    tube_usage: rigid_object
+    rack_usage: rigid_object
+  claims_not_requested:
+    - robot policy success
+    - full task 7 success
+    - full task 11 success
+    - benchmark score
+    - measured real-world mass or inertia parity

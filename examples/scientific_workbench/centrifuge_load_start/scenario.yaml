@@ -1,0 +1,132 @@
+schema_version: scenario-spec/v0.5
+scenario_id: wetlab_centrifuge_tube_load_start_no_wait
+domain: scientific_workbench
+task_family: centrifuge_load_start
+instruction: 左臂拿起试管并将其插入离心机指定孔位；左臂退出后，右臂关闭离心机盖，按下启动按钮，随后双臂退出。
+scene:
+  asset_id: scientific_environment_code_room_example4_v1
+  root_prim_path: /World
+  # ConvertAsset's source-bound center_open_floor profile. The whole fixed
+  # eBench workcell is centered in the open floor and all room Zones remain.
+  pose:
+    xyz: [0.2456705, -0.0069055, 0.0]
+    wxyz: [6.123233995736766e-17, 0.0, 0.0, 1.0]
+    scale_xyz: [1.0, 1.0, 1.0]
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table
+    source_prim_path: /World/table
+    role: table
+    pose:
+      xyz: [0.242788066, 0.0, 0.0]
+      wxyz: [0.0, 1.0, 0.0, 0.0]
+      scale_xyz: [0.003, 0.0035, 0.004]
+  - id: centrifuge
+    asset_id: scientific_workbench_hci955350_centrifuge_dynamic
+    source_prim_path: /World/Centrifuge
+    role: articulated_device
+    pose:
+      # eBench table top 0.7727606155 m + the standard 1 cm spawn clearance.
+      # The generator subtracts the admitted package bound min_z if non-zero.
+      xyz: [-0.08, 0.0, 0.7827606155]
+      # ConvertAsset's admitted canonical frame is Z-up with local +X as front.
+      # This yaw points the front panel toward the robot at world -X.
+      wxyz: [0.0, 0.0, 0.0, 1.0]
+    named_frames:
+      # This checked-in value is a readable template.  The task generator
+      # replaces it from the admitted ConvertAsset profile before compilation.
+      tube_socket_0_inserted_bottom_parked_root:
+        xyz: [0.0, -0.02, 0.055]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+  - id: test_tube
+    asset_id: scientific_workbench_test_tube_dynamic
+    source_prim_path: /World/TestTube
+    role: test_tube
+    pose:
+      xyz: [-0.25, 0.22, 0.7827606155]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+robot:
+  profile_ref: manip/lift2/R5a
+  spawn:
+    xyz: [-1.02, 0.0, 0.31]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
+  actors:
+    - id: operating_arm
+      end_effector: left
+      capabilities: [grasp, lift, align, insert, release]
+    - id: auxiliary_arm
+      end_effector: right
+      capabilities: [close, press, release]
+steps:
+  - id: grasp_tube
+    skill: grasp
+    actors: [operating_arm]
+    parameters:
+      object: test_tube
+  - id: insert_tube
+    skill: insert
+    actors: [operating_arm]
+    parameters:
+      object: test_tube
+      target: centrifuge
+      target_frame: centrifuge.tube_socket_0_inserted_bottom_parked_root
+    depends_on: [grasp_tube]
+  - id: close_lid
+    skill: close_articulated_part
+    actors: [auxiliary_arm]
+    parameters:
+      object: centrifuge
+      joint: lid
+      target_state: closed
+    depends_on: [insert_tube]
+  - id: press_start
+    skill: press
+    actors: [auxiliary_arm]
+    parameters:
+      object: centrifuge
+      joint: start_button
+      target_state: pressed
+    depends_on: [close_lid]
+  - id: retreat_hands
+    skill: retreat
+    actors: [operating_arm, auxiliary_arm]
+    parameters:
+      clear_of: centrifuge
+    depends_on: [press_start]
+invariants: []
+success:
+  operator: all
+  claim_scope: state_proxy
+  predicates:
+    - id: tube_inserted_in_rotor_socket
+      type: relative_pose_reached
+      sequence_index: 0
+      parameters:
+        object: test_tube
+        relative_to: centrifuge
+        xyz_range:
+          x: [-0.005, 0.005]
+          y: [0.015, 0.025]
+          z: [0.045, 0.065]
+        axis_alignment:
+          object_axis: z
+          target_axis: z
+          relative_to_part: rotor
+          comparison: <=
+          threshold_deg: 15.0
+    - id: centrifuge_lid_closed
+      type: articulation_joint_state_reached
+      sequence_index: 1
+      parameters:
+        object: centrifuge
+        joint: lid
+        state: closed
+    - id: centrifuge_start_button_pressed
+      type: articulation_joint_state_reached
+      sequence_index: 2
+      parameters:
+        object: centrifuge
+        joint: start_button
+        state: pressed
+max_steps: 1500
+seed: 7

@@ -1,0 +1,130 @@
+schema_version: scenario-spec/v0.5
+scenario_id: wetlab_bimanual_hold_rack_insert_tube
+domain: scientific_workbench
+task_family: bimanual_rack_insert
+instruction: 右臂抓住并稳定试管架；左臂拿起试管，对准指定空孔后向下插入，随后双臂退出。
+scene:
+  asset_id: scientific_environment_code_room_example4_v1
+  root_prim_path: /World
+  # ConvertAsset's source-bound center_open_floor profile. The whole fixed
+  # eBench workcell is centered in the open floor and all room Zones remain.
+  pose:
+    xyz: [0.2456705, -0.0069055, 0.0]
+    wxyz: [6.123233995736766e-17, 0.0, 0.0, 1.0]
+    scale_xyz: [1.0, 1.0, 1.0]
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table
+    source_prim_path: /World/table
+    role: table
+    pose:
+      xyz: [0.242788066, 0.0, 0.0]
+      wxyz: [0.0, 1.0, 0.0, 0.0]
+      scale_xyz: [0.003, 0.0035, 0.004]
+  - id: tube_rack
+    asset_id: scientific_workbench_tube_rack_dynamic
+    source_prim_path: /World/TubeRack
+    role: tube_rack
+    pose:
+      xyz: [-0.12, -0.17, 0.81]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    named_frames:
+      # These checked-in values are readable templates.  The task generator
+      # replaces them from the admitted ConvertAsset interaction contract.
+      rack_grasp:
+        xyz: [0.0, -0.025, 0.055]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+      socket_0_aperture:
+        xyz: [-0.017, 0.015, 0.10]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+      socket_0_inserted_bottom:
+        xyz: [-0.017, 0.015, 0.065]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+  - id: test_tube
+    asset_id: scientific_workbench_test_tube_dynamic
+    source_prim_path: /World/TestTube
+    role: test_tube
+    pose:
+      xyz: [-0.25, 0.2, 0.81]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+robot:
+  profile_ref: manip/lift2/R5a
+  spawn:
+    xyz: [-1.02, 0.0, 0.31]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
+  actors:
+    - id: stabilizing_arm
+      end_effector: right
+      capabilities: [grasp, hold, release]
+    - id: inserting_arm
+      end_effector: left
+      capabilities: [grasp, lift, align, insert, release]
+steps:
+  - id: stabilize_rack
+    skill: grasp_and_hold
+    actors: [stabilizing_arm]
+    parameters:
+      object: tube_rack
+      grasp_frame: tube_rack.rack_grasp
+  - id: grasp_tube
+    skill: grasp
+    actors: [inserting_arm]
+    parameters:
+      object: test_tube
+    depends_on: [stabilize_rack]
+  - id: align_tube
+    skill: align
+    actors: [inserting_arm]
+    parameters:
+      object: test_tube
+      target: tube_rack
+      target_frame: tube_rack.socket_0_aperture
+    depends_on: [grasp_tube]
+  - id: insert_tube
+    skill: insert
+    actors: [inserting_arm]
+    parameters:
+      object: test_tube
+      target: tube_rack
+      target_frame: tube_rack.socket_0_inserted_bottom
+    depends_on: [align_tube]
+  - id: retreat_hands
+    skill: retreat
+    actors: [stabilizing_arm, inserting_arm]
+    parameters:
+      clear_of: tube_rack
+    depends_on: [insert_tube]
+invariants:
+  - id: rack_held_during_insert
+    type: maintain_grasp
+    actor: stabilizing_arm
+    object: tube_rack
+    from_step: stabilize_rack
+    through_step: insert_tube
+success:
+  operator: all
+  claim_scope: state_proxy
+  predicates:
+    - id: tube_inserted_in_target_socket
+      type: relative_pose_reached
+      sequence_index: 0
+      parameters:
+        object: test_tube
+        relative_to: tube_rack
+        xyz_range:
+          x: [-0.022, -0.012]
+          y: [0.010, 0.020]
+          z: [0.060, 0.070]
+        axis_alignment:
+          object_axis: z
+          target_axis: z
+          comparison: <=
+          threshold_deg: 15.0
+    - id: rack_terminal_displacement_limited
+      type: object_at_initial_pose
+      sequence_index: 1
+      parameters:
+        object: tube_rack
+        xyz_tolerance: [0.02, 0.02, 0.01]
+max_steps: 1200
+seed: 11
