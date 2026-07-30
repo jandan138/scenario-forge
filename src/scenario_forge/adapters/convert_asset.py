@@ -67,10 +67,15 @@ _SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 _USAGE_ROLES = {
     "scene_overlay": "scene_overlay",
     "rigid_object": "rigid_object",
+    "articulated_object": "articulated_object",
     "visual_static_environment": "environment",
     "visual_static_object": "static_object",
 }
-_DYNAMIC_USAGES = frozenset({"scene_overlay", "rigid_object"})
+_DYNAMIC_USAGES = frozenset(
+    {"scene_overlay", "rigid_object", "articulated_object"}
+)
+_TASK_INTERACTIVE_USAGES = frozenset({"rigid_object", "articulated_object"})
+_TASK_INTERACTIVE_IDENTITY_TOLERANCE = 1e-6
 _VISUAL_STATIC_USAGES = frozenset(
     {"visual_static_environment", "visual_static_object"}
 )
@@ -80,8 +85,9 @@ _VISUAL_STATIC_PRODUCER_ROLES = {
     ),
     "visual_static_object": frozenset({"visual_static", "visual_static_object"}),
 }
-
-
+_ARTICULATION_PROMOTION_PATH = (
+    "evidence/articulation_runtime_qualification/promotion.json"
+)
 @dataclass(frozen=True)
 class ConvertAssetInteractionContract:
     schema_version: str
@@ -98,6 +104,61 @@ class ConvertAssetInteractionContract:
 
     def to_mapping(self) -> dict[str, Any]:
         return _copy_json_mapping(self.payload, "interaction_contract")
+
+
+@dataclass(frozen=True)
+class ConvertAssetArticulationContract:
+    schema_version: str
+    asset_entry_prim: str
+    articulation_root_prim: str
+    dof_mapping: tuple[Mapping[str, Any], ...]
+    reset_values: tuple[Mapping[str, Any], ...]
+    semantic_joints: Mapping[str, Mapping[str, Any]]
+    named_frames: Mapping[str, Mapping[str, Any]]
+    profile_sha256: str
+    required_artifact_paths: tuple[str, ...]
+    payload: Mapping[str, Any]
+    closure_payload: Mapping[str, Any]
+
+    def to_mapping(self) -> dict[str, Any]:
+        return _copy_json_mapping(self.payload, "articulation_contract")
+
+    def closure_mapping(self) -> dict[str, Any]:
+        return _copy_json_mapping(
+            self.closure_payload,
+            "articulation_closure",
+        )
+
+
+@dataclass(frozen=True)
+class ConvertAssetTaskInteractiveGeometry:
+    asset_entry_prim: str
+    entry_world_transform: tuple[tuple[float, float, float, float], ...]
+    package_world_bound_min_m: tuple[float, float, float]
+    package_world_bound_max_m: tuple[float, float, float]
+
+    def to_mapping(self) -> dict[str, Any]:
+        extent = [
+            upper - lower
+            for lower, upper in zip(
+                self.package_world_bound_min_m,
+                self.package_world_bound_max_m,
+                strict=True,
+            )
+        ]
+        return {
+            "schema_version": "scenario-forge-task-interactive-geometry/v0.1",
+            "asset_entry_prim": self.asset_entry_prim,
+            "entry_world_transform": [
+                list(row) for row in self.entry_world_transform
+            ],
+            "package_world_bound_m": {
+                "min": list(self.package_world_bound_min_m),
+                "max": list(self.package_world_bound_max_m),
+            },
+            "extent_m": extent,
+            "identity_tolerance": _TASK_INTERACTIVE_IDENTITY_TOLERANCE,
+        }
 
 
 @dataclass(frozen=True)
@@ -126,6 +187,8 @@ class ConvertAssetPackageHandoff:
     scoped_physics_warning_count: int
     usage: str
     interaction_contract: ConvertAssetInteractionContract | None = None
+    articulation_contract: ConvertAssetArticulationContract | None = None
+    task_interactive_geometry: ConvertAssetTaskInteractiveGeometry | None = None
 
     def to_local_usd_asset_source(
         self,
@@ -136,16 +199,34 @@ class ConvertAssetPackageHandoff:
         redistributable: bool = False,
         exclude_relative_paths: tuple[str, ...] = (),
     ) -> LocalUSDAssetSource:
+        required_artifact_paths: tuple[str, ...] = ()
         if self.usage == "rigid_object" and self.interaction_contract is not None:
+            required_artifact_paths = (
+                self.interaction_contract.qualification_report_paths
+            )
+        elif (
+            self.usage == "articulated_object"
+            and self.articulation_contract is not None
+        ):
+            required_artifact_paths = (
+                self.articulation_contract.required_artifact_paths
+            )
+        if required_artifact_paths:
             for excluded_path in exclude_relative_paths:
                 normalized = PurePosixPath(excluded_path).as_posix()
                 if any(
-                    report_path == normalized
-                    or report_path.startswith(normalized + "/")
-                    for report_path in self.interaction_contract.qualification_report_paths
+                    artifact_path == normalized
+                    or artifact_path.startswith(normalized + "/")
+                    for artifact_path in required_artifact_paths
                 ):
+                    if self.usage == "rigid_object":
+                        raise ValueError(
+                            "rigid_object source cannot exclude its "
+                            "qualification report"
+                        )
                     raise ValueError(
-                        "rigid_object source cannot exclude its qualification report"
+                        f"{self.usage} source cannot exclude a required "
+                        "qualification/profile artifact"
                     )
         upstream_metadata: dict[str, Any] = {
             "producer_asset_id": self.producer_asset_id,
@@ -173,6 +254,20 @@ class ConvertAssetPackageHandoff:
         if self.interaction_contract is not None:
             upstream_metadata["interaction_contract"] = (
                 self.interaction_contract.to_mapping()
+            )
+        if self.articulation_contract is not None:
+            upstream_metadata["articulation_contract"] = (
+                self.articulation_contract.to_mapping()
+            )
+            upstream_metadata["articulation_closure"] = (
+                self.articulation_contract.closure_mapping()
+            )
+            upstream_metadata["articulation_profile_sha256"] = (
+                f"sha256:{self.articulation_contract.profile_sha256}"
+            )
+        if self.task_interactive_geometry is not None:
+            upstream_metadata["task_interactive_geometry"] = (
+                self.task_interactive_geometry.to_mapping()
             )
         upstream = UpstreamPackageRef(
             producer="ConvertAsset",
@@ -236,7 +331,7 @@ def load_convert_asset_package_handoff(
         raise ConvertAssetHandoffError("expected_scope_prims must not be empty")
     if usage not in _USAGE_ROLES:
         raise ConvertAssetHandoffError(
-            "usage must be 'scene_overlay', 'rigid_object', "
+            "usage must be 'scene_overlay', 'rigid_object', 'articulated_object', "
             "'visual_static_environment', or 'visual_static_object'"
         )
 
@@ -250,11 +345,8 @@ def load_convert_asset_package_handoff(
         raise ConvertAssetHandoffError(
             "external and embedded manifest bytes do not match"
         )
-    try:
-        raw_manifest = json.loads(manifest_bytes)
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ConvertAssetHandoffError("ConvertAsset manifest is not valid JSON") from exc
-    manifest = _mapping(raw_manifest, "manifest")
+    manifest = _load_strict_json_mapping(manifest_bytes, "ConvertAsset manifest")
+    manifest_digest = sha256(manifest_bytes).hexdigest()
 
     schema_version = _required_string(manifest, "schema_version", "manifest")
     if schema_version != "asset_application_normalizer.v1":
@@ -330,6 +422,7 @@ def load_convert_asset_package_handoff(
         _required_string(entrypoints, "root_usd", "manifest.entrypoints"),
         "root_usd",
     )
+    root_sha = _file_sha256(root_usd)
     default_prim = _required_string(
         entrypoints,
         "default_prim",
@@ -375,6 +468,15 @@ def load_convert_asset_package_handoff(
     replacement_contract: str | None = None
     source_binding: Mapping[str, Any] | None = None
     interaction_contract: ConvertAssetInteractionContract | None = None
+    articulation_contract: ConvertAssetArticulationContract | None = None
+    task_interactive_geometry: ConvertAssetTaskInteractiveGeometry | None = None
+
+    if usage in _TASK_INTERACTIVE_USAGES:
+        task_interactive_geometry = _load_task_interactive_geometry(
+            manifest,
+            physics,
+            asset_entry_prim=entry_scope,
+        )
 
     if usage in _DYNAMIC_USAGES:
         _require_value(physics, "role", "dynamic", "manifest.physics_closure")
@@ -482,6 +584,18 @@ def load_convert_asset_package_handoff(
             asset_entry_prim=entry_scope,
             required=usage == "rigid_object",
         )
+        if usage == "articulated_object":
+            articulation_contract = _load_articulation_contract(
+                manifest.get("articulation_contract"),
+                manifest.get("articulation_closure"),
+                package_root=package_root,
+                source_sha256=source_digest,
+                asset_entry_prim=entry_scope,
+                expected_scopes=expected_scopes,
+                runtime_profile=runtime_profile,
+                manifest_sha256=manifest_digest,
+                asset_sha256=root_sha,
+            )
     else:
         physics_role = _required_string(
             physics,
@@ -518,7 +632,6 @@ def load_convert_asset_package_handoff(
     for gate_name in runtime_gate_names:
         gate = _required_mapping(runtime, gate_name, "runtime_evidence")
         _require_value(gate, "status", "pass", f"runtime_evidence.{gate_name}")
-    root_sha = _file_sha256(root_usd)
     for field_name in ("expected_root_usd_sha256", "root_usd_sha256"):
         if _required_string(runtime, field_name, "runtime_evidence") != root_sha:
             raise ConvertAssetHandoffError(
@@ -576,7 +689,6 @@ def load_convert_asset_package_handoff(
         "claims_forbidden",
         "manifest",
     )
-    manifest_digest = sha256(manifest_bytes).hexdigest()
     return ConvertAssetPackageHandoff(
         package_dir=package_root,
         package_id=package_id,
@@ -602,7 +714,1240 @@ def load_convert_asset_package_handoff(
         scoped_physics_warning_count=scoped_count,
         usage=usage,
         interaction_contract=interaction_contract,
+        articulation_contract=articulation_contract,
+        task_interactive_geometry=task_interactive_geometry,
     )
+
+
+def _load_task_interactive_geometry(
+    manifest: Mapping[str, Any],
+    physics: Mapping[str, Any],
+    *,
+    asset_entry_prim: str,
+) -> ConvertAssetTaskInteractiveGeometry:
+    """Validate the producer frame used by task-level USD reference composition."""
+
+    fingerprint = _required_mapping(
+        manifest,
+        "visual_preservation_fingerprint",
+        "manifest",
+    )
+    _require_value(
+        fingerprint,
+        "status",
+        "pass",
+        "visual_preservation_fingerprint",
+    )
+    package_fingerprint = _required_mapping(
+        fingerprint,
+        "package_before_physics_profile",
+        "visual_preservation_fingerprint",
+    )
+    transforms = _required_mapping(
+        package_fingerprint,
+        "scope_world_transforms",
+        "visual_preservation_fingerprint.package_before_physics_profile",
+    )
+    raw_transform = transforms.get(asset_entry_prim)
+    if not isinstance(raw_transform, list) or len(raw_transform) != 4:
+        raise ConvertAssetHandoffError(
+            "task-interactive asset entry transform must be a 4x4 matrix at "
+            f"{asset_entry_prim}"
+        )
+    rows: list[tuple[float, float, float, float]] = []
+    for row_index, raw_row in enumerate(raw_transform):
+        row = _finite_number_list(
+            raw_row,
+            4,
+            "visual_preservation_fingerprint."
+            "package_before_physics_profile.scope_world_transforms"
+            f"[{asset_entry_prim}][{row_index}]",
+        )
+        rows.append((row[0], row[1], row[2], row[3]))
+    identity = (
+        (1.0, 0.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0, 0.0),
+        (0.0, 0.0, 1.0, 0.0),
+        (0.0, 0.0, 0.0, 1.0),
+    )
+    if any(
+        not math.isclose(
+            value,
+            expected,
+            rel_tol=0.0,
+            abs_tol=_TASK_INTERACTIVE_IDENTITY_TOLERANCE,
+        )
+        for row, expected_row in zip(rows, identity, strict=True)
+        for value, expected in zip(row, expected_row, strict=True)
+    ):
+        raise ConvertAssetHandoffError(
+            "task-interactive asset entry transform must be identity within "
+            f"{_TASK_INTERACTIVE_IDENTITY_TOLERANCE:g} at {asset_entry_prim}"
+        )
+
+    frame = _required_mapping(
+        physics,
+        "physical_frame",
+        "manifest.physics_closure",
+    )
+    _require_value(
+        frame,
+        "status",
+        "pass",
+        "physics_closure.physical_frame",
+    )
+    if frame.get("metric_mismatches") != []:
+        raise ConvertAssetHandoffError(
+            "physics_closure.physical_frame.metric_mismatches must be empty"
+        )
+    if frame.get("blocked_scope_prims") != []:
+        raise ConvertAssetHandoffError(
+            "physics_closure.physical_frame.blocked_scope_prims must be empty"
+        )
+    raw_scope_bounds = frame.get("scope_bounds")
+    if not isinstance(raw_scope_bounds, list):
+        raise ConvertAssetHandoffError(
+            "physics_closure.physical_frame.scope_bounds must be a list"
+        )
+    matching_bounds = [
+        _mapping(item, "physics_closure.physical_frame.scope_bounds")
+        for item in raw_scope_bounds
+        if isinstance(item, Mapping) and item.get("path") == asset_entry_prim
+    ]
+    if len(matching_bounds) != 1:
+        raise ConvertAssetHandoffError(
+            "task-interactive asset requires exactly one physical-frame bound for "
+            f"{asset_entry_prim}"
+        )
+    bound = matching_bounds[0]
+    _require_value(
+        bound,
+        "status",
+        "pass",
+        f"physics_closure.physical_frame.scope_bounds[{asset_entry_prim}]",
+    )
+    package_bound = _required_mapping(
+        bound,
+        "package_world_bound_m",
+        f"physics_closure.physical_frame.scope_bounds[{asset_entry_prim}]",
+    )
+    lower = _finite_number_list(
+        package_bound.get("min"),
+        3,
+        "task-interactive package_world_bound_m.min",
+    )
+    upper = _finite_number_list(
+        package_bound.get("max"),
+        3,
+        "task-interactive package_world_bound_m.max",
+    )
+    if any(
+        maximum <= minimum
+        for minimum, maximum in zip(lower, upper, strict=True)
+    ):
+        raise ConvertAssetHandoffError(
+            "task-interactive package world bound must have positive extent"
+        )
+    return ConvertAssetTaskInteractiveGeometry(
+        asset_entry_prim=asset_entry_prim,
+        entry_world_transform=tuple(rows),
+        package_world_bound_min_m=(lower[0], lower[1], lower[2]),
+        package_world_bound_max_m=(upper[0], upper[1], upper[2]),
+    )
+
+
+def _load_articulation_contract(
+    value: object,
+    closure_value: object,
+    *,
+    package_root: Path,
+    source_sha256: str,
+    asset_entry_prim: str,
+    expected_scopes: tuple[str, ...],
+    runtime_profile: str,
+    manifest_sha256: str,
+    asset_sha256: str,
+) -> ConvertAssetArticulationContract:
+    contract = _mapping(value, "manifest.articulation_contract")
+    _require_exact_fields(
+        contract,
+        {
+            "schema_version",
+            "status",
+            "profile",
+            "runtime_qualification",
+        },
+        "manifest.articulation_contract",
+    )
+    _require_value(
+        contract,
+        "schema_version",
+        "aan.articulation_contract.v1",
+        "manifest.articulation_contract",
+    )
+    _require_value(
+        contract,
+        "status",
+        "pass",
+        "manifest.articulation_contract",
+    )
+
+    profile_metadata = _required_mapping(
+        contract,
+        "profile",
+        "manifest.articulation_contract",
+    )
+    _require_exact_fields(
+        profile_metadata,
+        {
+            "schema_version",
+            "profile_id",
+            "revision",
+            "source_sha256",
+            "profile_sha256",
+            "package_path",
+        },
+        "articulation_contract.profile",
+    )
+    _require_value(
+        profile_metadata,
+        "schema_version",
+        "aan.articulated_device_profile.v1",
+        "articulation_contract.profile",
+    )
+    profile_id = _required_string(
+        profile_metadata,
+        "profile_id",
+        "articulation_contract.profile",
+    )
+    profile_revision = _required_string(
+        profile_metadata,
+        "revision",
+        "articulation_contract.profile",
+    )
+    if (
+        _required_sha256(
+            profile_metadata,
+            "source_sha256",
+            "articulation_contract.profile",
+        )
+        != source_sha256
+    ):
+        raise ConvertAssetHandoffError(
+            "articulation_contract.profile.source_sha256 does not match source USD"
+        )
+    profile_relative_path = _required_string(
+        profile_metadata,
+        "package_path",
+        "articulation_contract.profile",
+    )
+    profile_path = _safe_package_file(
+        package_root,
+        profile_relative_path,
+        "articulation_contract.profile.package_path",
+    )
+    profile_sha = _required_sha256(
+        profile_metadata,
+        "profile_sha256",
+        "articulation_contract.profile",
+    )
+    if _file_sha256(profile_path) != profile_sha:
+        raise ConvertAssetHandoffError(
+            "articulation_contract.profile.profile_sha256 does not match "
+            "packaged device profile"
+        )
+    profile = _load_strict_json_mapping(
+        profile_path.read_bytes(),
+        "articulation_contract device profile",
+    )
+    _require_exact_fields(
+        profile,
+        {
+            "schema_version",
+            "profile_id",
+            "revision",
+            "source_sha256",
+            "asset_entry_prim",
+            "articulation_root_prim",
+            "runtime_units",
+            "semantic_joints",
+            "named_frames",
+            "required_runtime_task_gates",
+        },
+        "articulation_contract.device_profile",
+    )
+    _require_value(
+        profile,
+        "schema_version",
+        "aan.articulated_device_profile.v1",
+        "articulation_contract.device_profile",
+    )
+    _require_value(
+        profile,
+        "profile_id",
+        profile_id,
+        "articulation_contract.device_profile",
+    )
+    _require_value(
+        profile,
+        "revision",
+        profile_revision,
+        "articulation_contract.device_profile",
+    )
+    if (
+        _required_sha256(
+            profile,
+            "source_sha256",
+            "articulation_contract.device_profile",
+        )
+        != source_sha256
+    ):
+        raise ConvertAssetHandoffError(
+            "articulation_contract.device_profile.source_sha256 does not "
+            "match source USD"
+        )
+    _require_value(
+        profile,
+        "asset_entry_prim",
+        asset_entry_prim,
+        "articulation_contract.device_profile",
+    )
+    articulation_root = _required_string(
+        profile,
+        "articulation_root_prim",
+        "articulation_contract.device_profile",
+    )
+    _require_prim_within(
+        articulation_root,
+        asset_entry_prim,
+        "articulation_contract.device_profile.articulation_root_prim",
+        allow_root=True,
+    )
+    runtime_units = _required_mapping(
+        profile,
+        "runtime_units",
+        "articulation_contract.device_profile",
+    )
+    _require_exact_fields(
+        runtime_units,
+        {"revolute", "prismatic"},
+        "articulation_contract.device_profile.runtime_units",
+    )
+    _require_value(
+        runtime_units,
+        "revolute",
+        "radian",
+        "articulation_contract.device_profile.runtime_units",
+    )
+    _require_value(
+        runtime_units,
+        "prismatic",
+        "meter",
+        "articulation_contract.device_profile.runtime_units",
+    )
+    required_runtime_task_gates = _string_list(
+        profile.get("required_runtime_task_gates"),
+        (
+            "articulation_contract.device_profile."
+            "required_runtime_task_gates"
+        ),
+    )
+    if not required_runtime_task_gates:
+        raise ConvertAssetHandoffError(
+            "articulation_contract.device_profile.required_runtime_task_gates "
+            "must not be empty"
+        )
+
+    closure = _mapping(closure_value, "manifest.articulation_closure")
+    _require_value(
+        closure,
+        "status",
+        "pass",
+        "manifest.articulation_closure",
+    )
+    closure_scope = _required_mapping(
+        closure,
+        "scope",
+        "manifest.articulation_closure",
+    )
+    _require_scopes(
+        closure_scope,
+        "asset_scope_prims",
+        expected_scopes,
+        "articulation_closure.scope",
+    )
+    roots = _required_mapping_list(
+        closure.get("articulation_roots"),
+        "articulation_closure.articulation_roots",
+    )
+    if len(roots) != 1:
+        raise ConvertAssetHandoffError(
+            "articulation_closure must contain exactly one articulation root"
+        )
+    closure_root = _required_string(
+        roots[0],
+        "prim_path",
+        "articulation_closure.articulation_roots[0]",
+    )
+    if closure_root != articulation_root:
+        raise ConvertAssetHandoffError(
+            "device profile articulation_root_prim does not match "
+            "articulation_closure"
+        )
+
+    raw_joints = _required_mapping_list(
+        closure.get("joints"),
+        "articulation_closure.joints",
+    )
+    joints_by_prim: dict[str, Mapping[str, Any]] = {}
+    joint_types: dict[str, str] = {}
+    joint_limits: dict[str, tuple[float, float]] = {}
+    joint_resets: dict[str, float] = {}
+    for index, joint in enumerate(raw_joints):
+        field = f"articulation_closure.joints[{index}]"
+        joint_prim = _required_string(joint, "prim_path", field)
+        _require_prim_within(
+            joint_prim,
+            articulation_root,
+            f"{field}.prim_path",
+            allow_root=False,
+        )
+        if joint_prim in joints_by_prim:
+            raise ConvertAssetHandoffError(
+                "articulation_closure.joints prim_path entries must be unique"
+            )
+        joints_by_prim[joint_prim] = joint
+        joint_type = _required_string(joint, "joint_type", field)
+        if joint_type not in {
+            "PhysicsRevoluteJoint",
+            "PhysicsPrismaticJoint",
+        }:
+            continue
+        axis = _required_mapping(joint, "axis", field)
+        _require_value(axis, "status", "pass", f"{field}.axis")
+        _required_string(axis, "value", f"{field}.axis")
+        limits = _required_mapping(joint, "limits", field)
+        _require_value(limits, "status", "pass", f"{field}.limits")
+        lower_record = _required_mapping(limits, "lower", f"{field}.limits")
+        upper_record = _required_mapping(limits, "upper", f"{field}.limits")
+        _require_value(
+            lower_record,
+            "status",
+            "pass",
+            f"{field}.limits.lower",
+        )
+        _require_value(
+            upper_record,
+            "status",
+            "pass",
+            f"{field}.limits.upper",
+        )
+        lower = _finite_number(
+            lower_record.get("value"),
+            f"{field}.limits.lower.value",
+        )
+        upper = _finite_number(
+            upper_record.get("value"),
+            f"{field}.limits.upper.value",
+        )
+        if lower >= upper:
+            raise ConvertAssetHandoffError(
+                f"{field}.limits must have lower.value < upper.value"
+            )
+        enabled = _required_mapping(joint, "enabled", field)
+        _require_value(enabled, "status", "pass", f"{field}.enabled")
+        _require_value(enabled, "value", True, f"{field}.enabled")
+        reset_record = _required_mapping(joint, "reset_value", field)
+        _require_value(
+            reset_record,
+            "status",
+            "pass",
+            f"{field}.reset_value",
+        )
+        reset = _finite_number(
+            reset_record.get("value"),
+            f"{field}.reset_value.value",
+        )
+        if not lower <= reset <= upper:
+            raise ConvertAssetHandoffError(
+                f"{field}.reset_value must be within joint limits"
+            )
+        joint_limits[joint_prim] = (lower, upper)
+        joint_resets[joint_prim] = reset
+        joint_types[joint_prim] = joint_type
+
+    raw_dof_mapping = _required_mapping_list(
+        closure.get("dof_mapping"),
+        "articulation_closure.dof_mapping",
+    )
+    if not raw_dof_mapping:
+        raise ConvertAssetHandoffError(
+            "articulation_closure.dof_mapping must contain a positive DOF count"
+        )
+    mapping_by_index: dict[int, Mapping[str, Any]] = {}
+    mapping_by_prim: dict[str, Mapping[str, Any]] = {}
+    for index, item in enumerate(raw_dof_mapping):
+        field = f"articulation_closure.dof_mapping[{index}]"
+        dof_index = item.get("dof_index")
+        if (
+            not isinstance(dof_index, int)
+            or isinstance(dof_index, bool)
+            or dof_index < 0
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field}.dof_index must be a non-negative integer"
+            )
+        if dof_index in mapping_by_index:
+            raise ConvertAssetHandoffError(
+                "articulation_closure.dof_mapping dof_index values must be unique"
+            )
+        joint_prim = _required_string(item, "joint_prim", field)
+        if joint_prim in mapping_by_prim:
+            raise ConvertAssetHandoffError(
+                "articulation_closure.dof_mapping joint_prim values must be unique"
+            )
+        mapped_joint = joints_by_prim.get(joint_prim)
+        if mapped_joint is None or joint_prim not in joint_limits:
+            raise ConvertAssetHandoffError(
+                f"{field}.joint_prim must identify one controllable joint"
+            )
+        for key in ("joint_type",):
+            if item.get(key) != mapped_joint.get(key):
+                raise ConvertAssetHandoffError(
+                    f"{field}.{key} must match articulation_closure.joints"
+                )
+        axis = _required_mapping(mapped_joint, "axis", field)
+        if item.get("axis") != axis.get("value"):
+            raise ConvertAssetHandoffError(
+                f"{field}.axis must match articulation_closure.joints"
+            )
+        mapping_by_index[dof_index] = item
+        mapping_by_prim[joint_prim] = item
+    if sorted(mapping_by_index) != list(range(len(mapping_by_index))):
+        raise ConvertAssetHandoffError(
+            "articulation_closure.dof_mapping dof_index values must be "
+            "contiguous from 0"
+        )
+
+    raw_reset_values = _required_mapping_list(
+        closure.get("reset_values"),
+        "articulation_closure.reset_values",
+    )
+    reset_by_prim: dict[str, Mapping[str, Any]] = {}
+    for index, item in enumerate(raw_reset_values):
+        field = f"articulation_closure.reset_values[{index}]"
+        joint_prim = _required_string(item, "joint_prim", field)
+        if joint_prim in reset_by_prim:
+            raise ConvertAssetHandoffError(
+                "articulation_closure.reset_values joint_prim entries must be unique"
+            )
+        mapping = mapping_by_prim.get(joint_prim)
+        if mapping is None:
+            raise ConvertAssetHandoffError(
+                f"{field}.joint_prim must identify one mapped DOF"
+            )
+        if item.get("joint_type") != mapping.get("joint_type"):
+            raise ConvertAssetHandoffError(
+                f"{field}.joint_type must match the mapped DOF"
+            )
+        reset_record = _required_mapping(item, "reset_value", field)
+        _require_value(
+            reset_record,
+            "status",
+            "pass",
+            f"{field}.reset_value",
+        )
+        reset = _finite_number(
+            reset_record.get("value"),
+            f"{field}.reset_value.value",
+        )
+        if reset != joint_resets[joint_prim]:
+            raise ConvertAssetHandoffError(
+                f"{field}.reset_value must match articulation_closure.joints"
+            )
+        lower, upper = joint_limits[joint_prim]
+        if not lower <= reset <= upper:
+            raise ConvertAssetHandoffError(
+                f"{field}.reset_value must be within joint limits"
+            )
+        reset_by_prim[joint_prim] = item
+    if set(reset_by_prim) != set(mapping_by_prim):
+        raise ConvertAssetHandoffError(
+            "articulation_closure.reset_values must cover every mapped DOF"
+        )
+
+    summary = _required_mapping(
+        closure,
+        "summary",
+        "manifest.articulation_closure",
+    )
+    _require_value(
+        summary,
+        "articulation_root_count",
+        1,
+        "articulation_closure.summary",
+    )
+    _require_value(
+        summary,
+        "joint_count",
+        len(raw_joints),
+        "articulation_closure.summary",
+    )
+    _require_value(
+        summary,
+        "controllable_dof_count",
+        len(raw_dof_mapping),
+        "articulation_closure.summary",
+    )
+
+    raw_semantic_joints = _mapping(
+        profile.get("semantic_joints"),
+        "articulation_contract.device_profile.semantic_joints",
+    )
+    if not raw_semantic_joints:
+        raise ConvertAssetHandoffError(
+            "articulation_contract.device_profile.semantic_joints must not be empty"
+        )
+    semantic_joints: dict[str, Mapping[str, Any]] = {}
+    seen_semantic_dofs: set[int] = set()
+    wire_joints: dict[str, dict[str, Any]] = {}
+    for semantic_name, raw_semantic in raw_semantic_joints.items():
+        if (
+            not isinstance(semantic_name, str)
+            or not semantic_name
+            or "." in semantic_name
+        ):
+            raise ConvertAssetHandoffError(
+                "articulation_contract.device_profile.semantic_joints keys "
+                "must be non-empty and contain no '.'"
+            )
+        field = (
+            "articulation_contract.device_profile.semantic_joints."
+            f"{semantic_name}"
+        )
+        semantic = _mapping(raw_semantic, field)
+        _require_exact_fields(
+            semantic,
+            {
+                "joint_prim",
+                "part_prim",
+                "dof_index",
+                "runtime_reset_value",
+                "reset_state",
+                "states",
+            },
+            field,
+        )
+        joint_prim = _required_string(semantic, "joint_prim", field)
+        part_prim = _required_string(semantic, "part_prim", field)
+        _require_prim_within(
+            part_prim,
+            articulation_root,
+            f"{field}.part_prim",
+            allow_root=False,
+        )
+        dof_index = semantic.get("dof_index")
+        if (
+            not isinstance(dof_index, int)
+            or isinstance(dof_index, bool)
+            or mapping_by_index.get(dof_index, {}).get("joint_prim") != joint_prim
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field}.dof_index and joint_prim must identify the same DOF"
+            )
+        if dof_index in seen_semantic_dofs:
+            raise ConvertAssetHandoffError(
+                f"{field}.dof_index must be unique across semantic_joints"
+            )
+        seen_semantic_dofs.add(dof_index)
+        joint_type = joint_types[joint_prim]
+        raw_lower_limit, raw_upper_limit = joint_limits[joint_prim]
+        runtime_lower_limit = (
+            math.radians(raw_lower_limit)
+            if joint_type == "PhysicsRevoluteJoint"
+            else raw_lower_limit
+        )
+        runtime_upper_limit = (
+            math.radians(raw_upper_limit)
+            if joint_type == "PhysicsRevoluteJoint"
+            else raw_upper_limit
+        )
+        expected_runtime_reset = (
+            math.radians(joint_resets[joint_prim])
+            if joint_type == "PhysicsRevoluteJoint"
+            else joint_resets[joint_prim]
+        )
+        runtime_reset = _finite_number(
+            semantic.get("runtime_reset_value"),
+            f"{field}.runtime_reset_value",
+        )
+        if not math.isclose(
+            runtime_reset,
+            expected_runtime_reset,
+            rel_tol=0.0,
+            abs_tol=1e-6,
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field}.runtime_reset_value must match the normalized "
+                "runtime value of articulation_closure reset"
+            )
+        raw_states = _mapping(semantic.get("states"), f"{field}.states")
+        if not raw_states:
+            raise ConvertAssetHandoffError(f"{field}.states must not be empty")
+        states: dict[str, list[float]] = {}
+        for state_name, raw_interval in raw_states.items():
+            if (
+                not isinstance(state_name, str)
+                or not state_name
+                or "." in state_name
+            ):
+                raise ConvertAssetHandoffError(
+                    f"{field}.states keys must be non-empty and contain no '.'"
+                )
+            interval = _finite_number_list(
+                raw_interval,
+                2,
+                f"{field}.states.{state_name}",
+            )
+            if interval[0] > interval[1]:
+                raise ConvertAssetHandoffError(
+                    f"{field}.states.{state_name} lower bound must not "
+                    "exceed upper bound"
+                )
+            if (
+                interval[0] < runtime_lower_limit - 1e-6
+                or interval[1] > runtime_upper_limit + 1e-6
+            ):
+                raise ConvertAssetHandoffError(
+                    f"{field}.states.{state_name} must remain within joint limits"
+                )
+            states[state_name] = interval
+        reset_state = _required_string(semantic, "reset_state", field)
+        if reset_state not in states:
+            raise ConvertAssetHandoffError(
+                f"{field}.reset_state must name one declared state"
+            )
+        reset_interval = states[reset_state]
+        if not reset_interval[0] <= runtime_reset <= reset_interval[1]:
+            raise ConvertAssetHandoffError(
+                f"{field}.reset_state must contain the joint reset value"
+            )
+        semantic_joints[semantic_name] = semantic
+        wire_joints[semantic_name] = {
+            "joint_prim": joint_prim,
+            "part_prim": part_prim,
+            "runtime_reset_value": runtime_reset,
+            "states": states,
+        }
+    if seen_semantic_dofs != set(mapping_by_index):
+        raise ConvertAssetHandoffError(
+            "articulation_contract.device_profile.semantic_joints must cover "
+            "every mapped DOF"
+        )
+
+    raw_frames = _mapping(
+        profile.get("named_frames"),
+        "articulation_contract.device_profile.named_frames",
+    )
+    if not raw_frames:
+        raise ConvertAssetHandoffError(
+            "articulation_contract.device_profile.named_frames must not be empty"
+        )
+    named_frames: dict[str, Mapping[str, Any]] = {}
+    for frame_name, raw_frame in raw_frames.items():
+        if (
+            not isinstance(frame_name, str)
+            or not frame_name
+            or "." in frame_name
+        ):
+            raise ConvertAssetHandoffError(
+                "articulation_contract.device_profile.named_frames keys "
+                "must be non-empty and contain no '.'"
+            )
+        field = (
+            "articulation_contract.device_profile.named_frames."
+            f"{frame_name}"
+        )
+        frame = _mapping(raw_frame, field)
+        _require_exact_fields(
+            frame,
+            {
+                "parent_prim",
+                "translation_parent_local_m",
+                "rotation_parent_local_wxyz",
+                "authoritative",
+            },
+            field,
+        )
+        _require_prim_within(
+            _required_string(frame, "parent_prim", field),
+            articulation_root,
+            f"{field}.parent_prim",
+            allow_root=True,
+        )
+        _finite_number_list(
+            frame.get("translation_parent_local_m"),
+            3,
+            f"{field}.translation_parent_local_m",
+        )
+        rotation = _finite_number_list(
+            frame.get("rotation_parent_local_wxyz"),
+            4,
+            f"{field}.rotation_parent_local_wxyz",
+        )
+        if not math.isclose(
+            sum(component * component for component in rotation),
+            1.0,
+            rel_tol=0.0,
+            abs_tol=1e-6,
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field}.rotation_parent_local_wxyz must be a unit quaternion"
+            )
+        _require_value(frame, "authoritative", True, field)
+        named_frames[frame_name] = frame
+
+    runtime = _required_mapping(
+        contract,
+        "runtime_qualification",
+        "manifest.articulation_contract",
+    )
+    _require_exact_fields(
+        runtime,
+        {"status", "report_path", "report_sha256"},
+        "articulation_contract.runtime_qualification",
+    )
+    _require_value(
+        runtime,
+        "status",
+        "pass",
+        "articulation_contract.runtime_qualification",
+    )
+    report_relative_path = _required_string(
+        runtime,
+        "report_path",
+        "articulation_contract.runtime_qualification",
+    )
+    report_path = _safe_package_file(
+        package_root,
+        report_relative_path,
+        "articulation_contract.runtime_qualification.report_path",
+    )
+    report_sha = _required_sha256(
+        runtime,
+        "report_sha256",
+        "articulation_contract.runtime_qualification",
+    )
+    if _file_sha256(report_path) != report_sha:
+        raise ConvertAssetHandoffError(
+            "articulation_contract.runtime_qualification.report_sha256 "
+            "does not match qualification report"
+        )
+    report = _load_strict_json_mapping(
+        report_path.read_bytes(),
+        "articulation_contract.runtime_qualification.report",
+    )
+    _require_value(
+        report,
+        "schema_version",
+        "aan.articulation_runtime_qualification.v1",
+        "articulation_contract.runtime_qualification.report",
+    )
+    _require_value(
+        report,
+        "status",
+        "pass",
+        "articulation_contract.runtime_qualification.report",
+    )
+    report_inputs = _required_mapping(
+        report,
+        "inputs",
+        "articulation_contract.runtime_qualification.report",
+    )
+    report_profile = _required_mapping(
+        report_inputs,
+        "device_profile",
+        "articulation_contract.runtime_qualification.report.inputs",
+    )
+    _require_exact_fields(
+        report_profile,
+        {"schema_version", "profile_sha256", "source_sha256"},
+        "articulation runtime report.inputs.device_profile",
+    )
+    _require_value(
+        report_profile,
+        "schema_version",
+        "aan.articulated_device_profile.v1",
+        "articulation runtime report.inputs.device_profile",
+    )
+    if (
+        _required_sha256(
+            report_profile,
+            "profile_sha256",
+            "articulation runtime report.inputs.device_profile",
+        )
+        != profile_sha
+    ):
+        raise ConvertAssetHandoffError(
+            "articulation runtime report.inputs.device_profile.profile_sha256 "
+            "does not match the packaged device profile"
+        )
+    if (
+        _required_sha256(
+            report_profile,
+            "source_sha256",
+            "articulation runtime report.inputs.device_profile",
+        )
+        != source_sha256
+    ):
+        raise ConvertAssetHandoffError(
+            "articulation runtime report.inputs.device_profile.source_sha256 "
+            "does not match source USD"
+        )
+    runtime_dof_mapping = _required_mapping_list(
+        report.get("runtime_dof_mapping"),
+        (
+            "articulation_contract.runtime_qualification.report."
+            "runtime_dof_mapping"
+        ),
+    )
+    runtime_dofs_by_index: dict[int, Mapping[str, Any]] = {}
+    for index, item in enumerate(runtime_dof_mapping):
+        field = (
+            "articulation_contract.runtime_qualification.report."
+            f"runtime_dof_mapping[{index}]"
+        )
+        _require_exact_fields(
+            item,
+            {"dof_index", "dof_name", "joint_prim"},
+            field,
+        )
+        dof_index = item.get("dof_index")
+        if (
+            not isinstance(dof_index, int)
+            or isinstance(dof_index, bool)
+            or dof_index < 0
+            or dof_index in runtime_dofs_by_index
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field}.dof_index must be a unique non-negative integer"
+            )
+        _required_string(item, "dof_name", field)
+        joint_prim = _required_string(item, "joint_prim", field)
+        closure_joint = mapping_by_index.get(dof_index)
+        if (
+            closure_joint is None
+            or closure_joint.get("joint_prim") != joint_prim
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field} must match articulation_closure.dof_mapping at "
+                "the same runtime DOF index"
+            )
+        runtime_dofs_by_index[dof_index] = item
+    if set(runtime_dofs_by_index) != set(mapping_by_index):
+        raise ConvertAssetHandoffError(
+            "articulation runtime_dof_mapping must cover every mapped DOF"
+        )
+    task_gates = _required_mapping(
+        report,
+        "task_gates",
+        "articulation_contract.runtime_qualification.report",
+    )
+    for gate_name in required_runtime_task_gates:
+        gate = _required_mapping(
+            task_gates,
+            gate_name,
+            "articulation runtime task_gates",
+        )
+        _require_value(
+            gate,
+            "status",
+            "pass",
+            f"articulation runtime task_gates.{gate_name}",
+        )
+    promotion_relative_path = _validate_articulation_promotion(
+        package_root=package_root,
+        manifest_sha256=manifest_sha256,
+        asset_sha256=asset_sha256,
+        asset_entry_prim=asset_entry_prim,
+        runtime_profile=runtime_profile,
+        profile_relative_path=profile_relative_path,
+        profile_sha256=profile_sha,
+        report_relative_path=report_relative_path,
+        report_sha256=report_sha,
+        report=report,
+    )
+
+    wire_closure = {
+        "articulation_roots": _copy_json_value(
+            roots,
+            "articulation_closure.articulation_roots",
+        ),
+        "dof_mapping": _copy_json_value(
+            raw_dof_mapping,
+            "articulation_closure.dof_mapping",
+        ),
+        "reset_values": _copy_json_value(
+            raw_reset_values,
+            "articulation_closure.reset_values",
+        ),
+    }
+    wire_contract = {
+        "schema_version": "scenario-forge-articulation-contract/v0.1",
+        "asset_entry_prim": asset_entry_prim,
+        "articulation_root_prim": articulation_root,
+        "runtime_units": {
+            "revolute": "radian",
+            "prismatic": "meter",
+        },
+        "joints": wire_joints,
+        "named_frames": _copy_json_mapping(
+            named_frames,
+            "articulation_contract.named_frames",
+        ),
+        "required_runtime_task_gates": list(required_runtime_task_gates),
+        "closure": wire_closure,
+    }
+    return ConvertAssetArticulationContract(
+        schema_version="scenario-forge-articulation-contract/v0.1",
+        asset_entry_prim=asset_entry_prim,
+        articulation_root_prim=articulation_root,
+        dof_mapping=tuple(
+            _copy_json_mapping(item, "articulation_closure.dof_mapping")
+            for item in raw_dof_mapping
+        ),
+        reset_values=tuple(
+            _copy_json_mapping(item, "articulation_closure.reset_values")
+            for item in raw_reset_values
+        ),
+        semantic_joints={
+            name: _copy_json_mapping(
+                item,
+                f"articulation_contract.semantic_joints.{name}",
+            )
+            for name, item in semantic_joints.items()
+        },
+        named_frames={
+            name: _copy_json_mapping(
+                item,
+                f"articulation_contract.named_frames.{name}",
+            )
+            for name, item in named_frames.items()
+        },
+        profile_sha256=profile_sha,
+        required_artifact_paths=(
+            profile_relative_path,
+            report_relative_path,
+            promotion_relative_path,
+        ),
+        payload=wire_contract,
+        closure_payload=_copy_json_mapping(
+            closure,
+            "articulation_closure",
+        ),
+    )
+
+
+def _validate_articulation_promotion(
+    *,
+    package_root: Path,
+    manifest_sha256: str,
+    asset_sha256: str,
+    asset_entry_prim: str,
+    runtime_profile: str,
+    profile_relative_path: str,
+    profile_sha256: str,
+    report_relative_path: str,
+    report_sha256: str,
+    report: Mapping[str, Any],
+) -> str:
+    promotion_path = _safe_package_file(
+        package_root,
+        _ARTICULATION_PROMOTION_PATH,
+        "articulation promotion path",
+    )
+    promotion = _load_strict_json_mapping(
+        promotion_path.read_bytes(),
+        "articulation package promotion",
+    )
+    _require_exact_fields(
+        promotion,
+        {
+            "schema_version",
+            "status",
+            "prequalification_manifest_sha256",
+            "final_manifest_sha256",
+            "asset_usd_sha256",
+            "profile_path",
+            "profile_sha256",
+            "runtime_report_path",
+            "runtime_report_sha256",
+            "claim_boundary",
+        },
+        "articulation package promotion",
+    )
+    _require_value(
+        promotion,
+        "schema_version",
+        "aan.articulation_package_promotion.v1",
+        "articulation package promotion",
+    )
+    _require_value(
+        promotion,
+        "status",
+        "pass",
+        "articulation package promotion",
+    )
+    prequalification_manifest_sha256 = _required_sha256(
+        promotion,
+        "prequalification_manifest_sha256",
+        "articulation package promotion",
+    )
+    if _required_sha256(
+        promotion,
+        "final_manifest_sha256",
+        "articulation package promotion",
+    ) != manifest_sha256:
+        raise ConvertAssetHandoffError(
+            "articulation package promotion.final_manifest_sha256 does not match manifest"
+        )
+    if _required_sha256(
+        promotion,
+        "asset_usd_sha256",
+        "articulation package promotion",
+    ) != asset_sha256:
+        raise ConvertAssetHandoffError(
+            "articulation package promotion.asset_usd_sha256 does not match package asset"
+        )
+    _require_value(
+        promotion,
+        "profile_path",
+        profile_relative_path,
+        "articulation package promotion",
+    )
+    if _required_sha256(
+        promotion,
+        "profile_sha256",
+        "articulation package promotion",
+    ) != profile_sha256:
+        raise ConvertAssetHandoffError(
+            "articulation package promotion.profile_sha256 does not match contract"
+        )
+    _require_value(
+        promotion,
+        "runtime_report_path",
+        report_relative_path,
+        "articulation package promotion",
+    )
+    if _required_sha256(
+        promotion,
+        "runtime_report_sha256",
+        "articulation package promotion",
+    ) != report_sha256:
+        raise ConvertAssetHandoffError(
+            "articulation package promotion.runtime_report_sha256 does not match contract"
+        )
+    _required_string(promotion, "claim_boundary", "articulation package promotion")
+
+    inputs = _required_mapping(
+        report,
+        "inputs",
+        "articulation runtime qualification report",
+    )
+    integrity = _required_mapping(
+        inputs,
+        "integrity",
+        "articulation runtime qualification report.inputs",
+    )
+    _require_value(
+        integrity,
+        "status",
+        "pass",
+        "articulation runtime qualification report.inputs.integrity",
+    )
+    qualified_package = _required_mapping(
+        inputs,
+        "qualified_package",
+        "articulation runtime qualification report.inputs",
+    )
+    _require_exact_fields(
+        qualified_package,
+        {
+            "asset_path",
+            "asset_entry_prim",
+            "runtime_profile",
+            "prequalification_manifest_sha256",
+            "asset_usd_sha256_before",
+            "asset_usd_sha256_after",
+        },
+        "articulation runtime qualification report.inputs.qualified_package",
+    )
+    _require_value(
+        qualified_package,
+        "asset_path",
+        "asset.usd",
+        "articulation runtime qualified package",
+    )
+    _require_value(
+        qualified_package,
+        "asset_entry_prim",
+        asset_entry_prim,
+        "articulation runtime qualified package",
+    )
+    _require_value(
+        qualified_package,
+        "runtime_profile",
+        runtime_profile,
+        "articulation runtime qualified package",
+    )
+    if _required_sha256(
+        qualified_package,
+        "prequalification_manifest_sha256",
+        "articulation runtime qualified package",
+    ) != prequalification_manifest_sha256:
+        raise ConvertAssetHandoffError(
+            "articulation runtime report is not bound to the prequalification manifest"
+        )
+    if (
+        _required_sha256(
+            qualified_package,
+            "asset_usd_sha256_before",
+            "articulation runtime qualified package",
+        )
+        != asset_sha256
+        or _required_sha256(
+            qualified_package,
+            "asset_usd_sha256_after",
+            "articulation runtime qualified package",
+        )
+        != asset_sha256
+    ):
+        raise ConvertAssetHandoffError(
+            "articulation runtime report does not bind an unchanged package asset"
+        )
+    runtime = _required_mapping(
+        report,
+        "runtime",
+        "articulation runtime qualification report",
+    )
+    _require_value(
+        runtime,
+        "runtime_profile",
+        runtime_profile,
+        "articulation runtime qualification report.runtime",
+    )
+    drive_integrity = _required_mapping(
+        report,
+        "drive_integrity",
+        "articulation runtime qualification report",
+    )
+    _require_value(
+        drive_integrity,
+        "status",
+        "pass",
+        "articulation runtime qualification report.drive_integrity",
+    )
+    return _ARTICULATION_PROMOTION_PATH
 
 
 def _load_interaction_contract(
@@ -620,6 +1965,23 @@ def _load_interaction_contract(
             )
         return None
     contract = _mapping(value, "manifest.interaction_contract")
+    status = contract.get("status")
+    sentinel_fields = {
+        "schema_version",
+        "status",
+    }
+    if status == "not_run":
+        sentinel_fields.add("reason")
+    if (
+        contract.get("schema_version") == "aan.interaction_contract.v1"
+        and status in {"not_requested", "not_run"}
+        and set(contract) == sentinel_fields
+    ):
+        if required:
+            raise ConvertAssetHandoffError(
+                "rigid_object usage requires a passing manifest.interaction_contract"
+            )
+        return None
     _require_exact_fields(
         contract,
         {
@@ -868,24 +2230,29 @@ def _load_interaction_contract(
         "interaction_contract.open_top",
     )
     open_top_required = _required_bool(open_top, "required", "interaction_contract.open_top")
-    axis = _finite_number_list(
-        open_top.get("axis_body_local"),
-        3,
-        "interaction_contract.open_top.axis_body_local",
-    )
-    if sum(component * component for component in axis) == 0.0:
-        raise ConvertAssetHandoffError(
-            "interaction_contract.open_top.axis_body_local must be non-zero"
+    axis_value = open_top.get("axis_body_local")
+    if open_top_required or axis_value is not None:
+        axis = _finite_number_list(
+            axis_value,
+            3,
+            "interaction_contract.open_top.axis_body_local",
         )
-    aperture_frame = _required_string(
-        open_top,
-        "aperture_frame",
-        "interaction_contract.open_top",
-    )
-    if aperture_frame not in normalized_frames:
-        raise ConvertAssetHandoffError(
-            "interaction_contract.open_top.aperture_frame must name an authoritative frame"
-        )
+        if sum(component * component for component in axis) == 0.0:
+            raise ConvertAssetHandoffError(
+                "interaction_contract.open_top.axis_body_local must be non-zero"
+            )
+    aperture_frame = open_top.get("aperture_frame")
+    if open_top_required or aperture_frame is not None:
+        if not isinstance(aperture_frame, str) or not aperture_frame:
+            raise ConvertAssetHandoffError(
+                "interaction_contract.open_top.aperture_frame must be a "
+                "non-empty string"
+            )
+        if aperture_frame not in normalized_frames:
+            raise ConvertAssetHandoffError(
+                "interaction_contract.open_top.aperture_frame must name an "
+                "authoritative frame"
+            )
     open_top_status = _required_string(
         open_top,
         "status",
@@ -1101,6 +2468,21 @@ def _mapping(value: object, field_name: str) -> Mapping[str, Any]:
     return value
 
 
+def _reject_nonstandard_json_constant(value: str) -> None:
+    raise ValueError(f"non-standard JSON numeric constant: {value}")
+
+
+def _load_strict_json_mapping(value: bytes, field_name: str) -> Mapping[str, Any]:
+    try:
+        decoded = json.loads(
+            value.decode("utf-8"),
+            parse_constant=_reject_nonstandard_json_constant,
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        raise ConvertAssetHandoffError(f"{field_name} is not valid JSON") from exc
+    return _mapping(decoded, field_name)
+
+
 def _required_mapping(
     data: Mapping[str, Any], key: str, field_name: str
 ) -> Mapping[str, Any]:
@@ -1189,6 +2571,27 @@ def _require_descendant_prim(
         raise ConvertAssetHandoffError(f"{field_name} must be below rigid_root_prim")
     if not prim_path.startswith(root_prim + "/"):
         raise ConvertAssetHandoffError(f"{field_name} must be below rigid_root_prim")
+
+
+def _require_prim_within(
+    prim_path: str,
+    root_prim: str,
+    field_name: str,
+    *,
+    allow_root: bool,
+) -> None:
+    if not prim_path.startswith("/") or "//" in prim_path:
+        raise ConvertAssetHandoffError(
+            f"{field_name} must use an absolute USD prim path"
+        )
+    if prim_path == root_prim:
+        if allow_root:
+            return
+        raise ConvertAssetHandoffError(f"{field_name} must be below {root_prim}")
+    if not prim_path.startswith(root_prim + "/"):
+        raise ConvertAssetHandoffError(
+            f"{field_name} must be within {root_prim}"
+        )
 
 
 def _finite_number(value: object, field_name: str) -> float:

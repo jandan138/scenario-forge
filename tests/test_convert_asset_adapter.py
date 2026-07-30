@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -33,9 +34,11 @@ def _write_source_bound_handoff(
     *,
     source_usd: Path | None = None,
     with_interaction_contract: bool = False,
+    open_top_required: bool = True,
     with_disabled_source_collider: bool = False,
     observed_collider_approximation: str = "convexDecomposition",
     interaction_root: str = "/World/DryingBox_03",
+    entry_world_transform: list[list[float]] | None = None,
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     if source_usd is None:
         source_usd = root / "source" / "lab_001.usd"
@@ -242,11 +245,17 @@ def Xform "World"
             ],
             "collider_prims": collider_prims,
             "open_top": {
-                "required": True,
-                "axis_body_local": [0.0, 0.0, 1.0],
-                "aperture_frame": "opening",
-                "status": "pass",
-                "evidence": qualification_evidence("open_top"),
+                "required": open_top_required,
+                "axis_body_local": (
+                    [0.0, 0.0, 1.0] if open_top_required else None
+                ),
+                "aperture_frame": "opening" if open_top_required else None,
+                "status": "pass" if open_top_required else "not_applicable",
+                "evidence": (
+                    qualification_evidence("open_top")
+                    if open_top_required
+                    else {}
+                ),
             },
             "named_frames": {
                 "opening": {
@@ -334,6 +343,17 @@ def Xform "World"
         "frames_per_second": 24.0,
     }
     scope = interaction_root
+    if entry_world_transform is None:
+        entry_world_transform = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+    package_world_bound_m = {
+        "min": [-0.16, -0.175, 0.0],
+        "max": [0.16, 0.175, 0.226],
+    }
     manifest: dict[str, object] = {
         "schema_version": "asset_application_normalizer.v1",
         "package_id": f"{package_stem}_dynamic_package",
@@ -370,6 +390,21 @@ def Xform "World"
             "status": "pass",
             "role": "dynamic",
             "scope": {"mode": "asset_scope_prims", "asset_scope_prims": [scope]},
+            "physical_frame": {
+                "status": "pass",
+                "source": dict(metrics),
+                "package": dict(metrics),
+                "metric_mismatches": [],
+                "scope_bounds": [
+                    {
+                        "path": scope,
+                        "source_world_bound_m": dict(package_world_bound_m),
+                        "package_world_bound_m": dict(package_world_bound_m),
+                        "status": "pass",
+                    }
+                ],
+                "blocked_scope_prims": [],
+            },
             "profile_admission": {
                 "status": "pass",
                 "profile_sha256": profile_sha,
@@ -393,6 +428,14 @@ def Xform "World"
                 "overlay_path": "overlays/physics_profile.usda",
                 "packaged_profile_sha256": profile_sha,
                 "resolved_body_count": 3,
+            },
+        },
+        "visual_preservation_fingerprint": {
+            "status": "pass",
+            "package_before_physics_profile": {
+                "scope_world_transforms": {
+                    scope: entry_world_transform,
+                }
             },
         },
         "runtime_evidence": {
@@ -612,6 +655,315 @@ def Xform "World"
     return source_usd, package_dir, manifest_path, manifest
 
 
+def _write_articulated_handoff(
+    root: Path,
+) -> tuple[Path, Path, Path, dict[str, object]]:
+    source_usd, package_dir, manifest_path, manifest = _write_source_bound_handoff(
+        root,
+        interaction_root="/World/Centrifuge",
+    )
+    source_sha = _digest(source_usd)
+    articulation_root = "/World/Centrifuge"
+    joint_specs = (
+        ("lid", "/World/Centrifuge/lid", "PhysicsRevoluteJoint", "X", -90.0, 0.0, -89.0),
+        (
+            "start_button",
+            "/World/Centrifuge/start_button",
+            "PhysicsPrismaticJoint",
+            "Z",
+            -0.004,
+            0.0,
+            0.0,
+        ),
+        ("rotor", "/World/Centrifuge/rotor", "PhysicsRevoluteJoint", "Y", -180.0, 0.0, 0.0),
+    )
+    states = {
+        "lid": {
+            "open": [math.radians(-90.0), math.radians(-80.0)],
+            "closed": [math.radians(-5.0), 0.0],
+        },
+        "start_button": {
+            "pressed": [-0.004, -0.003],
+            "released": [-0.0005, 0.0],
+        },
+        "rotor": {"parked": [math.radians(-1.0), 0.0]},
+    }
+    reset_states = {
+        "lid": "open",
+        "start_button": "released",
+        "rotor": "parked",
+    }
+    joints: list[dict[str, object]] = []
+    dof_mapping: list[dict[str, object]] = []
+    reset_values: list[dict[str, object]] = []
+    semantic_joints: dict[str, object] = {}
+    for dof_index, (
+        semantic_name,
+        part_prim,
+        joint_type,
+        axis,
+        lower,
+        upper,
+        reset,
+    ) in enumerate(joint_specs):
+        joint_prim = f"{articulation_root}/{semantic_name}_joint"
+        reset_record = {
+            "value": reset,
+            "value_source": "authored",
+            "status": "pass",
+            "attribute": f"{joint_prim}.state:physics:position",
+            "provenance_status": "pass",
+        }
+        joints.append(
+            {
+                "prim_path": joint_prim,
+                "joint_type": joint_type,
+                "owning_layer": "overlays/physics_profile.usda",
+                "axis": {
+                    "value": axis,
+                    "value_source": "authored",
+                    "status": "pass",
+                    "attribute": f"{joint_prim}.physics:axis",
+                    "provenance_status": "pass",
+                },
+                "limits": {
+                    "lower": {
+                        "value": lower,
+                        "value_source": "authored",
+                        "status": "pass",
+                        "attribute": f"{joint_prim}.physics:lowerLimit",
+                        "provenance_status": "pass",
+                    },
+                    "upper": {
+                        "value": upper,
+                        "value_source": "authored",
+                        "status": "pass",
+                        "attribute": f"{joint_prim}.physics:upperLimit",
+                        "provenance_status": "pass",
+                    },
+                    "status": "pass",
+                },
+                "enabled": {
+                    "value": True,
+                    "value_source": "authored",
+                    "status": "pass",
+                    "attribute": f"{joint_prim}.physics:jointEnabled",
+                    "provenance_status": "pass",
+                },
+                "collision_enabled": {
+                    "value": False,
+                    "value_source": "fallback",
+                    "status": "pass",
+                    "attribute": f"{joint_prim}.physics:collisionEnabled",
+                    "provenance_status": "not_applicable",
+                },
+                "drive_status": "authored",
+                "reset_value": dict(reset_record),
+            }
+        )
+        dof_mapping.append(
+            {
+                "dof_index": dof_index,
+                "joint_prim": joint_prim,
+                "joint_type": joint_type,
+                "axis": axis,
+                "value_source": "authored",
+            }
+        )
+        reset_values.append(
+            {
+                "joint_prim": joint_prim,
+                "joint_type": joint_type,
+                "reset_value": dict(reset_record),
+            }
+        )
+        semantic_joints[semantic_name] = {
+            "joint_prim": joint_prim,
+            "part_prim": part_prim,
+            "dof_index": dof_index,
+            "runtime_reset_value": (
+                math.radians(reset)
+                if joint_type == "PhysicsRevoluteJoint"
+                else reset
+            ),
+            "reset_state": reset_states[semantic_name],
+            "states": states[semantic_name],
+        }
+
+    manifest["articulation_closure"] = {
+        "status": "pass",
+        "root_usd": str(package_dir / "asset.usd"),
+        "scope": {
+            "mode": "asset_scope_prims",
+            "asset_scope_prims": [articulation_root],
+        },
+        "articulation_roots": [
+            {
+                "prim_path": articulation_root,
+                "type_name": "Xform",
+                "owning_layer": "overlays/physics_profile.usda",
+                "value_source": "authored",
+            }
+        ],
+        "joints": joints,
+        "dof_mapping": dof_mapping,
+        "reset_values": reset_values,
+        "summary": {
+            "articulation_root_count": 1,
+            "joint_count": len(joints),
+            "controllable_dof_count": len(dof_mapping),
+        },
+    }
+
+    device_profile = {
+        "schema_version": "aan.articulated_device_profile.v1",
+        "profile_id": "hci955350.centrifuge",
+        "revision": "r1",
+        "source_sha256": source_sha,
+        "asset_entry_prim": articulation_root,
+        "articulation_root_prim": articulation_root,
+        "runtime_units": {
+            "revolute": "radian",
+            "prismatic": "meter",
+        },
+        "required_runtime_task_gates": [
+            "lid_contact_cycle",
+            "button_contact_cycle",
+            "button_reset_stability",
+            "rotor_reset_stability",
+            "socket_insertion_clearance",
+        ],
+        "semantic_joints": semantic_joints,
+        "named_frames": {
+            frame_name: {
+                "parent_prim": parent_prim,
+                "translation_parent_local_m": translation,
+                "rotation_parent_local_wxyz": [1.0, 0.0, 0.0, 0.0],
+                "authoritative": True,
+            }
+            for frame_name, parent_prim, translation in (
+                ("support", articulation_root, [0.0, 0.0, 0.0]),
+                ("lid_handle", f"{articulation_root}/lid", [-0.15, 0.0, 0.03]),
+                (
+                    "start_button_press",
+                    f"{articulation_root}/panel",
+                    [-0.15, -0.1, 0.14],
+                ),
+                (
+                    "tube_socket_0",
+                    f"{articulation_root}/rotor",
+                    [0.0, 0.02, 0.09],
+                ),
+            )
+        },
+    }
+    device_profile_path = package_dir / "articulation" / "device_profile.json"
+    device_profile_path.parent.mkdir(parents=True)
+    device_profile_path.write_text(
+        json.dumps(device_profile, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    _persist_manifest(manifest, manifest_path, package_dir)
+    prequalification_manifest_sha256 = _digest(manifest_path)
+    asset_sha256 = _digest(package_dir / "asset.usd")
+    qualification_report = (
+        package_dir
+        / "evidence"
+        / "articulation_runtime_qualification"
+        / "report.json"
+    )
+    qualification_report.parent.mkdir(parents=True)
+    qualification_report.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.articulation_runtime_qualification.v1",
+                "status": "pass",
+                "runtime": {"runtime_profile": "isaac41"},
+                "inputs": {
+                    "device_profile": {
+                        "schema_version": "aan.articulated_device_profile.v1",
+                        "profile_sha256": _digest(device_profile_path),
+                        "source_sha256": source_sha,
+                    },
+                    "integrity": {
+                        "status": "pass",
+                        "centrifuge_manifest_sha256": prequalification_manifest_sha256,
+                        "centrifuge_asset_usd_sha256_before": asset_sha256,
+                        "centrifuge_asset_usd_sha256_after": asset_sha256,
+                    },
+                    "qualified_package": {
+                        "asset_path": "asset.usd",
+                        "asset_entry_prim": articulation_root,
+                        "runtime_profile": "isaac41",
+                        "prequalification_manifest_sha256": prequalification_manifest_sha256,
+                        "asset_usd_sha256_before": asset_sha256,
+                        "asset_usd_sha256_after": asset_sha256,
+                    },
+                },
+                "drive_integrity": {"status": "pass"},
+                "runtime_dof_mapping": [
+                    {
+                        "dof_index": dof_index,
+                        "dof_name": semantic_name,
+                        "joint_prim": (
+                            f"{articulation_root}/{semantic_name}_joint"
+                        ),
+                    }
+                    for dof_index, (
+                        semantic_name,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                    ) in enumerate(joint_specs)
+                ],
+                "task_gates": {
+                    gate_name: {"status": "pass"}
+                    for gate_name in (
+                        "lid_contact_cycle",
+                        "button_contact_cycle",
+                        "button_reset_stability",
+                        "rotor_reset_stability",
+                        "socket_insertion_clearance",
+                    )
+                },
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    manifest["articulation_contract"] = {
+        "schema_version": "aan.articulation_contract.v1",
+        "status": "pass",
+        "profile": {
+            "schema_version": "aan.articulated_device_profile.v1",
+            "profile_id": "hci955350.centrifuge",
+            "revision": "r1",
+            "source_sha256": source_sha,
+            "profile_sha256": _digest(device_profile_path),
+            "package_path": "articulation/device_profile.json",
+        },
+        "runtime_qualification": {
+            "status": "pass",
+            "report_path": (
+                "evidence/articulation_runtime_qualification/report.json"
+            ),
+            "report_sha256": _digest(qualification_report),
+        },
+    }
+    _persist_manifest(manifest, manifest_path, package_dir)
+    _write_articulation_promotion(
+        package_dir,
+        manifest_path,
+        manifest,
+        prequalification_manifest_sha256=prequalification_manifest_sha256,
+    )
+    return source_usd, package_dir, manifest_path, manifest
+
+
 def test_convert_asset_plan_builds_command_without_executing_conversion() -> None:
     plan = ConvertAssetCommandPlan(
         convert_asset_root="/tools/ConvertAsset",
@@ -669,6 +1021,52 @@ def _persist_manifest(
             payload,
             encoding="utf-8",
         )
+
+
+def _write_articulation_promotion(
+    package_dir: Path,
+    manifest_path: Path,
+    manifest: dict[str, object],
+    *,
+    prequalification_manifest_sha256: str | None = None,
+) -> None:
+    promotion_path = (
+        package_dir
+        / "evidence"
+        / "articulation_runtime_qualification"
+        / "promotion.json"
+    )
+    if prequalification_manifest_sha256 is None:
+        existing = json.loads(promotion_path.read_text(encoding="utf-8"))
+        prequalification_manifest_sha256 = existing[
+            "prequalification_manifest_sha256"
+        ]
+    contract = manifest["articulation_contract"]
+    assert isinstance(contract, dict)
+    profile = contract["profile"]
+    runtime = contract["runtime_qualification"]
+    assert isinstance(profile, dict)
+    assert isinstance(runtime, dict)
+    promotion_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.articulation_package_promotion.v1",
+                "status": "pass",
+                "prequalification_manifest_sha256": prequalification_manifest_sha256,
+                "final_manifest_sha256": _digest(manifest_path),
+                "asset_usd_sha256": _digest(package_dir / "asset.usd"),
+                "profile_path": profile["package_path"],
+                "profile_sha256": profile["profile_sha256"],
+                "runtime_report_path": runtime["report_path"],
+                "runtime_report_sha256": runtime["report_sha256"],
+                "claim_boundary": "Package USD and physical properties were not changed during promotion.",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def test_load_source_bound_handoff_maps_verified_package_to_neutral_asset_source(
@@ -858,6 +1256,23 @@ def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repai
     assert handoff.interaction_contract.task_ready is True
     assert source.role == "rigid_object"
     assert source.upstream_package is not None
+    geometry = source.upstream_package.metadata["task_interactive_geometry"]
+    assert geometry == {
+        "schema_version": "scenario-forge-task-interactive-geometry/v0.1",
+        "asset_entry_prim": "/World/DryingBox_03",
+        "entry_world_transform": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ],
+        "package_world_bound_m": {
+            "min": [-0.16, -0.175, 0.0],
+            "max": [0.16, 0.175, 0.226],
+        },
+        "extent_m": [0.32, 0.35, 0.226],
+        "identity_tolerance": 1e-06,
+    }
     interaction = source.upstream_package.metadata["interaction_contract"]
     assert interaction["asset_entry_prim"] == "/World/DryingBox_03"
     assert interaction["runtime_identity"]["rigid_root_prim"] == (
@@ -866,6 +1281,78 @@ def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repai
     assert interaction["closure"]["tree_encoding"] == (
         "canonical_json_artifact_list_v1"
     )
+
+
+@pytest.mark.parametrize("usage", ["rigid_object", "articulated_object"])
+def test_task_interactive_handoff_rejects_non_identity_entry_transform(
+    tmp_path: Path,
+    usage: str,
+) -> None:
+    non_identity = [
+        [0.0, 0.175, 0.0, 0.0],
+        [0.0, 0.0, 0.175, 0.0],
+        [0.175, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.103633, 1.0],
+    ]
+    if usage == "articulated_object":
+        source_usd, package_dir, manifest_path, manifest = (
+            _write_articulated_handoff(tmp_path)
+        )
+        fingerprint = manifest["visual_preservation_fingerprint"]
+        assert isinstance(fingerprint, dict)
+        package_fingerprint = fingerprint["package_before_physics_profile"]
+        assert isinstance(package_fingerprint, dict)
+        package_fingerprint["scope_world_transforms"] = {
+            "/World/Centrifuge": non_identity
+        }
+        _persist_manifest(manifest, manifest_path, package_dir)
+        _write_articulation_promotion(package_dir, manifest_path, manifest)
+        expected_scope = "/World/Centrifuge"
+    else:
+        source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+            tmp_path,
+            with_interaction_contract=True,
+            entry_world_transform=non_identity,
+        )
+        expected_scope = "/World/DryingBox_03"
+
+    with pytest.raises(
+        ConvertAssetHandoffError,
+        match="task-interactive asset entry transform must be identity",
+    ):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=(expected_scope,),
+            producer_revision="identity-root-required",
+            usage=usage,
+        )
+
+
+def test_scene_overlay_keeps_legacy_non_identity_entry_transform_compatibility(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        entry_world_transform=[
+            [0.0, 0.175, 0.0, 0.0],
+            [0.0, 0.0, 0.175, 0.0],
+            [0.175, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.103633, 1.0],
+        ],
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/DryingBox_03",),
+        producer_revision="legacy-overlay",
+        usage="scene_overlay",
+    )
+
+    assert handoff.usage == "scene_overlay"
 
 
 def test_task_ready_interaction_handoff_accepts_disabled_source_collider(
@@ -888,6 +1375,424 @@ def test_task_ready_interaction_handoff_accepts_disabled_source_collider(
 
     assert handoff.interaction_contract is not None
     assert handoff.interaction_contract.task_ready is True
+
+
+def test_task_ready_interaction_handoff_accepts_not_applicable_open_top(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+        open_top_required=False,
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/DryingBox_03",),
+        producer_revision="324ce6e",
+        usage="rigid_object",
+    )
+
+    assert handoff.interaction_contract is not None
+    assert handoff.interaction_contract.task_ready is True
+
+
+def test_articulated_handoff_maps_validated_device_contract_without_local_repair(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_articulated_handoff(
+        tmp_path
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/Centrifuge",),
+        producer_revision="convertasset-articulation-r1",
+        usage="articulated_object",
+    )
+    source = handoff.to_local_usd_asset_source(
+        asset_id="qualified_centrifuge",
+        license="LicenseRef-Internal-Restricted",
+    )
+
+    assert handoff.articulation_contract is not None
+    assert handoff.articulation_contract.articulation_root_prim == (
+        "/World/Centrifuge"
+    )
+    assert tuple(
+        item["dof_index"]
+        for item in handoff.articulation_contract.dof_mapping
+    ) == (0, 1, 2)
+    assert source.role == "articulated_object"
+    assert source.upstream_package is not None
+    contract = source.upstream_package.metadata["articulation_contract"]
+    assert contract["schema_version"] == (
+        "scenario-forge-articulation-contract/v0.1"
+    )
+    assert contract["closure"]["dof_mapping"][1]["joint_prim"] == (
+        "/World/Centrifuge/start_button_joint"
+    )
+    assert contract["runtime_units"] == {
+        "revolute": "radian",
+        "prismatic": "meter",
+    }
+    assert contract["joints"]["lid"]["runtime_reset_value"] == pytest.approx(
+        math.radians(-89.0)
+    )
+    assert contract["joints"]["lid"]["states"]["open"] == pytest.approx(
+        [math.radians(-90.0), math.radians(-80.0)]
+    )
+    assert contract["named_frames"]["start_button_press"][
+        "authoritative"
+    ] is True
+
+
+def test_articulated_handoff_accepts_duplicate_runtime_dof_names(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_articulated_handoff(
+        tmp_path
+    )
+    contract = manifest["articulation_contract"]
+    assert isinstance(contract, dict)
+    runtime = contract["runtime_qualification"]
+    assert isinstance(runtime, dict)
+    report_path = package_dir / str(runtime["report_path"])
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    runtime_dof_mapping = report["runtime_dof_mapping"]
+    assert isinstance(runtime_dof_mapping, list)
+    for item in (runtime_dof_mapping[0], runtime_dof_mapping[2]):
+        assert isinstance(item, dict)
+        item["dof_name"] = "RevoluteJoint"
+    report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    runtime["report_sha256"] = _digest(report_path)
+    _persist_manifest(manifest, manifest_path, package_dir)
+    _write_articulation_promotion(package_dir, manifest_path, manifest)
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/Centrifuge",),
+        producer_revision="convertasset-articulation-r1",
+        usage="articulated_object",
+    )
+
+    assert handoff.articulation_contract is not None
+    assert tuple(
+        item["joint_prim"] for item in handoff.articulation_contract.dof_mapping
+    ) == (
+        "/World/Centrifuge/lid_joint",
+        "/World/Centrifuge/start_button_joint",
+        "/World/Centrifuge/rotor_joint",
+    )
+
+
+def test_articulated_handoff_ignores_not_requested_interaction_contract(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_articulated_handoff(
+        tmp_path
+    )
+    manifest["interaction_contract"] = {
+        "schema_version": "aan.interaction_contract.v1",
+        "status": "not_requested",
+    }
+    _persist_manifest(manifest, manifest_path, package_dir)
+    _write_articulation_promotion(package_dir, manifest_path, manifest)
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/Centrifuge",),
+        producer_revision="convertasset-articulation-r1",
+        usage="articulated_object",
+    )
+
+    assert handoff.interaction_contract is None
+    assert handoff.articulation_contract is not None
+
+
+def test_articulated_handoff_rejects_a_stale_promotion_manifest_hash(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_articulated_handoff(tmp_path)
+    promotion_path = (
+        package_dir
+        / "evidence"
+        / "articulation_runtime_qualification"
+        / "promotion.json"
+    )
+    promotion = json.loads(promotion_path.read_text(encoding="utf-8"))
+    promotion["final_manifest_sha256"] = "0" * 64
+    promotion_path.write_text(
+        json.dumps(promotion, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConvertAssetHandoffError, match="promotion.*final_manifest"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/Centrifuge",),
+            producer_revision="convertasset-articulation-r1",
+            usage="articulated_object",
+        )
+
+
+def test_articulated_handoff_rejects_nonstandard_json_runtime_report(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_articulated_handoff(
+        tmp_path
+    )
+    contract = manifest["articulation_contract"]
+    assert isinstance(contract, dict)
+    runtime = contract["runtime_qualification"]
+    assert isinstance(runtime, dict)
+    report_path = package_dir / str(runtime["report_path"])
+    report_path.write_text('{"status": Infinity}\n', encoding="utf-8")
+    runtime["report_sha256"] = _digest(report_path)
+    _persist_manifest(manifest, manifest_path, package_dir)
+    _write_articulation_promotion(package_dir, manifest_path, manifest)
+
+    with pytest.raises(ConvertAssetHandoffError, match="not valid JSON"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/Centrifuge",),
+            producer_revision="convertasset-articulation-r1",
+            usage="articulated_object",
+        )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("missing_contract", "articulation_contract"),
+        ("multiple_roots", "exactly one|articulation_root_count"),
+        ("duplicate_dof", "dof_index.*unique|contiguous"),
+        ("gapped_dof", "contiguous"),
+        ("missing_reset", "reset"),
+        ("reset_out_of_limits", "reset.*limits"),
+        ("semantic_joint_mismatch", "semantic_joints.*DOF|dof_index"),
+        ("runtime_reset_unit_mismatch", "runtime_reset_value"),
+        ("profile_hash_mismatch", "profile_sha256"),
+        ("runtime_report_hash_mismatch", "report_sha256"),
+        ("runtime_dof_order_mismatch", "runtime_dof_mapping"),
+        ("runtime_task_gate_blocked", "button_contact_cycle"),
+        ("runtime_report_profile_mismatch", "device_profile.profile_sha256"),
+        ("runtime_report_profile_source_mismatch", "device_profile.source_sha256"),
+        ("qualified_package_entry_mismatch", "qualified package\\.asset_entry_prim"),
+        ("runtime_not_pass", "runtime_qualification"),
+    ],
+)
+def test_articulated_handoff_rejects_incomplete_or_unbound_contract(
+    tmp_path: Path,
+    mutation: str,
+    message: str,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_articulated_handoff(
+        tmp_path
+    )
+    closure = manifest["articulation_closure"]
+    assert isinstance(closure, dict)
+    contract = manifest["articulation_contract"]
+    assert isinstance(contract, dict)
+    if mutation == "missing_contract":
+        del manifest["articulation_contract"]
+    elif mutation == "multiple_roots":
+        roots = closure["articulation_roots"]
+        assert isinstance(roots, list)
+        roots.append(
+            {
+                "prim_path": "/World/Centrifuge/other_root",
+                "type_name": "Xform",
+                "owning_layer": "overlays/physics_profile.usda",
+                "value_source": "authored",
+            }
+        )
+        summary = closure["summary"]
+        assert isinstance(summary, dict)
+        summary["articulation_root_count"] = 2
+    elif mutation == "duplicate_dof":
+        mapping = closure["dof_mapping"]
+        assert isinstance(mapping, list)
+        assert isinstance(mapping[1], dict)
+        mapping[1]["dof_index"] = 0
+    elif mutation == "gapped_dof":
+        mapping = closure["dof_mapping"]
+        assert isinstance(mapping, list)
+        assert isinstance(mapping[2], dict)
+        mapping[2]["dof_index"] = 3
+    elif mutation == "missing_reset":
+        reset_values = closure["reset_values"]
+        assert isinstance(reset_values, list)
+        reset_values.pop()
+    elif mutation == "reset_out_of_limits":
+        reset_values = closure["reset_values"]
+        assert isinstance(reset_values, list)
+        reset = reset_values[0]
+        assert isinstance(reset, dict)
+        reset_record = reset["reset_value"]
+        assert isinstance(reset_record, dict)
+        reset_record["value"] = 10.0
+        joints = closure["joints"]
+        assert isinstance(joints, list)
+        joint = joints[0]
+        assert isinstance(joint, dict)
+        joint_reset_record = joint["reset_value"]
+        assert isinstance(joint_reset_record, dict)
+        joint_reset_record["value"] = 10.0
+    elif mutation == "semantic_joint_mismatch":
+        profile_path = package_dir / "articulation/device_profile.json"
+        profile = json.loads(profile_path.read_text(encoding="utf-8"))
+        profile["semantic_joints"]["lid"]["dof_index"] = 2
+        profile_path.write_text(
+            json.dumps(profile, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        profile_metadata = contract["profile"]
+        assert isinstance(profile_metadata, dict)
+        profile_metadata["profile_sha256"] = _digest(profile_path)
+    elif mutation == "runtime_reset_unit_mismatch":
+        profile_path = package_dir / "articulation/device_profile.json"
+        profile = json.loads(profile_path.read_text(encoding="utf-8"))
+        profile["semantic_joints"]["lid"]["runtime_reset_value"] = -89.0
+        profile_path.write_text(
+            json.dumps(profile, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        profile_metadata = contract["profile"]
+        assert isinstance(profile_metadata, dict)
+        profile_metadata["profile_sha256"] = _digest(profile_path)
+    elif mutation == "profile_hash_mismatch":
+        profile_metadata = contract["profile"]
+        assert isinstance(profile_metadata, dict)
+        profile_metadata["profile_sha256"] = "0" * 64
+    elif mutation == "runtime_report_hash_mismatch":
+        runtime = contract["runtime_qualification"]
+        assert isinstance(runtime, dict)
+        runtime["report_sha256"] = "0" * 64
+    elif mutation == "runtime_dof_order_mismatch":
+        runtime = contract["runtime_qualification"]
+        assert isinstance(runtime, dict)
+        report_path = package_dir / str(runtime["report_path"])
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        first = report["runtime_dof_mapping"][0]
+        second = report["runtime_dof_mapping"][1]
+        first["joint_prim"], second["joint_prim"] = (
+            second["joint_prim"],
+            first["joint_prim"],
+        )
+        report_path.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        runtime["report_sha256"] = _digest(report_path)
+    elif mutation == "runtime_task_gate_blocked":
+        runtime = contract["runtime_qualification"]
+        assert isinstance(runtime, dict)
+        report_path = package_dir / str(runtime["report_path"])
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report["task_gates"]["button_contact_cycle"]["status"] = "blocked"
+        report_path.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        runtime["report_sha256"] = _digest(report_path)
+    elif mutation == "runtime_report_profile_mismatch":
+        runtime = contract["runtime_qualification"]
+        assert isinstance(runtime, dict)
+        report_path = package_dir / str(runtime["report_path"])
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report["inputs"]["device_profile"]["profile_sha256"] = "0" * 64
+        report_path.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        runtime["report_sha256"] = _digest(report_path)
+    elif mutation == "runtime_report_profile_source_mismatch":
+        runtime = contract["runtime_qualification"]
+        assert isinstance(runtime, dict)
+        report_path = package_dir / str(runtime["report_path"])
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report["inputs"]["device_profile"]["source_sha256"] = "0" * 64
+        report_path.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        runtime["report_sha256"] = _digest(report_path)
+    elif mutation == "qualified_package_entry_mismatch":
+        runtime = contract["runtime_qualification"]
+        assert isinstance(runtime, dict)
+        report_path = package_dir / str(runtime["report_path"])
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report["inputs"]["qualified_package"]["asset_entry_prim"] = "/World/Other"
+        report_path.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        runtime["report_sha256"] = _digest(report_path)
+    else:
+        runtime = contract["runtime_qualification"]
+        assert isinstance(runtime, dict)
+        runtime["status"] = "blocked"
+    _persist_manifest(manifest, manifest_path, package_dir)
+    if mutation != "missing_contract":
+        _write_articulation_promotion(package_dir, manifest_path, manifest)
+
+    with pytest.raises(ConvertAssetHandoffError, match=message):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/Centrifuge",),
+            producer_revision="convertasset-articulation-r1",
+            usage="articulated_object",
+        )
+
+
+@pytest.mark.parametrize(
+    "excluded_path",
+    [
+        "articulation",
+        "evidence",
+        "evidence/articulation_runtime_qualification/promotion.json",
+    ],
+)
+def test_articulated_source_cannot_exclude_bound_profile_or_runtime_report(
+    tmp_path: Path,
+    excluded_path: str,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_articulated_handoff(
+        tmp_path
+    )
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/Centrifuge",),
+        producer_revision="convertasset-articulation-r1",
+        usage="articulated_object",
+    )
+
+    with pytest.raises(ValueError, match="qualification/profile artifact"):
+        handoff.to_local_usd_asset_source(
+            asset_id="qualified_centrifuge",
+            license="LicenseRef-Internal-Restricted",
+            exclude_relative_paths=(excluded_path,),
+        )
 
 
 @pytest.mark.parametrize(

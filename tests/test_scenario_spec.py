@@ -524,6 +524,39 @@ def _scenario_mapping_v04() -> dict[str, object]:
     return data
 
 
+def _scenario_mapping_v05() -> dict[str, object]:
+    data = _scenario_mapping_v02([])
+    data["schema_version"] = "scenario-spec/v0.5"
+    scene = dict(data["scene"])  # type: ignore[arg-type]
+    scene.pop("overlay_asset_ids")
+    data["scene"] = scene
+    success = dict(data["success"])  # type: ignore[arg-type]
+    predicates = [dict(item) for item in success["predicates"]]  # type: ignore[index]
+    relative_parameters = dict(predicates[0]["parameters"])  # type: ignore[arg-type]
+    relative_alignment = dict(relative_parameters["axis_alignment"])  # type: ignore[arg-type]
+    relative_alignment["relative_to_part"] = "rotor"
+    relative_parameters["axis_alignment"] = relative_alignment
+    predicates[0]["parameters"] = relative_parameters
+    initial_parameters = dict(predicates[1]["parameters"])  # type: ignore[arg-type]
+    initial_parameters["relative_axis_part"] = "rotor"
+    predicates[1]["parameters"] = initial_parameters
+    predicates.append(
+        {
+            "id": "centrifuge_lid_closed",
+            "type": "articulation_joint_state_reached",
+            "sequence_index": 2,
+            "parameters": {
+                "object": "obj_graduated_cylinder_03",
+                "joint": "lid",
+                "state": "closed",
+            },
+        }
+    )
+    success["predicates"] = predicates
+    data["success"] = success
+    return data
+
+
 def test_scenario_spec_round_trips_bimanual_roles_and_invariant() -> None:
     spec = ScenarioSpec.from_mapping(_scenario_mapping())
 
@@ -1223,3 +1256,166 @@ def test_v04_json_schema_validates_rubric_and_rejects_bad_weight() -> None:
     bad["success"] = success
 
     assert list(validator.iter_errors(bad))
+
+
+def test_v05_round_trips_legacy_and_articulation_success_predicates() -> None:
+    data = _scenario_mapping_v05()
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.schema_version == "scenario-spec/v0.5"
+    assert [item.predicate_type for item in spec.success.predicates] == [
+        "relative_pose_reached",
+        "object_at_initial_pose",
+        "articulation_joint_state_reached",
+    ]
+    assert spec.success.predicates[-1].parameters == {
+        "object": "obj_graduated_cylinder_03",
+        "joint": "lid",
+        "state": "closed",
+    }
+    assert spec.success.predicates[0].parameters["axis_alignment"] == {
+        "object_axis": "y",
+        "target_axis": "y",
+        "comparison": ">=",
+        "threshold_deg": 40.0,
+        "relative_to_part": "rotor",
+    }
+    assert spec.success.predicates[1].parameters["relative_axis_part"] == "rotor"
+    assert spec.to_mapping() == data
+
+
+@pytest.mark.parametrize(
+    ("parameters", "message"),
+    [
+        ({"joint": "lid", "state": "closed"}, "object"),
+        (
+            {
+                "object": "unknown_centrifuge",
+                "joint": "lid",
+                "state": "closed",
+            },
+            "unknown object",
+        ),
+        (
+            {
+                "object": "obj_graduated_cylinder_03",
+                "joint": "",
+                "state": "closed",
+            },
+            "joint",
+        ),
+        (
+            {
+                "object": "obj_graduated_cylinder_03",
+                "joint": "lid",
+                "state": "",
+            },
+            "state",
+        ),
+        (
+            {
+                "object": "obj_graduated_cylinder_03",
+                "joint": "lid",
+                "state": "closed",
+                "runtime_dof_index": 2,
+            },
+            "unexpected",
+        ),
+    ],
+)
+def test_v05_rejects_invalid_articulation_semantic_references(
+    parameters: dict[str, object],
+    message: str,
+) -> None:
+    data = _scenario_mapping_v05()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    predicates = [dict(item) for item in success["predicates"]]  # type: ignore[index]
+    articulation = dict(predicates[-1])
+    articulation["parameters"] = parameters
+    predicates[-1] = articulation
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match=message):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_articulation_success_predicate_requires_v05() -> None:
+    data = _scenario_mapping_v05()
+    data["schema_version"] = "scenario-spec/v0.2"
+
+    with pytest.raises(ValueError, match="scenario-spec/v0.5"):
+        ScenarioSpec.from_mapping(data)
+
+
+@pytest.mark.parametrize(
+    ("predicate_index", "field_path", "value", "message"),
+    [
+        (0, ("axis_alignment", "relative_to_part"), "", "relative_to_part"),
+        (1, ("relative_axis_part",), "", "relative_axis_part"),
+    ],
+)
+def test_v05_rejects_empty_articulation_axis_part_references(
+    predicate_index: int,
+    field_path: tuple[str, ...],
+    value: object,
+    message: str,
+) -> None:
+    data = _scenario_mapping_v05()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    predicates = [dict(item) for item in success["predicates"]]  # type: ignore[index]
+    parameters = dict(predicates[predicate_index]["parameters"])  # type: ignore[arg-type]
+    if len(field_path) == 2:
+        nested = dict(parameters[field_path[0]])  # type: ignore[arg-type]
+        nested[field_path[1]] = value
+        parameters[field_path[0]] = nested
+    else:
+        parameters[field_path[0]] = value
+    predicates[predicate_index]["parameters"] = parameters
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match=message):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_relative_axis_part_requires_relative_axis_object() -> None:
+    data = _scenario_mapping_v05()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    predicates = [dict(item) for item in success["predicates"]]  # type: ignore[index]
+    parameters = dict(predicates[1]["parameters"])  # type: ignore[arg-type]
+    parameters.pop("relative_axis_object")
+    predicates[1]["parameters"] = parameters
+    success["predicates"] = predicates
+    data["success"] = success
+
+    with pytest.raises(ValueError, match="relative_axis_object"):
+        ScenarioSpec.from_mapping(data)
+
+
+def test_v05_json_schema_accepts_only_supported_generic_predicates() -> None:
+    schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.5.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    validator = Draft202012Validator(schema)
+    data = _scenario_mapping_v05()
+
+    assert not list(validator.iter_errors(data))
+
+    bad_parameters = json.loads(json.dumps(data))
+    bad_parameters["success"]["predicates"][-1]["parameters"]["runtime_dof_index"] = 2
+    assert list(validator.iter_errors(bad_parameters))
+
+    unsupported = json.loads(json.dumps(data))
+    unsupported["success"]["predicates"][-1]["type"] = "liquid_transfer_ratio"
+    assert list(validator.iter_errors(unsupported))
+
+    empty_part = json.loads(json.dumps(data))
+    empty_part["success"]["predicates"][0]["parameters"]["axis_alignment"][
+        "relative_to_part"
+    ] = ""
+    assert list(validator.iter_errors(empty_part))

@@ -15,12 +15,13 @@ from scenario_forge.adapters.ebench.genmanip import (
     export_genmanip_collected_package,
 )
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
-from scenario_forge.assets.source import LocalUSDAssetSource
+from scenario_forge.assets.source import LocalUSDAssetSource, UpstreamPackageRef
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from tests.test_scenario_package_compiler import _write_source_scene
 from tests.test_scenario_spec import _scenario_mapping
 from tests.test_scenario_spec import _scenario_mapping_v03
+from tests.test_scenario_spec import _scenario_mapping_v05
 from tests.test_scenario_spec import _exact_bimanual_success
 from tests.test_scenario_spec import _exact_bimanual_success_v03
 from tests.test_convert_asset_adapter import _write_source_bound_handoff
@@ -41,6 +42,11 @@ _RUNTIME_CONTRACT_V03_SCHEMA = (
     Path(__file__).resolve().parents[1]
     / "src/scenario_forge/schemas/jsonschema"
     / "scenario-forge-genmanip-runtime-contract-v0.3.schema.json"
+)
+_RUNTIME_CONTRACT_V05_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "src/scenario_forge/schemas/jsonschema"
+    / "scenario-forge-genmanip-runtime-contract-v0.5.schema.json"
 )
 
 
@@ -172,6 +178,160 @@ def _build_qualified_object_package(
     compile_scenario_package(
         ScenarioSpec.from_mapping(scenario),
         assets,
+        package_root,
+    )
+    return package_root
+
+
+def _articulation_metadata() -> dict[str, object]:
+    articulation_root = "/World/graduated_cylinder_03"
+    joints = {
+        "lid": {
+            "joint_prim": f"{articulation_root}/lid_joint",
+            "part_prim": f"{articulation_root}/lid",
+            "runtime_reset_value": -1.5556521048753416,
+            "states": {
+                "open": [-1.6, -1.5],
+                "closed": [-0.05, 0.05],
+            },
+        },
+        "rotor": {
+            "joint_prim": f"{articulation_root}/rotor_joint",
+            "part_prim": f"{articulation_root}/rotor",
+            "runtime_reset_value": 0.0,
+            "states": {"parked": [-0.05, 0.05]},
+        },
+        "start_button": {
+            "joint_prim": f"{articulation_root}/button_joint",
+            "part_prim": f"{articulation_root}/button",
+            "runtime_reset_value": 0.0,
+            "states": {
+                "released": [-0.001, 0.001],
+                "pressed": [-0.011, -0.009],
+            },
+        },
+    }
+    articulation_closure = {
+        "status": "pass",
+        "articulation_roots": [{"prim_path": articulation_root}],
+        "dof_mapping": [
+            {
+                "joint_prim": f"{articulation_root}/lid_joint",
+                "dof_index": 0,
+                "joint_type": "PhysicsRevoluteJoint",
+                "axis": "X",
+            },
+            {
+                "joint_prim": f"{articulation_root}/rotor_joint",
+                "dof_index": 1,
+                "joint_type": "PhysicsRevoluteJoint",
+                "axis": "Z",
+            },
+            {
+                "joint_prim": f"{articulation_root}/button_joint",
+                "dof_index": 2,
+                "joint_type": "PhysicsPrismaticJoint",
+                "axis": "Z",
+            },
+        ],
+        "reset_values": [
+            {
+                "joint_prim": f"{articulation_root}/lid_joint",
+                "reset_value": {"status": "pass", "value": -89.1323},
+            },
+            {
+                "joint_prim": f"{articulation_root}/rotor_joint",
+                "reset_value": {"status": "pass", "value": 0.0},
+            },
+            {
+                "joint_prim": f"{articulation_root}/button_joint",
+                "reset_value": {"status": "pass", "value": 0.0},
+            },
+        ],
+    }
+    articulation_contract = {
+        "schema_version": "scenario-forge-articulation-contract/v0.1",
+        "asset_entry_prim": articulation_root,
+        "articulation_root_prim": articulation_root,
+        "runtime_units": {
+            "revolute": "radian",
+            "prismatic": "meter",
+        },
+        "joints": joints,
+        "named_frames": {
+            "opening": {
+                "parent_prim": articulation_root,
+                "translation_parent_local_m": [0.0, 0.0, 0.20],
+                "rotation_parent_local_wxyz": [1.0, 0.0, 0.0, 0.0],
+                "authoritative": True,
+            }
+        },
+        "closure": articulation_closure,
+    }
+    return {
+        "articulation_contract": articulation_contract,
+        "articulation_closure": articulation_closure,
+    }
+
+
+def _build_articulated_object_package(
+    tmp_path: Path,
+    *,
+    articulation_metadata: dict[str, object] | None = None,
+    scenario_mapping: dict[str, object] | None = None,
+) -> Path:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = (
+        _scenario_mapping_v05()
+        if scenario_mapping is None
+        else scenario_mapping
+    )
+    objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
+    objects[2]["asset_id"] = "qualified_centrifuge"
+    objects[2]["role"] = "articulated_device"
+    scenario["objects"] = objects
+    metadata = (
+        _articulation_metadata()
+        if articulation_metadata is None
+        else articulation_metadata
+    )
+    articulated_source = LocalUSDAssetSource(
+        asset_id="qualified_centrifuge",
+        source_usd=source_usd,
+        role="articulated_object",
+        license="LicenseRef-Internal-Restricted",
+        source_uri="convert-asset://qualified-centrifuge/asset/sha256:"
+        + "1" * 64,
+        redistributable=False,
+        root_prim_path="/World/graduated_cylinder_03",
+        upstream_package=UpstreamPackageRef(
+            producer="ConvertAsset",
+            schema_version="asset_application_normalizer.v1",
+            package_id="qualified-centrifuge",
+            revision="producer-revision",
+            manifest_uri="convert-asset://qualified-centrifuge/manifest/sha256:"
+            + "2" * 64,
+            manifest_sha256="sha256:" + "2" * 64,
+            metadata={
+                "consumer_usage": "articulated_object",
+                **metadata,
+            },
+        ),
+    )
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            ),
+            "qualified_centrifuge": articulated_source,
+        },
         package_root,
     )
     return package_root
@@ -554,6 +714,7 @@ def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags
     )
     episode = json.loads(episode_path.read_text(encoding="utf-8"))
     layout = episode["task_data"]["initial_layout"]
+    assert "scenario_forge_runtime_contract_v05" not in episode["task_data"]
     contract = episode["task_data"]["scenario_forge_runtime_contract"]
 
     assert len(goal) == 3
@@ -676,6 +837,395 @@ def test_qualified_non_sdf_objects_do_not_force_gpu_dynamics(
     config = yaml.safe_load((output / "tasks/config.yaml").read_text(encoding="utf-8"))
 
     assert "physics_scene_config" not in config["evaluation_configs"][0]
+
+
+def test_articulated_object_exports_native_genmanip_articulation_contract(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_articulated_object_package(tmp_path)
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    config = yaml.safe_load((output / "tasks/config.yaml").read_text(encoding="utf-8"))
+    evaluation = config["evaluation_configs"][0]
+    centrifuge_config = evaluation["object_config"]["obj_graduated_cylinder_03"]
+    assert centrifuge_config == {
+        "type": "existed_object",
+        "uid_list": ["obj_graduated_cylinder_03"],
+        "is_articulated": True,
+        "target_positions": [-1.5556521048753416, 0.0, 0.0],
+        "articulation_info": {
+            "is_articulated": True,
+            "part": {
+                "lid": "/lid",
+                "rotor": "/rotor",
+                "start_button": "/button",
+            },
+        },
+    }
+    assert evaluation["generation_config"]["articulation"] == {
+        "obj_graduated_cylinder_03": {
+            "is_articulated": True,
+            "target_positions": [-1.5556521048753416, 0.0, 0.0],
+        }
+    }
+    first_axis_metric = evaluation["generation_config"]["goal"][0][0][1]
+    second_axis_metric = evaluation["generation_config"]["goal"][1][0][1]
+    assert first_axis_metric["obj2_uid"] == "obj_graduated_cylinder_03_rotor"
+    assert second_axis_metric["obj2_uid"] == "obj_graduated_cylinder_03_rotor"
+    articulation_metric = evaluation["generation_config"]["goal"][2][0][0]
+    assert articulation_metric == {
+        "type": "manip/default/sr_based_genmanip_relationship",
+        "obj1_uid": "obj_graduated_cylinder_03",
+        "status": [
+            [
+                [-0.05, 0.05],
+                [-100_000_000.0, 100_000_000.0],
+                [-100_000_000.0, 100_000_000.0],
+            ]
+        ],
+        "not_set_mass": True,
+    }
+
+    episode = json.loads(
+        (
+            output
+            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
+            "episode_metadata.json"
+        ).read_text(encoding="utf-8")
+    )
+    layout = episode["task_data"]["initial_layout"]["obj_graduated_cylinder_03"]
+    assert layout == {
+        "type": "articulation",
+        "position": [0.32, -0.18, 0.81],
+        "orientation": [0.7071068, 0.7071068, 0.0, 0.0],
+        "scale": [1.0, 1.0, 1.0],
+        "joint_positions": [-1.5556521048753416, 0.0, 0.0],
+        "prim_path": (
+            "/World/scientific_workbench_bimanual_pour/"
+            "obj_obj_graduated_cylinder_03"
+        ),
+    }
+    contract = episode["task_data"]["scenario_forge_runtime_contract"]
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.5"
+    )
+    assert contract["execution"]["native_goal_role"] == (
+        "native_articulation_status_with_diagnostic_compatibility_projection"
+    )
+    Draft202012Validator(
+        json.loads(_RUNTIME_CONTRACT_V05_SCHEMA.read_text(encoding="utf-8"))
+    ).validate(contract)
+    centrifuge_contract = next(
+        item
+        for item in contract["objects"]
+        if item["scenario_object_id"] == "obj_graduated_cylinder_03"
+    )
+    assert centrifuge_contract["articulation"] == {
+        "root_prim_path": "/World/graduated_cylinder_03",
+        "runtime_units": {
+            "revolute": "radian",
+            "prismatic": "meter",
+        },
+        "dof_mapping": [
+            {
+                "semantic_joint": "lid",
+                "joint_prim": "/World/graduated_cylinder_03/lid_joint",
+                "dof_index": 0,
+            },
+            {
+                "semantic_joint": "rotor",
+                "joint_prim": "/World/graduated_cylinder_03/rotor_joint",
+                "dof_index": 1,
+            },
+            {
+                "semantic_joint": "start_button",
+                "joint_prim": "/World/graduated_cylinder_03/button_joint",
+                "dof_index": 2,
+            },
+        ],
+        "reset_joint_positions": [-1.5556521048753416, 0.0, 0.0],
+        "states": {
+            "lid": {
+                "open": [-1.6, -1.5],
+                "closed": [-0.05, 0.05],
+            },
+            "rotor": {"parked": [-0.05, 0.05]},
+            "start_button": {
+                "released": [-0.001, 0.001],
+                "pressed": [-0.011, -0.009],
+            },
+        },
+    }
+    manifest = json.loads((output / "package_manifest.json").read_text(encoding="utf-8"))
+    assert (
+        "manip/default/sr_based_genmanip_relationship"
+        in manifest["runtime_requirements"]["registered_metrics"]
+    )
+
+
+def test_articulated_export_can_write_genmanip_v01_compatibility_projection(
+    tmp_path: Path,
+) -> None:
+    package_root = _build_articulated_object_package(tmp_path)
+
+    output = export_genmanip_collected_package(
+        package_root,
+        legacy_v01_transport=True,
+    ).output_dir
+    episode = json.loads(
+        (
+            output
+            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
+            "episode_metadata.json"
+        ).read_text(encoding="utf-8")
+    )
+    task_data = episode["task_data"]
+    compatibility = task_data["scenario_forge_runtime_contract"]
+    complete = task_data["scenario_forge_runtime_contract_v05"]
+
+    Draft202012Validator(
+        json.loads(_RUNTIME_CONTRACT_SCHEMA.read_text(encoding="utf-8"))
+    ).validate(compatibility)
+    assert compatibility["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.1"
+    )
+    assert compatibility["execution"] == {
+        "native_goal_role": "diagnostic_compatibility_projection",
+        "frame_aware_metric_active": False,
+        "process_invariants_evaluated": False,
+    }
+    assert all(
+        "physics_authoring" not in item and "articulation" not in item
+        for item in compatibility["objects"]
+    )
+
+    Draft202012Validator(
+        json.loads(_RUNTIME_CONTRACT_V05_SCHEMA.read_text(encoding="utf-8"))
+    ).validate(complete)
+    assert complete["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.5"
+    )
+    centrifuge = next(
+        item
+        for item in complete["objects"]
+        if item["scenario_object_id"] == "obj_graduated_cylinder_03"
+    )
+    assert centrifuge["articulation"]["dof_mapping"]
+
+    manifest = json.loads((output / "package_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["semantic_contract"]["json_pointer"] == (
+        "/task_data/scenario_forge_runtime_contract_v05"
+    )
+
+
+@pytest.mark.parametrize(
+    ("predicate_index", "part_field", "part_value", "message"),
+    [
+        (0, "relative_to_part", None, "relative_to_part.*required"),
+        (0, "relative_to_part", "missing", "unknown articulation part.*missing"),
+        (1, "relative_axis_part", None, "relative_axis_part.*required"),
+        (1, "relative_axis_part", "missing", "unknown articulation part.*missing"),
+    ],
+)
+def test_articulated_axis_target_requires_a_known_semantic_part(
+    tmp_path: Path,
+    predicate_index: int,
+    part_field: str,
+    part_value: str | None,
+    message: str,
+) -> None:
+    scenario = json.loads(json.dumps(_scenario_mapping_v05()))
+    predicate = scenario["success"]["predicates"][predicate_index]
+    parameters = predicate["parameters"]
+    if predicate_index == 0:
+        target = parameters["axis_alignment"]
+    else:
+        target = parameters
+    if part_value is None:
+        target.pop(part_field)
+    else:
+        target[part_field] = part_value
+    package_root = _build_articulated_object_package(
+        tmp_path,
+        scenario_mapping=scenario,
+    )
+
+    with pytest.raises(GenManipExportError, match=message):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_v05_qualified_rigid_objects_can_use_native_relative_pose_metrics(
+    tmp_path: Path,
+) -> None:
+    scenario = _scenario_mapping()
+    scenario["schema_version"] = "scenario-spec/v0.5"
+    scenario["success"] = {
+        "operator": "all",
+        "claim_scope": "state_proxy",
+        "predicates": [
+            {
+                "id": "tube_inserted",
+                "type": "relative_pose_reached",
+                "sequence_index": 0,
+                "parameters": {
+                    "object": "obj_conical_bottle03",
+                    "relative_to": "obj_graduated_cylinder_03",
+                    "xyz_range": {
+                        "x": [-0.01, 0.01],
+                        "y": [-0.01, 0.01],
+                        "z": [0.04, 0.08],
+                    },
+                },
+            },
+            {
+                "id": "target_stayed_put",
+                "type": "object_at_initial_pose",
+                "sequence_index": 1,
+                "parameters": {
+                    "object": "obj_graduated_cylinder_03",
+                    "xyz_tolerance": [0.02, 0.02, 0.01],
+                },
+            },
+        ],
+    }
+    package_root = _build_qualified_object_package(
+        tmp_path,
+        scenario_mapping=scenario,
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode = json.loads(
+        (
+            output
+            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
+            "episode_metadata.json"
+        ).read_text(encoding="utf-8")
+    )
+    contract = episode["task_data"]["scenario_forge_runtime_contract"]
+
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.5"
+    )
+    assert contract["execution"]["native_goal_role"] == (
+        "diagnostic_compatibility_projection"
+    )
+    Draft202012Validator(
+        json.loads(_RUNTIME_CONTRACT_V05_SCHEMA.read_text(encoding="utf-8"))
+    ).validate(contract)
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        (
+            lambda metadata: metadata.pop("articulation_contract"),
+            "articulation_contract",
+        ),
+        (
+            lambda metadata: metadata["articulation_contract"].pop("runtime_units"),  # type: ignore[index,union-attr]
+            "runtime_units",
+        ),
+        (
+            lambda metadata: metadata["articulation_contract"]["joints"]["lid"].update(  # type: ignore[index,union-attr]
+                {"joint_prim": "/World/graduated_cylinder_03/unknown_joint"}
+            ),
+            "lid.*dof_mapping|dof_mapping.*lid",
+        ),
+        (
+            lambda metadata: metadata["articulation_closure"].update(  # type: ignore[union-attr]
+                {"reset_values": []}
+            ),
+            "reset",
+        ),
+    ],
+)
+def test_articulated_object_export_rejects_missing_or_inconsistent_contract(
+    tmp_path: Path,
+    mutate: object,
+    message: str,
+) -> None:
+    metadata = json.loads(json.dumps(_articulation_metadata()))
+    assert callable(mutate)
+    mutate(metadata)
+    package_root = _build_articulated_object_package(
+        tmp_path,
+        articulation_metadata=metadata,
+    )
+    output = tmp_path / "collected"
+
+    with pytest.raises(GenManipExportError, match=message):
+        export_genmanip_collected_package(package_root, output)
+
+    assert not output.exists()
+
+
+@pytest.mark.parametrize(
+    ("frame_update", "message"),
+    [
+        (
+            {"xyz": [0.0, 0.0, 0.21]},
+            "named frame 'opening' translation.*articulation_contract",
+        ),
+        (
+            {"wxyz": [0.0, 0.0, 0.0, 1.0]},
+            "named frame 'opening' rotation.*articulation_contract",
+        ),
+    ],
+)
+def test_articulated_object_export_rejects_scenario_frame_pose_mismatch(
+    tmp_path: Path,
+    frame_update: dict[str, list[float]],
+    message: str,
+) -> None:
+    scenario = json.loads(json.dumps(_scenario_mapping_v05()))
+    scenario["objects"][2]["named_frames"]["opening"].update(frame_update)
+    package_root = _build_articulated_object_package(
+        tmp_path,
+        scenario_mapping=scenario,
+    )
+
+    with pytest.raises(GenManipExportError, match=message):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_articulated_object_export_rejects_unprovisioned_scenario_frame(
+    tmp_path: Path,
+) -> None:
+    scenario = json.loads(json.dumps(_scenario_mapping_v05()))
+    scenario["objects"][2]["named_frames"]["unprovisioned"] = {
+        "xyz": [0.0, 0.0, 0.0],
+        "wxyz": [1.0, 0.0, 0.0, 0.0],
+    }
+    package_root = _build_articulated_object_package(
+        tmp_path,
+        scenario_mapping=scenario,
+    )
+
+    with pytest.raises(
+        GenManipExportError,
+        match="named frame 'unprovisioned'.*articulation_contract",
+    ):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
+
+
+def test_articulated_object_export_rejects_non_root_authoritative_frame(
+    tmp_path: Path,
+) -> None:
+    metadata = json.loads(json.dumps(_articulation_metadata()))
+    root = metadata["articulation_contract"]["articulation_root_prim"]
+    metadata["articulation_contract"]["named_frames"]["opening"]["parent_prim"] = (
+        f"{root}/rotor"
+    )
+    package_root = _build_articulated_object_package(
+        tmp_path,
+        articulation_metadata=metadata,
+    )
+
+    with pytest.raises(
+        GenManipExportError,
+        match="named frame 'opening'.*parent_prim.*articulation root",
+    ):
+        export_genmanip_collected_package(package_root, tmp_path / "collected")
 
 
 def test_v02_runtime_contract_schema_rejects_reordered_exact_success(

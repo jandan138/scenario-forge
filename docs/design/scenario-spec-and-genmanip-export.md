@@ -27,6 +27,7 @@ adapters/ebench/genmanip/
   tasks/config.yaml
   tasks/<task_name>/000/episode_metadata.json
     task_data.scenario_forge_runtime_contract
+    task_data.scenario_forge_runtime_contract_v05  # compatibility export only
   tasks/<task_name>/000/meta_info.pkl
   cameras/fixed_camera_lift2.yml
   assets/scene_usds/scenario_forge/<scenario_id>/scene.usda
@@ -56,7 +57,7 @@ and target-frame-relative v0.3 forms all carry:
 - the Lift2 actor-to-end-effector mapping;
 - the normalized ScenarioSpec steps, invariants, and success contract.
 
-`package_manifest.json.semantic_contract` locates this one authoritative copy by
+`package_manifest.json.semantic_contract` locates the authoritative copy by
 episode-metadata path and JSON Pointer. There is no duplicate sidecar. In v0.1 the
 native `task_data.goal` is the only executable path and no frame-aware metric is
 activated. In v0.2 and v0.3, qualified ConvertAsset objects and an exact ordered
@@ -137,9 +138,14 @@ runtime IDs mean that their prims are present and active, not that an algorithm 
 proved they are visible or unobstructed in the RGB image. The parent process appends
 the renderer's stdout and stderr to the runtime log and scans the combined log for a
 declared set of known blocking material signals. The gate therefore establishes
-only that the expected render artifacts are current and structurally valid; a
-clean-room visual review still decides whether composition and asset appearance are
-acceptable.
+that the expected render artifacts are current and structurally valid. For
+task-interactive ConvertAsset objects it additionally compares the post-warmup
+runtime AABB extent with the producer-declared package extent (5% maximum relative
+error after axis sorting), requires the runtime AABB to remain within the table XY
+footprint, and limits support gap or penetration to 1 cm. These checks catch USD
+entry-transform composition failures before handoff. They still do not analyze
+pixels: a clean-room visual review decides whether composition and asset appearance
+are acceptable.
 
 ## Pour claim boundary
 
@@ -193,6 +199,61 @@ items (for example the two inactive liquid-transfer items) are transported with
 their `requires` and `active: false` flags so the downstream environment can
 feature-gate scoring explicitly rather than silently computing a different
 denominator.
+
+## Articulated-device export (v0.5)
+
+`scenario-spec/v0.5` adds the semantic
+`articulation_joint_state_reached` predicate. A task names only the scenario
+object, semantic joint, and state; it never embeds a USD joint path, DOF index, or
+numeric threshold. The referenced asset must be a ConvertAsset-owned
+`articulated_object` package with a validated
+`scenario-forge-articulation-contract/v0.1`. Export fails when that contract,
+its articulation closure, semantic joint mapping, reset vector, or state is
+missing or inconsistent.
+
+v0.5 is also the general successor for tasks that combine an articulated device
+with qualified rigid objects. Its native `relative_pose_reached` and
+`object_at_initial_pose` projections may evaluate those producer-owned rigid
+objects without forcing the pour-specific exact-frame contract used by v0.2-v0.4.
+The older schemas keep their existing restriction.
+
+The adapter maps the contract to GenManip's existing articulation wire:
+
+- `object_config` declares `is_articulated`, its semantic part paths, and runtime
+  reset targets;
+- episode metadata records an `articulation` initial-layout entry with the same
+  reset vector;
+- the ordered native goal stage uses
+  `manip/default/sr_based_genmanip_relationship` and a full DOF status vector,
+  with the selected state interval at its producer-mapped index and GenManip's
+  conventional unbounded interval for every non-target DOF.
+
+Axis comparisons against an articulated target must name its semantic part:
+`relative_pose_reached.parameters.axis_alignment.relative_to_part` or
+`object_at_initial_pose.parameters.relative_axis_part`. The adapter validates
+that part against the same ConvertAsset contract and emits GenManip's native
+`<object_uid>_<semantic_part>` UID (for example `centrifuge_rotor`). It rejects
+an articulated root UID or an unknown part before runtime, because GenManip
+registers articulated parts—not the root—as axis-comparison objects.
+
+The exporter normally places the complete v0.5 contract at
+`task_data.scenario_forge_runtime_contract`. The task-7/task-11 generator opts into
+the explicit `legacy_v01_transport` compatibility mode for the documented
+GenManip checkout. In that mode the key GenManip parses contains a
+JSON-schema-valid v0.1 projection: v0.5-only object fields are removed and the
+native goal is labelled as the executable diagnostic projection. The complete
+v0.5 contract remains beside it at
+`task_data.scenario_forge_runtime_contract_v05`, and
+`package_manifest.json.semantic_contract` points to that complete copy. This keeps
+the current GenManip consumer on its supported v0.1 native-goal path without
+discarding the richer portable contract or changing GenManip.
+
+All GenManip joint positions and state intervals use radians for revolute joints
+and meters for prismatic joints. Raw AAN closure reset values remain provenance
+and identity evidence because revolute USD attributes may be authored in degrees;
+only the ConvertAsset contract's explicit `runtime_reset_value` and runtime state
+intervals enter GenManip configuration or episode metadata. Scenario Forge does
+not repair appliance physics, add controller logic, or modify GenManip.
 
 ## Asset boundary
 

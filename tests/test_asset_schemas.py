@@ -221,6 +221,77 @@ def _v03_runtime_contract() -> dict[str, object]:
     }
 
 
+def _v05_runtime_contract() -> dict[str, object]:
+    contract = _v03_runtime_contract()
+    contract["schema_version"] = "scenario-forge-genmanip-runtime-contract/v0.5"
+    execution = dict(contract["execution"])  # type: ignore[arg-type]
+    execution["native_goal_role"] = (
+        "native_articulation_status_with_diagnostic_compatibility_projection"
+    )
+    contract["execution"] = execution
+    objects = [dict(item) for item in contract["objects"]]  # type: ignore[index]
+    centrifuge = objects[0]
+    centrifuge["role"] = "articulated_device"
+    centrifuge["articulation"] = {
+        "root_prim_path": "/World/scene/source",
+        "runtime_units": {
+            "revolute": "radian",
+            "prismatic": "meter",
+        },
+        "dof_mapping": [
+            {
+                "semantic_joint": "lid",
+                "joint_prim": "/World/scene/source/lid_joint",
+                "dof_index": 0,
+            },
+            {
+                "semantic_joint": "start_button",
+                "joint_prim": "/World/scene/source/start_button_joint",
+                "dof_index": 1,
+            },
+        ],
+        "reset_joint_positions": [-1.57, 0.0],
+        "states": {
+            "lid": {
+                "open": [-1.65, -1.45],
+                "closed": [-0.05, 0.05],
+            },
+            "start_button": {
+                "released": [-0.001, 0.001],
+                "pressed": [-0.045, -0.035],
+            },
+        },
+    }
+    objects[0] = centrifuge
+    contract["objects"] = objects
+    contract["success"] = {
+        "operator": "all",
+        "claim_scope": "native_articulation_and_kinematic_proxy",
+        "predicates": [
+            {
+                "id": "tube_inserted",
+                "type": "relative_pose_reached",
+                "sequence_index": 0,
+                "parameters": {
+                    "object": "target",
+                    "relative_to": "source",
+                },
+            },
+            {
+                "id": "lid_closed",
+                "type": "articulation_joint_state_reached",
+                "sequence_index": 1,
+                "parameters": {
+                    "object": "source",
+                    "joint": "lid",
+                    "state": "closed",
+                },
+            },
+        ],
+    }
+    return contract
+
+
 def _v03_task() -> dict[str, object]:
     return {
         "schema_version": "task/v0.3",
@@ -514,3 +585,31 @@ def test_metrics_v03_and_v04_contract_schema_artifacts_exist_and_parse() -> None
         assert schema["type"] == "object"
         assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
         assert schema["properties"]["schema_version"]["const"] == schema_version
+
+
+def test_v05_runtime_contract_schema_validates_articulation_semantics() -> None:
+    schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/scenario_forge/schemas/jsonschema/"
+            "scenario-forge-genmanip-runtime-contract-v0.5.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    validator = Draft202012Validator(schema)
+    contract = _v05_runtime_contract()
+
+    assert not list(validator.iter_errors(contract))
+
+    leaked_runtime_index = json.loads(json.dumps(contract))
+    leaked_runtime_index["success"]["predicates"][1]["parameters"]["dof_index"] = 0
+    assert list(validator.iter_errors(leaked_runtime_index))
+
+    malformed_mapping = json.loads(json.dumps(contract))
+    malformed_mapping["objects"][0]["articulation"]["dof_mapping"][0].pop(
+        "semantic_joint"
+    )
+    assert list(validator.iter_errors(malformed_mapping))
+
+    missing_runtime_units = json.loads(json.dumps(contract))
+    missing_runtime_units["objects"][0]["articulation"].pop("runtime_units")
+    assert list(validator.iter_errors(missing_runtime_units))

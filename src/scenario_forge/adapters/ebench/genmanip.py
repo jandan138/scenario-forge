@@ -26,6 +26,7 @@ from scenario_forge.package import (
 
 _GENMANIP_RANGE = "manip/default/sr_based_genmanip_range"
 _GENMANIP_AXIS_ALIGN = "manip/default/sr_based_genmanip_axis_align"
+_GENMANIP_RELATIONSHIP = "manip/default/sr_based_genmanip_relationship"
 _GENMANIP_FRAME_AWARE = "manip/default/scenario_forge_runtime_predicate"
 _ROBOT_PROFILE = "manip/lift2/R5a"
 _TABLE_LAYOUT_UID = "00000000000000000000000000000000"
@@ -35,6 +36,11 @@ _RUNTIME_CONTRACT_SCHEMA_V01 = "scenario-forge-genmanip-runtime-contract/v0.1"
 _RUNTIME_CONTRACT_SCHEMA_V02 = "scenario-forge-genmanip-runtime-contract/v0.2"
 _RUNTIME_CONTRACT_SCHEMA_V03 = "scenario-forge-genmanip-runtime-contract/v0.3"
 _RUNTIME_CONTRACT_SCHEMA_V04 = "scenario-forge-genmanip-runtime-contract/v0.4"
+_RUNTIME_CONTRACT_SCHEMA_V05 = "scenario-forge-genmanip-runtime-contract/v0.5"
+_ARTICULATION_CONTRACT_SCHEMA_V01 = (
+    "scenario-forge-articulation-contract/v0.1"
+)
+_GENMANIP_UNBOUNDED_DOF_RANGE = (-100_000_000.0, 100_000_000.0)
 _EXACT_PREDICATE_TYPES = frozenset(
     {
         "named_frames_relative_pose_reached",
@@ -66,9 +72,32 @@ class _RuntimeObjectBinding:
     is_table: bool
 
 
+@dataclass(frozen=True)
+class _ArticulationDofBinding:
+    semantic_joint: str
+    joint_prim: str
+    part_path: str
+    dof_index: int
+    reset_value: float
+    states: Mapping[str, tuple[float, float]]
+
+
+@dataclass(frozen=True)
+class _ArticulationObjectBinding:
+    root_prim_path: str
+    runtime_units: Mapping[str, str]
+    dofs: tuple[_ArticulationDofBinding, ...]
+
+    @property
+    def reset_joint_positions(self) -> list[float]:
+        return [item.reset_value for item in self.dofs]
+
+
 def export_genmanip_collected_package(
     package_dir: str | Path,
     out_dir: str | Path | None = None,
+    *,
+    legacy_v01_transport: bool = False,
 ) -> GenManipExportResult:
     """Export a compiled Scenario Forge package as a GenManip collected package.
 
@@ -169,6 +198,7 @@ def export_genmanip_collected_package(
         "scenario-spec/v0.2",
         "scenario-spec/v0.3",
         "scenario-spec/v0.4",
+        "scenario-spec/v0.5",
     }:
         raise GenManipExportError(
             "scenario scene overlays require scenario-spec/v0.2 or later"
@@ -227,6 +257,12 @@ def export_genmanip_collected_package(
         objects,
         assets_by_id,
     )
+    articulation_bindings = _articulation_requirements(objects, assets_by_id)
+    if articulation_bindings and scenario_schema_version != "scenario-spec/v0.5":
+        raise GenManipExportError(
+            "articulated_object export requires scenario-spec/v0.5"
+        )
+    qualified_object_ids.update(articulation_bindings)
     required_exact_object_ids = _exact_success_object_ids(success)
     unqualified_exact_objects = sorted(
         required_exact_object_ids.difference(qualified_object_ids)
@@ -240,6 +276,7 @@ def export_genmanip_collected_package(
         success,
         object_by_id,
         qualified_object_ids=qualified_object_ids,
+        articulation_bindings=articulation_bindings,
     )
     seed = _episode_name(scenario.get("seed", "000"))
     task_name = f"scenario_forge/{scenario_id}"
@@ -256,6 +293,7 @@ def export_genmanip_collected_package(
         table=table,
         goal=goal,
         requires_gpu_dynamics=requires_gpu_dynamics,
+        articulation_bindings=articulation_bindings,
     )
     runtime_contract = _runtime_contract(
         scenario=scenario,
@@ -265,7 +303,13 @@ def export_genmanip_collected_package(
         objects=objects,
         table=table,
         qualified_object_ids=qualified_object_ids,
+        articulation_bindings=articulation_bindings,
     )
+    complete_runtime_contract = (
+        runtime_contract if legacy_v01_transport else None
+    )
+    if legacy_v01_transport:
+        runtime_contract = _legacy_v01_transport_projection(runtime_contract)
     episode = _episode_metadata(
         scenario=scenario,
         scenario_id=scenario_id,
@@ -276,7 +320,9 @@ def export_genmanip_collected_package(
         assets_by_id=assets_by_id,
         goal=goal,
         runtime_contract=runtime_contract,
+        complete_runtime_contract=complete_runtime_contract,
         qualified_object_ids=qualified_object_ids,
+        articulation_bindings=articulation_bindings,
     )
 
     output_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -466,16 +512,31 @@ def _write_collected_package(
             _required_mapping(scenario, "success", "scenario spec")
         ),
         "success_contract_role": (
-            "authoritative_semantic_contract_with_explicit_diagnostic_projection"
-            if _success_uses_exact_predicates(
+            "authoritative_semantic_contract_with_native_articulation_status"
+            if _success_uses_articulation_predicates(
                 _required_mapping(scenario, "success", "scenario spec")
             )
-            else "validated_projection_of_semantic_contract"
+            else (
+                "authoritative_semantic_contract_with_explicit_diagnostic_projection"
+                if _success_uses_exact_predicates(
+                    _required_mapping(scenario, "success", "scenario spec")
+                )
+                else "validated_projection_of_semantic_contract"
+            )
         ),
         "semantic_contract": {
             "authority": "episode_metadata",
             "path": f"tasks/{task_name}/{episode_name}/episode_metadata.json",
-            "json_pointer": "/task_data/scenario_forge_runtime_contract",
+            "json_pointer": (
+                "/task_data/scenario_forge_runtime_contract_v05"
+                if "scenario_forge_runtime_contract_v05"
+                in _required_mapping(
+                    episode,
+                    "task_data",
+                    "episode metadata",
+                )
+                else "/task_data/scenario_forge_runtime_contract"
+            ),
         },
         "entrypoints": {
             "task_config": "tasks/config.yaml",
@@ -499,6 +560,13 @@ def _write_collected_package(
             "registered_metrics": [
                 _GENMANIP_RANGE,
                 _GENMANIP_AXIS_ALIGN,
+                *(
+                    [_GENMANIP_RELATIONSHIP]
+                    if _success_uses_articulation_predicates(
+                        _required_mapping(scenario, "success", "scenario spec")
+                    )
+                    else []
+                ),
                 *(
                     [_GENMANIP_FRAME_AWARE]
                     if _success_uses_exact_predicates(
@@ -531,18 +599,43 @@ def _task_config(
     table: Mapping[str, Any],
     goal: list[list[list[dict[str, Any]]]],
     requires_gpu_dynamics: bool,
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
 ) -> dict[str, Any]:
     robot = _required_mapping(scenario, "robot", "scenario spec")
     spawn = _required_mapping(robot, "spawn", "scenario robot")
     position = _number_list(spawn.get("xyz"), 3, "scenario robot spawn.xyz")
     table_id = _required_string(table, "id", "table object")
-    object_config = {
-        _required_string(item, "id", "scenario object"): {
+    object_config: dict[str, dict[str, Any]] = {}
+    for item in objects:
+        object_id = _required_string(item, "id", "scenario object")
+        if object_id == table_id:
+            continue
+        config_item: dict[str, Any] = {
             "type": "existed_object",
-            "uid_list": [_required_string(item, "id", "scenario object")],
+            "uid_list": [object_id],
         }
-        for item in objects
-        if _required_string(item, "id", "scenario object") != table_id
+        articulation = articulation_bindings.get(object_id)
+        if articulation is not None:
+            config_item.update(
+                {
+                    "is_articulated": True,
+                    "target_positions": articulation.reset_joint_positions,
+                    "articulation_info": {
+                        "is_articulated": True,
+                        "part": {
+                            dof.semantic_joint: dof.part_path
+                            for dof in articulation.dofs
+                        },
+                    },
+                }
+            )
+        object_config[object_id] = config_item
+    articulation_config = {
+        object_id: {
+            "is_articulated": True,
+            "target_positions": binding.reset_joint_positions,
+        }
+        for object_id, binding in articulation_bindings.items()
     }
     evaluation = {
         "task_name": task_name,
@@ -575,7 +668,7 @@ def _task_config(
         "generation_config": {
             "action_path": {"mode": "manual", "robot": 0},
             "goal": goal,
-            "articulation": {},
+            "articulation": articulation_config,
             "mode": "manual",
             "planner": "curobo",
         },
@@ -601,7 +694,9 @@ def _episode_metadata(
     assets_by_id: Mapping[str, AssetManifestEntry],
     goal: list[list[list[dict[str, Any]]]],
     runtime_contract: Mapping[str, Any],
+    complete_runtime_contract: Mapping[str, Any] | None,
     qualified_object_ids: set[str],
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
 ) -> dict[str, Any]:
     initial_layout: dict[str, Any] = {}
     table_id = _required_string(table, "id", "table object")
@@ -615,8 +710,7 @@ def _episode_metadata(
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
         asset = assets_by_id[asset_id]
         pose = _required_mapping(item, "pose", f"scenario object {object_id}")
-        initial_layout[binding.runtime_uid] = {
-            "type": "object",
+        base_layout = {
             "position": _number_list(pose.get("xyz"), 3, f"{object_id}.pose.xyz"),
             "orientation": _number_list(
                 pose.get("wxyz"), 4, f"{object_id}.pose.wxyz"
@@ -626,6 +720,19 @@ def _episode_metadata(
                 3,
                 f"{object_id}.pose.scale_xyz",
             ),
+            "prim_path": binding.state_prim_path,
+        }
+        articulation = articulation_bindings.get(object_id)
+        if articulation is not None:
+            initial_layout[binding.runtime_uid] = {
+                "type": "articulation",
+                **base_layout,
+                "joint_positions": articulation.reset_joint_positions,
+            }
+            continue
+        initial_layout[binding.runtime_uid] = {
+            "type": "object",
+            **base_layout,
             "path": (
                 _genmanip_collected_table_preload_path(scenario_id)
                 if binding.is_table and asset.role == "static_object"
@@ -635,7 +742,6 @@ def _episode_metadata(
             "add_rigid_body": (
                 not binding.is_table and object_id not in qualified_object_ids
             ),
-            "prim_path": binding.state_prim_path,
             "is_articulation_part": False,
         }
 
@@ -649,17 +755,22 @@ def _episode_metadata(
         ),
         "joint_positions": _lift2_default_joint_positions(),
     }
+    task_data = {
+        "instruction": _required_string(scenario, "instruction", "scenario spec"),
+        "goal": goal,
+        "initial_scene_graph": None,
+        "initial_layout": initial_layout,
+        "scenario_forge_runtime_contract": _json_safe_copy(runtime_contract),
+    }
+    if complete_runtime_contract is not None:
+        task_data["scenario_forge_runtime_contract_v05"] = _json_safe_copy(
+            complete_runtime_contract
+        )
     return {
         "schema_version": "genmanip-episode-metadata/v0.1",
         "task_name": task_name,
         "episode_name": episode_name,
-        "task_data": {
-            "instruction": _required_string(scenario, "instruction", "scenario spec"),
-            "goal": goal,
-            "initial_scene_graph": None,
-            "initial_layout": initial_layout,
-            "scenario_forge_runtime_contract": _json_safe_copy(runtime_contract),
-        },
+        "task_data": task_data,
     }
 
 
@@ -691,6 +802,7 @@ def _runtime_contract(
     objects: list[Mapping[str, Any]],
     table: Mapping[str, Any],
     qualified_object_ids: set[str],
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
 ) -> dict[str, Any]:
     table_id = _required_string(table, "id", "table object")
     contract_objects: list[dict[str, Any]] = []
@@ -763,6 +875,28 @@ def _runtime_contract(
                 "local_rigid_body": False,
                 "local_mass": False,
             }
+        articulation = articulation_bindings.get(object_id)
+        if articulation is not None:
+            contract_object["articulation"] = {
+                "root_prim_path": articulation.root_prim_path,
+                "runtime_units": dict(articulation.runtime_units),
+                "dof_mapping": [
+                    {
+                        "semantic_joint": dof.semantic_joint,
+                        "joint_prim": dof.joint_prim,
+                        "dof_index": dof.dof_index,
+                    }
+                    for dof in articulation.dofs
+                ],
+                "reset_joint_positions": articulation.reset_joint_positions,
+                "states": {
+                    dof.semantic_joint: {
+                        state: list(value_range)
+                        for state, value_range in dof.states.items()
+                    }
+                    for dof in articulation.dofs
+                },
+            }
         contract_objects.append(contract_object)
 
     robot = _required_mapping(scenario, "robot", "scenario spec")
@@ -788,26 +922,41 @@ def _runtime_contract(
     _validate_frame_references(steps, available_frames, "scenario steps")
     _validate_frame_references(success, available_frames, "scenario success")
     exact_success = _success_uses_exact_predicates(success)
-    if qualified_object_ids and not exact_success:
-        raise GenManipExportError(
-            "qualified rigid objects require the exact ordered success contract"
-        )
     scenario_schema_version = _required_string(
         scenario,
         "schema_version",
         "scenario spec",
     )
+    qualified_rigid_object_ids = qualified_object_ids.difference(
+        articulation_bindings
+    )
+    if (
+        qualified_rigid_object_ids
+        and not exact_success
+        and scenario_schema_version != "scenario-spec/v0.5"
+    ):
+        raise GenManipExportError(
+            "qualified rigid objects require the exact ordered success contract"
+        )
     exact_runtime_contract_schema = (
-        _RUNTIME_CONTRACT_SCHEMA_V04
-        if scenario_schema_version == "scenario-spec/v0.4"
+        _RUNTIME_CONTRACT_SCHEMA_V05
+        if scenario_schema_version == "scenario-spec/v0.5"
         else (
-            _RUNTIME_CONTRACT_SCHEMA_V03
-            if scenario_schema_version == "scenario-spec/v0.3"
-            else _RUNTIME_CONTRACT_SCHEMA_V02
+            _RUNTIME_CONTRACT_SCHEMA_V04
+            if scenario_schema_version == "scenario-spec/v0.4"
+            else (
+                _RUNTIME_CONTRACT_SCHEMA_V03
+                if scenario_schema_version == "scenario-spec/v0.3"
+                else _RUNTIME_CONTRACT_SCHEMA_V02
+            )
         )
     )
     execution: dict[str, Any] = {
-        "native_goal_role": "diagnostic_compatibility_projection",
+        "native_goal_role": (
+            "native_articulation_status_with_diagnostic_compatibility_projection"
+            if articulation_bindings
+            else "diagnostic_compatibility_projection"
+        ),
         "frame_aware_metric_active": False,
         "process_invariants_evaluated": False,
     }
@@ -826,7 +975,7 @@ def _runtime_contract(
     contract = {
         "schema_version": (
             exact_runtime_contract_schema
-            if qualified_object_ids or exact_success
+            if qualified_object_ids or exact_success or articulation_bindings
             else _RUNTIME_CONTRACT_SCHEMA_V01
         ),
         "contract_status": "transport_only",
@@ -852,6 +1001,34 @@ def _runtime_contract(
         "success": _json_safe_copy(success),
     }
     return cast(dict[str, Any], _json_safe_copy(contract))
+
+
+def _legacy_v01_transport_projection(
+    complete_contract: Mapping[str, Any],
+) -> dict[str, Any]:
+    if complete_contract.get("schema_version") != _RUNTIME_CONTRACT_SCHEMA_V05:
+        raise GenManipExportError(
+            "legacy_v01_transport requires a scenario-spec/v0.5 runtime contract"
+        )
+    projection = _json_safe_copy(complete_contract)
+    projection["schema_version"] = _RUNTIME_CONTRACT_SCHEMA_V01
+    projection["execution"] = {
+        "native_goal_role": "diagnostic_compatibility_projection",
+        "frame_aware_metric_active": False,
+        "process_invariants_evaluated": False,
+    }
+    projection["objects"] = [
+        {
+            key: value
+            for key, value in _as_mapping(
+                raw_object,
+                "v0.1 compatibility projection object",
+            ).items()
+            if key not in {"physics_authoring", "articulation"}
+        }
+        for raw_object in projection["objects"]
+    ]
+    return cast(dict[str, Any], _json_safe_copy(projection))
 
 
 def _runtime_initial_pose(
@@ -905,6 +1082,7 @@ def _genmanip_goal(
     object_by_id: Mapping[str, Mapping[str, Any]],
     *,
     qualified_object_ids: set[str],
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
 ) -> list[list[list[dict[str, Any]]]]:
     operator = _required_string(success, "operator", "scenario success")
     if operator != "all":
@@ -941,9 +1119,23 @@ def _genmanip_goal(
                 "diagnostic_compatibility_projection",
             )
         if predicate_type == "relative_pose_reached":
-            metrics = _relative_pose_metrics(parameters)
+            metrics = _relative_pose_metrics(
+                parameters,
+                articulation_bindings,
+            )
         elif predicate_type == "object_at_initial_pose":
-            metrics = _initial_pose_metrics(parameters, object_by_id)
+            metrics = _initial_pose_metrics(
+                parameters,
+                object_by_id,
+                articulation_bindings,
+            )
+        elif predicate_type == "articulation_joint_state_reached":
+            metrics = [
+                _articulation_joint_state_metric(
+                    parameters,
+                    articulation_bindings,
+                )
+            ]
         else:
             raise GenManipExportError(
                 f"unsupported GenManip success predicate type: {predicate_type}"
@@ -967,6 +1159,17 @@ def _success_uses_exact_predicates(success: Mapping[str, Any]) -> bool:
     return any(
         isinstance(predicate, Mapping)
         and predicate.get("type") in _EXACT_PREDICATE_TYPES
+        for predicate in raw_predicates
+    )
+
+
+def _success_uses_articulation_predicates(success: Mapping[str, Any]) -> bool:
+    raw_predicates = success.get("predicates")
+    if not isinstance(raw_predicates, list):
+        return False
+    return any(
+        isinstance(predicate, Mapping)
+        and predicate.get("type") == "articulation_joint_state_reached"
         for predicate in raw_predicates
     )
 
@@ -1092,6 +1295,335 @@ def _qualified_rigid_requirements(
     return qualified, requires_gpu_dynamics
 
 
+def _articulation_requirements(
+    objects: list[Mapping[str, Any]],
+    assets_by_id: Mapping[str, AssetManifestEntry],
+) -> dict[str, _ArticulationObjectBinding]:
+    bindings: dict[str, _ArticulationObjectBinding] = {}
+    for item in objects:
+        object_id = _required_string(item, "id", "scenario object")
+        asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
+        asset = assets_by_id[asset_id]
+        if asset.role != "articulated_object":
+            continue
+        upstream = _as_mapping(
+            asset.metadata.get("upstream_package"),
+            f"articulated object asset {asset_id}.upstream_package",
+        )
+        if upstream.get("producer") != "ConvertAsset":
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} must be owned by ConvertAsset"
+            )
+        upstream_metadata = _required_mapping(
+            upstream,
+            "metadata",
+            f"articulated object asset {asset_id}.upstream_package",
+        )
+        contract = _required_mapping(
+            upstream_metadata,
+            "articulation_contract",
+            f"articulated object asset {asset_id}",
+        )
+        if contract.get("schema_version") != _ARTICULATION_CONTRACT_SCHEMA_V01:
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} has unsupported "
+                "articulation_contract"
+            )
+        closure = _required_mapping(
+            upstream_metadata,
+            "articulation_closure",
+            f"articulated object asset {asset_id}",
+        )
+        if closure.get("status") != "pass":
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} articulation_closure "
+                "must have status 'pass'"
+            )
+        source_prim = _required_string(
+            item,
+            "source_prim_path",
+            f"scenario object {object_id}",
+        )
+        if contract.get("asset_entry_prim") != source_prim:
+            raise GenManipExportError(
+                f"scenario object {object_id} source_prim_path must equal its "
+                "articulation_contract asset_entry_prim"
+            )
+        root_prim = _required_string(
+            contract,
+            "articulation_root_prim",
+            f"articulated object asset {asset_id}.articulation_contract",
+        )
+        runtime_units = _required_mapping(
+            contract,
+            "runtime_units",
+            f"articulated object asset {asset_id}.articulation_contract",
+        )
+        expected_runtime_units = {
+            "revolute": "radian",
+            "prismatic": "meter",
+        }
+        if dict(runtime_units) != expected_runtime_units:
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} runtime_units must be "
+                "{'revolute': 'radian', 'prismatic': 'meter'}"
+            )
+        if root_prim != source_prim and not root_prim.startswith(source_prim + "/"):
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} articulation root must "
+                "be within asset_entry_prim"
+            )
+        roots = _mapping_list(
+            closure.get("articulation_roots"),
+            f"articulated object asset {asset_id}.articulation_closure.articulation_roots",
+        )
+        if len(roots) != 1 or roots[0].get("prim_path") != root_prim:
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} articulation root is "
+                "inconsistent with articulation_closure"
+            )
+        contract_frames = _required_mapping(
+            contract,
+            "named_frames",
+            f"articulated object asset {asset_id}.articulation_contract",
+        )
+        scenario_frames = _as_mapping(
+            item.get("named_frames", {}),
+            f"scenario object {object_id}.named_frames",
+        )
+        for frame_name, raw_pose in scenario_frames.items():
+            if frame_name not in contract_frames:
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} is not "
+                    "authoritative in its articulation_contract"
+                )
+            frame_label = (
+                f"articulated object asset {asset_id}.articulation_contract."
+                f"named_frames.{frame_name}"
+            )
+            contract_frame = _as_mapping(contract_frames[frame_name], frame_label)
+            parent_prim = _required_string(
+                contract_frame,
+                "parent_prim",
+                frame_label,
+            )
+            if parent_prim != root_prim:
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} "
+                    "parent_prim must equal the articulation root"
+                )
+            if contract_frame.get("authoritative") is not True:
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} must "
+                    "be authoritative in its articulation_contract"
+                )
+            pose = _as_mapping(
+                raw_pose,
+                f"scenario object {object_id}.named_frames.{frame_name}",
+            )
+            scenario_xyz = _finite_number_list(
+                pose.get("xyz"),
+                3,
+                f"scenario object {object_id}.named_frames.{frame_name}.xyz",
+            )
+            contract_xyz = _finite_number_list(
+                contract_frame.get("translation_parent_local_m"),
+                3,
+                f"{frame_label}.translation_parent_local_m",
+            )
+            if scenario_xyz != contract_xyz:
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} "
+                    "translation must match its articulation_contract"
+                )
+            scenario_wxyz = _finite_number_list(
+                pose.get("wxyz"),
+                4,
+                f"scenario object {object_id}.named_frames.{frame_name}.wxyz",
+            )
+            contract_wxyz = _finite_number_list(
+                contract_frame.get("rotation_parent_local_wxyz"),
+                4,
+                f"{frame_label}.rotation_parent_local_wxyz",
+            )
+            if scenario_wxyz != contract_wxyz:
+                raise GenManipExportError(
+                    f"scenario object {object_id} named frame {frame_name!r} "
+                    "rotation must match its articulation_contract"
+                )
+
+        raw_dof_mapping = _mapping_list(
+            closure.get("dof_mapping"),
+            f"articulated object asset {asset_id}.articulation_closure.dof_mapping",
+        )
+        if not raw_dof_mapping:
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} dof_mapping must not be empty"
+            )
+        dof_by_prim: dict[str, int] = {}
+        for raw_dof in raw_dof_mapping:
+            joint_prim = _required_string(
+                raw_dof,
+                "joint_prim",
+                f"articulated object asset {asset_id}.dof_mapping",
+            )
+            dof_index = _non_negative_int(
+                raw_dof.get("dof_index"),
+                f"articulated object asset {asset_id}.dof_mapping.dof_index",
+            )
+            if joint_prim in dof_by_prim or dof_index in dof_by_prim.values():
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} dof_mapping must "
+                    "use unique joint paths and indices"
+                )
+            dof_by_prim[joint_prim] = dof_index
+        if sorted(dof_by_prim.values()) != list(range(len(dof_by_prim))):
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} dof_mapping indices "
+                "must be contiguous from 0"
+            )
+
+        reset_prims: set[str] = set()
+        for raw_reset in _mapping_list(
+            closure.get("reset_values"),
+            f"articulated object asset {asset_id}.articulation_closure.reset_values",
+        ):
+            joint_prim = _required_string(
+                raw_reset,
+                "joint_prim",
+                f"articulated object asset {asset_id}.reset_values",
+            )
+            reset_record = _required_mapping(
+                raw_reset,
+                "reset_value",
+                f"articulated object asset {asset_id}.reset_values",
+            )
+            if reset_record.get("status") != "pass":
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} reset value for "
+                    f"{joint_prim!r} must have status 'pass'"
+                )
+            reset_value = _number(
+                reset_record.get("value"),
+                f"articulated object asset {asset_id}.reset_values.value",
+            )
+            if not math.isfinite(reset_value) or joint_prim in reset_prims:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} reset values must "
+                    "be finite and unique"
+                )
+            reset_prims.add(joint_prim)
+        if reset_prims != set(dof_by_prim):
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} reset_values must cover "
+                "every dof_mapping entry"
+            )
+
+        semantic_joints = _required_mapping(
+            contract,
+            "joints",
+            f"articulated object asset {asset_id}.articulation_contract",
+        )
+        semantic_by_index: dict[int, _ArticulationDofBinding] = {}
+        for semantic_joint, raw_semantic in semantic_joints.items():
+            if not isinstance(semantic_joint, str) or not semantic_joint:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} semantic joint names "
+                    "must be non-empty strings"
+                )
+            _require_usd_identifier(
+                semantic_joint,
+                f"articulated object asset {asset_id} semantic joint",
+            )
+            semantic = _as_mapping(
+                raw_semantic,
+                f"articulated object asset {asset_id}.joints.{semantic_joint}",
+            )
+            joint_prim = _required_string(
+                semantic,
+                "joint_prim",
+                f"articulated object asset {asset_id}.joints.{semantic_joint}",
+            )
+            if joint_prim not in dof_by_prim:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} semantic joint "
+                    f"{semantic_joint!r} is missing from dof_mapping"
+                )
+            dof_index = dof_by_prim[joint_prim]
+            if dof_index in semantic_by_index:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} semantic joints "
+                    "must map to unique DOFs"
+                )
+            part_prim = _required_string(
+                semantic,
+                "part_prim",
+                f"articulated object asset {asset_id}.joints.{semantic_joint}",
+            )
+            part_path = "/" + "/".join(
+                _relative_prim_parts(root_prim, part_prim)
+            )
+            raw_states = _required_mapping(
+                semantic,
+                "states",
+                f"articulated object asset {asset_id}.joints.{semantic_joint}",
+            )
+            states: dict[str, tuple[float, float]] = {}
+            for state_name, raw_range in raw_states.items():
+                if not isinstance(state_name, str) or not state_name:
+                    raise GenManipExportError(
+                        f"articulated object asset {asset_id!r} state names "
+                        "must be non-empty strings"
+                    )
+                state_range = _finite_number_list(
+                    raw_range,
+                    2,
+                    f"articulated object asset {asset_id} state {state_name}",
+                )
+                if state_range[0] > state_range[1]:
+                    raise GenManipExportError(
+                        f"articulated object asset {asset_id!r} state "
+                        f"{state_name!r} lower bound exceeds upper bound"
+                    )
+                states[state_name] = (state_range[0], state_range[1])
+            if not states:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} semantic joint "
+                    f"{semantic_joint!r} must declare states"
+                )
+            runtime_reset_value = _number(
+                semantic.get("runtime_reset_value"),
+                f"articulated object asset {asset_id}.joints."
+                f"{semantic_joint}.runtime_reset_value",
+            )
+            if not math.isfinite(runtime_reset_value):
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} semantic joint "
+                    f"{semantic_joint!r} runtime_reset_value must be finite"
+                )
+            semantic_by_index[dof_index] = _ArticulationDofBinding(
+                semantic_joint=semantic_joint,
+                joint_prim=joint_prim,
+                part_path=part_path,
+                dof_index=dof_index,
+                reset_value=runtime_reset_value,
+                states=states,
+            )
+        if set(semantic_by_index) != set(range(len(dof_by_prim))):
+            raise GenManipExportError(
+                f"articulated object asset {asset_id!r} articulation_contract "
+                "joints must cover every dof_mapping entry"
+            )
+        bindings[object_id] = _ArticulationObjectBinding(
+            root_prim_path=root_prim,
+            runtime_units=expected_runtime_units,
+            dofs=tuple(
+                semantic_by_index[index] for index in range(len(semantic_by_index))
+            ),
+        )
+    return bindings
+
+
 def _validate_visual_static_object_requirements(
     objects: list[Mapping[str, Any]],
     assets_by_id: Mapping[str, AssetManifestEntry],
@@ -1146,7 +1678,69 @@ def _interaction_requires_gpu_dynamics(
     )
 
 
-def _relative_pose_metrics(parameters: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _articulation_joint_state_metric(
+    parameters: Mapping[str, Any],
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
+) -> dict[str, Any]:
+    object_id = _required_string(
+        parameters,
+        "object",
+        "articulation joint state predicate",
+    )
+    articulation = articulation_bindings.get(object_id)
+    if articulation is None:
+        raise GenManipExportError(
+            "articulation joint state predicate references object "
+            f"{object_id!r} without a qualified articulation_contract"
+        )
+    semantic_joint = _required_string(
+        parameters,
+        "joint",
+        "articulation joint state predicate",
+    )
+    state_name = _required_string(
+        parameters,
+        "state",
+        "articulation joint state predicate",
+    )
+    target_dof = next(
+        (
+            dof
+            for dof in articulation.dofs
+            if dof.semantic_joint == semantic_joint
+        ),
+        None,
+    )
+    if target_dof is None:
+        raise GenManipExportError(
+            f"articulation joint state predicate joint {semantic_joint!r} is "
+            f"not declared by object {object_id!r}"
+        )
+    state_range = target_dof.states.get(state_name)
+    if state_range is None:
+        raise GenManipExportError(
+            f"articulation joint state predicate state {state_name!r} is not "
+            f"declared for {object_id!r}.{semantic_joint}"
+        )
+    candidate = [
+        (
+            list(state_range)
+            if dof.dof_index == target_dof.dof_index
+            else list(_GENMANIP_UNBOUNDED_DOF_RANGE)
+        )
+        for dof in articulation.dofs
+    ]
+    return {
+        "type": _GENMANIP_RELATIONSHIP,
+        "obj1_uid": object_id,
+        "status": [candidate],
+    }
+
+
+def _relative_pose_metrics(
+    parameters: Mapping[str, Any],
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
+) -> list[dict[str, Any]]:
     object_id = _required_string(parameters, "object", "relative pose predicate")
     relative_to = _required_string(
         parameters, "relative_to", "relative pose predicate"
@@ -1169,11 +1763,17 @@ def _relative_pose_metrics(parameters: Mapping[str, Any]) -> list[dict[str, Any]
     raw_alignment = parameters.get("axis_alignment")
     if raw_alignment is not None:
         alignment = _as_mapping(raw_alignment, "relative pose axis_alignment")
+        axis_target_uid = _axis_target_uid(
+            object_id=relative_to,
+            semantic_part=alignment.get("relative_to_part"),
+            part_field="relative_to_part",
+            articulation_bindings=articulation_bindings,
+        )
         metrics.append(
             {
                 "type": _GENMANIP_AXIS_ALIGN,
                 "obj1_uid": object_id,
-                "obj2_uid": relative_to,
+                "obj2_uid": axis_target_uid,
                 "obj1_axis": _required_string(
                     alignment, "object_axis", "axis_alignment"
                 ),
@@ -1192,7 +1792,9 @@ def _relative_pose_metrics(parameters: Mapping[str, Any]) -> list[dict[str, Any]
 
 
 def _initial_pose_metrics(
-    parameters: Mapping[str, Any], object_by_id: Mapping[str, Mapping[str, Any]]
+    parameters: Mapping[str, Any],
+    object_by_id: Mapping[str, Mapping[str, Any]],
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
 ) -> list[dict[str, Any]]:
     object_id = _required_string(parameters, "object", "initial pose predicate")
     if object_id not in object_by_id:
@@ -1214,17 +1816,28 @@ def _initial_pose_metrics(
     }
     metrics = [metric_range]
     relative_axis_object = parameters.get("relative_axis_object")
+    relative_axis_part = parameters.get("relative_axis_part")
     max_axis_error = parameters.get("max_axis_error_deg")
-    if relative_axis_object is not None or max_axis_error is not None:
+    if (
+        relative_axis_object is not None
+        or relative_axis_part is not None
+        or max_axis_error is not None
+    ):
         if not isinstance(relative_axis_object, str) or not relative_axis_object:
             raise GenManipExportError(
                 "initial pose predicate.relative_axis_object must be a non-empty string"
             )
+        axis_target_uid = _axis_target_uid(
+            object_id=relative_axis_object,
+            semantic_part=relative_axis_part,
+            part_field="relative_axis_part",
+            articulation_bindings=articulation_bindings,
+        )
         metrics.append(
             {
                 "type": _GENMANIP_AXIS_ALIGN,
                 "obj1_uid": object_id,
-                "obj2_uid": relative_axis_object,
+                "obj2_uid": axis_target_uid,
                 "obj1_axis": _optional_axis(parameters, "object_axis", "z"),
                 "obj2_axis": _optional_axis(parameters, "target_axis", "z"),
                 "comparison": "<=",
@@ -1234,6 +1847,38 @@ def _initial_pose_metrics(
             }
         )
     return metrics
+
+
+def _axis_target_uid(
+    *,
+    object_id: str,
+    semantic_part: object,
+    part_field: str,
+    articulation_bindings: Mapping[str, _ArticulationObjectBinding],
+) -> str:
+    articulation = articulation_bindings.get(object_id)
+    if articulation is None:
+        if semantic_part is not None:
+            raise GenManipExportError(
+                f"{part_field} may only be used when axis target "
+                f"{object_id!r} is articulated"
+            )
+        return object_id
+    if semantic_part is None:
+        raise GenManipExportError(
+            f"{part_field} is required when axis target {object_id!r} "
+            "is articulated"
+        )
+    if not isinstance(semantic_part, str) or not semantic_part:
+        raise GenManipExportError(f"{part_field} must be a non-empty string")
+    if semantic_part not in {
+        dof.semantic_joint for dof in articulation.dofs
+    }:
+        raise GenManipExportError(
+            f"unknown articulation part {semantic_part!r} for axis target "
+            f"{object_id!r}"
+        )
+    return f"{object_id}_{semantic_part}"
 
 
 def _optional_axis(parameters: Mapping[str, Any], key: str, default: str) -> str:
@@ -1722,6 +2367,15 @@ def _as_mapping(value: object, label: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise GenManipExportError(f"{label} must be a mapping")
     return value
+
+
+def _mapping_list(value: object, label: str) -> list[Mapping[str, Any]]:
+    if not isinstance(value, list):
+        raise GenManipExportError(f"{label} must be a list")
+    return [
+        _as_mapping(item, f"{label}[{index}]")
+        for index, item in enumerate(value)
+    ]
 
 
 def _required_mapping(

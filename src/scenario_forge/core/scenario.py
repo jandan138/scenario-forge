@@ -24,6 +24,13 @@ _V03_EXACT_BIMANUAL_PREDICATE_TYPES = (
 _EXACT_BIMANUAL_PREDICATE_TYPES = frozenset(
     (*_V02_EXACT_BIMANUAL_PREDICATE_TYPES, *_V03_EXACT_BIMANUAL_PREDICATE_TYPES)
 )
+_V05_SUCCESS_PREDICATE_TYPES = frozenset(
+    {
+        "relative_pose_reached",
+        "object_at_initial_pose",
+        "articulation_joint_state_reached",
+    }
+)
 _PROGRESS_RUBRIC_CONDITION_TYPES = frozenset(
     {
         "object_lifted",
@@ -604,6 +611,7 @@ class ScenarioSpec:
             "scenario-spec/v0.2",
             "scenario-spec/v0.3",
             "scenario-spec/v0.4",
+            "scenario-spec/v0.5",
         }:
             raise ValueError("unsupported scenario spec schema_version")
         raw_objects = data.get("objects")
@@ -705,6 +713,11 @@ class ScenarioSpec:
                 )
 
         for predicate in self.success.predicates:
+            _validate_v05_success_predicate(
+                predicate,
+                schema_version=self.schema_version,
+                object_ids=object_ids,
+            )
             _validate_parameter_references(
                 predicate.parameters, object_ids, self.objects, predicate.predicate_id
             )
@@ -851,6 +864,67 @@ def _validate_progress_rubric_references(
                     f"item {item_id}: a grasp condition may be a hard gate or a "
                     "scored rubric item, not both"
                 )
+
+
+def _validate_v05_success_predicate(
+    predicate: SuccessPredicateSpec,
+    *,
+    schema_version: str,
+    object_ids: set[str],
+) -> None:
+    parameters = predicate.parameters
+    relative_to_part: object = None
+    if predicate.predicate_type == "relative_pose_reached":
+        raw_alignment = parameters.get("axis_alignment")
+        if isinstance(raw_alignment, Mapping):
+            relative_to_part = raw_alignment.get("relative_to_part")
+    relative_axis_part = (
+        parameters.get("relative_axis_part")
+        if predicate.predicate_type == "object_at_initial_pose"
+        else None
+    )
+    if schema_version != "scenario-spec/v0.5":
+        if relative_to_part is not None or relative_axis_part is not None:
+            raise ValueError(
+                "articulated axis part references require scenario-spec/v0.5"
+            )
+        if predicate.predicate_type == "articulation_joint_state_reached":
+            raise ValueError(
+                "articulation_joint_state_reached requires scenario-spec/v0.5"
+            )
+        return
+    if predicate.predicate_type not in _V05_SUCCESS_PREDICATE_TYPES:
+        raise ValueError(
+            "scenario-spec/v0.5 success predicate type must be one of "
+            + ", ".join(sorted(_V05_SUCCESS_PREDICATE_TYPES))
+        )
+    field = f"success predicate {predicate.predicate_id}.parameters"
+    if predicate.predicate_type == "relative_pose_reached":
+        if relative_to_part is not None:
+            _string(
+                relative_to_part,
+                f"{field}.axis_alignment.relative_to_part",
+            )
+        return
+    if predicate.predicate_type == "object_at_initial_pose":
+        if relative_axis_part is not None:
+            _string(relative_axis_part, f"{field}.relative_axis_part")
+            relative_axis_object = _string(
+                parameters.get("relative_axis_object"),
+                f"{field}.relative_axis_object",
+            )
+            if relative_axis_object not in object_ids:
+                raise ValueError(
+                    f"{predicate.predicate_id} references unknown object "
+                    f"{relative_axis_object}"
+                )
+        return
+    _require_exact_fields(parameters, {"object", "joint", "state"}, field)
+    object_id = _string(parameters.get("object"), f"{field}.object")
+    if object_id not in object_ids:
+        raise ValueError(f"{predicate.predicate_id} references unknown object {object_id}")
+    _string(parameters.get("joint"), f"{field}.joint")
+    _string(parameters.get("state"), f"{field}.state")
 
 
 def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:

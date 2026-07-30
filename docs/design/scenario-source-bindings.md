@@ -50,7 +50,8 @@ bindings:
 `convert_asset_package` validates an existing source-bound ConvertAsset delivery
 through the existing inbound adapter. In v0.2 its `usage` explicitly selects the
 neutral role instead of inferring one. The available values are `scene_overlay`,
-`rigid_object`, `visual_static_environment`, and `visual_static_object`.
+`rigid_object`, `articulated_object`, `visual_static_environment`, and
+`visual_static_object`.
 
 The two `visual_static_*` values require a ConvertAsset `asset_role:
 visual_static` manifest. Scenario Forge verifies the exact source and scope hashes,
@@ -116,6 +117,19 @@ closure and locks it with the rest of the package. A static producer package wit
 `not_run` gates remains valid producer evidence, but is rejected for this task-ready
 usage.
 
+Both `rigid_object` and `articulated_object` are task-interactive references:
+the scenario wrapper owns their final task pose. Their ConvertAsset entry prim
+must therefore have an identity composed world transform within absolute
+tolerance `1e-6`. Scenario Forge reads that matrix from
+`visual_preservation_fingerprint.package_before_physics_profile.scope_world_transforms`
+and rejects a producer package whose entry root still carries scale, rotation,
+translation, pivot, or another effective canonicalization transform. It also
+reads the matching `physics_closure.physical_frame.scope_bounds` entry and
+transports it as `upstream_package.metadata.task_interactive_geometry`. This is
+a generic composition contract, not an asset-specific repair. Historical
+`scene_overlay` bindings and visual-static room/table packages retain their
+existing transform behavior.
+
 ```yaml
   scientific_workbench_conical_bottle03_dynamic:
     resolver: convert_asset_package
@@ -126,6 +140,77 @@ usage.
     producer_revision: <ConvertAsset commit>
     expected_scope_prims: [/World/conical_bottle03]
     license: CC-BY-NC-4.0
+    redistributable: false
+```
+
+`usage: articulated_object` is a separate dynamic handoff. It does not weaken or
+reuse the single-rigid-root `interaction_contract`. Scenario Forge requires one
+passing articulation root, a positive contiguous DOF map, finite non-degenerate
+joint limits, and an in-range passing reset value for every mapped DOF. It also
+requires a source-hash-bound `aan.articulated_device_profile.v1` and its passing,
+hash-locked runtime qualification report. That report must include the actual
+Isaac runtime DOF order (`runtime_dof_mapping` with index, runtime name, and joint
+prim); Scenario Forge rejects a static closure whose indices differ from the
+runtime vector. The profile also declares `required_runtime_task_gates`; the
+report must contain a passing record for every declared gate, so a top-level
+`status: pass` alone is insufficient. The profile supplies semantic joint names,
+moving-part prims, named state intervals, reset states, and authoritative named
+frames; all are checked against the manifest `articulation_closure`.
+
+All profile frames may be retained as authoritative validation frames, including
+frames parented below a moving articulated part. Current task materialization and
+GenManip export can use only a frame whose `parent_prim` is the articulation root:
+the exported portable pose has no moving-parent state/transform semantics. A
+moving-parent frame therefore remains qualification evidence, not a
+task/GenManip-exportable frame, until a future versioned contract defines its
+state binding and transform evaluation. Do not flatten or infer it consumer-side.
+
+The resulting upstream metadata exposes a simulator-neutral
+`scenario-forge-articulation-contract/v0.1`:
+
+```yaml
+schema_version: scenario-forge-articulation-contract/v0.1
+asset_entry_prim: /World/Centrifuge
+articulation_root_prim: /World/Centrifuge
+runtime_units:
+  revolute: radian
+  prismatic: meter
+required_runtime_task_gates:
+  - lid_contact_cycle
+  - button_contact_cycle
+joints:
+  lid:
+    joint_prim: /World/Centrifuge/lid_joint
+    part_prim: /World/Centrifuge/lid
+    runtime_reset_value: -1.553343
+    states:
+      open: [-1.570796, -1.396263]
+      closed: [-0.087266, 0.0]
+closure:
+  articulation_roots: [...]
+  dof_mapping: [...]
+  reset_values: [...]
+```
+
+The complete verified AAN closure remains available separately as
+`upstream_package.metadata.articulation_closure`. Bindings may not exclude the
+device profile or runtime report, because those files are part of the accepted
+contract rather than disposable preview evidence. AAN's raw USD revolute records
+remain authored in degrees, while GenManip reads and writes articulation positions
+in radians. The neutral contract therefore exposes explicit runtime units and
+runtime reset/state values; the inbound adapter verifies the degree-to-radian
+mapping instead of forwarding raw closure values into GenManip.
+
+```yaml
+  scientific_workbench_centrifuge:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ./hci955350-normalized-facade/facade.usd
+    package_dir: ./hci955350/package
+    manifest_path: ./hci955350/manifest.json
+    producer_revision: <ConvertAsset commit>
+    expected_scope_prims: [/World/Centrifuge]
+    license: LicenseRef-Internal-Restricted
     redistributable: false
 ```
 
