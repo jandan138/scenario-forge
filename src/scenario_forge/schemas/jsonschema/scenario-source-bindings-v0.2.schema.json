@@ -69,6 +69,7 @@
               "enum": [
                 "scene_overlay",
                 "rigid_object",
+                "articulated_object",
                 "visual_static_environment",
                 "visual_static_object"
               ]

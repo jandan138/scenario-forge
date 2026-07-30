@@ -12,6 +12,7 @@ from scenario_forge.generation.source_resolver import (
     resolve_scenario_source_bindings,
 )
 from tests.test_convert_asset_adapter import (
+    _write_articulated_handoff,
     _write_source_bound_handoff,
     _write_visual_static_handoff,
 )
@@ -79,6 +80,7 @@ def test_source_bindings_v02_schema_requires_explicit_convert_asset_usage() -> N
     assert convert_asset["properties"]["usage"]["enum"] == [
         "scene_overlay",
         "rigid_object",
+        "articulated_object",
         "visual_static_environment",
         "visual_static_object",
     ]
@@ -200,6 +202,40 @@ def test_v02_convert_asset_rigid_object_binding_requires_task_ready_interaction(
     assert source.upstream_package.metadata["interaction_contract"][
         "asset_entry_prim"
     ] == "/World/DryingBox_03"
+
+
+def test_v02_convert_asset_articulated_object_binding_preserves_device_contract(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_articulated_handoff(
+        tmp_path / "handoff"
+    )
+    bindings_path = _write_bindings(
+        tmp_path / "bindings.yaml",
+        {
+            "qualified_centrifuge": {
+                "resolver": "convert_asset_package",
+                "usage": "articulated_object",
+                "source_usd": source_usd.relative_to(tmp_path).as_posix(),
+                "package_dir": package_dir.relative_to(tmp_path).as_posix(),
+                "manifest_path": manifest_path.relative_to(tmp_path).as_posix(),
+                "producer_revision": "convertasset-articulation-r1",
+                "expected_scope_prims": ["/World/Centrifuge"],
+                "license": "LicenseRef-Internal-Restricted",
+                "redistributable": False,
+            }
+        },
+        schema_version="scenario-source-bindings/v0.2",
+    )
+
+    source = resolve_scenario_source_bindings(bindings_path)["qualified_centrifuge"]
+
+    assert source.role == "articulated_object"
+    assert source.upstream_package is not None
+    contract = source.upstream_package.metadata["articulation_contract"]
+    assert contract["joints"]["start_button"]["part_prim"] == (
+        "/World/Centrifuge/start_button"
+    )
 
 
 def test_v02_convert_asset_visual_static_binding_keeps_it_nonphysical(

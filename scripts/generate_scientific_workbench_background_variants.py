@@ -23,6 +23,9 @@ import yaml
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
+from scenario_forge.adapters.generated_environment import (
+    GENERATED_ENVIRONMENT_INTAKE_SCHEMA_VERSION,
+)
 from scenario_forge.assets.external_environment import (
     EXTERNAL_ENVIRONMENT_INTAKE_SCHEMA_VERSION,
 )
@@ -172,6 +175,7 @@ class BackgroundCandidate:
     root_translate_xyz: tuple[float, float, float]
     physical_bounds_m: tuple[tuple[float, float, float], tuple[float, float, float]]
     authored_camera: tuple[tuple[float, float, float], tuple[float, float, float]] | None
+    root_yaw_deg: float = 0.0
     license: str = "CC-BY-NC-4.0"
     attribution: tuple[str, ...] = (
         "LabUtopia-Dataset scientific environment: CC BY-NC 4.0",
@@ -183,6 +187,10 @@ class BackgroundCandidate:
     external_tree_sha256: str | None = None
     external_archive_sha256: str | None = None
     restricted_provenance_reference: str | None = None
+    generated_closure_sha256: str | None = None
+    generated_manifest_sha256: str | None = None
+    generated_producer_revision: str | None = None
+    generated_run_id: str | None = None
     # A producer-owned consumer facade can differ byte-for-byte from the raw
     # source that restricted intake and workspace profiles bind.  Keep both
     # identities: the raw source establishes provenance; the facade is the
@@ -252,17 +260,30 @@ def validate_generation_background_provenance(
         for candidate in candidates
         if LEGACY_BACKGROUND_ASSET_ID.fullmatch(candidate.candidate_id) is None
         and not (
-            candidate.license == "LicenseRef-Internal-Restricted"
-            and candidate.redistributable is False
-            and candidate.source_uri.startswith("restricted-environment://")
-            and candidate.external_tree_sha256 is not None
-            and candidate.external_archive_sha256 is not None
-            and candidate.restricted_provenance_reference is not None
+            (
+                candidate.license == "LicenseRef-Internal-Restricted"
+                and candidate.redistributable is False
+                and candidate.source_uri.startswith("restricted-environment://")
+                and candidate.external_tree_sha256 is not None
+                and candidate.external_archive_sha256 is not None
+                and candidate.restricted_provenance_reference is not None
+            )
+            or (
+                candidate.license == "LicenseRef-Internal-Generated"
+                and candidate.redistributable is False
+                and candidate.source_uri.startswith(
+                    "generated-environment://code-as-room/"
+                )
+                and candidate.generated_closure_sha256 is not None
+                and candidate.generated_manifest_sha256 is not None
+                and candidate.generated_producer_revision is not None
+                and candidate.generated_run_id is not None
+            )
         )
     ]
     if unbound:
         raise ValueError(
-            "non-legacy background assets require a matching restricted external intake "
+            "non-legacy background assets require a matching external or generated intake "
             "before generation: "
             + ", ".join(sorted(unbound))
         )
@@ -335,6 +356,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--generated-environment-intake",
+        type=Path,
+        help=(
+            "Optional generated-environment intake. It binds a Code-as-Room "
+            "producer delivery without copying local source paths."
+        ),
+    )
+    parser.add_argument(
         "--workspace-profiles",
         type=Path,
         help=(
@@ -386,6 +415,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.render and (args.isaac_python is None or args.genmanip_root is None):
         raise SystemExit("--isaac-python and --genmanip-root are required with --render")
+    if (
+        args.external_intake is not None
+        and args.generated_environment_intake is not None
+    ):
+        raise SystemExit(
+            "--external-intake and --generated-environment-intake are mutually exclusive"
+        )
     if args.workspace_profiles is not None and args.workspace_zone_profiles is not None:
         raise SystemExit("--workspace-profiles and --workspace-zone-profiles are mutually exclusive")
     if args.workspace_zone_profiles is not None and args.candidate_id is not None:
@@ -403,6 +439,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         admitted_candidates = apply_external_environment_intake(
             admitted_candidates,
             args.external_intake,
+        )
+    if args.generated_environment_intake is not None:
+        admitted_candidates = apply_generated_environment_intake(
+            admitted_candidates,
+            args.generated_environment_intake,
         )
     try:
         validate_generation_background_provenance(admitted_candidates)
@@ -623,6 +664,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                             }
                         }
                         if candidate.external_tree_sha256 is not None
+                        else {}
+                    ),
+                    **(
+                        {
+                            "generated_source_snapshot": {
+                                "declared_closure_sha256": (
+                                    candidate.generated_closure_sha256
+                                ),
+                                "producer_manifest_sha256": (
+                                    candidate.generated_manifest_sha256
+                                ),
+                                "producer_revision": (
+                                    candidate.generated_producer_revision
+                                ),
+                                "run_id": candidate.generated_run_id,
+                            }
+                        }
+                        if candidate.generated_closure_sha256 is not None
                         else {}
                     ),
                 },
@@ -854,7 +913,7 @@ def load_admitted_backgrounds(
             manifest_path,
             candidate_id=candidate_id,
         )
-        root_scale_xyz, root_translate_xyz = _source_root_transform(
+        root_scale_xyz, root_translate_xyz, root_yaw_deg = _source_root_transform(
             manifest_path,
             candidate_id=candidate_id,
         )
@@ -873,6 +932,7 @@ def load_admitted_backgrounds(
                 root_translate_xyz=root_translate_xyz,
                 physical_bounds_m=physical_bounds_m,
                 authored_camera=authored_camera,
+                root_yaw_deg=root_yaw_deg,
                 package_source_usd=package_source_usd,
                 package_source_sha256=package_source_sha256,
                 facade_provenance_path=facade_provenance_path,
@@ -972,6 +1032,130 @@ def apply_external_environment_intake(
         if item.candidate_id == background_asset_id
         else item
         for item in candidates
+    )
+
+
+def apply_generated_environment_intake(
+    candidates: Sequence[BackgroundCandidate],
+    intake_path: str | Path,
+) -> tuple[BackgroundCandidate, ...]:
+    """Attach portable Code-as-Room provenance to one admitted background."""
+
+    path = Path(intake_path).resolve()
+    try:
+        raw_intake = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, yaml.YAMLError) as exc:
+        raise ValueError(f"generated environment intake is invalid: {path}") from exc
+    intake = _mapping(raw_intake, "generated environment intake")
+    if intake.get("schema_version") != GENERATED_ENVIRONMENT_INTAKE_SCHEMA_VERSION:
+        raise ValueError("generated environment intake schema is unsupported")
+    background_asset_id = _string(
+        intake.get("asset_id"),
+        "generated environment intake.asset_id",
+    )
+    if not is_background_asset_id(background_asset_id):
+        raise ValueError("generated environment intake has an invalid background asset id")
+    if intake.get("asset_role") != "visual_static_environment":
+        raise ValueError("generated environment intake asset_role is unsupported")
+    if intake.get("license") != "LicenseRef-Internal-Generated":
+        raise ValueError(
+            "generated environment intake license must be internal generated"
+        )
+    if intake.get("redistributable") is not False:
+        raise ValueError("generated environment intake must be non-redistributable")
+    raw_attribution = intake.get("attribution")
+    if not isinstance(raw_attribution, list) or not raw_attribution:
+        raise ValueError("generated environment intake attribution must be non-empty")
+    attribution = tuple(
+        _string(item, f"generated environment intake.attribution[{index}]")
+        for index, item in enumerate(raw_attribution)
+    )
+
+    source = _mapping(intake.get("source"), "generated environment intake.source")
+    source_sha256 = _digest_without_prefix(
+        _string(
+            source.get("usd_sha256"),
+            "generated environment intake.source.usd_sha256",
+        )
+    )
+    closure_sha256 = _sha256_hex(
+        _string(
+            source.get("declared_closure_sha256"),
+            "generated environment intake.source.declared_closure_sha256",
+        ),
+        "generated environment intake.source.declared_closure_sha256",
+    )
+    producer = _mapping(
+        intake.get("producer"),
+        "generated environment intake.producer",
+    )
+    if producer.get("repo") != "Code-as-Room":
+        raise ValueError("generated environment intake producer must be Code-as-Room")
+    revision = _string(
+        producer.get("revision"),
+        "generated environment intake.producer.revision",
+    )
+    if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+        raise ValueError("generated environment producer revision is invalid")
+    run_id = _string(
+        producer.get("run_id"),
+        "generated environment intake.producer.run_id",
+    )
+    manifest_sha256 = _sha256_hex(
+        _string(
+            producer.get("manifest_sha256"),
+            "generated environment intake.producer.manifest_sha256",
+        ),
+        "generated environment intake.producer.manifest_sha256",
+    )
+    provenance = _mapping(
+        intake.get("provenance"),
+        "generated environment intake.provenance",
+    )
+    if provenance.get("kind") != "generated_blender_room":
+        raise ValueError("generated environment provenance kind is unsupported")
+    if provenance.get("visibility") != "internal":
+        raise ValueError("generated environment provenance must be internal")
+    source_uri = _string(
+        provenance.get("source_uri"),
+        "generated environment intake.provenance.source_uri",
+    )
+    expected_uri = f"generated-environment://code-as-room/{revision}/{run_id}"
+    if source_uri != expected_uri:
+        raise ValueError("generated environment provenance URI disagrees with producer")
+
+    matching = [
+        candidate
+        for candidate in candidates
+        if candidate.candidate_id == background_asset_id
+    ]
+    if len(matching) != 1:
+        raise ValueError(
+            "generated environment intake background asset must appear exactly once "
+            f"in admission: {background_asset_id}"
+        )
+    if matching[0].source_sha256 != source_sha256:
+        raise ValueError("generated environment intake source hash disagrees with admission")
+
+    return tuple(
+        replace(
+            candidate,
+            license="LicenseRef-Internal-Generated",
+            attribution=(
+                *attribution,
+                f"Code-as-Room revision: {revision}.",
+                f"Code-as-Room run ID: {run_id}.",
+            ),
+            redistributable=False,
+            source_uri=source_uri,
+            generated_closure_sha256=closure_sha256,
+            generated_manifest_sha256=manifest_sha256,
+            generated_producer_revision=revision,
+            generated_run_id=run_id,
+        )
+        if candidate.candidate_id == background_asset_id
+        else candidate
+        for candidate in candidates
     )
 
 
@@ -1466,11 +1650,21 @@ def load_workspace_zone_profiles(
                 "source_composed_meters_per_unit"
             ),
         )
+        workspace = _mapping(
+            profile.get("workspace"),
+            f"workspace zone profile {zone_id}.workspace",
+        )
+        workspace_mode = workspace.get("mode", "replace_assembly")
+        if workspace_mode not in {"replace_assembly", "open_floor"}:
+            raise ValueError(
+                f"workspace zone profile mode is unsupported: {zone_id}"
+            )
+        requires_replacement = workspace_mode == "replace_assembly"
         assembly = _mapping(profile.get("assembly"), f"workspace zone profile {zone_id}.assembly")
         required_roots = _prim_path_tuple(
             assembly.get("replaceable_assembly_roots"),
             f"workspace zone profile {zone_id}.assembly.replaceable_assembly_roots",
-            require_nonempty=True,
+            require_nonempty=requires_replacement,
         )
         anchor_prim = _prim_path(
             assembly.get("anchor_prim"),
@@ -1488,7 +1682,7 @@ def load_workspace_zone_profiles(
         inactive_roots = _prim_path_tuple(
             inactivation.get("inactive_prim_root_paths"),
             f"workspace zone profile {zone_id}.inactivation.inactive_prim_root_paths",
-            require_nonempty=True,
+            require_nonempty=requires_replacement,
         )
         if inactive_roots != required_roots:
             raise ValueError(
@@ -1498,7 +1692,6 @@ def load_workspace_zone_profiles(
             inactivation.get("optional_inactive_prim_paths", []),
             f"workspace zone profile {zone_id}.inactivation.optional_inactive_prim_paths",
         )
-        workspace = _mapping(profile.get("workspace"), f"workspace zone profile {zone_id}.workspace")
         clearance_key = (
             "clearance_aabb_su" if "clearance_aabb_su" in workspace else "clearance_aabb_m"
         )
@@ -1948,7 +2141,7 @@ def background_placement(
             for index in range(3)
         ]
     scene_wxyz = _quat_multiply(
-        _yaw_quaternion(composition_yaw_deg),
+        _yaw_quaternion(composition_yaw_deg + candidate.root_yaw_deg),
         tuple(spec.scene.pose.wxyz),
     )
     scene_pose = {
@@ -1960,6 +2153,7 @@ def background_placement(
         "meters_per_unit": candidate.meters_per_unit,
         "source_root_scale_xyz": list(candidate.root_scale_xyz),
         "source_root_translate_xyz": list(candidate.root_translate_xyz),
+        "source_root_yaw_deg": candidate.root_yaw_deg,
         "source_bounds_m": [list(lower), list(upper)],
         "fit_factor": fit_factor,
         "effective_scale": effective_scale,
@@ -2581,7 +2775,11 @@ def _source_root_transform(
     manifest_path: Path,
     *,
     candidate_id: str,
-) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+) -> tuple[
+    tuple[float, float, float],
+    tuple[float, float, float],
+    float,
+]:
     """Read the consumer-package root transform recorded by ConvertAsset.
 
     The eBench scene layer authors a transform on the destination ``room`` prim.
@@ -2590,8 +2788,9 @@ def _source_root_transform(
     package-side transform must be folded into the destination instance pose.
     A raw source may use unrelated namespaces (for example `/world` plus
     `/Root`), so it is not a valid substitute for the admitted consumer facade.
-    Reject a rotated/sheared facade root rather than silently changing its
-    appearance.
+    A Blender USD may encode its basis conversion as a proper +Z yaw on the
+    root (commonly 180 degrees).  Preserve that rotation explicitly; reject
+    reflections, tilt, or shear.
     """
 
     try:
@@ -2631,17 +2830,37 @@ def _source_root_transform(
         raise ValueError(
             f"{candidate_id}.package facade scope_world_transforms./World is non-finite"
         )
-    diagonal = tuple(values[index][index] for index in range(3))
-    if any(value <= 0.0 for value in diagonal):
+    if any(abs(values[row][2]) > 1e-8 for row in range(2)) or any(
+        abs(values[2][column]) > 1e-8 for column in range(2)
+    ):
+        raise ValueError(
+            f"{candidate_id}.source root transform has tilt/shear; "
+            "instance placement supports only a +Z yaw"
+        )
+    scale_x = math.hypot(values[0][0], values[0][1])
+    scale_y = math.hypot(values[1][0], values[1][1])
+    scale_z = values[2][2]
+    if min(scale_x, scale_y, scale_z) <= 0.0:
         raise ValueError(f"{candidate_id}.source root transform must have positive scale")
-    for row in range(3):
-        for column in range(3):
-            expected = diagonal[row] if row == column else 0.0
-            if not math.isclose(values[row][column], expected, rel_tol=1e-6, abs_tol=1e-8):
-                raise ValueError(
-                    f"{candidate_id}.source root transform has rotation/shear; "
-                    "instance placement requires an explicit transform adapter"
-                )
+    row_dot = values[0][0] * values[1][0] + values[0][1] * values[1][1]
+    if not math.isclose(row_dot, 0.0, rel_tol=1e-6, abs_tol=1e-8):
+        raise ValueError(
+            f"{candidate_id}.source root transform has shear; "
+            "instance placement requires an explicit transform adapter"
+        )
+    determinant_xy = (
+        values[0][0] * values[1][1] - values[0][1] * values[1][0]
+    )
+    if determinant_xy <= 0.0 or not math.isclose(
+        determinant_xy,
+        scale_x * scale_y,
+        rel_tol=1e-6,
+        abs_tol=1e-8,
+    ):
+        raise ValueError(
+            f"{candidate_id}.source root transform contains a reflection"
+        )
+    yaw_deg = math.degrees(math.atan2(values[0][1], values[0][0]))
     if not math.isclose(values[3][3], 1.0, rel_tol=1e-6, abs_tol=1e-8):
         raise ValueError(f"{candidate_id}.source root transform has invalid homogeneous row")
     if any(abs(values[3][index]) > 1e12 for index in range(3)):
@@ -2649,7 +2868,11 @@ def _source_root_transform(
     for index in range(3):
         if abs(values[index][3]) > 1e-8:
             raise ValueError(f"{candidate_id}.source root transform has perspective terms")
-    return diagonal, tuple(values[3][index] for index in range(3))
+    return (
+        (scale_x, scale_y, scale_z),
+        tuple(values[3][index] for index in range(3)),
+        yaw_deg,
+    )
 
 
 def _mapping(value: object, field: str) -> Mapping[str, Any]:

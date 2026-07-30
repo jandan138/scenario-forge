@@ -186,7 +186,42 @@ def test_consumer_facade_transform_uses_package_not_raw_source(tmp_path: Path) -
     assert module._source_root_transform(
         manifest_path,
         candidate_id="scientific_environment_3fo4k5c9jd44",
-    ) == ((0.5, 0.5, 0.5), (1.0, 2.0, 3.0))
+    ) == ((0.5, 0.5, 0.5), (1.0, 2.0, 3.0), 0.0)
+
+
+def test_blender_root_basis_yaw_is_preserved_without_negative_scale(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "visual_preservation_fingerprint": {
+                    "package_after_role": {
+                        "scope_world_transforms": {
+                            "/World": [
+                                [-1.0, 0.0, 0.0, 0.0],
+                                [0.0, -1.0, 0.0, 0.0],
+                                [0.0, 0.0, 1.0, 0.0],
+                                [0.0, 0.0, 0.0, 1.0],
+                            ]
+                        }
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    scale, translate, yaw = module._source_root_transform(
+        manifest_path,
+        candidate_id="scientific_environment_code_room_example4_v1",
+    )
+
+    assert scale == pytest.approx((1.0, 1.0, 1.0))
+    assert translate == pytest.approx((0.0, 0.0, 0.0))
+    assert abs(abs(yaw) - 180.0) < 1e-9
 
 
 def test_world_facade_survives_real_package_and_genmanip_export(tmp_path: Path) -> None:
@@ -1120,11 +1155,72 @@ def test_external_intake_replaces_legacy_background_provenance(tmp_path: Path) -
     assert attached[0].restricted_provenance_reference == "restricted/room/3FO4K5C9JD44"
 
 
+def test_generated_intake_binds_code_as_room_background_provenance(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate(
+        "scientific_environment_code_room_example4_v1"
+    )
+    intake_path = tmp_path / "generated_intake.yaml"
+    intake_path.write_text(
+        yaml.safe_dump(
+            {
+                "schema_version": (
+                    "scenario-forge-generated-environment-intake/v0.1"
+                ),
+                "asset_id": candidate.candidate_id,
+                "asset_role": "visual_static_environment",
+                "license": "LicenseRef-Internal-Generated",
+                "redistributable": False,
+                "attribution": ["Code-as-Room generated environment."],
+                "producer": {
+                    "repo": "Code-as-Room",
+                    "revision": "a" * 40,
+                    "run_id": "run_example4",
+                    "manifest_sha256": "b" * 64,
+                },
+                "source": {
+                    "usd_sha256": candidate.source_sha256,
+                    "declared_closure_sha256": "c" * 64,
+                },
+                "provenance": {
+                    "kind": "generated_blender_room",
+                    "visibility": "internal",
+                    "source_uri": (
+                        "generated-environment://code-as-room/"
+                        + "a" * 40
+                        + "/run_example4"
+                    ),
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    attached = module.apply_generated_environment_intake(
+        (candidate,),
+        intake_path,
+    )
+
+    assert attached[0].license == "LicenseRef-Internal-Generated"
+    assert attached[0].redistributable is False
+    assert attached[0].source_uri.startswith(
+        "generated-environment://code-as-room/"
+    )
+    assert attached[0].generated_closure_sha256 == "c" * 64
+    assert attached[0].generated_manifest_sha256 == "b" * 64
+    assert attached[0].generated_producer_revision == "a" * 40
+    assert attached[0].generated_run_id == "run_example4"
+    module.validate_generation_background_provenance(attached)
+
+
 def test_nonlegacy_background_requires_restricted_intake_before_generation() -> None:
     module = _load_module()
     candidate = _workspace_profile_candidate("scientific_environment_3fo4k5c9jd44")
 
-    with pytest.raises(ValueError, match="restricted external intake"):
+    with pytest.raises(ValueError, match="external or generated intake"):
         module.validate_generation_background_provenance((candidate,))
 
     module.validate_generation_background_provenance(
@@ -1858,6 +1954,13 @@ def _write_workspace_zone_profile_handoff(
         if status == "profiled":
             inactive_roots = tuple(zone["inactive_roots"])
             anchor_xyz_su = tuple(zone["anchor_xyz_su"])
+            workspace_mode = str(zone.get("workspace_mode", "replace_assembly"))
+            anchor_prim = str(
+                zone.get(
+                    "anchor_prim",
+                    inactive_roots[0] if inactive_roots else "/World/Floor",
+                )
+            )
             profile.update(
                 {
                     "coordinate_mapping": {
@@ -1866,7 +1969,7 @@ def _write_workspace_zone_profile_handoff(
                     },
                     "assembly": {
                         "replaceable_assembly_roots": list(inactive_roots),
-                        "anchor_prim": inactive_roots[0],
+                        "anchor_prim": anchor_prim,
                         "anchor_xyz_su": list(anchor_xyz_su),
                     },
                     "inactivation": {
@@ -1876,6 +1979,7 @@ def _write_workspace_zone_profile_handoff(
                         ),
                     },
                     "workspace": {
+                        "mode": workspace_mode,
                         "clearance_aabb_su": {
                             "min": [-20.0, -20.0, -2.0],
                             "max": [20.0, 20.0, 4.0],
@@ -1904,3 +2008,35 @@ def _write_workspace_zone_profile_handoff(
         encoding="utf-8",
     )
     return manifest_path
+
+
+def test_workspace_zone_profile_supports_open_floor_without_inactivation(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    candidate = _workspace_profile_candidate(
+        "scientific_environment_code_room_example4_v1"
+    )
+    manifest = _write_workspace_zone_profile_handoff(
+        tmp_path / "profiles",
+        candidate,
+        zones={
+            "center_open_floor": {
+                "status": "profiled",
+                "workspace_mode": "open_floor",
+                "anchor_prim": "/World/Floor",
+                "anchor_xyz_su": (0.0, -0.3, 0.772761),
+                "inactive_roots": (),
+                "yaw_deg": 0.0,
+            }
+        },
+    )
+
+    profiles = module.load_workspace_zone_profiles(manifest, (candidate,))
+    profile = profiles[
+        "scientific_environment_code_room_example4_v1__center_open_floor"
+    ]
+
+    assert profile.status == "profiled"
+    assert profile.anchor is not None
+    assert profile.anchor.hide_prim_paths == ()

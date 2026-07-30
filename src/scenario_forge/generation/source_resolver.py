@@ -213,11 +213,13 @@ def _required_usage(data: Mapping[str, Any], field: str) -> str:
     if usage not in {
         "scene_overlay",
         "rigid_object",
+        "articulated_object",
         "visual_static_environment",
         "visual_static_object",
     }:
         raise ScenarioSourceBindingError(
             f"{field}.usage must be 'scene_overlay', 'rigid_object', "
+            "'articulated_object', "
             "'visual_static_environment', or 'visual_static_object'"
         )
     return usage
