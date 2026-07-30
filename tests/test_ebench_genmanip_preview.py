@@ -193,6 +193,16 @@ def test_preview_request_carries_convertasset_expected_task_geometry(
         }
         assert item["extent_m"] == [0.32, 0.35, 0.226]
         assert item["max_extent_relative_error"] == 0.05
+        assert item["max_root_tilt_deg"] == 10.0
+        assert item["max_support_gap_m"] == 0.01
+        assert item["support_frame"] == "support"
+        assert item["support_frame_local_matrix"] == [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+        assert len(item["support_frame_source_sha256"]) == 64
         assert item["runtime_id"] == runtime_id
 
 
@@ -227,6 +237,7 @@ def test_preview_evidence_with_matching_digest_writes_visual_ready_gate(
         ("oversized", "extent"),
         ("off_table", "tabletop XY"),
         ("floating", "support gap"),
+        ("tipped", "root tilt"),
     ],
 )
 def test_preview_geometry_gate_rejects_bad_runtime_task_placement(
@@ -242,17 +253,23 @@ def test_preview_geometry_gate_rejects_bad_runtime_task_placement(
     manifest_path = evidence_dir / "render_manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     runtime_id = sorted(request["expected_runtime_geometry"])[0]
-    runtime_bound = manifest["runtime_geometry"]["task_objects"][runtime_id][
-        "world_bound_m"
-    ]
+    runtime_item = manifest["runtime_geometry"]["task_objects"][runtime_id]
+    runtime_bound = runtime_item["post_warmup"]["world_bound_m"]
     if mutation == "oversized":
         runtime_bound["max"][0] += 1.0
     elif mutation == "off_table":
         runtime_bound["min"][0] += 3.0
         runtime_bound["max"][0] += 3.0
+    elif mutation == "floating":
+        runtime_item["post_warmup"]["root_pose"]["xyz_m"][2] += 0.2
+        runtime_item["post_warmup"]["support_frame_world_point_m"][2] += 0.2
     else:
-        runtime_bound["min"][2] += 0.2
-        runtime_bound["max"][2] += 0.2
+        runtime_item["post_warmup"]["root_pose"]["wxyz"] = [
+            0.7071067811865476,
+            0.7071067811865475,
+            0.0,
+            0.0,
+        ]
     manifest_path.write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -262,6 +279,33 @@ def test_preview_geometry_gate_rejects_bad_runtime_task_placement(
         validate_genmanip_preview_evidence(collected_package)
 
     assert not (evidence_dir / "visual_ready_gate.yaml").exists()
+
+
+def test_preview_support_gate_is_not_spoofed_by_matching_overall_bbox(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(
+        _build_qualified_object_package(tmp_path)
+    ).output_dir
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    evidence_dir = _write_passing_evidence(collected_package, request)
+    manifest_path = evidence_dir / "render_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    runtime_id = sorted(request["expected_runtime_geometry"])[0]
+    item = manifest["runtime_geometry"]["task_objects"][runtime_id]
+
+    # The producer-declared support frame, not a collider-inflated overall AABB,
+    # is the authoritative tabletop contact witness.
+    assert item["post_warmup"]["world_bound_m"]["min"][2] == pytest.approx(0.805)
+    item["post_warmup"]["root_pose"]["xyz_m"][2] = 0.8135
+    item["post_warmup"]["support_frame_world_point_m"][2] = 0.8135
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(GenManipPreviewError, match="support gap"):
+        validate_genmanip_preview_evidence(collected_package)
 
 
 def test_preview_evidence_requires_room_visibility_and_honors_camera_reference(
@@ -557,9 +601,36 @@ def _write_passing_evidence(
             lower[1] + float(extent[1]),
             lower[2] + float(extent[2]),
         ]
-        task_bounds[str(runtime_id)] = {
+        support_matrix = expected.get("support_frame_local_matrix")
+        snapshot = {
             "world_bound_m": {"min": lower, "max": upper},
             "extent_m": [float(value) for value in extent],
+        }
+        if support_matrix is not None:
+            assert isinstance(support_matrix, list) and len(support_matrix) == 4
+            support_local_x = float(support_matrix[3][0])
+            support_local_y = float(support_matrix[3][1])
+            support_local_z = float(support_matrix[3][2])
+            root_x = float(lower[0]) - support_local_x
+            root_y = float(lower[1]) - support_local_y
+            root_z = table_bound["max"][2] - support_local_z
+            snapshot.update(
+                {
+                    "root_pose": {
+                        "xyz_m": [root_x, root_y, root_z],
+                        "wxyz": [1.0, 0.0, 0.0, 0.0],
+                    },
+                    "support_frame_world_point_m": [
+                        float(lower[0]),
+                        float(lower[1]),
+                        table_bound["max"][2],
+                    ],
+                }
+            )
+        task_bounds[str(runtime_id)] = {
+            "runtime_id": str(runtime_id),
+            "warmup_start": json.loads(json.dumps(snapshot)),
+            "post_warmup": json.loads(json.dumps(snapshot)),
         }
     manifest = {
         "schema_version": "scenario-forge-genmanip-preview-evidence/v0.1",

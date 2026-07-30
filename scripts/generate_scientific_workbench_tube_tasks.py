@@ -6,7 +6,10 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 from copy import deepcopy
+import math
 from pathlib import Path
+from pathlib import PurePosixPath
+import re
 from typing import Any, Mapping
 
 import yaml
@@ -39,6 +42,7 @@ TASK_SPECS = {
 }
 EBENCH_TABLETOP_Z_M = 0.7727606155
 TABLETOP_CLEARANCE_M = 0.01
+_SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 
 
 def _mapping(value: object, label: str) -> dict[str, Any]:
@@ -84,18 +88,30 @@ def _place_task_object_on_tabletop(
         asset_id,
         "task_interactive_geometry",
     )
-    bound = _mapping(
-        geometry.get("package_world_bound_m"),
-        f"asset {asset_id}.task_interactive_geometry.package_world_bound_m",
-    )
-    minimum = bound.get("min")
+    support_matrix = geometry.get("support_frame_local_matrix")
     if (
-        not isinstance(minimum, list)
-        or len(minimum) != 3
-        or not all(isinstance(value, (int, float)) for value in minimum)
+        geometry.get("support_frame") != "support"
+        or not isinstance(support_matrix, list)
+        or len(support_matrix) != 4
+        or any(not isinstance(row, list) or len(row) != 4 for row in support_matrix)
+        or any(
+            not isinstance(value, (int, float))
+            or isinstance(value, bool)
+            or not math.isfinite(float(value))
+            for row in support_matrix
+            for value in row
+        )
     ):
         raise ValueError(
-            f"asset {asset_id} task-interactive minimum bound must have three numbers"
+            f"asset {asset_id} requires a finite 4x4 support-frame matrix"
+        )
+    support_source_sha256 = geometry.get("support_frame_source_sha256")
+    if (
+        not isinstance(support_source_sha256, str)
+        or _SHA256_HEX.fullmatch(support_source_sha256) is None
+    ):
+        raise ValueError(
+            f"asset {asset_id} support frame must be hash-bound"
         )
     pose = _mapping(task_object.get("pose"), f"task object {task_object['id']}.pose")
     scale = pose.get("scale_xyz", [1.0, 1.0, 1.0])
@@ -110,11 +126,80 @@ def _place_task_object_on_tabletop(
         or not all(isinstance(value, (int, float)) for value in xyz)
     ):
         raise ValueError(f"task object {task_object['id']}.pose.xyz must be numeric")
+    quaternion = pose.get("wxyz")
+    if (
+        not isinstance(quaternion, list)
+        or len(quaternion) != 4
+        or not all(isinstance(value, (int, float)) for value in quaternion)
+    ):
+        raise ValueError(f"task object {task_object['id']}.pose.wxyz must be numeric")
+    quaternion_values = [float(value) for value in quaternion]
+    norm = math.sqrt(sum(value * value for value in quaternion_values))
+    if not math.isclose(norm, 1.0, rel_tol=0.0, abs_tol=1e-6):
+        raise ValueError(f"task object {task_object['id']}.pose.wxyz must be unit")
+    support_local = [
+        float(support_matrix[3][0]),
+        float(support_matrix[3][1]),
+        float(support_matrix[3][2]),
+    ]
+    support_world_offset = _rotate_wxyz(support_local, quaternion_values)
     pose["xyz"] = [
         float(xyz[0]),
         float(xyz[1]),
-        EBENCH_TABLETOP_Z_M + TABLETOP_CLEARANCE_M - float(minimum[2]),
+        EBENCH_TABLETOP_Z_M
+        + TABLETOP_CLEARANCE_M
+        - support_world_offset[2],
     ]
+
+
+def _require_task_qualification(
+    sources: Mapping[str, LocalUSDAssetSource],
+    asset_id: str,
+    qualification_id: str,
+) -> None:
+    source = sources.get(asset_id)
+    if source is None or source.upstream_package is None:
+        raise ValueError(
+            f"asset {asset_id!r} requires a ConvertAsset upstream package"
+        )
+    value = source.upstream_package.metadata.get("task_qualifications")
+    if not isinstance(value, list):
+        raise ValueError(
+            f"asset {asset_id} requires task qualification {qualification_id}"
+        )
+    matches = [
+        item
+        for item in value
+        if isinstance(item, Mapping)
+        and item.get("qualification_id") == qualification_id
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"asset {asset_id} requires exactly one task qualification "
+            f"{qualification_id}"
+        )
+    qualification = matches[0]
+    report_path = qualification.get("report_path")
+    report_sha256 = qualification.get("report_sha256")
+    normalized_report_path = (
+        PurePosixPath(report_path)
+        if isinstance(report_path, str)
+        else None
+    )
+    if (
+        qualification.get("status") != "pass"
+        or not isinstance(report_path, str)
+        or not report_path
+        or normalized_report_path is None
+        or normalized_report_path.is_absolute()
+        or ".." in normalized_report_path.parts
+        or not isinstance(report_sha256, str)
+        or _SHA256_HEX.fullmatch(report_sha256) is None
+    ):
+        raise ValueError(
+            f"asset {asset_id} task qualification {qualification_id} "
+            "must be a hash-bound pass"
+        )
 
 
 def _frame_pose(
@@ -244,7 +329,11 @@ def _materialize_authoritative_task_geometry(
         return spec
 
     rack = _object_by_id(spec, "tube_rack")
+    test_tube = _object_by_id(spec, "test_tube")
     asset_id = str(rack["asset_id"])
+    _require_task_qualification(sources, asset_id, "tube_insertion")
+    _place_task_object_on_tabletop(rack, sources)
+    _place_task_object_on_tabletop(test_tube, sources)
     contract = _source_contract(sources, asset_id, "interaction_contract")
     frames = _mapping(contract.get("named_frames"), f"asset {asset_id}.named_frames")
     frame_ids = (

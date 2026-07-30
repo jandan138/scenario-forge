@@ -44,6 +44,7 @@ def _task_geometry(
     *,
     minimum: list[float],
     maximum: list[float],
+    support_z_m: float = 0.0,
 ) -> dict[str, object]:
     return {
         "schema_version": "scenario-forge-task-interactive-geometry/v0.1",
@@ -63,6 +64,14 @@ def _task_geometry(
             for lower, upper in zip(minimum, maximum, strict=True)
         ],
         "identity_tolerance": 1e-6,
+        "support_frame": "support",
+        "support_frame_local_matrix": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, support_z_m, 1.0],
+        ],
+        "support_frame_source_sha256": "3" * 64,
     }
 
 
@@ -72,7 +81,31 @@ def _rigid_source(
     asset_id: str,
     entry_prim: str,
     named_frames: dict[str, object],
+    support_z_m: float = 0.0,
+    task_qualifications: list[dict[str, object]] | None = None,
 ) -> LocalUSDAssetSource:
+    metadata: dict[str, object] = {
+        "interaction_contract": {
+            "schema_version": "aan.interaction_contract.v1",
+            "asset_entry_prim": entry_prim,
+            "collider_prims": [
+                {
+                    "prim_path": f"{entry_prim}/body",
+                    "collision_enabled": True,
+                    "observed_approximation": "convexDecomposition",
+                }
+            ],
+            "named_frames": named_frames,
+        },
+        "task_interactive_geometry": _task_geometry(
+            entry_prim,
+            minimum=[-0.01, -0.01, 0.0],
+            maximum=[0.01, 0.01, 0.1],
+            support_z_m=support_z_m,
+        ),
+    }
+    if task_qualifications is not None:
+        metadata["task_qualifications"] = task_qualifications
     return LocalUSDAssetSource(
         asset_id=asset_id,
         source_usd=source_usd,
@@ -83,25 +116,7 @@ def _rigid_source(
         root_prim_path="/World",
         upstream_package=_upstream(
             asset_id,
-            {
-                "interaction_contract": {
-                    "schema_version": "aan.interaction_contract.v1",
-                    "asset_entry_prim": entry_prim,
-                    "collider_prims": [
-                        {
-                            "prim_path": f"{entry_prim}/body",
-                            "collision_enabled": True,
-                            "observed_approximation": "convexDecomposition",
-                        }
-                    ],
-                    "named_frames": named_frames,
-                },
-                "task_interactive_geometry": _task_geometry(
-                    entry_prim,
-                    minimum=[-0.01, -0.01, 0.0],
-                    maximum=[0.01, 0.01, 0.1],
-                ),
-            },
+            metadata,
         ),
     )
 
@@ -267,12 +282,22 @@ def Xform "World"
             asset_id="scientific_workbench_test_tube_dynamic",
             entry_prim="/World/TestTube",
             named_frames={},
+            support_z_m=0.005,
         ),
         "scientific_workbench_tube_rack_dynamic": _rigid_source(
             source_usd,
             asset_id="scientific_workbench_tube_rack_dynamic",
             entry_prim="/World/TubeRack",
             named_frames=rack_frames,
+            support_z_m=0.0135,
+            task_qualifications=[
+                {
+                    "qualification_id": "tube_insertion",
+                    "status": "pass",
+                    "report_path": "evidence/tube_insertion/report.json",
+                    "report_sha256": "4" * 64,
+                }
+            ],
         ),
     }
 
@@ -478,6 +503,44 @@ def test_all_mode_compiles_and_exports_both_packages_without_runtime(
     assert preview_calls == []
 
 
+def test_materialization_uses_support_frame_and_requires_rack_insertion_gate(
+    tmp_path: Path,
+) -> None:
+    sources = _integration_sources(tmp_path)
+    raw_spec = _load(generator.RACK_INSERT_SPEC)
+
+    materialized = generator._materialize_authoritative_task_geometry(
+        "11",
+        raw_spec,
+        sources,
+    )
+    objects = {
+        item["id"]: item
+        for item in materialized["objects"]
+        if isinstance(item, dict)
+    }
+    assert objects["tube_rack"]["pose"]["xyz"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M
+        + generator.TABLETOP_CLEARANCE_M
+        - 0.0135
+    )
+    assert objects["test_tube"]["pose"]["xyz"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M
+        + generator.TABLETOP_CLEARANCE_M
+        - 0.005
+    )
+
+    rack = sources["scientific_workbench_tube_rack_dynamic"]
+    assert rack.upstream_package is not None
+    rack.upstream_package.metadata.pop("task_qualifications")
+    with pytest.raises(ValueError, match="tube_insertion"):
+        generator._materialize_authoritative_task_geometry(
+            "11",
+            raw_spec,
+            sources,
+        )
+
+
 def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets(
     tmp_path: Path,
     monkeypatch,
@@ -546,7 +609,9 @@ def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets
         generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M
     )
     assert task7_layout["test_tube"]["position"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M
+        generator.EBENCH_TABLETOP_Z_M
+        + generator.TABLETOP_CLEARANCE_M
+        - 0.005
     )
     assert task7_data["scenario_forge_runtime_contract"]["schema_version"] == (
         "scenario-forge-genmanip-runtime-contract/v0.1"
@@ -576,6 +641,17 @@ def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets
     task11_data = yaml.safe_load(task11_episode.read_text(encoding="utf-8"))[
         "task_data"
     ]
+    task11_layout = task11_data["initial_layout"]
+    assert task11_layout["tube_rack"]["position"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M
+        + generator.TABLETOP_CLEARANCE_M
+        - 0.0135
+    )
+    assert task11_layout["test_tube"]["position"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M
+        + generator.TABLETOP_CLEARANCE_M
+        - 0.005
+    )
     task11_contract = task11_data["scenario_forge_runtime_contract_v05"]
     task11_objects = {
         item["scenario_object_id"]: item for item in task11_contract["objects"]

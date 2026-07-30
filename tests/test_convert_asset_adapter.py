@@ -1257,6 +1257,7 @@ def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repai
     assert source.role == "rigid_object"
     assert source.upstream_package is not None
     geometry = source.upstream_package.metadata["task_interactive_geometry"]
+    assert handoff.interaction_contract is not None
     assert geometry == {
         "schema_version": "scenario-forge-task-interactive-geometry/v0.1",
         "asset_entry_prim": "/World/DryingBox_03",
@@ -1272,6 +1273,16 @@ def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repai
         },
         "extent_m": [0.32, 0.35, 0.226],
         "identity_tolerance": 1e-06,
+        "support_frame": "support",
+        "support_frame_local_matrix": [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ],
+        "support_frame_source_sha256": (
+            handoff.interaction_contract.contract_payload_sha256
+        ),
     }
     interaction = source.upstream_package.metadata["interaction_contract"]
     assert interaction["asset_entry_prim"] == "/World/DryingBox_03"
@@ -1281,6 +1292,135 @@ def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repai
     assert interaction["closure"]["tree_encoding"] == (
         "canonical_json_artifact_list_v1"
     )
+
+
+def test_task_interactive_handoff_rejects_missing_authoritative_support_frame(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    interaction = manifest["interaction_contract"]
+    assert isinstance(interaction, dict)
+    frames = interaction["named_frames"]
+    assert isinstance(frames, dict)
+    frames.pop("support")
+    closure = interaction["closure"]
+    assert isinstance(closure, dict)
+    contract_payload = {
+        key: interaction[key]
+        for key in (
+            "schema_version",
+            "asset_entry_prim",
+            "runtime_identity",
+            "disabled_source_rigid_bodies",
+            "collider_prims",
+            "open_top",
+            "named_frames",
+        )
+    }
+    closure["contract_payload_sha256"] = _canonical_json_digest(contract_payload)
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    with pytest.raises(
+        ConvertAssetHandoffError,
+        match="authoritative root-local support frame",
+    ):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/DryingBox_03",),
+            producer_revision="support-frame-required",
+            usage="rigid_object",
+        )
+
+
+def test_task_qualification_report_is_verified_and_propagated(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    report_path = package_dir / "evidence" / "tube_insertion" / "report.json"
+    report_path.parent.mkdir(parents=True)
+    report_path.write_text(
+        '{"schema_version":"fixture","status":"pass"}\n',
+        encoding="utf-8",
+    )
+    manifest["task_qualifications"] = [
+        {
+            "qualification_id": "tube_insertion",
+            "status": "pass",
+            "report_path": "evidence/tube_insertion/report.json",
+            "report_sha256": _digest(report_path),
+        }
+    ]
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/DryingBox_03",),
+        producer_revision="task-qualification-fixture",
+        usage="rigid_object",
+    )
+    source = handoff.to_local_usd_asset_source(
+        asset_id="qualified_rigid_object",
+        license="CC-BY-NC-4.0",
+    )
+
+    assert handoff.task_qualifications[0].qualification_id == "tube_insertion"
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["task_qualifications"] == [
+        {
+            "qualification_id": "tube_insertion",
+            "status": "pass",
+            "report_path": "evidence/tube_insertion/report.json",
+            "report_sha256": _digest(report_path),
+        }
+    ]
+    with pytest.raises(ValueError, match="qualification report"):
+        handoff.to_local_usd_asset_source(
+            asset_id="qualified_rigid_object",
+            license="CC-BY-NC-4.0",
+            exclude_relative_paths=("evidence/tube_insertion",),
+        )
+
+
+def test_task_qualification_rejects_report_hash_mismatch(tmp_path: Path) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    report_path = package_dir / "evidence" / "tube_insertion" / "report.json"
+    report_path.parent.mkdir(parents=True)
+    report_path.write_text('{"status":"pass"}\n', encoding="utf-8")
+    manifest["task_qualifications"] = [
+        {
+            "qualification_id": "tube_insertion",
+            "status": "pass",
+            "report_path": "evidence/tube_insertion/report.json",
+            "report_sha256": "0" * 64,
+        }
+    ]
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    with pytest.raises(
+        ConvertAssetHandoffError,
+        match="task_qualifications.*report_sha256",
+    ):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/DryingBox_03",),
+            producer_revision="task-qualification-fixture",
+            usage="rigid_object",
+        )
 
 
 @pytest.mark.parametrize("usage", ["rigid_object", "articulated_object"])
@@ -1449,6 +1589,12 @@ def test_articulated_handoff_maps_validated_device_contract_without_local_repair
     assert contract["named_frames"]["start_button_press"][
         "authoritative"
     ] is True
+    geometry = source.upstream_package.metadata["task_interactive_geometry"]
+    assert geometry["support_frame"] == "support"
+    assert geometry["support_frame_local_matrix"][3] == [0.0, 0.0, 0.0, 1.0]
+    assert geometry["support_frame_source_sha256"] == (
+        handoff.articulation_contract.profile_sha256
+    )
 
 
 def test_articulated_handoff_accepts_duplicate_runtime_dof_names(

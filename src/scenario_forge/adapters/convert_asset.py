@@ -131,11 +131,27 @@ class ConvertAssetArticulationContract:
 
 
 @dataclass(frozen=True)
+class ConvertAssetTaskQualification:
+    qualification_id: str
+    status: str
+    report_path: str
+    report_sha256: str
+    payload: Mapping[str, Any]
+
+    def to_mapping(self) -> dict[str, Any]:
+        return _copy_json_mapping(self.payload, "task_qualification")
+
+
+@dataclass(frozen=True)
 class ConvertAssetTaskInteractiveGeometry:
     asset_entry_prim: str
     entry_world_transform: tuple[tuple[float, float, float, float], ...]
     package_world_bound_min_m: tuple[float, float, float]
     package_world_bound_max_m: tuple[float, float, float]
+    support_frame_local_matrix: tuple[
+        tuple[float, float, float, float], ...
+    ]
+    support_frame_source_sha256: str
 
     def to_mapping(self) -> dict[str, Any]:
         extent = [
@@ -158,6 +174,11 @@ class ConvertAssetTaskInteractiveGeometry:
             },
             "extent_m": extent,
             "identity_tolerance": _TASK_INTERACTIVE_IDENTITY_TOLERANCE,
+            "support_frame": "support",
+            "support_frame_local_matrix": [
+                list(row) for row in self.support_frame_local_matrix
+            ],
+            "support_frame_source_sha256": self.support_frame_source_sha256,
         }
 
 
@@ -189,6 +210,7 @@ class ConvertAssetPackageHandoff:
     interaction_contract: ConvertAssetInteractionContract | None = None
     articulation_contract: ConvertAssetArticulationContract | None = None
     task_interactive_geometry: ConvertAssetTaskInteractiveGeometry | None = None
+    task_qualifications: tuple[ConvertAssetTaskQualification, ...] = ()
 
     def to_local_usd_asset_source(
         self,
@@ -199,16 +221,19 @@ class ConvertAssetPackageHandoff:
         redistributable: bool = False,
         exclude_relative_paths: tuple[str, ...] = (),
     ) -> LocalUSDAssetSource:
-        required_artifact_paths: tuple[str, ...] = ()
+        required_artifact_paths: tuple[str, ...] = tuple(
+            qualification.report_path
+            for qualification in self.task_qualifications
+        )
         if self.usage == "rigid_object" and self.interaction_contract is not None:
-            required_artifact_paths = (
+            required_artifact_paths += (
                 self.interaction_contract.qualification_report_paths
             )
         elif (
             self.usage == "articulated_object"
             and self.articulation_contract is not None
         ):
-            required_artifact_paths = (
+            required_artifact_paths += (
                 self.articulation_contract.required_artifact_paths
             )
         if required_artifact_paths:
@@ -269,6 +294,11 @@ class ConvertAssetPackageHandoff:
             upstream_metadata["task_interactive_geometry"] = (
                 self.task_interactive_geometry.to_mapping()
             )
+        if self.task_qualifications:
+            upstream_metadata["task_qualifications"] = [
+                qualification.to_mapping()
+                for qualification in self.task_qualifications
+            ]
         upstream = UpstreamPackageRef(
             producer="ConvertAsset",
             schema_version=self.manifest_schema_version,
@@ -470,13 +500,10 @@ def load_convert_asset_package_handoff(
     interaction_contract: ConvertAssetInteractionContract | None = None
     articulation_contract: ConvertAssetArticulationContract | None = None
     task_interactive_geometry: ConvertAssetTaskInteractiveGeometry | None = None
-
-    if usage in _TASK_INTERACTIVE_USAGES:
-        task_interactive_geometry = _load_task_interactive_geometry(
-            manifest,
-            physics,
-            asset_entry_prim=entry_scope,
-        )
+    task_qualifications = _load_task_qualifications(
+        manifest.get("task_qualifications"),
+        package_root=package_root,
+    )
 
     if usage in _DYNAMIC_USAGES:
         _require_value(physics, "role", "dynamic", "manifest.physics_closure")
@@ -612,6 +639,44 @@ def load_convert_asset_package_handoff(
         _validate_visual_static_admission(manifest, expected_scopes)
         _validate_visual_static_physical_frame(physics, expected_scopes)
 
+    if usage in _TASK_INTERACTIVE_USAGES:
+        if usage == "rigid_object" and interaction_contract is not None:
+            support_frame = interaction_contract.named_frames.get("support")
+            support_frame_source_sha256 = (
+                interaction_contract.contract_payload_sha256
+            )
+            translation_field = "translation_body_local_usd"
+            rotation_field = "rotation_body_local_wxyz"
+            parent_field = "parent_prim"
+        elif usage == "articulated_object" and articulation_contract is not None:
+            support_frame = articulation_contract.named_frames.get("support")
+            support_frame_source_sha256 = articulation_contract.profile_sha256
+            translation_field = "translation_parent_local_m"
+            rotation_field = "rotation_parent_local_wxyz"
+            parent_field = "parent_prim"
+        else:
+            raise ConvertAssetHandoffError(
+                "task-interactive package is missing its validated producer contract"
+            )
+        if (
+            not isinstance(support_frame, Mapping)
+            or support_frame.get(parent_field) != entry_scope
+            or support_frame.get("authoritative") is not True
+        ):
+            raise ConvertAssetHandoffError(
+                "task-interactive package requires an authoritative root-local "
+                "support frame"
+            )
+        task_interactive_geometry = _load_task_interactive_geometry(
+            manifest,
+            physics,
+            asset_entry_prim=entry_scope,
+            support_frame=support_frame,
+            support_translation_field=translation_field,
+            support_rotation_field=rotation_field,
+            support_frame_source_sha256=support_frame_source_sha256,
+        )
+
     for field_name, digest in source_hash_fields.items():
         if digest != source_digest:
             raise ConvertAssetHandoffError(
@@ -716,6 +781,7 @@ def load_convert_asset_package_handoff(
         interaction_contract=interaction_contract,
         articulation_contract=articulation_contract,
         task_interactive_geometry=task_interactive_geometry,
+        task_qualifications=task_qualifications,
     )
 
 
@@ -724,6 +790,10 @@ def _load_task_interactive_geometry(
     physics: Mapping[str, Any],
     *,
     asset_entry_prim: str,
+    support_frame: Mapping[str, Any],
+    support_translation_field: str,
+    support_rotation_field: str,
+    support_frame_source_sha256: str,
 ) -> ConvertAssetTaskInteractiveGeometry:
     """Validate the producer frame used by task-level USD reference composition."""
 
@@ -848,12 +918,136 @@ def _load_task_interactive_geometry(
         raise ConvertAssetHandoffError(
             "task-interactive package world bound must have positive extent"
         )
+    support_translation = _finite_number_list(
+        support_frame.get(support_translation_field),
+        3,
+        f"task-interactive support frame.{support_translation_field}",
+    )
+    support_rotation = _finite_number_list(
+        support_frame.get(support_rotation_field),
+        4,
+        f"task-interactive support frame.{support_rotation_field}",
+    )
+    if not math.isclose(
+        sum(component * component for component in support_rotation),
+        1.0,
+        rel_tol=0.0,
+        abs_tol=1e-6,
+    ):
+        raise ConvertAssetHandoffError(
+            "task-interactive support frame rotation must be a unit quaternion"
+        )
+    source_digest = support_frame_source_sha256
+    if _SHA256_HEX.fullmatch(source_digest) is None:
+        raise ConvertAssetHandoffError(
+            "task-interactive support frame source must be a lowercase "
+            "SHA-256 digest"
+        )
     return ConvertAssetTaskInteractiveGeometry(
         asset_entry_prim=asset_entry_prim,
         entry_world_transform=tuple(rows),
         package_world_bound_min_m=(lower[0], lower[1], lower[2]),
         package_world_bound_max_m=(upper[0], upper[1], upper[2]),
+        support_frame_local_matrix=_pose_matrix_row_major(
+            support_translation,
+            support_rotation,
+        ),
+        support_frame_source_sha256=source_digest,
     )
+
+
+def _pose_matrix_row_major(
+    translation: list[float],
+    rotation_wxyz: list[float],
+) -> tuple[tuple[float, float, float, float], ...]:
+    """Return a USD/Gf row-vector transform matrix for a local frame pose."""
+
+    w, x, y, z = rotation_wxyz
+    column_rotation = (
+        (
+            1.0 - 2.0 * (y * y + z * z),
+            2.0 * (x * y - w * z),
+            2.0 * (x * z + w * y),
+        ),
+        (
+            2.0 * (x * y + w * z),
+            1.0 - 2.0 * (x * x + z * z),
+            2.0 * (y * z - w * x),
+        ),
+        (
+            2.0 * (x * z - w * y),
+            2.0 * (y * z + w * x),
+            1.0 - 2.0 * (x * x + y * y),
+        ),
+    )
+    return (
+        (
+            column_rotation[0][0],
+            column_rotation[1][0],
+            column_rotation[2][0],
+            0.0,
+        ),
+        (
+            column_rotation[0][1],
+            column_rotation[1][1],
+            column_rotation[2][1],
+            0.0,
+        ),
+        (
+            column_rotation[0][2],
+            column_rotation[1][2],
+            column_rotation[2][2],
+            0.0,
+        ),
+        (translation[0], translation[1], translation[2], 1.0),
+    )
+
+
+def _load_task_qualifications(
+    value: object,
+    *,
+    package_root: Path,
+) -> tuple[ConvertAssetTaskQualification, ...]:
+    if value is None:
+        return ()
+    raw_items = _required_mapping_list(value, "manifest.task_qualifications")
+    qualifications: list[ConvertAssetTaskQualification] = []
+    seen_ids: set[str] = set()
+    for index, item in enumerate(raw_items):
+        field = f"manifest.task_qualifications[{index}]"
+        qualification_id = _required_string(item, "qualification_id", field)
+        if qualification_id in seen_ids:
+            raise ConvertAssetHandoffError(
+                "manifest.task_qualifications qualification_id values "
+                "must be unique"
+            )
+        seen_ids.add(qualification_id)
+        status = _required_string(item, "status", field)
+        if status != "pass":
+            raise ConvertAssetHandoffError(
+                f"{field}.status must be pass"
+            )
+        report_relative_path = _required_string(item, "report_path", field)
+        report_path = _safe_package_file(
+            package_root,
+            report_relative_path,
+            f"{field}.report_path",
+        )
+        report_sha256 = _required_sha256(item, "report_sha256", field)
+        if _file_sha256(report_path) != report_sha256:
+            raise ConvertAssetHandoffError(
+                f"{field}.report_sha256 does not match qualification report"
+            )
+        qualifications.append(
+            ConvertAssetTaskQualification(
+                qualification_id=qualification_id,
+                status=status,
+                report_path=report_relative_path,
+                report_sha256=report_sha256,
+                payload=_copy_json_mapping(item, field),
+            )
+        )
+    return tuple(qualifications)
 
 
 def _load_articulation_contract(

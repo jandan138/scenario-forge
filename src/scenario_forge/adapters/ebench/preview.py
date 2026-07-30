@@ -5,6 +5,7 @@ from hashlib import sha256
 import json
 import math
 from pathlib import Path
+import re
 import struct
 import subprocess
 from typing import Any, Mapping
@@ -40,8 +41,10 @@ _BLOCKING_LOG_SIGNALS = (
     "wasn't resolved properly",
 )
 _MAX_EXTENT_RELATIVE_ERROR = 0.05
+_MAX_ROOT_TILT_DEG = 10.0
 _TABLETOP_XY_TOLERANCE_M = 0.01
 _TABLETOP_SUPPORT_TOLERANCE_M = 0.01
+_SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 
 
 class GenManipPreviewError(ValueError):
@@ -553,6 +556,24 @@ def _expected_runtime_geometry(
             raise GenManipPreviewError(
                 f"runtime object {runtime_id!r} producer extent does not match bound"
             )
+        if geometry.get("support_frame") != "support":
+            raise GenManipPreviewError(
+                f"runtime object {runtime_id!r} producer geometry requires "
+                "the authoritative support frame"
+            )
+        support_matrix = _matrix4(
+            geometry.get("support_frame_local_matrix"),
+            f"runtime object {runtime_id} producer geometry."
+            "support_frame_local_matrix",
+        )
+        source_sha256 = geometry.get("support_frame_source_sha256")
+        if (
+            not isinstance(source_sha256, str)
+            or _SHA256_HEX.fullmatch(source_sha256) is None
+        ):
+            raise GenManipPreviewError(
+                f"runtime object {runtime_id!r} support frame must be hash-bound"
+            )
         result[runtime_id] = {
             "schema_version": geometry["schema_version"],
             "runtime_id": runtime_id,
@@ -564,6 +585,13 @@ def _expected_runtime_geometry(
             },
             "extent_m": list(extent),
             "max_extent_relative_error": _MAX_EXTENT_RELATIVE_ERROR,
+            "support_frame": "support",
+            "support_frame_local_matrix": [
+                list(row) for row in support_matrix
+            ],
+            "support_frame_source_sha256": source_sha256,
+            "max_root_tilt_deg": _MAX_ROOT_TILT_DEG,
+            "max_support_gap_m": _TABLETOP_SUPPORT_TOLERANCE_M,
         }
     return result
 
@@ -636,19 +664,27 @@ def _validate_runtime_geometry(
             task_objects.get(runtime_id),
             f"preview runtime geometry task object {runtime_id}",
         )
-        actual_lower, actual_upper, actual_extent = _world_bound(
+        warmup_start = _runtime_geometry_snapshot(
             _required_mapping(
                 actual_item,
-                "world_bound_m",
+                "warmup_start",
                 f"preview runtime geometry task object {runtime_id}",
             ),
-            f"preview runtime geometry task object {runtime_id}",
+            expected_item,
+            f"preview runtime geometry task object {runtime_id}.warmup_start",
         )
-        _require_recorded_extent(
-            actual_item,
-            actual_extent,
-            f"preview runtime geometry task object {runtime_id}",
+        post_warmup = _runtime_geometry_snapshot(
+            _required_mapping(
+                actual_item,
+                "post_warmup",
+                f"preview runtime geometry task object {runtime_id}",
+            ),
+            expected_item,
+            f"preview runtime geometry task object {runtime_id}.post_warmup",
         )
+        actual_lower, actual_upper, actual_extent = post_warmup[
+            "world_bound"
+        ]
         expected_extent = _number_vector(
             expected_item.get("extent_m"),
             f"preview expected runtime geometry {runtime_id}.extent_m",
@@ -658,19 +694,25 @@ def _validate_runtime_geometry(
             f"preview expected runtime geometry {runtime_id} extent tolerance",
         )
         expected_sorted = sorted(expected_extent)
-        actual_sorted = sorted(actual_extent)
-        relative_errors = [
-            abs(actual_value - expected_value) / expected_value
-            for expected_value, actual_value in zip(
-                expected_sorted,
-                actual_sorted,
-                strict=True,
-            )
-        ]
-        if any(error > tolerance for error in relative_errors):
-            raise GenManipPreviewError(
-                f"preview runtime extent mismatch for {runtime_id}"
-            )
+        extent_relative_errors: dict[str, list[float]] = {}
+        for sample_name, sample in (
+            ("warmup_start", warmup_start),
+            ("post_warmup", post_warmup),
+        ):
+            actual_sorted = sorted(sample["world_bound"][2])
+            relative_errors = [
+                abs(actual_value - expected_value) / expected_value
+                for expected_value, actual_value in zip(
+                    expected_sorted,
+                    actual_sorted,
+                    strict=True,
+                )
+            ]
+            if any(error > tolerance for error in relative_errors):
+                raise GenManipPreviewError(
+                    f"preview runtime extent mismatch for {runtime_id}"
+                )
+            extent_relative_errors[sample_name] = relative_errors
 
         for axis_index in (0, 1):
             if (
@@ -682,11 +724,27 @@ def _validate_runtime_geometry(
                 raise GenManipPreviewError(
                     f"preview runtime object {runtime_id} is outside tabletop XY"
                 )
-        support_gap = actual_lower[2] - table_upper[2]
+        max_root_tilt_deg = _positive_finite_number(
+            expected_item.get("max_root_tilt_deg"),
+            f"preview expected runtime geometry {runtime_id} root tilt tolerance",
+        )
+        root_tilt_deg = _root_tilt_deg(
+            warmup_start["root_pose"][1],
+            post_warmup["root_pose"][1],
+        )
+        if root_tilt_deg > max_root_tilt_deg:
+            raise GenManipPreviewError(
+                f"preview runtime root tilt exceeds tolerance for {runtime_id}"
+            )
+        max_support_gap = _positive_finite_number(
+            expected_item.get("max_support_gap_m"),
+            f"preview expected runtime geometry {runtime_id} support tolerance",
+        )
+        support_gap = post_warmup["support_world_point"][2] - table_upper[2]
         if not (
-            -_TABLETOP_SUPPORT_TOLERANCE_M
+            -max_support_gap
             <= support_gap
-            <= _TABLETOP_SUPPORT_TOLERANCE_M
+            <= max_support_gap
         ):
             raise GenManipPreviewError(
                 f"preview runtime support gap exceeds tolerance for {runtime_id}"
@@ -695,9 +753,13 @@ def _validate_runtime_geometry(
             "status": "passed",
             "expected_extent_m": expected_extent,
             "actual_extent_m": list(actual_extent),
-            "extent_relative_error_sorted": relative_errors,
+            "extent_relative_error_sorted": extent_relative_errors,
             "support_gap_m": support_gap,
+            "root_tilt_deg": root_tilt_deg,
             "tabletop_xy_contained": True,
+            "overall_aabb_support_gap_diagnostic_m": (
+                actual_lower[2] - table_upper[2]
+            ),
         }
     return {
         "status": "passed",
@@ -709,10 +771,63 @@ def _validate_runtime_geometry(
         },
         "thresholds": {
             "max_extent_relative_error": _MAX_EXTENT_RELATIVE_ERROR,
+            "max_root_tilt_deg": _MAX_ROOT_TILT_DEG,
             "tabletop_xy_tolerance_m": _TABLETOP_XY_TOLERANCE_M,
             "tabletop_support_tolerance_m": _TABLETOP_SUPPORT_TOLERANCE_M,
         },
         "task_objects": gate_objects,
+    }
+
+
+def _runtime_geometry_snapshot(
+    value: Mapping[str, Any],
+    expected_item: Mapping[str, Any],
+    label: str,
+) -> dict[str, Any]:
+    lower, upper, extent = _world_bound(
+        _required_mapping(value, "world_bound_m", label),
+        label,
+    )
+    _require_recorded_extent(value, extent, label)
+    root_pose = _required_mapping(value, "root_pose", label)
+    root_xyz = _number_vector(root_pose.get("xyz_m"), f"{label}.root_pose.xyz_m")
+    root_wxyz = _quaternion(
+        root_pose.get("wxyz"),
+        f"{label}.root_pose.wxyz",
+    )
+    support_world_point = _number_vector(
+        value.get("support_frame_world_point_m"),
+        f"{label}.support_frame_world_point_m",
+    )
+    support_matrix = _matrix4(
+        expected_item.get("support_frame_local_matrix"),
+        f"{label}.expected_support_frame_local_matrix",
+    )
+    support_local = (
+        support_matrix[3][0],
+        support_matrix[3][1],
+        support_matrix[3][2],
+    )
+    rotated_support = _rotate_wxyz(support_local, root_wxyz)
+    computed_support = tuple(
+        origin + offset
+        for origin, offset in zip(root_xyz, rotated_support, strict=True)
+    )
+    if any(
+        not math.isclose(recorded, computed, rel_tol=0.0, abs_tol=1e-6)
+        for recorded, computed in zip(
+            support_world_point,
+            computed_support,
+            strict=True,
+        )
+    ):
+        raise GenManipPreviewError(
+            f"{label} support-frame world point is inconsistent with root pose"
+        )
+    return {
+        "world_bound": (lower, upper, extent),
+        "root_pose": (root_xyz, root_wxyz),
+        "support_world_point": support_world_point,
     }
 
 
@@ -753,6 +868,76 @@ def _number_vector(value: object, label: str) -> tuple[float, float, float]:
         raise GenManipPreviewError(f"{label} must contain three finite numbers")
     result = tuple(_finite_number(item, label) for item in value)
     return result[0], result[1], result[2]
+
+
+def _matrix4(
+    value: object,
+    label: str,
+) -> tuple[tuple[float, float, float, float], ...]:
+    if not isinstance(value, list) or len(value) != 4:
+        raise GenManipPreviewError(f"{label} must be a finite 4x4 matrix")
+    rows: list[tuple[float, float, float, float]] = []
+    for raw_row in value:
+        if not isinstance(raw_row, list) or len(raw_row) != 4:
+            raise GenManipPreviewError(f"{label} must be a finite 4x4 matrix")
+        row = tuple(_finite_number(item, label) for item in raw_row)
+        rows.append((row[0], row[1], row[2], row[3]))
+    expected_last_column = (0.0, 0.0, 0.0, 1.0)
+    if any(
+        not math.isclose(
+            rows[index][3],
+            expected,
+            rel_tol=0.0,
+            abs_tol=1e-9,
+        )
+        for index, expected in enumerate(expected_last_column)
+    ):
+        raise GenManipPreviewError(
+            f"{label} must use the USD row-vector affine convention"
+        )
+    return tuple(rows)
+
+
+def _quaternion(
+    value: object,
+    label: str,
+) -> tuple[float, float, float, float]:
+    if not isinstance(value, list) or len(value) != 4:
+        raise GenManipPreviewError(f"{label} must contain four finite numbers")
+    result = tuple(_finite_number(item, label) for item in value)
+    norm = math.sqrt(sum(component * component for component in result))
+    if not math.isclose(norm, 1.0, rel_tol=0.0, abs_tol=1e-6):
+        raise GenManipPreviewError(f"{label} must be a unit quaternion")
+    return result[0], result[1], result[2], result[3]
+
+
+def _rotate_wxyz(
+    vector: tuple[float, float, float],
+    quaternion: tuple[float, float, float, float],
+) -> tuple[float, float, float]:
+    w, x, y, z = quaternion
+    vx, vy, vz = vector
+    tx = 2.0 * (y * vz - z * vy)
+    ty = 2.0 * (z * vx - x * vz)
+    tz = 2.0 * (x * vy - y * vx)
+    return (
+        vx + w * tx + (y * tz - z * ty),
+        vy + w * ty + (z * tx - x * tz),
+        vz + w * tz + (x * ty - y * tx),
+    )
+
+
+def _root_tilt_deg(
+    start_wxyz: tuple[float, float, float, float],
+    post_wxyz: tuple[float, float, float, float],
+) -> float:
+    local_up = (0.0, 0.0, 1.0)
+    start_up = _rotate_wxyz(local_up, start_wxyz)
+    post_up = _rotate_wxyz(local_up, post_wxyz)
+    cosine = sum(
+        left * right for left, right in zip(start_up, post_up, strict=True)
+    )
+    return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
 
 
 def _expected_preview_visibility(view_name: str) -> str:

@@ -218,8 +218,26 @@ def _render_initial_scene(
             task_name,
             default_config,
         )
+        stage = scene.world.stage
+        bbox_cache = UsdGeom.BBoxCache(
+            Usd.TimeCode.Default(),
+            [UsdGeom.Tokens.default_, UsdGeom.Tokens.render],
+            useExtentsHint=True,
+        )
+        xform_cache = UsdGeom.XformCache(Usd.TimeCode.Default())
+        warmup_start_geometry = _runtime_task_geometry_snapshots(
+            request=request,
+            stage=stage,
+            scene=scene,
+            bbox_cache=bbox_cache,
+            xform_cache=xform_cache,
+            Gf=Gf,
+            np=np,
+        )
         for _ in range(WARMUP_STEPS):
             scene.world.step(render=False)
+        bbox_cache.Clear()
+        xform_cache.Clear()
         log_lines.extend(
             [
                 f"scene_usd={scene_path}",
@@ -233,7 +251,6 @@ def _render_initial_scene(
             ]
         )
 
-        stage = scene.world.stage
         preview_light = UsdLux.DomeLight.Define(
             stage, "/World/ScenarioForgeInitialPreviewLight"
         )
@@ -251,17 +268,15 @@ def _render_initial_scene(
             float(evaluation.get("rendering_dt", 1.0 / 60.0)),
             only_color_rep_for_camera=True,
         )
-        bbox_cache = UsdGeom.BBoxCache(
-            Usd.TimeCode.Default(),
-            [UsdGeom.Tokens.default_, UsdGeom.Tokens.render],
-            useExtentsHint=True,
-        )
         runtime_geometry = _runtime_geometry_record(
             request=request,
             stage=stage,
             scene=scene,
             bbox_cache=bbox_cache,
+            xform_cache=xform_cache,
+            Gf=Gf,
             np=np,
+            warmup_start_geometry=warmup_start_geometry,
         )
         room_prim = stage.GetPrimAtPath(f"/World/{scene.uuid}/room")
         if room_prim is None or not room_prim.IsValid():
@@ -468,6 +483,7 @@ def _render_initial_scene(
         del camera
         del preview_cameras
         del bbox_cache
+        del xform_cache
         del stage
         del scene
         gc.collect()
@@ -574,7 +590,10 @@ def _runtime_geometry_record(
     stage: Any,
     scene: Any,
     bbox_cache: Any,
+    xform_cache: Any,
+    Gf: Any,
     np: Any,
+    warmup_start_geometry: Mapping[str, Mapping[str, Any]],
 ) -> dict[str, Any]:
     expected_ids = _required_mapping(
         request,
@@ -591,7 +610,7 @@ def _runtime_geometry_record(
         "render request.expected_runtime_ids.task_objects",
     )
 
-    def record(runtime_id: str) -> dict[str, Any]:
+    def record_bound(runtime_id: str) -> dict[str, Any]:
         lower, upper = _runtime_bounds(
             stage=stage,
             scene=scene,
@@ -609,15 +628,142 @@ def _runtime_geometry_record(
             "extent_m": _float_list(extent),
         }
 
+    expected_geometry = _required_mapping(
+        request,
+        "expected_runtime_geometry",
+        "render request",
+    )
+    post_warmup_geometry = _runtime_task_geometry_snapshots(
+        request=request,
+        stage=stage,
+        scene=scene,
+        bbox_cache=bbox_cache,
+        xform_cache=xform_cache,
+        Gf=Gf,
+        np=np,
+    )
+    task_objects: dict[str, Any] = {}
+    for runtime_id in task_runtime_ids:
+        start = warmup_start_geometry.get(runtime_id)
+        post = post_warmup_geometry.get(runtime_id)
+        if start is None or post is None:
+            raise RuntimeError(
+                f"runtime geometry snapshot is missing for {runtime_id}"
+            )
+        task_objects[runtime_id] = {
+            "runtime_id": runtime_id,
+            "warmup_start": start,
+            "post_warmup": post,
+            "producer_geometry_expected": runtime_id in expected_geometry,
+        }
+
     return {
         "status": "pass",
         "sample_moment": "post_reset_zero_action_warmup",
-        "table": record(table_runtime_id),
-        "task_objects": {
-            runtime_id: record(runtime_id)
-            for runtime_id in task_runtime_ids
-        },
+        "table": record_bound(table_runtime_id),
+        "task_objects": task_objects,
     }
+
+
+def _runtime_task_geometry_snapshots(
+    *,
+    request: Mapping[str, Any],
+    stage: Any,
+    scene: Any,
+    bbox_cache: Any,
+    xform_cache: Any,
+    Gf: Any,
+    np: Any,
+) -> dict[str, dict[str, Any]]:
+    expected_ids = _required_mapping(
+        request,
+        "expected_runtime_ids",
+        "render request",
+    )
+    task_runtime_ids = _string_list(
+        expected_ids.get("task_objects"),
+        "render request.expected_runtime_ids.task_objects",
+    )
+    expected_geometry = _required_mapping(
+        request,
+        "expected_runtime_geometry",
+        "render request",
+    )
+    snapshots: dict[str, dict[str, Any]] = {}
+    for runtime_id in task_runtime_ids:
+        lower, upper = _runtime_bounds(
+            stage=stage,
+            scene=scene,
+            runtime_ids=[runtime_id],
+            bbox_cache=bbox_cache,
+            np=np,
+        )
+        extent = upper - lower
+        snapshot: dict[str, Any] = {
+            "world_bound_m": {
+                "min": _float_list(lower),
+                "max": _float_list(upper),
+            },
+            "extent_m": _float_list(extent),
+        }
+        expected = expected_geometry.get(runtime_id)
+        if expected is not None:
+            expected_item = _as_mapping(
+                expected,
+                f"render request.expected_runtime_geometry.{runtime_id}",
+            )
+            support_matrix = _matrix4(
+                expected_item.get("support_frame_local_matrix"),
+                f"render request.expected_runtime_geometry.{runtime_id}."
+                "support_frame_local_matrix",
+            )
+            prim = _runtime_prim(stage, scene, runtime_id)
+            if prim is None or not prim.IsValid() or not prim.IsActive():
+                raise RuntimeError(
+                    f"task runtime prim is unavailable for {runtime_id}"
+                )
+            world = xform_cache.GetLocalToWorldTransform(prim)
+            translation = world.ExtractTranslation()
+            quaternion = world.ExtractRotationQuat()
+            imaginary = quaternion.GetImaginary()
+            support_local = Gf.Vec3d(
+                support_matrix[3][0],
+                support_matrix[3][1],
+                support_matrix[3][2],
+            )
+            support_world = world.Transform(support_local)
+            snapshot.update(
+                {
+                    "root_pose": {
+                        "xyz_m": _float_list(translation),
+                        "wxyz": [
+                            float(quaternion.GetReal()),
+                            float(imaginary[0]),
+                            float(imaginary[1]),
+                            float(imaginary[2]),
+                        ],
+                    },
+                    "support_frame_world_point_m": _float_list(
+                        support_world
+                    ),
+                }
+            )
+        snapshots[runtime_id] = snapshot
+    return snapshots
+
+
+def _matrix4(value: object, label: str) -> list[list[float]]:
+    if not isinstance(value, list) or len(value) != 4:
+        raise ValueError(f"{label} must be a finite 4x4 matrix")
+    matrix: list[list[float]] = []
+    for raw_row in value:
+        if not isinstance(raw_row, list) or len(raw_row) != 4:
+            raise ValueError(f"{label} must be a finite 4x4 matrix")
+        row = [float(item) for item in raw_row]
+        if not all(math.isfinite(item) for item in row):
+            raise ValueError(f"{label} must be a finite 4x4 matrix")
+        matrix.append(row)
+    return matrix
 
 
 def _fit_camera(
