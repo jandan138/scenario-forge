@@ -137,6 +137,34 @@ def _place_task_object_on_tabletop(
     norm = math.sqrt(sum(value * value for value in quaternion_values))
     if not math.isclose(norm, 1.0, rel_tol=0.0, abs_tol=1e-6):
         raise ValueError(f"task object {task_object['id']}.pose.wxyz must be unit")
+    mounting = geometry.get("mounting")
+    if mounting is not None:
+        mount_translation, mount_rotation = _fixed_base_mount_pose(
+            mounting,
+            asset_id=asset_id,
+        )
+        if (
+            not math.isclose(quaternion_values[1], 0.0, abs_tol=1e-6)
+            or not math.isclose(quaternion_values[2], 0.0, abs_tol=1e-6)
+        ):
+            raise ValueError(
+                f"task object {task_object['id']}.pose.wxyz must be a Z yaw "
+                "when applying a producer-qualified mount"
+            )
+        world_mount_offset = _rotate_wxyz(
+            mount_translation,
+            quaternion_values,
+        )
+        pose["xyz"] = [
+            float(xyz[0]) + world_mount_offset[0],
+            float(xyz[1]) + world_mount_offset[1],
+            EBENCH_TABLETOP_Z_M + world_mount_offset[2],
+        ]
+        pose["wxyz"] = _multiply_wxyz(
+            quaternion_values,
+            mount_rotation,
+        )
+        return
     support_local = [
         float(support_matrix[3][0]),
         float(support_matrix[3][1]),
@@ -150,6 +178,89 @@ def _place_task_object_on_tabletop(
         + TABLETOP_CLEARANCE_M
         - support_world_offset[2],
     ]
+
+
+def _fixed_base_mount_pose(
+    raw_mounting: object,
+    *,
+    asset_id: str,
+) -> tuple[list[float], list[float]]:
+    mounting = _mapping(raw_mounting, f"asset {asset_id}.mounting")
+    if (
+        mounting.get("schema_version") != "aan.articulated_mounting.v1"
+        or mounting.get("status") != "pass"
+        or mounting.get("motion_mode") != "fixed_base"
+    ):
+        raise ValueError(
+            f"asset {asset_id} requires a passed fixed-base mounting contract"
+        )
+    for field_name in (
+        "source_sha256",
+        "profile_sha256",
+        "runtime_report_sha256",
+    ):
+        value = mounting.get(field_name)
+        if not isinstance(value, str) or _SHA256_HEX.fullmatch(value) is None:
+            raise ValueError(
+                f"asset {asset_id} mounting {field_name} must be hash-bound"
+            )
+    semantics = _mapping(
+        mounting.get("coordinate_semantics"),
+        f"asset {asset_id}.mounting.coordinate_semantics",
+    )
+    if semantics != {
+        "stage_up_axis": "Z",
+        "linear_units": "meter",
+        "quaternion_order": "wxyz",
+        "support_frame": "runtime_articulation_root_pose_local",
+        "mount_pose": (
+            "support_plane_to_runtime_articulation_root_pose_world_axes_"
+            "at_yaw_zero"
+        ),
+        "qualified_extents": (
+            "world_axis_aligned_at_mount_pose_after_joint_reset"
+        ),
+    }:
+        raise ValueError(
+            f"asset {asset_id} mounting coordinate semantics are unsupported"
+        )
+    pose = _mapping(
+        mounting.get("support_plane_to_root_mount_pose"),
+        f"asset {asset_id}.mounting.support_plane_to_root_mount_pose",
+    )
+    translation = pose.get("translation_m")
+    rotation = pose.get("rotation_wxyz")
+    if (
+        not isinstance(translation, list)
+        or len(translation) != 3
+        or not all(
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(float(value))
+            for value in translation
+        )
+        or not isinstance(rotation, list)
+        or len(rotation) != 4
+        or not all(
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(float(value))
+            for value in rotation
+        )
+    ):
+        raise ValueError(
+            f"asset {asset_id} mounting pose must contain finite translation "
+            "and rotation"
+        )
+    rotation_values = [float(value) for value in rotation]
+    if not math.isclose(
+        sum(value * value for value in rotation_values),
+        1.0,
+        rel_tol=0.0,
+        abs_tol=1e-6,
+    ):
+        raise ValueError(f"asset {asset_id} mounting rotation must be unit")
+    return [float(value) for value in translation], rotation_values
 
 
 def _require_task_qualification(
@@ -238,6 +349,19 @@ def _rotate_wxyz(vector: list[float], quaternion: list[float]) -> list[float]:
         vy + w * ty + (z * tx - x * tz),
         vz + w * tz + (x * ty - y * tx),
     ]
+
+
+def _multiply_wxyz(left: list[float], right: list[float]) -> list[float]:
+    lw, lx, ly, lz = left
+    rw, rx, ry, rz = right
+    result = [
+        lw * rw - lx * rx - ly * ry - lz * rz,
+        lw * rx + lx * rw + ly * rz - lz * ry,
+        lw * ry - lx * rz + ly * rw + lz * rx,
+        lw * rz + lx * ry - ly * rx + lz * rw,
+    ]
+    norm = math.sqrt(sum(value * value for value in result))
+    return [value / norm for value in result]
 
 
 def _set_relative_target_range(

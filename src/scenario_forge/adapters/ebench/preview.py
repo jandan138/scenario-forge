@@ -497,11 +497,21 @@ def _expected_runtime_geometry(
             geometry,
             f"package source_assets[{index}].task_interactive_geometry",
         )
-        if geometry_mapping.get("schema_version") != (
-            "scenario-forge-task-interactive-geometry/v0.1"
-        ):
+        geometry_schema = geometry_mapping.get("schema_version")
+        if geometry_schema not in {
+            "scenario-forge-task-interactive-geometry/v0.1",
+            "scenario-forge-task-interactive-geometry/v0.2",
+        }:
             raise GenManipPreviewError(
                 "unsupported task-interactive geometry schema_version"
+            )
+        if (
+            geometry_schema
+            == "scenario-forge-task-interactive-geometry/v0.2"
+        ) != ("mounting" in geometry_mapping):
+            raise GenManipPreviewError(
+                "task-interactive geometry v0.2 requires exactly one mounting "
+                "contract extension"
             )
         geometry_sources.append(
             (
@@ -593,6 +603,57 @@ def _expected_runtime_geometry(
             "max_root_tilt_deg": _MAX_ROOT_TILT_DEG,
             "max_support_gap_m": _TABLETOP_SUPPORT_TOLERANCE_M,
         }
+        mounting = geometry.get("mounting")
+        if mounting is not None:
+            mounting_mapping = _as_mapping(
+                mounting,
+                f"runtime object {runtime_id} producer geometry.mounting",
+            )
+            if (
+                mounting_mapping.get("schema_version")
+                != "aan.articulated_mounting.v1"
+                or mounting_mapping.get("status") != "pass"
+                or mounting_mapping.get("motion_mode") != "fixed_base"
+            ):
+                raise GenManipPreviewError(
+                    f"runtime object {runtime_id!r} mounting contract is invalid"
+                )
+            for field_name in (
+                "source_sha256",
+                "profile_sha256",
+                "runtime_report_sha256",
+            ):
+                digest = mounting_mapping.get(field_name)
+                if (
+                    not isinstance(digest, str)
+                    or _SHA256_HEX.fullmatch(digest) is None
+                ):
+                    raise GenManipPreviewError(
+                        f"runtime object {runtime_id!r} mounting {field_name} "
+                        "must be hash-bound"
+                    )
+            reset_geometry = _required_mapping(
+                mounting_mapping,
+                "qualified_reset_geometry",
+                f"runtime object {runtime_id} producer geometry.mounting",
+            )
+            warmup_extent = _number_vector(
+                reset_geometry.get("warmup_extent_world_aabb_m"),
+                f"runtime object {runtime_id} mounting warmup extent",
+            )
+            final_extent = _number_vector(
+                reset_geometry.get("final_extent_world_aabb_m"),
+                f"runtime object {runtime_id} mounting final extent",
+            )
+            if any(value <= 0.0 for value in (*warmup_extent, *final_extent)):
+                raise GenManipPreviewError(
+                    f"runtime object {runtime_id!r} mounting extents must be positive"
+                )
+            result[runtime_id]["mounting"] = dict(mounting_mapping)
+            result[runtime_id]["qualified_extent_m_by_sample"] = {
+                "warmup_start": list(warmup_extent),
+                "post_warmup": list(final_extent),
+            }
     return result
 
 
@@ -685,7 +746,7 @@ def _validate_runtime_geometry(
         actual_lower, actual_upper, actual_extent = post_warmup[
             "world_bound"
         ]
-        expected_extent = _number_vector(
+        default_expected_extent = _number_vector(
             expected_item.get("extent_m"),
             f"preview expected runtime geometry {runtime_id}.extent_m",
         )
@@ -693,12 +754,40 @@ def _validate_runtime_geometry(
             expected_item.get("max_extent_relative_error"),
             f"preview expected runtime geometry {runtime_id} extent tolerance",
         )
-        expected_sorted = sorted(expected_extent)
+        qualified_extents = expected_item.get("qualified_extent_m_by_sample")
+        expected_extent_by_sample: dict[str, list[float]] = {}
+        if qualified_extents is None:
+            expected_extent_by_sample = {
+                "warmup_start": list(default_expected_extent),
+                "post_warmup": list(default_expected_extent),
+            }
+        else:
+            raw_extents = _as_mapping(
+                qualified_extents,
+                f"preview expected runtime geometry {runtime_id} "
+                "qualified_extent_m_by_sample",
+            )
+            if set(raw_extents) != {"warmup_start", "post_warmup"}:
+                raise GenManipPreviewError(
+                    f"preview expected runtime geometry {runtime_id!r} "
+                    "qualified extents must cover both runtime samples"
+                )
+            expected_extent_by_sample = {
+                sample_name: list(
+                    _number_vector(
+                        raw_extents.get(sample_name),
+                        f"preview expected runtime geometry {runtime_id} "
+                        f"{sample_name} extent",
+                    )
+                )
+                for sample_name in ("warmup_start", "post_warmup")
+            }
         extent_relative_errors: dict[str, list[float]] = {}
         for sample_name, sample in (
             ("warmup_start", warmup_start),
             ("post_warmup", post_warmup),
         ):
+            expected_sorted = sorted(expected_extent_by_sample[sample_name])
             actual_sorted = sorted(sample["world_bound"][2])
             relative_errors = [
                 abs(actual_value - expected_value) / expected_value
@@ -751,7 +840,8 @@ def _validate_runtime_geometry(
             )
         gate_objects[runtime_id] = {
             "status": "passed",
-            "expected_extent_m": expected_extent,
+            "expected_extent_m": list(default_expected_extent),
+            "expected_extent_m_by_sample": expected_extent_by_sample,
             "actual_extent_m": list(actual_extent),
             "extent_relative_error_sorted": extent_relative_errors,
             "support_gap_m": support_gap,

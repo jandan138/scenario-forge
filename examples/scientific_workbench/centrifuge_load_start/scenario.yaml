@@ -26,11 +26,10 @@ objects:
     source_prim_path: /World/Centrifuge
     role: articulated_device
     pose:
-      # eBench table top 0.7727606155 m + the standard 1 cm spawn clearance.
-      # The generator subtracts the admitted package bound min_z if non-zero.
+      # Readable task anchor. The generator replaces Z with the flush
+      # producer-qualified fixed-base mount translation above the table.
       xyz: [-0.08, 0.0, 0.7827606155]
-      # ConvertAsset's admitted canonical frame is Z-up with local +X as front.
-      # This yaw points the front panel toward the robot at world -X.
+      # Task-level Z yaw, composed with the producer-qualified mount rotation.
       wxyz: [0.0, 0.0, 0.0, 1.0]
     named_frames:
       # This checked-in value is a readable template.  The task generator

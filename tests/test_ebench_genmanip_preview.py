@@ -17,6 +17,7 @@ from scripts.ebench.render_genmanip_initial_preview import (
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
 from scenario_forge.adapters.ebench.preview import (
     GenManipPreviewError,
+    _validate_runtime_geometry,
     compute_preview_input_digest,
     run_genmanip_initial_preview,
     validate_genmanip_preview_evidence,
@@ -229,6 +230,38 @@ def test_preview_evidence_with_matching_digest_writes_visual_ready_gate(
     assert gate["runtime_geometry"]["status"] == "passed"
     assert "on-camera visibility" in gate["claim_boundary"]
     assert "task success" in gate["claim_boundary"]
+
+
+def test_preview_geometry_gate_uses_qualified_extent_for_each_runtime_sample(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(
+        _build_qualified_object_package(tmp_path)
+    ).output_dir
+    request_path = collected_package / "evidence" / "render_request.yaml"
+    request = _load_yaml(request_path)
+    expected = request["expected_runtime_geometry"]
+    assert isinstance(expected, dict)
+    runtime_id = next(iter(expected))
+    expected_item = expected[runtime_id]
+    assert isinstance(expected_item, dict)
+    expected_item["qualified_extent_m_by_sample"] = {
+        "warmup_start": [0.32, 0.35, 0.226],
+        "post_warmup": [0.34, 0.36, 0.24],
+    }
+    evidence_dir = _write_passing_evidence(collected_package, request)
+    manifest = json.loads(
+        (evidence_dir / "render_manifest.json").read_text(encoding="utf-8")
+    )
+
+    gate = _validate_runtime_geometry(request, manifest)
+
+    assert gate["task_objects"][runtime_id][
+        "expected_extent_m_by_sample"
+    ] == {
+        "warmup_start": [0.32, 0.35, 0.226],
+        "post_warmup": [0.34, 0.36, 0.24],
+    }
 
 
 @pytest.mark.parametrize(
@@ -595,42 +628,52 @@ def _write_passing_evidence(
         assert isinstance(expected, dict)
         extent = expected.get("extent_m", [0.1, 0.1, 0.1])
         assert isinstance(extent, list) and len(extent) == 3
+        qualified_extents = expected.get("qualified_extent_m_by_sample", {})
+        assert isinstance(qualified_extents, dict)
+        warmup_extent = qualified_extents.get("warmup_start", extent)
+        post_extent = qualified_extents.get("post_warmup", extent)
+        assert isinstance(warmup_extent, list) and len(warmup_extent) == 3
+        assert isinstance(post_extent, list) and len(post_extent) == 3
         lower = [-0.7 + 0.5 * index, -0.2, 0.805]
-        upper = [
-            lower[0] + float(extent[0]),
-            lower[1] + float(extent[1]),
-            lower[2] + float(extent[2]),
-        ]
         support_matrix = expected.get("support_frame_local_matrix")
-        snapshot = {
-            "world_bound_m": {"min": lower, "max": upper},
-            "extent_m": [float(value) for value in extent],
-        }
-        if support_matrix is not None:
-            assert isinstance(support_matrix, list) and len(support_matrix) == 4
-            support_local_x = float(support_matrix[3][0])
-            support_local_y = float(support_matrix[3][1])
-            support_local_z = float(support_matrix[3][2])
-            root_x = float(lower[0]) - support_local_x
-            root_y = float(lower[1]) - support_local_y
-            root_z = table_bound["max"][2] - support_local_z
-            snapshot.update(
-                {
-                    "root_pose": {
-                        "xyz_m": [root_x, root_y, root_z],
-                        "wxyz": [1.0, 0.0, 0.0, 0.0],
-                    },
-                    "support_frame_world_point_m": [
-                        float(lower[0]),
-                        float(lower[1]),
-                        table_bound["max"][2],
-                    ],
-                }
-            )
+
+        def snapshot(sample_extent: list[object]) -> dict[str, object]:
+            upper = [
+                lower[0] + float(sample_extent[0]),
+                lower[1] + float(sample_extent[1]),
+                lower[2] + float(sample_extent[2]),
+            ]
+            value: dict[str, object] = {
+                "world_bound_m": {"min": lower, "max": upper},
+                "extent_m": [float(component) for component in sample_extent],
+            }
+            if support_matrix is not None:
+                assert isinstance(support_matrix, list) and len(support_matrix) == 4
+                support_local_x = float(support_matrix[3][0])
+                support_local_y = float(support_matrix[3][1])
+                support_local_z = float(support_matrix[3][2])
+                root_x = float(lower[0]) - support_local_x
+                root_y = float(lower[1]) - support_local_y
+                root_z = table_bound["max"][2] - support_local_z
+                value.update(
+                    {
+                        "root_pose": {
+                            "xyz_m": [root_x, root_y, root_z],
+                            "wxyz": [1.0, 0.0, 0.0, 0.0],
+                        },
+                        "support_frame_world_point_m": [
+                            float(lower[0]),
+                            float(lower[1]),
+                            table_bound["max"][2],
+                        ],
+                    }
+                )
+            return value
+
         task_bounds[str(runtime_id)] = {
             "runtime_id": str(runtime_id),
-            "warmup_start": json.loads(json.dumps(snapshot)),
-            "post_warmup": json.loads(json.dumps(snapshot)),
+            "warmup_start": snapshot(warmup_extent),
+            "post_warmup": snapshot(post_extent),
         }
     manifest = {
         "schema_version": "scenario-forge-genmanip-preview-evidence/v0.1",

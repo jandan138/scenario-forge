@@ -192,6 +192,47 @@ def _articulated_source(source_usd: Path) -> LocalUSDAssetSource:
         },
         "closure": closure,
     }
+    mounting = {
+        "schema_version": "aan.articulated_mounting.v1",
+        "status": "pass",
+        "motion_mode": "fixed_base",
+        "asset_entry_prim": root,
+        "coordinate_semantics": {
+            "stage_up_axis": "Z",
+            "linear_units": "meter",
+            "quaternion_order": "wxyz",
+            "support_frame": "runtime_articulation_root_pose_local",
+            "mount_pose": (
+                "support_plane_to_runtime_articulation_root_pose_world_axes_"
+                "at_yaw_zero"
+            ),
+            "qualified_extents": (
+                "world_axis_aligned_at_mount_pose_after_joint_reset"
+            ),
+        },
+        "support_frame_root_local": {
+            "translation_m": [0.0, -0.10363300144672394, 0.0],
+            "rotation_wxyz": [1.0, 0.0, 0.0, 0.0],
+        },
+        "support_plane_to_root_mount_pose": {
+            "translation_m": [0.0, 0.0, 0.10363300144672394],
+            "rotation_wxyz": [0.5, 0.5, 0.5, 0.5],
+        },
+        "initial_joint_reset_positions": [
+            {"dof_index": index, "position": reset_value}
+            for index, (_, _, _, reset_value, _) in enumerate(joints)
+        ],
+        "qualified_reset_geometry": {
+            "warmup_frames": 50,
+            "warmup_extent_world_aabb_m": [0.3893976, 0.35, 0.4448730],
+            "settle_frames": 240,
+            "final_extent_world_aabb_m": [0.3893976, 0.35, 0.4448730],
+        },
+        "verification_required": "benchtop_stability",
+        "source_sha256": "1" * 64,
+        "profile_sha256": "3" * 64,
+        "runtime_report_sha256": "4" * 64,
+    }
     asset_id = "scientific_workbench_hci955350_centrifuge_dynamic"
     return LocalUSDAssetSource(
         asset_id=asset_id,
@@ -210,7 +251,20 @@ def _articulated_source(source_usd: Path) -> LocalUSDAssetSource:
                     root,
                     minimum=[-0.1606148216, -0.174999997, 0.0],
                     maximum=[0.1606148216, 0.174999997, 0.225967365],
-                ),
+                )
+                | {
+                    "schema_version": (
+                        "scenario-forge-task-interactive-geometry/v0.2"
+                    ),
+                    "mounting": mounting,
+                    "support_frame_local_matrix": [
+                        [1.0, 0.0, 0.0, 0.0],
+                        [0.0, 1.0, 0.0, 0.0],
+                        [0.0, 0.0, 1.0, 0.0],
+                        [0.0, -0.10363300144672394, 0.0, 1.0],
+                    ],
+                    "support_frame_source_sha256": "4" * 64,
+                },
             },
         ),
     )
@@ -541,6 +595,40 @@ def test_materialization_uses_support_frame_and_requires_rack_insertion_gate(
         )
 
 
+def test_materialization_uses_fixed_base_mount_pose_flush_on_tabletop(
+    tmp_path: Path,
+) -> None:
+    sources = _integration_sources(tmp_path)
+    raw_spec = _load(generator.CENTRIFUGE_SPEC)
+
+    materialized = generator._materialize_authoritative_task_geometry(
+        "7",
+        raw_spec,
+        sources,
+    )
+    objects = {
+        item["id"]: item
+        for item in materialized["objects"]
+        if isinstance(item, dict)
+    }
+    centrifuge_pose = objects["centrifuge"]["pose"]
+    assert centrifuge_pose["xyz"] == pytest.approx(
+        [
+            -0.08,
+            0.0,
+            generator.EBENCH_TABLETOP_Z_M + 0.10363300144672394,
+        ]
+    )
+    assert centrifuge_pose["wxyz"] == pytest.approx(
+        [-0.5, -0.5, 0.5, 0.5]
+    )
+    assert objects["test_tube"]["pose"]["xyz"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M
+        + generator.TABLETOP_CLEARANCE_M
+        - 0.005
+    )
+
+
 def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets(
     tmp_path: Path,
     monkeypatch,
@@ -606,7 +694,13 @@ def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets
     task7_layout = task7_data["initial_layout"]
     assert task7_layout["centrifuge"]["type"] == "articulation"
     assert task7_layout["centrifuge"]["position"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M
+        generator.EBENCH_TABLETOP_Z_M + 0.10363300144672394
+    )
+    assert task7_layout["centrifuge"]["orientation"] == pytest.approx(
+        [-0.5, -0.5, 0.5, 0.5]
+    )
+    assert task7_layout["centrifuge"]["joint_positions"] == pytest.approx(
+        [-1.5556521049, 0.0, 0.0]
     )
     assert task7_layout["test_tube"]["position"][2] == pytest.approx(
         generator.EBENCH_TABLETOP_Z_M
@@ -627,10 +721,22 @@ def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets
         "tube_socket_0_inserted_bottom_parked_root"
     ]["xyz"] == [0.0, -0.02, 0.095]
     task7_metrics = task7_evaluation["generation_config"]["goal"][0][0]
-    assert task7_metrics[0]["x_range"] == [-0.005, 0.005]
-    assert task7_metrics[0]["y_range"] == [0.015, 0.025]
-    assert task7_metrics[0]["z_range"] == [0.085, 0.105]
+    assert task7_metrics[0]["x_range"] == [-0.1, -0.09]
+    assert task7_metrics[0]["y_range"] == [-0.005, 0.005]
+    assert task7_metrics[0]["z_range"] == [-0.03, -0.01]
     assert task7_metrics[1]["obj2_uid"] == "centrifuge_rotor"
+    task7_request = _load(task7_export / "evidence/render_request.yaml")
+    task7_expected_geometry = task7_request["expected_runtime_geometry"][
+        "centrifuge"
+    ]
+    assert task7_expected_geometry["schema_version"] == (
+        "scenario-forge-task-interactive-geometry/v0.2"
+    )
+    assert task7_expected_geometry["qualified_extent_m_by_sample"] == {
+        "warmup_start": [0.3893976, 0.35, 0.444873],
+        "post_warmup": [0.3893976, 0.35, 0.444873],
+    }
+    assert task7_expected_geometry["mounting"]["motion_mode"] == "fixed_base"
 
     task11_episode = next(
         task11_export.glob(

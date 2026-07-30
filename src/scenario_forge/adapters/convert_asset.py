@@ -115,6 +115,7 @@ class ConvertAssetArticulationContract:
     reset_values: tuple[Mapping[str, Any], ...]
     semantic_joints: Mapping[str, Mapping[str, Any]]
     named_frames: Mapping[str, Mapping[str, Any]]
+    mounting: Mapping[str, Any] | None
     profile_sha256: str
     required_artifact_paths: tuple[str, ...]
     payload: Mapping[str, Any]
@@ -152,6 +153,7 @@ class ConvertAssetTaskInteractiveGeometry:
         tuple[float, float, float, float], ...
     ]
     support_frame_source_sha256: str
+    mounting: Mapping[str, Any] | None = None
 
     def to_mapping(self) -> dict[str, Any]:
         extent = [
@@ -162,8 +164,12 @@ class ConvertAssetTaskInteractiveGeometry:
                 strict=True,
             )
         ]
-        return {
-            "schema_version": "scenario-forge-task-interactive-geometry/v0.1",
+        payload = {
+            "schema_version": (
+                "scenario-forge-task-interactive-geometry/v0.2"
+                if self.mounting is not None
+                else "scenario-forge-task-interactive-geometry/v0.1"
+            ),
             "asset_entry_prim": self.asset_entry_prim,
             "entry_world_transform": [
                 list(row) for row in self.entry_world_transform
@@ -180,6 +186,12 @@ class ConvertAssetTaskInteractiveGeometry:
             ],
             "support_frame_source_sha256": self.support_frame_source_sha256,
         }
+        if self.mounting is not None:
+            payload["mounting"] = _copy_json_mapping(
+                self.mounting,
+                "task_interactive_geometry.mounting",
+            )
+        return payload
 
 
 @dataclass(frozen=True)
@@ -649,19 +661,40 @@ def load_convert_asset_package_handoff(
             rotation_field = "rotation_body_local_wxyz"
             parent_field = "parent_prim"
         elif usage == "articulated_object" and articulation_contract is not None:
-            support_frame = articulation_contract.named_frames.get("support")
-            support_frame_source_sha256 = articulation_contract.profile_sha256
-            translation_field = "translation_parent_local_m"
-            rotation_field = "rotation_parent_local_wxyz"
-            parent_field = "parent_prim"
+            mounting = articulation_contract.mounting
+            if mounting is not None:
+                support_frame = _required_mapping(
+                    mounting,
+                    "support_frame_root_local",
+                    "articulation_contract.mounting",
+                )
+                support_frame_source_sha256 = _required_sha256(
+                    mounting,
+                    "runtime_report_sha256",
+                    "articulation_contract.mounting",
+                )
+                translation_field = "translation_m"
+                rotation_field = "rotation_wxyz"
+                parent_field = None
+            else:
+                support_frame = articulation_contract.named_frames.get("support")
+                support_frame_source_sha256 = articulation_contract.profile_sha256
+                translation_field = "translation_parent_local_m"
+                rotation_field = "rotation_parent_local_wxyz"
+                parent_field = "parent_prim"
         else:
             raise ConvertAssetHandoffError(
                 "task-interactive package is missing its validated producer contract"
             )
         if (
             not isinstance(support_frame, Mapping)
-            or support_frame.get(parent_field) != entry_scope
-            or support_frame.get("authoritative") is not True
+            or (
+                parent_field is not None
+                and (
+                    support_frame.get(parent_field) != entry_scope
+                    or support_frame.get("authoritative") is not True
+                )
+            )
         ):
             raise ConvertAssetHandoffError(
                 "task-interactive package requires an authoritative root-local "
@@ -675,6 +708,12 @@ def load_convert_asset_package_handoff(
             support_translation_field=translation_field,
             support_rotation_field=rotation_field,
             support_frame_source_sha256=support_frame_source_sha256,
+            mounting=(
+                articulation_contract.mounting
+                if usage == "articulated_object"
+                and articulation_contract is not None
+                else None
+            ),
         )
 
     for field_name, digest in source_hash_fields.items():
@@ -794,6 +833,7 @@ def _load_task_interactive_geometry(
     support_translation_field: str,
     support_rotation_field: str,
     support_frame_source_sha256: str,
+    mounting: Mapping[str, Any] | None,
 ) -> ConvertAssetTaskInteractiveGeometry:
     """Validate the producer frame used by task-level USD reference composition."""
 
@@ -953,6 +993,14 @@ def _load_task_interactive_geometry(
             support_rotation,
         ),
         support_frame_source_sha256=source_digest,
+        mounting=(
+            _copy_json_mapping(
+                mounting,
+                "task_interactive_geometry.mounting",
+            )
+            if mounting is not None
+            else None
+        ),
     )
 
 
@@ -1063,14 +1111,17 @@ def _load_articulation_contract(
     asset_sha256: str,
 ) -> ConvertAssetArticulationContract:
     contract = _mapping(value, "manifest.articulation_contract")
+    contract_fields = {
+        "schema_version",
+        "status",
+        "profile",
+        "runtime_qualification",
+    }
+    if "mounting" in contract:
+        contract_fields.add("mounting")
     _require_exact_fields(
         contract,
-        {
-            "schema_version",
-            "status",
-            "profile",
-            "runtime_qualification",
-        },
+        contract_fields,
         "manifest.articulation_contract",
     )
     _require_value(
@@ -1154,20 +1205,23 @@ def _load_articulation_contract(
         profile_path.read_bytes(),
         "articulation_contract device profile",
     )
+    profile_fields = {
+        "schema_version",
+        "profile_id",
+        "revision",
+        "source_sha256",
+        "asset_entry_prim",
+        "articulation_root_prim",
+        "runtime_units",
+        "semantic_joints",
+        "named_frames",
+        "required_runtime_task_gates",
+    }
+    if "mounting" in profile:
+        profile_fields.add("mounting")
     _require_exact_fields(
         profile,
-        {
-            "schema_version",
-            "profile_id",
-            "revision",
-            "source_sha256",
-            "asset_entry_prim",
-            "articulation_root_prim",
-            "runtime_units",
-            "semantic_joints",
-            "named_frames",
-            "required_runtime_task_gates",
-        },
+        profile_fields,
         "articulation_contract.device_profile",
     )
     _require_value(
@@ -1859,6 +1913,23 @@ def _load_articulation_contract(
             "pass",
             f"articulation runtime task_gates.{gate_name}",
         )
+    mounting = _load_articulated_mounting(
+        manifest_value=contract.get("mounting"),
+        profile_value=profile.get("mounting"),
+        report_value=report.get("qualified_consumer_placement"),
+        asset_entry_prim=asset_entry_prim,
+        source_sha256=source_sha256,
+        profile_sha256=profile_sha,
+        runtime_report_sha256=report_sha,
+        required_runtime_task_gates=required_runtime_task_gates,
+        runtime_reset_by_dof={
+            int(item["dof_index"]): _finite_number(
+                item["runtime_reset_value"],
+                "articulation semantic joint runtime_reset_value",
+            )
+            for item in semantic_joints.values()
+        },
+    )
     promotion_relative_path = _validate_articulation_promotion(
         package_root=package_root,
         manifest_sha256=manifest_sha256,
@@ -1928,6 +1999,7 @@ def _load_articulation_contract(
             )
             for name, item in named_frames.items()
         },
+        mounting=mounting,
         profile_sha256=profile_sha,
         required_artifact_paths=(
             profile_relative_path,
@@ -1940,6 +2012,369 @@ def _load_articulation_contract(
             "articulation_closure",
         ),
     )
+
+
+def _load_articulated_mounting(
+    *,
+    manifest_value: object,
+    profile_value: object,
+    report_value: object,
+    asset_entry_prim: str,
+    source_sha256: str,
+    profile_sha256: str,
+    runtime_report_sha256: str,
+    required_runtime_task_gates: list[str],
+    runtime_reset_by_dof: Mapping[int, float],
+) -> Mapping[str, Any] | None:
+    """Validate the producer-qualified fixed-base mounting ABI as one unit."""
+
+    values = (manifest_value, profile_value, report_value)
+    if all(value is None for value in values):
+        return None
+    if any(value is None for value in values):
+        raise ConvertAssetHandoffError(
+            "articulation mounting must be present in the final manifest, "
+            "packaged device profile, and runtime qualification report"
+        )
+    manifest_mounting = _mapping(
+        manifest_value,
+        "manifest.articulation_contract.mounting",
+    )
+    profile_mounting = _mapping(
+        profile_value,
+        "articulation_contract.device_profile.mounting",
+    )
+    report_mounting = _mapping(
+        report_value,
+        "articulation runtime report.qualified_consumer_placement",
+    )
+    candidate_fields = {
+        "schema_version",
+        "motion_mode",
+        "asset_entry_prim",
+        "coordinate_semantics",
+        "support_frame_root_local",
+        "support_plane_to_root_mount_pose",
+        "initial_joint_reset_positions",
+        "qualified_reset_geometry",
+        "verification_required",
+    }
+    _require_exact_fields(
+        profile_mounting,
+        candidate_fields,
+        "articulation_contract.device_profile.mounting",
+    )
+    _require_exact_fields(
+        report_mounting,
+        candidate_fields
+        | {
+            "status",
+            "profile_sha256",
+            "source_sha256",
+        },
+        "articulation runtime report.qualified_consumer_placement",
+    )
+    _require_exact_fields(
+        manifest_mounting,
+        candidate_fields
+        | {
+            "status",
+            "profile_sha256",
+            "runtime_report_sha256",
+            "source_sha256",
+        },
+        "manifest.articulation_contract.mounting",
+    )
+    report_candidate = {
+        key: report_mounting[key] for key in candidate_fields
+    }
+    manifest_candidate = {
+        key: manifest_mounting[key] for key in candidate_fields
+    }
+    if profile_mounting != report_candidate:
+        raise ConvertAssetHandoffError(
+            "articulation mounting in the runtime report does not match the "
+            "packaged device profile"
+        )
+    if profile_mounting != manifest_candidate:
+        raise ConvertAssetHandoffError(
+            "articulation mounting in the final manifest does not match the "
+            "packaged device profile"
+        )
+    _require_value(
+        report_mounting,
+        "status",
+        "pass",
+        "articulation runtime report.qualified_consumer_placement",
+    )
+    _require_value(
+        manifest_mounting,
+        "status",
+        "pass",
+        "manifest.articulation_contract.mounting",
+    )
+    for value, field_name, expected in (
+        (
+            report_mounting,
+            "articulation runtime report.qualified_consumer_placement",
+            profile_sha256,
+        ),
+        (
+            manifest_mounting,
+            "manifest.articulation_contract.mounting",
+            profile_sha256,
+        ),
+    ):
+        if _required_sha256(value, "profile_sha256", field_name) != expected:
+            raise ConvertAssetHandoffError(
+                f"{field_name}.profile_sha256 does not match the packaged profile"
+            )
+    for value, field_name in (
+        (
+            report_mounting,
+            "articulation runtime report.qualified_consumer_placement",
+        ),
+        (
+            manifest_mounting,
+            "manifest.articulation_contract.mounting",
+        ),
+    ):
+        if (
+            _required_sha256(value, "source_sha256", field_name)
+            != source_sha256
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field_name}.source_sha256 does not match source USD"
+            )
+    if (
+        _required_sha256(
+            manifest_mounting,
+            "runtime_report_sha256",
+            "manifest.articulation_contract.mounting",
+        )
+        != runtime_report_sha256
+    ):
+        raise ConvertAssetHandoffError(
+            "articulation mounting runtime_report_sha256 does not match the "
+            "qualified runtime report"
+        )
+
+    _require_value(
+        profile_mounting,
+        "schema_version",
+        "aan.articulated_mounting.v1",
+        "articulation_contract.device_profile.mounting",
+    )
+    _require_value(
+        profile_mounting,
+        "motion_mode",
+        "fixed_base",
+        "articulation_contract.device_profile.mounting",
+    )
+    _require_value(
+        profile_mounting,
+        "asset_entry_prim",
+        asset_entry_prim,
+        "articulation_contract.device_profile.mounting",
+    )
+    semantics = _required_mapping(
+        profile_mounting,
+        "coordinate_semantics",
+        "articulation_contract.device_profile.mounting",
+    )
+    expected_semantics = {
+        "stage_up_axis": "Z",
+        "linear_units": "meter",
+        "quaternion_order": "wxyz",
+        "support_frame": "runtime_articulation_root_pose_local",
+        "mount_pose": (
+            "support_plane_to_runtime_articulation_root_pose_world_axes_"
+            "at_yaw_zero"
+        ),
+        "qualified_extents": (
+            "world_axis_aligned_at_mount_pose_after_joint_reset"
+        ),
+    }
+    _require_exact_fields(
+        semantics,
+        set(expected_semantics),
+        "articulation mounting.coordinate_semantics",
+    )
+    if semantics != expected_semantics:
+        raise ConvertAssetHandoffError(
+            "articulation mounting.coordinate_semantics is unsupported"
+        )
+    support_translation, _ = _mounting_pose(
+        profile_mounting.get("support_frame_root_local"),
+        "articulation mounting.support_frame_root_local",
+    )
+    mount_translation, mount_rotation = _mounting_pose(
+        profile_mounting.get("support_plane_to_root_mount_pose"),
+        "articulation mounting.support_plane_to_root_mount_pose",
+    )
+    rotated_support = _rotate_vector_wxyz(
+        support_translation,
+        mount_rotation,
+    )
+    mounted_support = [
+        translation + offset
+        for translation, offset in zip(
+            mount_translation,
+            rotated_support,
+            strict=True,
+        )
+    ]
+    if any(abs(value) > 1e-6 for value in mounted_support):
+        raise ConvertAssetHandoffError(
+            "articulation mounting support frame and mount pose do not place "
+            "the qualified support point on the support plane"
+        )
+
+    reset_positions = profile_mounting.get("initial_joint_reset_positions")
+    if not isinstance(reset_positions, list) or not reset_positions:
+        raise ConvertAssetHandoffError(
+            "articulation mounting.initial_joint_reset_positions must be "
+            "a non-empty list"
+        )
+    reset_by_dof: dict[int, float] = {}
+    for index, raw_reset in enumerate(reset_positions):
+        field = f"articulation mounting.initial_joint_reset_positions[{index}]"
+        reset = _mapping(raw_reset, field)
+        _require_exact_fields(reset, {"dof_index", "position"}, field)
+        dof_index = reset.get("dof_index")
+        if (
+            not isinstance(dof_index, int)
+            or isinstance(dof_index, bool)
+            or dof_index < 0
+            or dof_index in reset_by_dof
+        ):
+            raise ConvertAssetHandoffError(
+                f"{field}.dof_index must be a unique non-negative integer"
+            )
+        reset_by_dof[dof_index] = _finite_number(
+            reset.get("position"),
+            f"{field}.position",
+        )
+    if set(reset_by_dof) != set(runtime_reset_by_dof):
+        raise ConvertAssetHandoffError(
+            "articulation mounting initial joint resets must cover every "
+            "runtime DOF"
+        )
+    for dof_index, expected_reset in runtime_reset_by_dof.items():
+        if not math.isclose(
+            reset_by_dof[dof_index],
+            expected_reset,
+            rel_tol=0.0,
+            abs_tol=1e-6,
+        ):
+            raise ConvertAssetHandoffError(
+                "articulation mounting initial joint reset does not match "
+                f"semantic runtime reset at DOF {dof_index}"
+            )
+
+    reset_geometry = _required_mapping(
+        profile_mounting,
+        "qualified_reset_geometry",
+        "articulation_contract.device_profile.mounting",
+    )
+    _require_exact_fields(
+        reset_geometry,
+        {
+            "warmup_frames",
+            "warmup_extent_world_aabb_m",
+            "settle_frames",
+            "final_extent_world_aabb_m",
+        },
+        "articulation mounting.qualified_reset_geometry",
+    )
+    for field_name in ("warmup_frames", "settle_frames"):
+        frames = reset_geometry.get(field_name)
+        if (
+            not isinstance(frames, int)
+            or isinstance(frames, bool)
+            or frames <= 0
+        ):
+            raise ConvertAssetHandoffError(
+                "articulation mounting.qualified_reset_geometry."
+                f"{field_name} must be a positive integer"
+            )
+    for field_name in (
+        "warmup_extent_world_aabb_m",
+        "final_extent_world_aabb_m",
+    ):
+        extent = _finite_number_list(
+            reset_geometry.get(field_name),
+            3,
+            f"articulation mounting.qualified_reset_geometry.{field_name}",
+        )
+        if any(value <= 0.0 for value in extent):
+            raise ConvertAssetHandoffError(
+                "articulation mounting qualified extents must be positive"
+            )
+    verification_required = _required_string(
+        profile_mounting,
+        "verification_required",
+        "articulation_contract.device_profile.mounting",
+    )
+    if (
+        verification_required != "benchtop_stability"
+        or verification_required not in required_runtime_task_gates
+    ):
+        raise ConvertAssetHandoffError(
+            "articulation mounting requires a passed benchtop_stability gate"
+        )
+    return _copy_json_mapping(
+        manifest_mounting,
+        "manifest.articulation_contract.mounting",
+    )
+
+
+def _mounting_pose(
+    value: object,
+    field_name: str,
+) -> tuple[list[float], list[float]]:
+    pose = _mapping(value, field_name)
+    _require_exact_fields(
+        pose,
+        {"translation_m", "rotation_wxyz"},
+        field_name,
+    )
+    translation = _finite_number_list(
+        pose.get("translation_m"),
+        3,
+        f"{field_name}.translation_m",
+    )
+    rotation = _finite_number_list(
+        pose.get("rotation_wxyz"),
+        4,
+        f"{field_name}.rotation_wxyz",
+    )
+    if not math.isclose(
+        sum(component * component for component in rotation),
+        1.0,
+        rel_tol=0.0,
+        abs_tol=1e-6,
+    ):
+        raise ConvertAssetHandoffError(
+            f"{field_name}.rotation_wxyz must be a unit quaternion"
+        )
+    return translation, rotation
+
+
+def _rotate_vector_wxyz(
+    vector: list[float],
+    quaternion: list[float],
+) -> list[float]:
+    w, x, y, z = quaternion
+    vx, vy, vz = vector
+    tx = 2.0 * (y * vz - z * vy)
+    ty = 2.0 * (z * vx - x * vz)
+    tz = 2.0 * (x * vy - y * vx)
+    return [
+        vx + w * tx + (y * tz - z * ty),
+        vy + w * ty + (z * tx - x * tz),
+        vz + w * tz + (x * ty - y * tx),
+    ]
 
 
 def _validate_articulation_promotion(

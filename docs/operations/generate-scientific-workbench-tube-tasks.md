@@ -12,38 +12,38 @@ selected HCI centrifuge. Task 11 uses the selected tube rack.
 
 ## Current gate
 
-The centrifuge r7 delivery passed its isolated asset articulation gates: its
-parent-local proxy repair, measured profile, passing runtime report, promotion
-receipt, and original loader smoke are recorded in
-[`../records/2026-07-30-centrifuge-proxy-parent-local-requalification.md`](../records/2026-07-30-centrifuge-proxy-parent-local-requalification.md).
-It is nevertheless rejected for task composition because `/World/Centrifuge`
-has a non-identity root transform. The task wrapper replaces that transform,
-producing a roughly 2 m device with the wrong axes. The retained wrong output is
-marked by `evidence/rejection.yaml`; do not deliver it to eBench.
+The admitted task inputs are the centrifuge r9 and tube-rack r4 source-bound
+packages. The centrifuge has an identity asset-entry prim, six passing
+articulation gates including `benchtop_stability`, and a final
+`aan.articulated_mounting.v1` declaration. The rack has the four passing
+interaction gates plus its hash-bound `tube_insertion` task qualification.
 
-Task 7 is blocked only on the identity-root r8 producer return specified in
-[`scientific-workbench-centrifuge-identity-root-requalification-request.yaml`](scientific-workbench-centrifuge-identity-root-requalification-request.yaml).
-The current rack candidate for task 11 still blocks gripper-collision and
-open-top insertion; its independent return request is
-[`scientific-workbench-tube-rack-final-qualification-request.yaml`](scientific-workbench-tube-rack-final-qualification-request.yaml).
-Scenario Forge must not add centrifuge-, tube-, or rack-specific colliders, mass,
-inertia, joint drives, scale fixes, or PhysX-warning suppression.
+The fixed-base mounting contract is verified across the packaged device
+profile, runtime report, and final manifest. It supplies the runtime-root support
+offset, support-plane-to-root pose, reset positions, and qualified warmup/final
+extents. Details are recorded in
+[`../records/2026-07-31-articulated-fixed-base-mounting-consumer.md`](../records/2026-07-31-articulated-fixed-base-mounting-consumer.md).
+
+Scenario Forge must not add centrifuge-, tube-, or rack-specific colliders,
+mass, inertia, joint drives, scale fixes, or PhysX-warning suppression.
 
 ## Source bindings
 
-There is no approved task 7 binding while the centrifuge r8 delivery is absent.
-After it passes, bind that identity-root package as `articulated_object` and the
-already qualified test tube as `rigid_object`. Task 11 remains separate and
-must not be generated from the blocked rack candidate. Do not point either task
-to a raw USD or a runtime-report input.
+Bind centrifuge r9 as `articulated_object`, rack r4 and the test tube as
+`rigid_object`, and use their final package manifests. Do not point a task to a
+raw USD, an intermediate candidate, or a runtime report in place of the final
+package.
 
 The generator reads producer-measured socket, insertion-target, and grasp frames
 from the hash-bound contracts. It replaces the human-readable template values
-and derives GenManip's world-axis relative ranges using the authored object pose.
+and derives GenManip's world-axis relative ranges using the materialized object
+pose. A fixed-base device is mounted flush: the task-authored Z yaw is composed
+with the producer mount rotation, while dynamic objects retain the existing
+10 mm settle clearance.
 
 ## Static Compile After Delivery
 
-Run only after the tube and rack are accepted:
+Run with the accepted five-asset binding file:
 
 ```bash
 PYTHONPATH=src python scripts/generate_scientific_workbench_tube_tasks.py \
@@ -79,8 +79,11 @@ For each task, review:
 <scenario-id>/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
 ```
 
-The render gate checks package/input hashes, runtime prims, producer-vs-runtime
-extent, tabletop XY containment, and a 1 cm support tolerance. It does not infer
+The render gate checks package/input hashes, runtime prims, tabletop XY
+containment, support position, and producer-vs-runtime extent. Fixed-base
+articulations use the producer-qualified warmup and final reset extents as two
+separate expectations without relaxing the five-percent threshold; dynamic
+objects continue to use their admitted package bounds. The gate does not infer
 visual quality from pixels. A clean-room visual review must separately pass on
 the package-matching renders before an eBench-ready claim.
 

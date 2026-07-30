@@ -964,6 +964,104 @@ def _write_articulated_handoff(
     return source_usd, package_dir, manifest_path, manifest
 
 
+def _add_fixed_base_mounting_contract(
+    package_dir: Path,
+    manifest_path: Path,
+    manifest: dict[str, object],
+) -> dict[str, object]:
+    """Add the producer-qualified fixed-base mounting ABI to a fixture."""
+
+    contract = manifest["articulation_contract"]
+    assert isinstance(contract, dict)
+    profile_metadata = contract["profile"]
+    runtime_metadata = contract["runtime_qualification"]
+    assert isinstance(profile_metadata, dict)
+    assert isinstance(runtime_metadata, dict)
+    profile_path = package_dir / str(profile_metadata["package_path"])
+    report_path = package_dir / str(runtime_metadata["report_path"])
+    profile = json.loads(profile_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    source_sha256 = str(profile["source_sha256"])
+    mounting = {
+        "schema_version": "aan.articulated_mounting.v1",
+        "motion_mode": "fixed_base",
+        "asset_entry_prim": "/World/Centrifuge",
+        "coordinate_semantics": {
+            "stage_up_axis": "Z",
+            "linear_units": "meter",
+            "quaternion_order": "wxyz",
+            "support_frame": "runtime_articulation_root_pose_local",
+            "mount_pose": (
+                "support_plane_to_runtime_articulation_root_pose_world_axes_"
+                "at_yaw_zero"
+            ),
+            "qualified_extents": (
+                "world_axis_aligned_at_mount_pose_after_joint_reset"
+            ),
+        },
+        "support_frame_root_local": {
+            "translation_m": [0.0, -0.10363300144672394, 0.0],
+            "rotation_wxyz": [1.0, 0.0, 0.0, 0.0],
+        },
+        "support_plane_to_root_mount_pose": {
+            "translation_m": [0.0, 0.0, 0.10363300144672394],
+            "rotation_wxyz": [0.5, 0.5, 0.5, 0.5],
+        },
+        "initial_joint_reset_positions": [
+            {"dof_index": 0, "position": math.radians(-89.0)},
+            {"dof_index": 1, "position": 0.0},
+            {"dof_index": 2, "position": 0.0},
+        ],
+        "qualified_reset_geometry": {
+            "warmup_frames": 50,
+            "warmup_extent_world_aabb_m": [0.3893976, 0.35, 0.4448730],
+            "settle_frames": 240,
+            "final_extent_world_aabb_m": [0.3893976, 0.35, 0.4448730],
+        },
+        "verification_required": "benchtop_stability",
+    }
+    required_gates = profile["required_runtime_task_gates"]
+    assert isinstance(required_gates, list)
+    required_gates.append("benchtop_stability")
+    profile["mounting"] = mounting
+    profile_path.write_text(
+        json.dumps(profile, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    profile_sha256 = _digest(profile_path)
+    profile_metadata["profile_sha256"] = profile_sha256
+    report_inputs = report["inputs"]
+    assert isinstance(report_inputs, dict)
+    report_profile = report_inputs["device_profile"]
+    assert isinstance(report_profile, dict)
+    report_profile["profile_sha256"] = profile_sha256
+    task_gates = report["task_gates"]
+    assert isinstance(task_gates, dict)
+    task_gates["benchtop_stability"] = {"status": "pass"}
+    report["qualified_consumer_placement"] = {
+        **mounting,
+        "status": "pass",
+        "profile_sha256": profile_sha256,
+        "source_sha256": source_sha256,
+    }
+    report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    report_sha256 = _digest(report_path)
+    runtime_metadata["report_sha256"] = report_sha256
+    contract["mounting"] = {
+        **mounting,
+        "status": "pass",
+        "profile_sha256": profile_sha256,
+        "runtime_report_sha256": report_sha256,
+        "source_sha256": source_sha256,
+    }
+    _persist_manifest(manifest, manifest_path, package_dir)
+    _write_articulation_promotion(package_dir, manifest_path, manifest)
+    return mounting
+
+
 def test_convert_asset_plan_builds_command_without_executing_conversion() -> None:
     plan = ConvertAssetCommandPlan(
         convert_asset_root="/tools/ConvertAsset",
@@ -1595,6 +1693,95 @@ def test_articulated_handoff_maps_validated_device_contract_without_local_repair
     assert geometry["support_frame_source_sha256"] == (
         handoff.articulation_contract.profile_sha256
     )
+
+
+def test_articulated_handoff_verifies_and_propagates_fixed_base_mounting(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_articulated_handoff(
+        tmp_path
+    )
+    mounting = _add_fixed_base_mounting_contract(
+        package_dir,
+        manifest_path,
+        manifest,
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/Centrifuge",),
+        producer_revision="convertasset-articulation-mounting-r1",
+        usage="articulated_object",
+    )
+    source = handoff.to_local_usd_asset_source(
+        asset_id="qualified_fixed_base_device",
+        license="LicenseRef-Internal-Restricted",
+    )
+
+    assert handoff.articulation_contract is not None
+    assert handoff.articulation_contract.mounting is not None
+    assert handoff.articulation_contract.mounting["motion_mode"] == "fixed_base"
+    assert source.upstream_package is not None
+    geometry = source.upstream_package.metadata["task_interactive_geometry"]
+    assert geometry["schema_version"] == (
+        "scenario-forge-task-interactive-geometry/v0.2"
+    )
+    propagated = geometry["mounting"]
+    assert propagated["schema_version"] == "aan.articulated_mounting.v1"
+    assert propagated["status"] == "pass"
+    assert propagated["profile_sha256"] == (
+        manifest["articulation_contract"]["profile"]["profile_sha256"]
+    )
+    assert propagated["runtime_report_sha256"] == (
+        manifest["articulation_contract"]["runtime_qualification"][
+            "report_sha256"
+        ]
+    )
+    assert propagated["qualified_reset_geometry"] == (
+        mounting["qualified_reset_geometry"]
+    )
+    assert geometry["support_frame_local_matrix"][3] == [
+        0.0,
+        -0.10363300144672394,
+        0.0,
+        1.0,
+    ]
+    assert geometry["support_frame_source_sha256"] == (
+        propagated["runtime_report_sha256"]
+    )
+
+
+def test_articulated_handoff_rejects_mounting_that_disagrees_with_profile(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_articulated_handoff(
+        tmp_path
+    )
+    _add_fixed_base_mounting_contract(package_dir, manifest_path, manifest)
+    contract = manifest["articulation_contract"]
+    assert isinstance(contract, dict)
+    mounting = contract["mounting"]
+    assert isinstance(mounting, dict)
+    geometry = mounting["qualified_reset_geometry"]
+    assert isinstance(geometry, dict)
+    geometry["warmup_extent_world_aabb_m"] = [9.0, 9.0, 9.0]
+    _persist_manifest(manifest, manifest_path, package_dir)
+    _write_articulation_promotion(package_dir, manifest_path, manifest)
+
+    with pytest.raises(
+        ConvertAssetHandoffError,
+        match="mounting.*packaged device profile",
+    ):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/Centrifuge",),
+            producer_revision="convertasset-articulation-mounting-r1",
+            usage="articulated_object",
+        )
 
 
 def test_articulated_handoff_accepts_duplicate_runtime_dof_names(
