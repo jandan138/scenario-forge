@@ -15,6 +15,10 @@ from typing import Any, Mapping, Sequence
 import yaml
 
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
+from scenario_forge.adapters.ebench.preview import (
+    run_genmanip_initial_preview,
+    write_genmanip_preview_request,
+)
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from scenario_forge.generation.source_resolver import resolve_scenario_source_bindings
@@ -22,6 +26,7 @@ from scenario_forge.generation.source_resolver import resolve_scenario_source_bi
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RENDERER = REPO_ROOT / "scripts/ebench/render_scientific_environment_previews.py"
+DEFAULT_RUNTIME_RENDERER = REPO_ROOT / "scripts/ebench/render_genmanip_initial_preview.py"
 SPEC_ROOT = REPO_ROOT / "examples/scientific_workbench/layout_validated"
 TASK_SPECS = {
     "task2": SPEC_ROOT / "pour_cylinder_to_beaker/scenario.yaml",
@@ -36,6 +41,10 @@ CLAIM_BOUNDARY = (
     "Authored static visualization only. No robot motion, collision-free path, "
     "policy, liquid transfer, benchmark success, or task completion was executed."
 )
+FINAL_STATIC_RENDER_WIDTH = 1920
+FINAL_STATIC_RENDER_HEIGHT = 1080
+FINAL_STATIC_WARMUP_FRAMES = 40
+FINAL_RUNTIME_RENDER_RESOLUTION = (1920, 1080)
 
 
 KEY_STATES: dict[str, tuple[dict[str, Any], ...]] = {
@@ -208,16 +217,16 @@ def _digest(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
 
 
-def _render_state(
+def static_render_command(
     *,
     isaac_python: Path,
     renderer: Path,
     state_id: str,
     scene_path: Path,
     output_dir: Path,
-    timeout_seconds: float,
-) -> None:
-    command = [
+) -> list[str]:
+    """Build the audited high-quality static storyboard render command."""
+    return [
         str(isaac_python.resolve()),
         str(renderer.resolve()),
         "worker",
@@ -230,13 +239,34 @@ def _render_state(
         "--out",
         str(output_dir.resolve()),
         "--width",
-        "640",
+        str(FINAL_STATIC_RENDER_WIDTH),
         "--height",
-        "360",
+        str(FINAL_STATIC_RENDER_HEIGHT),
         "--warmup-frames",
-        "4",
-        "--fast-static-preview",
+        str(FINAL_STATIC_WARMUP_FRAMES),
+        "--exposure-mode",
+        "fixed",
+        "--exposure-multiplier",
+        "0.8",
     ]
+
+
+def _render_state(
+    *,
+    isaac_python: Path,
+    renderer: Path,
+    state_id: str,
+    scene_path: Path,
+    output_dir: Path,
+    timeout_seconds: float,
+) -> None:
+    command = static_render_command(
+        isaac_python=isaac_python,
+        renderer=renderer,
+        state_id=state_id,
+        scene_path=scene_path,
+        output_dir=output_dir,
+    )
     environment = dict(os.environ)
     for name in (
         "ISAAC_SIM_ROOT",
@@ -336,9 +366,18 @@ def _write_key_states(
             if render_manifest.is_file():
                 try:
                     previous = json.loads(render_manifest.read_text(encoding="utf-8"))
+                    views = previous.get("views")
                     reusable = (
                         previous.get("render_status") == "pass"
                         and previous.get("source_sha256") == _digest(scene_path)
+                        and isinstance(views, Mapping)
+                        and all(
+                            isinstance(views.get(view_name), Mapping)
+                            and views[view_name].get("resolution")
+                            == [FINAL_STATIC_RENDER_WIDTH, FINAL_STATIC_RENDER_HEIGHT]
+                            for view_name in ("authored", "eye_left", "eye_right")
+                        )
+                        and previous.get("runtime", {}).get("exposure_mode") == "fixed"
                         and (state_dir / "contact_sheet.png").is_file()
                     )
                 except (OSError, json.JSONDecodeError):
@@ -409,6 +448,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--isaac-python", type=Path)
     parser.add_argument("--renderer", type=Path, default=DEFAULT_RENDERER)
     parser.add_argument("--render-timeout", type=float, default=600.0)
+    parser.add_argument(
+        "--render-runtime-preview",
+        action="store_true",
+        help="Render 1080p post-reset, pre-action GenManip evidence with Lift2 visible.",
+    )
+    parser.add_argument("--genmanip-root", type=Path)
+    parser.add_argument(
+        "--runtime-renderer", type=Path, default=DEFAULT_RUNTIME_RENDERER
+    )
+    parser.add_argument("--runtime-preview-timeout", type=float, default=900.0)
     return parser
 
 
@@ -416,6 +465,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.render and args.isaac_python is None:
         raise SystemExit("--isaac-python is required with --render")
+    if args.render_runtime_preview and args.isaac_python is None:
+        raise SystemExit("--isaac-python is required with --render-runtime-preview")
+    if args.render_runtime_preview and args.genmanip_root is None:
+        raise SystemExit("--genmanip-root is required with --render-runtime-preview")
     sources = resolve_scenario_source_bindings(args.bindings)
     selected = tuple(TASK_SPECS) if args.task == "all" else (args.task,)
     results: list[dict[str, Any]] = []
@@ -435,6 +488,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             renderer=args.renderer,
             timeout_seconds=args.render_timeout,
         )
+        if args.render_runtime_preview:
+            # This is evidence only: overwrite the exported default request
+            # with a hash-bound 1080p request, then let the native GenManip
+            # renderer reset the scene and inject the standard Lift2 robot.
+            write_genmanip_preview_request(
+                export.output_dir, resolution=FINAL_RUNTIME_RENDER_RESOLUTION
+            )
+            run_genmanip_initial_preview(
+                export.output_dir,
+                args.isaac_python,
+                args.runtime_renderer,
+                args.genmanip_root,
+                timeout_seconds=args.runtime_preview_timeout,
+            )
         results.append(
             {
                 "task_key": task_key,
@@ -451,6 +518,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                     6,
                 ),
                 "authored_key_states": len(states),
+                "runtime_preview": (
+                    "post_reset_pre_action_1080p"
+                    if args.render_runtime_preview
+                    else "not_run"
+                ),
                 "execution_status": "not_executed",
             }
         )

@@ -255,11 +255,17 @@ def render_worker(
     height: int,
     warmup_frames: int,
     fast_static_preview: bool = False,
+    exposure_mode: str = "auto",
+    exposure_multiplier: float = 0.8,
 ) -> int:
     if _file_sha256(source_usd) != source_sha256:
         raise ValueError(f"source SHA-256 mismatch: {source_usd}")
     if width < 1 or height < 1:
         raise ValueError("render resolution must be positive")
+    if exposure_mode not in {"auto", "fixed"}:
+        raise ValueError("exposure_mode must be auto or fixed")
+    if not math.isfinite(exposure_multiplier) or exposure_multiplier <= 0.0:
+        raise ValueError("exposure_multiplier must be positive and finite")
 
     output_root.mkdir(parents=True, exist_ok=True)
     simulation_app = None
@@ -296,9 +302,10 @@ def render_worker(
         from pxr import Usd, UsdGeom, UsdPhysics
 
         settings = carb.settings.get_settings()
-        settings.set("/rtx/post/aa/autoExposureMode", 1)
-        settings.set("/rtx/post/aa/exposureMultiplier", 0.8)
-        settings.set("/rtx/post/histogram/enabled", True)
+        fixed_exposure = exposure_mode == "fixed"
+        settings.set("/rtx/post/aa/autoExposureMode", 0 if fixed_exposure else 1)
+        settings.set("/rtx/post/aa/exposureMultiplier", exposure_multiplier)
+        settings.set("/rtx/post/histogram/enabled", not fixed_exposure)
 
         timeline = omni.timeline.get_timeline_interface()
         timeline.stop()
@@ -438,7 +445,8 @@ def render_worker(
                 "isaac_sim_version": isaac_sim_version,
                 "renderer": "RayTracedLighting",
                 "stage_meters_per_unit": stage_units,
-                "auto_exposure": True,
+                "exposure_mode": exposure_mode,
+                "exposure_multiplier": exposure_multiplier,
                 "authored_static_physics_disabled": authored_static_preview,
             },
             "views": view_records,
@@ -715,6 +723,8 @@ def build_parser() -> argparse.ArgumentParser:
     worker.add_argument("--height", type=int, default=540)
     worker.add_argument("--warmup-frames", type=int, default=20)
     worker.add_argument("--fast-static-preview", action="store_true")
+    worker.add_argument("--exposure-mode", choices=("auto", "fixed"), default="auto")
+    worker.add_argument("--exposure-multiplier", type=float, default=0.8)
     return parser
 
 
@@ -740,6 +750,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         height=args.height,
         warmup_frames=args.warmup_frames,
         fast_static_preview=args.fast_static_preview,
+        exposure_mode=args.exposure_mode,
+        exposure_multiplier=args.exposure_multiplier,
     )
 
 

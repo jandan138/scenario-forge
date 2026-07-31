@@ -130,6 +130,19 @@ def _render_initial_scene(
 
     # Simulator imports stay behind the process boundary and after SimulationApp
     # starts.  Pure Scenario Forge package modules never import these SDKs.
+    request_views = _required_mapping(request, "views", "render request")
+    resolutions = [
+        _resolution(
+            _as_mapping(request_views.get(view_name), f"render request view {view_name}").get(
+                "resolution"
+            ),
+            view_name,
+        )
+        for view_name in VIEW_NAMES
+    ]
+    app_width = max(width for width, _ in resolutions)
+    app_height = max(height for _, height in resolutions)
+
     from isaacsim import SimulationApp
 
     simulation_app = SimulationApp(
@@ -138,8 +151,8 @@ def _render_initial_scene(
             "renderer": "RayTracedLighting",
             "anti_aliasing": 4,
             "multi_gpu": False,
-            "width": 1280,
-            "height": 720,
+            "width": app_width,
+            "height": app_height,
         }
     )
     log_lines = [
@@ -150,9 +163,19 @@ def _render_initial_scene(
     ]
     _flush_runtime_log(staging_dir, log_lines)
     try:
+        import carb.settings
         import numpy as np
         from PIL import Image
         from pxr import Gf, Usd, UsdGeom, UsdLux
+
+        settings = carb.settings.get_settings()
+        # Evidence reproducibility benefits from a fixed exposure: automatic
+        # adaptation can make the same room/table/asset look materially
+        # different from one request to the next.  This affects only this
+        # one-shot renderer, not GenManip's runtime or policy camera configs.
+        settings.set("/rtx/post/aa/autoExposureMode", 0)
+        settings.set("/rtx/post/aa/exposureMultiplier", 0.8)
+        settings.set("/rtx/post/histogram/enabled", False)
 
         from genmanip.core.scene.scene import Scene
         from genmanip.core.scene.scene_config import SceneConfig
@@ -257,7 +280,6 @@ def _render_initial_scene(
         preview_light.CreateIntensityAttr(750.0)
         preview_light.CreateColorAttr(Gf.Vec3f(1.0, 1.0, 1.0))
 
-        request_views = _required_mapping(request, "views", "render request")
         camera_data = {
             view_name: _camera_config(view_name, request_views)
             for view_name in VIEW_NAMES
@@ -455,6 +477,9 @@ def _render_initial_scene(
                 "robot_injected": "lift2",
                 "action_count": 0,
                 "warmup_steps": WARMUP_STEPS,
+                "exposure_mode": "fixed",
+                "exposure_multiplier": 0.8,
+                "application_resolution": [app_width, app_height],
             },
             "runtime_log_path": "runtime.log",
             "runtime_log_sha256": _file_sha256(staging_dir / "runtime.log"),

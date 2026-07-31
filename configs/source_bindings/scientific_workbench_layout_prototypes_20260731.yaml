@@ -48,12 +48,12 @@ bindings:
     resolver: convert_asset_package
     usage: rigid_object
     source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker/facade/facade.usda
-    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker/package
-    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker/package/evidence/manifest.json
-    producer_revision: scientific-workbench-beaker-r1-20260731
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker_transparent_r2/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker_transparent_r2/package/evidence/manifest.json
+    producer_revision: scientific-workbench-beaker-transparent-glass-r2-20260731
     expected_scope_prims: [/World/Beaker]
     license: LicenseRef-Team-Owned-Public-Redistribution
-    attribution: [valid_with_json_by_final_category_usd archive; ConvertAsset source-bound beaker r1]
+    attribution: [valid_with_json_by_final_category_usd archive; ConvertAsset source-bound beaker r2 transparent-glass visual profile]
     redistributable: true
   scientific_workbench_funnel_dynamic:
     resolver: convert_asset_package

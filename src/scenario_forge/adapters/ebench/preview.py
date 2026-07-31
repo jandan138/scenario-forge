@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 import json
 import math
+import os
 from pathlib import Path
 import re
 import struct
@@ -100,10 +101,36 @@ def run_genmanip_initial_preview(
         "--request",
         PREVIEW_REQUEST_PATH.as_posix(),
     ]
+    # Calling an interpreter by absolute path does not itself put its bin
+    # directory on PATH.  CuRobo's extension loader invokes the `ninja`
+    # executable, so preserve the caller environment but make the selected
+    # runtime's command-line tools discoverable.  This remains a process-bound
+    # adapter concern; it does not modify GenManip or the package.
+    environment = dict(os.environ)
+    runtime_bin = str(python_path.parent)
+    inherited_path = environment.get("PATH", "")
+    environment["PATH"] = (
+        runtime_bin if not inherited_path else runtime_bin + os.pathsep + inherited_path
+    )
+    runtime_prefix = python_path.parent.parent
+    native_library_paths = [
+        runtime_prefix / "lib/python3.10/site-packages/torch/lib",
+        runtime_prefix / "lib/python3.10/site-packages/nvidia/cuda_runtime/lib",
+        runtime_prefix
+        / "lib/python3.10/site-packages/isaacsim/extscache/omni.cuda.libs/bin",
+    ]
+    inherited_ld = environment.get("LD_LIBRARY_PATH", "")
+    environment["LD_LIBRARY_PATH"] = os.pathsep.join(
+        [
+            *[str(path) for path in native_library_paths if path.is_dir()],
+            *([inherited_ld] if inherited_ld else []),
+        ]
+    )
     try:
         completed = subprocess.run(
             command,
             cwd=runtime_root,
+            env=environment,
             capture_output=True,
             text=True,
             timeout=timeout_seconds,
@@ -138,8 +165,28 @@ def run_genmanip_initial_preview(
     return validate_genmanip_preview_evidence(root)
 
 
-def write_genmanip_preview_request(collected_root: str | Path) -> Path:
+def write_genmanip_preview_request(
+    collected_root: str | Path,
+    *,
+    resolution: tuple[int, int] = (1280, 720),
+) -> Path:
+    """Write an evidence-only request without changing GenManip policy cameras.
+
+    The exported default remains compact for ordinary package generation.  A
+    final evidence producer may explicitly request a larger resolution; the
+    requested pixels are then part of the hash-bound render request and are
+    checked against the resulting PNGs.
+    """
     root = Path(collected_root).resolve()
+    if (
+        len(resolution) != 2
+        or any(
+            not isinstance(value, int) or isinstance(value, bool) or value <= 0
+            for value in resolution
+        )
+    ):
+        raise GenManipPreviewError("preview request resolution must contain two positive integers")
+    width, height = resolution
     package_manifest = _load_json(root / "package_manifest.json", "package manifest")
     package_id = _required_string(package_manifest, "package_id", "package manifest")
     entrypoints = _required_mapping(package_manifest, "entrypoints", "package manifest")
@@ -199,8 +246,8 @@ def write_genmanip_preview_request(collected_root: str | Path) -> Path:
         "expected_runtime_geometry": expected_runtime_geometry,
         "views": {
             "workspace_closeup": {
-                "resolution": [1280, 720],
-                "required_runtime_ids": [table_ids[0], *task_object_ids],
+                "resolution": [width, height],
+                "required_runtime_ids": ["lift2", table_ids[0], *task_object_ids],
                 "anchor_runtime_ids": ["lift2_end_effectors", *task_object_ids],
                 "azimuth_deg": -35.0,
                 "elevation_deg": 34.0,
@@ -208,10 +255,9 @@ def write_genmanip_preview_request(collected_root: str | Path) -> Path:
                 "minimum_distance": 1.0,
             },
             "scene_overview": {
-                "resolution": [1280, 720],
+                "resolution": [width, height],
                 "required_runtime_ids": ["lift2", table_ids[0], *task_object_ids],
                 "anchor_runtime_ids": [
-                    "scene_room",
                     "lift2",
                     table_ids[0],
                     *task_object_ids,

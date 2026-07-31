@@ -50,6 +50,27 @@ def test_authored_state_layer_is_explicitly_static_and_package_relative(
     assert "orbitTarget" in text
 
 
+def test_final_static_render_request_is_1080p_high_quality_and_fixed_exposure(
+    tmp_path: Path,
+) -> None:
+    module = _script_module()
+    scene_path = tmp_path / "scene.usda"
+    scene_path.write_text("#usda 1.0\n", encoding="utf-8")
+    command = module["static_render_command"](
+        isaac_python=tmp_path / "python",
+        renderer=tmp_path / "renderer.py",
+        state_id="task2.initial_layout",
+        scene_path=scene_path,
+        output_dir=tmp_path / "out",
+    )
+
+    assert command[command.index("--width") + 1] == "1920"
+    assert command[command.index("--height") + 1] == "1080"
+    assert command[command.index("--warmup-frames") + 1] == "40"
+    assert command[command.index("--exposure-mode") + 1] == "fixed"
+    assert "--fast-static-preview" not in command
+
+
 @pytest.mark.parametrize(
     ("task_key", "state_id", "prim_path", "opening_height", "target_xy"),
     [

@@ -118,6 +118,7 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
 
     assert set(request["views"]) == {"workspace_closeup", "scene_overview"}
     assert request["views"]["workspace_closeup"]["required_runtime_ids"] == [
+        "lift2",
         _TABLE_RUNTIME_ID,
         *_TASK_RUNTIME_IDS,
     ]
@@ -134,7 +135,6 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
         *_TASK_RUNTIME_IDS,
     ]
     assert request["views"]["scene_overview"]["anchor_runtime_ids"] == [
-        "scene_room",
         "lift2",
         _TABLE_RUNTIME_ID,
         *_TASK_RUNTIME_IDS,
@@ -152,6 +152,17 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
     assert b"workspace_closeup" not in camera_bytes
     assert b"scene_overview" not in camera_bytes
     assert b"qa_camera" not in camera_bytes.lower()
+
+
+def test_preview_request_can_require_1080p_runtime_evidence(tmp_path: Path) -> None:
+    collected_package = export_genmanip_collected_package(_build_package(tmp_path)).output_dir
+
+    write_genmanip_preview_request(collected_package, resolution=(1920, 1080))
+
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    for view_name in ("workspace_closeup", "scene_overview"):
+        assert request["views"][view_name]["resolution"] == [1920, 1080]
+        assert "lift2" in request["views"][view_name]["required_runtime_ids"]
 
 
 def test_preview_request_requires_articulated_task_objects_in_both_views(
