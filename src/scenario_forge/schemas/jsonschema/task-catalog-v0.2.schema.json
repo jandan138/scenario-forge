@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/task-catalog-v0.2.schema.json",
+  "title": "Scenario Forge Task Catalog v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "catalog_id",
+    "domain",
+    "source",
+    "source_consistency",
+    "tasks"
+  ],
+  "properties": {
+    "schema_version": {"const": "task-catalog/v0.2"},
+    "catalog_id": {"$ref": "#/$defs/id"},
+    "domain": {"$ref": "#/$defs/id"},
+    "source": {"$ref": "#/$defs/source"},
+    "source_consistency": {"$ref": "#/$defs/sourceConsistency"},
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/task"}
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonEmptyString": {"type": "string", "minLength": 1},
+    "stringList": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/nonEmptyString"},
+      "uniqueItems": true
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "uri",
+        "document_id",
+        "document_revision",
+        "section_block_id",
+        "section_sha256",
+        "spreadsheet_token",
+        "spreadsheet_revision",
+        "sheet_id",
+        "range",
+        "snapshot_path",
+        "content_sha256",
+        "captured_at"
+      ],
+      "properties": {
+        "kind": {"const": "feishu_embedded_sheet"},
+        "uri": {"type": "string", "format": "uri"},
+        "document_id": {"$ref": "#/$defs/nonEmptyString"},
+        "document_revision": {"type": "integer", "minimum": 0},
+        "section_block_id": {"$ref": "#/$defs/nonEmptyString"},
+        "section_sha256": {"$ref": "#/$defs/sha256"},
+        "spreadsheet_token": {"$ref": "#/$defs/nonEmptyString"},
+        "spreadsheet_revision": {"type": "integer", "minimum": 0},
+        "sheet_id": {"$ref": "#/$defs/nonEmptyString"},
+        "range": {"$ref": "#/$defs/nonEmptyString"},
+        "snapshot_path": {"$ref": "#/$defs/nonEmptyString"},
+        "content_sha256": {"$ref": "#/$defs/sha256"},
+        "captured_at": {"type": "string", "format": "date"}
+      }
+    },
+    "sourceConsistency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "declared_task_count",
+        "observed_task_count",
+        "warnings"
+      ],
+      "properties": {
+        "status": {"enum": ["pass", "warning"]},
+        "declared_task_count": {"type": "integer", "minimum": 1},
+        "observed_task_count": {"type": "integer", "minimum": 1},
+        "warnings": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "progressCriterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "description_zh", "weight"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "description_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "weight": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "source_order",
+        "source_row",
+        "title_zh",
+        "level",
+        "execution_mode",
+        "execution_mode_source_zh",
+        "execution_notes_zh",
+        "process_overview_zh",
+        "atomic_skills_source_zh",
+        "atomic_skills",
+        "step_count",
+        "core_assets_source_zh",
+        "required_asset_roles",
+        "horizon",
+        "precision",
+        "progress_score_source_zh",
+        "progress_score",
+        "progress_score_total",
+        "source_warnings"
+      ],
+      "properties": {
+        "task_id": {"$ref": "#/$defs/id"},
+        "source_order": {"type": "integer", "minimum": 1},
+        "source_row": {"type": "integer", "minimum": 2},
+        "title_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "level": {"enum": ["basic", "long_horizon"]},
+        "execution_mode": {"enum": ["joint", "simulation", "real"]},
+        "execution_mode_source_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "execution_notes_zh": {"$ref": "#/$defs/stringList"},
+        "process_overview_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "atomic_skills_source_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "atomic_skills": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "grasp",
+              "pick",
+              "place",
+              "pour",
+              "stir",
+              "shake",
+              "press",
+              "pull",
+              "push",
+              "insert",
+              "turn",
+              "twist",
+              "handover",
+              "align",
+              "scoop"
+            ]
+          }
+        },
+        "step_count": {"type": "integer", "minimum": 1, "maximum": 20},
+        "core_assets_source_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "required_asset_roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "horizon": {"enum": ["low", "middle", "high"]},
+        "precision": {"enum": ["low", "middle", "high"]},
+        "progress_score_source_zh": {"$ref": "#/$defs/nonEmptyString"},
+        "progress_score": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/progressCriterion"}
+        },
+        "progress_score_total": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "source_warnings": {"$ref": "#/$defs/stringList"}
+      }
+    }
+  }
+}

@@ -1,7 +1,9 @@
 request_id: scientific_workbench_tube_rack_final_qualification_20260730
+status: historical_request_satisfied
 consumer: scenario-forge
 consumer_task:
-  scenario_id: wetlab_bimanual_hold_rack_insert_tube
+  scenario_id: scientific_workbench_prototype_bimanual_rack_insert
+  canonical_feishu_task: false
   background: scientific_environment_code_room_example4_v1
   workspace_profile: center_open_floor
 

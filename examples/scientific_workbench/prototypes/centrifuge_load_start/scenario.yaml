@@ -1,7 +1,7 @@
 schema_version: scenario-spec/v0.5
-scenario_id: wetlab_centrifuge_tube_load_start_no_wait
+scenario_id: scientific_workbench_prototype_centrifuge_load_start
 domain: scientific_workbench
-task_family: centrifuge_load_start
+task_family: prototype_centrifuge_load_start
 instruction: 左臂拿起试管并将其插入离心机指定孔位；左臂退出后，右臂关闭离心机盖，按下启动按钮，随后双臂退出。
 scene:
   asset_id: scientific_environment_code_room_example4_v1

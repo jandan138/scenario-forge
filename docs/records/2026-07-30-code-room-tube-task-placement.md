@@ -1,5 +1,10 @@
 # 2026-07-30 Code-as-Room tube-task placement
 
+> Identity correction (2026-07-31): “task 7” and “task 11” below preserve the
+> historical labels used when this evidence was produced. They are non-canonical
+> integration prototypes, not live Feishu task 7 or task 11. See
+> [the correction record](2026-07-31-scientific-workbench-task-design-correction.md).
+
 ## Outcome: task 7 output rejected
 
 Both task 7 and task 11 ScenarioSpecs now select the admitted

@@ -1,5 +1,10 @@
 # 2026-07-29 Scientific Workbench Tube-task Foundation
 
+> Identity correction (2026-07-31): this dated record used obsolete PDF-derived
+> task numbering. The two cases below are integration prototypes, not live
+> Feishu task 7 or task 11. See
+> [the correction record](2026-07-31-scientific-workbench-task-design-correction.md).
+
 ## Outcome
 
 Scenario Forge now has compiler-side definitions for wetlab tasks 7 and 11:
@@ -60,9 +65,9 @@ normalized facades and their three source-bound packages are still required:
 3. rigid tube rack with one qualified empty socket.
 
 The exact producer request is
-[`../operations/scientific-workbench-tube-task-asset-admission-request.yaml`](../operations/scientific-workbench-tube-task-asset-admission-request.yaml).
+[`../operations/scientific-workbench-tube-prototype-asset-admission-request.yaml`](../operations/scientific-workbench-tube-prototype-asset-admission-request.yaml).
 After those packages pass, the two outputs can be generated with
-[`../operations/generate-scientific-workbench-tube-tasks.md`](../operations/generate-scientific-workbench-tube-tasks.md).
+[`../operations/generate-scientific-workbench-tube-prototypes.md`](../operations/generate-scientific-workbench-tube-prototypes.md).
 
 This record does not claim robot rollout success, benchmark success, real-world
 physical calibration, or a final task-package render.

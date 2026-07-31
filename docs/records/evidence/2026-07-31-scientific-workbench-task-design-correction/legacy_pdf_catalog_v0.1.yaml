@@ -1,0 +1,242 @@
+schema_version: task-catalog/v0.1
+catalog_id: scientific_workbench_phase1
+domain: scientific_workbench
+source:
+  uri: handoff:wet-experiment-embodied-task-design@2026-07-14
+  filename: 湿实验具身操作评测任务设计.pdf
+  sha256: sha256:3b7ebb2592a8dd612f37e0e934aa052284de772fd0e7fb80b7359afa57d82eca
+  captured_at: "2026-07-14"
+  table_pages: [11, 12, 13, 14, 15, 16, 17]
+identity_reconciliation:
+  status: unresolved
+  declared_task_count: 17
+  observed_candidate_row_count: 19
+  note: The detailed table contains 1..17 plus 8a and 8b.
+tasks:
+  - task_id: wetlab_nonquant_pour_to_cylinder
+    source_id: "1"
+    title_zh: 锥形瓶向量筒非定量倾倒
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 双臂协同完成锥形瓶到量筒的非定量倾倒并将锥形瓶放回安全位置。
+    atomic_skills: [grasp, pick, align, pour, place]
+    required_asset_roles: [erlenmeyer_flask, graduated_cylinder]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 瓶口与量筒口对准，达到倾倒姿态并回到安全位置；不考核体积或读数。
+
+  - task_id: wetlab_glassrod_mix_and_stage
+    source_id: "2"
+    title_zh: 玻璃棒搅拌并转移烧杯
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 使用玻璃棒在烧杯内完成搅拌动作，再把烧杯放到目标区域。
+    atomic_skills: [grasp, stir, place]
+    required_asset_roles: [glass_rod, beaker, target_region]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 玻璃棒接触目标烧杯并完成搅拌轨迹，烧杯最终到达目标区域。
+
+  - task_id: wetlab_dryingbox_beaker_load_start
+    source_id: "3"
+    title_zh: 干燥箱装载烧杯并启动
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 打开干燥箱门，将烧杯放入箱内，关闭门并触发启动按钮。
+    atomic_skills: [pull, push, grasp, place, press]
+    required_asset_roles: [drying_box, beaker, start_button]
+    claim_scope: state_proxy
+    success_evidence_zh: 门关闭到位、烧杯位于箱内目标区、启动按钮状态被触发；不等待干燥完成。
+
+  - task_id: wetlab_two_sample_add_and_swirl
+    source_id: "4"
+    title_zh: 两种样品依次加入并晃匀
+    level: basic
+    execution_mode: joint
+    step_count: 6
+    goal_zh: 将两个模拟样品容器依次倾倒到同一烧杯并完成晃匀动作。
+    atomic_skills: [grasp, pour, place, shake]
+    required_asset_roles: [sample_container_a, sample_container_b, beaker]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 两次倾倒动作、目标容器晃动轨迹和最终归位完成；不考核浓度、体积或液面。
+
+  - task_id: wetlab_decant_motion_and_mix
+    source_id: "5"
+    title_zh: 烧杯倾析并用玻璃棒搅拌
+    level: basic
+    execution_mode: joint
+    step_count: 6
+    goal_zh: 完成源烧杯向收集烧杯的倾析姿态，再用玻璃棒搅拌收集烧杯。
+    atomic_skills: [grasp, pour, place, stir]
+    required_asset_roles: [source_beaker, collection_beaker, glass_rod]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 倾倒姿态、目标对准、搅拌轨迹和工具归位完成；不考核分层或回收体积。
+
+  - task_id: wetlab_tabletop_reagent_delivery
+    source_id: "6"
+    title_zh: 同桌面试剂容器短距递送
+    level: basic
+    execution_mode: joint
+    step_count: 4
+    goal_zh: 将源区域的试剂瓶或锥形瓶移动到同一实验桌上的目标区域。
+    atomic_skills: [grasp, pick, place]
+    required_asset_roles: [reagent_container, target_region]
+    claim_scope: state_proxy
+    success_evidence_zh: 容器到达桌面目标区域并保持稳定；不涉及跨工位或底盘导航。
+
+  - task_id: wetlab_centrifuge_tube_load_start_no_wait
+    source_id: "7"
+    title_zh: 离心机上样并启动
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 将试管插入离心机孔位，关闭门并触发启动按钮。
+    atomic_skills: [grasp, insert, pull, push, press]
+    required_asset_roles: [test_tube, centrifuge, centrifuge_door, start_button]
+    claim_scope: state_proxy
+    success_evidence_zh: 试管进入孔位、门关闭、启动按钮被触发；不等待离心完成。
+
+  - task_id: wetlab_stoppered_bottle_pour_reseal
+    source_id: "8"
+    title_zh: 试剂瓶拔塞倾倒并复位
+    level: basic
+    execution_mode: joint
+    step_count: 7
+    goal_zh: 拔出瓶塞，完成非定量倾倒，再将瓶塞插回并放回试剂瓶。
+    atomic_skills: [grasp, pull, align, pour, insert, place]
+    required_asset_roles: [stoppered_reagent_bottle, stopper, beaker]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 瓶塞拔出和插回状态可见、倾倒动作完成、瓶口最终关闭；不涉及螺纹拧紧。
+
+  - task_id: wetlab_weighing_prepare_and_sample
+    source_id: "8a"
+    title_zh: 称量准备、去皮与样品转移
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 放置称量纸或容器，触发去皮，再用取样工具转移少量模拟样品。
+    atomic_skills: [place, press, grasp, scoop]
+    required_asset_roles: [balance, weighing_container, spatula, sample_container]
+    claim_scope: state_proxy
+    success_evidence_zh: 称量容器位于目标区、去皮按钮被触发、模拟样品到达称量位置；不考核真实质量。
+
+  - task_id: wetlab_pour_contact_point_generalization
+    source_id: "8b"
+    title_zh: 倾倒目标接触点泛化
+    level: basic
+    execution_mode: joint
+    step_count: 4
+    goal_zh: 将源容器瓶口对准量筒、烧杯、漏斗或锥形瓶口并完成一次非定量倾倒姿态。
+    atomic_skills: [grasp, align, pour, place]
+    required_asset_roles: [source_container, target_container]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 瓶口到达目标接触点附近并保持正确倾倒姿态，目标容器未被碰倒。
+
+  - task_id: wetlab_heating_plate_knob_set
+    source_id: "9"
+    title_zh: 加热板装载和旋钮档位设置
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 将烧杯放到加热板，旋转温度旋钮并触发电源或确认按钮。
+    atomic_skills: [place, turn, press]
+    required_asset_roles: [heating_plate, beaker, control_knob, start_button]
+    claim_scope: state_proxy
+    success_evidence_zh: 旋钮角度进入目标范围、设备状态被触发且烧杯仍在加热区域；不等待温度结果。
+
+  - task_id: wetlab_vortex_tube_contact_start
+    source_id: "10"
+    title_zh: 试管接触振荡器并启动
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 将试管放入或接触振荡器工作位，启动设备，再取出试管并归位。
+    atomic_skills: [grasp, insert, place, press, pull]
+    required_asset_roles: [test_tube, vortex_oscillator, control_knob, start_button, tube_rack]
+    claim_scope: state_proxy
+    success_evidence_zh: 试管到达工作位、控制部件被触发、试管取出并归位；不等待混匀结果。
+
+  - task_id: wetlab_bimanual_hold_rack_insert_tube
+    source_id: "11"
+    title_zh: 双臂稳定试管架并插入试管
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 一臂稳定试管架，另一臂将试管对准并插入指定孔位。
+    atomic_skills: [grasp, align, insert]
+    required_asset_roles: [test_tube, tube_rack]
+    claim_scope: state_proxy
+    success_evidence_zh: 试管架位移受限，试管进入指定孔位并达到插入深度。
+
+  - task_id: wetlab_bimanual_tube_handover
+    source_id: "12"
+    title_zh: 双臂试管交接并插架
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 双臂完成试管交接，再将试管插入试管架指定孔位。
+    atomic_skills: [grasp, handover, place, insert]
+    required_asset_roles: [test_tube, tube_rack, handover_region]
+    claim_scope: state_proxy
+    success_evidence_zh: 交接后目标手稳定持有试管，试管未掉落并最终进入指定孔位。
+
+  - task_id: wetlab_simplified_extraction_mix
+    source_id: "13"
+    title_zh: 简化萃取前混合动作
+    level: long_horizon
+    execution_mode: joint
+    step_count: 8
+    goal_zh: 用漏斗加入模拟样品，插入瓶塞，晃动锥形瓶并最终归位。
+    atomic_skills: [grasp, insert, align, pour, shake, place]
+    required_asset_roles: [funnel, erlenmeyer_flask, stopper, sample_container]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 漏斗和瓶塞插入、倾倒动作、晃动轨迹及最终归位完成；不考核分层、放液或体积。
+
+  - task_id: wetlab_filter_setup_and_pour_motion
+    source_id: "14"
+    title_zh: 过滤准备与非定量进样
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 将漏斗插入锥形瓶，并使样品容器对准漏斗完成非定量倾倒动作。
+    atomic_skills: [grasp, insert, align, pour, place]
+    required_asset_roles: [funnel, erlenmeyer_flask, sample_container]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 漏斗稳定插入目标容器，样品容器完成对准和倾倒姿态；不考核滤速或滤液体积。
+
+  - task_id: wetlab_centrifuge_tube_unload
+    source_id: "15"
+    title_zh: 离心机开门取样并放回试管架
+    level: basic
+    execution_mode: joint
+    step_count: 5
+    goal_zh: 打开离心机门，从指定孔位取出试管并稳定放入试管架。
+    atomic_skills: [pull, push, grasp, pick, place]
+    required_asset_roles: [test_tube, centrifuge, centrifuge_door, tube_rack]
+    claim_scope: state_proxy
+    success_evidence_zh: 离心机门打开，试管从孔位取出并稳定放入试管架；不等待离心状态确认。
+
+  - task_id: wetlab_rotary_evaporation_workflow
+    source_id: "16"
+    title_zh: 旋转蒸发仪装载、设置与卸载
+    level: long_horizon
+    execution_mode: joint
+    step_count: 8
+    goal_zh: 安装圆底烧瓶、固定接口、定位水浴、触发旋转和真空相关控制，再停止并退出。
+    atomic_skills: [grasp, align, insert, press, turn, place]
+    required_asset_roles: [rotary_evaporator, round_bottom_flask, receiving_flask, water_bath, clamp, control_knob, start_button]
+    claim_scope: state_proxy
+    success_evidence_zh: 烧瓶稳定安装、水浴相对位置正确、控制部件被触发；不考核真实真空、温度或蒸发终点。
+
+  - task_id: wetlab_column_chromatography_setup_and_collection
+    source_id: "17"
+    title_zh: 柱层析进样、洗脱与收集管更换
+    level: long_horizon
+    execution_mode: joint
+    step_count: 8
+    goal_zh: 围绕预装层析柱完成收集管放置、进样、洗脱剂加入和至少一次收集管更换。
+    atomic_skills: [grasp, align, pour, insert, pull, place]
+    required_asset_roles: [chromatography_column, column_stand, funnel, sample_container, collection_tube, tube_rack]
+    claim_scope: kinematic_proxy
+    success_evidence_zh: 收集管位于柱出口下方，柱顶进样和洗脱剂加入姿态完成，至少更换一次收集管；不考核真实分离效果。

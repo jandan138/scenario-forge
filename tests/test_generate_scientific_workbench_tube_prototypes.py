@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from scripts import generate_scientific_workbench_tube_tasks as generator
+from scripts import generate_scientific_workbench_tube_prototypes as generator
 from scenario_forge.assets.source import LocalUSDAssetSource, UpstreamPackageRef
 
 
@@ -59,10 +59,7 @@ def _task_geometry(
             "min": minimum,
             "max": maximum,
         },
-        "extent_m": [
-            upper - lower
-            for lower, upper in zip(minimum, maximum, strict=True)
-        ],
+        "extent_m": [upper - lower for lower, upper in zip(minimum, maximum, strict=True)],
         "identity_tolerance": 1e-6,
         "support_frame": "support",
         "support_frame_local_matrix": [
@@ -203,12 +200,9 @@ def _articulated_source(source_usd: Path) -> LocalUSDAssetSource:
             "quaternion_order": "wxyz",
             "support_frame": "runtime_articulation_root_pose_local",
             "mount_pose": (
-                "support_plane_to_runtime_articulation_root_pose_world_axes_"
-                "at_yaw_zero"
+                "support_plane_to_runtime_articulation_root_pose_world_axes_at_yaw_zero"
             ),
-            "qualified_extents": (
-                "world_axis_aligned_at_mount_pose_after_joint_reset"
-            ),
+            "qualified_extents": ("world_axis_aligned_at_mount_pose_after_joint_reset"),
         },
         "support_frame_root_local": {
             "translation_m": [0.0, -0.10363300144672394, 0.0],
@@ -253,9 +247,7 @@ def _articulated_source(source_usd: Path) -> LocalUSDAssetSource:
                     maximum=[0.1606148216, 0.174999997, 0.225967365],
                 )
                 | {
-                    "schema_version": (
-                        "scenario-forge-task-interactive-geometry/v0.2"
-                    ),
+                    "schema_version": ("scenario-forge-task-interactive-geometry/v0.2"),
                     "mounting": mounting,
                     "support_frame_local_matrix": [
                         [1.0, 0.0, 0.0, 0.0],
@@ -328,9 +320,7 @@ def Xform "World"
     return {
         environment.asset_id: environment,
         table.asset_id: table,
-        "scientific_workbench_hci955350_centrifuge_dynamic": (
-            _articulated_source(source_usd)
-        ),
+        "scientific_workbench_hci955350_centrifuge_dynamic": (_articulated_source(source_usd)),
         "scientific_workbench_test_tube_dynamic": _rigid_source(
             source_usd,
             asset_id="scientific_workbench_test_tube_dynamic",
@@ -362,7 +352,7 @@ def test_centrifuge_spec_uses_hci_layout_and_ordered_device_states() -> None:
     actors = {item["id"]: item for item in scenario["robot"]["actors"]}
 
     assert scenario["schema_version"] == "scenario-spec/v0.5"
-    assert scenario["scenario_id"] == "wetlab_centrifuge_tube_load_start_no_wait"
+    assert scenario["scenario_id"] == "scientific_workbench_prototype_centrifuge_load_start"
     assert scenario["scene"] == {
         "asset_id": "scientific_environment_code_room_example4_v1",
         "root_prim_path": "/World",
@@ -439,7 +429,7 @@ def test_rack_insert_spec_keeps_the_two_arm_corridor_and_checks_rack_motion() ->
     actors = {item["id"]: item for item in scenario["robot"]["actors"]}
 
     assert scenario["schema_version"] == "scenario-spec/v0.5"
-    assert scenario["scenario_id"] == "wetlab_bimanual_hold_rack_insert_tube"
+    assert scenario["scenario_id"] == "scientific_workbench_prototype_bimanual_rack_insert"
     assert scenario["scene"] == {
         "asset_id": "scientific_environment_code_room_example4_v1",
         "root_prim_path": "/World",
@@ -492,6 +482,18 @@ def test_rack_insert_spec_keeps_the_two_arm_corridor_and_checks_rack_motion() ->
     }
 
 
+def test_generator_exposes_prototype_names_not_feishu_task_numbers() -> None:
+    parser = generator.build_parser()
+    help_text = parser.format_help()
+
+    assert "--prototype" in help_text
+    assert "--task" not in help_text
+    assert generator.PROTOTYPE_SPECS == {
+        "centrifuge_load_start": generator.CENTRIFUGE_SPEC,
+        "bimanual_rack_insert": generator.RACK_INSERT_SPEC,
+    }
+
+
 def test_all_mode_compiles_and_exports_both_packages_without_runtime(
     tmp_path: Path,
     monkeypatch,
@@ -533,7 +535,7 @@ def test_all_mode_compiles_and_exports_both_packages_without_runtime(
             [
                 "--bindings",
                 str(bindings),
-                "--task",
+                "--prototype",
                 "all",
                 "--out",
                 str(output),
@@ -545,12 +547,12 @@ def test_all_mode_compiles_and_exports_both_packages_without_runtime(
 
     assert compile_calls == [
         (
-            "wetlab_centrifuge_tube_load_start_no_wait",
-            output / "wetlab_centrifuge_tube_load_start_no_wait",
+            "scientific_workbench_prototype_centrifuge_load_start",
+            output / "scientific_workbench_prototype_centrifuge_load_start",
         ),
         (
-            "wetlab_bimanual_hold_rack_insert_tube",
-            output / "wetlab_bimanual_hold_rack_insert_tube",
+            "scientific_workbench_prototype_bimanual_rack_insert",
+            output / "scientific_workbench_prototype_bimanual_rack_insert",
         ),
     ]
     assert export_calls == [(call[1], True) for call in compile_calls]
@@ -564,24 +566,16 @@ def test_materialization_uses_support_frame_and_requires_rack_insertion_gate(
     raw_spec = _load(generator.RACK_INSERT_SPEC)
 
     materialized = generator._materialize_authoritative_task_geometry(
-        "11",
+        generator.RACK_INSERT_PROTOTYPE,
         raw_spec,
         sources,
     )
-    objects = {
-        item["id"]: item
-        for item in materialized["objects"]
-        if isinstance(item, dict)
-    }
+    objects = {item["id"]: item for item in materialized["objects"] if isinstance(item, dict)}
     assert objects["tube_rack"]["pose"]["xyz"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M
-        + generator.TABLETOP_CLEARANCE_M
-        - 0.0135
+        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M - 0.0135
     )
     assert objects["test_tube"]["pose"]["xyz"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M
-        + generator.TABLETOP_CLEARANCE_M
-        - 0.005
+        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M - 0.005
     )
 
     rack = sources["scientific_workbench_tube_rack_dynamic"]
@@ -589,7 +583,7 @@ def test_materialization_uses_support_frame_and_requires_rack_insertion_gate(
     rack.upstream_package.metadata.pop("task_qualifications")
     with pytest.raises(ValueError, match="tube_insertion"):
         generator._materialize_authoritative_task_geometry(
-            "11",
+            generator.RACK_INSERT_PROTOTYPE,
             raw_spec,
             sources,
         )
@@ -602,15 +596,11 @@ def test_materialization_uses_fixed_base_mount_pose_flush_on_tabletop(
     raw_spec = _load(generator.CENTRIFUGE_SPEC)
 
     materialized = generator._materialize_authoritative_task_geometry(
-        "7",
+        generator.CENTRIFUGE_PROTOTYPE,
         raw_spec,
         sources,
     )
-    objects = {
-        item["id"]: item
-        for item in materialized["objects"]
-        if isinstance(item, dict)
-    }
+    objects = {item["id"]: item for item in materialized["objects"] if isinstance(item, dict)}
     centrifuge_pose = objects["centrifuge"]["pose"]
     assert centrifuge_pose["xyz"] == pytest.approx(
         [
@@ -619,13 +609,9 @@ def test_materialization_uses_fixed_base_mount_pose_flush_on_tabletop(
             generator.EBENCH_TABLETOP_Z_M + 0.10363300144672394,
         ]
     )
-    assert centrifuge_pose["wxyz"] == pytest.approx(
-        [-0.5, -0.5, 0.5, 0.5]
-    )
+    assert centrifuge_pose["wxyz"] == pytest.approx([-0.5, -0.5, 0.5, 0.5])
     assert objects["test_tube"]["pose"]["xyz"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M
-        + generator.TABLETOP_CLEARANCE_M
-        - 0.005
+        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M - 0.005
     )
 
 
@@ -647,7 +633,7 @@ def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets
             [
                 "--bindings",
                 str(bindings),
-                "--task",
+                "--prototype",
                 "all",
                 "--out",
                 str(output),
@@ -657,19 +643,19 @@ def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets
         == 0
     )
 
-    task7 = output / "wetlab_centrifuge_tube_load_start_no_wait"
-    task11 = output / "wetlab_bimanual_hold_rack_insert_tube"
-    task7_export = task7 / "adapters/ebench/genmanip"
-    task11_export = task11 / "adapters/ebench/genmanip"
-    task7_config = _load(task7_export / "tasks/config.yaml")
-    task11_config = _load(task11_export / "tasks/config.yaml")
-    task7_evaluation = task7_config["evaluation_configs"][0]
-    task11_evaluation = task11_config["evaluation_configs"][0]
+    centrifuge_prototype = output / "scientific_workbench_prototype_centrifuge_load_start"
+    rack_insert_prototype = output / "scientific_workbench_prototype_bimanual_rack_insert"
+    centrifuge_prototype_export = centrifuge_prototype / "adapters/ebench/genmanip"
+    rack_insert_prototype_export = rack_insert_prototype / "adapters/ebench/genmanip"
+    centrifuge_prototype_config = _load(centrifuge_prototype_export / "tasks/config.yaml")
+    rack_insert_prototype_config = _load(rack_insert_prototype_export / "tasks/config.yaml")
+    centrifuge_prototype_evaluation = centrifuge_prototype_config["evaluation_configs"][0]
+    rack_insert_prototype_evaluation = rack_insert_prototype_config["evaluation_configs"][0]
 
-    assert task7_evaluation["object_config"]["centrifuge"]["is_articulated"] is True
+    assert centrifuge_prototype_evaluation["object_config"]["centrifuge"]["is_articulated"] is True
     assert [
         stage[0][0]["type"]
-        for stage in task7_evaluation["generation_config"]["goal"]
+        for stage in centrifuge_prototype_evaluation["generation_config"]["goal"]
     ] == [
         "manip/default/sr_based_genmanip_range",
         "manip/default/sr_based_genmanip_relationship",
@@ -677,101 +663,103 @@ def test_all_mode_real_static_compile_exports_mixed_articulated_and_rigid_assets
     ]
     assert [
         stage[0][0]["type"]
-        for stage in task11_evaluation["generation_config"]["goal"]
+        for stage in rack_insert_prototype_evaluation["generation_config"]["goal"]
     ] == [
         "manip/default/sr_based_genmanip_range",
         "manip/default/sr_based_genmanip_range",
     ]
-    task7_episode = next(
-        task7_export.glob(
-            "tasks/scenario_forge/wetlab_centrifuge_tube_load_start_no_wait/"
+    centrifuge_prototype_episode = next(
+        centrifuge_prototype_export.glob(
+            "tasks/scenario_forge/scientific_workbench_prototype_centrifuge_load_start/"
             "*/episode_metadata.json"
         )
     )
-    task7_data = yaml.safe_load(task7_episode.read_text(encoding="utf-8"))[
-        "task_data"
-    ]
-    task7_layout = task7_data["initial_layout"]
-    assert task7_layout["centrifuge"]["type"] == "articulation"
-    assert task7_layout["centrifuge"]["position"][2] == pytest.approx(
+    centrifuge_prototype_data = yaml.safe_load(
+        centrifuge_prototype_episode.read_text(encoding="utf-8")
+    )["task_data"]
+    centrifuge_prototype_layout = centrifuge_prototype_data["initial_layout"]
+    assert centrifuge_prototype_layout["centrifuge"]["type"] == "articulation"
+    assert centrifuge_prototype_layout["centrifuge"]["position"][2] == pytest.approx(
         generator.EBENCH_TABLETOP_Z_M + 0.10363300144672394
     )
-    assert task7_layout["centrifuge"]["orientation"] == pytest.approx(
+    assert centrifuge_prototype_layout["centrifuge"]["orientation"] == pytest.approx(
         [-0.5, -0.5, 0.5, 0.5]
     )
-    assert task7_layout["centrifuge"]["joint_positions"] == pytest.approx(
+    assert centrifuge_prototype_layout["centrifuge"]["joint_positions"] == pytest.approx(
         [-1.5556521049, 0.0, 0.0]
     )
-    assert task7_layout["test_tube"]["position"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M
-        + generator.TABLETOP_CLEARANCE_M
-        - 0.005
+    assert centrifuge_prototype_layout["test_tube"]["position"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M - 0.005
     )
-    assert task7_data["scenario_forge_runtime_contract"]["schema_version"] == (
+    assert centrifuge_prototype_data["scenario_forge_runtime_contract"]["schema_version"] == (
         "scenario-forge-genmanip-runtime-contract/v0.1"
     )
-    assert task7_data["scenario_forge_runtime_contract_v05"]["schema_version"] == (
+    assert centrifuge_prototype_data["scenario_forge_runtime_contract_v05"]["schema_version"] == (
         "scenario-forge-genmanip-runtime-contract/v0.5"
     )
-    task7_contract = task7_data["scenario_forge_runtime_contract_v05"]
-    task7_objects = {
-        item["scenario_object_id"]: item for item in task7_contract["objects"]
+    centrifuge_prototype_contract = centrifuge_prototype_data["scenario_forge_runtime_contract_v05"]
+    centrifuge_prototype_objects = {
+        item["scenario_object_id"]: item for item in centrifuge_prototype_contract["objects"]
     }
-    assert task7_objects["centrifuge"]["named_frames"][
+    assert centrifuge_prototype_objects["centrifuge"]["named_frames"][
         "tube_socket_0_inserted_bottom_parked_root"
     ]["xyz"] == [0.0, -0.02, 0.095]
-    task7_metrics = task7_evaluation["generation_config"]["goal"][0][0]
-    assert task7_metrics[0]["x_range"] == [-0.1, -0.09]
-    assert task7_metrics[0]["y_range"] == [-0.005, 0.005]
-    assert task7_metrics[0]["z_range"] == [-0.03, -0.01]
-    assert task7_metrics[1]["obj2_uid"] == "centrifuge_rotor"
-    task7_request = _load(task7_export / "evidence/render_request.yaml")
-    task7_expected_geometry = task7_request["expected_runtime_geometry"][
-        "centrifuge"
+    centrifuge_prototype_metrics = centrifuge_prototype_evaluation["generation_config"]["goal"][0][
+        0
     ]
-    assert task7_expected_geometry["schema_version"] == (
+    assert centrifuge_prototype_metrics[0]["x_range"] == [-0.1, -0.09]
+    assert centrifuge_prototype_metrics[0]["y_range"] == [-0.005, 0.005]
+    assert centrifuge_prototype_metrics[0]["z_range"] == [-0.03, -0.01]
+    assert centrifuge_prototype_metrics[1]["obj2_uid"] == "centrifuge_rotor"
+    centrifuge_prototype_request = _load(
+        centrifuge_prototype_export / "evidence/render_request.yaml"
+    )
+    centrifuge_prototype_expected_geometry = centrifuge_prototype_request[
+        "expected_runtime_geometry"
+    ]["centrifuge"]
+    assert centrifuge_prototype_expected_geometry["schema_version"] == (
         "scenario-forge-task-interactive-geometry/v0.2"
     )
-    assert task7_expected_geometry["qualified_extent_m_by_sample"] == {
+    assert centrifuge_prototype_expected_geometry["qualified_extent_m_by_sample"] == {
         "warmup_start": [0.3893976, 0.35, 0.444873],
         "post_warmup": [0.3893976, 0.35, 0.444873],
     }
-    assert task7_expected_geometry["mounting"]["motion_mode"] == "fixed_base"
+    assert centrifuge_prototype_expected_geometry["mounting"]["motion_mode"] == "fixed_base"
 
-    task11_episode = next(
-        task11_export.glob(
-            "tasks/scenario_forge/wetlab_bimanual_hold_rack_insert_tube/"
+    rack_insert_prototype_episode = next(
+        rack_insert_prototype_export.glob(
+            "tasks/scenario_forge/scientific_workbench_prototype_bimanual_rack_insert/"
             "*/episode_metadata.json"
         )
     )
-    task11_data = yaml.safe_load(task11_episode.read_text(encoding="utf-8"))[
-        "task_data"
+    rack_insert_prototype_data = yaml.safe_load(
+        rack_insert_prototype_episode.read_text(encoding="utf-8")
+    )["task_data"]
+    rack_insert_prototype_layout = rack_insert_prototype_data["initial_layout"]
+    assert rack_insert_prototype_layout["tube_rack"]["position"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M - 0.0135
+    )
+    assert rack_insert_prototype_layout["test_tube"]["position"][2] == pytest.approx(
+        generator.EBENCH_TABLETOP_Z_M + generator.TABLETOP_CLEARANCE_M - 0.005
+    )
+    rack_insert_prototype_contract = rack_insert_prototype_data[
+        "scenario_forge_runtime_contract_v05"
     ]
-    task11_layout = task11_data["initial_layout"]
-    assert task11_layout["tube_rack"]["position"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M
-        + generator.TABLETOP_CLEARANCE_M
-        - 0.0135
-    )
-    assert task11_layout["test_tube"]["position"][2] == pytest.approx(
-        generator.EBENCH_TABLETOP_Z_M
-        + generator.TABLETOP_CLEARANCE_M
-        - 0.005
-    )
-    task11_contract = task11_data["scenario_forge_runtime_contract_v05"]
-    task11_objects = {
-        item["scenario_object_id"]: item for item in task11_contract["objects"]
+    rack_insert_prototype_objects = {
+        item["scenario_object_id"]: item for item in rack_insert_prototype_contract["objects"]
     }
-    assert task11_objects["tube_rack"]["named_frames"][
-        "socket_0_aperture"
-    ]["xyz"] == [0.04, 0.07, 0.09]
-    assert task11_objects["tube_rack"]["named_frames"][
-        "socket_0_inserted_bottom"
-    ]["xyz"] == [0.04, 0.07, 0.055]
-    task11_metric = task11_evaluation["generation_config"]["goal"][0][0][0]
-    assert task11_metric["x_range"] == [0.035, 0.045]
-    assert task11_metric["y_range"] == [0.065, 0.075]
-    assert task11_metric["z_range"] == [0.05, 0.06]
+    assert rack_insert_prototype_objects["tube_rack"]["named_frames"]["socket_0_aperture"][
+        "xyz"
+    ] == [0.04, 0.07, 0.09]
+    assert rack_insert_prototype_objects["tube_rack"]["named_frames"]["socket_0_inserted_bottom"][
+        "xyz"
+    ] == [0.04, 0.07, 0.055]
+    rack_insert_prototype_metric = rack_insert_prototype_evaluation["generation_config"]["goal"][0][
+        0
+    ][0]
+    assert rack_insert_prototype_metric["x_range"] == [0.035, 0.045]
+    assert rack_insert_prototype_metric["y_range"] == [0.065, 0.075]
+    assert rack_insert_prototype_metric["z_range"] == [0.05, 0.06]
 
 
 @pytest.mark.skipif(
@@ -796,7 +784,7 @@ def test_generated_tasks_use_native_goals_with_documented_genmanip_consumer(
             [
                 "--bindings",
                 str(bindings),
-                "--task",
+                "--prototype",
                 "all",
                 "--out",
                 str(output),
@@ -817,8 +805,7 @@ def test_generated_tasks_use_native_goals_with_documented_genmanip_consumer(
     try:
         module_spec.loader.exec_module(consumer)
         for episode_path in output.glob(
-            "*/adapters/ebench/genmanip/tasks/scenario_forge/*/*/"
-            "episode_metadata.json"
+            "*/adapters/ebench/genmanip/tasks/scenario_forge/*/*/episode_metadata.json"
         ):
             task_data = _load(episode_path)["task_data"]
             assert consumer.parse_runtime_contract(task_data) is None

@@ -1,242 +1,1481 @@
-schema_version: task-catalog/v0.1
+schema_version: task-catalog/v0.2
 catalog_id: scientific_workbench_phase1
 domain: scientific_workbench
 source:
-  uri: handoff:wet-experiment-embodied-task-design@2026-07-14
-  filename: 湿实验具身操作评测任务设计.pdf
-  sha256: sha256:3b7ebb2592a8dd612f37e0e934aa052284de772fd0e7fb80b7359afa57d82eca
-  captured_at: "2026-07-14"
-  table_pages: [11, 12, 13, 14, 15, 16, 17]
-identity_reconciliation:
-  status: unresolved
+  kind: feishu_embedded_sheet
+  uri: https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab
+  document_id: YdLVdAe7noWEWTxaUTxcKD28nUh
+  document_revision: 1576
+  section_block_id: EQKednVHBoOgD8xoLnLc6vAAnzd
+  section_sha256: sha256:cb6caae73552f2ced0f4db1d56123cbd3152aa30ee0829efbc498477c49dfe5d
+  spreadsheet_token: A6cPsrjWbhLS68tgNmzcqdf7nqd
+  spreadsheet_revision: 564
+  sheet_id: J1nUiN
+  range: A1:J19
+  snapshot_path: configs/task_catalogs/sources/scientific_workbench_task_design.json
+  content_sha256: sha256:a189f79b7582e0273200c1c5a76adcef142b4287ea7214307b4633d026d84bd4
+  captured_at: '2026-07-31'
+source_consistency:
+  status: warning
   declared_task_count: 17
-  observed_candidate_row_count: 19
-  note: The detailed table contains 1..17 plus 8a and 8b.
+  observed_task_count: 18
+  warnings:
+  - Task Design 正文声明第一期 17 tasks，但嵌入表格实际包含 18 行任务；目录按表格 18 行保存。
+  - Task Design 注意事项称仿真液体任务暂定只评估动作、忽略液体，但多项 Progress Score 仍包含液体转移比例；两种原文均保留。
+  - Task Design 正文称长程实验操作为 7-11 steps，但第 18 行旋转蒸发记录为 13 steps；未修改源值。
 tasks:
-  - task_id: wetlab_nonquant_pour_to_cylinder
-    source_id: "1"
-    title_zh: 锥形瓶向量筒非定量倾倒
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 双臂协同完成锥形瓶到量筒的非定量倾倒并将锥形瓶放回安全位置。
-    atomic_skills: [grasp, pick, align, pour, place]
-    required_asset_roles: [erlenmeyer_flask, graduated_cylinder]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 瓶口与量筒口对准，达到倾倒姿态并回到安全位置；不考核体积或读数。
+- task_id: scientific_workbench_pour_flask_to_cylinder
+  source_order: 1
+  source_row: 2
+  title_zh: 液体倾倒：锥形瓶→量筒
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂抓量筒并保持目标位置（抓） → 操作臂拿起锥形瓶（拿起） → 双臂协同调整瓶口与量筒口对准（对准） → 操作臂倾斜完成倾倒（倾倒） → 操作臂放回锥形瓶（放置）
+  atomic_skills_source_zh: 抓、拿起、放置、倾倒、对准
+  atomic_skills:
+  - grasp
+  - pick
+  - place
+  - pour
+  - align
+  step_count: 5
+  core_assets_source_zh: 锥形瓶、量筒
+  required_asset_roles:
+  - erlenmeyer_flask
+  - graduated_cylinder
+  horizon: middle
+  precision: high
+  progress_score_source_zh: '时序1：
 
-  - task_id: wetlab_glassrod_mix_and_stage
-    source_id: "2"
-    title_zh: 玻璃棒搅拌并转移烧杯
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 使用玻璃棒在烧杯内完成搅拌动作，再把烧杯放到目标区域。
-    atomic_skills: [grasp, stir, place]
-    required_asset_roles: [glass_rod, beaker, target_region]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 玻璃棒接触目标烧杯并完成搅拌轨迹，烧杯最终到达目标区域。
+    - 锥形瓶离开桌面（0.20）
 
-  - task_id: wetlab_dryingbox_beaker_load_start
-    source_id: "3"
-    title_zh: 干燥箱装载烧杯并启动
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 打开干燥箱门，将烧杯放入箱内，关闭门并触发启动按钮。
-    atomic_skills: [pull, push, grasp, place, press]
-    required_asset_roles: [drying_box, beaker, start_button]
-    claim_scope: state_proxy
-    success_evidence_zh: 门关闭到位、烧杯位于箱内目标区、启动按钮状态被触发；不等待干燥完成。
+    时序2：
 
-  - task_id: wetlab_two_sample_add_and_swirl
-    source_id: "4"
-    title_zh: 两种样品依次加入并晃匀
-    level: basic
-    execution_mode: joint
-    step_count: 6
-    goal_zh: 将两个模拟样品容器依次倾倒到同一烧杯并完成晃匀动作。
-    atomic_skills: [grasp, pour, place, shake]
-    required_asset_roles: [sample_container_a, sample_container_b, beaker]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 两次倾倒动作、目标容器晃动轨迹和最终归位完成；不考核浓度、体积或液面。
+    - 操作臂仍夹持锥形瓶，锥形瓶瓶口位于量筒口上方，且瓶口中心xy平面投影位于量筒口区域内（0.30）
 
-  - task_id: wetlab_decant_motion_and_mix
-    source_id: "5"
-    title_zh: 烧杯倾析并用玻璃棒搅拌
-    level: basic
-    execution_mode: joint
-    step_count: 6
-    goal_zh: 完成源烧杯向收集烧杯的倾析姿态，再用玻璃棒搅拌收集烧杯。
-    atomic_skills: [grasp, pour, place, stir]
-    required_asset_roles: [source_beaker, collection_beaker, glass_rod]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 倾倒姿态、目标对准、搅拌轨迹和工具归位完成；不考核分层或回收体积。
+    时序3：
 
-  - task_id: wetlab_tabletop_reagent_delivery
-    source_id: "6"
-    title_zh: 同桌面试剂容器短距递送
-    level: basic
-    execution_mode: joint
-    step_count: 4
-    goal_zh: 将源区域的试剂瓶或锥形瓶移动到同一实验桌上的目标区域。
-    atomic_skills: [grasp, pick, place]
-    required_asset_roles: [reagent_container, target_region]
-    claim_scope: state_proxy
-    success_evidence_zh: 容器到达桌面目标区域并保持稳定；不涉及跨工位或底盘导航。
+    - 最终帧：量筒内包含锥形瓶初始液体的比例超过50%（0.20）
 
-  - task_id: wetlab_centrifuge_tube_load_start_no_wait
-    source_id: "7"
-    title_zh: 离心机上样并启动
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 将试管插入离心机孔位，关闭门并触发启动按钮。
-    atomic_skills: [grasp, insert, pull, push, press]
-    required_asset_roles: [test_tube, centrifuge, centrifuge_door, start_button]
-    claim_scope: state_proxy
-    success_evidence_zh: 试管进入孔位、门关闭、启动按钮被触发；不等待离心完成。
+    - 最终帧：量筒内包含锥形瓶初始液体的比例达到本任务配置的全部转移阈值（0.20）
 
-  - task_id: wetlab_stoppered_bottle_pour_reseal
-    source_id: "8"
-    title_zh: 试剂瓶拔塞倾倒并复位
-    level: basic
-    execution_mode: joint
-    step_count: 7
-    goal_zh: 拔出瓶塞，完成非定量倾倒，再将瓶塞插回并放回试剂瓶。
-    atomic_skills: [grasp, pull, align, pour, insert, place]
-    required_asset_roles: [stoppered_reagent_bottle, stopper, beaker]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 瓶塞拔出和插回状态可见、倾倒动作完成、瓶口最终关闭；不涉及螺纹拧紧。
+    - 最终帧：锥形瓶正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放（0.10）'
+  progress_score:
+  - sequence: 1
+    description_zh: 锥形瓶离开桌面
+    weight: 0.2
+  - sequence: 2
+    description_zh: 操作臂仍夹持锥形瓶，锥形瓶瓶口位于量筒口上方，且瓶口中心xy平面投影位于量筒口区域内
+    weight: 0.3
+  - sequence: 3
+    description_zh: 最终帧：量筒内包含锥形瓶初始液体的比例超过50%
+    weight: 0.2
+  - sequence: 3
+    description_zh: 最终帧：量筒内包含锥形瓶初始液体的比例达到本任务配置的全部转移阈值
+    weight: 0.2
+  - sequence: 3
+    description_zh: 最终帧：锥形瓶正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放
+    weight: 0.1
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_pour_cylinder_to_beaker
+  source_order: 2
+  source_row: 3
+  title_zh: 液体倾倒：量筒-> 烧杯
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂固定烧杯并保持目标位置（抓） → 操作臂拿起量筒（拿起） → 双臂协同调整量筒口与烧杯口对准（对准） → 操作臂倾斜完成倒液（倾倒） → 操作臂放回量筒（放置）
+  atomic_skills_source_zh: 抓、拿起、放置、倾倒、对准
+  atomic_skills:
+  - grasp
+  - pick
+  - place
+  - pour
+  - align
+  step_count: 5
+  core_assets_source_zh: 量筒、烧杯
+  required_asset_roles:
+  - graduated_cylinder
+  - beaker
+  horizon: middle
+  precision: middle
+  progress_score_source_zh: '时序1：
 
-  - task_id: wetlab_weighing_prepare_and_sample
-    source_id: "8a"
-    title_zh: 称量准备、去皮与样品转移
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 放置称量纸或容器，触发去皮，再用取样工具转移少量模拟样品。
-    atomic_skills: [place, press, grasp, scoop]
-    required_asset_roles: [balance, weighing_container, spatula, sample_container]
-    claim_scope: state_proxy
-    success_evidence_zh: 称量容器位于目标区、去皮按钮被触发、模拟样品到达称量位置；不考核真实质量。
+    - 量筒离开桌面（0.20）
 
-  - task_id: wetlab_pour_contact_point_generalization
-    source_id: "8b"
-    title_zh: 倾倒目标接触点泛化
-    level: basic
-    execution_mode: joint
-    step_count: 4
-    goal_zh: 将源容器瓶口对准量筒、烧杯、漏斗或锥形瓶口并完成一次非定量倾倒姿态。
-    atomic_skills: [grasp, align, pour, place]
-    required_asset_roles: [source_container, target_container]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 瓶口到达目标接触点附近并保持正确倾倒姿态，目标容器未被碰倒。
+    时序2：
 
-  - task_id: wetlab_heating_plate_knob_set
-    source_id: "9"
-    title_zh: 加热板装载和旋钮档位设置
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 将烧杯放到加热板，旋转温度旋钮并触发电源或确认按钮。
-    atomic_skills: [place, turn, press]
-    required_asset_roles: [heating_plate, beaker, control_knob, start_button]
-    claim_scope: state_proxy
-    success_evidence_zh: 旋钮角度进入目标范围、设备状态被触发且烧杯仍在加热区域；不等待温度结果。
+    - 操作臂仍夹持量筒，量筒口位于烧杯口上方，且量筒口中心投影位于烧杯口区域内（0.30）
 
-  - task_id: wetlab_vortex_tube_contact_start
-    source_id: "10"
-    title_zh: 试管接触振荡器并启动
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 将试管放入或接触振荡器工作位，启动设备，再取出试管并归位。
-    atomic_skills: [grasp, insert, place, press, pull]
-    required_asset_roles: [test_tube, vortex_oscillator, control_knob, start_button, tube_rack]
-    claim_scope: state_proxy
-    success_evidence_zh: 试管到达工作位、控制部件被触发、试管取出并归位；不等待混匀结果。
+    时序3：
 
-  - task_id: wetlab_bimanual_hold_rack_insert_tube
-    source_id: "11"
-    title_zh: 双臂稳定试管架并插入试管
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 一臂稳定试管架，另一臂将试管对准并插入指定孔位。
-    atomic_skills: [grasp, align, insert]
-    required_asset_roles: [test_tube, tube_rack]
-    claim_scope: state_proxy
-    success_evidence_zh: 试管架位移受限，试管进入指定孔位并达到插入深度。
+    - 最终帧：烧杯内包含量筒初始液体的比例超过50%（0.20）
 
-  - task_id: wetlab_bimanual_tube_handover
-    source_id: "12"
-    title_zh: 双臂试管交接并插架
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 双臂完成试管交接，再将试管插入试管架指定孔位。
-    atomic_skills: [grasp, handover, place, insert]
-    required_asset_roles: [test_tube, tube_rack, handover_region]
-    claim_scope: state_proxy
-    success_evidence_zh: 交接后目标手稳定持有试管，试管未掉落并最终进入指定孔位。
+    - 最终帧：烧杯内包含量筒初始液体的比例达到本任务配置的全部转移阈值（0.20）
 
-  - task_id: wetlab_simplified_extraction_mix
-    source_id: "13"
-    title_zh: 简化萃取前混合动作
-    level: long_horizon
-    execution_mode: joint
-    step_count: 8
-    goal_zh: 用漏斗加入模拟样品，插入瓶塞，晃动锥形瓶并最终归位。
-    atomic_skills: [grasp, insert, align, pour, shake, place]
-    required_asset_roles: [funnel, erlenmeyer_flask, stopper, sample_container]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 漏斗和瓶塞插入、倾倒动作、晃动轨迹及最终归位完成；不考核分层、放液或体积。
+    - 最终帧：量筒正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放（0.10）'
+  progress_score:
+  - sequence: 1
+    description_zh: 量筒离开桌面
+    weight: 0.2
+  - sequence: 2
+    description_zh: 操作臂仍夹持量筒，量筒口位于烧杯口上方，且量筒口中心投影位于烧杯口区域内
+    weight: 0.3
+  - sequence: 3
+    description_zh: 最终帧：烧杯内包含量筒初始液体的比例超过50%
+    weight: 0.2
+  - sequence: 3
+    description_zh: 最终帧：烧杯内包含量筒初始液体的比例达到本任务配置的全部转移阈值
+    weight: 0.2
+  - sequence: 3
+    description_zh: 最终帧：量筒正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放
+    weight: 0.1
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_spatula_sample_transfer
+  source_order: 3
+  source_row: 4
+  title_zh: 药匙取样
+  level: basic
+  execution_mode: real
+  execution_mode_source_zh: '真机
 
-  - task_id: wetlab_filter_setup_and_pour_motion
-    source_id: "14"
-    title_zh: 过滤准备与非定量进样
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 将漏斗插入锥形瓶，并使样品容器对准漏斗完成非定量倾倒动作。
-    atomic_skills: [grasp, insert, align, pour, place]
-    required_asset_roles: [funnel, erlenmeyer_flask, sample_container]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 漏斗稳定插入目标容器，样品容器完成对准和倾倒姿态；不考核滤速或滤液体积。
+    仿真待验证'
+  execution_notes_zh:
+  - 仿真待验证
+  process_overview_zh: 辅助臂固定试剂瓶并保持瓶口稳定（抓） → 操作臂抓药匙（拿起） → 操作臂伸入样品瓶舀出样品（舀） → 操作臂将样品放置到容器中（放置） → 操作臂放回药匙（放置）
+  atomic_skills_source_zh: 抓、拿起、放置、舀
+  atomic_skills:
+  - grasp
+  - pick
+  - place
+  - scoop
+  step_count: 5
+  core_assets_source_zh: 药匙、试剂瓶、称量容器/烧杯
+  required_asset_roles:
+  - spatula
+  - reagent_bottle
+  - sample_receiver
+  horizon: middle
+  precision: middle
+  progress_score_source_zh: '时序1：
 
-  - task_id: wetlab_centrifuge_tube_unload
-    source_id: "15"
-    title_zh: 离心机开门取样并放回试管架
-    level: basic
-    execution_mode: joint
-    step_count: 5
-    goal_zh: 打开离心机门，从指定孔位取出试管并稳定放入试管架。
-    atomic_skills: [pull, push, grasp, pick, place]
-    required_asset_roles: [test_tube, centrifuge, centrifuge_door, tube_rack]
-    claim_scope: state_proxy
-    success_evidence_zh: 离心机门打开，试管从孔位取出并稳定放入试管架；不等待离心状态确认。
+    - 药匙离开初始放置位置（0.15）
 
-  - task_id: wetlab_rotary_evaporation_workflow
-    source_id: "16"
-    title_zh: 旋转蒸发仪装载、设置与卸载
-    level: long_horizon
-    execution_mode: joint
-    step_count: 8
-    goal_zh: 安装圆底烧瓶、固定接口、定位水浴、触发旋转和真空相关控制，再停止并退出。
-    atomic_skills: [grasp, align, insert, press, turn, place]
-    required_asset_roles: [rotary_evaporator, round_bottom_flask, receiving_flask, water_bath, clamp, control_knob, start_button]
-    claim_scope: state_proxy
-    success_evidence_zh: 烧瓶稳定安装、水浴相对位置正确、控制部件被触发；不考核真实真空、温度或蒸发终点。
+    时序2：
 
-  - task_id: wetlab_column_chromatography_setup_and_collection
-    source_id: "17"
-    title_zh: 柱层析进样、洗脱与收集管更换
-    level: long_horizon
-    execution_mode: joint
-    step_count: 8
-    goal_zh: 围绕预装层析柱完成收集管放置、进样、洗脱剂加入和至少一次收集管更换。
-    atomic_skills: [grasp, align, pour, insert, pull, place]
-    required_asset_roles: [chromatography_column, column_stand, funnel, sample_container, collection_tube, tube_rack]
-    claim_scope: kinematic_proxy
-    success_evidence_zh: 收集管位于柱出口下方，柱顶进样和洗脱剂加入姿态完成，至少更换一次收集管；不考核真实分离效果。
+    - 药匙取样端进入试剂瓶内的样品区域（0.15）
+
+    时序3：
+
+    - 药匙取样端已离开试剂瓶口，且药匙上承载从试剂瓶取出的样品（0.20）
+
+    时序4：
+
+    - 药匙仍承载样品并位于称量容器/烧杯开口上方，且取样端中心投影位于开口区域内（0.15）
+
+    时序5：
+
+    - 最终帧：称量容器/烧杯内包含本次由药匙取出的（全部）样品（0.25）
+
+    - 最终帧：药匙位于本任务配置的归还区域内，由承托面支撑且机械手已释放（0.10）'
+  progress_score:
+  - sequence: 1
+    description_zh: 药匙离开初始放置位置
+    weight: 0.15
+  - sequence: 2
+    description_zh: 药匙取样端进入试剂瓶内的样品区域
+    weight: 0.15
+  - sequence: 3
+    description_zh: 药匙取样端已离开试剂瓶口，且药匙上承载从试剂瓶取出的样品
+    weight: 0.2
+  - sequence: 4
+    description_zh: 药匙仍承载样品并位于称量容器/烧杯开口上方，且取样端中心投影位于开口区域内
+    weight: 0.15
+  - sequence: 5
+    description_zh: 最终帧：称量容器/烧杯内包含本次由药匙取出的（全部）样品
+    weight: 0.25
+  - sequence: 5
+    description_zh: 最终帧：药匙位于本任务配置的归还区域内，由承托面支撑且机械手已释放
+    weight: 0.1
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_insert_stir_bar_and_closure
+  source_order: 4
+  source_row: 5
+  title_zh: 磁子放入锥形瓶/烧杯
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂固定目标容器（抓） → 操作臂拿起磁子（拿起） → 放置磁子到目标容器（放置） → 拿起盖子(拿起)→ 将盖子对准容器（对准）→ 插入盖子（插入）
+  atomic_skills_source_zh: 拿起、放置、插入、抓、对准
+  atomic_skills:
+  - pick
+  - place
+  - insert
+  - grasp
+  - align
+  step_count: 6
+  core_assets_source_zh: 磁子、锥形瓶/烧杯、瓶塞
+  required_asset_roles:
+  - stir_bar
+  - target_vessel
+  - vessel_closure
+  horizon: middle
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 磁子离开初始放置位置（0.15）
+
+    时序2：
+
+    - 操作臂仍夹持磁子，磁子位于目标容器开口上方，且磁子中心投影位于开口区域内（0.15）
+
+    时序3：
+
+    - 磁子位于目标容器内部（0.15）
+
+    时序4：
+
+    - 瓶塞/盖子离开初始放置位置（0.10）
+
+    时序5：
+
+    - 操作臂仍夹持瓶塞/盖子，瓶塞/盖子位于目标容器口上方，插入轴与容器口轴线对齐，且尚未插入（0.15）
+
+    时序6：
+
+    - 最终帧：磁子位于目标容器内部（0.10）
+
+    - 最终帧：瓶塞/盖子位于容器口闭合位置，且机械手已释放（0.20）'
+  progress_score:
+  - sequence: 1
+    description_zh: 磁子离开初始放置位置
+    weight: 0.15
+  - sequence: 2
+    description_zh: 操作臂仍夹持磁子，磁子位于目标容器开口上方，且磁子中心投影位于开口区域内
+    weight: 0.15
+  - sequence: 3
+    description_zh: 磁子位于目标容器内部
+    weight: 0.15
+  - sequence: 4
+    description_zh: 瓶塞/盖子离开初始放置位置
+    weight: 0.1
+  - sequence: 5
+    description_zh: 操作臂仍夹持瓶塞/盖子，瓶塞/盖子位于目标容器口上方，插入轴与容器口轴线对齐，且尚未插入
+    weight: 0.15
+  - sequence: 6
+    description_zh: 最终帧：磁子位于目标容器内部
+    weight: 0.1
+  - sequence: 6
+    description_zh: 最终帧：瓶塞/盖子位于容器口闭合位置，且机械手已释放
+    weight: 0.2
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_remove_vessel_closure
+  source_order: 5
+  source_row: 6
+  title_zh: 锥形瓶/烧杯去除瓶塞/盖子
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂抓取锥形瓶瓶塞（抓） →操作臂扭转去掉盖子（扭转） → 拿起盖子（拿起） → 放置盖子到架子（放置）
+  atomic_skills_source_zh: 抓、扭转、拿起、放置
+  atomic_skills:
+  - grasp
+  - twist
+  - pick
+  - place
+  step_count: 4
+  core_assets_source_zh: 锥形瓶/烧杯、瓶塞/盖子、放置架
+  required_asset_roles:
+  - target_vessel
+  - vessel_closure
+  - closure_rack
+  horizon: low
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 夹爪与瓶塞/盖子保持接触（0.2）
+
+    时序2：
+
+    - 瓶塞/盖子已脱离容器口接合区域，并与容器口保持分离（0.4）
+
+    时序4：
+
+    - 最终帧：瓶塞/盖子位于本任务配置的放置架或归还区域内（0.25）
+
+    - 最终帧：目标容器正立（0.15）'
+  progress_score:
+  - sequence: 1
+    description_zh: 夹爪与瓶塞/盖子保持接触
+    weight: 0.2
+  - sequence: 2
+    description_zh: 瓶塞/盖子已脱离容器口接合区域，并与容器口保持分离
+    weight: 0.4
+  - sequence: 4
+    description_zh: 最终帧：瓶塞/盖子位于本任务配置的放置架或归还区域内
+    weight: 0.25
+  - sequence: 4
+    description_zh: 最终帧：目标容器正立
+    weight: 0.15
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_place_vessel_on_stirrer
+  source_order: 6
+  source_row: 7
+  title_zh: 烧杯/锥型瓶放搅拌器上
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 操作臂拿起烧杯或锥形瓶（拿起） → 对准搅拌器工作区中心（对准） → 放置容器（放置）
+  atomic_skills_source_zh: 拿起、放置、对准
+  atomic_skills:
+  - pick
+  - place
+  - align
+  step_count: 3
+  core_assets_source_zh: 烧杯/锥形瓶、搅拌器
+  required_asset_roles:
+  - target_vessel
+  - stirrer
+  horizon: middle
+  precision: low
+  progress_score_source_zh: '时序1：
+
+    - 烧杯/锥形瓶离开桌面（0.20）
+
+    时序2：
+
+    - 操作臂仍夹持烧杯/锥形瓶，容器位于搅拌器工作区上方，且容器中心投影位于工作区内（0.30）
+
+    时序3：
+
+    - 最终帧：烧杯/锥形瓶底部由搅拌器工作面支撑，容器正立且中心投影位于工作区内（0.5）'
+  progress_score:
+  - sequence: 1
+    description_zh: 烧杯/锥形瓶离开桌面
+    weight: 0.2
+  - sequence: 2
+    description_zh: 操作臂仍夹持烧杯/锥形瓶，容器位于搅拌器工作区上方，且容器中心投影位于工作区内
+    weight: 0.3
+  - sequence: 3
+    description_zh: 最终帧：烧杯/锥形瓶底部由搅拌器工作面支撑，容器正立且中心投影位于工作区内
+    weight: 0.5
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_glass_rod_stir
+  source_order: 7
+  source_row: 8
+  title_zh: 玻璃棒搅拌
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂固定烧杯位置（抓） → 操作臂拿起玻璃棒（拿起） → 操作臂将玻璃棒插入烧杯（插入） → 操作臂执行搅拌轨迹（搅拌） → 操作臂放回玻璃棒（放置）
+  atomic_skills_source_zh: 抓、拿起、插入、搅拌、放置
+  atomic_skills:
+  - grasp
+  - pick
+  - insert
+  - stir
+  - place
+  step_count: 5
+  core_assets_source_zh: 玻璃棒、烧杯
+  required_asset_roles:
+  - glass_rod
+  - beaker
+  horizon: middle
+  precision: low
+  progress_score_source_zh: '时序1：
+
+    - 玻璃棒离开初始放置位置（0.15）
+
+    时序2：
+
+    - 玻璃棒工作端进入烧杯内部（0.20）
+
+    时序3：
+
+    - 玻璃棒工作端保持在烧杯内，并完成本任务配置的搅拌轨迹（0.35）
+
+    时序4：
+
+    - 最终帧：玻璃棒位于本任务配置的归还区域内，由承托面支撑（0.20）
+
+    - 最终帧：烧杯正立并稳定处于桌面或本任务配置的位置（0.10）'
+  progress_score:
+  - sequence: 1
+    description_zh: 玻璃棒离开初始放置位置
+    weight: 0.15
+  - sequence: 2
+    description_zh: 玻璃棒工作端进入烧杯内部
+    weight: 0.2
+  - sequence: 3
+    description_zh: 玻璃棒工作端保持在烧杯内，并完成本任务配置的搅拌轨迹
+    weight: 0.35
+  - sequence: 4
+    description_zh: 最终帧：玻璃棒位于本任务配置的归还区域内，由承托面支撑
+    weight: 0.2
+  - sequence: 4
+    description_zh: 最终帧：烧杯正立并稳定处于桌面或本任务配置的位置
+    weight: 0.1
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_tighten_centrifuge_tube_cap
+  source_order: 8
+  source_row: 9
+  title_zh: 旋紧离心管
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: ' 操作臂拿起离心管盖子（拿起） → 辅助臂拿起离心管（拿起）→   操作臂扭转离心管盖子（扭转）→ 辅助臂放回离心管（放置）'
+  atomic_skills_source_zh: 拿起、扭转、放置
+  atomic_skills:
+  - pick
+  - twist
+  - place
+  step_count: 4
+  core_assets_source_zh: 漏斗、锥形瓶、离心管、离心管盖
+  required_asset_roles:
+  - centrifuge_tube
+  - centrifuge_tube_cap
+  horizon: high
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 离心管盖离开初始放置位置（0.10）
+
+    时序2：
+
+    - 离心管离开初始放置位置（0.10）
+
+    时序3：
+
+    - 离心管盖中心轴与离心管口中心轴对齐，盖子位于管口上方且尚未接触管口（0.15）
+
+    时序4：
+
+    - 离心管盖沿管口轴向下降，与离心管口完成初步套合并接触（0.15）
+
+    时序5：
+
+    - 最终帧：在套合状态下，离心管盖旋入离心管（0.30）
+
+    - 最终帧：离心管正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放（0.20）'
+  progress_score:
+  - sequence: 1
+    description_zh: 离心管盖离开初始放置位置
+    weight: 0.1
+  - sequence: 2
+    description_zh: 离心管离开初始放置位置
+    weight: 0.1
+  - sequence: 3
+    description_zh: 离心管盖中心轴与离心管口中心轴对齐，盖子位于管口上方且尚未接触管口
+    weight: 0.15
+  - sequence: 4
+    description_zh: 离心管盖沿管口轴向下降，与离心管口完成初步套合并接触
+    weight: 0.15
+  - sequence: 5
+    description_zh: 最终帧：在套合状态下，离心管盖旋入离心管
+    weight: 0.3
+  - sequence: 5
+    description_zh: 最终帧：离心管正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放
+    weight: 0.2
+  progress_score_total: 1.0
+  source_warnings:
+  - 核心资产列包含漏斗、锥形瓶，但标题和过程仅描述离心管及离心管盖；原文保留，规范化资产角色按标题和过程取离心管与管盖。
+- task_id: scientific_workbench_oven_load_start
+  source_order: 9
+  source_row: 10
+  title_zh: 仪器交互/开启烘箱
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂抓住设备门体把手，拉开并保持设备门体（抓，拉） → 操作臂拿起实验容器（拿起） → 操作臂放置容器到设备目标区域（放置） → 辅助臂推关设备门（推） → 操作臂转动旋钮设置温度（转动） → 操作臂按下启动按钮（按压）
+  atomic_skills_source_zh: 抓、拉、放置、推、转动、按压
+  atomic_skills:
+  - grasp
+  - pull
+  - place
+  - push
+  - turn
+  - press
+  step_count: 6
+  core_assets_source_zh: 烘箱、烧杯/试管、按钮/旋钮
+  required_asset_roles:
+  - oven
+  - sample_vessel
+  - oven_door
+  - temperature_control
+  - start_button
+  horizon: middle
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 烘箱门被拉开并保持在可装载位置（0.10）
+
+    时序2：
+
+    - 实验容器离开桌面或原放置位置（0.10）
+
+    时序3：
+
+    - 烘箱门保持打开，实验容器完全进入烘箱内目标区域（0.10）
+
+    时序4：
+
+    - 烘箱门保持打开，实验容器由烘箱内承托面支撑（0.10）
+
+    时序5：
+
+    - 烘箱门关闭到位（0.15）
+
+    时序6：
+
+    - 温度旋钮进入本任务配置的目标档位（0.15）
+
+    时序7：
+
+    - 启动按钮达到触发位置（0.10）
+
+    时序8：
+
+    - 最终帧：实验容器仍位于烘箱内目标区域并由承托面支撑（0.05）
+
+    - 最终帧：烘箱门保持关闭（0.05）
+
+    - 最终帧：启动按钮达到触发位置（0.10）'
+  progress_score:
+  - sequence: 1
+    description_zh: 烘箱门被拉开并保持在可装载位置
+    weight: 0.1
+  - sequence: 2
+    description_zh: 实验容器离开桌面或原放置位置
+    weight: 0.1
+  - sequence: 3
+    description_zh: 烘箱门保持打开，实验容器完全进入烘箱内目标区域
+    weight: 0.1
+  - sequence: 4
+    description_zh: 烘箱门保持打开，实验容器由烘箱内承托面支撑
+    weight: 0.1
+  - sequence: 5
+    description_zh: 烘箱门关闭到位
+    weight: 0.15
+  - sequence: 6
+    description_zh: 温度旋钮进入本任务配置的目标档位
+    weight: 0.15
+  - sequence: 7
+    description_zh: 启动按钮达到触发位置
+    weight: 0.1
+  - sequence: 8
+    description_zh: 最终帧：实验容器仍位于烘箱内目标区域并由承托面支撑
+    weight: 0.05
+  - sequence: 8
+    description_zh: 最终帧：烘箱门保持关闭
+    weight: 0.05
+  - sequence: 8
+    description_zh: 最终帧：启动按钮达到触发位置
+    weight: 0.1
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_centrifuge_load_start
+  source_order: 10
+  source_row: 11
+  title_zh: 仪器交互/开启离心机
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂抓住设备门体把手，拉开并保持设备门体（抓，拉）  → 操作臂抓取离心管（拿起） → 操作臂插入试管（插入） → 辅助臂推关设备门（推） → 操作臂按下设置按钮（按压） → 操作臂按下启动按钮（按压）
+  atomic_skills_source_zh: 抓、拉、拿起、插入、推、按压
+  atomic_skills:
+  - grasp
+  - pull
+  - pick
+  - insert
+  - push
+  - press
+  step_count: 6
+  core_assets_source_zh: 离心机、离心管、按钮/门
+  required_asset_roles:
+  - centrifuge
+  - centrifuge_tube
+  - centrifuge_lid
+  - setting_button
+  - start_button
+  horizon: middle
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 离心机门被拉开并保持在可装载位置（0.10）
+
+    时序2：
+
+    - 离心管离开桌面、离心板或试管架（0.10）
+
+    时序3：
+
+    - 离心机门保持打开，离心管进入目标孔位并达到配置的插入位置（0.3）
+
+    时序4：
+
+    - 离心机门关闭到位（0.15）
+
+    时序5：
+
+    - 设置按钮达到触发位置（0.1）
+
+    时序6：
+
+    - 启动按钮达到触发位置（0.10）
+
+    时序8：
+
+    - 最终帧：离心管仍位于目标孔位并由孔位稳定支撑（0.05）
+
+    - 最终帧：离心机门保持关闭（0.05）
+
+    - 最终帧：启动按钮达到触发位置（0.05）'
+  progress_score:
+  - sequence: 1
+    description_zh: 离心机门被拉开并保持在可装载位置
+    weight: 0.1
+  - sequence: 2
+    description_zh: 离心管离开桌面、离心板或试管架
+    weight: 0.1
+  - sequence: 3
+    description_zh: 离心机门保持打开，离心管进入目标孔位并达到配置的插入位置
+    weight: 0.3
+  - sequence: 4
+    description_zh: 离心机门关闭到位
+    weight: 0.15
+  - sequence: 5
+    description_zh: 设置按钮达到触发位置
+    weight: 0.1
+  - sequence: 6
+    description_zh: 启动按钮达到触发位置
+    weight: 0.1
+  - sequence: 8
+    description_zh: 最终帧：离心管仍位于目标孔位并由孔位稳定支撑
+    weight: 0.05
+  - sequence: 8
+    description_zh: 最终帧：离心机门保持关闭
+    weight: 0.05
+  - sequence: 8
+    description_zh: 最终帧：启动按钮达到触发位置
+    weight: 0.05
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_centrifuge_unload_shutdown
+  source_order: 11
+  source_row: 12
+  title_zh: 仪器交互/结束离心
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 按下离心机开盖按钮（按压） → 拿起离心管（拿起） → 放置离心管到离心板上（放置） → 按下关机按钮（按压）
+  atomic_skills_source_zh: 按压、拿起、放置
+  atomic_skills:
+  - press
+  - pick
+  - place
+  step_count: 4
+  core_assets_source_zh: 离心机、离心管、离心板/试管架、按钮
+  required_asset_roles:
+  - centrifuge
+  - centrifuge_tube
+  - tube_rack_or_plate
+  - lid_open_button
+  - shutdown_button
+  horizon: low
+  precision: middle
+  progress_score_source_zh: '时序1：
+
+    - 离心机开盖按钮达到触发位置（0.10）
+
+    时序2：
+
+    - 离心机门打开到可取样位置（0.15）
+
+    时序3：
+
+    - 离心管完全离开离心机目标孔位（0.20）
+
+    时序4：
+
+    - 离心管进入本任务指定的离心板或试管架目标孔位（0.15）
+
+    时序5：
+
+    - 离心管由目标孔位稳定支撑，且机械手已释放离心管（0.15）
+
+    时序6：
+
+    - 关机按钮达到触发位置（0.10）
+
+    时序7：
+
+    - 最终帧：离心管稳定处于指定目标孔位（0.10）
+
+    - 最终帧：离心机运行状态为关机（0.05）'
+  progress_score:
+  - sequence: 1
+    description_zh: 离心机开盖按钮达到触发位置
+    weight: 0.1
+  - sequence: 2
+    description_zh: 离心机门打开到可取样位置
+    weight: 0.15
+  - sequence: 3
+    description_zh: 离心管完全离开离心机目标孔位
+    weight: 0.2
+  - sequence: 4
+    description_zh: 离心管进入本任务指定的离心板或试管架目标孔位
+    weight: 0.15
+  - sequence: 5
+    description_zh: 离心管由目标孔位稳定支撑，且机械手已释放离心管
+    weight: 0.15
+  - sequence: 6
+    description_zh: 关机按钮达到触发位置
+    weight: 0.1
+  - sequence: 7
+    description_zh: 最终帧：离心管稳定处于指定目标孔位
+    weight: 0.1
+  - sequence: 7
+    description_zh: 最终帧：离心机运行状态为关机
+    weight: 0.05
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_oven_unload_shutdown
+  source_order: 12
+  source_row: 13
+  title_zh: 仪器交互/结束烘干
+  level: basic
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂抓取烘箱门把手，拉开烘箱门（抓，拉） → 操作臂拿起离心板（拿起） →辅助臂推关烘箱门（推） → 按下关机按钮（按压）
+  atomic_skills_source_zh: 拉、拿起、推、按压
+  atomic_skills:
+  - pull
+  - pick
+  - push
+  - press
+  step_count: 4
+  core_assets_source_zh: 烘箱、离心板/样品板、按钮/门
+  required_asset_roles:
+  - oven
+  - sample_plate
+  - oven_door
+  - shutdown_button
+  horizon: low
+  precision: middle
+  progress_score_source_zh: '时序1：
+
+    - 烘箱门被拉开并保持在可取样位置（0.2）
+
+    时序2：
+
+    - 离心板完全离开烘箱内部区域（0.3）
+
+    时序3：
+
+    - 烘箱门关闭到位（0.2）
+
+    时序4：
+
+    - 关机按钮达到触发位置（0.2）'
+  progress_score:
+  - sequence: 1
+    description_zh: 烘箱门被拉开并保持在可取样位置
+    weight: 0.2
+  - sequence: 2
+    description_zh: 离心板完全离开烘箱内部区域
+    weight: 0.3
+  - sequence: 3
+    description_zh: 烘箱门关闭到位
+    weight: 0.2
+  - sequence: 4
+    description_zh: 关机按钮达到触发位置
+    weight: 0.2
+  progress_score_total: 0.9
+  source_warnings:
+  - Progress Score 原始权重合计为 0.90；未补写缺失的 0.10。
+- task_id: scientific_workbench_funnel_pour_cylinder_to_flask
+  source_order: 13
+  source_row: 14
+  title_zh: 液体倾倒：基于漏斗，量筒-> 锥形瓶
+  level: long_horizon
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 操作臂拿起漏斗（拿起） → 辅助臂抓取试剂瓶（抓） → 漏斗对准瓶口（对准）→ 操作臂将漏斗插入容器口（插入）  → 拿起量筒（拿起） → 对准漏斗（对准） → 倾倒液体（倾倒） → 放回量筒（放置）
+  atomic_skills_source_zh: 抓、插入、放置、拿起、倾倒、对准
+  atomic_skills:
+  - grasp
+  - insert
+  - place
+  - pick
+  - pour
+  - align
+  step_count: 8
+  core_assets_source_zh: 漏斗、试剂瓶、烧杯
+  required_asset_roles:
+  - funnel
+  - graduated_cylinder
+  - erlenmeyer_flask
+  horizon: middle
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 漏斗离开初始放置位置（0.10）
+
+    时序2：
+
+    - 操作臂仍夹持漏斗，漏斗下端位于锥形瓶口上方，中心投影位于瓶口区域内，且插入轴与瓶口轴线对齐（0.10）
+
+    时序3：
+
+    - 漏斗达到本任务配置的插入深度，并与锥形瓶在规定时间内保持稳定的相对位姿（0.10）
+
+    时序4：
+
+    - 量筒离开初始放置位置（0.10）
+
+    时序5：
+
+    - 操作臂仍夹持量筒，量筒口位于漏斗入口上方，且量筒口中心投影位于漏斗入口区域内（0.10）
+
+    时序6：
+
+    - 最终帧：锥形瓶内包含量筒初始液体的比例超过50%（0.2）
+
+    - 最终帧：锥形瓶内包含量筒初始液体的比例达到本任务配置的全部转移阈值（0.2）
+
+    - 最终帧：量筒正立位于本任务配置的归还区域内，由承托面支撑（0.05）
+
+    - 最终帧：漏斗仍与锥形瓶口保持有效插入关系（0.05）'
+  progress_score:
+  - sequence: 1
+    description_zh: 漏斗离开初始放置位置
+    weight: 0.1
+  - sequence: 2
+    description_zh: 操作臂仍夹持漏斗，漏斗下端位于锥形瓶口上方，中心投影位于瓶口区域内，且插入轴与瓶口轴线对齐
+    weight: 0.1
+  - sequence: 3
+    description_zh: 漏斗达到本任务配置的插入深度，并与锥形瓶在规定时间内保持稳定的相对位姿
+    weight: 0.1
+  - sequence: 4
+    description_zh: 量筒离开初始放置位置
+    weight: 0.1
+  - sequence: 5
+    description_zh: 操作臂仍夹持量筒，量筒口位于漏斗入口上方，且量筒口中心投影位于漏斗入口区域内
+    weight: 0.1
+  - sequence: 6
+    description_zh: 最终帧：锥形瓶内包含量筒初始液体的比例超过50%
+    weight: 0.2
+  - sequence: 6
+    description_zh: 最终帧：锥形瓶内包含量筒初始液体的比例达到本任务配置的全部转移阈值
+    weight: 0.2
+  - sequence: 6
+    description_zh: 最终帧：量筒正立位于本任务配置的归还区域内，由承托面支撑
+    weight: 0.05
+  - sequence: 6
+    description_zh: 最终帧：漏斗仍与锥形瓶口保持有效插入关系
+    weight: 0.05
+  progress_score_total: 1.0
+  source_warnings:
+  - 标题和过程描述量筒经漏斗倒入锥形瓶，但核心资产列写为“漏斗、试剂瓶、烧杯”；原文保留，规范化角色按标题和评分条件处理。
+- task_id: scientific_workbench_funnel_pour_flask_to_centrifuge_tube
+  source_order: 14
+  source_row: 15
+  title_zh: 液体倾倒：锥形瓶-> 离心管
+  level: long_horizon
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 操作臂拿起漏斗（拿起） → 辅助臂拿起离心管（拿起）-> 操作臂对准离心管口（对准） →将漏斗插入离心管口（插入） → 操作臂抓锥形瓶（拿起） → 锥形瓶对准离心管（对准）→ 倾倒液体到离心管（倾倒） → 放回锥形瓶（放置）→ 抓离心管盖子（锥形瓶） → 扭转离心管盖子（扭转）
+  atomic_skills_source_zh: 拿起、插入、倾倒、扭转、对准
+  atomic_skills:
+  - pick
+  - insert
+  - pour
+  - twist
+  - align
+  step_count: 10
+  core_assets_source_zh: 漏斗、锥形瓶、离心管、离心管盖
+  required_asset_roles:
+  - funnel
+  - erlenmeyer_flask
+  - centrifuge_tube
+  - centrifuge_tube_cap
+  horizon: middle
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 漏斗离开初始放置位置（0.05）
+
+    时序2：
+
+    - 漏斗下端位于离心管口上方，且插入轴与管口轴线对齐（0.05）
+
+    时序3：
+
+    - 漏斗达到配置的插入深度，并与离心管保持有效插入关系（0.05）
+
+    时序4：
+
+    - 锥形瓶离开初始放置位置（0.05）
+
+    时序5：
+
+    - 锥形瓶瓶口位于漏斗入口上方，且瓶口中心投影位于漏斗入口区域内（0.10）
+
+    时序6：
+
+    - 液体由锥形瓶流经漏斗进入离心管（0.10）
+
+    时序7：
+
+    - 漏斗完全退出离心管口，且不再占用管口区域（0.05）
+
+    时序8：
+
+    - 离心管盖离开初始放置位置（0.05）
+
+    时序9：
+
+    - 离心管盖中心轴与离心管口中心轴对齐，盖子位于管口上方且尚未接触管口（0.05）
+
+    时序10：
+
+    - 离心管盖沿管口轴向下降，与离心管口完成初步套合（0.05）
+
+    时序11：
+
+    - 在套合状态下，离心管盖相对离心管沿旋紧方向发生转动（0.05）
+
+    时序12：
+
+    - 最终帧：离心管内包含锥形瓶初始液体的比例超过50%（0.10）
+
+    - 最终帧：离心管内包含锥形瓶初始液体的比例达到本任务配置的全部转移阈值（0.15）
+
+    - 最终帧：离心管盖处于旋紧关闭状态（0.05）
+
+    - 最终帧：锥形瓶正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放（0.05）'
+  progress_score:
+  - sequence: 1
+    description_zh: 漏斗离开初始放置位置
+    weight: 0.05
+  - sequence: 2
+    description_zh: 漏斗下端位于离心管口上方，且插入轴与管口轴线对齐
+    weight: 0.05
+  - sequence: 3
+    description_zh: 漏斗达到配置的插入深度，并与离心管保持有效插入关系
+    weight: 0.05
+  - sequence: 4
+    description_zh: 锥形瓶离开初始放置位置
+    weight: 0.05
+  - sequence: 5
+    description_zh: 锥形瓶瓶口位于漏斗入口上方，且瓶口中心投影位于漏斗入口区域内
+    weight: 0.1
+  - sequence: 6
+    description_zh: 液体由锥形瓶流经漏斗进入离心管
+    weight: 0.1
+  - sequence: 7
+    description_zh: 漏斗完全退出离心管口，且不再占用管口区域
+    weight: 0.05
+  - sequence: 8
+    description_zh: 离心管盖离开初始放置位置
+    weight: 0.05
+  - sequence: 9
+    description_zh: 离心管盖中心轴与离心管口中心轴对齐，盖子位于管口上方且尚未接触管口
+    weight: 0.05
+  - sequence: 10
+    description_zh: 离心管盖沿管口轴向下降，与离心管口完成初步套合
+    weight: 0.05
+  - sequence: 11
+    description_zh: 在套合状态下，离心管盖相对离心管沿旋紧方向发生转动
+    weight: 0.05
+  - sequence: 12
+    description_zh: 最终帧：离心管内包含锥形瓶初始液体的比例超过50%
+    weight: 0.1
+  - sequence: 12
+    description_zh: 最终帧：离心管内包含锥形瓶初始液体的比例达到本任务配置的全部转移阈值
+    weight: 0.15
+  - sequence: 12
+    description_zh: 最终帧：离心管盖处于旋紧关闭状态
+    weight: 0.05
+  - sequence: 12
+    description_zh: 最终帧：锥形瓶正立位于本任务配置的归还区域内，由承托面支撑且机械手已释放
+    weight: 0.05
+  progress_score_total: 1.0
+  source_warnings:
+  - 过程原文含“抓离心管盖子（锥形瓶）”，括号内容疑似笔误；原文保留，不在 Scenario Forge 静默改写。
+- task_id: scientific_workbench_solid_sample_weighing
+  source_order: 15
+  source_row: 16
+  title_zh: 固体样品称量
+  level: long_horizon
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 操作臂拿起量容器（拿起） → 放置称量容器（放置） → 辅助臂按下去皮按钮（按压） → 辅助臂固定试剂瓶并保持瓶口稳定（抓） → 操作臂抓药匙（拿起） → 操作臂伸入样品瓶舀出样品（舀） → 操作臂将样品放置到容器（放置） → 操作臂放回药匙（放置）
+  atomic_skills_source_zh: 拿起、放置、按压、抓、舀
+  atomic_skills:
+  - pick
+  - place
+  - press
+  - grasp
+  - scoop
+  step_count: 8
+  core_assets_source_zh: 天平、称量容器、药匙
+  required_asset_roles:
+  - balance
+  - weighing_container
+  - spatula
+  - reagent_bottle
+  - solid_sample
+  horizon: middle
+  precision: middle
+  progress_score_source_zh: '时序1：
+
+    - 称量容器完全位于天平称量区域内，由称量面支撑（0.10）
+
+    时序2：
+
+    - 去皮按钮达到触发位置（0.1）
+
+    时序3：
+
+    - 药匙离开初始放置位置（0.10）
+
+    时序4：
+
+    - 药匙取样端进入试剂瓶内的固体样品区域（0.10）
+
+    时序5：
+
+    - 药匙取样端已离开试剂瓶口，且药匙上承载固体样品（0.2）
+
+    时序6：
+
+    - 固体样品位于称量容器上/内（0.25）
+
+    时序7：
+
+    - 最终帧：药匙位于本任务配置的归还区域内，由承托面支撑（0.05）
+
+    - 最终帧：称量容器仍位于天平称量区域内（0.10）'
+  progress_score:
+  - sequence: 1
+    description_zh: 称量容器完全位于天平称量区域内，由称量面支撑
+    weight: 0.1
+  - sequence: 2
+    description_zh: 去皮按钮达到触发位置
+    weight: 0.1
+  - sequence: 3
+    description_zh: 药匙离开初始放置位置
+    weight: 0.1
+  - sequence: 4
+    description_zh: 药匙取样端进入试剂瓶内的固体样品区域
+    weight: 0.1
+  - sequence: 5
+    description_zh: 药匙取样端已离开试剂瓶口，且药匙上承载固体样品
+    weight: 0.2
+  - sequence: 6
+    description_zh: 固体样品位于称量容器上/内
+    weight: 0.25
+  - sequence: 7
+    description_zh: 最终帧：药匙位于本任务配置的归还区域内，由承托面支撑
+    weight: 0.05
+  - sequence: 7
+    description_zh: 最终帧：称量容器仍位于天平称量区域内
+    weight: 0.1
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_two_sample_mix
+  source_order: 16
+  source_row: 17
+  title_zh: '样品混合
+
+    （烧杯）'
+  level: long_horizon
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂固定目标容器（抓） → 操作臂抓取样品 A（拿起） → 对准目标容器口（对准） → 操作臂完成倾倒（倾倒） → 操作臂放回样品 A（放置） → 操作臂抓取样品 B（拿起） → 对准目标容器口（对准） → 操作臂完成第二次倾倒（倾倒） → 操作臂抓取目标容器（拿起） → 操作臂执行晃匀（摇晃）
+  atomic_skills_source_zh: 抓、拿起、放置、倾倒、摇晃、对准
+  atomic_skills:
+  - grasp
+  - pick
+  - place
+  - pour
+  - shake
+  - align
+  step_count: 10
+  core_assets_source_zh: 试剂瓶、烧杯/锥形瓶
+  required_asset_roles:
+  - sample_container_a
+  - sample_container_b
+  - target_vessel
+  horizon: high
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 样品A容器离开初始放置位置（0.05）
+
+    时序2：
+
+    - 样品A容器口位于目标容器口上方，且瓶口中心投影位于目标容器开口区域内（0.10）
+
+    时序3：
+
+    - 样品A进入目标容器，且达到容量阈值（0.15）
+
+    时序4：
+
+    - 样品A容器恢复正立并位于配置的归还区域内，由承托面支撑（0.05）
+
+    时序5：
+
+    - 样品B容器离开初始放置位置（0.05）
+
+    时序6：
+
+    - 样品B容器口位于目标容器口上方，且瓶口中心投影位于目标容器开口区域内（0.10）
+
+    时序7：
+
+    - 样品B进入目标容器，且达到容量阈值（0.15）
+
+    时序8：
+
+    - 样品B容器恢复正立并位于配置的归还区域内，由承托面支撑（0.05）
+
+    时序9：
+
+    - 目标容器离开初始放置位置（0.05）
+
+    时序10：
+
+    - 目标容器完成本任务配置的摇晃混合轨迹（0.2）
+
+    时序11：
+
+    - 最终帧：目标容器正立并稳定处于配置的归还区域内，由承托面支撑且机械手已释放（0.05）'
+  progress_score:
+  - sequence: 1
+    description_zh: 样品A容器离开初始放置位置
+    weight: 0.05
+  - sequence: 2
+    description_zh: 样品A容器口位于目标容器口上方，且瓶口中心投影位于目标容器开口区域内
+    weight: 0.1
+  - sequence: 3
+    description_zh: 样品A进入目标容器，且达到容量阈值
+    weight: 0.15
+  - sequence: 4
+    description_zh: 样品A容器恢复正立并位于配置的归还区域内，由承托面支撑
+    weight: 0.05
+  - sequence: 5
+    description_zh: 样品B容器离开初始放置位置
+    weight: 0.05
+  - sequence: 6
+    description_zh: 样品B容器口位于目标容器口上方，且瓶口中心投影位于目标容器开口区域内
+    weight: 0.1
+  - sequence: 7
+    description_zh: 样品B进入目标容器，且达到容量阈值
+    weight: 0.15
+  - sequence: 8
+    description_zh: 样品B容器恢复正立并位于配置的归还区域内，由承托面支撑
+    weight: 0.05
+  - sequence: 9
+    description_zh: 目标容器离开初始放置位置
+    weight: 0.05
+  - sequence: 10
+    description_zh: 目标容器完成本任务配置的摇晃混合轨迹
+    weight: 0.2
+  - sequence: 11
+    description_zh: 最终帧：目标容器正立并稳定处于配置的归还区域内，由承托面支撑且机械手已释放
+    weight: 0.05
+  progress_score_total: 1.0
+  source_warnings: []
+- task_id: scientific_workbench_solution_preparation
+  source_order: 17
+  source_row: 18
+  title_zh: 溶液配制
+  level: long_horizon
+  execution_mode: joint
+  execution_mode_source_zh: 联合
+  execution_notes_zh: []
+  process_overview_zh: 辅助臂固定烧杯或锥形瓶（抓） → 操作臂抓取药匙（拿起） → 操作臂舀起固体样品（舀） → 将固体药品放入容器（放置） → 操作臂抓取试剂瓶（拿起）→ 将试剂瓶对准目标容器（对准） → 向目标容器倾倒溶剂（倾倒） → 操作臂放回试剂瓶（放置） → 辅助臂抓取玻璃棒（拿起） →辅助臂执行搅拌轨迹（搅拌） → 放回玻璃棒（放回）
+  atomic_skills_source_zh: 抓、拿起、放置、倾倒、搅拌、舀
+  atomic_skills:
+  - grasp
+  - pick
+  - place
+  - pour
+  - stir
+  - scoop
+  step_count: 11
+  core_assets_source_zh: 烧杯/锥形瓶、药匙、试剂瓶、试剂瓶、玻璃棒
+  required_asset_roles:
+  - target_vessel
+  - spatula
+  - reagent_bottle
+  - glass_rod
+  - solid_sample
+  - solvent
+  horizon: high
+  precision: middle
+  progress_score_source_zh: '时序1：
+
+    - 药匙离开初始放置位置（0.05）
+
+    时序2：
+
+    - 药匙取样端进入试剂瓶内的固体样品区域（0.05）
+
+    时序3：
+
+    - 药匙取样端已离开试剂瓶口，且药匙上承载固体样品（0.05）
+
+    时序4：
+
+    - 固体样品进入目标容器（0.10）
+
+    时序5：
+
+    - 试剂瓶离开初始放置位置（0.05）
+
+    时序6：
+
+    - 试剂瓶瓶口位于目标容器口上方，且瓶口中心投影位于目标容器开口区域内（0.05）
+
+    时序7：
+
+    - 溶剂进入目标容器（0.10）
+
+    时序8：
+
+    - 试剂瓶恢复正立并位于配置的归还区域内，由承托面支撑（0.05）
+
+    时序9：
+
+    - 玻璃棒离开初始放置位置（0.05）
+
+    时序10：
+
+    - 玻璃棒工作端进入目标容器内部（0.05）
+
+    时序11：
+
+    - 玻璃棒工作端保持在目标容器内，并存在搅拌动作（0.05）
+
+    时序12：
+
+    - 最终帧：目标容器内固体样品质量与溶剂体积均达到本任务配置范围（0.1）
+
+    - 最终帧：目标容器内不存在超过配置阈值的未溶解固体样品（0.1）？
+
+    - 最终帧：试剂瓶位于本任务配置的归还区域内（0.05）
+
+    - 最终帧：玻璃棒位于本任务配置的归还区域内，由承托面支撑（0.05）
+
+    - 最终帧：目标容器正立且处于稳定状态（0.05）'
+  progress_score:
+  - sequence: 1
+    description_zh: 药匙离开初始放置位置
+    weight: 0.05
+  - sequence: 2
+    description_zh: 药匙取样端进入试剂瓶内的固体样品区域
+    weight: 0.05
+  - sequence: 3
+    description_zh: 药匙取样端已离开试剂瓶口，且药匙上承载固体样品
+    weight: 0.05
+  - sequence: 4
+    description_zh: 固体样品进入目标容器
+    weight: 0.1
+  - sequence: 5
+    description_zh: 试剂瓶离开初始放置位置
+    weight: 0.05
+  - sequence: 6
+    description_zh: 试剂瓶瓶口位于目标容器口上方，且瓶口中心投影位于目标容器开口区域内
+    weight: 0.05
+  - sequence: 7
+    description_zh: 溶剂进入目标容器
+    weight: 0.1
+  - sequence: 8
+    description_zh: 试剂瓶恢复正立并位于配置的归还区域内，由承托面支撑
+    weight: 0.05
+  - sequence: 9
+    description_zh: 玻璃棒离开初始放置位置
+    weight: 0.05
+  - sequence: 10
+    description_zh: 玻璃棒工作端进入目标容器内部
+    weight: 0.05
+  - sequence: 11
+    description_zh: 玻璃棒工作端保持在目标容器内，并存在搅拌动作
+    weight: 0.05
+  - sequence: 12
+    description_zh: 最终帧：目标容器内固体样品质量与溶剂体积均达到本任务配置范围
+    weight: 0.1
+  - sequence: 12
+    description_zh: 最终帧：目标容器内不存在超过配置阈值的未溶解固体样品？
+    weight: 0.1
+  - sequence: 12
+    description_zh: 最终帧：试剂瓶位于本任务配置的归还区域内
+    weight: 0.05
+  - sequence: 12
+    description_zh: 最终帧：玻璃棒位于本任务配置的归还区域内，由承托面支撑
+    weight: 0.05
+  - sequence: 12
+    description_zh: 最终帧：目标容器正立且处于稳定状态
+    weight: 0.05
+  progress_score_total: 1.0
+  source_warnings:
+  - 核心资产原文重复列出两次试剂瓶；原文保留，规范化角色只列一次。
+  - 一条 Progress Score 原文在权重“（0.1）”后带问号；权重按 0.1 记录，问号作为评分描述的不确定标记保留。
+- task_id: scientific_workbench_rotary_evaporation_cycle
+  source_order: 18
+  source_row: 19
+  title_zh: 旋转蒸发（简化装机/启动流程）
+  level: long_horizon
+  execution_mode: joint
+  execution_mode_source_zh: '联合
+
+    旋蒸仪仿真资产待确认'
+  execution_notes_zh:
+  - 旋蒸仪仿真资产待确认
+  process_overview_zh: 操作臂拿起圆底烧瓶（拿起） → 对准旋转蒸发仪接口（对准） → 安装圆底烧瓶（插入） → 辅助臂稳定烧瓶或仪器区域（抓） → 操作臂夹住升降机构（抓） → 操作臂推下降机构，使烧瓶下降至水浴区域（推） → 操作臂按下启动按钮（按压） → 操作臂转动旋钮（转动） → 操作臂按下停止按钮（按压） → 操作臂夹住升降机构（抓） → 操作臂拉起升降机构（拉） → 操作臂拿起圆底烧瓶（拿起） → 操作臂放回圆底烧瓶（放置）
+  atomic_skills_source_zh: 抓、放置、插入、推、按压、转动、拉、拿起、对准
+  atomic_skills:
+  - grasp
+  - place
+  - insert
+  - push
+  - press
+  - turn
+  - pull
+  - pick
+  - align
+  step_count: 13
+  core_assets_source_zh: 旋转蒸发仪、圆底烧瓶、水浴锅、按钮/旋钮
+  required_asset_roles:
+  - rotary_evaporator
+  - round_bottom_flask
+  - water_bath
+  - lift_mechanism
+  - start_button
+  - stop_button
+  - control_knob
+  horizon: high
+  precision: high
+  progress_score_source_zh: '时序1：
+
+    - 圆底烧瓶离开初始放置位置（0.05）
+
+    时序2：
+
+    - 圆底烧瓶瓶口与旋转蒸发仪接口完成对准（0.05）
+
+    时序3：
+
+    - 圆底烧瓶与旋转蒸发仪接口的安装连接已建立（0.10）
+
+    时序4：
+
+    - 升降机构下降，圆底烧瓶到达本任务配置的水浴工作区域（0.10）
+
+    时序5：
+
+    - 启动按钮达到触发位置（0.05）
+
+    时序6：
+
+    - 旋转蒸发仪由停止状态切换为运行状态（0.05）
+
+    时序7：
+
+    - 旋钮进入本任务配置的目标设置（0.05）
+
+    时序8：
+
+    - 停止按钮达到触发位置（0.05）
+
+    时序9：
+
+    - 旋转蒸发仪由运行状态切换为停止状态（0.05）
+
+    时序10：
+
+    - 升降机构升起，使圆底烧瓶完全离开水浴工作区域（0.10）
+
+    时序11：
+
+    - 圆底烧瓶与旋转蒸发仪接口的安装连接已解除（0.10）
+
+    时序12：
+
+    - 最终帧：圆底烧瓶稳定处于本任务配置的归还区域内，由承托面支撑且机械手已释放（0.10）
+
+    - 最终帧：旋转蒸发仪处于停止状态（0.05）
+
+    - 最终帧：升降机构位于本任务配置的安全位置（0.10）'
+  progress_score:
+  - sequence: 1
+    description_zh: 圆底烧瓶离开初始放置位置
+    weight: 0.05
+  - sequence: 2
+    description_zh: 圆底烧瓶瓶口与旋转蒸发仪接口完成对准
+    weight: 0.05
+  - sequence: 3
+    description_zh: 圆底烧瓶与旋转蒸发仪接口的安装连接已建立
+    weight: 0.1
+  - sequence: 4
+    description_zh: 升降机构下降，圆底烧瓶到达本任务配置的水浴工作区域
+    weight: 0.1
+  - sequence: 5
+    description_zh: 启动按钮达到触发位置
+    weight: 0.05
+  - sequence: 6
+    description_zh: 旋转蒸发仪由停止状态切换为运行状态
+    weight: 0.05
+  - sequence: 7
+    description_zh: 旋钮进入本任务配置的目标设置
+    weight: 0.05
+  - sequence: 8
+    description_zh: 停止按钮达到触发位置
+    weight: 0.05
+  - sequence: 9
+    description_zh: 旋转蒸发仪由运行状态切换为停止状态
+    weight: 0.05
+  - sequence: 10
+    description_zh: 升降机构升起，使圆底烧瓶完全离开水浴工作区域
+    weight: 0.1
+  - sequence: 11
+    description_zh: 圆底烧瓶与旋转蒸发仪接口的安装连接已解除
+    weight: 0.1
+  - sequence: 12
+    description_zh: 最终帧：圆底烧瓶稳定处于本任务配置的归还区域内，由承托面支撑且机械手已释放
+    weight: 0.1
+  - sequence: 12
+    description_zh: 最终帧：旋转蒸发仪处于停止状态
+    weight: 0.05
+  - sequence: 12
+    description_zh: 最终帧：升降机构位于本任务配置的安全位置
+    weight: 0.1
+  progress_score_total: 1.0
+  source_warnings: []

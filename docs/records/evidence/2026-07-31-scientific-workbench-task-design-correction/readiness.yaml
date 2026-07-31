@@ -1,0 +1,222 @@
+schema_version: task-readiness-snapshot/v0.1
+snapshot_id: scientific_workbench_feishu_task_design_20260731
+captured_at: "2026-07-31"
+catalog_source:
+  catalog_id: scientific_workbench_phase1
+  catalog_path: configs/task_catalogs/scientific_workbench_phase1.yaml
+  source_sha256: sha256:a189f79b7582e0273200c1c5a76adcef142b4287ea7214307b4633d026d84bd4
+assets:
+  - asset_role: glass_rod
+    candidate_identity: null
+    context_package_status: pending
+    interactive_affordance_status: blocked
+    pending_affordances: [stable_grasp, working_tip, stir_contact]
+    blockers:
+      - No source-bound glass-rod package has been selected and qualified.
+
+  - asset_role: beaker
+    candidate_identity: ConvertAsset:Beaker_01
+    context_package_status: passed
+    interactive_affordance_status: blocked
+    pending_affordances:
+      [stable_grasp, stable_support, opening_frame, interior_region, stir_contact]
+    blockers:
+      - Existing evidence covers visual and rigid-object admission, not the glass-rod insertion and stirring contact contract required by live task 7.
+
+  - asset_role: centrifuge
+    candidate_identity: ConvertAsset:centrifuge_identity_root_r9_mount_contract_v2
+    context_package_status: passed
+    interactive_affordance_status: blocked
+    pending_affordances:
+      [lid_open_button, setting_button, shutdown_button, observable_power_state]
+    blockers:
+      - The qualified r9 profile exposes lid, rotor, and start_button only.
+      - The package does not expose the live task 10 setting button or the live task 11 lid-open button, shutdown button, and off-state.
+
+  - asset_role: centrifuge_tube
+    candidate_identity: ConvertAsset:scientific_workbench_test_tube_dynamic_uniform_scale_k0365
+    context_package_status: passed
+    interactive_affordance_status: passed
+    pending_affordances: []
+    blockers: []
+
+  - asset_role: tube_rack_or_plate
+    candidate_identity: ConvertAsset:blenderkit.tube_rack.r4
+    context_package_status: passed
+    interactive_affordance_status: passed
+    pending_affordances: []
+    blockers: []
+
+  - asset_role: setting_button
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [press, reset, observable_state]
+    blockers:
+      - No setting-button joint or named interaction frame exists in the current centrifuge profile.
+
+  - asset_role: lid_open_button
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [press, reset, lid_open_transition]
+    blockers:
+      - No lid-open button joint or named interaction frame exists in the current centrifuge profile.
+
+  - asset_role: shutdown_button
+    candidate_identity: null
+    context_package_status: blocked
+    interactive_affordance_status: blocked
+    pending_affordances: [press, reset, observable_off_state]
+    blockers:
+      - No shutdown-button joint or observable off-state exists in the current centrifuge profile.
+
+tasks:
+  - task_id: scientific_workbench_pour_flask_to_cylinder
+    compile_status: pending
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - The live Task Design conflicts between liquid-transfer Progress Score criteria and its simulation note to ignore liquid.
+    next_action: Resolve the source metric interpretation, then bind the existing source-bound vessel candidates to the resulting predicate contract.
+
+  - task_id: scientific_workbench_pour_cylinder_to_beaker
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - A task-ready beaker package and the live liquid-versus-motion metric interpretation are unresolved.
+    next_action: Qualify the beaker and resolve the liquid metric source conflict.
+
+  - task_id: scientific_workbench_spatula_sample_transfer
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - Spatula, sample-carrying proxy, and receiving-container interaction contracts are unavailable.
+    next_action: Select source-bound candidates and define the sample-carrying evidence boundary.
+
+  - task_id: scientific_workbench_insert_stir_bar_and_closure
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - Stir-bar, vessel-opening, and non-threaded closure packages are unavailable.
+    next_action: Qualify the three source-bound interaction packages.
+
+  - task_id: scientific_workbench_remove_vessel_closure
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - A removable non-threaded closure and placement-rack contract are unavailable.
+    next_action: Select and qualify the closure, vessel, and rack candidates.
+
+  - task_id: scientific_workbench_place_vessel_on_stirrer
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - The stirrer support region has no task-ready source-bound package.
+    next_action: Qualify a stirrer support region and compatible vessel.
+
+  - task_id: scientific_workbench_glass_rod_stir
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - No source-bound glass rod with a stable grasp frame and working tip is qualified.
+      - The beaker lacks the opening, interior, and stir-contact contract required by live task 7.
+    next_action: Ask ConvertAsset to qualify the glass rod and beaker task-interaction contracts; do not generate a placeholder package.
+
+  - task_id: scientific_workbench_tighten_centrifuge_tube_cap
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - A source-bound tube-cap attach and twist-state contract is unavailable.
+    next_action: Qualify a non-threaded or observably twistable tube-cap assembly.
+
+  - task_id: scientific_workbench_oven_load_start
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - No oven package exposes qualified door, temperature-control, and start-button affordances.
+    next_action: Request an articulated oven handoff with all live task 9 controls.
+
+  - task_id: scientific_workbench_centrifuge_load_start
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - The existing prototype starts with an open lid and does not perform the live open-lid action.
+      - The current centrifuge profile has no setting button required by live task 10.
+    next_action: Qualify a real setting button and full lid-open/load/close sequence before remapping the prototype.
+
+  - task_id: scientific_workbench_centrifuge_unload_shutdown
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - The current centrifuge profile has no lid-open button.
+      - The current centrifuge profile has no shutdown button.
+      - The current centrifuge profile has no observable off-state.
+    next_action: Inspect the producer source for real controls; qualify them if present, otherwise return not_applicable and select a different centrifuge.
+
+  - task_id: scientific_workbench_oven_unload_shutdown
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - No oven package exposes qualified unload, close, shutdown, and off-state affordances.
+    next_action: Request an articulated oven handoff for live task 12.
+
+  - task_id: scientific_workbench_funnel_pour_cylinder_to_flask
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - Funnel insertion and source asset naming conflict in the live row remain unresolved.
+    next_action: Clarify the source row and qualify funnel, cylinder, and flask opening frames.
+
+  - task_id: scientific_workbench_funnel_pour_flask_to_centrifuge_tube
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - Funnel insertion, liquid-transfer interpretation, and tube-cap closure contracts are unavailable.
+    next_action: Qualify all four object interactions after the source typo is clarified.
+
+  - task_id: scientific_workbench_solid_sample_weighing
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - Balance, tare button, spatula, and solid-sample proxy contracts are unavailable.
+    next_action: Define and qualify the weighing and sample-transfer evidence boundary.
+
+  - task_id: scientific_workbench_two_sample_mix
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - Two source-container pour contracts and the target-vessel shake contract are unavailable.
+    next_action: Qualify the three vessel roles and motion predicates.
+
+  - task_id: scientific_workbench_solution_preparation
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - Solid sample, solvent, spatula, target vessel, and glass-rod interaction contracts are incomplete.
+    next_action: Decompose upstream asset qualification without weakening the live Progress Score.
+
+  - task_id: scientific_workbench_rotary_evaporation_cycle
+    compile_status: blocked
+    runtime_reset_status: not_run
+    oracle_status: not_run
+    blockers:
+      - The Task Design itself marks the rotary-evaporator simulation asset pending.
+      - No qualified lift, flask interface, buttons, knob, and observable run-state package exists.
+    next_action: Select an articulated rotary-evaporator source before authoring a ScenarioSpec.

@@ -1,7 +1,7 @@
 schema_version: scenario-spec/v0.5
-scenario_id: wetlab_bimanual_hold_rack_insert_tube
+scenario_id: scientific_workbench_prototype_bimanual_rack_insert
 domain: scientific_workbench
-task_family: bimanual_rack_insert
+task_family: prototype_bimanual_rack_insert
 instruction: 右臂抓住并稳定试管架；左臂拿起试管，对准指定空孔后向下插入，随后双臂退出。
 scene:
   asset_id: scientific_environment_code_room_example4_v1

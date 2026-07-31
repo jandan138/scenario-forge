@@ -3,18 +3,30 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
 import yaml
+
+from scripts import sync_scientific_workbench_task_catalog as sync
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CATALOG_PATH = (
-    REPO_ROOT / "configs/task_catalogs/scientific_workbench_phase1.yaml"
-)
+CATALOG_PATH = REPO_ROOT / "configs/task_catalogs/scientific_workbench_phase1.yaml"
+SNAPSHOT_PATH = REPO_ROOT / "configs/task_catalogs/sources/scientific_workbench_task_design.json"
 READINESS_PATH = (
     REPO_ROOT
-    / "docs/records/evidence/2026-07-14-scientific-workbench-task-catalog/readiness.yaml"
+    / "docs/records/evidence/2026-07-31-scientific-workbench-task-design-correction/readiness.yaml"
 )
-SOURCE_SHA256 = "3b7ebb2592a8dd612f37e0e934aa052284de772fd0e7fb80b7359afa57d82eca"
+MARKDOWN_PATH = REPO_ROOT / "docs/reference/scientific-workbench-task-design.md"
+HTML_PATH = REPO_ROOT / "docs/reference/scientific-workbench-task-design.html"
+LEGACY_CATALOG_PATH = (
+    REPO_ROOT
+    / "docs/records/evidence/2026-07-31-scientific-workbench-task-design-correction"
+    / "legacy_pdf_catalog_v0.1.yaml"
+)
+LIVE_TASK_ASSET_REQUEST_PATH = (
+    REPO_ROOT
+    / "docs/operations/scientific-workbench-live-task-7-10-11-asset-admission-request.yaml"
+)
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -23,112 +35,181 @@ def _load_yaml(path: Path) -> dict[str, object]:
     return data
 
 
-def test_task_catalog_and_readiness_schema_artifacts_exist_and_parse() -> None:
-    expected = {
-        "task-catalog-v0.1.schema.json": "task-catalog/v0.1",
-        "task-readiness-snapshot-v0.1.schema.json": "task-readiness-snapshot/v0.1",
-    }
-    for filename, schema_version in expected.items():
-        path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema" / filename
-        schema = json.loads(path.read_text(encoding="utf-8"))
-
-        assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
-        assert schema["type"] == "object"
-        assert schema["properties"]["schema_version"]["const"] == schema_version
+def _load_json(path: Path) -> dict[str, object]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert isinstance(data, dict)
+    return data
 
 
-def test_pdf_derived_catalog_preserves_the_declared_17_observed_19_ambiguity() -> None:
+def test_catalog_v02_schema_validates_the_feishu_derived_catalog() -> None:
+    schema_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/task-catalog-v0.2.schema.json"
+    schema = _load_json(schema_path)
     catalog = _load_yaml(CATALOG_PATH)
-    source = catalog["source"]
-    reconciliation = catalog["identity_reconciliation"]
-    tasks = catalog["tasks"]
 
-    assert catalog["schema_version"] == "task-catalog/v0.1"
+    assert schema["properties"]["schema_version"]["const"] == "task-catalog/v0.2"
+    Draft202012Validator(schema).validate(catalog)
+
+
+def test_snapshot_pins_the_live_task_design_sheet_and_all_18_rows() -> None:
+    snapshot = _load_json(SNAPSHOT_PATH)
+    source = snapshot["source"]
+    rows = snapshot["rows"]
+
+    assert snapshot["schema_version"] == "task-design-source-snapshot/v0.1"
     assert isinstance(source, dict)
-    assert source["sha256"] == f"sha256:{SOURCE_SHA256}"
-    assert isinstance(reconciliation, dict)
-    assert reconciliation == {
-        "status": "unresolved",
-        "declared_task_count": 17,
-        "observed_candidate_row_count": 19,
-        "note": "The detailed table contains 1..17 plus 8a and 8b.",
-    }
+    assert source["wiki_url"] == ("https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab")
+    assert source["document_id"] == "YdLVdAe7noWEWTxaUTxcKD28nUh"
+    assert source["document_revision"] == 1576
+    assert source["spreadsheet_revision"] == 564
+    assert source["sheet_id"] == "J1nUiN"
+    assert source["range"] == "A1:J19"
+    assert source["declared_task_count"] == 17
+    assert isinstance(rows, list)
+    assert len(rows) == 18
+
+
+def test_catalog_uses_stable_non_lab_identity_and_live_row_order() -> None:
+    catalog = _load_yaml(CATALOG_PATH)
+    tasks = catalog["tasks"]
+    source_consistency = catalog["source_consistency"]
+
+    assert catalog["schema_version"] == "task-catalog/v0.2"
     assert isinstance(tasks, list)
-    assert len(tasks) == 19
+    assert len(tasks) == 18
+    assert [task["source_order"] for task in tasks] == list(range(1, 19))
+    assert all(task["task_id"].startswith("scientific_workbench_") for task in tasks)
+    assert all("wetlab" not in task["task_id"] for task in tasks)
+    assert isinstance(source_consistency, dict)
+    assert source_consistency["status"] == "warning"
+    assert source_consistency["declared_task_count"] == 17
+    assert source_consistency["observed_task_count"] == 18
 
-    task_ids = [task["task_id"] for task in tasks]
-    source_ids = [task["source_id"] for task in tasks]
-    assert len(task_ids) == len(set(task_ids))
-    assert {"8", "8a", "8b"}.issubset(source_ids)
 
-
-def test_catalog_keeps_task_one_aligned_with_the_golden_bimanual_pour() -> None:
+def test_live_tasks_7_10_and_11_are_not_the_old_pdf_tasks() -> None:
     catalog = _load_yaml(CATALOG_PATH)
     tasks = catalog["tasks"]
     assert isinstance(tasks, list)
-    task = next(item for item in tasks if item["source_id"] == "1")
+    by_order = {task["source_order"]: task for task in tasks}
 
-    assert task["task_id"] == "wetlab_nonquant_pour_to_cylinder"
-    assert task["level"] == "basic"
-    assert task["step_count"] == 5
-    assert task["claim_scope"] == "kinematic_proxy"
-    assert task["required_asset_roles"] == [
-        "erlenmeyer_flask",
-        "graduated_cylinder",
+    task7 = by_order[7]
+    assert task7["task_id"] == "scientific_workbench_glass_rod_stir"
+    assert task7["title_zh"] == "玻璃棒搅拌"
+    assert task7["step_count"] == 5
+    assert task7["atomic_skills"] == [
+        "grasp",
+        "pick",
+        "insert",
+        "stir",
+        "place",
     ]
-    assert task["atomic_skills"] == ["grasp", "pick", "align", "pour", "place"]
+    assert task7["required_asset_roles"] == ["glass_rod", "beaker"]
+    assert task7["horizon"] == "middle"
+    assert task7["precision"] == "low"
+    assert task7["progress_score_total"] == 1.0
+    assert [item["weight"] for item in task7["progress_score"]] == [
+        0.15,
+        0.20,
+        0.35,
+        0.20,
+        0.10,
+    ]
+
+    task10 = by_order[10]
+    assert task10["task_id"] == "scientific_workbench_centrifuge_load_start"
+    assert task10["title_zh"] == "仪器交互/开启离心机"
+    assert "setting_button" in task10["required_asset_roles"]
+
+    task11 = by_order[11]
+    assert task11["task_id"] == ("scientific_workbench_centrifuge_unload_shutdown")
+    assert task11["title_zh"] == "仪器交互/结束离心"
+    assert task11["step_count"] == 4
+    assert task11["atomic_skills"] == ["press", "pick", "place"]
+    assert "lid_open_button" in task11["required_asset_roles"]
+    assert "shutdown_button" in task11["required_asset_roles"]
+    assert task11["progress_score_total"] == 1.0
 
 
-def test_readiness_snapshot_does_not_promote_unverified_tasks_or_interactions() -> None:
+def test_source_warnings_are_preserved_without_silent_repairs() -> None:
+    catalog = _load_yaml(CATALOG_PATH)
+    tasks = catalog["tasks"]
+    assert isinstance(tasks, list)
+    by_order = {task["source_order"]: task for task in tasks}
+
+    task12 = by_order[12]
+    assert task12["progress_score_total"] == 0.9
+    assert any("0.90" in warning for warning in task12["source_warnings"])
+
+    assert any("核心资产" in warning for warning in by_order[13]["source_warnings"])
+    assert any("锥形瓶" in warning for warning in by_order[14]["source_warnings"])
+    assert any("重复" in warning for warning in by_order[17]["source_warnings"])
+
+
+def test_checked_in_catalog_and_references_are_deterministic_from_snapshot() -> None:
+    snapshot = _load_json(SNAPSHOT_PATH)
+    catalog = sync.build_catalog(snapshot)
+
+    assert catalog == _load_yaml(CATALOG_PATH)
+    assert sync.render_markdown(catalog) == MARKDOWN_PATH.read_text(encoding="utf-8")
+    assert sync.render_html(catalog) == HTML_PATH.read_text(encoding="utf-8")
+
+
+def test_current_readiness_uses_only_the_live_catalog_task_ids() -> None:
     catalog = _load_yaml(CATALOG_PATH)
     readiness = _load_yaml(READINESS_PATH)
-    source = readiness["catalog_source"]
     task_statuses = readiness["tasks"]
-    asset_statuses = readiness["assets"]
-
-    assert readiness["schema_version"] == "task-readiness-snapshot/v0.1"
-    assert isinstance(source, dict)
-    assert source["source_sha256"] == f"sha256:{SOURCE_SHA256}"
     assert isinstance(task_statuses, list)
-    assert isinstance(asset_statuses, list)
-
     catalog_tasks = catalog["tasks"]
     assert isinstance(catalog_tasks, list)
+
+    assert readiness["schema_version"] == "task-readiness-snapshot/v0.1"
     assert {item["task_id"] for item in task_statuses} == {
         item["task_id"] for item in catalog_tasks
     }
-    required_roles = {
-        role
-        for item in catalog_tasks
-        for role in item["required_asset_roles"]
-    }
-    assert required_roles.issubset(
-        {item["asset_role"] for item in asset_statuses}
+
+    task7 = next(
+        item for item in task_statuses if item["task_id"] == "scientific_workbench_glass_rod_stir"
     )
+    assert task7["compile_status"] == "blocked"
+    assert "glass rod" in " ".join(task7["blockers"]).lower()
 
-    current = next(item for item in task_statuses if item["task_id"] == "wetlab_nonquant_pour_to_cylinder")
-    assert current["compile_status"] == "passed"
-    assert current["runtime_reset_status"] == "passed"
-    assert current["oracle_status"] == "blocked"
-    assert "wrapper" in " ".join(current["blockers"])
-    assert "opening-frame" in " ".join(current["blockers"])
-
-    assert all(
-        item["compile_status"] != "passed"
+    task11 = next(
+        item
         for item in task_statuses
-        if item["task_id"] != "wetlab_nonquant_pour_to_cylinder"
+        if item["task_id"] == "scientific_workbench_centrifuge_unload_shutdown"
     )
+    assert task11["compile_status"] == "blocked"
+    blockers = " ".join(task11["blockers"])
+    assert "lid-open" in blockers
+    assert "shutdown" in blockers
+    assert "off-state" in blockers
 
-    drying_box = next(item for item in asset_statuses if item["asset_role"] == "drying_box")
-    assert drying_box["context_package_status"] == "passed"
-    assert drying_box["interactive_affordance_status"] == "blocked"
-    assert "door" in drying_box["pending_affordances"]
-    assert "start_button" in drying_box["pending_affordances"]
-    assert "removes colliders" in " ".join(drying_box["blockers"])
 
-    flask = next(item for item in asset_statuses if item["asset_role"] == "erlenmeyer_flask")
-    cylinder = next(
-        item for item in asset_statuses if item["asset_role"] == "graduated_cylinder"
-    )
-    assert flask["interactive_affordance_status"] == "blocked"
-    assert cylinder["interactive_affordance_status"] == "blocked"
+def test_convertasset_request_uses_live_task_7_10_11_identities() -> None:
+    request = _load_yaml(LIVE_TASK_ASSET_REQUEST_PATH)
+    tasks = request["tasks"]
+    assert isinstance(tasks, list)
+
+    assert {(task["source_order"], task["task_id"], task["source_title_zh"]) for task in tasks} == {
+        (7, "scientific_workbench_glass_rod_stir", "玻璃棒搅拌"),
+        (
+            10,
+            "scientific_workbench_centrifuge_load_start",
+            "仪器交互/开启离心机",
+        ),
+        (
+            11,
+            "scientific_workbench_centrifuge_unload_shutdown",
+            "仪器交互/结束离心",
+        ),
+    }
+    assert request["ownership_boundary"]["consumer_specific_scale_or_physics_patch_forbidden"]
+
+
+def test_legacy_pdf_catalog_is_archived_but_not_active() -> None:
+    legacy = _load_yaml(LEGACY_CATALOG_PATH)
+    active = _load_yaml(CATALOG_PATH)
+
+    assert legacy["schema_version"] == "task-catalog/v0.1"
+    assert legacy["source"]["filename"] == "湿实验具身操作评测任务设计.pdf"
+    assert len(legacy["tasks"]) == 19
+    assert active["schema_version"] == "task-catalog/v0.2"

@@ -34,12 +34,14 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Intake an External Visual Environment](operations/intake-external-environment.md)
 - [Intake a Generated Blender Environment](operations/intake-generated-blender-environment.md)
 - [Generate External-Room Zone Variants](operations/generate-external-room-zone-variants.md)
-- [Generate Scientific Workbench Tube Tasks 7 and 11](operations/generate-scientific-workbench-tube-tasks.md)
-- [Tube-task ConvertAsset Admission Request](operations/scientific-workbench-tube-task-asset-admission-request.yaml)
+- [Generate Scientific Workbench Tube Prototypes](operations/generate-scientific-workbench-tube-prototypes.md)
+- [Live Tasks 7, 10, and 11 ConvertAsset Request](operations/scientific-workbench-live-task-7-10-11-asset-admission-request.yaml)
+- [Historical Tube-prototype ConvertAsset Request](operations/scientific-workbench-tube-prototype-asset-admission-request.yaml)
 
 ## Reference
 
-- [Wetlab Embodied Manipulation Task Design (external, self-contained HTML)](reference/wetlab-task-design.html) — upstream Feishu requirements doc; refresh via `python scripts/extract_wetlab_task_design_doc.py`
+- [Scientific Workbench Task Design](reference/scientific-workbench-task-design.md) — generated from the pinned Feishu `1. Task Design` snapshot
+- [Scientific Workbench Task Design (self-contained HTML)](reference/scientific-workbench-task-design.html) — refresh via `python scripts/sync_scientific_workbench_task_catalog.py --write`
 
 ## Records
 
@@ -62,4 +64,5 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-29 Scientific Workbench Tube-task Foundation](records/2026-07-29-scientific-workbench-tube-task-foundation.md)
 - [2026-07-30 Code-as-Room Generated Environment Integration](records/2026-07-30-code-as-room-generated-environment-integration.md)
 - [2026-07-30 Centrifuge Proxy Parent-Local Requalification](records/2026-07-30-centrifuge-proxy-parent-local-requalification.md)
+- [2026-07-31 Task Design Authority Correction](records/2026-07-31-scientific-workbench-task-design-correction.md)
 - [2026-07-06 Phase 13 S2D-12 Soap-to-Dish Static Candidate Evidence](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/generated_package_summary.yaml)

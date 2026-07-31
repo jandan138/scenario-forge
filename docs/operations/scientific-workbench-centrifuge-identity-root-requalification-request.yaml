@@ -1,7 +1,9 @@
 request_id: scientific_workbench_centrifuge_identity_root_r8_20260730
+status: historical_request_satisfied
 consumer: scenario-forge
 consumer_task:
-  scenario_id: wetlab_centrifuge_tube_load_start_no_wait
+  scenario_id: scientific_workbench_prototype_centrifuge_load_start
+  canonical_feishu_task: false
   usage: articulated_object
   background: scientific_environment_code_room_example4_v1
   workspace_profile: center_open_floor

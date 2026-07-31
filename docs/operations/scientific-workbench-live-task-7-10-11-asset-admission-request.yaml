@@ -1,0 +1,127 @@
+schema_version: scenario-forge-convertasset-live-task-input-request/v0.1
+request_id: scientific_workbench_live_tasks_7_10_11_20260731
+consumer:
+  project: scenario-forge
+  runtime_profile: isaac41
+  source_authority:
+    uri: https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab
+    section: 1. Task Design
+    document_revision: 1576
+    spreadsheet_token: A6cPsrjWbhLS68tgNmzcqdf7nqd
+    spreadsheet_revision: 564
+    range: J1nUiN!A1:J19
+    content_sha256: sha256:a189f79b7582e0273200c1c5a76adcef142b4287ea7214307b4633d026d84bd4
+
+ownership_boundary:
+  original_source_files_must_remain_unchanged: true
+  source_bound_package_required: true
+  package_local_dependency_closure_required: true
+  consumer_specific_scale_or_physics_patch_forbidden: true
+  scenario_forge_does_not_own_usd_mdl_mesh_conversion: true
+  missing_real_affordance_result: not_applicable
+  fabricated_button_or_hidden_state_proxy_forbidden: true
+
+tasks:
+  - source_order: 7
+    task_id: scientific_workbench_glass_rod_stir
+    source_title_zh: 玻璃棒搅拌
+    required_assets:
+      glass_rod:
+        usage: rigid_object
+        required_named_frames: [support, grasp, working_tip]
+        required_gates:
+          - stable_support
+          - collision_safe_grasp_lift_hold
+          - working_tip_geometry_matches_collision
+      beaker:
+        usage: rigid_object
+        required_named_frames: [support, grasp, opening_center, interior_stir_region]
+        required_regions: [opening, interior_stir, stable_support]
+        required_gates:
+          - stable_support
+          - collision_safe_grasp_hold
+          - glass_rod_tip_crosses_opening
+          - glass_rod_tip_follows_stir_path_inside_without_wall_penetration
+    required_cross_asset_qualification:
+      glass_rod_and_beaker:
+        - insert_working_tip_through_opening
+        - execute_representative_stir_path_while_tip_remains_inside
+        - return_glass_rod_to_stable_support
+
+  - source_order: 10
+    task_id: scientific_workbench_centrifuge_load_start
+    source_title_zh: 仪器交互/开启离心机
+    existing_candidate:
+      package: centrifuge_identity_root_r9_mount_contract_v2
+      status: partial_input_only
+      already_qualified:
+        [lid, rotor, start_button, tube_socket, fixed_base_mounting]
+      missing: [setting_button]
+    required_additional_affordances:
+      setting_button:
+        required_if_present_in_source: true
+        required_contract:
+          - semantic_joint_or_observable_press_state
+          - released_and_pressed_ranges
+          - contact_safe_press_frame
+          - press_and_reset_runtime_gate
+    required_sequence_qualification:
+      - lid can begin closed, open to the load position, and remain open
+      - qualified test tube reaches the target rotor socket
+      - lid closes after insertion without collision
+      - setting button reaches its trigger state
+      - start button reaches its trigger state
+
+  - source_order: 11
+    task_id: scientific_workbench_centrifuge_unload_shutdown
+    source_title_zh: 仪器交互/结束离心
+    existing_candidate:
+      package: centrifuge_identity_root_r9_mount_contract_v2
+      status: partial_input_only
+      already_qualified: [lid, rotor, start_button, tube_socket]
+      missing: [lid_open_button, shutdown_button, observable_power_state]
+    required_additional_affordances:
+      lid_open_button:
+        required_if_present_in_source: true
+        required_contract:
+          - semantic_joint_or_observable_press_state
+          - contact_safe_press_frame
+          - button_press_causes_or_enables_lid_open_transition
+      shutdown_button:
+        required_if_present_in_source: true
+        required_contract:
+          - semantic_joint_or_observable_press_state
+          - contact_safe_press_frame
+          - press_and_reset_runtime_gate
+      power_state:
+        required_states: [on, off]
+        required_observation: package_declared_runtime_state
+        shutdown_transition: on_to_off
+    required_sequence_qualification:
+      - task can initialize with lid closed and a tube in the qualified socket
+      - lid-open button reaches its trigger state
+      - lid reaches the open sample-removal position
+      - qualified tube can leave the rotor socket
+      - shutdown button reaches its trigger state
+      - final observable power state is off
+
+shared_counterparts:
+  test_tube:
+    accepted_package: scientific_workbench_test_tube_dynamic_uniform_scale_k0365_scenario-forge_isaac41
+  tube_rack:
+    accepted_package: blenderkit.tube_rack.r4_scenario-forge_isaac41
+
+handoff:
+  each_profiled_asset_must_include:
+    - package/asset.usd
+    - package/evidence/manifest.json
+    - hash-bound interaction or articulation profile
+    - package-local Isaac Sim 4.1 runtime qualification report
+  return_one_of:
+    - pass_with_package_and_evidence
+    - not_applicable_with_source_geometry_evidence
+  claims_not_requested:
+    - robot_policy_success
+    - full_task_success
+    - benchmark_score
+    - real_world_mass_or_inertia_calibration

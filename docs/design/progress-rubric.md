@@ -95,6 +95,6 @@ only and must always be reported as a labelled secondary copy, never silently.
 ## Source-of-truth and update policy
 
 The rubric mirrors the upstream task-design Progress Score (see
-[the reference copy](../reference/wetlab-task-design.html)). Weights are
+[the generated reference copy](../reference/scientific-workbench-task-design.html)). Weights are
 re-aligned in batches, not per upstream edit; every item carries a pinned
 `source_ref` (document revision, sheet revision, extraction date).

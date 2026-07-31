@@ -6,18 +6,30 @@ about the assets and runtime available on one date.
 
 ## Catalog contract
 
-`task-catalog/v0.1` records stable task IDs, source IDs, task level, execution mode,
-step count, atomic skills, required asset roles, claim scope, and intended success
-evidence. It does not contain local USD paths, ConvertAsset manifests, simulator
-objects, rollout code, or a claim that any task is executable.
+`task-catalog/v0.2` records stable task IDs, exact source fields, normalized
+execution mode, step count, atomic skills, required asset roles, and every
+Progress Score criterion. It also binds the catalog to the source document,
+embedded sheet, revisions, range, and content hash. It does not contain local USD
+paths, ConvertAsset manifests, simulator objects, rollout code, or a claim that
+any task is executable.
 
-The current scientific-workbench catalog lives at
-`configs/task_catalogs/scientific_workbench_phase1.yaml`. It is derived from the
-detailed table in the 2026-07-14 task-design handoff. The source document declares
-17 first-phase tasks, while the detailed table contains 19 candidate rows: `1..17`
-plus `8a` and `8b`. The catalog preserves all source IDs and records the discrepancy
-as unresolved. A later product decision may mark variants or replacements, but must
-not silently renumber or delete rows.
+The product authority is the `1. Task Design` section of the Feishu wiki and its
+embedded task sheet. The checked-in source snapshot lives at
+`configs/task_catalogs/sources/scientific_workbench_task_design.json`; the
+generated catalog lives at
+`configs/task_catalogs/scientific_workbench_phase1.yaml`. The current pinned
+source contains 18 table rows. The document prose still says 17 tasks, so the
+catalog records that inconsistency instead of silently deleting a row.
+
+Refresh or check the snapshot explicitly:
+
+```bash
+python scripts/sync_scientific_workbench_task_catalog.py --check
+python scripts/sync_scientific_workbench_task_catalog.py --write
+```
+
+These commands use the user's Feishu authorization. Normal compilation and CI
+consume the pinned snapshot and remain offline.
 
 The catalog is not a ScenarioSpec and is not directly compiled into a scenario
 package. A selected task still needs an explicit ScenarioSpec, asset-source
@@ -52,9 +64,10 @@ collision-active device, and it does not prove that a door or start button can b
 manipulated and observed. Dynamic asset repair and interaction-ready packaging
 remain upstream asset-owner responsibilities.
 
-Snapshots are dated records, not mutable project-management truth. The current
-snapshot lives under
-`docs/records/evidence/2026-07-14-scientific-workbench-task-catalog/`.
+Snapshots are dated evidence, not mutable project-management truth. The current
+readiness snapshot lives at
+`docs/records/evidence/2026-07-31-scientific-workbench-task-design-correction/readiness.yaml`.
+The former PDF-derived v0.1 catalog remains beside it as archival evidence only.
 
 ## Selection rule
 

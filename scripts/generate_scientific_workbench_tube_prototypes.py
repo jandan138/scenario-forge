@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the scientific-workbench centrifuge and tube-rack task packages."""
+"""Compile non-canonical centrifuge and tube-rack integration prototypes."""
 
 from __future__ import annotations
 
@@ -28,17 +28,17 @@ from scenario_forge.generation.source_resolver import (
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CENTRIFUGE_SPEC = (
-    REPO_ROOT
-    / "examples/scientific_workbench/centrifuge_load_start/scenario.yaml"
+    REPO_ROOT / "examples/scientific_workbench/prototypes/centrifuge_load_start/scenario.yaml"
 )
 RACK_INSERT_SPEC = (
-    REPO_ROOT
-    / "examples/scientific_workbench/bimanual_rack_insert/scenario.yaml"
+    REPO_ROOT / "examples/scientific_workbench/prototypes/bimanual_rack_insert/scenario.yaml"
 )
 DEFAULT_RENDERER = REPO_ROOT / "scripts/ebench/render_genmanip_initial_preview.py"
-TASK_SPECS = {
-    "7": CENTRIFUGE_SPEC,
-    "11": RACK_INSERT_SPEC,
+CENTRIFUGE_PROTOTYPE = "centrifuge_load_start"
+RACK_INSERT_PROTOTYPE = "bimanual_rack_insert"
+PROTOTYPE_SPECS = {
+    CENTRIFUGE_PROTOTYPE: CENTRIFUGE_SPEC,
+    RACK_INSERT_PROTOTYPE: RACK_INSERT_SPEC,
 }
 EBENCH_TABLETOP_Z_M = 0.7727606155
 TABLETOP_CLEARANCE_M = 0.01
@@ -69,9 +69,7 @@ def _source_contract(
 ) -> dict[str, Any]:
     source = sources.get(asset_id)
     if source is None or source.upstream_package is None:
-        raise ValueError(
-            f"asset {asset_id!r} requires a ConvertAsset upstream package"
-        )
+        raise ValueError(f"asset {asset_id!r} requires a ConvertAsset upstream package")
     return _mapping(
         source.upstream_package.metadata.get(contract_name),
         f"asset {asset_id}.{contract_name}",
@@ -102,23 +100,17 @@ def _place_task_object_on_tabletop(
             for value in row
         )
     ):
-        raise ValueError(
-            f"asset {asset_id} requires a finite 4x4 support-frame matrix"
-        )
+        raise ValueError(f"asset {asset_id} requires a finite 4x4 support-frame matrix")
     support_source_sha256 = geometry.get("support_frame_source_sha256")
     if (
         not isinstance(support_source_sha256, str)
         or _SHA256_HEX.fullmatch(support_source_sha256) is None
     ):
-        raise ValueError(
-            f"asset {asset_id} support frame must be hash-bound"
-        )
+        raise ValueError(f"asset {asset_id} support frame must be hash-bound")
     pose = _mapping(task_object.get("pose"), f"task object {task_object['id']}.pose")
     scale = pose.get("scale_xyz", [1.0, 1.0, 1.0])
     if scale != [1.0, 1.0, 1.0]:
-        raise ValueError(
-            f"task object {task_object['id']} must use identity task-level scale"
-        )
+        raise ValueError(f"task object {task_object['id']} must use identity task-level scale")
     xyz = pose.get("xyz")
     if (
         not isinstance(xyz, list)
@@ -143,9 +135,8 @@ def _place_task_object_on_tabletop(
             mounting,
             asset_id=asset_id,
         )
-        if (
-            not math.isclose(quaternion_values[1], 0.0, abs_tol=1e-6)
-            or not math.isclose(quaternion_values[2], 0.0, abs_tol=1e-6)
+        if not math.isclose(quaternion_values[1], 0.0, abs_tol=1e-6) or not math.isclose(
+            quaternion_values[2], 0.0, abs_tol=1e-6
         ):
             raise ValueError(
                 f"task object {task_object['id']}.pose.wxyz must be a Z yaw "
@@ -174,9 +165,7 @@ def _place_task_object_on_tabletop(
     pose["xyz"] = [
         float(xyz[0]),
         float(xyz[1]),
-        EBENCH_TABLETOP_Z_M
-        + TABLETOP_CLEARANCE_M
-        - support_world_offset[2],
+        EBENCH_TABLETOP_Z_M + TABLETOP_CLEARANCE_M - support_world_offset[2],
     ]
 
 
@@ -191,9 +180,7 @@ def _fixed_base_mount_pose(
         or mounting.get("status") != "pass"
         or mounting.get("motion_mode") != "fixed_base"
     ):
-        raise ValueError(
-            f"asset {asset_id} requires a passed fixed-base mounting contract"
-        )
+        raise ValueError(f"asset {asset_id} requires a passed fixed-base mounting contract")
     for field_name in (
         "source_sha256",
         "profile_sha256",
@@ -201,9 +188,7 @@ def _fixed_base_mount_pose(
     ):
         value = mounting.get(field_name)
         if not isinstance(value, str) or _SHA256_HEX.fullmatch(value) is None:
-            raise ValueError(
-                f"asset {asset_id} mounting {field_name} must be hash-bound"
-            )
+            raise ValueError(f"asset {asset_id} mounting {field_name} must be hash-bound")
     semantics = _mapping(
         mounting.get("coordinate_semantics"),
         f"asset {asset_id}.mounting.coordinate_semantics",
@@ -213,17 +198,10 @@ def _fixed_base_mount_pose(
         "linear_units": "meter",
         "quaternion_order": "wxyz",
         "support_frame": "runtime_articulation_root_pose_local",
-        "mount_pose": (
-            "support_plane_to_runtime_articulation_root_pose_world_axes_"
-            "at_yaw_zero"
-        ),
-        "qualified_extents": (
-            "world_axis_aligned_at_mount_pose_after_joint_reset"
-        ),
+        "mount_pose": ("support_plane_to_runtime_articulation_root_pose_world_axes_at_yaw_zero"),
+        "qualified_extents": ("world_axis_aligned_at_mount_pose_after_joint_reset"),
     }:
-        raise ValueError(
-            f"asset {asset_id} mounting coordinate semantics are unsupported"
-        )
+        raise ValueError(f"asset {asset_id} mounting coordinate semantics are unsupported")
     pose = _mapping(
         mounting.get("support_plane_to_root_mount_pose"),
         f"asset {asset_id}.mounting.support_plane_to_root_mount_pose",
@@ -249,8 +227,7 @@ def _fixed_base_mount_pose(
         )
     ):
         raise ValueError(
-            f"asset {asset_id} mounting pose must contain finite translation "
-            "and rotation"
+            f"asset {asset_id} mounting pose must contain finite translation and rotation"
         )
     rotation_values = [float(value) for value in rotation]
     if not math.isclose(
@@ -270,33 +247,23 @@ def _require_task_qualification(
 ) -> None:
     source = sources.get(asset_id)
     if source is None or source.upstream_package is None:
-        raise ValueError(
-            f"asset {asset_id!r} requires a ConvertAsset upstream package"
-        )
+        raise ValueError(f"asset {asset_id!r} requires a ConvertAsset upstream package")
     value = source.upstream_package.metadata.get("task_qualifications")
     if not isinstance(value, list):
-        raise ValueError(
-            f"asset {asset_id} requires task qualification {qualification_id}"
-        )
+        raise ValueError(f"asset {asset_id} requires task qualification {qualification_id}")
     matches = [
         item
         for item in value
-        if isinstance(item, Mapping)
-        and item.get("qualification_id") == qualification_id
+        if isinstance(item, Mapping) and item.get("qualification_id") == qualification_id
     ]
     if len(matches) != 1:
         raise ValueError(
-            f"asset {asset_id} requires exactly one task qualification "
-            f"{qualification_id}"
+            f"asset {asset_id} requires exactly one task qualification {qualification_id}"
         )
     qualification = matches[0]
     report_path = qualification.get("report_path")
     report_sha256 = qualification.get("report_sha256")
-    normalized_report_path = (
-        PurePosixPath(report_path)
-        if isinstance(report_path, str)
-        else None
-    )
+    normalized_report_path = PurePosixPath(report_path) if isinstance(report_path, str) else None
     if (
         qualification.get("status") != "pass"
         or not isinstance(report_path, str)
@@ -308,8 +275,7 @@ def _require_task_qualification(
         or _SHA256_HEX.fullmatch(report_sha256) is None
     ):
         raise ValueError(
-            f"asset {asset_id} task qualification {qualification_id} "
-            "must be a hash-bound pass"
+            f"asset {asset_id} task qualification {qualification_id} must be a hash-bound pass"
         )
 
 
@@ -410,14 +376,14 @@ def _set_relative_target_range(
 
 
 def _materialize_authoritative_task_geometry(
-    task_id: str,
+    prototype_id: str,
     raw_spec: dict[str, Any],
     sources: Mapping[str, LocalUSDAssetSource],
 ) -> dict[str, Any]:
     """Replace readable template geometry with producer-qualified named frames."""
 
     spec = deepcopy(raw_spec)
-    if task_id == "7":
+    if prototype_id == CENTRIFUGE_PROTOTYPE:
         centrifuge = _object_by_id(spec, "centrifuge")
         test_tube = _object_by_id(spec, "test_tube")
         _place_task_object_on_tabletop(centrifuge, sources)
@@ -488,8 +454,9 @@ def _materialize_authoritative_task_geometry(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Compile task 7 (centrifuge load/start), task 11 "
-            "(bimanual rack insert), or both."
+            "Compile the non-canonical centrifuge load/start and bimanual "
+            "rack-insert integration prototypes. These are not canonical "
+            "Feishu Task 7, Task 10, or Task 11 packages."
         )
     )
     parser.add_argument(
@@ -499,10 +466,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Scenario source bindings for the admitted background and task assets.",
     )
     parser.add_argument(
-        "--task",
-        choices=("7", "11", "all"),
+        "--prototype",
+        choices=(*PROTOTYPE_SPECS, "all"),
         default="all",
-        help="Task package to generate; defaults to both.",
+        help="Prototype package to generate; defaults to both.",
     )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument(
@@ -534,15 +501,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise SystemExit("--genmanip-root is required unless --static-only is used")
 
     sources = resolve_scenario_source_bindings(args.bindings)
-    selected = tuple(TASK_SPECS) if args.task == "all" else (args.task,)
+    selected = tuple(PROTOTYPE_SPECS) if args.prototype == "all" else (args.prototype,)
     results: list[tuple[str, Path, Path]] = []
-    for task_id in selected:
-        spec_path = TASK_SPECS[task_id]
+    for prototype_id in selected:
+        spec_path = PROTOTYPE_SPECS[prototype_id]
         raw_spec = yaml.safe_load(spec_path.read_text(encoding="utf-8"))
         if not isinstance(raw_spec, dict):
             raise ValueError(f"Scenario spec must be a mapping: {spec_path}")
         materialized_spec = _materialize_authoritative_task_geometry(
-            task_id,
+            prototype_id,
             raw_spec,
             sources,
         )

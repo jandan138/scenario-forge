@@ -1,11 +1,18 @@
-schema_version: scenario-forge-convertasset-tube-task-admission-request/v0.2
-request_id: scientific_workbench_tube_tasks_7_11_20260729
+schema_version: scenario-forge-convertasset-tube-prototype-admission-request/v0.2
+request_id: scientific_workbench_tube_prototypes_20260729
+status: historical_request_satisfied
+catalog_identity:
+  canonical_feishu_task: false
+  correction_date: "2026-07-31"
+  note: >-
+    This request qualified shared assets for two integration prototypes. It did
+    not define Feishu Task 7 or Task 11.
 consumer:
   project: scenario-forge
   runtime_profile: isaac41
-  task_ids:
-    - wetlab_centrifuge_tube_load_start_no_wait
-    - wetlab_bimanual_hold_rack_insert_tube
+  prototype_ids:
+    - scientific_workbench_prototype_centrifuge_load_start
+    - scientific_workbench_prototype_bimanual_rack_insert
   license: LicenseRef-Internal-Restricted
   redistributable: false
 
@@ -311,7 +318,8 @@ handoff:
     rack_usage: rigid_object
   claims_not_requested:
     - robot policy success
-    - full task 7 success
-    - full task 11 success
+    - live Feishu task 7 success
+    - live Feishu task 10 success
+    - live Feishu task 11 success
     - benchmark score
     - measured real-world mass or inertia parity
