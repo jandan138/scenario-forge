@@ -22,7 +22,7 @@ Do not rename either asset to unblock row 6.
 PYTHONPATH=src python scripts/generate_scientific_workbench_layout_prototypes.py \
   --bindings configs/source_bindings/scientific_workbench_layout_prototypes_20260731.yaml \
   --task all \
-  --out outputs/scientific_workbench_layout_validated_prototypes_20260731
+  --out outputs/scientific_workbench_layout_validated_prototypes_v3_20260801
 ```
 
 Produce the final two-layer 1080p visual evidence:
@@ -33,7 +33,7 @@ export CUROBO_SRC=/cpfs/user/zhuzihou/dev/scenario-forge-runtime-evidence/scient
 PYTHONPATH="src:$CUROBO_SRC" python scripts/generate_scientific_workbench_layout_prototypes.py \
   --bindings configs/source_bindings/scientific_workbench_layout_prototypes_20260731.yaml \
   --task all \
-  --out outputs/scientific_workbench_layout_validated_prototypes_20260731 \
+  --out outputs/scientific_workbench_layout_validated_prototypes_v3_20260801 \
   --render \
   --isaac-python /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python \
   --render-runtime-preview \
@@ -48,6 +48,7 @@ completed package has:
   scene/main.usda
   task/task.yaml
   metrics/metrics.yaml
+  evidence/tabletop_placement_policy.yaml
   adapters/ebench/genmanip/
   adapters/ebench/genmanip/evidence/authored_key_states/
 ```
@@ -60,6 +61,14 @@ provenance.
 ## Evidence and claim boundary
 
 The output has two intentionally separate evidence layers.
+
+Before eBench export, the generator also writes
+`evidence/tabletop_placement_policy.yaml`. It verifies each initially tabletop-
+supported task object's composed visual footprint is at least 10 cm inside the
+declared tabletop edge and lies in the half facing Lift2. A written
+`tabletop_placement_exception` can record a genuine far-side task requirement,
+but can never waive the table-edge margin. See [Scientific Workbench Tabletop
+Placement](../design/scientific-workbench-tabletop-placement.md).
 
 - `evidence/authored_key_states/` contains 1920×1080 static storyboard frames:
   a package-relative `scene.usda`, authored/left/right cameras,

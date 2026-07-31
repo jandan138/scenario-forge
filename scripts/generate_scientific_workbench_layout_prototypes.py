@@ -19,6 +19,9 @@ from scenario_forge.adapters.ebench.preview import (
     run_genmanip_initial_preview,
     write_genmanip_preview_request,
 )
+from scenario_forge.adapters.ebench.tabletop_placement import (
+    validate_scientific_workbench_tabletop_placement,
+)
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from scenario_forge.generation.source_resolver import resolve_scenario_source_bindings
@@ -55,7 +58,7 @@ KEY_STATES: dict[str, tuple[dict[str, Any], ...]] = {
             "description_zh": "量筒静态摆到烧杯上方的对准示意",
             "poses": {
                 "/World/graduated_cylinder_03": {
-                    "xyz": [0.30, 0.05304, 1.00],
+                    "xyz": [0.10, 0.05304, 1.00],
                     "wxyz": [0.8870108332, 0.4617486132, 0.0, 0.0],
                 }
             },
@@ -69,7 +72,7 @@ KEY_STATES: dict[str, tuple[dict[str, Any], ...]] = {
             "description_zh": "漏斗出口静态插入锥形瓶口的示意",
             "poses": {
                 "/World/Funnel": {
-                    "xyz": [0.30, -0.20, 0.965],
+                    "xyz": [0.10, -0.20, 0.965],
                     "wxyz": [1.0, 0.0, 0.0, 0.0],
                 }
             },
@@ -79,11 +82,11 @@ KEY_STATES: dict[str, tuple[dict[str, Any], ...]] = {
             "description_zh": "量筒静态摆到已插入漏斗上方的示意",
             "poses": {
                 "/World/Funnel": {
-                    "xyz": [0.30, -0.20, 0.965],
+                    "xyz": [0.10, -0.20, 0.965],
                     "wxyz": [1.0, 0.0, 0.0, 0.0],
                 },
                 "/World/graduated_cylinder_03": {
-                    "xyz": [0.30, 0.02304, 1.18],
+                    "xyz": [0.10, 0.02304, 1.18],
                     "wxyz": [0.8870108332, 0.4617486132, 0.0, 0.0],
                 },
             },
@@ -96,7 +99,7 @@ KEY_STATES: dict[str, tuple[dict[str, Any], ...]] = {
             "description_zh": "样品 A 容器静态对准烧杯的示意",
             "poses": {
                 "/World/graduated_cylinder_03": {
-                    "xyz": [0.28, 0.02304, 1.00],
+                    "xyz": [0.10, 0.02304, 1.00],
                     "wxyz": [0.8870108332, 0.4617486132, 0.0, 0.0],
                 }
             },
@@ -106,7 +109,7 @@ KEY_STATES: dict[str, tuple[dict[str, Any], ...]] = {
             "description_zh": "样品 B 容器静态对准烧杯的示意",
             "poses": {
                 "/World/conical_bottle03": {
-                    "xyz": [0.28, -0.03898, 0.98],
+                    "xyz": [0.10, -0.03898, 0.98],
                     "wxyz": [0.8870108332, 0.4617486132, 0.0, 0.0],
                 }
             },
@@ -116,7 +119,7 @@ KEY_STATES: dict[str, tuple[dict[str, Any], ...]] = {
             "description_zh": "烧杯离台并倾斜的晃匀关键姿态示意",
             "poses": {
                 "/World/Beaker": {
-                    "xyz": [0.20, -0.16, 1.02],
+                    "xyz": [0.10, -0.16, 1.02],
                     "wxyz": [0.984807753, 0.1736481777, 0.0, 0.0],
                 }
             },
@@ -479,6 +482,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise ValueError(f"scenario spec must be a mapping: {spec_path}")
         spec = ScenarioSpec.from_mapping(raw)
         package = compile_scenario_package(spec, sources, args.out / spec.scenario_id)
+        tabletop_placement = validate_scientific_workbench_tabletop_placement(
+            package.package_root
+        )
         export = export_genmanip_collected_package(package.package_root)
         states = _write_key_states(
             task_key=task_key,
@@ -518,6 +524,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     6,
                 ),
                 "authored_key_states": len(states),
+                "tabletop_placement_policy": tabletop_placement.overall_status,
                 "runtime_preview": (
                     "post_reset_pre_action_1080p"
                     if args.render_runtime_preview

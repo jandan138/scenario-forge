@@ -5,7 +5,19 @@ from itertools import product
 from math import isfinite
 from pathlib import Path
 import re
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable, Mapping
+
+import yaml
+
+from scenario_forge.generation.layout.constraints import (
+    TabletopPlacementConstraints,
+    load_layout_constraints,
+)
+from scenario_forge.generation.layout.tabletop_placement import (
+    TabletopBounds,
+    TabletopPlacementReport,
+    evaluate_tabletop_placement,
+)
 
 
 OFFICIAL_APPLE_XY = (-0.35, -0.22)
@@ -40,6 +52,21 @@ class OfficialTabletopPlacement:
     wxyz: tuple[float, float, float, float]
     scale_xyz: tuple[float, float, float]
     evidence: dict[str, object]
+
+
+class TabletopPlacementValidationError(ValueError):
+    """Raised after a science-workbench tabletop-policy evidence write."""
+
+    def __init__(self, message: str, evidence_path: Path):
+        super().__init__(message)
+        self.evidence_path = evidence_path
+
+
+@dataclass(frozen=True)
+class ScientificWorkbenchTabletopPlacementResult:
+    evidence_path: Path
+    overall_status: str
+    applicable_object_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -124,6 +151,299 @@ def derive_official_tabletop_placement(
         scale_xyz=scale_xyz,
         evidence=evidence,
     )
+
+
+def validate_scientific_workbench_tabletop_placement(
+    package_root: str | Path,
+    *,
+    domain_pack_dir: str | Path | None = None,
+) -> ScientificWorkbenchTabletopPlacementResult:
+    """Write and enforce the robot-facing tabletop policy for one package.
+
+    This is intentionally an eBench adapter check: it opens the composed USD
+    with lazy OpenUSD imports and leaves the portable package compiler free of
+    simulator/runtime dependencies.
+    """
+
+    root = Path(package_root)
+    evidence_path = root / "evidence" / "tabletop_placement_policy.yaml"
+    scenario = _load_yaml_mapping(root / "scenario.yaml", "scenario spec")
+    if scenario.get("domain") != "scientific_workbench":
+        raise ValueError("tabletop placement policy applies only to scientific_workbench")
+    constraints = load_layout_constraints(domain_pack_dir)
+    policy = constraints.tabletop_placement
+    if policy is None:
+        raise ValueError("scientific_workbench domain pack does not declare tabletop_placement")
+    table, task_objects = _table_and_task_objects(scenario)
+    table_support_path = policy.support_surface_prim_path
+    if table.get("source_prim_path") != "/World/table":
+        raise ValueError(
+            "scientific_workbench tabletop policy currently requires table source prim "
+            "'/World/table'"
+        )
+    robot_xy = _robot_spawn_xy(scenario)
+    stage, cache = _open_stage_with_bbox_cache(root / "scene" / "main.usda")
+    table_bounds_3d = _world_bounds(stage, cache, table_support_path)
+    table_bounds = TabletopBounds(
+        table_bounds_3d[0][0],
+        table_bounds_3d[1][0],
+        table_bounds_3d[0][1],
+        table_bounds_3d[1][1],
+    )
+
+    applicable_bounds: dict[str, TabletopBounds] = {}
+    exceptions: dict[str, str] = {}
+    not_applicable: list[dict[str, object]] = []
+    for item in task_objects:
+        object_id = _required_string(item, "id", "scenario object")
+        prim_path = _required_string(item, "source_prim_path", f"object {object_id}")
+        object_bounds_3d = _world_bounds(stage, cache, prim_path)
+        support_gap = object_bounds_3d[0][2] - table_bounds_3d[1][2]
+        if abs(support_gap) > policy.support_height_tolerance_m:
+            not_applicable.append(
+                {
+                    "object_id": object_id,
+                    "status": "not_applicable",
+                    "reason": "not_initially_supported_by_declared_tabletop",
+                    "support_gap_m": round(support_gap, 9),
+                    "world_bounds_m": _bounds_mapping(object_bounds_3d),
+                }
+            )
+            continue
+        applicable_bounds[object_id] = TabletopBounds(
+            object_bounds_3d[0][0],
+            object_bounds_3d[1][0],
+            object_bounds_3d[0][1],
+            object_bounds_3d[1][1],
+        )
+        reason = _robot_side_exception(item, policy)
+        if reason is not None:
+            exceptions[object_id] = reason
+
+    if applicable_bounds:
+        report = evaluate_tabletop_placement(
+            table_bounds=table_bounds,
+            robot_xy=robot_xy,
+            object_bounds=applicable_bounds,
+            policy=policy.policy,
+            robot_side_exceptions=exceptions,
+        )
+        evidence = _evidence_mapping(
+            report,
+            policy,
+            table_bounds_3d,
+            not_applicable,
+        )
+    else:
+        evidence = {
+            "schema_version": "scenario-forge-tabletop-placement-policy/v0.1",
+            "overall_status": "pass",
+            "policy": _policy_mapping(policy),
+            "table_support_world_bounds_m": _bounds_mapping(table_bounds_3d),
+            "robot_base_xy_m": [round(value, 9) for value in robot_xy],
+            "objects": not_applicable,
+            "claim_boundary": (
+                "No task object was initially supported by the declared tabletop; "
+                "the robot-side tabletop rule is not applicable to this package."
+            ),
+        }
+
+    evidence_path.parent.mkdir(parents=True, exist_ok=True)
+    evidence_path.write_text(
+        yaml.safe_dump(evidence, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
+    overall_status = str(evidence["overall_status"])
+    result = ScientificWorkbenchTabletopPlacementResult(
+        evidence_path=evidence_path,
+        overall_status=overall_status,
+        applicable_object_ids=tuple(applicable_bounds),
+    )
+    if overall_status != "pass":
+        raise TabletopPlacementValidationError(
+            "scientific workbench tabletop placement is blocked: "
+            + _blocked_summary(evidence),
+            evidence_path,
+        )
+    return result
+
+
+def _open_stage_with_bbox_cache(scene_path: Path) -> tuple[object, object]:
+    try:
+        from pxr import Usd, UsdGeom
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "OpenUSD is required for eBench tabletop placement validation"
+        ) from exc
+    stage = Usd.Stage.Open(str(scene_path))
+    if stage is None:
+        raise RuntimeError(f"unable to open composed scene for tabletop policy: {scene_path}")
+    cache = UsdGeom.BBoxCache(
+        Usd.TimeCode.Default(),
+        [UsdGeom.Tokens.default_, UsdGeom.Tokens.render, UsdGeom.Tokens.proxy],
+        useExtentsHint=True,
+    )
+    return stage, cache
+
+
+def _world_bounds(
+    stage: object,
+    cache: object,
+    prim_path: str,
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    prim = stage.GetPrimAtPath(prim_path)
+    if not prim or not prim.IsValid():
+        raise ValueError(f"tabletop policy prim is missing from composed scene: {prim_path}")
+    aligned_range = cache.ComputeWorldBound(prim).ComputeAlignedRange()
+    lower = _range_tuple(aligned_range.GetMin())
+    upper = _range_tuple(aligned_range.GetMax())
+    if not all(isfinite(value) for value in (*lower, *upper)) or any(
+        upper[index] <= lower[index] for index in range(3)
+    ):
+        raise ValueError(f"tabletop policy prim has invalid world bounds: {prim_path}")
+    return lower, upper
+
+
+def _load_yaml_mapping(path: Path, field: str) -> dict[str, Any]:
+    try:
+        value = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"could not read {field}: {path}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"{field} must be a mapping: {path}")
+    return value
+
+
+def _table_and_task_objects(
+    scenario: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], tuple[Mapping[str, Any], ...]]:
+    objects = scenario.get("objects")
+    if not isinstance(objects, list) or not all(isinstance(item, dict) for item in objects):
+        raise ValueError("scenario objects must be a list of mappings")
+    tables = [item for item in objects if item.get("role") == "table"]
+    if len(tables) != 1:
+        raise ValueError("scientific workbench tabletop policy requires exactly one table object")
+    return tables[0], tuple(item for item in objects if item is not tables[0])
+
+
+def _robot_spawn_xy(scenario: Mapping[str, Any]) -> tuple[float, float]:
+    robot = scenario.get("robot")
+    if not isinstance(robot, Mapping):
+        raise ValueError("scenario robot must be a mapping")
+    spawn = robot.get("spawn")
+    if not isinstance(spawn, Mapping):
+        raise ValueError("scenario robot.spawn must be a mapping")
+    xyz = spawn.get("xyz")
+    if (
+        not isinstance(xyz, list)
+        or len(xyz) != 3
+        or not all(isinstance(value, int | float) and isfinite(value) for value in xyz)
+    ):
+        raise ValueError("scenario robot.spawn.xyz must contain three finite numbers")
+    return (float(xyz[0]), float(xyz[1]))
+
+
+def _robot_side_exception(
+    item: Mapping[str, Any],
+    policy: TabletopPlacementConstraints,
+) -> str | None:
+    metadata = item.get("metadata", {})
+    if not isinstance(metadata, Mapping):
+        raise ValueError("scenario object metadata must be a mapping")
+    value = metadata.get(policy.exception_metadata_key)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(
+            f"scenario object metadata.{policy.exception_metadata_key} must be a non-empty string"
+        )
+    return value.strip()
+
+
+def _evidence_mapping(
+    report: TabletopPlacementReport,
+    constraints: TabletopPlacementConstraints,
+    table_bounds_3d: tuple[tuple[float, float, float], tuple[float, float, float]],
+    not_applicable: list[dict[str, object]],
+) -> dict[str, object]:
+    objects = [
+        {
+            "object_id": item.object_id,
+            "status": item.status,
+            "world_bounds_xy_m": {
+                "min": [round(item.bounds.x_min, 9), round(item.bounds.y_min, 9)],
+                "max": [round(item.bounds.x_max, 9), round(item.bounds.y_max, 9)],
+            },
+            "edge_clearances_m": item.edge_clearances_m,
+            "minimum_edge_clearance_m": item.minimum_edge_clearance_m,
+            "edge_clearance_status": item.edge_clearance_status,
+            "robot_facing_half": item.robot_facing_half,
+            "robot_side_status": item.robot_side_status,
+            "robot_side_exception_reason": item.robot_side_exception_reason,
+        }
+        for item in report.objects
+    ]
+    objects.extend(not_applicable)
+    return {
+        "schema_version": "scenario-forge-tabletop-placement-policy/v0.1",
+        "overall_status": report.overall_status,
+        "policy": _policy_mapping(constraints),
+        "table_support_world_bounds_m": _bounds_mapping(table_bounds_3d),
+        "robot_base_xy_m": [round(value, 9) for value in report.robot_xy],
+        "objects": objects,
+        "claim_boundary": (
+            "This verifies initial tabletop footprint placement only. It does not "
+            "prove reachability, grasping, path planning, collision-free motion, "
+            "or task success."
+        ),
+    }
+
+
+def _policy_mapping(constraints: TabletopPlacementConstraints) -> dict[str, object]:
+    return {
+        "policy_id": constraints.policy.policy_id,
+        "preferred_region": "robot_facing_table_half",
+        "min_edge_clearance_m": constraints.policy.min_edge_clearance_m,
+        "support_surface_prim_path": constraints.support_surface_prim_path,
+        "support_height_tolerance_m": constraints.support_height_tolerance_m,
+        "exception_metadata_key": constraints.exception_metadata_key,
+        "exception_scope": "robot-side preference only; never table-edge safety",
+    }
+
+
+def _bounds_mapping(
+    bounds: tuple[tuple[float, float, float], tuple[float, float, float]],
+) -> dict[str, list[float]]:
+    return {
+        "min": [round(value, 9) for value in bounds[0]],
+        "max": [round(value, 9) for value in bounds[1]],
+    }
+
+
+def _required_string(value: Mapping[str, Any], key: str, field: str) -> str:
+    result = value.get(key)
+    if not isinstance(result, str) or not result:
+        raise ValueError(f"{field}.{key} must be a non-empty string")
+    return result
+
+
+def _blocked_summary(evidence: Mapping[str, Any]) -> str:
+    blocked = [
+        _blocked_object_summary(item)
+        for item in evidence.get("objects", [])
+        if isinstance(item, Mapping) and item.get("status") == "blocked"
+    ]
+    return ", ".join(blocked) if blocked else "unknown reason"
+
+
+def _blocked_object_summary(item: Mapping[str, Any]) -> str:
+    object_id = str(item.get("object_id", "<unknown>"))
+    reasons: list[str] = []
+    if item.get("edge_clearance_status") == "blocked":
+        reasons.append("table-edge clearance")
+    if item.get("robot_side_status") == "blocked":
+        reasons.append("robot-facing side")
+    return f"{object_id} ({'; '.join(reasons) or 'policy failure'})"
 
 
 def _is_mesh_prim(prim: object) -> bool:

@@ -17,7 +17,7 @@ objects:
     asset_id: scientific_workbench_graduated_cylinder_03_dynamic
     source_prim_path: /World/graduated_cylinder_03
     role: sample_container_a
-    pose: {xyz: [0.30, 0.22, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    pose: {xyz: [0.10, 0.22, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
     named_frames:
       opening: {xyz: [0.0, 0.0, 0.2722941904], wxyz: [1.0, 0.0, 0.0, 0.0]}
       grasp: {xyz: [0.0, 0.0, 0.14], wxyz: [1.0, 0.0, 0.0, 0.0]}
@@ -26,7 +26,7 @@ objects:
     asset_id: scientific_workbench_conical_bottle03_dynamic
     source_prim_path: /World/conical_bottle03
     role: sample_container_b
-    pose: {xyz: [0.36, 0.0, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    pose: {xyz: [0.10, 0.0, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
     named_frames:
       opening: {xyz: [0.0, 0.0, 0.1965674179], wxyz: [1.0, 0.0, 0.0, 0.0]}
       grasp: {xyz: [0.0, 0.0, 0.16], wxyz: [1.0, 0.0, 0.0, 0.0]}
@@ -35,7 +35,7 @@ objects:
     asset_id: scientific_workbench_beaker_dynamic
     source_prim_path: /World/Beaker
     role: target_vessel
-    pose: {xyz: [0.28, -0.20, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    pose: {xyz: [0.10, -0.20, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
     named_frames:
       opening: {xyz: [0.0, 0.0, 0.10], wxyz: [1.0, 0.0, 0.0, 0.0]}
       grasp: {xyz: [0.0, 0.0, 0.06], wxyz: [1.0, 0.0, 0.0, 0.0]}

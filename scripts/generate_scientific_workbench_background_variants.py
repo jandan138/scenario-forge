@@ -23,6 +23,9 @@ import yaml
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
+from scenario_forge.adapters.ebench.tabletop_placement import (
+    validate_scientific_workbench_tabletop_placement,
+)
 from scenario_forge.adapters.generated_environment import (
     GENERATED_ENVIRONMENT_INTAKE_SCHEMA_VERSION,
 )
@@ -608,6 +611,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
         package_root = output_root / task_variant.variant_id
         compiled = compile_scenario_package(variant, sources, package_root)
+        tabletop_placement = validate_scientific_workbench_tabletop_placement(
+            compiled.package_root
+        )
         export = export_genmanip_collected_package(compiled.package_root)
         _configure_background_preview(
             export.output_dir,
@@ -644,6 +650,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ),
                 "scenario_id": variant.scenario_id,
                 "package_root": str(compiled.package_root),
+                "tabletop_placement_policy": {
+                    "status": tabletop_placement.overall_status,
+                    "evidence_path": str(tabletop_placement.evidence_path),
+                },
                 "genmanip_root": str(export.output_dir),
                 "background_manifest": str(candidate.manifest_path),
                 "background_source_sha256": candidate.source_sha256,

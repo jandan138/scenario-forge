@@ -23,7 +23,7 @@ objects:
     source_prim_path: /World/graduated_cylinder_03
     role: source_container
     pose:
-      xyz: [0.30, 0.17, 0.7827606155]
+      xyz: [0.10, 0.17, 0.7827606155]
       wxyz: [1.0, 0.0, 0.0, 0.0]
     named_frames:
       opening:
@@ -40,7 +40,7 @@ objects:
     source_prim_path: /World/Beaker
     role: target_container
     pose:
-      xyz: [0.30, -0.17, 0.7827606155]
+      xyz: [0.10, -0.17, 0.7827606155]
       wxyz: [1.0, 0.0, 0.0, 0.0]
     named_frames:
       opening:

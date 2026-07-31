@@ -18,6 +18,9 @@ from scenario_forge.adapters.ebench.genmanip import (
     export_genmanip_collected_package,
 )
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
+from scenario_forge.adapters.ebench.tabletop_placement import (
+    validate_scientific_workbench_tabletop_placement,
+)
 from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
@@ -516,6 +519,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         spec = ScenarioSpec.from_mapping(materialized_spec)
         package_root = args.out / spec.scenario_id
         package = compile_scenario_package(spec, sources, package_root)
+        validate_scientific_workbench_tabletop_placement(package.package_root)
         export = export_genmanip_collected_package(
             package.package_root,
             legacy_v01_transport=True,

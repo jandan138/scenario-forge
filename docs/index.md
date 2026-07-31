@@ -22,6 +22,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Scene Asset Overlays](design/scene-asset-overlays.md)
 - [Scenario Source Bindings](design/scenario-source-bindings.md)
 - [Task Catalog and Readiness](design/task-catalog-and-readiness.md)
+- [Scientific Workbench Tabletop Placement](design/scientific-workbench-tabletop-placement.md)
 - [Progress Rubric (scenario-spec/v0.4)](design/progress-rubric.md)
 - [Liquid Measurement Adapter Contract](design/liquid-measurement-adapter-contract.md)
 

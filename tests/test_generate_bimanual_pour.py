@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -20,6 +21,22 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # rotation for the lab_015 payload; ConvertAsset extracts this exact scope.
 _SCENE1_ENVIRONMENT_SCOPE = "/World/lab_015"
 _EBENCH_TABLE_SCOPE = "/World/table"
+
+
+@pytest.fixture(autouse=True)
+def _stub_tabletop_policy_for_non_tabletop_fixture_packages(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Keep these source-handoff tests independent from tabletop geometry fixtures."""
+
+    monkeypatch.setattr(
+        generator,
+        "validate_scientific_workbench_tabletop_placement",
+        lambda package_root: SimpleNamespace(
+            evidence_path=Path(package_root) / "evidence/tabletop_placement_policy.yaml",
+            overall_status="pass",
+        ),
+    )
 
 
 def _convert_asset_args(

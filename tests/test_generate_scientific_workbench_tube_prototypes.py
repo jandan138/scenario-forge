@@ -18,6 +18,20 @@ _DOCUMENTED_GENMANIP_CONSUMER = Path(
 )
 
 
+@pytest.fixture(autouse=True)
+def _stub_tabletop_policy_for_non_tabletop_fixture_packages(monkeypatch) -> None:
+    """The generator tests use minimal malformed-USDA handoff fixtures by design."""
+
+    monkeypatch.setattr(
+        generator,
+        "validate_scientific_workbench_tabletop_placement",
+        lambda package_root: SimpleNamespace(
+            evidence_path=Path(package_root) / "evidence/tabletop_placement_policy.yaml",
+            overall_status="pass",
+        ),
+    )
+
+
 def _load(path: Path) -> dict[str, object]:
     value = yaml.safe_load(path.read_text(encoding="utf-8"))
     assert isinstance(value, dict)

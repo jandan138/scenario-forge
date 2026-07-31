@@ -1284,6 +1284,14 @@ def test_main_generates_independent_packages_for_profiled_zones(
     monkeypatch.setattr(module, "compile_scenario_package", fake_compile)
     monkeypatch.setattr(
         module,
+        "validate_scientific_workbench_tabletop_placement",
+        lambda package_root: SimpleNamespace(
+            evidence_path=Path(package_root) / "evidence/tabletop_placement_policy.yaml",
+            overall_status="pass",
+        ),
+    )
+    monkeypatch.setattr(
+        module,
         "export_genmanip_collected_package",
         lambda package_root: SimpleNamespace(output_dir=package_root),
     )
