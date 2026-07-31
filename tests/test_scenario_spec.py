@@ -557,6 +557,42 @@ def _scenario_mapping_v05() -> dict[str, object]:
     return data
 
 
+def _scenario_mapping_v06() -> dict[str, object]:
+    data = _scenario_mapping_v05()
+    data["schema_version"] = "scenario-spec/v0.6"
+    success = dict(data["success"])  # type: ignore[arg-type]
+    predicates = [dict(item) for item in success["predicates"][:2]]  # type: ignore[index]
+    relative_parameters = dict(predicates[0]["parameters"])  # type: ignore[arg-type]
+    relative_alignment = dict(relative_parameters["axis_alignment"])  # type: ignore[arg-type]
+    relative_alignment.pop("relative_to_part")
+    relative_parameters["axis_alignment"] = relative_alignment
+    predicates[0]["parameters"] = relative_parameters
+    initial_parameters = dict(predicates[1]["parameters"])  # type: ignore[arg-type]
+    initial_parameters.pop("relative_axis_part")
+    predicates[1]["parameters"] = initial_parameters
+    success["predicates"] = predicates
+    rubric = _progress_rubric()
+    items = [dict(item) for item in rubric["items"]]
+    for item in items:
+        item.setdefault("active", True)
+    items[-1] = {
+        **items[-1],
+        "active": True,
+        "condition": {
+            "type": "motion_trajectory_completed",
+            "parameters": {
+                "object": "obj_conical_bottle03",
+                "trajectory_id": "shake_mix",
+                "min_cycles": 2,
+            },
+        },
+    }
+    rubric["items"] = items
+    success["progress_rubric"] = rubric
+    data["success"] = success
+    return data
+
+
 def test_scenario_spec_round_trips_bimanual_roles_and_invariant() -> None:
     spec = ScenarioSpec.from_mapping(_scenario_mapping())
 
@@ -1419,3 +1455,26 @@ def test_v05_json_schema_accepts_only_supported_generic_predicates() -> None:
         "relative_to_part"
     ] = ""
     assert list(validator.iter_errors(empty_part))
+
+
+def test_v06_combines_generic_success_and_weighted_progress_rubric() -> None:
+    data = _scenario_mapping_v06()
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.schema_version == "scenario-spec/v0.6"
+    assert spec.success.progress_rubric is not None
+    assert spec.success.progress_rubric.items[-1].condition["type"] == (
+        "motion_trajectory_completed"
+    )
+    assert spec.to_mapping() == data
+
+
+def test_v06_json_schema_validates_generic_predicates_and_rubric() -> None:
+    schema_path = (
+        REPO_ROOT
+        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.6.schema.json"
+    )
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+    Draft202012Validator(schema).validate(_scenario_mapping_v06())

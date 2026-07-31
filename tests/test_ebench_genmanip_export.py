@@ -1835,6 +1835,12 @@ _RUNTIME_CONTRACT_V04_SCHEMA = (
     / "scenario-forge-genmanip-runtime-contract-v0.4.schema.json"
 )
 
+_RUNTIME_CONTRACT_V06_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "src/scenario_forge/schemas/jsonschema"
+    / "scenario-forge-genmanip-runtime-contract-v0.6.schema.json"
+)
+
 
 def test_v04_export_transports_progress_rubric_as_unevaluated(tmp_path: Path) -> None:
     from tests.test_scenario_spec import _scenario_mapping_v04
@@ -1875,3 +1881,33 @@ def test_v04_export_transports_progress_rubric_as_unevaluated(tmp_path: Path) ->
         json.loads(_RUNTIME_CONTRACT_V04_SCHEMA.read_text(encoding="utf-8"))
     )
     validator.validate(contract)
+
+
+def test_v06_export_transports_generic_success_and_rubric_as_unevaluated(
+    tmp_path: Path,
+) -> None:
+    from tests.test_scenario_spec import _scenario_mapping_v06
+
+    package_root = _build_qualified_object_package(
+        tmp_path, scenario_mapping=_scenario_mapping_v06()
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode_path = (
+        output
+        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+    )
+    contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
+        "scenario_forge_runtime_contract"
+    ]
+
+    assert contract["schema_version"] == (
+        "scenario-forge-genmanip-runtime-contract/v0.6"
+    )
+    assert contract["success"]["progress_rubric"]["items"][-1]["condition"][
+        "type"
+    ] == "motion_trajectory_completed"
+    assert contract["execution"]["progress_rubric"]["scored_here"] is False
+    Draft202012Validator(
+        json.loads(_RUNTIME_CONTRACT_V06_SCHEMA.read_text(encoding="utf-8"))
+    ).validate(contract)

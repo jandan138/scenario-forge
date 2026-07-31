@@ -1,0 +1,68 @@
+schema_version: scenario-source-bindings/v0.2
+bindings:
+  scientific_environment_code_room_example4_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_environment_code_room_example4_v1/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_environment_code_room_example4_v1/package
+    manifest_path: /cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_environment_code_room_example4_v1/package/evidence/manifest.json
+    producer_revision: 2026-07-30-generated-room-facade-working-tree-r2
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room run_20260729_175041_example4_detail_small]
+    redistributable: true
+  scientific_workbench_ebench_table:
+    resolver: convert_asset_package
+    usage: visual_static_object
+    source_usd: /cpfs/shared/simulation/zhuzihou/dev/LabUtopia/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd
+    package_dir: /cpfs/user/zhuzihou/dev/scenario-forge/outputs/convertasset-lab001-table-visual-static-20260723
+    manifest_path: /cpfs/user/zhuzihou/dev/scenario-forge/outputs/convertasset-lab001-table-visual-static-20260723/evidence/manifest.json
+    producer_revision: 73a84d3
+    expected_scope_prims: [/World/table]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [LabUtopia lab_001 workbench]
+    redistributable: true
+  scientific_workbench_graduated_cylinder_03_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/package/evidence/manifest.json
+    producer_revision: scientific-workbench-graduated-cylinder-identity-r4-20260731
+    expected_scope_prims: [/World/graduated_cylinder_03]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [LabUtopia graduated_cylinder_03; ConvertAsset identity facade over source-bound r3]
+    redistributable: true
+  scientific_workbench_conical_bottle03_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/package/evidence/manifest.json
+    producer_revision: scientific-workbench-conical-bottle-identity-r2-20260731
+    expected_scope_prims: [/World/conical_bottle03]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [LabUtopia conical_bottle03; ConvertAsset identity facade over source-bound r1]
+    redistributable: true
+  scientific_workbench_beaker_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/beaker/package/evidence/manifest.json
+    producer_revision: scientific-workbench-beaker-r1-20260731
+    expected_scope_prims: [/World/Beaker]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [valid_with_json_by_final_category_usd archive; ConvertAsset source-bound beaker r1]
+    redistributable: true
+  scientific_workbench_funnel_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/funnel/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/funnel/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/funnel/package/evidence/manifest.json
+    producer_revision: scientific-workbench-funnel-r2-20260731
+    expected_scope_prims: [/World/Funnel]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [valid_with_json_by_final_category_usd archive; ConvertAsset source-bound funnel r2]
+    redistributable: true

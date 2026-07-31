@@ -1,0 +1,411 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/scenario-spec-v0.6.schema.json",
+  "title": "Scenario Forge Scenario Spec v0.6",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scenario_id",
+    "domain",
+    "task_family",
+    "instruction",
+    "scene",
+    "objects",
+    "robot",
+    "steps",
+    "invariants",
+    "success",
+    "max_steps",
+    "seed"
+  ],
+  "properties": {
+    "schema_version": {"const": "scenario-spec/v0.6"},
+    "scenario_id": {"$ref": "#/$defs/packageSegment"},
+    "domain": {"$ref": "#/$defs/nonEmptyString"},
+    "task_family": {"$ref": "#/$defs/nonEmptyString"},
+    "instruction": {"$ref": "#/$defs/nonEmptyString"},
+    "scene": {"$ref": "#/$defs/sceneSource"},
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/objectBinding"}
+    },
+    "robot": {"$ref": "#/$defs/robot"},
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/taskStep"}
+    },
+    "invariants": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/invariant"}
+    },
+    "success": {"$ref": "#/$defs/success"},
+    "max_steps": {"type": "integer", "minimum": 1},
+    "seed": {
+      "oneOf": [
+        {"$ref": "#/$defs/packageSegment"},
+        {"type": "integer", "minimum": 0}
+      ]
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packageSegment": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "vector3": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "numberRange": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "signedAxis": {
+      "enum": ["x", "y", "z", "-x", "-y", "-z"]
+    },
+    "quaternion": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"},
+        {"type": "number"}
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xyz", "wxyz"],
+      "properties": {
+        "xyz": {"$ref": "#/$defs/vector3"},
+        "wxyz": {"$ref": "#/$defs/quaternion"},
+        "scale_xyz": {"$ref": "#/$defs/vector3"}
+      }
+    },
+    "sceneSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "root_prim_path"],
+      "properties": {
+        "asset_id": {"$ref": "#/$defs/nonEmptyString"},
+        "root_prim_path": {"$ref": "#/$defs/nonEmptyString"},
+        "overlay_asset_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "inactive_prim_paths": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "world_anchored_prim_paths": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "pose": {"$ref": "#/$defs/pose"}
+      }
+    },
+    "objectBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "asset_id", "source_prim_path", "role", "pose"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "asset_id": {"$ref": "#/$defs/nonEmptyString"},
+        "source_prim_path": {"$ref": "#/$defs/nonEmptyString"},
+        "role": {"$ref": "#/$defs/nonEmptyString"},
+        "pose": {"$ref": "#/$defs/pose"},
+        "named_frames": {
+          "type": "object",
+          "propertyNames": {"minLength": 1},
+          "additionalProperties": {"$ref": "#/$defs/pose"}
+        },
+        "metadata": {"type": "object"}
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "end_effector", "capabilities"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "end_effector": {"$ref": "#/$defs/nonEmptyString"},
+        "capabilities": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "robot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_ref", "spawn", "actors"],
+      "properties": {
+        "profile_ref": {"$ref": "#/$defs/nonEmptyString"},
+        "spawn": {"$ref": "#/$defs/pose"},
+        "actors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/actor"}
+        }
+      }
+    },
+    "taskStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "skill", "actors", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "skill": {"$ref": "#/$defs/nonEmptyString"},
+        "actors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "parameters": {"type": "object"},
+        "depends_on": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "actor", "object", "from_step", "through_step"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"$ref": "#/$defs/nonEmptyString"},
+        "actor": {"$ref": "#/$defs/nonEmptyString"},
+        "object": {"$ref": "#/$defs/nonEmptyString"},
+        "from_step": {"$ref": "#/$defs/nonEmptyString"},
+        "through_step": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    },
+    "relativePosePredicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"const": "relative_pose_reached"},
+        "sequence_index": {"type": "integer", "minimum": 0},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object", "relative_to", "xyz_range"],
+          "properties": {
+            "object": {"$ref": "#/$defs/nonEmptyString"},
+            "relative_to": {"$ref": "#/$defs/nonEmptyString"},
+            "xyz_range": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["x", "y", "z"],
+              "properties": {
+                "x": {"$ref": "#/$defs/numberRange"},
+                "y": {"$ref": "#/$defs/numberRange"},
+                "z": {"$ref": "#/$defs/numberRange"}
+              }
+            },
+            "axis_alignment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "object_axis",
+                "target_axis",
+                "comparison",
+                "threshold_deg"
+              ],
+              "properties": {
+                "object_axis": {"$ref": "#/$defs/signedAxis"},
+                "target_axis": {"$ref": "#/$defs/signedAxis"},
+                "comparison": {"enum": ["<=", ">="]},
+                "threshold_deg": {"type": "number"},
+                "relative_to_part": {"$ref": "#/$defs/nonEmptyString"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "objectAtInitialPosePredicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"const": "object_at_initial_pose"},
+        "sequence_index": {"type": "integer", "minimum": 0},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object", "xyz_tolerance"],
+          "properties": {
+            "object": {"$ref": "#/$defs/nonEmptyString"},
+            "xyz_tolerance": {"$ref": "#/$defs/vector3"},
+            "relative_axis_object": {"$ref": "#/$defs/nonEmptyString"},
+            "relative_axis_part": {"$ref": "#/$defs/nonEmptyString"},
+            "object_axis": {"$ref": "#/$defs/signedAxis"},
+            "target_axis": {"$ref": "#/$defs/signedAxis"},
+            "max_axis_error_deg": {"type": "number"}
+          },
+          "dependentRequired": {
+            "relative_axis_part": ["relative_axis_object"]
+          }
+        }
+      }
+    },
+    "articulationJointStatePredicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sequence_index", "parameters"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {"const": "articulation_joint_state_reached"},
+        "sequence_index": {"type": "integer", "minimum": 0},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object", "joint", "state"],
+          "properties": {
+            "object": {"$ref": "#/$defs/nonEmptyString"},
+            "joint": {"$ref": "#/$defs/nonEmptyString"},
+            "state": {"$ref": "#/$defs/nonEmptyString"}
+          }
+        }
+      }
+    },
+    "successPredicate": {
+      "oneOf": [
+        {"$ref": "#/$defs/relativePosePredicate"},
+        {"$ref": "#/$defs/objectAtInitialPosePredicate"},
+        {"$ref": "#/$defs/articulationJointStatePredicate"}
+      ]
+    },
+    "success": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operator", "claim_scope", "predicates"],
+      "properties": {
+        "operator": {"enum": ["all", "any"]},
+        "claim_scope": {"$ref": "#/$defs/nonEmptyString"},
+        "predicates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/successPredicate"}
+        },
+        "progress_rubric": {"$ref": "#/$defs/progressRubric"}
+      }
+    },
+    "progressRubric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["aggregation", "items"],
+      "properties": {
+        "aggregation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "normalization", "inactive_treatment"],
+          "properties": {
+            "type": {"const": "weighted_progress_score"},
+            "normalization": {
+              "enum": ["declared_sum", "active_subset_renormalize"]
+            },
+            "inactive_treatment": {"enum": ["zero", "exclude"]},
+            "primary_metric_id": {"$ref": "#/$defs/nonEmptyString"}
+          }
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/progressRubricItem"}
+        }
+      }
+    },
+    "progressRubricItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "weight", "temporal", "condition"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "active": {"type": "boolean"},
+        "requires": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "temporal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {"enum": ["instant", "sustained", "terminal"]},
+            "window": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["from_step", "through_step"],
+              "properties": {
+                "from_step": {"$ref": "#/$defs/nonEmptyString"},
+                "through_step": {"$ref": "#/$defs/nonEmptyString"}
+              }
+            }
+          }
+        },
+        "condition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "parameters"],
+          "properties": {
+            "type": {
+              "enum": [
+                "object_lifted",
+                "pose_while_grasped",
+                "object_released_on_support",
+                "liquid_transfer_ratio",
+                "relative_pose_reached",
+                "object_at_initial_pose",
+                "motion_trajectory_completed"
+              ]
+            },
+            "parameters": {"type": "object"}
+          }
+        },
+        "source_ref": {"type": "object"}
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+schema_version: scenario-spec/v0.6
+scenario_id: scientific_workbench_two_sample_mix
+domain: scientific_workbench
+task_family: bimanual_two_sample_mix
+instruction: 辅助臂固定烧杯；操作臂依次拿起样品 A 和 B 容器、对准烧杯并倾倒、各自放回；最后拿起烧杯完成晃匀并正立放回。
+scene:
+  asset_id: scientific_environment_code_room_example4_v1
+  root_prim_path: /World
+  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table
+    source_prim_path: /World/table
+    role: table
+    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+  - id: obj_sample_a
+    asset_id: scientific_workbench_graduated_cylinder_03_dynamic
+    source_prim_path: /World/graduated_cylinder_03
+    role: sample_container_a
+    pose: {xyz: [0.30, 0.22, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.2722941904], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.14], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_sample_b
+    asset_id: scientific_workbench_conical_bottle03_dynamic
+    source_prim_path: /World/conical_bottle03
+    role: sample_container_b
+    pose: {xyz: [0.36, 0.0, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.1965674179], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.16], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_beaker
+    asset_id: scientific_workbench_beaker_dynamic
+    source_prim_path: /World/Beaker
+    role: target_vessel
+    pose: {xyz: [0.28, -0.20, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.10], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.06], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a
+  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, hold]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, tilt, place, release, shake]}
+steps:
+  - {id: grasp_target, skill: grasp_and_hold, actors: [auxiliary_arm], parameters: {object: obj_beaker}}
+  - {id: lift_sample_a, skill: lift, actors: [operating_arm], parameters: {object: obj_sample_a}, depends_on: [grasp_target]}
+  - {id: align_sample_a, skill: align_openings, actors: [operating_arm], parameters: {source_frame: obj_sample_a.opening, target_frame: obj_beaker.opening}, depends_on: [lift_sample_a]}
+  - {id: pour_sample_a, skill: tilt_pour, actors: [operating_arm], parameters: {object: obj_sample_a}, depends_on: [align_sample_a]}
+  - {id: return_sample_a, skill: place_on_surface, actors: [operating_arm], parameters: {object: obj_sample_a, support_surface: table}, depends_on: [pour_sample_a]}
+  - {id: lift_sample_b, skill: lift, actors: [operating_arm], parameters: {object: obj_sample_b}, depends_on: [return_sample_a]}
+  - {id: align_sample_b, skill: align_openings, actors: [operating_arm], parameters: {source_frame: obj_sample_b.opening, target_frame: obj_beaker.opening}, depends_on: [lift_sample_b]}
+  - {id: pour_sample_b, skill: tilt_pour, actors: [operating_arm], parameters: {object: obj_sample_b}, depends_on: [align_sample_b]}
+  - {id: return_sample_b, skill: place_on_surface, actors: [operating_arm], parameters: {object: obj_sample_b, support_surface: table}, depends_on: [pour_sample_b]}
+  - {id: shake_target, skill: shake, actors: [operating_arm], parameters: {object: obj_beaker, trajectory_id: configured_mix_trajectory}, depends_on: [return_sample_b]}
+  - {id: return_target, skill: place_on_surface, actors: [operating_arm], parameters: {object: obj_beaker, support_surface: table}, depends_on: [shake_target]}
+invariants:
+  - {id: target_held_during_pours, type: maintain_grasp, actor: auxiliary_arm, object: obj_beaker, from_step: grasp_target, through_step: pour_sample_b}
+success:
+  operator: all
+  claim_scope: layout_validated_prototype
+  predicates:
+    - id: target_returned_after_motion
+      type: object_at_initial_pose
+      sequence_index: 0
+      parameters: {object: obj_beaker, xyz_tolerance: [0.06, 0.06, 0.06], require_episode_motion: true}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: mix_trajectory_completed}
+    items:
+      - {id: sample_a_lifted, weight: 0.05, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_sample_a, support_surface: table}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序1}}
+      - {id: sample_a_aligned, weight: 0.10, temporal: {kind: instant}, condition: {type: pose_while_grasped, parameters: {grasp: {actor: operating_arm, object: obj_sample_a}, predicate: {type: relative_pose_reached, parameters: {object: obj_sample_a, relative_to: obj_beaker}}}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序2}}
+      - {id: sample_a_transferred, weight: 0.15, active: false, requires: [liquid_sim.contained_volume_ratio], temporal: {kind: instant}, condition: {type: liquid_transfer_ratio, parameters: {source: obj_sample_a, target: obj_beaker, ratio_threshold: 0.9}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序3}}
+      - {id: sample_a_returned, weight: 0.05, temporal: {kind: instant}, condition: {type: object_released_on_support, parameters: {object: obj_sample_a, support_surface: table}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序4}}
+      - {id: sample_b_lifted, weight: 0.05, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_sample_b, support_surface: table}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序5}}
+      - {id: sample_b_aligned, weight: 0.10, temporal: {kind: instant}, condition: {type: pose_while_grasped, parameters: {grasp: {actor: operating_arm, object: obj_sample_b}, predicate: {type: relative_pose_reached, parameters: {object: obj_sample_b, relative_to: obj_beaker}}}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序6}}
+      - {id: sample_b_transferred, weight: 0.15, active: false, requires: [liquid_sim.contained_volume_ratio], temporal: {kind: instant}, condition: {type: liquid_transfer_ratio, parameters: {source: obj_sample_b, target: obj_beaker, ratio_threshold: 0.9}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序7}}
+      - {id: sample_b_returned, weight: 0.05, temporal: {kind: instant}, condition: {type: object_released_on_support, parameters: {object: obj_sample_b, support_surface: table}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序8}}
+      - {id: target_lifted, weight: 0.05, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_beaker, support_surface: table}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序9}}
+      - {id: mix_trajectory_completed, weight: 0.20, temporal: {kind: instant}, condition: {type: motion_trajectory_completed, parameters: {object: obj_beaker, trajectory_id: configured_mix_trajectory}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序10}}
+      - {id: target_returned_released, weight: 0.05, temporal: {kind: terminal}, condition: {type: object_released_on_support, parameters: {object: obj_beaker, support_surface: table, released: true}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 16, item: 时序11}}
+max_steps: 3000
+seed: "000"

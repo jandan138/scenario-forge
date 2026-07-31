@@ -64,6 +64,46 @@ def test_camera_plan_preserves_authored_view_and_adds_eye_level_orbits() -> None
         assert distance == pytest.approx(math.sqrt(50.0) * 1.1)
 
 
+def test_camera_plan_can_separate_closeup_from_overview_orbits() -> None:
+    module = _load_renderer_module()
+    views = module.plan_camera_views(
+        position=(0.0, -1.0, 1.0),
+        target=(0.0, 0.0, 0.5),
+        orbit_position=(0.0, -5.0, 5.0),
+        orbit_target=(0.0, 0.0, 0.0),
+    )
+
+    assert views[0]["position"] == pytest.approx([0.0, -1.0, 1.0])
+    assert views[0]["target"] == pytest.approx([0.0, 0.0, 0.5])
+    for view in views[1:]:
+        offset = [
+            view["position"][index] - view["target"][index]
+            for index in range(3)
+        ]
+        assert math.sqrt(sum(value * value for value in offset)) == pytest.approx(
+            math.sqrt(50.0) * 1.1
+        )
+        assert view["target"] == pytest.approx([0.0, 0.0, 0.0])
+
+
+def test_frame_visibility_stats_detect_effectively_black_frame() -> None:
+    import numpy as np
+
+    module = _load_renderer_module()
+
+    black = module._frame_visibility_stats(
+        np.zeros((8, 8, 3), dtype=np.uint8),
+        np=np,
+    )
+    visible = module._frame_visibility_stats(
+        np.full((8, 8, 3), 128, dtype=np.uint8),
+        np=np,
+    )
+
+    assert black == {"mean_luminance": 0.0, "p99_luminance": 0.0}
+    assert visible == {"mean_luminance": 128.0, "p99_luminance": 128.0}
+
+
 def test_batch_selection_accepts_hash_bound_pass_and_warn_retake_items(
     tmp_path: Path,
 ) -> None:

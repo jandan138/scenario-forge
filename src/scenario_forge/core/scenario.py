@@ -39,6 +39,14 @@ _PROGRESS_RUBRIC_CONDITION_TYPES = frozenset(
         "liquid_transfer_ratio",
     }
 )
+_V06_PROGRESS_RUBRIC_CONDITION_TYPES = frozenset(
+    {
+        *_PROGRESS_RUBRIC_CONDITION_TYPES,
+        "relative_pose_reached",
+        "object_at_initial_pose",
+        "motion_trajectory_completed",
+    }
+)
 
 
 def _mapping(value: object, field: str) -> Mapping[str, Any]:
@@ -417,7 +425,12 @@ class ProgressRubricItemSpec:
     source_ref: dict[str, JsonValue]
 
     @classmethod
-    def from_mapping(cls, value: object) -> ProgressRubricItemSpec:
+    def from_mapping(
+        cls,
+        value: object,
+        *,
+        schema_version: str,
+    ) -> ProgressRubricItemSpec:
         data = _mapping(value, "progress rubric item")
         item_id = _string(data.get("id"), "progress rubric item.id")
         weight = data.get("weight")
@@ -460,10 +473,15 @@ class ProgressRubricItemSpec:
             _json_mapping(data.get("condition"), f"progress rubric item {item_id}.condition")
         )
         condition_type = condition.get("type")
-        if condition_type not in _PROGRESS_RUBRIC_CONDITION_TYPES:
+        supported_condition_types = (
+            _V06_PROGRESS_RUBRIC_CONDITION_TYPES
+            if schema_version == "scenario-spec/v0.6"
+            else _PROGRESS_RUBRIC_CONDITION_TYPES
+        )
+        if condition_type not in supported_condition_types:
             raise ValueError(
                 f"progress rubric item {item_id}.condition.type must be one of "
-                + ", ".join(sorted(_PROGRESS_RUBRIC_CONDITION_TYPES))
+                + ", ".join(sorted(supported_condition_types))
             )
         _mapping(
             condition.get("parameters"),
@@ -502,7 +520,12 @@ class ProgressRubricSpec:
     items: tuple[ProgressRubricItemSpec, ...]
 
     @classmethod
-    def from_mapping(cls, value: object) -> ProgressRubricSpec:
+    def from_mapping(
+        cls,
+        value: object,
+        *,
+        schema_version: str,
+    ) -> ProgressRubricSpec:
         data = _mapping(value, "success.progress_rubric")
         aggregation = dict(
             _json_mapping(data.get("aggregation"), "success.progress_rubric.aggregation")
@@ -527,7 +550,13 @@ class ProgressRubricSpec:
         raw_items = data.get("items")
         if not isinstance(raw_items, list) or not raw_items:
             raise ValueError("success.progress_rubric.items must be a non-empty list")
-        items = tuple(ProgressRubricItemSpec.from_mapping(item) for item in raw_items)
+        items = tuple(
+            ProgressRubricItemSpec.from_mapping(
+                item,
+                schema_version=schema_version,
+            )
+            for item in raw_items
+        )
         _require_unique((item.item_id for item in items), "progress rubric item")
         weight_sum = sum(item.weight for item in items)
         if not math.isclose(weight_sum, 1.0, rel_tol=0.0, abs_tol=1e-6):
@@ -552,7 +581,12 @@ class SuccessSpec:
     progress_rubric: ProgressRubricSpec | None = None
 
     @classmethod
-    def from_mapping(cls, value: object) -> SuccessSpec:
+    def from_mapping(
+        cls,
+        value: object,
+        *,
+        schema_version: str,
+    ) -> SuccessSpec:
         data = _mapping(value, "success")
         raw_predicates = data.get("predicates")
         if not isinstance(raw_predicates, list) or not raw_predicates:
@@ -571,7 +605,12 @@ class SuccessSpec:
             claim_scope=_string(data.get("claim_scope"), "success.claim_scope"),
             predicates=predicates,
             progress_rubric=(
-                None if raw_rubric is None else ProgressRubricSpec.from_mapping(raw_rubric)
+                None
+                if raw_rubric is None
+                else ProgressRubricSpec.from_mapping(
+                    raw_rubric,
+                    schema_version=schema_version,
+                )
             ),
         )
 
@@ -612,6 +651,7 @@ class ScenarioSpec:
             "scenario-spec/v0.3",
             "scenario-spec/v0.4",
             "scenario-spec/v0.5",
+            "scenario-spec/v0.6",
         }:
             raise ValueError("unsupported scenario spec schema_version")
         raw_objects = data.get("objects")
@@ -637,7 +677,10 @@ class ScenarioSpec:
         _require_unique((item.invariant_id for item in invariants), "invariant")
 
         robot = RobotSpec.from_mapping(data.get("robot"))
-        success = SuccessSpec.from_mapping(data.get("success"))
+        success = SuccessSpec.from_mapping(
+            data.get("success"),
+            schema_version=str(schema_version),
+        )
         max_steps = data.get("max_steps")
         if not isinstance(max_steps, int) or isinstance(max_steps, bool) or max_steps <= 0:
             raise ValueError("max_steps must be a positive integer")
@@ -797,9 +840,9 @@ def _validate_progress_rubric_references(
     rubric = spec.success.progress_rubric
     if rubric is None:
         return
-    if spec.schema_version != "scenario-spec/v0.4":
+    if spec.schema_version not in {"scenario-spec/v0.4", "scenario-spec/v0.6"}:
         raise ValueError(
-            "success.progress_rubric requires scenario-spec/v0.4, "
+            "success.progress_rubric requires scenario-spec/v0.4 or v0.6, "
             f"got {spec.schema_version}"
         )
     grasp_windows: list[tuple[str, str, str, str, str]] = []
@@ -883,19 +926,19 @@ def _validate_v05_success_predicate(
         if predicate.predicate_type == "object_at_initial_pose"
         else None
     )
-    if schema_version != "scenario-spec/v0.5":
+    if schema_version not in {"scenario-spec/v0.5", "scenario-spec/v0.6"}:
         if relative_to_part is not None or relative_axis_part is not None:
             raise ValueError(
-                "articulated axis part references require scenario-spec/v0.5"
+                "articulated axis part references require scenario-spec/v0.5 or v0.6"
             )
         if predicate.predicate_type == "articulation_joint_state_reached":
             raise ValueError(
-                "articulation_joint_state_reached requires scenario-spec/v0.5"
+                "articulation_joint_state_reached requires scenario-spec/v0.5 or v0.6"
             )
         return
     if predicate.predicate_type not in _V05_SUCCESS_PREDICATE_TYPES:
         raise ValueError(
-            "scenario-spec/v0.5 success predicate type must be one of "
+            f"{schema_version} success predicate type must be one of "
             + ", ".join(sorted(_V05_SUCCESS_PREDICATE_TYPES))
         )
     field = f"success predicate {predicate.predicate_id}.parameters"

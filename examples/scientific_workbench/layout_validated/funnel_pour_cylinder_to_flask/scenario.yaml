@@ -1,0 +1,93 @@
+schema_version: scenario-spec/v0.6
+scenario_id: scientific_workbench_funnel_pour_cylinder_to_flask
+domain: scientific_workbench
+task_family: bimanual_funnel_pour
+instruction: 操作臂拿起漏斗并插入锥形瓶口；再拿起量筒，对准漏斗入口后倾斜倾倒，最后放回量筒并保持漏斗有效插入。
+scene:
+  asset_id: scientific_environment_code_room_example4_v1
+  root_prim_path: /World
+  pose:
+    xyz: [0.2456705, -0.0069055, 0.0]
+    wxyz: [0.0, 0.0, 0.0, 1.0]
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table
+    source_prim_path: /World/table
+    role: table
+    pose:
+      xyz: [0.242788066, 0.0, 0.0]
+      wxyz: [0.0, 1.0, 0.0, 0.0]
+      scale_xyz: [0.003, 0.0035, 0.004]
+  - id: obj_funnel
+    asset_id: scientific_workbench_funnel_dynamic
+    source_prim_path: /World/Funnel
+    role: funnel
+    pose:
+      xyz: [0.24, 0.22, 0.7827606155]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.12], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      outlet: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.055], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_graduated_cylinder
+    asset_id: scientific_workbench_graduated_cylinder_03_dynamic
+    source_prim_path: /World/graduated_cylinder_03
+    role: source_container
+    pose:
+      xyz: [0.36, 0.02, 0.7827606155]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.2722941904], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.14], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_conical_flask
+    asset_id: scientific_workbench_conical_bottle03_dynamic
+    source_prim_path: /World/conical_bottle03
+    role: target_container
+    pose:
+      xyz: [0.30, -0.20, 0.7827606155]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.1965674179], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.16], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a
+  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, hold]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, insert, tilt, place, release]}
+steps:
+  - {id: lift_funnel, skill: lift, actors: [operating_arm], parameters: {object: obj_funnel}}
+  - {id: grasp_flask, skill: grasp_and_hold, actors: [auxiliary_arm], parameters: {object: obj_conical_flask}, depends_on: [lift_funnel]}
+  - {id: align_funnel, skill: align_frames, actors: [operating_arm], parameters: {source_frame: obj_funnel.outlet, target_frame: obj_conical_flask.opening}, depends_on: [grasp_flask]}
+  - {id: insert_funnel, skill: insert, actors: [operating_arm], parameters: {object: obj_funnel, into: obj_conical_flask}, depends_on: [align_funnel]}
+  - {id: lift_cylinder, skill: lift, actors: [operating_arm], parameters: {object: obj_graduated_cylinder}, depends_on: [insert_funnel]}
+  - {id: align_cylinder_to_funnel, skill: align_openings, actors: [operating_arm], parameters: {source_frame: obj_graduated_cylinder.opening, target_frame: obj_funnel.opening}, depends_on: [lift_cylinder]}
+  - {id: tilt_pour, skill: tilt_pour, actors: [operating_arm], parameters: {object: obj_graduated_cylinder, min_tilt_deg: 65.0}, depends_on: [align_cylinder_to_funnel]}
+  - {id: return_cylinder, skill: place_on_surface, actors: [operating_arm], parameters: {object: obj_graduated_cylinder, support_surface: table}, depends_on: [tilt_pour]}
+invariants:
+  - {id: flask_held_during_insert_and_pour, type: maintain_grasp, actor: auxiliary_arm, object: obj_conical_flask, from_step: grasp_flask, through_step: tilt_pour}
+success:
+  operator: all
+  claim_scope: layout_validated_prototype
+  predicates:
+    - id: funnel_outlet_aligned_with_flask
+      type: relative_pose_reached
+      sequence_index: 0
+      parameters: {object: obj_funnel, relative_to: obj_conical_flask, xyz_range: {x: [-0.08, 0.08], y: [-0.08, 0.08], z: [0.08, 0.30]}}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: funnel_inserted_stably}
+    items:
+      - {id: funnel_lifted, weight: 0.10, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_funnel, support_surface: table, min_clearance_m: 0.01, held_by: operating_arm}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 时序1}}
+      - {id: funnel_aligned_while_grasped, weight: 0.10, temporal: {kind: instant}, condition: {type: pose_while_grasped, parameters: {grasp: {actor: operating_arm, object: obj_funnel}, predicate: {type: relative_pose_reached, parameters: {object: obj_funnel, relative_to: obj_conical_flask}}}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 时序2}}
+      - {id: funnel_inserted_stably, weight: 0.10, temporal: {kind: sustained, window: {from_step: insert_funnel, through_step: tilt_pour}}, condition: {type: relative_pose_reached, parameters: {object: obj_funnel, relative_to: obj_conical_flask, relation: inserted}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 时序3}}
+      - {id: cylinder_lifted, weight: 0.10, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_graduated_cylinder, support_surface: table, min_clearance_m: 0.01, held_by: operating_arm}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 时序4}}
+      - {id: cylinder_aligned_to_funnel, weight: 0.10, temporal: {kind: instant}, condition: {type: pose_while_grasped, parameters: {grasp: {actor: operating_arm, object: obj_graduated_cylinder}, predicate: {type: relative_pose_reached, parameters: {object: obj_graduated_cylinder, relative_to: obj_funnel}}}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 时序5}}
+      - {id: liquid_transfer_majority, weight: 0.20, active: false, requires: [liquid_sim.contained_volume_ratio], temporal: {kind: terminal}, condition: {type: liquid_transfer_ratio, parameters: {source: obj_graduated_cylinder, target: obj_conical_flask, ratio_threshold: 0.5}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 终帧-转移比例过半}}
+      - {id: liquid_transfer_complete, weight: 0.20, active: false, requires: [liquid_sim.contained_volume_ratio], temporal: {kind: terminal}, condition: {type: liquid_transfer_ratio, parameters: {source: obj_graduated_cylinder, target: obj_conical_flask, ratio_threshold: 0.9}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 终帧-全部转移阈值}}
+      - {id: cylinder_returned, weight: 0.05, temporal: {kind: terminal}, condition: {type: object_released_on_support, parameters: {object: obj_graduated_cylinder, support_surface: table}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 终帧-量筒归还}}
+      - {id: funnel_remains_inserted, weight: 0.05, temporal: {kind: terminal}, condition: {type: relative_pose_reached, parameters: {object: obj_funnel, relative_to: obj_conical_flask, relation: inserted}}, source_ref: {document_revision: 1576, sheet_revision: 564, source_order: 13, item: 终帧-漏斗仍插入}}
+max_steps: 2200
+seed: "000"

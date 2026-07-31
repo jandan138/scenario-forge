@@ -1,0 +1,166 @@
+schema_version: scenario-spec/v0.6
+scenario_id: scientific_workbench_pour_cylinder_to_beaker
+domain: scientific_workbench
+task_family: bimanual_pour
+instruction: 辅助臂固定烧杯；操作臂拿起量筒，将量筒口对准烧杯口后倾斜倾倒，最后把量筒正立放回原位。
+scene:
+  asset_id: scientific_environment_code_room_example4_v1
+  root_prim_path: /World
+  pose:
+    xyz: [0.2456705, -0.0069055, 0.0]
+    wxyz: [0.0, 0.0, 0.0, 1.0]
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table
+    source_prim_path: /World/table
+    role: table
+    pose:
+      xyz: [0.242788066, 0.0, 0.0]
+      wxyz: [0.0, 1.0, 0.0, 0.0]
+      scale_xyz: [0.003, 0.0035, 0.004]
+  - id: obj_graduated_cylinder
+    asset_id: scientific_workbench_graduated_cylinder_03_dynamic
+    source_prim_path: /World/graduated_cylinder_03
+    role: source_container
+    pose:
+      xyz: [0.30, 0.17, 0.7827606155]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    named_frames:
+      opening:
+        xyz: [0.0, 0.0, 0.2722941904]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+      grasp:
+        xyz: [0.0, 0.0, 0.14]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+      support:
+        xyz: [0.0, 0.0, 0.0]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+  - id: obj_beaker
+    asset_id: scientific_workbench_beaker_dynamic
+    source_prim_path: /World/Beaker
+    role: target_container
+    pose:
+      xyz: [0.30, -0.17, 0.7827606155]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+    named_frames:
+      opening:
+        xyz: [0.0, 0.0, 0.10]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+      grasp:
+        xyz: [0.0, 0.0, 0.06]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+      support:
+        xyz: [0.0, 0.0, 0.0]
+        wxyz: [1.0, 0.0, 0.0, 0.0]
+robot:
+  profile_ref: manip/lift2/R5a
+  spawn:
+    xyz: [-1.02, 0.0, 0.31]
+    wxyz: [1.0, 0.0, 0.0, 0.0]
+  actors:
+    - id: auxiliary_arm
+      end_effector: right
+      capabilities: [grasp, hold]
+    - id: operating_arm
+      end_effector: left
+      capabilities: [grasp, lift, align, tilt, place, release]
+steps:
+  - id: grasp_beaker
+    skill: grasp_and_hold
+    actors: [auxiliary_arm]
+    parameters: {object: obj_beaker}
+  - id: lift_cylinder
+    skill: lift
+    actors: [operating_arm]
+    parameters: {object: obj_graduated_cylinder}
+    depends_on: [grasp_beaker]
+  - id: align_openings
+    skill: align_openings
+    actors: [auxiliary_arm, operating_arm]
+    parameters:
+      source_frame: obj_graduated_cylinder.opening
+      target_frame: obj_beaker.opening
+    depends_on: [lift_cylinder]
+  - id: tilt_pour
+    skill: tilt_pour
+    actors: [operating_arm]
+    parameters: {object: obj_graduated_cylinder, min_tilt_deg: 65.0}
+    depends_on: [align_openings]
+  - id: return_cylinder
+    skill: place_on_surface
+    actors: [operating_arm]
+    parameters: {object: obj_graduated_cylinder, support_surface: table}
+    depends_on: [tilt_pour]
+invariants:
+  - id: beaker_held_during_pour
+    type: maintain_grasp
+    actor: auxiliary_arm
+    object: obj_beaker
+    from_step: grasp_beaker
+    through_step: tilt_pour
+success:
+  operator: all
+  claim_scope: layout_validated_prototype
+  predicates:
+    - id: cylinder_opening_aligned_above_beaker
+      type: relative_pose_reached
+      sequence_index: 0
+      parameters:
+        object: obj_graduated_cylinder
+        relative_to: obj_beaker
+        xyz_range:
+          x: [-0.10, 0.10]
+          y: [-0.10, 0.10]
+          z: [0.12, 0.40]
+  progress_rubric:
+    aggregation:
+      type: weighted_progress_score
+      normalization: declared_sum
+      inactive_treatment: zero
+      primary_metric_id: openings_aligned_while_grasped
+    items:
+      - id: cylinder_lifted
+        weight: 0.20
+        temporal: {kind: instant}
+        condition:
+          type: object_lifted
+          parameters: {object: obj_graduated_cylinder, support_surface: table, min_clearance_m: 0.01, held_by: operating_arm}
+        source_ref: {document_url: "https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab", document_revision: 1576, sheet_revision: 564, source_order: 2, item: 时序1}
+      - id: openings_aligned_while_grasped
+        weight: 0.30
+        temporal: {kind: instant}
+        condition:
+          type: pose_while_grasped
+          parameters:
+            grasp: {actor: operating_arm, object: obj_graduated_cylinder}
+            predicate:
+              type: relative_pose_reached
+              parameters: {object: obj_graduated_cylinder, relative_to: obj_beaker, xyz_range: {x: [-0.10, 0.10], y: [-0.10, 0.10], z: [0.12, 0.40]}}
+        source_ref: {document_url: "https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab", document_revision: 1576, sheet_revision: 564, source_order: 2, item: 时序2}
+      - id: liquid_transfer_majority
+        weight: 0.20
+        active: false
+        requires: [liquid_sim.contained_volume_ratio]
+        temporal: {kind: terminal}
+        condition:
+          type: liquid_transfer_ratio
+          parameters: {source: obj_graduated_cylinder, target: obj_beaker, ratio_threshold: 0.5}
+        source_ref: {document_url: "https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab", document_revision: 1576, sheet_revision: 564, source_order: 2, item: 终帧-转移比例过半}
+      - id: liquid_transfer_complete
+        weight: 0.20
+        active: false
+        requires: [liquid_sim.contained_volume_ratio]
+        temporal: {kind: terminal}
+        condition:
+          type: liquid_transfer_ratio
+          parameters: {source: obj_graduated_cylinder, target: obj_beaker, ratio_threshold: 0.9}
+        source_ref: {document_url: "https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab", document_revision: 1576, sheet_revision: 564, source_order: 2, item: 终帧-全部转移阈值}
+      - id: cylinder_returned_released
+        weight: 0.10
+        temporal: {kind: terminal}
+        condition:
+          type: object_released_on_support
+          parameters: {object: obj_graduated_cylinder, support_surface: table, released: true, upright_max_tilt_deg: 15.0}
+        source_ref: {document_url: "https://aicarrier.feishu.cn/wiki/GNGCwR2uAi9dK3k6FT0cX5krnab", document_revision: 1576, sheet_revision: 564, source_order: 2, item: 终帧-归还并释放}
+max_steps: 1500
+seed: "000"

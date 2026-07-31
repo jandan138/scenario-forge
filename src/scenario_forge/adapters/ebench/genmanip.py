@@ -37,6 +37,7 @@ _RUNTIME_CONTRACT_SCHEMA_V02 = "scenario-forge-genmanip-runtime-contract/v0.2"
 _RUNTIME_CONTRACT_SCHEMA_V03 = "scenario-forge-genmanip-runtime-contract/v0.3"
 _RUNTIME_CONTRACT_SCHEMA_V04 = "scenario-forge-genmanip-runtime-contract/v0.4"
 _RUNTIME_CONTRACT_SCHEMA_V05 = "scenario-forge-genmanip-runtime-contract/v0.5"
+_RUNTIME_CONTRACT_SCHEMA_V06 = "scenario-forge-genmanip-runtime-contract/v0.6"
 _ARTICULATION_CONTRACT_SCHEMA_V01 = (
     "scenario-forge-articulation-contract/v0.1"
 )
@@ -199,6 +200,7 @@ def export_genmanip_collected_package(
         "scenario-spec/v0.3",
         "scenario-spec/v0.4",
         "scenario-spec/v0.5",
+        "scenario-spec/v0.6",
     }:
         raise GenManipExportError(
             "scenario scene overlays require scenario-spec/v0.2 or later"
@@ -258,9 +260,12 @@ def export_genmanip_collected_package(
         assets_by_id,
     )
     articulation_bindings = _articulation_requirements(objects, assets_by_id)
-    if articulation_bindings and scenario_schema_version != "scenario-spec/v0.5":
+    if articulation_bindings and scenario_schema_version not in {
+        "scenario-spec/v0.5",
+        "scenario-spec/v0.6",
+    }:
         raise GenManipExportError(
-            "articulated_object export requires scenario-spec/v0.5"
+            "articulated_object export requires scenario-spec/v0.5 or v0.6"
         )
     qualified_object_ids.update(articulation_bindings)
     required_exact_object_ids = _exact_success_object_ids(success)
@@ -933,21 +938,26 @@ def _runtime_contract(
     if (
         qualified_rigid_object_ids
         and not exact_success
-        and scenario_schema_version != "scenario-spec/v0.5"
+        and scenario_schema_version
+        not in {"scenario-spec/v0.5", "scenario-spec/v0.6"}
     ):
         raise GenManipExportError(
             "qualified rigid objects require the exact ordered success contract"
         )
     exact_runtime_contract_schema = (
-        _RUNTIME_CONTRACT_SCHEMA_V05
-        if scenario_schema_version == "scenario-spec/v0.5"
+        _RUNTIME_CONTRACT_SCHEMA_V06
+        if scenario_schema_version == "scenario-spec/v0.6"
         else (
-            _RUNTIME_CONTRACT_SCHEMA_V04
-            if scenario_schema_version == "scenario-spec/v0.4"
+            _RUNTIME_CONTRACT_SCHEMA_V05
+            if scenario_schema_version == "scenario-spec/v0.5"
             else (
-                _RUNTIME_CONTRACT_SCHEMA_V03
-                if scenario_schema_version == "scenario-spec/v0.3"
-                else _RUNTIME_CONTRACT_SCHEMA_V02
+                _RUNTIME_CONTRACT_SCHEMA_V04
+                if scenario_schema_version == "scenario-spec/v0.4"
+                else (
+                    _RUNTIME_CONTRACT_SCHEMA_V03
+                    if scenario_schema_version == "scenario-spec/v0.3"
+                    else _RUNTIME_CONTRACT_SCHEMA_V02
+                )
             )
         )
     )

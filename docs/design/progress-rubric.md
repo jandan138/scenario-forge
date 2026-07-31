@@ -1,4 +1,4 @@
-# Progress Rubric (scenario-spec/v0.4)
+# Progress Rubric (scenario-spec/v0.4 and v0.6)
 
 `scenario-spec/v0.4` adds an optional `success.progress_rubric` alongside the
 existing `success.predicates` contract. The two have different jobs:
@@ -98,3 +98,20 @@ The rubric mirrors the upstream task-design Progress Score (see
 [the generated reference copy](../reference/scientific-workbench-task-design.html)). Weights are
 re-aligned in batches, not per upstream edit; every item carries a pinned
 `source_ref` (document revision, sheet revision, extraction date).
+
+## v0.6 condition extension
+
+`scenario-spec/v0.6` retains the v0.4 aggregation and activation semantics and
+adds three rubric condition types needed by the live scientific-workbench task
+sheet:
+
+- `relative_pose_reached` for a scored alignment or insertion relation;
+- `object_at_initial_pose` for a return-to-start condition;
+- `motion_trajectory_completed` for an explicitly configured motion sequence,
+  such as vessel shaking.
+
+The compiler emits `task/v0.5` and `metrics/v0.4`; the GenManip adapter transports
+the result in `scenario-forge-genmanip-runtime-contract/v0.6`. These additions do
+not add an evaluator to Scenario Forge or activate scoring in GenManip. The
+runtime contract remains `transport_only`, and every rubric item remains
+unevaluated until the downstream runtime explicitly implements and records it.

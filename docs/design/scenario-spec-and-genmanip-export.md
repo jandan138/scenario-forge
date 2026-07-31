@@ -255,6 +255,28 @@ only the ConvertAsset contract's explicit `runtime_reset_value` and runtime stat
 intervals enter GenManip configuration or episode metadata. Scenario Forge does
 not repair appliance physics, add controller logic, or modify GenManip.
 
+## Layout-prototype rubric transport (v0.6)
+
+`scenario-spec/v0.6` combines the general v0.5 object and articulation predicate
+set with the progress rubric. It is intended for source-faithful task packages
+whose complete metric definition must travel with the package even when some
+capabilities are not yet available.
+
+The portable compiler emits `task/v0.5` and `metrics/v0.4`. The GenManip adapter
+emits `scenario-forge-genmanip-runtime-contract/v0.6` and keeps
+`contract_status: transport_only`; it does not execute robot steps or score the
+rubric. Inactive capability-gated items remain present. A
+`declared_sum + zero` rubric therefore keeps its original denominator and exposes
+an honest active score ceiling instead of silently renormalizing the available
+subset.
+
+Authored key-state layers used for visual review are evidence sidecars, not task
+execution. They sublayer the compiled scene, preserve Z-up metre units, author
+only the reviewed object transforms, and use an evidence-only dome light. The
+Isaac preview disables rigid-body and collision APIs in the session layer so
+these static poses can be inspected without mutating the package USD or claiming
+physical feasibility.
+
 ## Asset boundary
 
 The compiler accepts an already usable USD bundle and copies it into a fat package.

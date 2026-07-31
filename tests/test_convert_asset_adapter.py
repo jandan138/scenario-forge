@@ -38,6 +38,7 @@ def _write_source_bound_handoff(
     with_disabled_source_collider: bool = False,
     observed_collider_approximation: str = "convexDecomposition",
     interaction_root: str = "/World/DryingBox_03",
+    interaction_profile_schema_version: str = "aan.object_interaction_profile.v1",
     entry_world_transform: list[list[float]] | None = None,
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     if source_usd is None:
@@ -185,7 +186,7 @@ def Xform "World"
         interaction_profile = package_dir / "interaction" / "profile.json"
         interaction_profile.parent.mkdir(parents=True)
         interaction_profile.write_text(
-            '{"schema_version":"aan.object_interaction_profile.v1"}\n',
+            json.dumps({"schema_version": interaction_profile_schema_version}) + "\n",
             encoding="utf-8",
         )
         interaction_overlay = package_dir / "overlays" / "interaction.usda"
@@ -221,7 +222,7 @@ def Xform "World"
             "schema_version": "aan.interaction_contract.v1",
             "status": "pass",
             "profile": {
-                "schema_version": "aan.object_interaction_profile.v1",
+                "schema_version": interaction_profile_schema_version,
                 "profile_id": "dryingbox.interaction",
                 "revision": "r1",
                 "source_sha256": source_sha,
@@ -1389,6 +1390,31 @@ def test_task_ready_interaction_handoff_maps_to_rigid_object_without_local_repai
     )
     assert interaction["closure"]["tree_encoding"] == (
         "canonical_json_artifact_list_v1"
+    )
+
+
+def test_task_ready_interaction_handoff_accepts_profile_v2(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+        interaction_profile_schema_version="aan.object_interaction_profile.v2",
+    )
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/DryingBox_03",),
+        producer_revision="interaction-profile-v2",
+        usage="rigid_object",
+    )
+
+    assert handoff.interaction_contract is not None
+    assert (
+        handoff.interaction_contract.payload["profile"]["schema_version"]
+        == "aan.object_interaction_profile.v2"
     )
 
 

@@ -2652,12 +2652,20 @@ def _load_interaction_contract(
         },
         "interaction_contract.profile",
     )
-    _require_value(
+    profile_schema_version = _required_string(
         profile,
         "schema_version",
-        "aan.object_interaction_profile.v1",
         "interaction_contract.profile",
     )
+    if profile_schema_version not in {
+        "aan.object_interaction_profile.v1",
+        "aan.object_interaction_profile.v2",
+    }:
+        raise ConvertAssetHandoffError(
+            "interaction_contract.profile.schema_version must be "
+            "'aan.object_interaction_profile.v1' or "
+            "'aan.object_interaction_profile.v2'"
+        )
     _required_string(profile, "profile_id", "interaction_contract.profile")
     _required_string(profile, "revision", "interaction_contract.profile")
     if _required_sha256(profile, "source_sha256", "interaction_contract.profile") != source_sha256:

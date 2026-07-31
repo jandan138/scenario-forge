@@ -471,12 +471,16 @@ def _task_contract(scenario: Mapping[str, Any]) -> dict[str, Any]:
     actors = _mapping_list(robot.get("actors"), "robot.actors")
     return {
         "schema_version": (
-            "task/v0.4"
-            if scenario.get("schema_version") == "scenario-spec/v0.4"
+            "task/v0.5"
+            if scenario.get("schema_version") == "scenario-spec/v0.6"
             else (
-                "task/v0.3"
-                if scenario.get("schema_version") == "scenario-spec/v0.3"
-                else "task/v0.2"
+                "task/v0.4"
+                if scenario.get("schema_version") == "scenario-spec/v0.4"
+                else (
+                    "task/v0.3"
+                    if scenario.get("schema_version") == "scenario-spec/v0.3"
+                    else "task/v0.2"
+                )
             )
         ),
         "task_id": scenario["scenario_id"],
@@ -535,7 +539,14 @@ def _metrics(scenario: Mapping[str, Any]) -> dict[str, Any]:
     success = _mapping(scenario.get("success"), "success")
     raw_rubric = success.get("progress_rubric")
     if isinstance(raw_rubric, Mapping):
-        return _rubric_metrics(raw_rubric)
+        return _rubric_metrics(
+            raw_rubric,
+            schema_version=(
+                "metrics/v0.4"
+                if scenario.get("schema_version") == "scenario-spec/v0.6"
+                else "metrics/v0.3"
+            ),
+        )
     predicates = _mapping_list(success.get("predicates"), "success.predicates")
     metrics: list[dict[str, Any]] = []
     for index, predicate in enumerate(predicates):
@@ -552,7 +563,11 @@ def _metrics(scenario: Mapping[str, Any]) -> dict[str, Any]:
     return {"schema_version": "metrics/v0.2", "metrics": metrics}
 
 
-def _rubric_metrics(rubric: Mapping[str, Any]) -> dict[str, Any]:
+def _rubric_metrics(
+    rubric: Mapping[str, Any],
+    *,
+    schema_version: str,
+) -> dict[str, Any]:
     items = _mapping_list(rubric.get("items"), "success.progress_rubric.items")
     metrics: list[dict[str, Any]] = []
     for item in items:
@@ -571,7 +586,7 @@ def _rubric_metrics(rubric: Mapping[str, Any]) -> dict[str, Any]:
             metric["source_ref"] = item["source_ref"]
         metrics.append(metric)
     return {
-        "schema_version": "metrics/v0.3",
+        "schema_version": schema_version,
         "aggregation": rubric["aggregation"],
         "metrics": metrics,
     }

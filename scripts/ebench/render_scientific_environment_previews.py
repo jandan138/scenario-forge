@@ -33,13 +33,25 @@ def plan_camera_views(
     *,
     position: Sequence[float],
     target: Sequence[float],
+    orbit_position: Sequence[float] | None = None,
+    orbit_target: Sequence[float] | None = None,
 ) -> list[dict[str, Any]]:
     """Preserve the author view and add two comparable eye-level orbit views."""
 
     authored_position = _finite_vector(position, "position")
     authored_target = _finite_vector(target, "target")
+    orbit_position_vector = (
+        authored_position
+        if orbit_position is None
+        else _finite_vector(orbit_position, "orbit_position")
+    )
+    orbit_target_vector = (
+        authored_target
+        if orbit_target is None
+        else _finite_vector(orbit_target, "orbit_target")
+    )
     offset = [
-        authored_position[index] - authored_target[index]
+        orbit_position_vector[index] - orbit_target_vector[index]
         for index in range(3)
     ]
     distance = math.sqrt(sum(value * value for value in offset))
@@ -60,12 +72,12 @@ def plan_camera_views(
             {
                 "name": name,
                 "position": _orbit_position(
-                    target=authored_target,
+                    target=orbit_target_vector,
                     distance=eye_distance,
                     elevation_deg=18.0,
                     azimuth_deg=azimuth + azimuth_delta,
                 ),
-                "target": authored_target,
+                "target": orbit_target_vector,
             }
         )
     return views
@@ -242,6 +254,7 @@ def render_worker(
     width: int,
     height: int,
     warmup_frames: int,
+    fast_static_preview: bool = False,
 ) -> int:
     if _file_sha256(source_usd) != source_sha256:
         raise ValueError(f"source SHA-256 mismatch: {source_usd}")
@@ -264,7 +277,7 @@ def render_worker(
             {
                 "headless": True,
                 "renderer": "RayTracedLighting",
-                "anti_aliasing": 4,
+                "anti_aliasing": 0 if fast_static_preview else 4,
                 "multi_gpu": False,
                 "sync_loads": True,
                 "width": width,
@@ -275,17 +288,20 @@ def render_worker(
         import carb.settings
         import numpy as np
         import omni.replicator.core as rep
+        import omni.timeline
         import omni.usd
         from omni.isaac.sensor import Camera
         from PIL import Image
         from scipy.spatial.transform import Rotation
-        from pxr import UsdGeom
+        from pxr import Usd, UsdGeom, UsdPhysics
 
         settings = carb.settings.get_settings()
         settings.set("/rtx/post/aa/autoExposureMode", 1)
         settings.set("/rtx/post/aa/exposureMultiplier", 0.8)
         settings.set("/rtx/post/histogram/enabled", True)
 
+        timeline = omni.timeline.get_timeline_interface()
+        timeline.stop()
         context = omni.usd.get_context()
         opened = bool(context.open_stage(str(source_usd.resolve())))
         if not opened:
@@ -306,7 +322,18 @@ def render_worker(
         stage = context.get_stage()
         if stage is None:
             raise RuntimeError(f"opened stage is unavailable: {source_usd}")
-        camera_settings = stage.GetRootLayer().customLayerData.get(
+        root_custom_data = stage.GetRootLayer().customLayerData
+        authored_static_preview = bool(
+            root_custom_data.get("scenarioForgeAuthoredStaticPreview", False)
+        )
+        if authored_static_preview:
+            with Usd.EditContext(stage, stage.GetSessionLayer()):
+                for prim in stage.TraverseAll():
+                    if prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                        UsdPhysics.RigidBodyAPI(prim).GetRigidBodyEnabledAttr().Set(False)
+                    if prim.HasAPI(UsdPhysics.CollisionAPI):
+                        UsdPhysics.CollisionAPI(prim).GetCollisionEnabledAttr().Set(False)
+        camera_settings = root_custom_data.get(
             "cameraSettings", {}
         )
         perspective = (
@@ -320,7 +347,12 @@ def render_worker(
         target = perspective.get("target")
         if position is None or target is None:
             raise RuntimeError("Perspective camera position/target are missing")
-        views = plan_camera_views(position=tuple(position), target=tuple(target))
+        views = plan_camera_views(
+            position=tuple(position),
+            target=tuple(target),
+            orbit_position=perspective.get("orbitPosition"),
+            orbit_target=perspective.get("orbitTarget"),
+        )
 
         for index, view in enumerate(views):
             camera = Camera(
@@ -353,7 +385,7 @@ def render_worker(
             simulation_app.update()
         for _ in range(max(1, math.ceil(warmup_frames / 20))):
             rep.orchestrator.step(
-                rt_subframes=4,
+                rt_subframes=1 if fast_static_preview else 4,
                 pause_timeline=True,
                 delta_time=0.0,
             )
@@ -369,6 +401,15 @@ def render_worker(
             if not isinstance(rgba, np.ndarray) or rgba.size == 0:
                 raise RuntimeError(f"camera returned no frame: {view['name']}")
             rgb = _rgba_to_rgb(rgba, np=np)
+            visibility = _frame_visibility_stats(rgb, np=np)
+            if (
+                visibility["mean_luminance"] < 2.0
+                or visibility["p99_luminance"] < 10.0
+            ):
+                raise RuntimeError(
+                    "camera frame is effectively black: "
+                    f"{view['name']} {visibility}"
+                )
             image_path = output_root / f"{view['name']}.png"
             Image.fromarray(rgb).save(image_path)
             view_records[str(view["name"])] = {
@@ -377,6 +418,7 @@ def render_worker(
                 "position": [float(value) for value in view["position"]],
                 "target": [float(value) for value in view["target"]],
                 "resolution": [width, height],
+                "visibility": visibility,
             }
 
         _write_retake_contact_sheet(
@@ -397,6 +439,7 @@ def render_worker(
                 "renderer": "RayTracedLighting",
                 "stage_meters_per_unit": stage_units,
                 "auto_exposure": True,
+                "authored_static_physics_disabled": authored_static_preview,
             },
             "views": view_records,
             "contact_sheet": {
@@ -560,6 +603,21 @@ def _rgba_to_rgb(rgba, *, np):
     ).astype(np.uint8)
 
 
+def _frame_visibility_stats(rgb, *, np) -> dict[str, float]:
+    array = np.asarray(rgb, dtype=np.float32)
+    if array.ndim != 3 or array.shape[2] != 3:
+        raise RuntimeError(f"unexpected RGB frame shape: {array.shape}")
+    luminance = (
+        array[:, :, 0] * 0.2126
+        + array[:, :, 1] * 0.7152
+        + array[:, :, 2] * 0.0722
+    )
+    return {
+        "mean_luminance": round(float(np.mean(luminance)), 3),
+        "p99_luminance": round(float(np.percentile(luminance, 99.0)), 3),
+    }
+
+
 def _orbit_position(
     *,
     target: Sequence[float],
@@ -656,6 +714,7 @@ def build_parser() -> argparse.ArgumentParser:
     worker.add_argument("--width", type=int, default=960)
     worker.add_argument("--height", type=int, default=540)
     worker.add_argument("--warmup-frames", type=int, default=20)
+    worker.add_argument("--fast-static-preview", action="store_true")
     return parser
 
 
@@ -680,6 +739,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         width=args.width,
         height=args.height,
         warmup_frames=args.warmup_frames,
+        fast_static_preview=args.fast_static_preview,
     )
 
 

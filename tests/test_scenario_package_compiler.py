@@ -669,3 +669,25 @@ def test_metrics_v03_file_matches_its_json_schema(tmp_path: Path) -> None:
     )
 
     Draft202012Validator(schema).validate(metrics)
+
+
+def test_package_compiler_emits_v06_task_and_rubric_metrics(tmp_path: Path) -> None:
+    from tests.test_scenario_spec import _scenario_mapping_v06
+
+    source_usd = _write_source_scene(tmp_path)
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(_scenario_mapping_v06()),
+        {"scientific_workbench_environment": _asset_source(source_usd)},
+        package_root,
+    )
+
+    task = yaml.safe_load((package_root / "task/task.yaml").read_text(encoding="utf-8"))
+    metrics = yaml.safe_load(
+        (package_root / "metrics/metrics.yaml").read_text(encoding="utf-8")
+    )
+    assert task["schema_version"] == "task/v0.5"
+    assert metrics["schema_version"] == "metrics/v0.4"
+    assert metrics["metrics"][-1]["condition"]["type"] == (
+        "motion_trajectory_completed"
+    )
