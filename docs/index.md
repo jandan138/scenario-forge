@@ -23,12 +23,14 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Scenario Source Bindings](design/scenario-source-bindings.md)
 - [Task Catalog and Readiness](design/task-catalog-and-readiness.md)
 - [Scientific Workbench Tabletop Placement](design/scientific-workbench-tabletop-placement.md)
+- [Scientific Workbench Task Coverage Factory](design/task-coverage-factory.md)
 - [Progress Rubric (scenario-spec/v0.4)](design/progress-rubric.md)
 - [Liquid Measurement Adapter Contract](design/liquid-measurement-adapter-contract.md)
 
 ## Operations
 
 - [Artifact Policy](operations/artifact-policy.md)
+- [Build the Scientific Workbench Task Directory](operations/build-scientific-workbench-task-directory.md)
 - [Development Checks](operations/development-checks.md)
 - [Generate the Bimanual Pour Package](operations/generate-bimanual-pour-package.md)
 - [Qualify the Bimanual Pour Vessel Assets](operations/qualify-bimanual-pour-vessels.md)
@@ -66,4 +68,5 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-30 Code-as-Room Generated Environment Integration](records/2026-07-30-code-as-room-generated-environment-integration.md)
 - [2026-07-30 Centrifuge Proxy Parent-Local Requalification](records/2026-07-30-centrifuge-proxy-parent-local-requalification.md)
 - [2026-07-31 Task Design Authority Correction](records/2026-07-31-scientific-workbench-task-design-correction.md)
+- [2026-08-01 Scientific Workbench Coverage Factory v1](records/2026-08-01-scientific-workbench-coverage-factory-v1.md)
 - [2026-07-06 Phase 13 S2D-12 Soap-to-Dish Static Candidate Evidence](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/generated_package_summary.yaml)

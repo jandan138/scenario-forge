@@ -1292,6 +1292,12 @@ def test_main_generates_independent_packages_for_profiled_zones(
     )
     monkeypatch.setattr(
         module,
+        "write_provisional_ik_preflight_request",
+        lambda package_root: Path(package_root)
+        / "adapters/ebench/genmanip/provisional_ik_preflight/request.yaml",
+    )
+    monkeypatch.setattr(
+        module,
         "export_genmanip_collected_package",
         lambda package_root: SimpleNamespace(output_dir=package_root),
     )

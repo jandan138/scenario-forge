@@ -30,6 +30,12 @@ def _stub_tabletop_policy_for_non_tabletop_fixture_packages(monkeypatch) -> None
             overall_status="pass",
         ),
     )
+    monkeypatch.setattr(
+        generator,
+        "write_provisional_ik_preflight_request",
+        lambda package_root: Path(package_root)
+        / "adapters/ebench/genmanip/provisional_ik_preflight/request.yaml",
+    )
 
 
 def _load(path: Path) -> dict[str, object]:

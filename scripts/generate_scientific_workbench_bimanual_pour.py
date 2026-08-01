@@ -11,6 +11,9 @@ import yaml
 
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
+from scenario_forge.adapters.ebench.ik_preflight import (
+    write_provisional_ik_preflight_request,
+)
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
 from scenario_forge.adapters.ebench.tabletop_placement import (
     validate_scientific_workbench_tabletop_placement,
@@ -209,6 +212,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         package.package_root
     )
     export = export_genmanip_collected_package(package.package_root)
+    ik_preflight_request = write_provisional_ik_preflight_request(package.package_root)
     if not args.static_only:
         run_genmanip_initial_preview(
             export.output_dir,
@@ -219,6 +223,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     print(f"Portable package: {package.package_root}")
     print(f"Tabletop placement policy: {tabletop_placement.evidence_path}")
+    print(f"Provisional IK request: {ik_preflight_request}")
     print(f"GenManip collected package: {export.output_dir}")
     print(
         "Initial-scene preview: "

@@ -15,6 +15,9 @@ from typing import Any, Mapping, Sequence
 import yaml
 
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
+from scenario_forge.adapters.ebench.ik_preflight import (
+    write_provisional_ik_preflight_request,
+)
 from scenario_forge.adapters.ebench.preview import (
     run_genmanip_initial_preview,
     write_genmanip_preview_request,
@@ -486,6 +489,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             package.package_root
         )
         export = export_genmanip_collected_package(package.package_root)
+        ik_preflight_request = write_provisional_ik_preflight_request(package.package_root)
         states = _write_key_states(
             task_key=task_key,
             package_root=package.package_root,
@@ -525,6 +529,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ),
                 "authored_key_states": len(states),
                 "tabletop_placement_policy": tabletop_placement.overall_status,
+                "provisional_ik_preflight": {
+                    "status": "requested",
+                    "request_path": str(ik_preflight_request.resolve()),
+                },
                 "runtime_preview": (
                     "post_reset_pre_action_1080p"
                     if args.render_runtime_preview

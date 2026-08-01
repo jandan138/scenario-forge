@@ -17,6 +17,9 @@ import yaml
 from scenario_forge.adapters.ebench.genmanip import (
     export_genmanip_collected_package,
 )
+from scenario_forge.adapters.ebench.ik_preflight import (
+    write_provisional_ik_preflight_request,
+)
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
 from scenario_forge.adapters.ebench.tabletop_placement import (
     validate_scientific_workbench_tabletop_placement,
@@ -524,6 +527,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             package.package_root,
             legacy_v01_transport=True,
         )
+        write_provisional_ik_preflight_request(package.package_root)
         if not args.static_only:
             run_genmanip_initial_preview(
                 export.output_dir,

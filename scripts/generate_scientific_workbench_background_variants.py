@@ -22,6 +22,9 @@ import yaml
 
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
+from scenario_forge.adapters.ebench.ik_preflight import (
+    write_provisional_ik_preflight_request,
+)
 from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
 from scenario_forge.adapters.ebench.tabletop_placement import (
     validate_scientific_workbench_tabletop_placement,
@@ -615,6 +618,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             compiled.package_root
         )
         export = export_genmanip_collected_package(compiled.package_root)
+        ik_preflight_request = write_provisional_ik_preflight_request(
+            compiled.package_root
+        )
         _configure_background_preview(
             export.output_dir,
             placement,
@@ -653,6 +659,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "tabletop_placement_policy": {
                     "status": tabletop_placement.overall_status,
                     "evidence_path": str(tabletop_placement.evidence_path),
+                },
+                "provisional_ik_preflight": {
+                    "status": "requested",
+                    "request_path": str(ik_preflight_request),
                 },
                 "genmanip_root": str(export.output_dir),
                 "background_manifest": str(candidate.manifest_path),
