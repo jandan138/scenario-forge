@@ -30,6 +30,22 @@ candidate** and the separately-qualified `latest` package. A candidate stays
 visible while any required promotion gate is still `not_run` or failed; only an
 all-pass release becomes `latest`.
 
+## Publish the reviewed directory
+
+The repository's GitHub Pages source is `main:/docs`. After building the
+directory, publish its HTML and candidate overview images into that source:
+
+```bash
+PYTHONPATH=src python scripts/publish_scientific_workbench_task_directory.py \
+  --source outputs/scientific_workbench_coverage_factory_YYYYMMDD/directory \
+  --out docs/task-directory
+```
+
+Commit the resulting `docs/task-directory/` files. GitHub Pages then serves the
+directory at `/scenario-forge/task-directory/`. The publisher only copies the
+reviewed overview images displayed by the page; portable packages and USD
+assets remain outside the public site.
+
 Give ConvertAsset the generated admission request. It must return source-bound
 packages and manifests; Scenario Forge must not add a task-specific collider,
 mass, inertia, scale, or PhysX workaround.

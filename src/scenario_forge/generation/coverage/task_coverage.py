@@ -396,7 +396,7 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
 def _directory_html(payload: Mapping[str, object]) -> str:
     tasks = _mappings(payload.get("tasks"), "directory.tasks")
     rows = "\n".join(
-        "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+        "<tr><td class=\"row-order\">{}</td><td class=\"task-title\">{}</td><td class=\"queue-status\">{}</td><td class=\"release-id\">{}</td><td class=\"latest-id\">{}</td><td class=\"background-binding\">{}</td><td class=\"evidence-thumb\">{}</td></tr>".format(
             task["source_order"],
             _html(str(task["title_zh"])),
             _html(str(task["queue_status"])),
@@ -415,9 +415,9 @@ def _directory_html(payload: Mapping[str, object]) -> str:
     )
     return """<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><title>Scientific Workbench Task Directory</title>
-<style>body{font-family:system-ui,sans-serif;margin:2rem;color:#18212f}table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #d8dee9;padding:.6rem;text-align:left}th{background:#f4f7fb}code{font-size:.9em}img{width:144px;height:81px;object-fit:cover;border-radius:4px}p{max-width:72rem;color:#4a5568}</style>
+<style>*{box-sizing:border-box}body{font-family:system-ui,sans-serif;margin:2rem;color:#18212f}.table-scroll{max-width:100%;overflow-x:auto}table{border-collapse:collapse;min-width:1080px;width:100%;table-layout:fixed}th,td{border-bottom:1px solid #d8dee9;padding:.6rem;text-align:left}.row-order{width:3rem}.task-title{width:12rem}.queue-status{width:6rem}.release-id{overflow-wrap:anywhere;width:20rem}.latest-id{overflow-wrap:anywhere;width:12rem}.background-binding{overflow-wrap:anywhere;width:15rem}.evidence-thumb{width:11rem}th{background:#f4f7fb}code{font-size:.9em}img{width:144px;height:81px;object-fit:cover;border-radius:4px}p{max-width:72rem;color:#4a5568}.scroll-hint{display:none}@media(max-width:700px){body{margin:1rem}th,td{padding:.5rem}img{width:120px;height:68px}.scroll-hint{display:block;color:#4a5568}}</style>
 </head><body><h1>Scientific Workbench Task Directory</h1>
-<table><thead><tr><th>#</th><th>Task</th><th>Queue</th><th>Current candidate</th><th>Latest qualified</th><th>Background</th><th>Evidence</th></tr></thead><tbody>""" + rows + """</tbody></table>
+<p class="scroll-hint">左右滑动查看全部列。</p><div class="table-scroll"><table><thead><tr><th class="row-order">#</th><th class="task-title">Task</th><th class="queue-status">Queue</th><th class="release-id">Current candidate</th><th class="latest-id">Latest qualified</th><th class="background-binding">Background</th><th class="evidence-thumb">Evidence</th></tr></thead><tbody>""" + rows + """</tbody></table></div>
 <h2>Claim boundary</h2><p>""" + _html(str(payload["claim_boundary"])) + """</p></body></html>
 """
 

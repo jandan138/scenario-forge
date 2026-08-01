@@ -187,6 +187,51 @@ def test_task_directory_keeps_immutable_release_and_latest_separate(tmp_path: Pa
     )
 
 
+def test_task_directory_html_keeps_wide_tables_inside_a_scroll_container(tmp_path: Path) -> None:
+    plan = {
+        "catalog_id": "catalog",
+        "default_environment_binding": "environment",
+        "default_table_binding": "table",
+        "tasks": [
+            {
+                "task_id": "pour",
+                "source_order": 1,
+                "title_zh": "倒液",
+                "status": "queued",
+                "blockers": [],
+            }
+        ],
+        "claim_boundary": "boundary",
+    }
+    releases = [
+        {
+            "task_id": "pour",
+            "release_id": "pour.v1",
+            "package_path": "packages/pour",
+            "background_binding": "environment",
+            "promotion": "candidate",
+            "evidence": {"overview_image": "images/pour.png"},
+            "gates": {
+                "self_contained_package": "not_run",
+                "runtime_reset": "not_run",
+                "tabletop_placement": "not_run",
+                "visual_review": "not_run",
+                "provisional_ik": "not_run",
+            },
+        }
+    ]
+
+    result = write_task_directory(plan, releases, output_dir=tmp_path / "directory")
+
+    html = (result / "index.html").read_text(encoding="utf-8")
+    assert '<div class="table-scroll"><table>' in html
+    assert ".table-scroll{max-width:100%;overflow-x:auto}" in html
+    assert 'class="task-title"' in html
+    assert 'class="release-id"' in html
+    assert ".release-id{overflow-wrap:anywhere" in html
+    assert 'class="scroll-hint"' in html
+
+
 def test_task_directory_shows_candidate_evidence_without_promoting_it(tmp_path: Path) -> None:
     plan = build_task_coverage_plan(
         catalog=_catalog(),
