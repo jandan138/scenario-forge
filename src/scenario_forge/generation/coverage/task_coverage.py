@@ -25,10 +25,53 @@ REQUIRED_LATEST_GATES = (
     "visual_review",
     "provisional_ik",
 )
+_GATE_EVIDENCE = {
+    "self_contained_package": ("evidence/package_closure.yaml", "status", "pass"),
+    "runtime_reset": (
+        "adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml",
+        "status",
+        "passed",
+    ),
+    "tabletop_placement": ("evidence/tabletop_placement_policy.yaml", "overall_status", "pass"),
+    "visual_review": ("evidence/phase11_visual_review_gate.yaml", "status", "passed"),
+    "provisional_ik": ("evidence/provisional_ik_preflight.yaml", "overall_status", "pass"),
+}
 
 
 class CoveragePlanError(ValueError):
     """Raised when coverage inputs or release records are malformed."""
+
+
+def refresh_release_evidence(
+    releases: Iterable[Mapping[str, object]],
+    *,
+    base_dir: str | Path = ".",
+) -> list[dict[str, object]]:
+    """Refresh gate state from a package's recorded evidence.
+
+    A release is promoted only when all five evidence files independently report
+    their passing state. Missing evidence remains ``not_run``; a present file
+    whose status does not pass is recorded as ``failed``.
+    """
+
+    root_dir = Path(base_dir)
+    refreshed: list[dict[str, object]] = []
+    for raw_release in releases:
+        release = dict(raw_release)
+        package_path = _required_string(release, "package_path", "release")
+        root = Path(package_path)
+        if not root.is_absolute():
+            root = root_dir / root
+        gates = {
+            gate: _gate_status(root, relative_path, field, passing_value)
+            for gate, (relative_path, field, passing_value) in _GATE_EVIDENCE.items()
+        }
+        release["gates"] = gates
+        release["promotion"] = (
+            "latest" if all(status == "pass" for status in gates.values()) else "candidate"
+        )
+        refreshed.append(release)
+    return refreshed
 
 
 def build_task_coverage_plan(
@@ -147,6 +190,19 @@ def write_convertasset_admission_request(
     target = Path(path)
     _write_yaml(target, payload)
     return target
+
+
+def _gate_status(root: Path, relative_path: str, field: str, passing_value: str) -> str:
+    evidence_path = root / relative_path
+    if not evidence_path.is_file():
+        return "not_run"
+    try:
+        payload = yaml.safe_load(evidence_path.read_text(encoding="utf-8"))
+    except OSError:
+        return "failed"
+    if not isinstance(payload, Mapping):
+        return "failed"
+    return "pass" if payload.get(field) == passing_value else "failed"
 
 
 def write_task_directory(

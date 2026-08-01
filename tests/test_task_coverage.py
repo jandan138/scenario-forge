@@ -8,6 +8,7 @@ import yaml
 from scenario_forge.generation.coverage.task_coverage import (
     CoveragePlanError,
     build_task_coverage_plan,
+    refresh_release_evidence,
     write_convertasset_admission_request,
     write_task_directory,
 )
@@ -256,3 +257,78 @@ def test_task_directory_refuses_to_promote_partial_gate_release(tmp_path: Path) 
             ],
             output_dir=tmp_path / "directory",
         )
+
+
+def test_refresh_release_evidence_promotes_only_complete_candidate(tmp_path: Path) -> None:
+    package = tmp_path / "package"
+    (package / "evidence").mkdir(parents=True)
+    (package / "adapters/ebench/genmanip/evidence/initial_scene").mkdir(parents=True)
+    evidence = {
+        "evidence/package_closure.yaml": {"status": "pass"},
+        "evidence/tabletop_placement_policy.yaml": {"overall_status": "pass"},
+        "evidence/phase11_visual_review_gate.yaml": {"status": "passed"},
+        "evidence/provisional_ik_preflight.yaml": {"overall_status": "pass"},
+        "adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml": {
+            "status": "passed"
+        },
+    }
+    for relative, payload in evidence.items():
+        (package / relative).write_text(yaml.safe_dump(payload), encoding="utf-8")
+    release = {
+        "task_id": "pour",
+        "release_id": "pour.v4",
+        "package_path": str(package),
+        "background_binding": "room",
+        "promotion": "candidate",
+        "gates": {gate: "not_run" for gate in (
+            "self_contained_package",
+            "runtime_reset",
+            "tabletop_placement",
+            "visual_review",
+            "provisional_ik",
+        )},
+    }
+
+    refreshed = refresh_release_evidence([release])
+
+    assert refreshed == [
+        {
+            **release,
+            "promotion": "latest",
+            "gates": {
+                "self_contained_package": "pass",
+                "runtime_reset": "pass",
+                "tabletop_placement": "pass",
+                "visual_review": "pass",
+                "provisional_ik": "pass",
+            },
+        }
+    ]
+
+
+def test_refresh_release_evidence_retains_candidate_for_missing_gate(tmp_path: Path) -> None:
+    release = {
+        "task_id": "pour",
+        "release_id": "pour.v4",
+        "package_path": str(tmp_path / "missing-package"),
+        "background_binding": "room",
+        "promotion": "candidate",
+        "gates": {gate: "not_run" for gate in (
+            "self_contained_package",
+            "runtime_reset",
+            "tabletop_placement",
+            "visual_review",
+            "provisional_ik",
+        )},
+    }
+
+    refreshed = refresh_release_evidence([release])
+
+    assert refreshed[0]["promotion"] == "candidate"
+    assert refreshed[0]["gates"] == {
+        "self_contained_package": "not_run",
+        "runtime_reset": "not_run",
+        "tabletop_placement": "not_run",
+        "visual_review": "not_run",
+        "provisional_ik": "not_run",
+    }

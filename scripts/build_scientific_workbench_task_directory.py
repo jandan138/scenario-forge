@@ -11,6 +11,7 @@ import yaml
 
 from scenario_forge.generation.coverage.task_coverage import (
     build_task_coverage_plan,
+    refresh_release_evidence,
     write_convertasset_admission_request,
     write_task_directory,
 )
@@ -62,11 +63,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     request = write_convertasset_admission_request(
         plan, args.out / "convertasset_admission_request.yaml"
     )
-    directory = write_task_directory(plan, releases, output_dir=args.out / "directory")
+    refreshed_releases = refresh_release_evidence(releases, base_dir=REPO_ROOT)
+    (args.out / "release_status.yaml").write_text(
+        yaml.safe_dump(refreshed_releases, allow_unicode=True, sort_keys=False), encoding="utf-8"
+    )
+    directory = write_task_directory(plan, refreshed_releases, output_dir=args.out / "directory")
     summary = plan["summary"]
     assert isinstance(summary, Mapping)
     print(f"coverage plan: {(args.out / 'coverage_plan.yaml').resolve()}")
     print(f"ConvertAsset request: {request.resolve()}")
+    print(f"release status: {(args.out / 'release_status.yaml').resolve()}")
     print(f"task directory: {directory.resolve()}")
     print(f"queued={summary['queued']} blocked={summary['blocked']}")
     return 0

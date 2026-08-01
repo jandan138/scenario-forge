@@ -31,6 +31,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 - [Artifact Policy](operations/artifact-policy.md)
 - [Build the Scientific Workbench Task Directory](operations/build-scientific-workbench-task-directory.md)
+- [Generate Scientific Workbench Layout Prototypes](operations/generate-scientific-workbench-layout-prototypes.md)
 - [Development Checks](operations/development-checks.md)
 - [Generate the Bimanual Pour Package](operations/generate-bimanual-pour-package.md)
 - [Qualify the Bimanual Pour Vessel Assets](operations/qualify-bimanual-pour-vessels.md)
@@ -69,4 +70,5 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-30 Centrifuge Proxy Parent-Local Requalification](records/2026-07-30-centrifuge-proxy-parent-local-requalification.md)
 - [2026-07-31 Task Design Authority Correction](records/2026-07-31-scientific-workbench-task-design-correction.md)
 - [2026-08-01 Scientific Workbench Coverage Factory v1](records/2026-08-01-scientific-workbench-coverage-factory-v1.md)
+- [2026-08-01 Scientific Workbench v4 Candidate Evidence](records/2026-08-01-scientific-workbench-v4-candidate-evidence.md)
 - [2026-07-06 Phase 13 S2D-12 Soap-to-Dish Static Candidate Evidence](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/generated_package_summary.yaml)

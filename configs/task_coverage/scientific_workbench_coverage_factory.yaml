@@ -41,14 +41,14 @@ inventory:
       manifest_sha256: sha256:61bd778f20644d9e0775ed71d426210ef603322ca26cfd3da2bbca897cb9e84f
 releases:
   - task_id: scientific_workbench_pour_cylinder_to_beaker
-    release_id: scientific_workbench_pour_cylinder_to_beaker.v3_20260801
-    package_path: outputs/scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_pour_cylinder_to_beaker
+    release_id: scientific_workbench_pour_cylinder_to_beaker.v4_20260801_r1
+    package_path: outputs/scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_pour_cylinder_to_beaker
     background_binding: scientific_environment_code_room_example4_v1
     promotion: candidate
     evidence:
-      overview_image: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_pour_cylinder_to_beaker/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
-      closeup_image: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_pour_cylinder_to_beaker/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
-      runtime_reset_gate: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_pour_cylinder_to_beaker/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+      overview_image: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_pour_cylinder_to_beaker/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_pour_cylinder_to_beaker/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_pour_cylinder_to_beaker/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
     gates:
       self_contained_package: not_run
       runtime_reset: pass
@@ -56,14 +56,14 @@ releases:
       visual_review: not_run
       provisional_ik: not_run
   - task_id: scientific_workbench_funnel_pour_cylinder_to_flask
-    release_id: scientific_workbench_funnel_pour_cylinder_to_flask.v3_20260801
-    package_path: outputs/scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_funnel_pour_cylinder_to_flask
+    release_id: scientific_workbench_funnel_pour_cylinder_to_flask.v4_20260801_r1
+    package_path: outputs/scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_funnel_pour_cylinder_to_flask
     background_binding: scientific_environment_code_room_example4_v1
     promotion: candidate
     evidence:
-      overview_image: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_funnel_pour_cylinder_to_flask/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
-      closeup_image: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_funnel_pour_cylinder_to_flask/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
-      runtime_reset_gate: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_funnel_pour_cylinder_to_flask/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+      overview_image: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_funnel_pour_cylinder_to_flask/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_funnel_pour_cylinder_to_flask/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_funnel_pour_cylinder_to_flask/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
     gates:
       self_contained_package: not_run
       runtime_reset: pass
@@ -71,14 +71,14 @@ releases:
       visual_review: not_run
       provisional_ik: not_run
   - task_id: scientific_workbench_two_sample_mix
-    release_id: scientific_workbench_two_sample_mix.v3_20260801
-    package_path: outputs/scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_two_sample_mix
+    release_id: scientific_workbench_two_sample_mix.v4_20260801_r1
+    package_path: outputs/scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_two_sample_mix
     background_binding: scientific_environment_code_room_example4_v1
     promotion: candidate
     evidence:
-      overview_image: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_two_sample_mix/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
-      closeup_image: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_two_sample_mix/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
-      runtime_reset_gate: ../../scientific_workbench_layout_validated_prototypes_v3_20260801/scientific_workbench_two_sample_mix/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+      overview_image: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_two_sample_mix/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_two_sample_mix/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_two_sample_mix/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
     gates:
       self_contained_package: not_run
       runtime_reset: pass

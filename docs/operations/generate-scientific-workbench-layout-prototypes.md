@@ -22,7 +22,7 @@ Do not rename either asset to unblock row 6.
 PYTHONPATH=src python scripts/generate_scientific_workbench_layout_prototypes.py \
   --bindings configs/source_bindings/scientific_workbench_layout_prototypes_20260731.yaml \
   --task all \
-  --out outputs/scientific_workbench_layout_validated_prototypes_v3_20260801
+  --out outputs/scientific_workbench_layout_validated_prototypes_v4_20260801_r1
 ```
 
 Produce the final two-layer 1080p visual evidence:
@@ -33,7 +33,7 @@ export CUROBO_SRC=/cpfs/user/zhuzihou/dev/scenario-forge-runtime-evidence/scient
 PYTHONPATH="src:$CUROBO_SRC" python scripts/generate_scientific_workbench_layout_prototypes.py \
   --bindings configs/source_bindings/scientific_workbench_layout_prototypes_20260731.yaml \
   --task all \
-  --out outputs/scientific_workbench_layout_validated_prototypes_v3_20260801 \
+  --out outputs/scientific_workbench_layout_validated_prototypes_v4_20260801_r1 \
   --render \
   --isaac-python /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python \
   --render-runtime-preview \
@@ -48,7 +48,10 @@ completed package has:
   scene/main.usda
   task/task.yaml
   metrics/metrics.yaml
+  evidence/package_closure.yaml
   evidence/tabletop_placement_policy.yaml
+  evidence/phase11_visual_review_gate.yaml
+  adapters/ebench/genmanip/provisional_ik_preflight/request.yaml
   adapters/ebench/genmanip/
   adapters/ebench/genmanip/evidence/authored_key_states/
 ```
@@ -94,6 +97,21 @@ establish only that this same initial task package can be loaded/reset and
 rendered through GenManip with Lift2 visibly present. Neither layer establishes
 robot reachability, collision-free motion, liquid transfer, policy success,
 benchmark success, or task completion.
+
+`evidence/package_closure.yaml` follows references from `scene/main.usda` and
+checks only the runtime-reachable USD/MDL dependency graph. Source copies kept
+solely for provenance are not treated as executable dependencies; absolute,
+remote, escaping, and missing reachable references fail the gate. The Phase 11
+visual gate records an image-only review of the native post-reset frame. The
+current v4 review passes task-object visibility and placement, while recording
+that the transparent vessels remain visually darker than physical glass under
+the present lighting.
+
+The fixed-base IK request is intentionally not an IK result. Use the ingestion
+command in [Build the Scientific Workbench Task Directory](build-scientific-workbench-task-directory.md)
+only after GenManip/CuRobo returns an `ebench-provisional-ik-result/v0.1` bound
+to the request digest. Do not substitute a Python import or static reach
+estimate for solver output.
 
 `CUROBO_SRC` is the recorded, prebuilt CuRobo dependency required by the EOS
 GenManip checkout. It is a runtime dependency only—not task evidence and not a

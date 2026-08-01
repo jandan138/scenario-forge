@@ -17,16 +17,18 @@ The output contains:
 ```text
 coverage_plan.yaml
 convertasset_admission_request.yaml
+release_status.yaml
 directory/
   task_directory.yaml
   index.md
   index.html
 ```
 
-The page displays both the newest immutable **current candidate** and the
-separately-qualified `latest` package. A candidate stays visible with its
-render/reset evidence while any required promotion gate is still `not_run` or
-blocked; only an all-pass release becomes `latest`.
+`release_status.yaml` is refreshed from evidence inside each package every time
+the command runs. The page displays both the newest immutable **current
+candidate** and the separately-qualified `latest` package. A candidate stays
+visible while any required promotion gate is still `not_run` or failed; only an
+all-pass release becomes `latest`.
 
 Give ConvertAsset the generated admission request. It must return source-bound
 packages and manifests; Scenario Forge must not add a task-specific collider,
@@ -39,13 +41,23 @@ adapters/ebench/genmanip/provisional_ik_preflight/request.yaml
 ```
 
 The GenManip/CuRobo owner should solve the listed candidates without base motion
-and provide `ebench-provisional-ik-result/v0.1`. Scenario Forge validates it with
-`validate_provisional_ik_result()` and writes:
+and provide `ebench-provisional-ik-result/v0.1`. Ingest one returned result with:
+
+```bash
+PYTHONPATH=src python scripts/ingest_provisional_ik_result.py \
+  --package outputs/<package-id> \
+  --result /path/from-genmanip/result.yaml
+```
+
+The command verifies the result binds the exact request digest, requires all
+declared task objects to have a passing candidate, and writes:
 
 ```text
 evidence/provisional_ik_preflight.yaml
 ```
 
-That evidence is only a fixed-base IK result. It does not authorize claims about
+Re-run the directory builder afterwards; it promotes the immutable package to
+`latest` automatically only when this and the other four gates all pass. That
+evidence is only a fixed-base IK result. It does not authorize claims about
 approach collisions, grasp/lift, task execution, liquid transfer, or benchmark
 success.

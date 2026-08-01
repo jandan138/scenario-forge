@@ -25,6 +25,7 @@ from scenario_forge.adapters.ebench.preview import (
 from scenario_forge.adapters.ebench.tabletop_placement import (
     validate_scientific_workbench_tabletop_placement,
 )
+from scenario_forge.artifacts.package_closure import write_package_closure_evidence
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 from scenario_forge.generation.source_resolver import resolve_scenario_source_bindings
@@ -490,6 +491,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         export = export_genmanip_collected_package(package.package_root)
         ik_preflight_request = write_provisional_ik_preflight_request(package.package_root)
+        package_closure = write_package_closure_evidence(package.package_root)
         states = _write_key_states(
             task_key=task_key,
             package_root=package.package_root,
@@ -529,6 +531,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ),
                 "authored_key_states": len(states),
                 "tabletop_placement_policy": tabletop_placement.overall_status,
+                "package_closure": {
+                    "status": "recorded",
+                    "evidence_path": str(package_closure.resolve()),
+                },
                 "provisional_ik_preflight": {
                     "status": "requested",
                     "request_path": str(ik_preflight_request.resolve()),
