@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render three initial-scene QA views through the native GenManip scene path.
+"""Render initial-scene QA views through the native GenManip scene path.
 
 This is a one-shot evidence producer.  It resets and restores a collected
 episode, takes no actions, and never evaluates a policy or task result.
@@ -25,11 +25,22 @@ from typing import Any, Mapping, Sequence
 import yaml
 
 
-REQUEST_SCHEMA = "scenario-forge-genmanip-preview-request/v0.2"
-EVIDENCE_SCHEMA = "scenario-forge-genmanip-preview-evidence/v0.2"
+REQUEST_SCHEMA = "scenario-forge-genmanip-preview-request/v0.3"
+EVIDENCE_SCHEMA = "scenario-forge-genmanip-preview-evidence/v0.3"
+TASK_REQUEST_SCHEMA = "scenario-forge-genmanip-preview-request/v0.2"
+TASK_EVIDENCE_SCHEMA = "scenario-forge-genmanip-preview-evidence/v0.2"
 LEGACY_REQUEST_SCHEMA = "scenario-forge-genmanip-preview-request/v0.1"
 LEGACY_EVIDENCE_SCHEMA = "scenario-forge-genmanip-preview-evidence/v0.1"
-VIEW_NAMES = ("workspace_closeup", "scene_overview", "task_object_closeup")
+VIEW_NAMES = (
+    "workspace_closeup",
+    "scene_overview",
+    "task_object_closeup",
+    "room_topdown",
+    "room_corner_a",
+    "room_corner_b",
+    "room_entrance_eye_level",
+)
+TASK_VIEW_NAMES = VIEW_NAMES[:3]
 LEGACY_VIEW_NAMES = ("workspace_closeup", "scene_overview")
 EVIDENCE_DIRECTORY = Path("evidence/initial_scene")
 INPUT_ROLES = {
@@ -43,6 +54,51 @@ INPUT_ROLES = {
 TABLE_RUNTIME_ID = "00000000000000000000000000000000"
 WARMUP_STEPS = 50
 RENDER_STEPS = 50
+
+
+def _opposite_room_corner_azimuths() -> tuple[float, float]:
+    return 45.0, 225.0
+
+
+def _room_cutaway_sides(azimuth_deg: float) -> tuple[str, str]:
+    radians = math.radians(float(azimuth_deg))
+    x_side = "east" if math.cos(radians) >= 0.0 else "west"
+    y_side = "north" if math.sin(radians) >= 0.0 else "south"
+    return tuple(sorted((x_side, y_side)))
+
+
+def _entrance_side_from_wall_coverage(
+    coverage: Mapping[str, Sequence[tuple[float, float]]],
+) -> tuple[str, float]:
+    """Return the perimeter side and normalized midpoint of its largest opening."""
+
+    best = ("south", 0.5, -1.0)
+    for side in ("south", "north", "west", "east"):
+        intervals = sorted(
+            (max(0.0, float(start)), min(1.0, float(end)))
+            for start, end in coverage.get(side, ())
+            if float(end) > float(start)
+        )
+        if not intervals:
+            if 1.0 > best[2]:
+                best = (side, 0.5, 1.0)
+            continue
+        cursor = 0.0
+        gaps: list[tuple[float, float]] = []
+        for start, end in intervals:
+            # Gaps at the numeric extent boundary are normally wall thickness,
+            # not doors.  Only a gap between two complete wall roots is a
+            # trustworthy authored opening.
+            if cursor > 0.0 and start > cursor:
+                gaps.append((cursor, start))
+            cursor = max(cursor, end)
+        if not gaps:
+            continue
+        gap = max(gaps, key=lambda item: item[1] - item[0])
+        width = gap[1] - gap[0]
+        if width > best[2]:
+            best = (side, (gap[0] + gap[1]) / 2.0, width)
+    return best[0], best[1]
 
 
 def _task_data_with_preserved_articulation_parts(
@@ -313,28 +369,74 @@ def _render_initial_scene(
         if not original_room_visibility:
             original_room_visibility = UsdGeom.Tokens.inherited
 
+        expected_ids = _required_mapping(request, "expected_runtime_ids", "render request")
+        workcell_runtime_ids = [
+            _required_string(expected_ids, "robot", "render request.expected_runtime_ids"),
+            _required_string(expected_ids, "table", "render request.expected_runtime_ids"),
+            *_string_list(
+                expected_ids.get("task_objects"),
+                "render request.expected_runtime_ids.task_objects",
+            ),
+        ]
+        room_bounds = _runtime_bounds(
+            stage=stage,
+            scene=scene,
+            runtime_ids=["scene_room"],
+            bbox_cache=bbox_cache,
+            np=np,
+        )
+        workcell_bounds = _runtime_bounds(
+            stage=stage,
+            scene=scene,
+            runtime_ids=workcell_runtime_ids,
+            bbox_cache=bbox_cache,
+            np=np,
+        )
+        combined_bounds = (
+            np.minimum(room_bounds[0], workcell_bounds[0]),
+            np.maximum(room_bounds[1], workcell_bounds[1]),
+        )
+        wall_records = _room_wall_records(room_prim, room_bounds, bbox_cache, np)
+
         camera_records: dict[str, dict[str, Any]] = {}
         for view_name in view_names:
             view_request = _as_mapping(
                 request_views.get(view_name), f"render request view {view_name}"
             )
             focal_length = float(camera_data[view_name]["focal_length"])
+            camera_role = view_request.get("camera_role")
+            entrance_side: str | None = None
             referenced = _referenced_camera(view_request, camera_records, np)
-            if referenced is not None:
+            explicit_override = _explicit_camera(view_request, np)
+            if explicit_override is not None:
+                target, distance, elevation, azimuth = explicit_override
+            elif camera_role == "room_entrance_eye_level":
+                target, distance, elevation, azimuth, entrance_side = _entrance_camera(
+                    room_bounds,
+                    workcell_bounds,
+                    wall_records,
+                    camera_height_m=float(view_request.get("camera_height_m", 1.65)),
+                    np=np,
+                )
+            elif referenced is not None:
                 target, distance, elevation, azimuth = referenced
             else:
                 anchor_ids = _string_list(
                     view_request.get("anchor_runtime_ids"),
                     f"{view_name}.anchor_runtime_ids",
                 )
-                bounds = _runtime_bounds(
-                    stage=stage,
-                    scene=scene,
-                    runtime_ids=anchor_ids,
-                    bbox_cache=bbox_cache,
-                    np=np,
+                bounds = (
+                    combined_bounds
+                    if isinstance(camera_role, str) and camera_role.startswith("room_")
+                    else _runtime_bounds(
+                        stage=stage,
+                        scene=scene,
+                        runtime_ids=anchor_ids,
+                        bbox_cache=bbox_cache,
+                        np=np,
+                    )
                 )
-                explicit = _explicit_camera(view_request, np)
+                explicit = None
                 if explicit is None:
                     target, distance = _fit_camera(bounds, view_request, focal_length, np)
                     runtime_target_position_camera = _runtime_target_position_camera(
@@ -360,6 +462,16 @@ def _render_initial_scene(
                             target, distance, elevation, azimuth = runtime_target_camera
                 else:
                     target, distance, elevation, azimuth = explicit
+            if camera_role in {"room_topdown", "room_corner_a", "room_corner_b"}:
+                distance = _fit_projected_camera(
+                    combined_bounds,
+                    target=target,
+                    distance=distance,
+                    elevation=elevation,
+                    azimuth=azimuth,
+                    focal_length=focal_length,
+                    np=np,
+                )
             camera = preview_cameras[view_name]
             set_camera_look_at(
                 camera,
@@ -374,6 +486,7 @@ def _render_initial_scene(
                 "position": position,
                 "distance": distance,
                 "focal_length": focal_length,
+                "entrance_side": entrance_side,
             }
 
         manifest_views: dict[str, Any] = {}
@@ -383,6 +496,8 @@ def _render_initial_scene(
             # eBench camera after a visual-only fit.  The closeup is therefore
             # an intentional workspace-isolation view; the following overview
             # restores the room and proves the substituted background renders.
+            hidden_wall_records: list[Mapping[str, Any]] = []
+            original_wall_visibility: list[tuple[Any, Any]] = []
             if view_name in {"workspace_closeup", "task_object_closeup"}:
                 room_visibility_attr.Set(
                     _preview_room_visibility_token(
@@ -401,6 +516,49 @@ def _render_initial_scene(
                     )
                 )
                 visibility_mode = "scene_room_inherited"
+                view_request = _as_mapping(
+                    request_views.get(view_name), f"render request view {view_name}"
+                )
+                if view_request.get("cutaway_policy") == "nearest_complete_room_wall_roots":
+                    reviewed_hidden = view_request.get(
+                        "reviewed_temporary_hidden_prim_paths"
+                    )
+                    if reviewed_hidden is not None:
+                        reviewed_names = {
+                            Path(path).name
+                            for path in _string_list(
+                                reviewed_hidden,
+                                f"{view_name}.reviewed_temporary_hidden_prim_paths",
+                            )
+                        }
+                        hidden_wall_records = [
+                            record
+                            for record in wall_records
+                            if Path(record["path"]).name in reviewed_names
+                        ]
+                        if len(hidden_wall_records) != len(reviewed_names):
+                            raise RuntimeError(
+                                f"reviewed wall roots could not be resolved for {view_name}"
+                            )
+                    else:
+                        sides = set(
+                            _room_cutaway_sides(float(view_request["azimuth_deg"]))
+                        )
+                        hidden_wall_records = [
+                            record for record in wall_records if record["side"] in sides
+                        ]
+                    if not hidden_wall_records:
+                        raise RuntimeError(
+                            f"no complete wall roots found for {view_name} cutaway"
+                        )
+                    for wall_record in hidden_wall_records:
+                        visibility_attr = UsdGeom.Imageable(
+                            wall_record["prim"]
+                        ).GetVisibilityAttr()
+                        original_wall_visibility.append(
+                            (visibility_attr, visibility_attr.Get() or UsdGeom.Tokens.inherited)
+                        )
+                        visibility_attr.Set(UsdGeom.Tokens.invisible)
             for _ in range(RENDER_STEPS):
                 scene.world.step(render=True)
             camera = preview_cameras[view_name]
@@ -414,6 +572,8 @@ def _render_initial_scene(
                 raise RuntimeError(f"camera returned no RGB frame: {view_name}")
             image_path = staging_dir / f"{view_name}.png"
             _save_rgb_png(image_path, rgb, np, Image)
+            for visibility_attr, original_visibility in original_wall_visibility:
+                visibility_attr.Set(original_visibility)
 
             view_request = _as_mapping(
                 request_views.get(view_name), f"render request view {view_name}"
@@ -430,6 +590,20 @@ def _render_initial_scene(
                 )
             record = camera_records[view_name]
             resolution = _resolution(view_request.get("resolution"), view_name)
+            room_projection = _projected_bound_record(
+                room_bounds,
+                position=record["position"],
+                target=record["target"],
+                focal_length=float(record["focal_length"]),
+                np=np,
+            )
+            workcell_projection = _projected_bound_record(
+                workcell_bounds,
+                position=record["position"],
+                target=record["target"],
+                focal_length=float(record["focal_length"]),
+                np=np,
+            )
             manifest_views[view_name] = {
                 "status": "pass",
                 "image_path": image_path.name,
@@ -437,6 +611,9 @@ def _render_initial_scene(
                 "resolution": list(resolution),
                 "present_runtime_ids": present_ids,
                 "scene_visibility": visibility_mode,
+                "temporary_hidden_prim_paths": [
+                    wall_record["path"] for wall_record in hidden_wall_records
+                ],
                 "camera": {
                     "position": _float_list(record["position"]),
                     "look_at": _float_list(record["target"]),
@@ -446,6 +623,13 @@ def _render_initial_scene(
                     "temporary_evidence_camera": True,
                 },
             }
+            if view_name.startswith("room_"):
+                manifest_views[view_name]["framing"] = {
+                    "status": "pass",
+                    "room": room_projection,
+                    "workcell": workcell_projection,
+                    "entrance_side": record.get("entrance_side"),
+                }
 
         # Do not leave an evidence-only visibility override on the live stage
         # while the cleanup path runs.
@@ -463,11 +647,11 @@ def _render_initial_scene(
             "\n".join(log_lines) + "\n", encoding="utf-8"
         )
         manifest = {
-            "schema_version": (
-                EVIDENCE_SCHEMA
-                if request.get("schema_version") == REQUEST_SCHEMA
-                else LEGACY_EVIDENCE_SCHEMA
-            ),
+            "schema_version": {
+                REQUEST_SCHEMA: EVIDENCE_SCHEMA,
+                TASK_REQUEST_SCHEMA: TASK_EVIDENCE_SCHEMA,
+                LEGACY_REQUEST_SCHEMA: LEGACY_EVIDENCE_SCHEMA,
+            }[request.get("schema_version")],
             "package_id": _required_string(request, "package_id", "render request"),
             "input_digest": _required_string(
                 request, "input_digest", "render request"
@@ -499,6 +683,14 @@ def _render_initial_scene(
                 "blocking_signals": [],
             },
             "runtime_geometry": runtime_geometry,
+            "room_world_bound_m": {
+                "min": _float_list(room_bounds[0]),
+                "max": _float_list(room_bounds[1]),
+            },
+            "workcell_world_bound_m": {
+                "min": _float_list(workcell_bounds[0]),
+                "max": _float_list(workcell_bounds[1]),
+            },
             "views": manifest_views,
             "claim_boundary": (
                 "Initial-scene visual evidence only; not task success, policy success, "
@@ -578,8 +770,17 @@ def _camera_config(
         "resolution": [width, height],
         "focal_length": (
             10.0
-            if view_name == "task_object_closeup"
-            else 7.0 if view_name == "workspace_closeup" else 6.0
+            if view_name in {
+                "task_object_closeup",
+                "room_topdown",
+                "room_corner_a",
+                "room_corner_b",
+            }
+            else 7.0
+            if view_name == "workspace_closeup"
+            else 4.5
+            if view_name == "room_entrance_eye_level"
+            else 6.0
         ),
         "horizontal_aperture": 10.0,
         "vertical_aperture": 5.625,
@@ -619,6 +820,177 @@ def _runtime_bounds(
     return np.min(np.stack(lower_points), axis=0), np.max(
         np.stack(upper_points), axis=0
     )
+
+
+def _bound_corners(bounds: tuple[Any, Any], np: Any) -> Any:
+    lower, upper = bounds
+    return np.asarray(
+        [
+            [x, y, z]
+            for x in (lower[0], upper[0])
+            for y in (lower[1], upper[1])
+            for z in (lower[2], upper[2])
+        ],
+        dtype=float,
+    )
+
+
+def _projected_bound_record(
+    bounds: tuple[Any, Any],
+    *,
+    position: Any,
+    target: Any,
+    focal_length: float,
+    np: Any,
+) -> dict[str, Any]:
+    forward = np.asarray(target, dtype=float) - np.asarray(position, dtype=float)
+    forward /= float(np.linalg.norm(forward))
+    up_reference = np.asarray([0.0, 0.0, 1.0], dtype=float)
+    if abs(float(np.dot(forward, up_reference))) > 0.98:
+        up_reference = np.asarray([0.0, 1.0, 0.0], dtype=float)
+    right = np.cross(forward, up_reference)
+    right /= float(np.linalg.norm(right))
+    up = np.cross(right, forward)
+    relative = _bound_corners(bounds, np) - np.asarray(position, dtype=float)
+    depth = relative @ forward
+    tan_h = 10.0 / (2.0 * focal_length)
+    tan_v = 5.625 / (2.0 * focal_length)
+    if bool(np.any(depth <= 1e-6)):
+        return {"fully_in_frame": False, "ndc_bounds": None, "occupancy_ratio": 0.0}
+    x = (relative @ right) / (depth * tan_h)
+    y = (relative @ up) / (depth * tan_v)
+    ndc = [float(np.min(x)), float(np.min(y)), float(np.max(x)), float(np.max(y))]
+    fully = max(abs(value) for value in ndc) <= 0.94
+    occupancy = max(0.0, min(1.0, (ndc[2] - ndc[0]) * (ndc[3] - ndc[1]) / 4.0))
+    return {
+        "fully_in_frame": bool(fully),
+        "ndc_bounds": ndc,
+        "occupancy_ratio": float(occupancy),
+    }
+
+
+def _camera_position(target: Any, distance: float, elevation: float, azimuth: float, np: Any) -> Any:
+    elevation_radians = math.radians(elevation)
+    azimuth_radians = math.radians(azimuth)
+    return np.asarray(target, dtype=float) + distance * np.asarray(
+        [
+            math.cos(elevation_radians) * math.cos(azimuth_radians),
+            math.cos(elevation_radians) * math.sin(azimuth_radians),
+            math.sin(elevation_radians),
+        ],
+        dtype=float,
+    )
+
+
+def _fit_projected_camera(
+    bounds: tuple[Any, Any],
+    *,
+    target: Any,
+    distance: float,
+    elevation: float,
+    azimuth: float,
+    focal_length: float,
+    np: Any,
+) -> float:
+    fitted = float(distance)
+    for _ in range(80):
+        position = _camera_position(target, fitted, elevation, azimuth, np)
+        projection = _projected_bound_record(
+            bounds,
+            position=position,
+            target=target,
+            focal_length=focal_length,
+            np=np,
+        )
+        ndc = projection.get("ndc_bounds")
+        if ndc is not None and max(abs(value) for value in ndc) <= 0.90:
+            return fitted
+        fitted *= 1.08
+    raise RuntimeError("automatic room camera could not frame its required bounds")
+
+
+def _room_wall_records(room_prim: Any, room_bounds: tuple[Any, Any], bbox_cache: Any, np: Any) -> list[dict[str, Any]]:
+    lower, upper = room_bounds
+    extent = upper - lower
+    records: list[dict[str, Any]] = []
+    room_path = str(room_prim.GetPath()).rstrip("/") + "/"
+    for prim in room_prim.GetStage().Traverse():
+        if not str(prim.GetPath()).startswith(room_path):
+            continue
+        name = prim.GetName().lower()
+        if not name.startswith("wall_"):
+            continue
+        if str(prim.GetTypeName()) != "Xform":
+            continue
+        parent_name = prim.GetParent().GetName().lower()
+        if parent_name.startswith("wall_"):
+            continue
+        aligned = bbox_cache.ComputeWorldBound(prim).ComputeAlignedRange()
+        wall_lower = np.asarray(aligned.GetMin(), dtype=float)
+        wall_upper = np.asarray(aligned.GetMax(), dtype=float)
+        if not np.all(np.isfinite(wall_lower)) or not np.all(np.isfinite(wall_upper)):
+            continue
+        center = (wall_lower + wall_upper) / 2.0
+        named_sides = [
+            side for side in ("north", "east", "south", "west") if side in name
+        ]
+        if len(named_sides) == 1:
+            side = named_sides[0]
+        else:
+            distances = {
+                "west": abs(float(center[0] - lower[0])),
+                "east": abs(float(upper[0] - center[0])),
+                "south": abs(float(center[1] - lower[1])),
+                "north": abs(float(upper[1] - center[1])),
+            }
+            side = min(distances, key=distances.get)
+        if side in {"north", "south"}:
+            start = (wall_lower[0] - lower[0]) / max(float(extent[0]), 1e-6)
+            end = (wall_upper[0] - lower[0]) / max(float(extent[0]), 1e-6)
+        else:
+            start = (wall_lower[1] - lower[1]) / max(float(extent[1]), 1e-6)
+            end = (wall_upper[1] - lower[1]) / max(float(extent[1]), 1e-6)
+        records.append(
+            {
+                "prim": prim,
+                "path": str(prim.GetPath()),
+                "side": side,
+                "coverage": (max(0.0, float(start)), min(1.0, float(end))),
+            }
+        )
+    return records
+
+
+def _entrance_camera(
+    room_bounds: tuple[Any, Any],
+    workcell_bounds: tuple[Any, Any],
+    wall_records: Sequence[Mapping[str, Any]],
+    *,
+    camera_height_m: float,
+    np: Any,
+) -> tuple[Any, float, float, float, str]:
+    coverage = {
+        side: [record["coverage"] for record in wall_records if record["side"] == side]
+        for side in ("north", "east", "south", "west")
+    }
+    side, along = _entrance_side_from_wall_coverage(coverage)
+    lower, upper = room_bounds
+    position = np.asarray((lower + upper) / 2.0, dtype=float)
+    inset = min(0.55, 0.12 * min(float(upper[0] - lower[0]), float(upper[1] - lower[1])))
+    if side in {"north", "south"}:
+        position[0] = lower[0] + along * (upper[0] - lower[0])
+        position[1] = upper[1] - inset if side == "north" else lower[1] + inset
+    else:
+        position[1] = lower[1] + along * (upper[1] - lower[1])
+        position[0] = upper[0] - inset if side == "east" else lower[0] + inset
+    position[2] = lower[2] + camera_height_m
+    target = (workcell_bounds[0] + workcell_bounds[1]) / 2.0
+    target[2] = min(float(target[2]), float(lower[2] + 1.15))
+    offset = position - target
+    distance = float(np.linalg.norm(offset))
+    azimuth = math.degrees(math.atan2(float(offset[1]), float(offset[0])))
+    elevation = math.degrees(math.asin(float(offset[2]) / distance))
+    return target, distance, elevation, azimuth, side
 
 
 def _runtime_geometry_record(
@@ -907,7 +1279,7 @@ def _preview_room_visibility_token(
 
     if view_name in {"workspace_closeup", "task_object_closeup"}:
         return invisible_token
-    if view_name == "scene_overview":
+    if view_name == "scene_overview" or view_name.startswith("room_"):
         return inherited_token
     raise ValueError(f"unsupported preview view: {view_name}")
 
@@ -1039,7 +1411,11 @@ def _select_evaluation(
 
 
 def _validate_request(root: Path, request: Mapping[str, Any]) -> None:
-    if request.get("schema_version") not in {REQUEST_SCHEMA, LEGACY_REQUEST_SCHEMA}:
+    if request.get("schema_version") not in {
+        REQUEST_SCHEMA,
+        TASK_REQUEST_SCHEMA,
+        LEGACY_REQUEST_SCHEMA,
+    }:
         raise ValueError("unsupported render request schema_version")
     if request.get("purpose") != "evidence_only":
         raise ValueError("render request purpose must be evidence_only")
@@ -1087,6 +1463,8 @@ def _validate_request(root: Path, request: Mapping[str, Any]) -> None:
 def _request_view_names(request: Mapping[str, Any]) -> tuple[str, ...]:
     if request.get("schema_version") == REQUEST_SCHEMA:
         return VIEW_NAMES
+    if request.get("schema_version") == TASK_REQUEST_SCHEMA:
+        return TASK_VIEW_NAMES
     if request.get("schema_version") == LEGACY_REQUEST_SCHEMA:
         return LEGACY_VIEW_NAMES
     raise ValueError("unsupported render request schema_version")

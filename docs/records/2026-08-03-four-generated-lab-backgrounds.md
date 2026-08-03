@@ -1,5 +1,10 @@
 # Four generated laboratory backgrounds
 
+> Superseded for gallery camera coverage by
+> [`2026-08-03-full-room-seven-view-gallery.md`](2026-08-03-full-room-seven-view-gallery.md).
+> The source rooms and task packages remain the same; the newer record adds a
+> uniform seven-view, 1080p runtime evidence contract to all five backgrounds.
+
 Date: 2026-08-03
 
 ## Outcome

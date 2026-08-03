@@ -17,9 +17,12 @@ from scenario_forge.artifacts.package_writer import write_yaml_artifact
 from scenario_forge.assets.checksum import compute_sha256
 
 
-PREVIEW_REQUEST_SCHEMA_VERSION = "scenario-forge-genmanip-preview-request/v0.2"
-PREVIEW_EVIDENCE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-evidence/v0.2"
-PREVIEW_GATE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-gate/v0.2"
+PREVIEW_REQUEST_SCHEMA_VERSION = "scenario-forge-genmanip-preview-request/v0.3"
+PREVIEW_EVIDENCE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-evidence/v0.3"
+PREVIEW_GATE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-gate/v0.3"
+TASK_PREVIEW_REQUEST_SCHEMA_VERSION = "scenario-forge-genmanip-preview-request/v0.2"
+TASK_PREVIEW_EVIDENCE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-evidence/v0.2"
+TASK_PREVIEW_GATE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-gate/v0.2"
 LEGACY_PREVIEW_REQUEST_SCHEMA_VERSION = "scenario-forge-genmanip-preview-request/v0.1"
 LEGACY_PREVIEW_EVIDENCE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-evidence/v0.1"
 LEGACY_PREVIEW_GATE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-gate/v0.1"
@@ -29,7 +32,12 @@ PREVIEW_VIEW_NAMES = (
     "workspace_closeup",
     "scene_overview",
     "task_object_closeup",
+    "room_topdown",
+    "room_corner_a",
+    "room_corner_b",
+    "room_entrance_eye_level",
 )
+TASK_PREVIEW_VIEW_NAMES = PREVIEW_VIEW_NAMES[:3]
 LEGACY_PREVIEW_VIEW_NAMES = ("workspace_closeup", "scene_overview")
 
 _INPUT_ENTRYPOINTS = {
@@ -170,7 +178,26 @@ def run_genmanip_initial_preview(
             f"render manifest{suffix}"
         )
     _finalize_runtime_log_scan(root, completed.stdout, completed.stderr)
-    return validate_genmanip_preview_evidence(root)
+    try:
+        return validate_genmanip_preview_evidence(root)
+    except GenManipPreviewError as exc:
+        request = _load_yaml(root / PREVIEW_REQUEST_PATH, "preview render request")
+        if request.get("schema_version") == PREVIEW_REQUEST_SCHEMA_VERSION:
+            write_yaml_artifact(
+                gate_path,
+                {
+                    "schema_version": PREVIEW_GATE_SCHEMA_VERSION,
+                    "status": "failed",
+                    "package_id": request.get("package_id"),
+                    "reason": str(exc),
+                    "next_stage": "camera_profile_review",
+                    "claim_boundary": (
+                        "The package and render evidence are retained, but this "
+                        "full-room package is not visual-ready for publishing."
+                    ),
+                },
+            )
+        raise
 
 
 def write_genmanip_preview_request(
@@ -196,6 +223,9 @@ def write_genmanip_preview_request(
         raise GenManipPreviewError("preview request resolution must contain two positive integers")
     width, height = resolution
     package_manifest = _load_json(root / "package_manifest.json", "package manifest")
+    full_environment = _has_full_environment(package_manifest)
+    if full_environment:
+        width, height = 1920, 1080
     package_id = _required_string(package_manifest, "package_id", "package manifest")
     entrypoints = _required_mapping(package_manifest, "entrypoints", "package manifest")
     episode_path = _entrypoint_path(root, entrypoints, "episode_metadata")
@@ -235,15 +265,97 @@ def write_genmanip_preview_request(
         task_data,
         task_object_ids,
     )
+    required_workcell_ids = ["lift2", table_ids[0], *task_object_ids]
+    views: dict[str, Any] = {
+        "workspace_closeup": {
+            "resolution": [width, height],
+            "required_runtime_ids": required_workcell_ids,
+            "anchor_runtime_ids": ["lift2_end_effectors", *task_object_ids],
+            "azimuth_deg": -35.0,
+            "elevation_deg": 34.0,
+            "framing_margin": 1.15,
+            "minimum_distance": 1.0,
+        },
+        "scene_overview": {
+            "resolution": [width, height],
+            "required_runtime_ids": required_workcell_ids,
+            "anchor_runtime_ids": required_workcell_ids,
+            "azimuth_deg": -125.0,
+            "elevation_deg": 38.0,
+            "framing_margin": 1.05,
+            "minimum_distance": 1.6,
+        },
+        "task_object_closeup": {
+            "resolution": [width, height],
+            "required_runtime_ids": task_object_ids,
+            "anchor_runtime_ids": task_object_ids,
+            "azimuth_deg": -35.0,
+            "elevation_deg": 30.0,
+            "framing_margin": 1.2,
+            "minimum_distance": 0.45,
+        },
+    }
+    if full_environment:
+        common_room = {
+            "resolution": [width, height],
+            "required_runtime_ids": required_workcell_ids,
+            "anchor_runtime_ids": ["scene_room", *required_workcell_ids],
+            "bounds_source": "runtime_scene_room",
+            "framing_margin": 1.08,
+        }
+        views.update(
+            {
+                "room_topdown": {
+                    **common_room,
+                    "camera_role": "room_topdown",
+                    "cutaway_policy": "none",
+                    "azimuth_deg": 90.0,
+                    "elevation_deg": 89.0,
+                    "minimum_distance": 4.0,
+                },
+                "room_corner_a": {
+                    **common_room,
+                    "camera_role": "room_corner_a",
+                    "cutaway_policy": "nearest_complete_room_wall_roots",
+                    "azimuth_deg": 45.0,
+                    "elevation_deg": 46.0,
+                    "minimum_distance": 4.0,
+                },
+                "room_corner_b": {
+                    **common_room,
+                    "camera_role": "room_corner_b",
+                    "cutaway_policy": "nearest_complete_room_wall_roots",
+                    "azimuth_deg": 225.0,
+                    "elevation_deg": 46.0,
+                    "minimum_distance": 4.0,
+                },
+                "room_entrance_eye_level": {
+                    **common_room,
+                    "camera_role": "room_entrance_eye_level",
+                    "cutaway_policy": "none",
+                    "camera_height_m": 1.65,
+                    "minimum_distance": 2.0,
+                },
+            }
+        )
+
     request = {
-        "schema_version": PREVIEW_REQUEST_SCHEMA_VERSION,
+        "schema_version": (
+            PREVIEW_REQUEST_SCHEMA_VERSION
+            if full_environment
+            else TASK_PREVIEW_REQUEST_SCHEMA_VERSION
+        ),
         "package_id": package_id,
         "task_name": task_name,
         "episode_name": episode_name,
         "purpose": "evidence_only",
         "affects_policy_observation": False,
         "moment": "post_reset_pre_action",
-        "camera_policy_version": "scenario-forge/task-anchor-fit-v6",
+        "camera_policy_version": (
+            "scenario-forge/runtime-room-survey-v1"
+            if full_environment
+            else "scenario-forge/task-anchor-fit-v6"
+        ),
         "input_digest": _digest_inputs(package_id, inputs),
         "inputs": inputs,
         "expected_runtime_ids": {
@@ -252,39 +364,7 @@ def write_genmanip_preview_request(
             "task_objects": task_object_ids,
         },
         "expected_runtime_geometry": expected_runtime_geometry,
-        "views": {
-            "workspace_closeup": {
-                "resolution": [width, height],
-                "required_runtime_ids": ["lift2", table_ids[0], *task_object_ids],
-                "anchor_runtime_ids": ["lift2_end_effectors", *task_object_ids],
-                "azimuth_deg": -35.0,
-                "elevation_deg": 34.0,
-                "framing_margin": 1.15,
-                "minimum_distance": 1.0,
-            },
-            "scene_overview": {
-                "resolution": [width, height],
-                "required_runtime_ids": ["lift2", table_ids[0], *task_object_ids],
-                "anchor_runtime_ids": [
-                    "lift2",
-                    table_ids[0],
-                    *task_object_ids,
-                ],
-                "azimuth_deg": -125.0,
-                "elevation_deg": 38.0,
-                "framing_margin": 1.05,
-                "minimum_distance": 1.6,
-            },
-            "task_object_closeup": {
-                "resolution": [width, height],
-                "required_runtime_ids": task_object_ids,
-                "anchor_runtime_ids": task_object_ids,
-                "azimuth_deg": -35.0,
-                "elevation_deg": 30.0,
-                "framing_margin": 1.2,
-                "minimum_distance": 0.45,
-            },
-        },
+        "views": views,
         "output": {
             "directory": PREVIEW_EVIDENCE_DIR.as_posix(),
             "manifest": (PREVIEW_EVIDENCE_DIR / "render_manifest.json").as_posix(),
@@ -298,6 +378,25 @@ def write_genmanip_preview_request(
         root, PREVIEW_REQUEST_PATH, "preview render request"
     )
     return write_yaml_artifact(request_path, request)
+
+
+def _has_full_environment(package_manifest: Mapping[str, Any]) -> bool:
+    raw_assets = package_manifest.get("source_assets")
+    if not isinstance(raw_assets, list):
+        return False
+    for raw_asset in raw_assets:
+        if not isinstance(raw_asset, Mapping):
+            continue
+        upstream = raw_asset.get("upstream_package")
+        if not isinstance(upstream, Mapping):
+            continue
+        metadata = upstream.get("metadata")
+        if (
+            isinstance(metadata, Mapping)
+            and metadata.get("producer_asset_role") == "visual_static_environment"
+        ):
+            return True
+    return False
 
 
 def compute_preview_input_digest(collected_root: str | Path) -> str:
@@ -326,24 +425,30 @@ def validate_genmanip_preview_evidence(
     request_schema = request.get("schema_version")
     if request_schema not in {
         PREVIEW_REQUEST_SCHEMA_VERSION,
+        TASK_PREVIEW_REQUEST_SCHEMA_VERSION,
         LEGACY_PREVIEW_REQUEST_SCHEMA_VERSION,
     }:
         raise GenManipPreviewError("unsupported preview request schema_version")
-    preview_view_names = (
-        PREVIEW_VIEW_NAMES
-        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION
-        else LEGACY_PREVIEW_VIEW_NAMES
-    )
-    expected_evidence_schema = (
-        PREVIEW_EVIDENCE_SCHEMA_VERSION
-        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION
-        else LEGACY_PREVIEW_EVIDENCE_SCHEMA_VERSION
-    )
-    gate_schema = (
-        PREVIEW_GATE_SCHEMA_VERSION
-        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION
-        else LEGACY_PREVIEW_GATE_SCHEMA_VERSION
-    )
+    schema_contracts = {
+        PREVIEW_REQUEST_SCHEMA_VERSION: (
+            PREVIEW_VIEW_NAMES,
+            PREVIEW_EVIDENCE_SCHEMA_VERSION,
+            PREVIEW_GATE_SCHEMA_VERSION,
+        ),
+        TASK_PREVIEW_REQUEST_SCHEMA_VERSION: (
+            TASK_PREVIEW_VIEW_NAMES,
+            TASK_PREVIEW_EVIDENCE_SCHEMA_VERSION,
+            TASK_PREVIEW_GATE_SCHEMA_VERSION,
+        ),
+        LEGACY_PREVIEW_REQUEST_SCHEMA_VERSION: (
+            LEGACY_PREVIEW_VIEW_NAMES,
+            LEGACY_PREVIEW_EVIDENCE_SCHEMA_VERSION,
+            LEGACY_PREVIEW_GATE_SCHEMA_VERSION,
+        ),
+    }
+    preview_view_names, expected_evidence_schema, gate_schema = schema_contracts[
+        request_schema
+    ]
     package_id = _required_string(request, "package_id", "preview request")
     package_manifest = _load_json(root / "package_manifest.json", "package manifest")
     manifest_package_id = _required_string(
@@ -472,6 +577,13 @@ def validate_genmanip_preview_evidence(
         if view.get("sha256") != actual_hash:
             raise GenManipPreviewError(f"preview image sha256 mismatch for {view_name}")
         requested_resolution = _resolution(view_request.get("resolution"), view_name)
+        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION and requested_resolution != (
+            1920,
+            1080,
+        ):
+            raise GenManipPreviewError(
+                f"preview room-survey view {view_name} must request 1920x1080"
+            )
         recorded_resolution = _resolution(view.get("resolution"), view_name)
         image_resolution = _png_dimensions(image_path)
         if recorded_resolution != requested_resolution or image_resolution != requested_resolution:
@@ -493,6 +605,10 @@ def validate_genmanip_preview_evidence(
             view,
             manifest_views,
         )
+        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION and view_name.startswith(
+            "room_"
+        ):
+            _validate_room_survey_view(view_name, view_request, view)
         gate_views[view_name] = {
             "image_path": image_path.relative_to(evidence_dir).as_posix(),
             "sha256": actual_hash,
@@ -1115,9 +1231,68 @@ def _root_tilt_deg(
 def _expected_preview_visibility(view_name: str) -> str:
     if view_name in {"workspace_closeup", "task_object_closeup"}:
         return "scene_room_invisible_workspace_isolation"
-    if view_name == "scene_overview":
+    if view_name == "scene_overview" or view_name.startswith("room_"):
         return "scene_room_inherited"
     raise GenManipPreviewError(f"unsupported preview view: {view_name}")
+
+
+def _validate_room_survey_view(
+    view_name: str,
+    view_request: Mapping[str, Any],
+    view: Mapping[str, Any],
+) -> None:
+    if view_request.get("bounds_source") != "runtime_scene_room":
+        raise GenManipPreviewError(
+            f"preview room-survey view {view_name} must use runtime_scene_room bounds"
+        )
+    hidden_paths = _string_list(
+        view.get("temporary_hidden_prim_paths", []),
+        f"evidence view {view_name}.temporary_hidden_prim_paths",
+    )
+    if len(hidden_paths) != len(set(hidden_paths)):
+        raise GenManipPreviewError(
+            f"preview room-survey view {view_name} repeats a hidden prim path"
+        )
+    corner = view_name in {"room_corner_a", "room_corner_b"}
+    if corner and not hidden_paths:
+        raise GenManipPreviewError(
+            f"preview room-survey view {view_name} must hide complete wall roots"
+        )
+    if not corner and hidden_paths:
+        raise GenManipPreviewError(
+            f"preview room-survey view {view_name} cannot hide room prims"
+        )
+    for path in hidden_paths:
+        if "/room/" not in path or not Path(path).name.lower().startswith("wall_"):
+            raise GenManipPreviewError(
+                f"preview room-survey view {view_name} hidden path is not a complete wall root"
+            )
+    framing = _required_mapping(view, "framing", f"evidence view {view_name}")
+    if framing.get("status") != "pass":
+        raise GenManipPreviewError(
+            f"preview room-survey view {view_name} framing status must be pass"
+        )
+    workcell = _required_mapping(
+        framing, "workcell", f"evidence view {view_name}.framing"
+    )
+    if workcell.get("fully_in_frame") is not True:
+        raise GenManipPreviewError(
+            f"preview room-survey view {view_name} must fully frame the workcell"
+        )
+    room = _required_mapping(framing, "room", f"evidence view {view_name}.framing")
+    if view_name in {"room_topdown", "room_corner_a", "room_corner_b"}:
+        if room.get("fully_in_frame") is not True:
+            raise GenManipPreviewError(
+                f"preview room-survey view {view_name} must fully frame the room"
+            )
+        occupancy = _positive_finite_number(
+            room.get("occupancy_ratio"),
+            f"evidence view {view_name}.framing.room.occupancy_ratio",
+        )
+        if occupancy < 0.08:
+            raise GenManipPreviewError(
+                f"preview room-survey view {view_name} room framing is too small"
+            )
 
 
 def _validate_camera_reference(

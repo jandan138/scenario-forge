@@ -158,6 +158,7 @@ class WorkspaceZoneProfile:
     # background instance placement is known.
     evidence_camera_position_xyz_su: tuple[float, float, float] | None = None
     evidence_camera_target_xyz_su: tuple[float, float, float] | None = None
+    room_survey_views_su: Mapping[str, Mapping[str, Any]] | None = None
     optional_inactive_prim_paths: tuple[str, ...] = ()
     not_applicable_reason: str | None = None
     consumer_exclusion_reason: str | None = None
@@ -1773,6 +1774,53 @@ def load_workspace_zone_profiles(
                 f"workspace zone profile {zone_id}.evidence_camera.target_xyz",
             )
 
+        room_survey_views_su: dict[str, dict[str, Any]] | None = None
+        raw_room_survey = profile.get("room_survey")
+        if raw_room_survey is not None:
+            room_survey = _mapping(
+                raw_room_survey,
+                f"workspace zone profile {zone_id}.room_survey",
+            )
+            if room_survey.get("frame_convention") != USD_Z_UP_RIGHT_HANDED_CCW:
+                raise ValueError(
+                    "workspace zone profile room survey has unsupported frame "
+                    f"convention: {zone_id}"
+                )
+            raw_views = _mapping(
+                room_survey.get("views"),
+                f"workspace zone profile {zone_id}.room_survey.views",
+            )
+            room_survey_views_su = {}
+            allowed_room_views = {
+                "room_topdown",
+                "room_corner_a",
+                "room_corner_b",
+                "room_entrance_eye_level",
+            }
+            for room_view_name, raw_room_view in raw_views.items():
+                if room_view_name not in allowed_room_views:
+                    raise ValueError(
+                        f"workspace zone profile room survey view is unsupported: {room_view_name}"
+                    )
+                room_view = _mapping(
+                    raw_room_view,
+                    f"workspace zone profile {zone_id}.room_survey.views.{room_view_name}",
+                )
+                room_survey_views_su[room_view_name] = {
+                    "position_xyz": _number_tuple(
+                        room_view.get("position_xyz"),
+                        f"workspace zone profile {zone_id}.room_survey.views.{room_view_name}.position_xyz",
+                    ),
+                    "target_xyz": _number_tuple(
+                        room_view.get("target_xyz"),
+                        f"workspace zone profile {zone_id}.room_survey.views.{room_view_name}.target_xyz",
+                    ),
+                    "temporary_hidden_prim_paths": _prim_path_tuple(
+                        room_view.get("temporary_hidden_prim_paths", []),
+                        f"workspace zone profile {zone_id}.room_survey.views.{room_view_name}.temporary_hidden_prim_paths",
+                    ),
+                }
+
         lower, upper = _raw_source_composed_bounds(candidate)
         if any(
             raw_anchor[index] < lower[index] or raw_anchor[index] > upper[index]
@@ -1807,6 +1855,7 @@ def load_workspace_zone_profiles(
             composition_yaw_deg=composition_yaw_deg,
             evidence_camera_position_xyz_su=evidence_camera_position_xyz_su,
             evidence_camera_target_xyz_su=evidence_camera_target_xyz_su,
+            room_survey_views_su=room_survey_views_su,
             optional_inactive_prim_paths=optional_paths,
             consumer_exclusion_reason=consumer_exclusion_reason,
         )
@@ -2221,6 +2270,36 @@ def _configure_background_preview(
     overview = _mapping(views.get("scene_overview"), "render request.scene_overview")
     if anchor is None:
         anchor = workspace_anchor_for(candidate)
+    if workspace_zone is not None and workspace_zone.room_survey_views_su:
+        metres_per_unit = workspace_zone.source_composed_meters_per_unit
+        if metres_per_unit is None:
+            raise ValueError("workspace zone room survey requires a coordinate mapping")
+        for view_name, reviewed_view in workspace_zone.room_survey_views_su.items():
+            request_view = _mapping(
+                views.get(view_name), f"render request.{view_name}"
+            )
+            request_view["position_xyz"] = list(
+                _source_composed_point_to_scene(
+                    candidate,
+                    placement,
+                    tuple(reviewed_view["position_xyz"]),
+                    metres_per_unit,
+                )
+            )
+            request_view["target_xyz"] = list(
+                _source_composed_point_to_scene(
+                    candidate,
+                    placement,
+                    tuple(reviewed_view["target_xyz"]),
+                    metres_per_unit,
+                )
+            )
+            request_view["reviewed_temporary_hidden_prim_paths"] = list(
+                reviewed_view["temporary_hidden_prim_paths"]
+            )
+            request_view["camera_source"] = (
+                "ConvertAsset source-bound room_survey override"
+            )
     if anchor is not None and anchor.camera_mode == "workspace_focus":
         if workspace_zone is not None:
             # ConvertAsset's optional evidence_camera is source-room

@@ -11,6 +11,9 @@ import pytest
 import yaml
 
 from scripts.ebench.render_genmanip_initial_preview import (
+    _entrance_side_from_wall_coverage,
+    _opposite_room_corner_azimuths,
+    _room_cutaway_sides,
     _runtime_prim,
     _task_data_with_preserved_articulation_parts,
 )
@@ -174,6 +177,85 @@ def test_preview_request_can_require_1080p_runtime_evidence(tmp_path: Path) -> N
     ):
         assert request["views"][view_name]["resolution"] == [1920, 1080]
     assert "lift2" in request["views"]["workspace_closeup"]["required_runtime_ids"]
+
+
+def test_full_environment_preview_request_requires_seven_1080p_views(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(_build_package(tmp_path)).output_dir
+    manifest_path = collected_package / "package_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["source_assets"][0]["upstream_package"] = {
+        "metadata": {"producer_asset_role": "visual_static_environment"}
+    }
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    write_genmanip_preview_request(collected_package)
+
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    assert request["schema_version"] == "scenario-forge-genmanip-preview-request/v0.3"
+    assert list(request["views"]) == [
+        "workspace_closeup",
+        "scene_overview",
+        "task_object_closeup",
+        "room_topdown",
+        "room_corner_a",
+        "room_corner_b",
+        "room_entrance_eye_level",
+    ]
+    required = ["lift2", _TABLE_RUNTIME_ID, *_TASK_RUNTIME_IDS]
+    for name, view in request["views"].items():
+        assert view["resolution"] == [1920, 1080], name
+    for name in (
+        "room_topdown",
+        "room_corner_a",
+        "room_corner_b",
+        "room_entrance_eye_level",
+    ):
+        assert request["views"][name]["required_runtime_ids"] == required
+        assert request["views"][name]["bounds_source"] == "runtime_scene_room"
+    assert request["views"]["room_corner_a"]["cutaway_policy"] == (
+        "nearest_complete_room_wall_roots"
+    )
+    assert request["views"]["room_entrance_eye_level"]["cutaway_policy"] == "none"
+
+
+def test_full_environment_preview_evidence_passes_room_framing_gate(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(_build_package(tmp_path)).output_dir
+    manifest_path = collected_package / "package_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["source_assets"][0]["upstream_package"] = {
+        "metadata": {"producer_asset_role": "visual_static_environment"}
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    write_genmanip_preview_request(collected_package)
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    _write_passing_evidence(collected_package, request)
+
+    result = validate_genmanip_preview_evidence(collected_package)
+
+    assert result.status == "passed"
+    gate = _load_yaml(result.gate_path)
+    assert gate["schema_version"] == "scenario-forge-genmanip-preview-gate/v0.3"
+    assert set(gate["views"]) == set(request["views"])
+
+
+def test_room_survey_camera_policy_selects_opposite_corners_and_open_entrance() -> None:
+    assert _opposite_room_corner_azimuths() == pytest.approx((45.0, 225.0))
+    assert _room_cutaway_sides(45.0) == ("east", "north")
+    assert _room_cutaway_sides(225.0) == ("south", "west")
+    coverage = {
+        "north": [(0.0, 1.0)],
+        "east": [(0.0, 0.9)],
+        "south": [(0.0, 0.25), (0.75, 1.0)],
+        "west": [(0.0, 1.0)],
+    }
+    assert _entrance_side_from_wall_coverage(coverage) == ("south", pytest.approx(0.5))
 
 
 def test_preview_request_requires_articulated_task_objects_in_both_views(
@@ -603,22 +685,40 @@ def _write_passing_evidence(
     views: dict[str, object] = {}
     request_views = request["views"]
     assert isinstance(request_views, dict)
-    for index, (view_name, color) in enumerate(image_specs.items()):
+    image_specs.update(
+        {
+            "room_topdown": (87, 105, 128),
+            "room_corner_a": (102, 126, 139),
+            "room_corner_b": (113, 136, 147),
+            "room_entrance_eye_level": (126, 143, 150),
+        }
+    )
+    for index, view_name in enumerate(request_views):
+        color = image_specs[view_name]
         image_path = evidence_dir / f"{view_name}.png"
-        _write_rgb_png(image_path, width=1280, height=720, color=color)
         view_request = request_views[view_name]
         assert isinstance(view_request, dict)
+        width, height = view_request["resolution"]
+        _write_rgb_png(image_path, width=width, height=height, color=color)
         distance_m = 1.4 + index
         views[view_name] = {
             "status": "pass",
             "image_path": image_path.name,
             "sha256": _file_sha256(image_path),
-            "resolution": [1280, 720],
+            "resolution": [width, height],
             "present_runtime_ids": view_request["required_runtime_ids"],
             "scene_visibility": (
                 "scene_room_invisible_workspace_isolation"
                 if view_name in {"workspace_closeup", "task_object_closeup"}
                 else "scene_room_inherited"
+            ),
+            "temporary_hidden_prim_paths": (
+                [
+                    "/World/test/room/Wall_North",
+                    "/World/test/room/Wall_East",
+                ]
+                if view_name in {"room_corner_a", "room_corner_b"}
+                else []
             ),
             "camera": {
                 "position": [0.3 + index, -0.8, 1.4],
@@ -627,6 +727,23 @@ def _write_passing_evidence(
                 "distance_m": distance_m,
             },
         }
+        if view_name.startswith("room_"):
+            views[view_name]["framing"] = {
+                "status": "pass",
+                "room": {
+                    "fully_in_frame": view_name != "room_entrance_eye_level",
+                    "ndc_bounds": [-0.8, -0.75, 0.8, 0.75],
+                    "occupancy_ratio": 0.6,
+                },
+                "workcell": {
+                    "fully_in_frame": True,
+                    "ndc_bounds": [-0.4, -0.4, 0.4, 0.4],
+                    "occupancy_ratio": 0.16,
+                },
+                "entrance_side": (
+                    "south" if view_name == "room_entrance_eye_level" else None
+                ),
+            }
 
     overview_request = request_views["scene_overview"]
     assert isinstance(overview_request, dict)
@@ -707,7 +824,12 @@ def _write_passing_evidence(
             "post_warmup": snapshot(post_extent),
         }
     manifest = {
-        "schema_version": "scenario-forge-genmanip-preview-evidence/v0.2",
+        "schema_version": (
+            "scenario-forge-genmanip-preview-evidence/v0.3"
+            if request["schema_version"]
+            == "scenario-forge-genmanip-preview-request/v0.3"
+            else "scenario-forge-genmanip-preview-evidence/v0.2"
+        ),
         "package_id": request["package_id"],
         "input_digest": request["input_digest"],
         "request_sha256": _file_sha256(

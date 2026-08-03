@@ -1,5 +1,11 @@
 # Generate fixed-workspace background variants
 
+Full-room packages emit the v0.3 seven-view preview contract described in
+[`genmanip-full-room-preview-v0.3.md`](../design/genmanip-full-room-preview-v0.3.md).
+Run it through the existing managed EOS/Isaac environment; do not create a
+task-local Conda environment or patch GenManip. Ordinary tabletop packages
+continue to use the v0.2 three-view contract.
+
 This workflow answers one narrow question: can the scientific workbench task
 keep the eBench table, Lift2 robot, two vessels, poses, and task contract fixed
 while swapping only the visual laboratory background? The answer is yes, when
