@@ -135,13 +135,14 @@ done
 
 ## Rendering evidence
 
-The GenManip adapter's two evidence views are written below each collected
+The GenManip adapter's three evidence views are written below each collected
 package after an Isaac Sim 4.1 run:
 
 ```text
 <package>/adapters/ebench/genmanip/evidence/initial_scene/
   workspace_closeup.png
   scene_overview.png
+  task_object_closeup.png
   render_manifest.json
   visual_ready_gate.yaml
 ```
@@ -150,6 +151,9 @@ package after an Isaac Sim 4.1 run:
 evidence-only view the renderer temporarily hides the visual-static room, so a
 room wall or floor cannot mask the fixed table, robot, or vessels. It is not
 proof that the task has been embedded well in the room.
+`task_object_closeup.png` uses the task-object bounds without the robot or table
+as camera anchors. It is the material and support-contact inspection view, not
+task-success evidence.
 `scene_overview.png` restores the room but, for an anchored replacement,
 centres its temporary evidence camera at the fixed eBench workspace. When the
 admitted package carries a source Perspective camera, Scenario Forge preserves

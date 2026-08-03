@@ -83,7 +83,7 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
     request_path = collected_package / "evidence" / "render_request.yaml"
     request = yaml.safe_load(request_path.read_text(encoding="utf-8"))
 
-    assert request["schema_version"] == "scenario-forge-genmanip-preview-request/v0.1"
+    assert request["schema_version"] == "scenario-forge-genmanip-preview-request/v0.2"
     assert request["package_id"] == "scientific_workbench_bimanual_pour"
     assert request["purpose"] == "evidence_only"
     assert request["affects_policy_observation"] is False
@@ -116,7 +116,14 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
         else:
             assert item["sha256"] == _file_sha256(input_path)
 
-    assert set(request["views"]) == {"workspace_closeup", "scene_overview"}
+    assert set(request["views"]) == {
+        "workspace_closeup",
+        "scene_overview",
+        "task_object_closeup",
+    }
+    assert request["views"]["task_object_closeup"]["required_runtime_ids"] == (
+        _TASK_RUNTIME_IDS
+    )
     assert request["views"]["workspace_closeup"]["required_runtime_ids"] == [
         "lift2",
         _TABLE_RUNTIME_ID,
@@ -160,9 +167,13 @@ def test_preview_request_can_require_1080p_runtime_evidence(tmp_path: Path) -> N
     write_genmanip_preview_request(collected_package, resolution=(1920, 1080))
 
     request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
-    for view_name in ("workspace_closeup", "scene_overview"):
+    for view_name in (
+        "workspace_closeup",
+        "scene_overview",
+        "task_object_closeup",
+    ):
         assert request["views"][view_name]["resolution"] == [1920, 1080]
-        assert "lift2" in request["views"][view_name]["required_runtime_ids"]
+    assert "lift2" in request["views"]["workspace_closeup"]["required_runtime_ids"]
 
 
 def test_preview_request_requires_articulated_task_objects_in_both_views(
@@ -176,7 +187,11 @@ def test_preview_request_requires_articulated_task_objects_in_both_views(
     articulated_id = "obj_graduated_cylinder_03"
 
     assert articulated_id in request["expected_runtime_ids"]["task_objects"]
-    for view_name in ("workspace_closeup", "scene_overview"):
+    for view_name in (
+        "workspace_closeup",
+        "scene_overview",
+        "task_object_closeup",
+    ):
         assert articulated_id in request["views"][view_name]["required_runtime_ids"]
         assert articulated_id in request["views"][view_name]["anchor_runtime_ids"]
 
@@ -229,11 +244,15 @@ def test_preview_evidence_with_matching_digest_writes_visual_ready_gate(
 
     gate_path = evidence_dir / "visual_ready_gate.yaml"
     gate = _load_yaml(gate_path)
-    assert gate["schema_version"] == "scenario-forge-genmanip-preview-gate/v0.1"
+    assert gate["schema_version"] == "scenario-forge-genmanip-preview-gate/v0.2"
     assert gate["status"] == "passed"
     assert gate["package_id"] == request["package_id"]
     assert gate["input_digest"] == request["input_digest"]
-    assert set(gate["views"]) == {"workspace_closeup", "scene_overview"}
+    assert set(gate["views"]) == {
+        "workspace_closeup",
+        "scene_overview",
+        "task_object_closeup",
+    }
     assert gate["next_stage"] == "clean_room_visual_review"
     assert gate["verification_scope"] == (
         "structural_runtime_geometry_and_camera_composition_metadata"
@@ -579,6 +598,7 @@ def _write_passing_evidence(
     image_specs = {
         "workspace_closeup": (34, 89, 144),
         "scene_overview": (91, 117, 74),
+        "task_object_closeup": (147, 91, 62),
     }
     views: dict[str, object] = {}
     request_views = request["views"]
@@ -597,7 +617,7 @@ def _write_passing_evidence(
             "present_runtime_ids": view_request["required_runtime_ids"],
             "scene_visibility": (
                 "scene_room_invisible_workspace_isolation"
-                if view_name == "workspace_closeup"
+                if view_name in {"workspace_closeup", "task_object_closeup"}
                 else "scene_room_inherited"
             ),
             "camera": {
@@ -687,7 +707,7 @@ def _write_passing_evidence(
             "post_warmup": snapshot(post_extent),
         }
     manifest = {
-        "schema_version": "scenario-forge-genmanip-preview-evidence/v0.1",
+        "schema_version": "scenario-forge-genmanip-preview-evidence/v0.2",
         "package_id": request["package_id"],
         "input_digest": request["input_digest"],
         "request_sha256": _file_sha256(

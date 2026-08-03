@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render two initial-scene QA views through the native GenManip scene path.
+"""Render three initial-scene QA views through the native GenManip scene path.
 
 This is a one-shot evidence producer.  It resets and restores a collected
 episode, takes no actions, and never evaluates a policy or task result.
@@ -25,9 +25,12 @@ from typing import Any, Mapping, Sequence
 import yaml
 
 
-REQUEST_SCHEMA = "scenario-forge-genmanip-preview-request/v0.1"
-EVIDENCE_SCHEMA = "scenario-forge-genmanip-preview-evidence/v0.1"
-VIEW_NAMES = ("workspace_closeup", "scene_overview")
+REQUEST_SCHEMA = "scenario-forge-genmanip-preview-request/v0.2"
+EVIDENCE_SCHEMA = "scenario-forge-genmanip-preview-evidence/v0.2"
+LEGACY_REQUEST_SCHEMA = "scenario-forge-genmanip-preview-request/v0.1"
+LEGACY_EVIDENCE_SCHEMA = "scenario-forge-genmanip-preview-evidence/v0.1"
+VIEW_NAMES = ("workspace_closeup", "scene_overview", "task_object_closeup")
+LEGACY_VIEW_NAMES = ("workspace_closeup", "scene_overview")
 EVIDENCE_DIRECTORY = Path("evidence/initial_scene")
 INPUT_ROLES = {
     "package_manifest",
@@ -131,6 +134,7 @@ def _render_initial_scene(
     # Simulator imports stay behind the process boundary and after SimulationApp
     # starts.  Pure Scenario Forge package modules never import these SDKs.
     request_views = _required_mapping(request, "views", "render request")
+    view_names = _request_view_names(request)
     resolutions = [
         _resolution(
             _as_mapping(request_views.get(view_name), f"render request view {view_name}").get(
@@ -138,7 +142,7 @@ def _render_initial_scene(
             ),
             view_name,
         )
-        for view_name in VIEW_NAMES
+        for view_name in view_names
     ]
     app_width = max(width for width, _ in resolutions)
     app_height = max(height for _, height in resolutions)
@@ -282,7 +286,7 @@ def _render_initial_scene(
 
         camera_data = {
             view_name: _camera_config(view_name, request_views)
-            for view_name in VIEW_NAMES
+            for view_name in view_names
         }
         preview_cameras = create_camera_list(
             camera_data,
@@ -310,7 +314,7 @@ def _render_initial_scene(
             original_room_visibility = UsdGeom.Tokens.inherited
 
         camera_records: dict[str, dict[str, Any]] = {}
-        for view_name in VIEW_NAMES:
+        for view_name in view_names:
             view_request = _as_mapping(
                 request_views.get(view_name), f"render request view {view_name}"
             )
@@ -373,13 +377,13 @@ def _render_initial_scene(
             }
 
         manifest_views: dict[str, Any] = {}
-        for view_name in VIEW_NAMES:
+        for view_name in view_names:
             # Keep the task-focused image stable across room packages.  Some
             # admitted rooms contain a floor/wall that intersects the fixed
             # eBench camera after a visual-only fit.  The closeup is therefore
             # an intentional workspace-isolation view; the following overview
             # restores the room and proves the substituted background renders.
-            if view_name == "workspace_closeup":
+            if view_name in {"workspace_closeup", "task_object_closeup"}:
                 room_visibility_attr.Set(
                     _preview_room_visibility_token(
                         view_name,
@@ -449,7 +453,7 @@ def _render_initial_scene(
 
         log_lines.extend(
             [
-                "temporary_evidence_cameras=workspace_closeup,scene_overview",
+                "temporary_evidence_cameras=" + ",".join(view_names),
                 f"render_steps={RENDER_STEPS}",
                 "runtime_log_scan=pending_parent_capture",
                 "render_status=pass",
@@ -459,7 +463,11 @@ def _render_initial_scene(
             "\n".join(log_lines) + "\n", encoding="utf-8"
         )
         manifest = {
-            "schema_version": EVIDENCE_SCHEMA,
+            "schema_version": (
+                EVIDENCE_SCHEMA
+                if request.get("schema_version") == REQUEST_SCHEMA
+                else LEGACY_EVIDENCE_SCHEMA
+            ),
             "package_id": _required_string(request, "package_id", "render request"),
             "input_digest": _required_string(
                 request, "input_digest", "render request"
@@ -568,7 +576,11 @@ def _camera_config(
         "orientation": [1.0, 0.0, 0.0, 0.0],
         "prim_path": f"_{view_name}",
         "resolution": [width, height],
-        "focal_length": 7.0 if view_name == "workspace_closeup" else 6.0,
+        "focal_length": (
+            10.0
+            if view_name == "task_object_closeup"
+            else 7.0 if view_name == "workspace_closeup" else 6.0
+        ),
         "horizontal_aperture": 10.0,
         "vertical_aperture": 5.625,
         "with_distance": False,
@@ -893,7 +905,7 @@ def _preview_room_visibility_token(
 ) -> Any:
     """Return the evidence-only room visibility for one preview view."""
 
-    if view_name == "workspace_closeup":
+    if view_name in {"workspace_closeup", "task_object_closeup"}:
         return invisible_token
     if view_name == "scene_overview":
         return inherited_token
@@ -1027,7 +1039,7 @@ def _select_evaluation(
 
 
 def _validate_request(root: Path, request: Mapping[str, Any]) -> None:
-    if request.get("schema_version") != REQUEST_SCHEMA:
+    if request.get("schema_version") not in {REQUEST_SCHEMA, LEGACY_REQUEST_SCHEMA}:
         raise ValueError("unsupported render request schema_version")
     if request.get("purpose") != "evidence_only":
         raise ValueError("render request purpose must be evidence_only")
@@ -1063,13 +1075,21 @@ def _validate_request(root: Path, request: Mapping[str, Any]) -> None:
     if request.get("input_digest") != expected_digest:
         raise ValueError("render request input_digest does not match inputs")
     views = _required_mapping(request, "views", "render request")
-    if set(views) != set(VIEW_NAMES):
-        raise ValueError("render request must contain both preview views")
+    if set(views) != set(_request_view_names(request)):
+        raise ValueError("render request must contain every contract preview view")
     _required_mapping(
         request,
         "expected_runtime_geometry",
         "render request",
     )
+
+
+def _request_view_names(request: Mapping[str, Any]) -> tuple[str, ...]:
+    if request.get("schema_version") == REQUEST_SCHEMA:
+        return VIEW_NAMES
+    if request.get("schema_version") == LEGACY_REQUEST_SCHEMA:
+        return LEGACY_VIEW_NAMES
+    raise ValueError("unsupported render request schema_version")
 
 
 def _input_path(root: Path, inputs: Mapping[str, Any], role: str) -> Path:

@@ -124,7 +124,13 @@ no policy action, then creates temporary QA cameras for:
 
 - `workspace_closeup`: task objects, both Lift2 end effectors, and the work surface;
 - `scene_overview`: the complete GenManip `room` bound, Lift2 robot, worktable,
-  and task objects.
+  and task objects;
+- `task_object_closeup`: task objects only, framed tightly enough to inspect
+  material, support contact, and relative placement.
+
+Preview contract v0.2 requires all three views. The validator and one-shot
+renderer continue to accept v0.1 requests and evidence with the historical two
+views so previously exported packages remain auditable.
 
 The images, runtime manifest, runtime log, and `visual_ready_gate.yaml` live below
 `adapters/ebench/genmanip/evidence/initial_scene/`. Input hashes and the render-request

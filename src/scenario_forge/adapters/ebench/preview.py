@@ -17,12 +17,20 @@ from scenario_forge.artifacts.package_writer import write_yaml_artifact
 from scenario_forge.assets.checksum import compute_sha256
 
 
-PREVIEW_REQUEST_SCHEMA_VERSION = "scenario-forge-genmanip-preview-request/v0.1"
-PREVIEW_EVIDENCE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-evidence/v0.1"
-PREVIEW_GATE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-gate/v0.1"
+PREVIEW_REQUEST_SCHEMA_VERSION = "scenario-forge-genmanip-preview-request/v0.2"
+PREVIEW_EVIDENCE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-evidence/v0.2"
+PREVIEW_GATE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-gate/v0.2"
+LEGACY_PREVIEW_REQUEST_SCHEMA_VERSION = "scenario-forge-genmanip-preview-request/v0.1"
+LEGACY_PREVIEW_EVIDENCE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-evidence/v0.1"
+LEGACY_PREVIEW_GATE_SCHEMA_VERSION = "scenario-forge-genmanip-preview-gate/v0.1"
 PREVIEW_REQUEST_PATH = Path("evidence/render_request.yaml")
 PREVIEW_EVIDENCE_DIR = Path("evidence/initial_scene")
-PREVIEW_VIEW_NAMES = ("workspace_closeup", "scene_overview")
+PREVIEW_VIEW_NAMES = (
+    "workspace_closeup",
+    "scene_overview",
+    "task_object_closeup",
+)
+LEGACY_PREVIEW_VIEW_NAMES = ("workspace_closeup", "scene_overview")
 
 _INPUT_ENTRYPOINTS = {
     "package_manifest": None,
@@ -267,6 +275,15 @@ def write_genmanip_preview_request(
                 "framing_margin": 1.05,
                 "minimum_distance": 1.6,
             },
+            "task_object_closeup": {
+                "resolution": [width, height],
+                "required_runtime_ids": task_object_ids,
+                "anchor_runtime_ids": task_object_ids,
+                "azimuth_deg": -35.0,
+                "elevation_deg": 30.0,
+                "framing_margin": 1.2,
+                "minimum_distance": 0.45,
+            },
         },
         "output": {
             "directory": PREVIEW_EVIDENCE_DIR.as_posix(),
@@ -306,8 +323,27 @@ def validate_genmanip_preview_evidence(
         gate_path.unlink()
 
     request = _load_yaml(root / PREVIEW_REQUEST_PATH, "preview render request")
-    if request.get("schema_version") != PREVIEW_REQUEST_SCHEMA_VERSION:
+    request_schema = request.get("schema_version")
+    if request_schema not in {
+        PREVIEW_REQUEST_SCHEMA_VERSION,
+        LEGACY_PREVIEW_REQUEST_SCHEMA_VERSION,
+    }:
         raise GenManipPreviewError("unsupported preview request schema_version")
+    preview_view_names = (
+        PREVIEW_VIEW_NAMES
+        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION
+        else LEGACY_PREVIEW_VIEW_NAMES
+    )
+    expected_evidence_schema = (
+        PREVIEW_EVIDENCE_SCHEMA_VERSION
+        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION
+        else LEGACY_PREVIEW_EVIDENCE_SCHEMA_VERSION
+    )
+    gate_schema = (
+        PREVIEW_GATE_SCHEMA_VERSION
+        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION
+        else LEGACY_PREVIEW_GATE_SCHEMA_VERSION
+    )
     package_id = _required_string(request, "package_id", "preview request")
     package_manifest = _load_json(root / "package_manifest.json", "package manifest")
     manifest_package_id = _required_string(
@@ -363,7 +399,7 @@ def validate_genmanip_preview_evidence(
         )
 
     manifest = _load_json(evidence_dir / "render_manifest.json", "preview render manifest")
-    if manifest.get("schema_version") != PREVIEW_EVIDENCE_SCHEMA_VERSION:
+    if manifest.get("schema_version") != expected_evidence_schema:
         raise GenManipPreviewError("unsupported preview evidence schema_version")
     if manifest.get("package_id") != package_id:
         raise GenManipPreviewError("preview evidence package_id does not match request")
@@ -410,11 +446,11 @@ def validate_genmanip_preview_evidence(
     runtime_geometry = _validate_runtime_geometry(request, manifest)
     request_views = _required_mapping(request, "views", "preview request")
     manifest_views = _required_mapping(manifest, "views", "preview render manifest")
-    if set(manifest_views) != set(PREVIEW_VIEW_NAMES):
-        raise GenManipPreviewError("preview evidence must contain both required views")
+    if set(manifest_views) != set(preview_view_names):
+        raise GenManipPreviewError("preview evidence must contain all required views")
 
     gate_views: dict[str, Any] = {}
-    for view_name in PREVIEW_VIEW_NAMES:
+    for view_name in preview_view_names:
         view_request = _as_mapping(request_views.get(view_name), f"request view {view_name}")
         view = _as_mapping(manifest_views.get(view_name), f"evidence view {view_name}")
         if view.get("status") != "pass":
@@ -465,7 +501,7 @@ def validate_genmanip_preview_evidence(
         }
 
     gate = {
-        "schema_version": PREVIEW_GATE_SCHEMA_VERSION,
+        "schema_version": gate_schema,
         "status": "passed",
         "package_id": package_id,
         "input_digest": expected_digest,
@@ -1077,7 +1113,7 @@ def _root_tilt_deg(
 
 
 def _expected_preview_visibility(view_name: str) -> str:
-    if view_name == "workspace_closeup":
+    if view_name in {"workspace_closeup", "task_object_closeup"}:
         return "scene_room_invisible_workspace_isolation"
     if view_name == "scene_overview":
         return "scene_room_inherited"

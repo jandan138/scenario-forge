@@ -68,6 +68,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-27 External Room Zone-Background Implementation](records/2026-07-27-external-room-zone-background-implementation.md)
 - [2026-07-29 Scientific Workbench Tube-task Foundation](records/2026-07-29-scientific-workbench-tube-task-foundation.md)
 - [2026-07-30 Code-as-Room Generated Environment Integration](records/2026-07-30-code-as-room-generated-environment-integration.md)
+- [2026-08-03 Three-view Background Package QA](records/2026-08-03-three-view-background-package-qa.md)
 - [2026-07-30 Centrifuge Proxy Parent-Local Requalification](records/2026-07-30-centrifuge-proxy-parent-local-requalification.md)
 - [2026-07-31 Task Design Authority Correction](records/2026-07-31-scientific-workbench-task-design-correction.md)
 - [2026-08-01 Scientific Workbench Coverage Factory v1](records/2026-08-01-scientific-workbench-coverage-factory-v1.md)
