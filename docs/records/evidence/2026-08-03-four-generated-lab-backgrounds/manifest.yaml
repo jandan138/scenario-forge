@@ -1,0 +1,94 @@
+schema_version: scenario-forge-background-comparison-evidence/v0.1
+recorded_at: '2026-08-03'
+task_family: scientific_workbench_bimanual_pour
+fixed_workcell:
+  robot: ebench_lift2_bimanual
+  task_objects:
+  - conical_flask
+  - graduated_cylinder
+baseline:
+  background_asset_id: scientific_environment_code_room_example4_v1
+  zone_id: center_open_floor
+  overview_image: ../../../background-gallery/assets/original-example4-overview.png
+  overview_sha256: 45a6a86f12372c3fbc174d4af617838d3f3cddbc8336e4b0bc2b9933d3f2bd36
+generated_backgrounds:
+- background_asset_id: scientific_environment_code_room_wet_chemistry_v1
+  zone_id: center_open_floor
+  source_usd_sha256: 1cde97a43e6f1cdb7a68d6ee29dc39c87c5195da84278825a7b541036cb642f7
+  reviewed_yaw_deg: 0.0
+  optional_inactive_prim_paths: []
+  convertasset_runtime_smoke: pass
+  scenario_package_check: pass
+  images:
+    overview:
+      path: ../../../background-gallery/assets/wet-chemistry-overview.png
+      sha256: 644dc7b423d03b802ec0d63dc9ee0cd0b17645f0dfe66f9448ed6c60e9c397cc
+    workspace:
+      path: ../../../background-gallery/assets/wet-chemistry-workspace.png
+      sha256: b3a5bbc3a2832caf3a8ab5398a422b82952c568c6a6d2101cc7e2962f47eff87
+    task_objects:
+      path: ../../../background-gallery/assets/wet-chemistry-task-objects.png
+      sha256: 4a56db60e453d201f01a80a49d76189efc1407e960f198c63d76efdd20f11314
+- background_asset_id: scientific_environment_code_room_analytical_instrumentation_v1
+  zone_id: center_open_floor
+  source_usd_sha256: e70dbe983012d14cc5fa9274be2568134b8c4e562b2e950b09a44151d05c5bad
+  reviewed_yaw_deg: 90.0
+  optional_inactive_prim_paths:
+  - /World/Lab_Stool_Left
+  - /World/Lab_Stool_Middle
+  - /World/Lab_Stool_Right
+  convertasset_runtime_smoke: pass
+  scenario_package_check: pass
+  images:
+    overview:
+      path: ../../../background-gallery/assets/analytical-instrumentation-overview.png
+      sha256: 53f290ac2d4511e3a070393ae9412a058807b2e750e4590902357683a0f85d4c
+    workspace:
+      path: ../../../background-gallery/assets/analytical-instrumentation-workspace.png
+      sha256: ae518fe0f864c8e3cb23a0e47fc01cb029cda7d022ccbe4ce4546d32158c9dc5
+    task_objects:
+      path: ../../../background-gallery/assets/analytical-instrumentation-task-objects.png
+      sha256: 73eb5e0c050aa674d0b75153a0e85903865d96ffb7bdc848e8e4837c3c7926aa
+- background_asset_id: scientific_environment_code_room_bioclean_v1
+  zone_id: center_open_floor
+  source_usd_sha256: 9075bb03e16f4566457c236c480f15bbd2a2609603f733725746cf55bc803164
+  reviewed_yaw_deg: 90.0
+  optional_inactive_prim_paths: []
+  convertasset_runtime_smoke: pass
+  scenario_package_check: pass
+  images:
+    overview:
+      path: ../../../background-gallery/assets/bioclean-overview.png
+      sha256: 1202ccfa8f801e6fc2176ecda4b3006f8446016aa95f574b0f89a73db43f7373
+    workspace:
+      path: ../../../background-gallery/assets/bioclean-workspace.png
+      sha256: e8a0dc29fc31989cd6608f1d5f0bf11551fe5e2a32379c769fd7947d5a2b34be
+    task_objects:
+      path: ../../../background-gallery/assets/bioclean-task-objects.png
+      sha256: 6f571ff8302113945a1f8da9920e9ee7116c34bd9bef35d671d4da07695badde
+- background_asset_id: scientific_environment_code_room_teaching_research_v1
+  zone_id: center_open_floor
+  source_usd_sha256: 7f6ccd25579df0b5cb96a84f11aa19591189aab7d63775adadd176c557e09523
+  reviewed_yaw_deg: 0.0
+  optional_inactive_prim_paths: []
+  convertasset_runtime_smoke: pass
+  scenario_package_check: pass
+  images:
+    overview:
+      path: ../../../background-gallery/assets/teaching-research-overview.png
+      sha256: f6a21c763999fc243f969fe1ed8b9647e3651499951fb74412368b9a05b86817
+    workspace:
+      path: ../../../background-gallery/assets/teaching-research-workspace.png
+      sha256: 0f7cd1e25ca247fb14ebd9ddccb048261017f9c3a5437673d1e403f71302db3c
+    task_objects:
+      path: ../../../background-gallery/assets/teaching-research-task-objects.png
+      sha256: 59c237a9f6b3a64e398d020c7d59a838155ef9bd753e0e4c801f8fe0aef00a36
+claim_boundary:
+  proves:
+  - source-bound static-background admission
+  - package composition and asset lock
+  - post-reset initial-scene visual evidence
+  does_not_prove:
+  - reachability or collision-free motion
+  - grasp, pour, or liquid-transfer success
+  - policy or benchmark success

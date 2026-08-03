@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Scientific Workbench · 背景对比</title>
+  <style>
+    :root {
+      --ink: #102536;
+      --muted: #536878;
+      --paper: #f2f7f8;
+      --panel: #ffffff;
+      --line: #cbd9dd;
+      --cyan: #18a6a6;
+      --cyan-soft: #dff3f1;
+      --amber: #e49b2f;
+      --navy: #173b56;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+    .shell { width: min(1480px, calc(100% - 40px)); margin: 0 auto; }
+    header {
+      color: #fff;
+      background:
+        linear-gradient(110deg, rgba(24, 166, 166, .18), transparent 45%),
+        var(--navy);
+      border-bottom: 6px solid var(--cyan);
+      padding: 48px 0 38px;
+    }
+    .eyebrow, .tag, figcaption, code {
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      letter-spacing: .035em;
+    }
+    .eyebrow { margin: 0 0 10px; color: #9fe1dc; font-size: .82rem; text-transform: uppercase; }
+    h1 { max-width: 920px; margin: 0; font-size: clamp(2rem, 5vw, 4.8rem); line-height: .98; letter-spacing: -.045em; }
+    header p { max-width: 780px; margin: 20px 0 0; color: #d7e7ee; font-size: 1.05rem; }
+    .proof-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(220px, 1fr));
+      gap: 4px;
+      margin: 28px 0 0;
+      overflow-x: auto;
+      background: var(--cyan);
+      border: 4px solid var(--cyan);
+    }
+    .proof-strip a { min-width: 220px; background: #fff; }
+    .proof-strip img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+    main { padding: 44px 0 72px; }
+    .summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+    h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.5rem); letter-spacing: -.025em; }
+    .summary p { max-width: 760px; margin: 8px 0 0; color: var(--muted); }
+    .gate {
+      padding: 10px 14px;
+      color: #075b59;
+      background: var(--cyan-soft);
+      border: 1px solid #9fd6d2;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .grid { display: grid; gap: 24px; }
+    article {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 32px rgba(16, 37, 54, .07);
+    }
+    .card-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    h3 { margin: 0 0 5px; font-size: 1.3rem; }
+    .card-head p { margin: 0; color: var(--muted); }
+    .tag { padding: 5px 8px; font-size: .75rem; background: #edf2f4; border-left: 3px solid var(--amber); }
+    .views { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1px; background: var(--line); }
+    figure { margin: 0; min-width: 0; background: var(--panel); }
+    figure a { display: block; overflow: hidden; }
+    figure img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      transition: transform .18s ease;
+    }
+    figure a:hover img { transform: scale(1.012); }
+    figcaption { padding: 9px 12px 11px; color: var(--muted); font-size: .73rem; }
+    .baseline .views { grid-template-columns: 1fr; }
+    .baseline figure img { aspect-ratio: 21 / 9; }
+    .claim {
+      margin-top: 30px;
+      padding: 22px 24px;
+      color: #354e5f;
+      background: #e8eff2;
+      border-left: 5px solid var(--navy);
+    }
+    .claim strong { color: var(--ink); }
+    .back { display: inline-block; margin-top: 24px; color: var(--navy); font-weight: 700; }
+    :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+    @media (max-width: 860px) {
+      .shell { width: min(100% - 24px, 1480px); }
+      header { padding-top: 34px; }
+      .summary, .card-head { grid-template-columns: 1fr; }
+      .gate { white-space: normal; }
+      .views { grid-template-columns: 1fr; }
+      .baseline figure img, figure img { aspect-ratio: 16 / 9; }
+    }
+    @media (prefers-reduced-motion: reduce) { figure img { transition: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <p class="eyebrow">eBench bimanual pour · background set v1</p>
+      <h1>同一张实验台，五种实验室背景</h1>
+      <p>机器人、深蓝操作台、锥形瓶和量筒保持不变。下方只比较房间背景，避免把“换背景”误看成“换任务”。点击任意图可查看原始分辨率。</p>
+      <div class="proof-strip" aria-label="五个背景总览">
+        <a href="assets/original-example4-overview.png"><img src="assets/original-example4-overview.png" alt="原 example4 房间总览"></a>
+        <a href="assets/wet-chemistry-overview.png"><img src="assets/wet-chemistry-overview.png" alt="湿化学实验室总览"></a>
+        <a href="assets/analytical-instrumentation-overview.png"><img src="assets/analytical-instrumentation-overview.png" alt="分析仪器实验室总览"></a>
+        <a href="assets/bioclean-overview.png"><img src="assets/bioclean-overview.png" alt="生物洁净实验室总览"></a>
+        <a href="assets/teaching-research-overview.png"><img src="assets/teaching-research-overview.png" alt="教学科研实验室总览"></a>
+      </div>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="summary">
+      <div>
+        <h2>背景可替换性证据</h2>
+        <p>四个新房间分别经过 Code-as-Room 源交付、ConvertAsset source-bound 静态背景准入和 3.8 m × 4.0 m 工作区检查，再由 Scenario Forge 编译为独立、自描述的 eBench 任务包。</p>
+      </div>
+      <div class="gate">4 / 4 新背景：package check 通过</div>
+    </section>
+
+    <section class="grid">
+      <article class="baseline">
+        <div class="card-head">
+          <div><h3>原背景 · example4</h3><p>此前已验证的 Code-as-Room 中央开放区，作为视觉基线保留。</p></div>
+          <span class="tag">historical baseline</span>
+        </div>
+        <div class="views"><figure><a href="assets/original-example4-overview.png"><img src="assets/original-example4-overview.png" alt="原 example4 总览"></a><figcaption>scene overview · 历史双视角包</figcaption></figure></div>
+      </article>
+
+      <article>
+        <div class="card-head"><div><h3>现代湿化学实验室</h3><p>青绿色地柜、洗涤与常规湿实验器材；工作区 yaw 0°。</p></div><span class="tag">wet chemistry</span></div>
+        <div class="views">
+          <figure><a href="assets/wet-chemistry-overview.png"><img src="assets/wet-chemistry-overview.png" alt="湿化学实验室总览"></a><figcaption>01 · 完整房间</figcaption></figure>
+          <figure><a href="assets/wet-chemistry-workspace.png"><img src="assets/wet-chemistry-workspace.png" alt="湿化学实验室工作区近景"></a><figcaption>02 · 机器人与操作台</figcaption></figure>
+          <figure><a href="assets/wet-chemistry-task-objects.png"><img src="assets/wet-chemistry-task-objects.png" alt="湿化学任务器具近景"></a><figcaption>03 · 任务器具</figcaption></figure>
+        </div>
+      </article>
+
+      <article>
+        <div class="card-head"><div><h3>分析仪器实验室</h3><p>仪器柜与冷藏存储；工作区 yaw 90°，仅移除三只完整、可移动的凳子 assembly。</p></div><span class="tag">instrumentation</span></div>
+        <div class="views">
+          <figure><a href="assets/analytical-instrumentation-overview.png"><img src="assets/analytical-instrumentation-overview.png" alt="分析仪器实验室总览"></a><figcaption>01 · 完整房间</figcaption></figure>
+          <figure><a href="assets/analytical-instrumentation-workspace.png"><img src="assets/analytical-instrumentation-workspace.png" alt="分析仪器实验室工作区近景"></a><figcaption>02 · 机器人与操作台</figcaption></figure>
+          <figure><a href="assets/analytical-instrumentation-task-objects.png"><img src="assets/analytical-instrumentation-task-objects.png" alt="分析仪器任务器具近景"></a><figcaption>03 · 任务器具</figcaption></figure>
+        </div>
+      </article>
+
+      <article>
+        <div class="card-head"><div><h3>生物洁净实验室</h3><p>洁净设备、储物和不锈钢器械台；工作区 yaw 90°。</p></div><span class="tag">bioclean</span></div>
+        <div class="views">
+          <figure><a href="assets/bioclean-overview.png"><img src="assets/bioclean-overview.png" alt="生物洁净实验室总览"></a><figcaption>01 · 完整房间</figcaption></figure>
+          <figure><a href="assets/bioclean-workspace.png"><img src="assets/bioclean-workspace.png" alt="生物洁净实验室工作区近景"></a><figcaption>02 · 机器人与操作台</figcaption></figure>
+          <figure><a href="assets/bioclean-task-objects.png"><img src="assets/bioclean-task-objects.png" alt="生物洁净任务器具近景"></a><figcaption>03 · 任务器具</figcaption></figure>
+        </div>
+      </article>
+
+      <article>
+        <div class="card-head"><div><h3>教学科研实验室</h3><p>显微镜、样品架和常规教学仪器；工作区 yaw 0°。</p></div><span class="tag">teaching research</span></div>
+        <div class="views">
+          <figure><a href="assets/teaching-research-overview.png"><img src="assets/teaching-research-overview.png" alt="教学科研实验室总览"></a><figcaption>01 · 完整房间</figcaption></figure>
+          <figure><a href="assets/teaching-research-workspace.png"><img src="assets/teaching-research-workspace.png" alt="教学科研实验室工作区近景"></a><figcaption>02 · 机器人与操作台</figcaption></figure>
+          <figure><a href="assets/teaching-research-task-objects.png"><img src="assets/teaching-research-task-objects.png" alt="教学科研任务器具近景"></a><figcaption>03 · 任务器具</figcaption></figure>
+        </div>
+      </article>
+    </section>
+
+    <aside class="claim"><strong>证据边界：</strong>这些图片证明任务包能加载、复位并以同一机器人/桌面/器具布局呈现不同静态房间。它们不证明机械臂可达、无碰路径、抓取、倒液、策略成功率或 benchmark 成功。</aside>
+    <a class="back" href="../">← 返回 Scenario Forge 文档</a>
+  </main>
+</body>
+</html>

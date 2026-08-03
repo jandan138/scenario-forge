@@ -31,6 +31,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 - [Artifact Policy](operations/artifact-policy.md)
 - [Scientific Workbench Task Directory](task-directory/)
+- [Scientific Workbench Background Gallery](background-gallery/)
 - [Build the Scientific Workbench Task Directory](operations/build-scientific-workbench-task-directory.md)
 - [Generate Scientific Workbench Layout Prototypes](operations/generate-scientific-workbench-layout-prototypes.md)
 - [Development Checks](operations/development-checks.md)
@@ -69,6 +70,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-29 Scientific Workbench Tube-task Foundation](records/2026-07-29-scientific-workbench-tube-task-foundation.md)
 - [2026-07-30 Code-as-Room Generated Environment Integration](records/2026-07-30-code-as-room-generated-environment-integration.md)
 - [2026-08-03 Three-view Background Package QA](records/2026-08-03-three-view-background-package-qa.md)
+- [2026-08-03 Four Generated Laboratory Backgrounds](records/2026-08-03-four-generated-lab-backgrounds.md)
 - [2026-07-30 Centrifuge Proxy Parent-Local Requalification](records/2026-07-30-centrifuge-proxy-parent-local-requalification.md)
 - [2026-07-31 Task Design Authority Correction](records/2026-07-31-scientific-workbench-task-design-correction.md)
 - [2026-08-01 Scientific Workbench Coverage Factory v1](records/2026-08-01-scientific-workbench-coverage-factory-v1.md)
