@@ -8,9 +8,11 @@ physics.
 ## Ownership
 
 - Code-as-Room owns `room.blend`, the Z-up metric `room_source.usdc`, relative
-  textures, semantic Zone roots, source evidence, and `source_manifest.json`.
+  textures, semantic Zone roots, source evidence, `source_manifest.json`, and
+  the hash-bound `support_relations.json` inventory for non-floor decorations.
 - ConvertAsset owns the `/World` consumer facade, dependency closure, Isaac
-  4.1 admission, and source-bound workspace-zone clearance profiles.
+  4.1 admission, an independent geometry audit of every declared support
+  relation, and source-bound workspace-zone clearance profiles.
 - Scenario Forge verifies both handoffs, preserves the fixed eBench
   table/robot/task objects, and compiles one package per eligible Zone.
 
@@ -26,8 +28,9 @@ PYTHONPATH=src python scripts/intake_generated_environment.py \
   --out "$OUTPUT_ROOT/intake.yaml"
 ```
 
-The intake verifies every producer-declared hash, `/Room`, Z-up, metric units,
-relative dependencies, and the four Zone roots. It emits no absolute source
+For `room-source-v2`, the intake additionally requires a passing engineering
+review, verifies that `support_relations.json` is part of the declared closure,
+and binds it to the exact `room_source.usdc` hash. It emits no absolute source
 path. Files that are present but absent from the producer manifest are reported
 as warnings.
 
@@ -59,6 +62,12 @@ separate facade geometry hash, and complete Zone assembly roots. It supports:
 
 Do not list anonymous meshes as ad-hoc masks.
 
+Generated-room admission must also include the support sidecar. ConvertAsset
+recomputes each footprint/contact relation from the composed raw USD and writes
+`evidence/support_audit/report.json`. A workspace-zone request must point to
+that passing report, so removing a support parent also carries its reviewed
+dependent-object closure.
+
 ## 3. Compile and render eBench packages
 
 ```bash
@@ -85,6 +94,11 @@ python scripts/generate_scientific_workbench_background_variants.py \
 The generator preserves the package's table, Lift2, vessels, steps, and metric.
 It changes only the visual background asset, reviewed room instance pose,
 reviewed Zone inactivation, and variant scenario ID.
+
+Scenario Forge refuses a generated background when the intake certificate is
+missing, the ConvertAsset certificate is missing or blocked, or their raw
+source hash/relation/removal counts disagree. Previously published images must
+be quarantined until a new source revision passes this chain and is re-rendered.
 
 ## Acceptance
 

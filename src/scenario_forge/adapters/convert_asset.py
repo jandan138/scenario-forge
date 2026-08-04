@@ -144,6 +144,32 @@ class ConvertAssetTaskQualification:
 
 
 @dataclass(frozen=True)
+class ConvertAssetSupportAudit:
+    """Portable certificate for a generated room's reviewed support graph."""
+
+    schema_version: str
+    source_sha256: str
+    relation_count: int
+    removed_decoration_count: int
+    report_sha256: str
+    support_closure: Mapping[str, tuple[str, ...]]
+
+    def to_mapping(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "status": "pass",
+            "source_sha256": f"sha256:{self.source_sha256}",
+            "relation_count": self.relation_count,
+            "removed_decoration_count": self.removed_decoration_count,
+            "report_sha256": f"sha256:{self.report_sha256}",
+            "support_closure": {
+                key: list(values)
+                for key, values in sorted(self.support_closure.items())
+            },
+        }
+
+
+@dataclass(frozen=True)
 class ConvertAssetTaskInteractiveGeometry:
     asset_entry_prim: str
     entry_world_transform: tuple[tuple[float, float, float, float], ...]
@@ -223,6 +249,7 @@ class ConvertAssetPackageHandoff:
     articulation_contract: ConvertAssetArticulationContract | None = None
     task_interactive_geometry: ConvertAssetTaskInteractiveGeometry | None = None
     task_qualifications: tuple[ConvertAssetTaskQualification, ...] = ()
+    support_audit: ConvertAssetSupportAudit | None = None
 
     def to_local_usd_asset_source(
         self,
@@ -302,6 +329,8 @@ class ConvertAssetPackageHandoff:
             upstream_metadata["articulation_profile_sha256"] = (
                 f"sha256:{self.articulation_contract.profile_sha256}"
             )
+        if self.support_audit is not None:
+            upstream_metadata["support_audit"] = self.support_audit.to_mapping()
         if self.task_interactive_geometry is not None:
             upstream_metadata["task_interactive_geometry"] = (
                 self.task_interactive_geometry.to_mapping()
@@ -514,6 +543,10 @@ def load_convert_asset_package_handoff(
     task_interactive_geometry: ConvertAssetTaskInteractiveGeometry | None = None
     task_qualifications = _load_task_qualifications(
         manifest.get("task_qualifications"),
+        package_root=package_root,
+    )
+    support_audit = _load_support_audit(
+        manifest.get("support_audit"),
         package_root=package_root,
     )
 
@@ -821,6 +854,94 @@ def load_convert_asset_package_handoff(
         articulation_contract=articulation_contract,
         task_interactive_geometry=task_interactive_geometry,
         task_qualifications=task_qualifications,
+        support_audit=support_audit,
+    )
+
+
+def _load_support_audit(
+    value: Any,
+    *,
+    package_root: Path,
+) -> ConvertAssetSupportAudit | None:
+    if value is None:
+        return None
+    audit = _required_mapping({"support_audit": value}, "support_audit", "manifest")
+    _require_value(
+        audit,
+        "schema_version",
+        "aan.generated_room_support_audit.v1",
+        "manifest.support_audit",
+    )
+    _require_value(audit, "overall_status", "pass", "manifest.support_audit")
+    if audit.get("blocked_reasons") != []:
+        raise ConvertAssetHandoffError(
+            "manifest.support_audit.blocked_reasons must be empty"
+        )
+    source_sha256 = _required_sha256(
+        audit,
+        "source_sha256",
+        "manifest.support_audit",
+    )
+    review = _required_mapping(
+        audit,
+        "producer_review",
+        "manifest.support_audit",
+    )
+    _require_value(review, "status", "pass", "manifest.support_audit.producer_review")
+    _required_string(review, "reviewer", "manifest.support_audit.producer_review")
+    raw_relations = audit.get("relations")
+    if not isinstance(raw_relations, list):
+        raise ConvertAssetHandoffError("manifest.support_audit.relations must be a list")
+    removed_count = 0
+    for index, raw_relation in enumerate(raw_relations):
+        relation = _mapping(raw_relation, f"manifest.support_audit.relations[{index}]")
+        _require_value(
+            relation,
+            "independent_status",
+            "pass",
+            f"manifest.support_audit.relations[{index}]",
+        )
+        if relation.get("producer_status") == "removed":
+            removed_count += 1
+    raw_closure = _required_mapping(
+        audit,
+        "support_closure",
+        "manifest.support_audit",
+    )
+    closure: dict[str, tuple[str, ...]] = {}
+    for support_prim, raw_objects in raw_closure.items():
+        if not isinstance(support_prim, str) or not support_prim.startswith("/Room/"):
+            raise ConvertAssetHandoffError(
+                "manifest.support_audit.support_closure has an invalid support prim"
+            )
+        if not isinstance(raw_objects, list) or not all(
+            isinstance(item, str) and item.startswith("/Room/")
+            for item in raw_objects
+        ):
+            raise ConvertAssetHandoffError(
+                "manifest.support_audit.support_closure has invalid object prims"
+            )
+        closure[support_prim] = tuple(raw_objects)
+    report_path = package_root / "evidence" / "support_audit" / "report.json"
+    if not report_path.is_file():
+        raise ConvertAssetHandoffError(
+            "ConvertAsset support_audit report is missing: evidence/support_audit/report.json"
+        )
+    report = _load_strict_json_mapping(
+        report_path.read_bytes(),
+        "ConvertAsset support_audit report",
+    )
+    if report != audit:
+        raise ConvertAssetHandoffError(
+            "ConvertAsset support_audit report disagrees with embedded manifest evidence"
+        )
+    return ConvertAssetSupportAudit(
+        schema_version="aan.generated_room_support_audit.v1",
+        source_sha256=source_sha256,
+        relation_count=len(raw_relations),
+        removed_decoration_count=removed_count,
+        report_sha256=_file_sha256(report_path),
+        support_closure=closure,
     )
 
 

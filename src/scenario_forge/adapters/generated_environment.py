@@ -17,10 +17,11 @@ from typing import Mapping
 
 
 GENERATED_ENVIRONMENT_INTAKE_SCHEMA_VERSION = (
-    "scenario-forge-generated-environment-intake/v0.1"
+    "scenario-forge-generated-environment-intake/v0.2"
 )
 
-_PRODUCER_SCHEMA_VERSION = "room-source-v1"
+_PRODUCER_SCHEMA_VERSIONS = frozenset({"room-source-v1", "room-source-v2"})
+_SUPPORT_SCHEMA_VERSION = "room-support-relations-v1"
 _SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 _ASSET_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _COMMIT = re.compile(r"^[0-9a-f]{40}$")
@@ -42,13 +43,16 @@ class GeneratedEnvironmentIntake:
     meters_per_unit: float
     zone_roots: tuple[str, ...]
     unlisted_files: tuple[str, ...]
+    support_sidecar_sha256: str | None = None
+    support_relation_count: int | None = None
+    support_removed_decoration_count: int | None = None
 
     def to_mapping(self) -> dict[str, object]:
         source_uri = (
             "generated-environment://code-as-room/"
             f"{self.producer_revision}/{self.run_id}"
         )
-        return {
+        result: dict[str, object] = {
             "schema_version": GENERATED_ENVIRONMENT_INTAKE_SCHEMA_VERSION,
             "asset_id": self.asset_id,
             "asset_role": "visual_static_environment",
@@ -65,7 +69,11 @@ class GeneratedEnvironmentIntake:
                 "repo": "Code-as-Room",
                 "revision": self.producer_revision,
                 "run_id": self.run_id,
-                "source_schema_version": _PRODUCER_SCHEMA_VERSION,
+                "source_schema_version": (
+                    "room-source-v2"
+                    if self.support_sidecar_sha256 is not None
+                    else "room-source-v1"
+                ),
                 "manifest_sha256": self.producer_manifest_sha256,
             },
             "source": {
@@ -91,6 +99,16 @@ class GeneratedEnvironmentIntake:
                 "runtime admission, and workspace-zone profiling."
             ),
         }
+        if self.support_sidecar_sha256 is not None:
+            result["support_audit"] = {
+                "schema_version": _SUPPORT_SCHEMA_VERSION,
+                "status": "pass",
+                "sidecar_sha256": self.support_sidecar_sha256,
+                "source_usd_sha256": self.source_usd_sha256,
+                "relation_count": self.support_relation_count,
+                "removed_decoration_count": self.support_removed_decoration_count,
+            }
+        return result
 
 
 def build_generated_environment_intake(
@@ -98,7 +116,7 @@ def build_generated_environment_intake(
     asset_id: str,
     delivery_root: str | Path,
 ) -> GeneratedEnvironmentIntake:
-    """Validate one ``room-source-v1`` delivery and bind its declared closure."""
+    """Validate one room-source delivery and bind its declared closure."""
 
     _validate_asset_id(asset_id)
     root = Path(delivery_root)
@@ -108,13 +126,14 @@ def build_generated_environment_intake(
     manifest_path = root / "source_manifest.json"
     manifest = _load_manifest(manifest_path)
 
-    if manifest.get("schema_version") != _PRODUCER_SCHEMA_VERSION:
+    producer_schema = manifest.get("schema_version")
+    if producer_schema not in _PRODUCER_SCHEMA_VERSIONS:
         raise ValueError("generated room source manifest schema is unsupported")
     run_id = _required_string(manifest, "run_id", "source manifest")
     producer = _required_mapping(manifest, "code_as_room", "source manifest")
     revision = _required_string(producer, "commit", "source manifest.code_as_room")
-    if _COMMIT.fullmatch(revision) is None:
-        raise ValueError("source manifest Code-as-Room commit must be a 40-character hash")
+    if re.fullmatch(r"[0-9a-f]{7,40}", revision) is None:
+        raise ValueError("source manifest Code-as-Room commit must be a Git hash")
 
     assets = _required_mapping(manifest, "assets", "source manifest")
     declared = _declared_assets(assets)
@@ -142,6 +161,75 @@ def build_generated_environment_intake(
         "sha256",
         "assets.room_source_usdc",
     )
+
+    support_sidecar_sha256: str | None = None
+    support_relation_count: int | None = None
+    support_removed_count: int | None = None
+    if producer_schema == "room-source-v2":
+        support_entry = _required_mapping(
+            assets,
+            "support_relations",
+            "source manifest.assets",
+        )
+        support_relative = _safe_relative_path(
+            _required_string(
+                support_entry,
+                "path",
+                "assets.support_relations",
+            )
+        )
+        support_sidecar_sha256 = _required_sha256(
+            support_entry,
+            "sha256",
+            "assets.support_relations",
+        )
+        support_path = _safe_delivery_file(root, support_relative)
+        support = _load_manifest(support_path)
+        if support.get("schema_version") != _SUPPORT_SCHEMA_VERSION:
+            raise ValueError("generated room support sidecar schema is unsupported")
+        support_source = _required_mapping(
+            support,
+            "source_usd",
+            "support relations",
+        )
+        if _required_string(support_source, "path", "support relations.source_usd") != source_usd:
+            raise ValueError("generated room support sidecar source USD path disagrees")
+        if _required_sha256(
+            support_source,
+            "sha256",
+            "support relations.source_usd",
+        ) != source_sha256:
+            raise ValueError("generated room support sidecar source USD hash disagrees")
+        support_review = _required_mapping(
+            support,
+            "review",
+            "support relations",
+        )
+        if support_review.get("status") != "pass":
+            raise ValueError("generated room support review must pass")
+        _required_string(support_review, "reviewer", "support relations.review")
+        raw_relations = support.get("relations")
+        if not isinstance(raw_relations, list):
+            raise ValueError("generated room support relations must be a list")
+        support_relation_count = len(raw_relations)
+        support_removed_count = sum(
+            1
+            for relation in raw_relations
+            if isinstance(relation, Mapping)
+            and relation.get("audit_status") == "removed"
+        )
+        support_summary = _required_mapping(
+            manifest,
+            "support_audit",
+            "source manifest",
+        )
+        if (
+            support_summary.get("schema_version") != _SUPPORT_SCHEMA_VERSION
+            or support_summary.get("overall_status") != "pass"
+            or support_summary.get("relation_count") != support_relation_count
+            or support_summary.get("removed_decoration_count") != support_removed_count
+        ):
+            raise ValueError("generated room support summary disagrees with sidecar")
 
     export = _required_mapping(
         manifest,
@@ -220,6 +308,9 @@ def build_generated_environment_intake(
         meters_per_unit=float(meters_per_unit),
         zone_roots=tuple(sorted(zone_roots)),
         unlisted_files=unlisted,
+        support_sidecar_sha256=support_sidecar_sha256,
+        support_relation_count=support_relation_count,
+        support_removed_decoration_count=support_removed_count,
     )
 
 

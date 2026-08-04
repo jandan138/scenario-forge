@@ -16,7 +16,7 @@
     .eyebrow { margin:0 0 10px; color:#9fe1dc; font-size:.82rem; text-transform:uppercase; }
     h1 { max-width:1050px; margin:0; font-size:clamp(2rem,5vw,4.7rem); line-height:.98; letter-spacing:-.045em; }
     header p { max-width:880px; margin:20px 0 0; color:#d7e7ee; font-size:1.05rem; }
-    .proof-strip { display:grid; grid-template-columns:repeat(3,minmax(220px,1fr)); gap:4px; margin-top:28px; overflow-x:auto; background:var(--cyan); border:4px solid var(--cyan); }
+    .proof-strip { display:grid; grid-template-columns:repeat(5,minmax(220px,1fr)); gap:4px; margin-top:28px; overflow-x:auto; background:var(--cyan); border:4px solid var(--cyan); }
     .proof-strip a { min-width:220px; background:#fff; }
     .proof-strip img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
     main { padding:42px 0 72px; }
@@ -24,7 +24,6 @@
     h2 { margin:0; font-size:clamp(1.5rem,3vw,2.5rem); letter-spacing:-.025em; }
     .summary p { max-width:850px; margin:8px 0 0; color:var(--muted); }
     .gate { padding:10px 14px; color:#075b59; background:var(--soft); border:1px solid #9fd6d2; font-weight:700; white-space:nowrap; }
-    .maintenance { margin:0 0 28px; padding:18px 20px; color:#6d4511; background:#fff6df; border:1px solid #e7bd72; border-left:5px solid var(--amber); }
     .grid { display:grid; gap:28px; }
     article { background:var(--panel); border:1px solid var(--line); box-shadow:0 14px 32px rgba(16,37,54,.07); }
     .card-head { display:grid; grid-template-columns:1fr auto; gap:16px; align-items:start; padding:22px 24px 18px; border-bottom:1px solid var(--line); }
@@ -52,12 +51,14 @@
 <body>
   <header>
     <div class="shell">
-      <p class="eyebrow">eBench bimanual pour · room survey v3</p>
-      <h1>同一项任务，三个已发布房间，七种证据视角</h1>
+      <p class="eyebrow">eBench bimanual pour · support-audited room survey v4</p>
+      <h1>同一项任务，五个合格房间，七种证据视角</h1>
       <p>每个卡片先用四张标准房间视角交代完整空间，再给出三张任务视角。机器人、深蓝操作台、锥形瓶和量筒始终来自同一个实际 eBench 任务包；点击任意图查看 1920 × 1080 原图。</p>
-      <div class="proof-strip" aria-label="三个已发布背景高位对角总览">
+      <div class="proof-strip" aria-label="五个已发布背景高位对角总览">
         <a href="assets/example4-room-corner-a.png"><img src="assets/example4-room-corner-a.png" alt="example4 高位对角总览"></a>
+        <a href="assets/wet-chemistry-room-corner-a.png"><img src="assets/wet-chemistry-room-corner-a.png" alt="现代湿化学实验室高位对角总览"></a>
         <a href="assets/analytical-instrumentation-room-corner-a.png"><img src="assets/analytical-instrumentation-room-corner-a.png" alt="分析仪器实验室高位对角总览"></a>
+        <a href="assets/bioclean-room-corner-a.png"><img src="assets/bioclean-room-corner-a.png" alt="生物洁净实验室高位对角总览"></a>
         <a href="assets/teaching-research-room-corner-a.png"><img src="assets/teaching-research-room-corner-a.png" alt="教学科研实验室高位对角总览"></a>
       </div>
     </div>
@@ -65,9 +66,8 @@
   <main class="shell">
     <section class="summary">
       <div><h2>房间不是一张“贴近桌子的截图”</h2><p>俯视图验证房间平面关系，两张相反方向的高位对角图验证整体陈设，入口平视图验证人进入房间时看到的工作区；下方三张再专门检查机器人、桌面和任务器具。</p></div>
-      <div class="gate">3 / 3：当前发布背景通过</div>
+      <div class="gate">5 / 5：支持关系、准入与七视角通过</div>
     </section>
-    <aside class="maintenance"><strong>维护中：</strong>现代湿化学实验室与生物洁净实验室发现装饰小物支撑关系不合格，已从公开候选中暂时下架。它们会在源房间修复、独立资产准入和七视角复审全部通过后以 v2 重新发布；旧图仅保留为历史证据，不代表当前可用。</aside>
     <section class="grid">
 
       <article data-prefix="example4">
@@ -87,12 +87,30 @@
         </div>
       </article>
 
+      <article data-prefix="wet-chemistry">
+        <div class="card-head"><div><h3>现代湿化学实验室 · v2</h3><p>水槽、试剂台和常规湿实验设备。原越界瓶组已回到东侧台面，无法可信落位的吊柜瓶组已删除并留痕。</p></div><span class="tag">support audited · v2</span></div>
+        <p class="section-label">房间视角 · Room survey</p><div class="room-views">
+          <figure><a href="assets/wet-chemistry-room-topdown.png"><img src="assets/wet-chemistry-room-topdown.png" alt="湿化学俯视全景"></a><figcaption>01 · 俯视全景</figcaption></figure><figure><a href="assets/wet-chemistry-room-corner-a.png"><img src="assets/wet-chemistry-room-corner-a.png" alt="湿化学高位对角 A"></a><figcaption>02 · 高位对角 A</figcaption></figure><figure><a href="assets/wet-chemistry-room-corner-b.png"><img src="assets/wet-chemistry-room-corner-b.png" alt="湿化学高位对角 B"></a><figcaption>03 · 高位对角 B</figcaption></figure><figure><a href="assets/wet-chemistry-room-entrance.png"><img src="assets/wet-chemistry-room-entrance.png" alt="湿化学入口平视"></a><figcaption>04 · 入口平视</figcaption></figure>
+        </div><p class="section-label">任务视角 · Task context</p><div class="task-views">
+          <figure><a href="assets/wet-chemistry-scene-overview.png"><img src="assets/wet-chemistry-scene-overview.png" alt="湿化学任务与房间关系"></a><figcaption>05 · 任务与房间关系</figcaption></figure><figure><a href="assets/wet-chemistry-workspace.png"><img src="assets/wet-chemistry-workspace.png" alt="湿化学机器人与操作台"></a><figcaption>06 · 机器人与操作台</figcaption></figure><figure><a href="assets/wet-chemistry-task-objects.png"><img src="assets/wet-chemistry-task-objects.png" alt="湿化学任务器具"></a><figcaption>07 · 任务器具</figcaption></figure>
+        </div>
+      </article>
+
       <article data-prefix="analytical-instrumentation">
         <div class="card-head"><div><h3>分析仪器实验室</h3><p>仪器柜、冷藏存储与分析设备，呈现更密集的设备型实验室。</p></div><span class="tag">instrumentation</span></div>
         <p class="section-label">房间视角 · Room survey</p><div class="room-views">
           <figure><a href="assets/analytical-instrumentation-room-topdown.png"><img src="assets/analytical-instrumentation-room-topdown.png" alt="分析仪器俯视全景"></a><figcaption>01 · 俯视全景</figcaption></figure><figure><a href="assets/analytical-instrumentation-room-corner-a.png"><img src="assets/analytical-instrumentation-room-corner-a.png" alt="分析仪器高位对角 A"></a><figcaption>02 · 高位对角 A</figcaption></figure><figure><a href="assets/analytical-instrumentation-room-corner-b.png"><img src="assets/analytical-instrumentation-room-corner-b.png" alt="分析仪器高位对角 B"></a><figcaption>03 · 高位对角 B</figcaption></figure><figure><a href="assets/analytical-instrumentation-room-entrance.png"><img src="assets/analytical-instrumentation-room-entrance.png" alt="分析仪器入口平视"></a><figcaption>04 · 入口平视</figcaption></figure>
         </div><p class="section-label">任务视角 · Task context</p><div class="task-views">
-          <figure><a href="assets/analytical-instrumentation-scene-overview.png"><img src="assets/analytical-instrumentation-scene-overview.png" alt="分析仪器任务与房间关系"></a><figcaption>05 · 任务与房间关系</figcaption></figure><figure><a href="assets/analytical-instrumentation-workspace-v3.png"><img src="assets/analytical-instrumentation-workspace-v3.png" alt="分析仪器机器人与操作台"></a><figcaption>06 · 机器人与操作台</figcaption></figure><figure><a href="assets/analytical-instrumentation-task-objects-v3.png"><img src="assets/analytical-instrumentation-task-objects-v3.png" alt="分析仪器任务器具"></a><figcaption>07 · 任务器具</figcaption></figure>
+          <figure><a href="assets/analytical-instrumentation-scene-overview.png"><img src="assets/analytical-instrumentation-scene-overview.png" alt="分析仪器任务与房间关系"></a><figcaption>05 · 任务与房间关系</figcaption></figure><figure><a href="assets/analytical-instrumentation-workspace.png"><img src="assets/analytical-instrumentation-workspace.png" alt="分析仪器机器人与操作台"></a><figcaption>06 · 机器人与操作台</figcaption></figure><figure><a href="assets/analytical-instrumentation-task-objects.png"><img src="assets/analytical-instrumentation-task-objects.png" alt="分析仪器任务器具"></a><figcaption>07 · 任务器具</figcaption></figure>
+        </div>
+      </article>
+
+      <article data-prefix="bioclean">
+        <div class="card-head"><div><h3>生物洁净实验室 · v2</h3><p>洁净柜、冷藏与生物处理设备。原洗瓶组已吸附回东侧水槽台，失去可信承载面的孤立晾架已删除并留痕。</p></div><span class="tag">support audited · v2</span></div>
+        <p class="section-label">房间视角 · Room survey</p><div class="room-views">
+          <figure><a href="assets/bioclean-room-topdown.png"><img src="assets/bioclean-room-topdown.png" alt="生物洁净俯视全景"></a><figcaption>01 · 俯视全景</figcaption></figure><figure><a href="assets/bioclean-room-corner-a.png"><img src="assets/bioclean-room-corner-a.png" alt="生物洁净高位对角 A"></a><figcaption>02 · 高位对角 A</figcaption></figure><figure><a href="assets/bioclean-room-corner-b.png"><img src="assets/bioclean-room-corner-b.png" alt="生物洁净高位对角 B"></a><figcaption>03 · 高位对角 B</figcaption></figure><figure><a href="assets/bioclean-room-entrance.png"><img src="assets/bioclean-room-entrance.png" alt="生物洁净入口平视"></a><figcaption>04 · 入口平视</figcaption></figure>
+        </div><p class="section-label">任务视角 · Task context</p><div class="task-views">
+          <figure><a href="assets/bioclean-scene-overview.png"><img src="assets/bioclean-scene-overview.png" alt="生物洁净任务与房间关系"></a><figcaption>05 · 任务与房间关系</figcaption></figure><figure><a href="assets/bioclean-workspace.png"><img src="assets/bioclean-workspace.png" alt="生物洁净机器人与操作台"></a><figcaption>06 · 机器人与操作台</figcaption></figure><figure><a href="assets/bioclean-task-objects.png"><img src="assets/bioclean-task-objects.png" alt="生物洁净任务器具"></a><figcaption>07 · 任务器具</figcaption></figure>
         </div>
       </article>
 
@@ -101,11 +119,11 @@
         <p class="section-label">房间视角 · Room survey</p><div class="room-views">
           <figure><a href="assets/teaching-research-room-topdown.png"><img src="assets/teaching-research-room-topdown.png" alt="教学科研俯视全景"></a><figcaption>01 · 俯视全景</figcaption></figure><figure><a href="assets/teaching-research-room-corner-a.png"><img src="assets/teaching-research-room-corner-a.png" alt="教学科研高位对角 A"></a><figcaption>02 · 高位对角 A</figcaption></figure><figure><a href="assets/teaching-research-room-corner-b.png"><img src="assets/teaching-research-room-corner-b.png" alt="教学科研高位对角 B"></a><figcaption>03 · 高位对角 B</figcaption></figure><figure><a href="assets/teaching-research-room-entrance.png"><img src="assets/teaching-research-room-entrance.png" alt="教学科研入口平视"></a><figcaption>04 · 入口平视</figcaption></figure>
         </div><p class="section-label">任务视角 · Task context</p><div class="task-views">
-          <figure><a href="assets/teaching-research-scene-overview.png"><img src="assets/teaching-research-scene-overview.png" alt="教学科研任务与房间关系"></a><figcaption>05 · 任务与房间关系</figcaption></figure><figure><a href="assets/teaching-research-workspace-v3.png"><img src="assets/teaching-research-workspace-v3.png" alt="教学科研机器人与操作台"></a><figcaption>06 · 机器人与操作台</figcaption></figure><figure><a href="assets/teaching-research-task-objects-v3.png"><img src="assets/teaching-research-task-objects-v3.png" alt="教学科研任务器具"></a><figcaption>07 · 任务器具</figcaption></figure>
+          <figure><a href="assets/teaching-research-scene-overview.png"><img src="assets/teaching-research-scene-overview.png" alt="教学科研任务与房间关系"></a><figcaption>05 · 任务与房间关系</figcaption></figure><figure><a href="assets/teaching-research-workspace.png"><img src="assets/teaching-research-workspace.png" alt="教学科研机器人与操作台"></a><figcaption>06 · 机器人与操作台</figcaption></figure><figure><a href="assets/teaching-research-task-objects.png"><img src="assets/teaching-research-task-objects.png" alt="教学科研任务器具"></a><figcaption>07 · 任务器具</figcaption></figure>
         </div>
       </article>
     </section>
-    <aside class="claim"><strong>证据边界：</strong>七张图证明任务包能通过真实 Isaac Sim / GenManip 场景路径加载、复位，并在房间视角中同时呈现完整背景和实际 eBench 工作单元。对角图会为取证临时隐藏相机最近的完整墙体根，且渲染后恢复；源 USD、任务状态和物理均未修改。这仍不等于机械臂可达、无碰规划、倒液或 benchmark 成功。</aside>
+    <aside class="claim"><strong>证据边界：</strong>五个背景均绑定 Code-as-Room 支持关系清单、ConvertAsset 独立几何复核和同一源 USD 哈希；七张图证明任务包能通过真实 Isaac Sim / GenManip 场景路径加载、复位，并在房间视角中同时呈现完整背景和实际 eBench 工作单元。对角图会为取证临时隐藏相机最近的完整墙体根，且渲染后恢复；源任务状态和物理均未修改。这仍不等于机械臂可达、无碰规划、倒液或 benchmark 成功。</aside>
     <a class="back" href="../">← 返回 Scenario Forge 文档</a>
   </main>
 </body>

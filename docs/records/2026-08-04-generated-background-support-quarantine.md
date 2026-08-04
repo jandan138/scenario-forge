@@ -1,5 +1,9 @@
 # Generated background support quarantine
 
+> Resolved later on 2026-08-04. The two backgrounds were re-admitted as v2
+> after source correction and independent support audit; see
+> [generated-room support remediation and v4 gallery](2026-08-04-generated-room-support-remediation-and-v4-gallery.md).
+
 Date: 2026-08-04
 
 ## Decision

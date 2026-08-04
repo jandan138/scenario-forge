@@ -1167,7 +1167,7 @@ def test_generated_intake_binds_code_as_room_background_provenance(
         yaml.safe_dump(
             {
                 "schema_version": (
-                    "scenario-forge-generated-environment-intake/v0.1"
+                    "scenario-forge-generated-environment-intake/v0.2"
                 ),
                 "asset_id": candidate.candidate_id,
                 "asset_role": "visual_static_environment",
@@ -1183,6 +1183,14 @@ def test_generated_intake_binds_code_as_room_background_provenance(
                 "source": {
                     "usd_sha256": candidate.source_sha256,
                     "declared_closure_sha256": "c" * 64,
+                },
+                "support_audit": {
+                    "schema_version": "room-support-relations-v1",
+                    "status": "pass",
+                    "sidecar_sha256": "d" * 64,
+                    "source_usd_sha256": candidate.source_sha256,
+                    "relation_count": 2,
+                    "removed_decoration_count": 1,
                 },
                 "provenance": {
                     "kind": "generated_blender_room",
@@ -1213,7 +1221,35 @@ def test_generated_intake_binds_code_as_room_background_provenance(
     assert attached[0].generated_manifest_sha256 == "b" * 64
     assert attached[0].generated_producer_revision == "a" * 40
     assert attached[0].generated_run_id == "run_example4"
+    assert attached[0].generated_support_sidecar_sha256 == "d" * 64
+    assert attached[0].generated_support_relation_count == 2
+    assert attached[0].generated_support_removed_decoration_count == 1
     module.validate_generation_background_provenance(attached)
+
+
+def test_generated_background_rejects_missing_or_mismatched_convertasset_support_audit() -> None:
+    module = _load_module()
+    candidate = module.replace(
+        _workspace_profile_candidate("scientific_environment_code_room_example4_v1"),
+        generated_support_sidecar_sha256="d" * 64,
+        generated_support_relation_count=2,
+        generated_support_removed_decoration_count=1,
+    )
+
+    with pytest.raises(ValueError, match="support audit certificate is missing"):
+        module.validate_generated_support_certificate(candidate, None)
+
+    certificate = type(
+        "Certificate",
+        (),
+        {
+            "source_sha256": "0" * 64,
+            "relation_count": 2,
+            "removed_decoration_count": 1,
+        },
+    )()
+    with pytest.raises(ValueError, match="source hash"):
+        module.validate_generated_support_certificate(candidate, certificate)
 
 
 def test_nonlegacy_background_requires_restricted_intake_before_generation() -> None:

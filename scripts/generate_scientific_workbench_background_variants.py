@@ -198,6 +198,9 @@ class BackgroundCandidate:
     generated_manifest_sha256: str | None = None
     generated_producer_revision: str | None = None
     generated_run_id: str | None = None
+    generated_support_sidecar_sha256: str | None = None
+    generated_support_relation_count: int | None = None
+    generated_support_removed_decoration_count: int | None = None
     # A producer-owned consumer facade can differ byte-for-byte from the raw
     # source that restricted intake and workspace profiles bind.  Keep both
     # identities: the raw source establishes provenance; the facade is the
@@ -285,6 +288,9 @@ def validate_generation_background_provenance(
                 and candidate.generated_manifest_sha256 is not None
                 and candidate.generated_producer_revision is not None
                 and candidate.generated_run_id is not None
+                and candidate.generated_support_sidecar_sha256 is not None
+                and candidate.generated_support_relation_count is not None
+                and candidate.generated_support_removed_decoration_count is not None
             )
         )
     ]
@@ -700,6 +706,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                                     candidate.generated_producer_revision
                                 ),
                                 "run_id": candidate.generated_run_id,
+                                "support_audit": {
+                                    "status": "pass",
+                                    "sidecar_sha256": (
+                                        candidate.generated_support_sidecar_sha256
+                                    ),
+                                    "relation_count": (
+                                        candidate.generated_support_relation_count
+                                    ),
+                                    "removed_decoration_count": (
+                                        candidate.generated_support_removed_decoration_count
+                                    ),
+                                },
                             }
                         }
                         if candidate.generated_closure_sha256 is not None
@@ -1116,7 +1134,7 @@ def apply_generated_environment_intake(
         producer.get("revision"),
         "generated environment intake.producer.revision",
     )
-    if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+    if re.fullmatch(r"[0-9a-f]{7,40}", revision) is None:
         raise ValueError("generated environment producer revision is invalid")
     run_id = _string(
         producer.get("run_id"),
@@ -1129,6 +1147,40 @@ def apply_generated_environment_intake(
         ),
         "generated environment intake.producer.manifest_sha256",
     )
+    support_audit = _mapping(
+        intake.get("support_audit"),
+        "generated environment intake.support_audit",
+    )
+    if (
+        support_audit.get("schema_version") != "room-support-relations-v1"
+        or support_audit.get("status") != "pass"
+    ):
+        raise ValueError("generated environment support audit is not passing")
+    support_source_sha256 = _digest_without_prefix(
+        _string(
+            support_audit.get("source_usd_sha256"),
+            "generated environment intake.support_audit.source_usd_sha256",
+        )
+    )
+    if support_source_sha256 != source_sha256:
+        raise ValueError("generated environment support audit source hash disagrees")
+    support_sidecar_sha256 = _sha256_hex(
+        _string(
+            support_audit.get("sidecar_sha256"),
+            "generated environment intake.support_audit.sidecar_sha256",
+        ),
+        "generated environment intake.support_audit.sidecar_sha256",
+    )
+    support_relation_count = _nonnegative_int(
+        support_audit.get("relation_count"),
+        "generated environment intake.support_audit.relation_count",
+    )
+    support_removed_count = _nonnegative_int(
+        support_audit.get("removed_decoration_count"),
+        "generated environment intake.support_audit.removed_decoration_count",
+    )
+    if support_removed_count > support_relation_count:
+        raise ValueError("generated environment support removal count exceeds relations")
     provenance = _mapping(
         intake.get("provenance"),
         "generated environment intake.provenance",
@@ -1173,6 +1225,9 @@ def apply_generated_environment_intake(
             generated_manifest_sha256=manifest_sha256,
             generated_producer_revision=revision,
             generated_run_id=run_id,
+            generated_support_sidecar_sha256=support_sidecar_sha256,
+            generated_support_relation_count=support_relation_count,
+            generated_support_removed_decoration_count=support_removed_count,
         )
         if candidate.candidate_id == background_asset_id
         else candidate
@@ -2636,6 +2691,10 @@ def _load_background_source(candidate: BackgroundCandidate) -> LocalUSDAssetSour
         producer_revision=candidate.producer_revision,
         usage="visual_static_environment",
     )
+    validate_generated_support_certificate(
+        candidate,
+        getattr(handoff, "support_audit", None),
+    )
     return handoff.to_local_usd_asset_source(
         asset_id=candidate.candidate_id,
         license=candidate.license,
@@ -2643,6 +2702,35 @@ def _load_background_source(candidate: BackgroundCandidate) -> LocalUSDAssetSour
         redistributable=candidate.redistributable,
         exclude_relative_paths=("_reports", "evidence"),
     )
+
+
+def validate_generated_support_certificate(
+    candidate: BackgroundCandidate,
+    certificate: Any,
+) -> None:
+    """Bind ConvertAsset's independent support audit to generated provenance."""
+
+    if candidate.generated_support_sidecar_sha256 is None:
+        return
+    if certificate is None:
+        raise ValueError(
+            f"generated background support audit certificate is missing: {candidate.candidate_id}"
+        )
+    if certificate.source_sha256 != candidate.source_sha256:
+        raise ValueError(
+            f"generated background support audit source hash disagrees: {candidate.candidate_id}"
+        )
+    if certificate.relation_count != candidate.generated_support_relation_count:
+        raise ValueError(
+            f"generated background support audit relation count disagrees: {candidate.candidate_id}"
+        )
+    if (
+        certificate.removed_decoration_count
+        != candidate.generated_support_removed_decoration_count
+    ):
+        raise ValueError(
+            f"generated background support audit removal count disagrees: {candidate.candidate_id}"
+        )
 
 
 def _validate_base_inputs(
@@ -3004,6 +3092,12 @@ def _positive_finite_number(value: object, field: str) -> float:
     if not math.isfinite(result) or result <= 0.0:
         raise ValueError(f"{field} must be a positive finite number")
     return result
+
+
+def _nonnegative_int(value: object, field: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise ValueError(f"{field} must be a non-negative integer")
+    return value
 
 
 def _finite_number(value: object, field: str) -> float:

@@ -1277,6 +1277,85 @@ def test_visual_static_environment_producer_role_is_accepted(
     assert source.role == "environment"
 
 
+def test_generated_room_handoff_carries_passing_support_certificate(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_visual_static_handoff(
+        tmp_path,
+        scope="/World",
+        producer_asset_role="visual_static_environment",
+        physics_role="visual_static_environment",
+    )
+    support = {
+        "schema_version": "aan.generated_room_support_audit.v1",
+        "overall_status": "pass",
+        "blocked_reasons": [],
+        "source_sha256": "a" * 64,
+        "producer_review": {"status": "pass", "reviewer": "reviewer"},
+        "relations": [
+            {
+                "object_prim": "/Room/Beaker",
+                "support_prim": "/Room/Bench",
+                "producer_status": "pass",
+                "independent_status": "pass",
+            }
+        ],
+        "support_closure": {"/Room/Bench": ["/Room/Beaker"]},
+    }
+    report = package_dir / "evidence/support_audit/report.json"
+    report.parent.mkdir(parents=True)
+    report.write_text(json.dumps(support, sort_keys=True) + "\n", encoding="utf-8")
+    manifest["support_audit"] = support
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World",),
+        producer_revision="support-audit-r1",
+        usage="visual_static_environment",
+    )
+
+    assert handoff.support_audit is not None
+    assert handoff.support_audit.source_sha256 == "a" * 64
+    assert handoff.support_audit.relation_count == 1
+    source = handoff.to_local_usd_asset_source(
+        asset_id="generated_room",
+        license="LicenseRef-Internal-Generated",
+        exclude_relative_paths=("evidence",),
+    )
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["support_audit"]["status"] == "pass"
+
+
+def test_generated_room_handoff_rejects_blocked_support_certificate(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_visual_static_handoff(
+        tmp_path,
+        scope="/World",
+        producer_asset_role="visual_static_environment",
+        physics_role="visual_static_environment",
+    )
+    manifest["support_audit"] = {
+        "schema_version": "aan.generated_room_support_audit.v1",
+        "overall_status": "blocked",
+        "blocked_reasons": ["floating object"],
+    }
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    with pytest.raises(ConvertAssetHandoffError, match="support_audit"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World",),
+            producer_revision="support-audit-r1",
+            usage="visual_static_environment",
+        )
+
+
 def test_visual_static_handoff_rejects_physics_residue(tmp_path: Path) -> None:
     source_usd, package_dir, manifest_path, manifest = _write_visual_static_handoff(
         tmp_path
