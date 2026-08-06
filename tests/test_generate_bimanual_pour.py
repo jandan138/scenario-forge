@@ -159,6 +159,7 @@ def test_golden_actor_roles_use_same_side_arms_instead_of_crossing_midline() -> 
 def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_reports(
     tmp_path: Path,
 ) -> None:
+    pytest.importorskip("pxr.Usd", reason="IK request generation requires OpenUSD")
     scene1_source_usd = _write_scene1_hard_environment_source(tmp_path)
     source_vessel_source_usd = _write_source_scene(tmp_path / "source-vessel-source")
     target_vessel_source_usd = _write_source_scene(tmp_path / "target-vessel-source")
@@ -391,6 +392,7 @@ def test_golden_generator_default_build_runs_genmanip_preview(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
+    pytest.importorskip("pxr.Usd", reason="IK request generation requires OpenUSD")
     scene1_source_usd = _write_scene1_hard_environment_source(tmp_path)
     vessel_source_usd = _write_source_scene(tmp_path / "vessel-source")
     output = tmp_path / "output"

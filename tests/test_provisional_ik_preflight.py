@@ -12,6 +12,9 @@ from scenario_forge.adapters.ebench.ik_preflight import (
 )
 
 
+pytest.importorskip("pxr.Usd", reason="composed USD geometry requires OpenUSD")
+
+
 def _package(tmp_path: Path) -> Path:
     root = tmp_path / "package"
     root.mkdir()

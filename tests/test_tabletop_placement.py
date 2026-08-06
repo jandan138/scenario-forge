@@ -111,6 +111,7 @@ def test_scientific_workbench_domain_pack_declares_the_robot_side_policy() -> No
 def test_adapter_writes_world_bound_policy_evidence_and_blocks_far_side(
     tmp_path: Path,
 ) -> None:
+    pytest.importorskip("pxr.Usd", reason="world bounds require OpenUSD")
     _write_tabletop_fixture(tmp_path, object_x=0.45)
 
     with pytest.raises(TabletopPlacementValidationError, match="robot-facing") as error:
@@ -125,6 +126,7 @@ def test_adapter_writes_world_bound_policy_evidence_and_blocks_far_side(
 def test_adapter_allows_written_far_side_exception_but_not_edge_exception(
     tmp_path: Path,
 ) -> None:
+    pytest.importorskip("pxr.Usd", reason="world bounds require OpenUSD")
     _write_tabletop_fixture(
         tmp_path,
         object_x=0.45,
