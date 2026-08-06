@@ -1,49 +1,69 @@
 # Experimental PBD beaker pour
 
-This temporary task is deliberately outside the formal wet-experiment catalog
-and catalog statistics. It exercises the LabUtopia 3,600-particle source scene
-through the same Scenario Forge package and two consumer adapters.
+This temporary task remains outside the formal wet-experiment catalog and its
+statistics. It exercises a producer-owned 3,600-particle PBD beaker scene with
+the standard eBench Lift2 robot. Two independent packages are generated so a
+consumer never has to switch table variants inside one USD:
 
-Generate it with:
+- `source_workbench` (recommended): preserve the complete, wide source table;
+- `ebench_workbench`: replace it upstream with the qualified eBench static-
+  support table while keeping the task and robot-relative layout unchanged.
+
+Generate each package from its matching qualified LabUtopia handoff:
 
 ```bash
 PYTHONPATH=src python scripts/generate_experimental_pbd_beaker_pour.py \
-  --handoff-package /path/to/qualified/labutopia/package \
-  --out outputs/experimental_lab001_pbd_beaker_to_beaker_pour_20260806_r4
+  --variant source_workbench \
+  --handoff-package /path/to/lab001_pbd_beaker_to_beaker_source_workbench_v3/package \
+  --out outputs/experimental_pbd_beaker_to_beaker_pour_source_workbench_20260807_r1
+
+PYTHONPATH=src python scripts/generate_experimental_pbd_beaker_pour.py \
+  --variant ebench_workbench \
+  --handoff-package /path/to/lab001_pbd_beaker_to_beaker_ebench_workbench_v3/package \
+  --out outputs/experimental_pbd_beaker_to_beaker_pour_ebench_workbench_20260807_r1
 ```
 
-The producer package must have id
-`lab001_pbd_beaker_to_beaker_step600_v2` and qualified `native`, `genmanip` and
-`vr` endpoints. The generator writes:
+The generator requires handoff schema
+`labutopia.interactive_scene_handoff/v0.3`, qualified `native`, `genmanip`, and
+`vr` endpoints, and a matching variant/package id. It writes:
 
 - `scene/main.usda`: neutral/native composition;
 - `adapters/ebench/genmanip/`: GenManip collected package at 600 Hz;
-- `adapters/vr/scene.usd` and `task_config.py`: VR handoff at 60 Hz.
+- `adapters/vr/scene.usd` and `task_config.py`: VR handoff at 60 Hz;
+- `evidence/robot_table_clearance.yaml`: circular Lift2-base versus producer-
+  certified table-AABB clearance;
+- `evidence/tabletop_placement_policy.yaml`: 10 cm table-edge and robot-facing-
+  half checks for both beakers.
 
-The left arm starts open above `beaker2`; the right arm starts open in a clear
-idle pose; both vessels remain on the source table. The initial 16-joint Lift2
-state is explicit in `scenario.yaml` and is copied to GenManip episode metadata.
-The primary success contract is staged geometric pour pose followed by return
-to the initial source pose. Release is an instruction-only inactive
-rubric item because GenManip has no native release success metric. Liquid
-transfer is also inactive until a particle-transfer scorer is separately
-qualified.
+Both beakers and all 3,600 authored PBD points move by the same producer-owned
+translation. Scenario Forge consumes that layout; it does not author particle,
+collider, mass, inertia, or PhysX fixes. The eBench-table variant additionally
+requires the hash-bound ConvertAsset static-support package recorded by the
+producer manifest.
 
-The package is internal and non-redistributable. Do not extract its LabUtopia
-assets for public delivery, and do not add consumer-side collider or physics
-patches.
+Lift2 uses its neutral open-arm reset state for initial-scene evidence. No old
+pregrasp joint vector is reused after moving the robot and vessels. The base is
+outside the table with at least 5 cm clearance; vessel AABBs remain at least 10
+cm from every table edge and in the robot-facing half. These are initial-layout
+gates, not arm-reachability or motion-planning claims.
 
-For initial-scene evidence, producer-composed PBD scenes use eight zero-action
-physics steps, matching the producer qualification window. Camera warmup after
-that point refreshes rendering without advancing physics. All task views keep
-the inseparable producer scene visible; the overview fits the recovered source
-table and complete Lift2 workcell.
-These images remain visual evidence only and do not establish stable grasp,
-liquid transfer or task success.
+The primary success contract remains the staged geometric pour pose followed
+by return to the initial source pose. Release is instruction-only and liquid
+transfer is inactive until their scorers are separately qualified. The package
+does not claim stable grasp, policy success, liquid-transfer success, or
+benchmark success.
 
-The v0.2 handoff records the composed position, quaternion, local scale and
-world AABB of the source vessel, target vessel and support table for every
-entrypoint. Scenario Forge treats those records as recovery authority. In
-particular, it must not replace the source table's non-unit local scale with an
-identity transform. The older r3 output did that during GenManip recovery and
-is superseded by r4.
+For initial-scene evidence, the renderer uses eight zero-action physics steps,
+then renders without further physics advancement. A clean GenManip code copy
+may point its ignored `saved/assets` path at the shared eBench asset store; use
+a process-local `mesh_data` directory when the shared cache is full. CuRobo is
+provided through the managed runtime's documented external source path. This
+setup does not modify GenManip or its shared environment.
+
+The old
+`outputs/experimental_lab001_pbd_beaker_to_beaker_pour_20260806_r4` package is
+rejected: its Lift2 base spawn `[0, 0, 0]` lies inside the source table XY AABB.
+Its images and manifests remain historical diagnostic evidence only.
+
+All variants are internal and non-redistributable. Do not extract their source
+assets for public delivery.

@@ -17,9 +17,20 @@ def _digest(path: Path) -> str:
 
 
 def write_interactive_handoff(
-    root: Path, *, scenario_id: str = "task"
+    root: Path,
+    *,
+    scenario_id: str = "task",
+    schema_version: str = "labutopia.interactive_scene_handoff/v0.2",
+    variant_id: str | None = None,
 ) -> tuple[Path, Path]:
     package = root / "package"
+    translation_x = (
+        -1.0199846981
+        if variant_id == "source_workbench"
+        else -0.436631421014276
+        if variant_id == "ebench_workbench"
+        else 0.0
+    )
     package.mkdir(parents=True)
     for name in ("native.usda", "genmanip.usdc", "vr.usdc"):
         (package / name).write_text(f"#usda 1.0\n# {name}\n", encoding="utf-8")
@@ -31,6 +42,22 @@ def write_interactive_handoff(
     evidence = package / "evidence/runtime_qualification.json"
     evidence.parent.mkdir()
     evidence.write_text("{}\n", encoding="utf-8")
+    if variant_id == "ebench_workbench":
+        support_asset = package / "deps/ebench_table/asset.usd"
+        support_manifest = package / "deps/ebench_table/evidence/manifest.json"
+        support_manifest.parent.mkdir(parents=True)
+        support_asset.write_text("#usda 1.0\n", encoding="utf-8")
+        support_manifest.write_text(
+            json.dumps(
+                {
+                    "overall_status": "pass",
+                    "asset_profile": {
+                        "profile_id": "labutopia.lab001.table.static_support"
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
     files = []
     for path in sorted(item for item in package.rglob("*") if item.is_file()):
         files.append(
@@ -51,22 +78,22 @@ def write_interactive_handoff(
         embedded_object_states = {
             "source_container": {
                 "prim_path": object_prims["source_container"],
-                "position_xyz_m": [0.295, 0.075, 0.8233382266115852],
+                "position_xyz_m": [0.295 + translation_x, 0.075, 0.8233382266115852],
                 "orientation_wxyz": [0.6532814824, 0.6532814824, 0.2705980501, 0.2705980501],
                 "local_scale_xyz": [1.0, 1.0, 1.0],
                 "world_aabb_m": {
-                    "min": [0.2564758473, 0.0364758581, 0.7799941122],
-                    "max": [0.3671289439, 0.1471289547, 0.8703945490],
+                    "min": [0.2564758473 + translation_x, 0.0364758581, 0.7799941122],
+                    "max": [0.3671289439 + translation_x, 0.1471289547, 0.8703945490],
                 },
             },
             "target_container": {
                 "prim_path": object_prims["target_container"],
-                "position_xyz_m": [0.255, -0.245, 0.8406758673476564],
+                "position_xyz_m": [0.255 + translation_x, -0.245, 0.8406758673476564],
                 "orientation_wxyz": [0.6532814824, 0.6532814824, 0.2705980501, 0.2705980501],
                 "local_scale_xyz": [1.0, 1.0, 1.0],
                 "world_aabb_m": {
-                    "min": [0.2010661907, -0.2989337942, 0.7799941122],
-                    "max": [0.3559805131, -0.1440194718, 0.9065547133],
+                    "min": [0.2010661907 + translation_x, -0.2989337942, 0.7799941122],
+                    "max": [0.3559805131 + translation_x, -0.1440194718, 0.9065547133],
                 },
             },
             "support_table": {
@@ -74,10 +101,17 @@ def write_interactive_handoff(
                 "position_xyz_m": [0.2427880660, 0.0, 0.0],
                 "orientation_wxyz": [0.0, -1.0, 0.0, 0.0],
                 "local_scale_xyz": [0.006, 0.005, 0.004000000059604645],
-                "world_aabb_m": {
-                    "min": [-0.9239185074, -1.3322193410, -0.3997177640],
-                    "max": [1.4210249282, 1.3124908584, 0.7727606155],
-                },
+                "world_aabb_m": (
+                    {
+                        "min": [-0.3405652207, -0.9325535202, -0.3997177124],
+                        "max": [0.8319064971, 0.9187435913, 0.7727605591],
+                    }
+                    if variant_id == "ebench_workbench"
+                    else {
+                        "min": [-0.9239185074, -1.3322193410, -0.3997177640],
+                        "max": [1.4210249282, 1.3124908584, 0.7727606155],
+                    }
+                ),
             },
         }
         entrypoints[name] = {
@@ -93,9 +127,14 @@ def write_interactive_handoff(
             "particle_prims": {"particles": "/World/task/Particles"},
             "scenario_prim": scenario_prim,
         }
+    package_id = (
+        f"lab001_pbd_beaker_to_beaker_{variant_id}_v3"
+        if variant_id
+        else "lab001_pbd_beaker_to_beaker_step600_v2"
+    )
     manifest = {
-        "schema_version": "labutopia.interactive_scene_handoff/v0.2",
-        "package_id": "lab001_pbd_beaker_to_beaker_step600_v2",
+        "schema_version": schema_version,
+        "package_id": package_id,
         "producer": "LabUtopia",
         "producer_revision": "producer-r1",
         "source_revision": "source-r1",
@@ -120,9 +159,98 @@ def write_interactive_handoff(
             "receipts": {"isaac41": "evidence/runtime_qualification.json"},
         },
     }
+    if variant_id:
+        robot_x = -1.603353277085724 if variant_id == "source_workbench" else -1.02
+        support_table: dict[str, object] = {"mode": "embedded_source"}
+        if variant_id == "ebench_workbench":
+            support_asset = package / "deps/ebench_table/asset.usd"
+            support_manifest = package / "deps/ebench_table/evidence/manifest.json"
+            support_table = {
+                "mode": "external_static_support",
+                "asset_entry_prim": "/World/table",
+                "required_profile_id": "labutopia.lab001.table.static_support",
+                "package": {
+                    "path": "deps/ebench_table",
+                    "asset_path": "deps/ebench_table/asset.usd",
+                    "asset_sha256": _digest(support_asset),
+                    "manifest_path": "deps/ebench_table/evidence/manifest.json",
+                    "manifest_sha256": _digest(support_manifest),
+                    "profile_id": "labutopia.lab001.table.static_support",
+                },
+            }
+        manifest["layout"] = {
+            "variant_id": variant_id,
+            "task_group_translation_xyz_m": [translation_x, 0.0, 0.0],
+            "translated_members": {
+                role: {"translation_xyz_m": [translation_x, 0.0, 0.0]}
+                for role in ("source_container", "target_container", "particles")
+            },
+            "tabletop_placement": {
+                "hard_edge_clearance_m": 0.1,
+                "nominal_edge_clearance_m": 0.105,
+                "robot_facing_edge": "x_min",
+            },
+            "robot_workspace": {
+                "profile_ref": "manip/lift2/R5a_isaac41_vr600_v1",
+                "spawn_xyz_m": [robot_x, 0.0, 0.31],
+                "orientation_wxyz": [1.0, 0.0, 0.0, 0.0],
+                "base_footprint_radius_m": 0.35,
+                "minimum_table_clearance_m": 0.05,
+            },
+            "support_table": support_table,
+        }
     manifest_path = package / "manifest.json"
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     return package, manifest_path
+
+
+@pytest.mark.parametrize("variant_id", ["source_workbench", "ebench_workbench"])
+def test_loader_accepts_v03_workbench_layout_contract(
+    tmp_path: Path, variant_id: str
+) -> None:
+    package, manifest = write_interactive_handoff(
+        tmp_path,
+        schema_version="labutopia.interactive_scene_handoff/v0.3",
+        variant_id=variant_id,
+    )
+
+    handoff = load_labutopia_interactive_scene_handoff(
+        package,
+        manifest,
+        producer_revision="producer-r1",
+        expected_package_id=f"lab001_pbd_beaker_to_beaker_{variant_id}_v3",
+    )
+
+    assert handoff.manifest["layout"]["variant_id"] == variant_id
+
+
+@pytest.mark.parametrize("mutation", ["member_translation", "support_hash"])
+def test_loader_rejects_invalid_v03_layout_contract(
+    tmp_path: Path, mutation: str
+) -> None:
+    package, manifest_path = write_interactive_handoff(
+        tmp_path,
+        schema_version="labutopia.interactive_scene_handoff/v0.3",
+        variant_id="ebench_workbench",
+    )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if mutation == "member_translation":
+        manifest["layout"]["translated_members"]["particles"][
+            "translation_xyz_m"
+        ][0] += 0.01
+    else:
+        manifest["layout"]["support_table"]["package"]["asset_sha256"] = (
+            "sha256:" + "0" * 64
+        )
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(LabUtopiaInteractiveSceneHandoffError):
+        load_labutopia_interactive_scene_handoff(
+            package,
+            manifest_path,
+            producer_revision="producer-r1",
+            expected_package_id="lab001_pbd_beaker_to_beaker_ebench_workbench_v3",
+        )
 
 
 def test_loader_accepts_hash_bound_qualified_three_endpoint_handoff(tmp_path: Path) -> None:

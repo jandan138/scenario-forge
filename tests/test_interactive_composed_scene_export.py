@@ -24,7 +24,10 @@ def test_producer_scene_is_not_reinstanced_and_adapters_select_their_entrypoints
     tmp_path: Path,
 ) -> None:
     producer, manifest_path = write_interactive_handoff(
-        tmp_path / "producer", scenario_id=SCENARIO_ID
+        tmp_path / "producer",
+        scenario_id=SCENARIO_ID,
+        schema_version="labutopia.interactive_scene_handoff/v0.3",
+        variant_id="source_workbench",
     )
     handoff = load_labutopia_interactive_scene_handoff(
         producer,
@@ -39,7 +42,8 @@ def test_producer_scene_is_not_reinstanced_and_adapters_select_their_entrypoints
             scenario_mapping(
                 handoff.manifest["entrypoints"]["genmanip"][
                     "embedded_object_states"
-                ]
+                ],
+                robot_workspace=handoff.manifest["layout"]["robot_workspace"],
             )
         ),
         {
@@ -84,9 +88,17 @@ def test_producer_scene_is_not_reinstanced_and_adapters_select_their_entrypoints
         0.005,
         0.004000000059604645,
     ]
-    assert layout["lift2"]["joint_positions"] == scenario_mapping()["robot"][
-        "initial_joint_positions"
-    ]
+    assert layout["lift2"]["position"] == [-1.603353277085724, 0.0, 0.31]
+    assert layout["lift2"]["joint_positions"] == [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.044,
+        0.044,
+    ] * 2
     preview_request = yaml.safe_load(
         (gen.output_dir / "evidence/render_request.yaml").read_text(encoding="utf-8")
     )

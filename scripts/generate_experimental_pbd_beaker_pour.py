@@ -9,15 +9,33 @@ from pathlib import Path
 from typing import Any
 
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
+from scenario_forge.adapters.ebench.interactive_workcell_layout import (
+    validate_interactive_workcell_layout,
+)
 from scenario_forge.adapters.labutopia import load_labutopia_interactive_scene_handoff
 from scenario_forge.adapters.vr_teleop import export_vr_teleop_package
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
 
 
-SCENARIO_ID = "experimental_lab001_pbd_beaker_to_beaker_pour"
-ASSET_ID = "lab001_pbd_beaker_to_beaker_step600"
-PACKAGE_ID = "lab001_pbd_beaker_to_beaker_step600_v2"
+VARIANTS = {
+    "source_workbench": {
+        "scenario_id": "experimental_pbd_beaker_to_beaker_pour_source_workbench",
+        "asset_id": "pbd_beaker_to_beaker_source_workbench",
+        "package_id": "lab001_pbd_beaker_to_beaker_source_workbench_v3",
+    },
+    "ebench_workbench": {
+        "scenario_id": "experimental_pbd_beaker_to_beaker_pour_ebench_workbench",
+        "asset_id": "pbd_beaker_to_beaker_ebench_workbench",
+        "package_id": "lab001_pbd_beaker_to_beaker_ebench_workbench_v3",
+    },
+}
+# Recommended default keeps the complete source workbench.  These aliases are
+# retained for small callers that import the generator rather than its CLI.
+DEFAULT_VARIANT = "source_workbench"
+SCENARIO_ID = str(VARIANTS[DEFAULT_VARIANT]["scenario_id"])
+ASSET_ID = str(VARIANTS[DEFAULT_VARIANT]["asset_id"])
+PACKAGE_ID = str(VARIANTS[DEFAULT_VARIANT]["package_id"])
 
 _DEFAULT_EMBEDDED_STATES: dict[str, dict[str, Any]] = {
     "support_table": {
@@ -47,35 +65,23 @@ _DEFAULT_EMBEDDED_STATES: dict[str, dict[str, Any]] = {
     },
 }
 
-# Lift2 order is left arm(6), left gripper(2), right arm(6), right gripper(2).
-# These CuRobo solutions place the left tool above the filled source and park
-# the right tool away from both vessels. They are task initialization, not a
-# successful grasp or policy claim.
-LIFT2_INITIAL_JOINT_POSITIONS = [
-    -1.0030521154403687,
-    0.9941719174385071,
-    0.7586961984634399,
-    0.23549744486808777,
-    -1.0030428171157837,
-    1.1397801245038863e-05,
-    0.044,
-    0.044,
-    -1.2234256267547607,
-    1.0433391332626343,
-    0.7014200091362,
-    0.3419278860092163,
-    -1.2234159708023071,
-    3.900537649315083e-06,
-    0.044,
-    0.044,
-]
-
-
 def scenario_mapping(
     embedded_object_states: dict[str, Any] | None = None,
+    *,
+    variant_id: str = DEFAULT_VARIANT,
+    robot_workspace: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    try:
+        variant = VARIANTS[variant_id]
+    except KeyError as exc:
+        raise ValueError(f"unsupported workbench variant: {variant_id}") from exc
     prefix = "/World/_scene"
     states = embedded_object_states or _DEFAULT_EMBEDDED_STATES
+    workspace = robot_workspace or {
+        "profile_ref": "manip/lift2/R5a_isaac41_vr600_v1",
+        "spawn_xyz_m": [-1.603353277085724, 0.0, 0.31],
+        "orientation_wxyz": [1.0, 0.0, 0.0, 0.0],
+    }
 
     def pose(role: str) -> dict[str, list[float]]:
         state = states[role]
@@ -86,7 +92,7 @@ def scenario_mapping(
         }
     return {
         "schema_version": "scenario-spec/v0.7",
-        "scenario_id": SCENARIO_ID,
+        "scenario_id": variant["scenario_id"],
         "domain": "scientific_workbench",
         "task_family": "experimental_single_arm_pbd_pour",
         "instruction": (
@@ -95,14 +101,14 @@ def scenario_mapping(
             "Keep the right arm idle."
         ),
         "scene": {
-            "asset_id": ASSET_ID,
+            "asset_id": variant["asset_id"],
             "root_prim_path": "/World",
             "composition_mode": "producer_entrypoint",
         },
         "objects": [
             {
                 "id": "table",
-                "asset_id": ASSET_ID,
+                "asset_id": variant["asset_id"],
                 "source_prim_path": f"{prefix}/obj_table",
                 "role": "table",
                 "instance_mode": "embedded_scene_prim",
@@ -110,7 +116,7 @@ def scenario_mapping(
             },
             {
                 "id": "beaker2",
-                "asset_id": ASSET_ID,
+                "asset_id": variant["asset_id"],
                 "source_prim_path": f"{prefix}/obj_beaker2",
                 "role": "source_container",
                 "instance_mode": "embedded_scene_prim",
@@ -124,7 +130,7 @@ def scenario_mapping(
             },
             {
                 "id": "beaker1",
-                "asset_id": ASSET_ID,
+                "asset_id": variant["asset_id"],
                 "source_prim_path": f"{prefix}/obj_beaker1",
                 "role": "target_container",
                 "instance_mode": "embedded_scene_prim",
@@ -138,9 +144,11 @@ def scenario_mapping(
             },
         ],
         "robot": {
-            "profile_ref": "manip/lift2/R5a_isaac41_vr600_v1",
-            "spawn": {"xyz": [0.0, 0.0, 0.0], "wxyz": [1.0, 0.0, 0.0, 0.0]},
-            "initial_joint_positions": LIFT2_INITIAL_JOINT_POSITIONS,
+            "profile_ref": workspace["profile_ref"],
+            "spawn": {
+                "xyz": list(workspace["spawn_xyz_m"]),
+                "wxyz": list(workspace["orientation_wxyz"]),
+            },
             "actors": [
                 {
                     "id": "operating_arm",
@@ -209,43 +217,68 @@ def scenario_mapping(
     }
 
 
-def generate(*, handoff_package: Path, output: Path) -> None:
+def generate(
+    *, handoff_package: Path, output: Path, variant_id: str | None = None
+) -> None:
     manifest = handoff_package / "manifest.json"
     data = json.loads(manifest.read_text(encoding="utf-8"))
+    producer_variant = str(data.get("layout", {}).get("variant_id", ""))
+    selected_variant = variant_id or producer_variant
+    if selected_variant not in VARIANTS or selected_variant != producer_variant:
+        raise ValueError(
+            "requested workbench variant does not match the producer package: "
+            f"requested={selected_variant!r}, producer={producer_variant!r}"
+        )
+    variant = VARIANTS[selected_variant]
     handoff = load_labutopia_interactive_scene_handoff(
         handoff_package,
         manifest,
         producer_revision=str(data["producer_revision"]),
-        expected_package_id=PACKAGE_ID,
+        expected_package_id=str(variant["package_id"]),
         expected_entrypoints=("native", "genmanip", "vr"),
     )
     source = handoff.to_local_usd_asset_source(
-        asset_id=ASSET_ID,
+        asset_id=str(variant["asset_id"]),
         attribution=("LabUtopia interactive PBD scene",),
     )
-    compile_scenario_package(
-        ScenarioSpec.from_mapping(
-            scenario_mapping(
-                dict(
-                    handoff.manifest["entrypoints"]["genmanip"][
-                        "embedded_object_states"
-                    ]
-                )
-            )
+    mapping = scenario_mapping(
+        dict(
+            handoff.manifest["entrypoints"]["genmanip"][
+                "embedded_object_states"
+            ]
         ),
-        {ASSET_ID: source},
+        variant_id=selected_variant,
+        robot_workspace=dict(handoff.manifest["layout"]["robot_workspace"]),
+    )
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(mapping),
+        {str(variant["asset_id"]): source},
         output,
     )
+    validate_interactive_workcell_layout(
+        package_root=output,
+        scenario=mapping,
+        handoff_manifest=handoff.manifest,
+    )
     export_genmanip_collected_package(output)
-    export_vr_teleop_package(output, output / "adapters/vr", task_id=SCENARIO_ID)
+    export_vr_teleop_package(
+        output,
+        output / "adapters/vr",
+        task_id=str(variant["scenario_id"]),
+    )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--handoff-package", required=True, type=Path)
+    parser.add_argument("--variant", choices=sorted(VARIANTS))
     parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
-    generate(handoff_package=args.handoff_package.resolve(), output=args.out.resolve())
+    generate(
+        handoff_package=args.handoff_package.resolve(),
+        output=args.out.resolve(),
+        variant_id=args.variant,
+    )
     return 0
 
 
