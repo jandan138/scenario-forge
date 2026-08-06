@@ -170,8 +170,11 @@ def run_genmanip_initial_preview(
     )
     if not manifest_path.is_file():
         detail = _latest_staging_failure(root)
+        captured = (completed.stderr or completed.stdout).strip() or None
         if detail is None:
-            detail = (completed.stderr or completed.stdout).strip() or None
+            detail = captured
+        elif captured:
+            detail = detail + "\n" + captured[-4000:]
         suffix = f": {detail[-4000:]}" if detail else ""
         raise GenManipPreviewError(
             "GenManip initial preview exited with status 0 without committing "
@@ -234,6 +237,7 @@ def write_genmanip_preview_request(
     episode_name = _required_string(episode, "episode_name", "episode metadata")
     task_data = _required_mapping(episode, "task_data", "episode metadata")
     initial_layout = _required_mapping(task_data, "initial_layout", "episode task_data")
+    producer_entrypoint_owned = _producer_entrypoint_owned(task_data)
 
     robot_ids = [
         str(runtime_id)
@@ -295,6 +299,17 @@ def write_genmanip_preview_request(
             "minimum_distance": 0.45,
         },
     }
+    for view_name, view in views.items():
+        view["expected_scene_visibility"] = _expected_preview_visibility(
+            view_name,
+            producer_entrypoint_owned=producer_entrypoint_owned,
+        )
+    if producer_entrypoint_owned:
+        # A producer-composed scene can carry distant utility geometry below its
+        # support-table prim.  Reuse the workcell camera instead of fitting the
+        # overview to that non-task geometry.
+        views["scene_overview"]["camera_reference_view"] = "workspace_closeup"
+        views["scene_overview"]["camera_distance_multiplier"] = 1.6
     if full_environment:
         common_room = {
             "resolution": [width, height],
@@ -338,6 +353,11 @@ def write_genmanip_preview_request(
                 },
             }
         )
+        for view_name, view in views.items():
+            view["expected_scene_visibility"] = _expected_preview_visibility(
+                view_name,
+                producer_entrypoint_owned=producer_entrypoint_owned,
+            )
 
     request = {
         "schema_version": (
@@ -488,6 +508,7 @@ def validate_genmanip_preview_evidence(
         "episode metadata",
     )
     task_data = _required_mapping(episode, "task_data", "episode metadata")
+    producer_entrypoint_owned = _producer_entrypoint_owned(task_data)
     current_expected_geometry = _expected_runtime_geometry(
         package_manifest,
         task_data,
@@ -560,7 +581,14 @@ def validate_genmanip_preview_evidence(
         view = _as_mapping(manifest_views.get(view_name), f"evidence view {view_name}")
         if view.get("status") != "pass":
             raise GenManipPreviewError(f"preview view {view_name} status must be pass")
-        expected_visibility = _expected_preview_visibility(view_name)
+        expected_visibility = _expected_preview_visibility(
+            view_name,
+            producer_entrypoint_owned=producer_entrypoint_owned,
+        )
+        if view_request.get("expected_scene_visibility") != expected_visibility:
+            raise GenManipPreviewError(
+                f"preview request view {view_name} has stale scene visibility contract"
+            )
         if view.get("scene_visibility") != expected_visibility:
             raise GenManipPreviewError(
                 f"preview view {view_name} scene_visibility must be "
@@ -1228,7 +1256,35 @@ def _root_tilt_deg(
     return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
 
 
-def _expected_preview_visibility(view_name: str) -> str:
+def _producer_entrypoint_owned(task_data: Mapping[str, Any]) -> bool:
+    runtime_contract = task_data.get("scenario_forge_runtime_contract_v05")
+    if not isinstance(runtime_contract, Mapping):
+        runtime_contract = task_data.get("scenario_forge_runtime_contract")
+    if not isinstance(runtime_contract, Mapping):
+        return False
+    objects = runtime_contract.get("objects")
+    if not isinstance(objects, list) or not objects:
+        return False
+    owners: list[str] = []
+    for index, raw_object in enumerate(objects):
+        item = _as_mapping(raw_object, f"runtime contract objects[{index}]")
+        physics = item.get("physics_authoring")
+        if not isinstance(physics, Mapping):
+            return False
+        owner = physics.get("owner")
+        if not isinstance(owner, str):
+            return False
+        owners.append(owner)
+    return all(owner == "producer_entrypoint" for owner in owners)
+
+
+def _expected_preview_visibility(
+    view_name: str,
+    *,
+    producer_entrypoint_owned: bool = False,
+) -> str:
+    if producer_entrypoint_owned:
+        return "producer_entrypoint_scene_inherited"
     if view_name in {"workspace_closeup", "task_object_closeup"}:
         return "scene_room_invisible_workspace_isolation"
     if view_name == "scene_overview" or view_name.startswith("room_"):

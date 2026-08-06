@@ -333,6 +333,12 @@ def _compile_scene_usda(
             raise ValueError(f"duplicate source_prim_path: {prim_path}")
         seen_paths.add(str(prim_path))
 
+        if item.get("instance_mode", "referenced_asset") == "embedded_scene_prim":
+            # The producer entrypoint already owns transforms and physics. The
+            # object record is semantic registration, not an instruction to
+            # re-instance or overwrite that prim.
+            continue
+
         cursor = tree
         for part in prim_path.parts:
             cursor = cursor.children.setdefault(part, _PrimOverride())
@@ -472,7 +478,10 @@ def _task_contract(scenario: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": (
             "task/v0.5"
-            if scenario.get("schema_version") == "scenario-spec/v0.6"
+            if scenario.get("schema_version") in {
+                "scenario-spec/v0.6",
+                "scenario-spec/v0.7",
+            }
             else (
                 "task/v0.4"
                 if scenario.get("schema_version") == "scenario-spec/v0.4"
@@ -543,7 +552,10 @@ def _metrics(scenario: Mapping[str, Any]) -> dict[str, Any]:
             raw_rubric,
             schema_version=(
                 "metrics/v0.4"
-                if scenario.get("schema_version") == "scenario-spec/v0.6"
+                if scenario.get("schema_version") in {
+                    "scenario-spec/v0.6",
+                    "scenario-spec/v0.7",
+                }
                 else "metrics/v0.3"
             ),
         )

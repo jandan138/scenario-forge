@@ -18,6 +18,7 @@ from tests.test_convert_asset_adapter import (
     _write_visual_static_handoff,
 )
 from tests.test_scenario_package_compiler import _write_source_scene
+from tests.test_labutopia_interactive_scene_handoff import write_interactive_handoff
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -104,6 +105,52 @@ def test_source_bindings_v03_adds_static_support_without_changing_v02() -> None:
     assert convert_asset["properties"]["usage"]["enum"][-1] == (
         "static_support_object"
     )
+
+
+def test_source_bindings_v04_adds_producer_composed_scene_resolver() -> None:
+    schema_path = (
+        REPO_ROOT
+        / "src/scenario_forge/schemas/jsonschema/scenario-source-bindings-v0.4.schema.json"
+    )
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    assert schema["properties"]["schema_version"]["const"] == (
+        "scenario-source-bindings/v0.4"
+    )
+    variants = schema["$defs"]["binding"]["oneOf"]
+    assert {item["properties"]["resolver"]["const"] for item in variants} == {
+        "local_usd",
+        "convert_asset_package",
+        "producer_package",
+    }
+
+
+def test_source_bindings_v04_resolves_interactive_producer_package(tmp_path: Path) -> None:
+    package, manifest = write_interactive_handoff(tmp_path / "producer")
+    bindings = _write_bindings(
+        tmp_path / "bindings.yaml",
+        {
+            "lab001_pbd_scene": {
+                "resolver": "producer_package",
+                "usage": "interactive_composed_scene",
+                "package_dir": package.relative_to(tmp_path).as_posix(),
+                "manifest_path": manifest.relative_to(tmp_path).as_posix(),
+                "producer_revision": "producer-r1",
+                "expected_package_id": "lab001_pbd_beaker_to_beaker_step600_v1",
+                "expected_entrypoints": ["native", "genmanip", "vr"],
+                "license": "CC-BY-NC-4.0",
+                "attribution": ["LabUtopia"],
+                "redistributable": False,
+            }
+        },
+        schema_version="scenario-source-bindings/v0.4",
+    )
+
+    source = resolve_scenario_source_bindings(bindings)["lab001_pbd_scene"]
+
+    assert source.role == "interactive_composed_scene"
+    assert source.source_usd == package / "native.usda"
+    assert source.upstream_package is not None
+    assert source.upstream_package.producer == "LabUtopia"
 
 
 def test_source_bindings_v03_resolves_static_support_package(tmp_path: Path) -> None:

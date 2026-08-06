@@ -191,6 +191,7 @@ def _render_initial_scene(
     # starts.  Pure Scenario Forge package modules never import these SDKs.
     request_views = _required_mapping(request, "views", "render request")
     view_names = _request_view_names(request)
+    physics_warmup_steps, render_without_physics = _preview_timing(request)
     resolutions = [
         _resolution(
             _as_mapping(request_views.get(view_name), f"render request view {view_name}").get(
@@ -317,7 +318,7 @@ def _render_initial_scene(
             Gf=Gf,
             np=np,
         )
-        for _ in range(WARMUP_STEPS):
+        for _ in range(physics_warmup_steps):
             scene.world.step(render=False)
         bbox_cache.Clear()
         xform_cache.Clear()
@@ -330,7 +331,8 @@ def _render_initial_scene(
                 "genmanip_recovery_scene=true",
                 "genmanip_recovery_preserved_articulation_parts="
                 + ",".join(preserved_articulation_parts),
-                f"zero_action_warmup_steps={WARMUP_STEPS}",
+                f"zero_action_warmup_steps={physics_warmup_steps}",
+                f"render_without_physics={str(render_without_physics).lower()}",
             ]
         )
 
@@ -361,8 +363,17 @@ def _render_initial_scene(
             warmup_start_geometry=warmup_start_geometry,
         )
         room_prim = stage.GetPrimAtPath(f"/World/{scene.uuid}/room")
+        room_isolation_supported = bool(
+            room_prim and room_prim.IsValid() and list(room_prim.GetChildren())
+        )
+        if not room_isolation_supported:
+            # Producer-composed scenes may own the complete workcell directly
+            # below the scenario root. In that contract the room and task
+            # objects cannot be hidden independently, so keep the producer
+            # scene visible for every evidence view.
+            room_prim = stage.GetPrimAtPath(f"/World/{scene.uuid}")
         if room_prim is None or not room_prim.IsValid():
-            raise RuntimeError("scene_room prim is unavailable for preview isolation")
+            raise RuntimeError("producer scene root is unavailable for preview")
         room_imageable = UsdGeom.Imageable(room_prim)
         room_visibility_attr = room_imageable.GetVisibilityAttr()
         original_room_visibility = room_visibility_attr.Get()
@@ -498,7 +509,10 @@ def _render_initial_scene(
             # restores the room and proves the substituted background renders.
             hidden_wall_records: list[Mapping[str, Any]] = []
             original_wall_visibility: list[tuple[Any, Any]] = []
-            if view_name in {"workspace_closeup", "task_object_closeup"}:
+            if not room_isolation_supported:
+                room_visibility_attr.Set(UsdGeom.Tokens.inherited)
+                visibility_mode = "producer_entrypoint_scene_inherited"
+            elif view_name in {"workspace_closeup", "task_object_closeup"}:
                 room_visibility_attr.Set(
                     _preview_room_visibility_token(
                         view_name,
@@ -560,12 +574,18 @@ def _render_initial_scene(
                         )
                         visibility_attr.Set(UsdGeom.Tokens.invisible)
             for _ in range(RENDER_STEPS):
-                scene.world.step(render=True)
+                if render_without_physics:
+                    scene.world.render()
+                else:
+                    scene.world.step(render=True)
             camera = preview_cameras[view_name]
             rgb = get_src(camera, "rgb")
             attempts = 0
             while rgb is None and attempts < 20:
-                scene.world.step(render=True)
+                if render_without_physics:
+                    scene.world.render()
+                else:
+                    scene.world.step(render=True)
                 rgb = get_src(camera, "rgb")
                 attempts += 1
             if rgb is None:
@@ -668,7 +688,8 @@ def _render_initial_scene(
                 "genmanip_scene_uid": scene.uuid,
                 "robot_injected": "lift2",
                 "action_count": 0,
-                "warmup_steps": WARMUP_STEPS,
+                "warmup_steps": physics_warmup_steps,
+                "render_without_physics": render_without_physics,
                 "exposure_mode": "fixed",
                 "exposure_multiplier": 0.8,
                 "application_resolution": [app_width, app_height],
@@ -1284,6 +1305,22 @@ def _preview_room_visibility_token(
     raise ValueError(f"unsupported preview view: {view_name}")
 
 
+def _preview_timing(request: Mapping[str, Any]) -> tuple[int, bool]:
+    """Keep producer PBD evidence within its qualified eight-step window."""
+
+    raw_views = request.get("views")
+    if isinstance(raw_views, Mapping) and raw_views:
+        inherited = [
+            isinstance(raw_view, Mapping)
+            and raw_view.get("expected_scene_visibility")
+            == "producer_entrypoint_scene_inherited"
+            for raw_view in raw_views.values()
+        ]
+        if all(inherited):
+            return 8, True
+    return WARMUP_STEPS, False
+
+
 def _runtime_target_position_camera(
     view: Mapping[str, Any], target: Any, np: Any
 ) -> tuple[Any, float, float, float] | None:
@@ -1348,7 +1385,10 @@ def _runtime_target_camera(
 
 def _runtime_prims(stage: Any, scene: Any, runtime_id: str) -> list[Any]:
     if runtime_id == "scene_room":
-        return [stage.GetPrimAtPath(f"/World/{scene.uuid}/room")]
+        room = stage.GetPrimAtPath(f"/World/{scene.uuid}/room")
+        if room is not None and room.IsValid() and list(room.GetChildren()):
+            return [room]
+        return [stage.GetPrimAtPath(f"/World/{scene.uuid}")]
     if runtime_id == "lift2_end_effectors":
         root = f"/World/{scene.uuid}/lift2/lift2/lift2"
         return [

@@ -6,14 +6,16 @@ from typing import Any, Mapping
 import yaml
 
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
+from scenario_forge.adapters.labutopia import load_labutopia_interactive_scene_handoff
 from scenario_forge.assets.source import LocalUSDAssetSource
 
 
-SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.3"
+SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.4"
 SUPPORTED_SOURCE_BINDINGS_SCHEMA_VERSIONS = frozenset(
     {
         "scenario-source-bindings/v0.1",
         "scenario-source-bindings/v0.2",
+        "scenario-source-bindings/v0.3",
         SOURCE_BINDINGS_SCHEMA_VERSION,
     }
 )
@@ -49,6 +51,20 @@ _CONVERT_ASSET_FIELDS = frozenset(
     }
 )
 _CONVERT_ASSET_V02_FIELDS = _CONVERT_ASSET_FIELDS | {"usage"}
+_PRODUCER_PACKAGE_FIELDS = frozenset(
+    {
+        "resolver",
+        "usage",
+        "package_dir",
+        "manifest_path",
+        "producer_revision",
+        "expected_package_id",
+        "expected_entrypoints",
+        "license",
+        "attribution",
+        "redistributable",
+    }
+)
 
 
 class ScenarioSourceBindingError(ValueError):
@@ -111,6 +127,7 @@ def resolve_scenario_source_bindings(
                         _CONVERT_ASSET_V02_FIELDS
                         if schema_version in {
                             "scenario-source-bindings/v0.2",
+                            "scenario-source-bindings/v0.3",
                             SOURCE_BINDINGS_SCHEMA_VERSION,
                         }
                         else _CONVERT_ASSET_FIELDS
@@ -126,10 +143,21 @@ def resolve_scenario_source_bindings(
                         _required_usage(binding, field, schema_version)
                         if schema_version in {
                             "scenario-source-bindings/v0.2",
+                            "scenario-source-bindings/v0.3",
                             SOURCE_BINDINGS_SCHEMA_VERSION,
                         }
                         else "scene_overlay"
                     ),
+                )
+            elif resolver == "producer_package":
+                if schema_version != SOURCE_BINDINGS_SCHEMA_VERSION:
+                    raise ScenarioSourceBindingError(
+                        f"{field}.resolver producer_package requires "
+                        f"{SOURCE_BINDINGS_SCHEMA_VERSION}"
+                    )
+                _reject_unknown_fields(binding, _PRODUCER_PACKAGE_FIELDS, field)
+                source = _resolve_producer_package(
+                    raw_asset_id, binding, base_dir, field
                 )
             else:
                 raise ScenarioSourceBindingError(
@@ -218,6 +246,43 @@ def _resolve_convert_asset_package(
     )
 
 
+def _resolve_producer_package(
+    asset_id: str,
+    binding: Mapping[str, Any],
+    base_dir: Path,
+    field: str,
+) -> LocalUSDAssetSource:
+    usage = _required_string(binding, "usage", field)
+    if usage != "interactive_composed_scene":
+        raise ScenarioSourceBindingError(
+            f"{field}.usage must be 'interactive_composed_scene'"
+        )
+    if _required_string(binding, "license", field) != "CC-BY-NC-4.0":
+        raise ScenarioSourceBindingError(
+            f"{field}.license must match producer license CC-BY-NC-4.0"
+        )
+    if _boolean(binding.get("redistributable", False), f"{field}.redistributable"):
+        raise ScenarioSourceBindingError(
+            f"{field}.redistributable must be false"
+        )
+    handoff = load_labutopia_interactive_scene_handoff(
+        _local_path(binding, "package_dir", base_dir, field),
+        _local_path(binding, "manifest_path", base_dir, field),
+        producer_revision=_required_string(binding, "producer_revision", field),
+        expected_package_id=_required_string(binding, "expected_package_id", field),
+        expected_entrypoints=_nonempty_string_tuple(
+            binding.get("expected_entrypoints"),
+            f"{field}.expected_entrypoints",
+        ),
+    )
+    return handoff.to_local_usd_asset_source(
+        asset_id=asset_id,
+        attribution=_string_tuple(
+            binding.get("attribution", []), f"{field}.attribution"
+        ),
+    )
+
+
 def _required_usage(
     data: Mapping[str, Any], field: str, schema_version: str
 ) -> str:
@@ -229,7 +294,10 @@ def _required_usage(
         "visual_static_environment",
         "visual_static_object",
     }
-    if schema_version == SOURCE_BINDINGS_SCHEMA_VERSION:
+    if schema_version in {
+        "scenario-source-bindings/v0.3",
+        SOURCE_BINDINGS_SCHEMA_VERSION,
+    }:
         allowed.add("static_support_object")
     if usage not in allowed:
         raise ScenarioSourceBindingError(

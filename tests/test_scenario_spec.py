@@ -194,6 +194,50 @@ def _scenario_mapping() -> dict[str, object]:
     }
 
 
+def test_v07_supports_producer_entrypoint_scene_with_embedded_objects() -> None:
+    data = _scenario_mapping()
+    data["schema_version"] = "scenario-spec/v0.7"
+    scene = data["scene"]
+    assert isinstance(scene, dict)
+    scene["composition_mode"] = "producer_entrypoint"
+    objects = data["objects"]
+    assert isinstance(objects, list)
+    for item in objects:
+        assert isinstance(item, dict)
+        item["asset_id"] = scene["asset_id"]
+        item["instance_mode"] = "embedded_scene_prim"
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.scene.composition_mode == "producer_entrypoint"
+    assert {item.instance_mode for item in spec.objects} == {"embedded_scene_prim"}
+    assert spec.to_mapping()["scene"]["composition_mode"] == "producer_entrypoint"
+    schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.7.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert list(Draft202012Validator(schema).iter_errors(data)) == []
+
+
+def test_v07_embedded_object_must_belong_to_scene_asset() -> None:
+    data = _scenario_mapping()
+    data["schema_version"] = "scenario-spec/v0.7"
+    scene = data["scene"]
+    assert isinstance(scene, dict)
+    scene["composition_mode"] = "producer_entrypoint"
+    objects = data["objects"]
+    assert isinstance(objects, list)
+    item = objects[1]
+    assert isinstance(item, dict)
+    item["instance_mode"] = "embedded_scene_prim"
+    item["asset_id"] = "different_asset"
+
+    with pytest.raises(ValueError, match="embedded_scene_prim.*scene.asset_id"):
+        ScenarioSpec.from_mapping(data)
+
+
 def _scenario_mapping_v02(
     overlay_asset_ids: object = (
         "drying_box_03_dynamic_profile",

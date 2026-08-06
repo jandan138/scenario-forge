@@ -76,7 +76,21 @@ def export_vr_teleop_package(
     table_asset = _asset(assets, _string(table.get("asset_id"), "table.asset_id"))
     source_asset = _asset(assets, _string(source.get("asset_id"), "source.asset_id"))
     target_asset = _asset(assets, _string(target.get("asset_id"), "target.asset_id"))
-    _require_static_support_table(table_asset)
+    scene_mapping = _mapping(scenario.get("scene"), "scenario.scene")
+    composition_mode = scene_mapping.get("composition_mode", "referenced_assets")
+    producer_entrypoint: Mapping[str, Any] | None = None
+    if composition_mode == "producer_entrypoint":
+        if any(
+            item.get("instance_mode") != "embedded_scene_prim"
+            or item.get("asset_id") != environment_id
+            for item in (table, source, target)
+        ):
+            raise VRTeleopExportError(
+                "producer entrypoint objects must be embedded in the scene asset"
+            )
+        producer_entrypoint = _interactive_producer_entrypoint(environment, "vr")
+    else:
+        _require_static_support_table(table_asset)
 
     output = Path(out_dir)
     output_parent = output.parent
@@ -85,12 +99,16 @@ def export_vr_teleop_package(
         raise VRTeleopExportError(f"VR output already exists: {output}")
     staging = Path(tempfile.mkdtemp(prefix=f".{output.name}.", dir=output_parent))
     try:
-        asset_roles = {
-            "environment": environment,
-            "table": table_asset,
-            "source_container": source_asset,
-            "target_container": target_asset,
-        }
+        asset_roles = (
+            {"scene": environment}
+            if producer_entrypoint is not None
+            else {
+                "environment": environment,
+                "table": table_asset,
+                "source_container": source_asset,
+                "target_container": target_asset,
+            }
+        )
         for role, asset in asset_roles.items():
             source_root = (package_root / asset.canonical_usd).parent
             if not source_root.is_dir():
@@ -101,12 +119,16 @@ def export_vr_teleop_package(
 
         scene_path = staging / "scene.usd"
         scene_path.write_text(
-            _scene_usda(
-                scenario=scenario,
-                table=table,
-                source=source,
-                target=target,
-                environment=environment,
+            (
+                _producer_entrypoint_scene_usda(producer_entrypoint)
+                if producer_entrypoint is not None
+                else _scene_usda(
+                    scenario=scenario,
+                    table=table,
+                    source=source,
+                    target=target,
+                    environment=environment,
+                )
             ),
             encoding="utf-8",
         )
@@ -117,12 +139,28 @@ def export_vr_teleop_package(
                 robot=robot,
                 source_id=_string(source.get("id"), "source.id"),
                 target_id=_string(target.get("id"), "target.id"),
+                object_prim_paths=(
+                    None
+                    if producer_entrypoint is None
+                    else [
+                        _string(
+                            _mapping(
+                                producer_entrypoint.get("object_prims"),
+                                "vr entrypoint.object_prims",
+                            ).get(role),
+                            f"vr entrypoint.object_prims.{role}",
+                        )
+                        for role in ("source_container", "target_container")
+                    ]
+                ),
             ),
             encoding="utf-8",
         )
         parity_path = staging / "parity_manifest.json"
         scenario_bytes = (package_root / "scenario.yaml").read_bytes()
-        table_contract = _static_support_contract(table_asset)
+        table_contract = (
+            None if producer_entrypoint is not None else _static_support_contract(table_asset)
+        )
         parity = {
             "schema_version": "scenario-forge-vr-ebench-parity/v0.1",
             "status": "pass_with_declared_exception",
@@ -133,21 +171,36 @@ def export_vr_teleop_package(
             "source_contract": SOURCE_CONTRACT,
             "equivalence": {
                 "environment": "same_asset_and_pose",
-                "table_static_support": "same_asset_and_pose",
-                "task_objects": "same_assets_poses_and_physics",
+                "table_static_support": (
+                    "producer_entrypoint_same_authored_prim"
+                    if producer_entrypoint is not None
+                    else "same_asset_and_pose"
+                ),
+                "task_objects": (
+                    "producer_entrypoint_same_authored_prims_and_physics"
+                    if producer_entrypoint is not None
+                    else "same_assets_poses_and_physics"
+                ),
                 "robot_model": "same_runtime_robot_type",
                 "robot_base_pose": "same",
                 "physx_scene_config": "same_shared_profile",
                 "robot_material_and_offsets": "same_shared_profile",
             },
-            "static_support_contract": {
-                "profile_id": table_contract["profile_id"],
-                "profile_revision": table_contract["profile_revision"],
-                "collider_paths": [
-                    item["prim_path"] for item in table_contract["colliders"]
-                ],
-                "qualification": table_contract["qualification"],
-            },
+            "static_support_contract": (
+                {
+                    "authority": "producer_entrypoint",
+                    "consumer_authored_collider": False,
+                }
+                if table_contract is None
+                else {
+                    "profile_id": table_contract["profile_id"],
+                    "profile_revision": table_contract["profile_revision"],
+                    "collider_paths": [
+                        item["prim_path"] for item in table_contract["colliders"]
+                    ],
+                    "qualification": table_contract["qualification"],
+                }
+            ),
             "allowed_exceptions": [
                 {
                     "id": "robot_joint_initialization",
@@ -256,14 +309,19 @@ def _pose_lines(pose: Mapping[str, Any], *, indent: int) -> list[str]:
 
 
 def _task_config_python(
-    *, task_id: str, robot: Mapping[str, Any], source_id: str, target_id: str
+    *,
+    task_id: str,
+    robot: Mapping[str, Any],
+    source_id: str,
+    target_id: str,
+    object_prim_paths: list[str] | None = None,
 ) -> str:
     spawn = _mapping(robot.get("spawn"), "scenario.robot.spawn")
     config: dict[str, Any] = {
         "scene_usd_file_path": {
             "scene1": "__SCENE_PATH__",
         },
-        "obj_prim_list": [
+        "obj_prim_list": object_prim_paths or [
             f"/World/_scene/{source_id}",
             f"/World/_scene/{target_id}",
         ],
@@ -340,6 +398,49 @@ def _static_support_contract(asset: AssetManifestEntry) -> Mapping[str, Any]:
     upstream = _mapping(asset.metadata.get("upstream_package"), "table.upstream_package")
     metadata = _mapping(upstream.get("metadata"), "table.upstream_package.metadata")
     return _mapping(metadata.get("static_support_contract"), "table.static_support_contract")
+
+
+def _interactive_producer_entrypoint(
+    asset: AssetManifestEntry, target: str
+) -> Mapping[str, Any]:
+    if asset.role != "interactive_composed_scene":
+        raise VRTeleopExportError(
+            "producer entrypoint scene must use interactive_composed_scene asset"
+        )
+    upstream = _mapping(asset.metadata.get("upstream_package"), "scene.upstream_package")
+    if upstream.get("producer") != "LabUtopia":
+        raise VRTeleopExportError("interactive scene producer must be LabUtopia")
+    metadata = _mapping(upstream.get("metadata"), "scene.upstream_package.metadata")
+    entrypoints = _mapping(metadata.get("entrypoints"), "scene.entrypoints")
+    entrypoint = _mapping(entrypoints.get(target), f"scene.entrypoints.{target}")
+    if entrypoint.get("status") != "qualified":
+        raise VRTeleopExportError(f"producer {target} entrypoint is not qualified")
+    if entrypoint.get("hidden_cube_overlay_applied") is not True:
+        raise VRTeleopExportError(f"producer {target} entrypoint lacks required overlay")
+    if entrypoint.get("physics_hz") != 60:
+        raise VRTeleopExportError("VR producer entrypoint must be 60 Hz")
+    return entrypoint
+
+
+def _producer_entrypoint_scene_usda(entrypoint: Mapping[str, Any]) -> str:
+    path = entrypoint.get("path")
+    if not isinstance(path, str) or not path or Path(path).is_absolute() or ".." in Path(path).parts:
+        raise VRTeleopExportError("producer entrypoint path must be package-relative")
+    return "\n".join(
+        [
+            "#usda 1.0",
+            "(",
+            '    defaultPrim = "World"',
+            "    metersPerUnit = 1",
+            "    kilogramsPerUnit = 1",
+            "    timeCodesPerSecond = 60",
+            "    framesPerSecond = 60",
+            '    upAxis = "Z"',
+            f"    subLayers = [@deps/scene/{path}@]",
+            ")",
+            "",
+        ]
+    )
 
 
 def _one_object_by_role(objects: list[Mapping[str, Any]], role: str) -> Mapping[str, Any]:

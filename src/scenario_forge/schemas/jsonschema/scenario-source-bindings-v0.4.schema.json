@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scenario-forge.local/schemas/scenario-source-bindings-v0.4.schema.json",
+  "title": "Scenario Source Bindings v0.4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "bindings"],
+  "properties": {
+    "schema_version": {"const": "scenario-source-bindings/v0.4"},
+    "bindings": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+      "additionalProperties": {"$ref": "#/$defs/binding"}
+    }
+  },
+  "$defs": {
+    "stringArray": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "localUsd": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resolver", "source_usd", "role", "license", "source_uri"],
+      "properties": {
+        "resolver": {"const": "local_usd"},
+        "source_usd": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "minLength": 1},
+        "source_uri": {"type": "string", "minLength": 1},
+        "attribution": {"$ref": "#/$defs/stringArray"},
+        "redistributable": {"type": "boolean"},
+        "exclude_relative_paths": {"$ref": "#/$defs/stringArray"},
+        "root_prim_path": {"type": "string", "pattern": "^/"},
+        "expected_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "convertAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resolver", "usage", "source_usd", "package_dir", "manifest_path", "producer_revision", "expected_scope_prims", "license"],
+      "properties": {
+        "resolver": {"const": "convert_asset_package"},
+        "usage": {"enum": ["scene_overlay", "rigid_object", "articulated_object", "visual_static_environment", "visual_static_object", "static_support_object"]},
+        "source_usd": {"type": "string", "minLength": 1},
+        "package_dir": {"type": "string", "minLength": 1},
+        "manifest_path": {"type": "string", "minLength": 1},
+        "producer_revision": {"type": "string", "minLength": 1},
+        "expected_scope_prims": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^/"}, "uniqueItems": true},
+        "license": {"type": "string", "minLength": 1},
+        "attribution": {"$ref": "#/$defs/stringArray"},
+        "redistributable": {"type": "boolean"},
+        "exclude_relative_paths": {"$ref": "#/$defs/stringArray"},
+        "expected_consumer_profile": {"type": "string", "minLength": 1},
+        "expected_runtime_profile": {"type": "string", "minLength": 1}
+      }
+    },
+    "producerPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resolver", "usage", "package_dir", "manifest_path", "producer_revision", "expected_package_id", "expected_entrypoints", "license", "redistributable"],
+      "properties": {
+        "resolver": {"const": "producer_package"},
+        "usage": {"const": "interactive_composed_scene"},
+        "package_dir": {"type": "string", "minLength": 1},
+        "manifest_path": {"type": "string", "minLength": 1},
+        "producer_revision": {"type": "string", "minLength": 1},
+        "expected_package_id": {"type": "string", "minLength": 1},
+        "expected_entrypoints": {"type": "array", "minItems": 1, "items": {"enum": ["native", "genmanip", "vr"]}, "uniqueItems": true},
+        "license": {"const": "CC-BY-NC-4.0"},
+        "attribution": {"$ref": "#/$defs/stringArray"},
+        "redistributable": {"const": false}
+      }
+    },
+    "binding": {
+      "oneOf": [
+        {"$ref": "#/$defs/localUsd", "properties": {"resolver": {"const": "local_usd"}}},
+        {"$ref": "#/$defs/convertAsset", "properties": {"resolver": {"const": "convert_asset_package"}}},
+        {"$ref": "#/$defs/producerPackage", "properties": {"resolver": {"const": "producer_package"}}}
+      ]
+    }
+  }
+}

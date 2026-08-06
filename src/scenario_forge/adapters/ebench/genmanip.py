@@ -185,6 +185,9 @@ def export_genmanip_collected_package(
     object_by_id = {_required_string(item, "id", "scenario object"): item for item in objects}
     table = _table_object(objects)
     scene_source = _required_mapping(scenario, "scene", "scenario spec")
+    composition_mode = str(
+        scene_source.get("composition_mode", "referenced_assets")
+    )
     source_asset_id = _required_string(scene_source, "asset_id", "scenario scene")
     source_root_prim = _required_string(
         scene_source, "root_prim_path", "scenario scene"
@@ -249,6 +252,50 @@ def export_genmanip_collected_package(
     _validate_asset_provenance(package_root, manifest, asset_manifest.assets)
     assets_by_id = {asset.asset_id: asset for asset in asset_manifest.assets}
     _require_assets(objects, source_asset_id, overlay_asset_ids, assets_by_id)
+    producer_entrypoint: Mapping[str, Any] | None = None
+    embedded_object_ids: set[str] = set()
+    if composition_mode == "producer_entrypoint":
+        if scenario_schema_version != "scenario-spec/v0.7":
+            raise GenManipExportError(
+                "producer_entrypoint composition requires scenario-spec/v0.7"
+            )
+        if overlay_asset_ids:
+            raise GenManipExportError(
+                "producer_entrypoint composition cannot add consumer overlays"
+            )
+        source_asset = assets_by_id[source_asset_id]
+        producer_entrypoint = _interactive_producer_entrypoint(
+            source_asset, "genmanip"
+        )
+        for item in objects:
+            object_id = _required_string(item, "id", "scenario object")
+            if item.get("instance_mode") != "embedded_scene_prim":
+                raise GenManipExportError(
+                    f"producer entrypoint object {object_id} must use "
+                    "embedded_scene_prim"
+                )
+            if item.get("asset_id") != source_asset_id:
+                raise GenManipExportError(
+                    f"producer entrypoint object {object_id} must use scene asset"
+                )
+            producer_role = {
+                "table": "support_table",
+                "source_container": "source_container",
+                "target_container": "target_container",
+            }.get(_required_string(item, "role", f"scenario object {object_id}"))
+            expected_path = _required_mapping(
+                producer_entrypoint,
+                "object_prims",
+                "producer genmanip entrypoint",
+            ).get(producer_role)
+            source_path = _required_string(
+                item, "source_prim_path", f"scenario object {object_id}"
+            )
+            if expected_path != source_path:
+                raise GenManipExportError(
+                    f"producer entrypoint path mismatch for {object_id}"
+                )
+            embedded_object_ids.add(object_id)
     for overlay_asset_id in overlay_asset_ids:
         overlay_asset = assets_by_id[overlay_asset_id]
         if overlay_asset.role != "scene_overlay":
@@ -262,12 +309,17 @@ def export_genmanip_collected_package(
                 "scenario scene.root_prim_path"
             )
 
-    _validate_visual_static_object_requirements(objects, assets_by_id, table)
-    qualified_object_ids, requires_gpu_dynamics = _qualified_rigid_requirements(
-        objects,
-        assets_by_id,
-    )
-    articulation_bindings = _articulation_requirements(objects, assets_by_id)
+    if producer_entrypoint is None:
+        _validate_visual_static_object_requirements(objects, assets_by_id, table)
+        qualified_object_ids, requires_gpu_dynamics = _qualified_rigid_requirements(
+            objects,
+            assets_by_id,
+        )
+        articulation_bindings = _articulation_requirements(objects, assets_by_id)
+    else:
+        qualified_object_ids = set(embedded_object_ids)
+        requires_gpu_dynamics = True
+        articulation_bindings = {}
     if articulation_bindings and scenario_schema_version not in {
         "scenario-spec/v0.5",
         "scenario-spec/v0.6",
@@ -307,6 +359,11 @@ def export_genmanip_collected_package(
         goal=goal,
         requires_gpu_dynamics=requires_gpu_dynamics,
         articulation_bindings=articulation_bindings,
+        physics_hz=(
+            int(producer_entrypoint["physics_hz"])
+            if producer_entrypoint is not None
+            else 60
+        ),
     )
     runtime_contract = _runtime_contract(
         scenario=scenario,
@@ -364,6 +421,7 @@ def export_genmanip_collected_package(
             task_name=task_name,
             episode_name=seed,
             claim_scope=claim_scope,
+            producer_entrypoint=producer_entrypoint,
         )
         if output_dir.exists():
             shutil.rmtree(output_dir)
@@ -452,6 +510,7 @@ def _write_collected_package(
     task_name: str,
     episode_name: str,
     claim_scope: str,
+    producer_entrypoint: Mapping[str, Any] | None,
 ) -> None:
     scene_dir = (
         staging_dir
@@ -474,25 +533,37 @@ def _write_collected_package(
             encoding="utf-8",
         )
 
-    scene_text = _scene_usda(
-        scenario_id=scenario_id,
-        source_asset_id=source_asset_id,
-        overlay_asset_ids=overlay_asset_ids,
-        source_root_prim=source_root_prim,
-        inactive_source_prims=inactive_source_prims,
-        world_anchored_source_prims=world_anchored_source_prims,
-        source_room_pose=source_room_pose,
-        assets_by_id=assets_by_id,
-        objects=objects,
-        use_shared_runtime_namespace=(
-            _required_string(
-                _required_mapping(scenario, "robot", "scenario spec"),
-                "profile_ref",
-                "scenario robot",
-            )
-            == _SHARED_ISAAC41_PROFILE
-        ),
-    )
+    if producer_entrypoint is None:
+        scene_text = _scene_usda(
+            scenario_id=scenario_id,
+            source_asset_id=source_asset_id,
+            overlay_asset_ids=overlay_asset_ids,
+            source_root_prim=source_root_prim,
+            inactive_source_prims=inactive_source_prims,
+            world_anchored_source_prims=world_anchored_source_prims,
+            source_room_pose=source_room_pose,
+            assets_by_id=assets_by_id,
+            objects=objects,
+            use_shared_runtime_namespace=(
+                _required_string(
+                    _required_mapping(scenario, "robot", "scenario spec"),
+                    "profile_ref",
+                    "scenario robot",
+                )
+                == _SHARED_ISAAC41_PROFILE
+            ),
+        )
+    else:
+        source_asset = assets_by_id[source_asset_id]
+        scene_text = _producer_entrypoint_scene_usda(
+            _producer_entrypoint_reference(source_asset, producer_entrypoint),
+            physics_hz=int(producer_entrypoint["physics_hz"]),
+            scenario_prim=_required_string(
+                producer_entrypoint,
+                "scenario_prim",
+                "producer genmanip entrypoint",
+            ),
+        )
     (scene_dir / "scene.usda").write_text(scene_text, encoding="utf-8")
 
     tasks_dir = staging_dir / "tasks"
@@ -626,6 +697,7 @@ def _task_config(
     goal: list[list[list[dict[str, Any]]]],
     requires_gpu_dynamics: bool,
     articulation_bindings: Mapping[str, _ArticulationObjectBinding],
+    physics_hz: int = 60,
 ) -> dict[str, Any]:
     robot = _required_mapping(scenario, "robot", "scenario spec")
     robot_profile = _required_string(robot, "profile_ref", "scenario robot")
@@ -671,7 +743,7 @@ def _task_config(
         "mode": "manual",
         "num_test": 1,
         "num_steps": _positive_int(scenario.get("max_steps"), "scenario max_steps"),
-        "physics_dt": 1.0 / 60.0,
+        "physics_dt": 1.0 / physics_hz,
         "rendering_dt": 1.0 / 60.0,
         "robots": [
             {
@@ -720,6 +792,7 @@ def _task_config(
     }
     if robot_profile == _SHARED_ISAAC41_PROFILE:
         evaluation["physics_scene_config"] = physx_scene_config()
+        evaluation["physics_scene_config"]["TimeStepsPerSecond"] = physics_hz
     elif requires_gpu_dynamics:
         evaluation["physics_scene_config"] = {"EnableGPUDynamics": True}
     return {"demonstration_configs": [], "evaluation_configs": [evaluation]}
@@ -835,7 +908,11 @@ def _runtime_object_binding(
         scenario_object_id=object_id,
         runtime_uid=_TABLE_LAYOUT_UID if is_table else object_id,
         wrapper_name=wrapper_name,
-        state_prim_path=f"/World/{scenario_id}/{wrapper_name}",
+        state_prim_path=(
+            _required_string(item, "source_prim_path", f"scenario object {object_id}")
+            if item.get("instance_mode") == "embedded_scene_prim"
+            else f"/World/{scenario_id}/{wrapper_name}"
+        ),
         is_table=is_table,
     )
 
@@ -917,7 +994,11 @@ def _runtime_contract(
             }
         if object_id in qualified_object_ids:
             contract_object["physics_authoring"] = {
-                "owner": "convert_asset_package",
+                "owner": (
+                    "producer_entrypoint"
+                    if item.get("instance_mode") == "embedded_scene_prim"
+                    else "convert_asset_package"
+                ),
                 "local_colliders": False,
                 "local_rigid_body": False,
                 "local_mass": False,
@@ -981,14 +1062,18 @@ def _runtime_contract(
         qualified_rigid_object_ids
         and not exact_success
         and scenario_schema_version
-        not in {"scenario-spec/v0.5", "scenario-spec/v0.6"}
+        not in {
+            "scenario-spec/v0.5",
+            "scenario-spec/v0.6",
+            "scenario-spec/v0.7",
+        }
     ):
         raise GenManipExportError(
             "qualified rigid objects require the exact ordered success contract"
         )
     exact_runtime_contract_schema = (
         _RUNTIME_CONTRACT_SCHEMA_V06
-        if scenario_schema_version == "scenario-spec/v0.6"
+        if scenario_schema_version in {"scenario-spec/v0.6", "scenario-spec/v0.7"}
         else (
             _RUNTIME_CONTRACT_SCHEMA_V05
             if scenario_schema_version == "scenario-spec/v0.5"
@@ -2252,6 +2337,86 @@ def _asset_reference(asset: AssetManifestEntry) -> str:
         )
     relative = PurePosixPath(*path.parts[1:])
     return (PurePosixPath("source_bundle") / relative).as_posix()
+
+
+def _interactive_producer_entrypoint(
+    asset: AssetManifestEntry, target: str
+) -> Mapping[str, Any]:
+    if asset.role != "interactive_composed_scene":
+        raise GenManipExportError(
+            "producer_entrypoint scene asset must have role interactive_composed_scene"
+        )
+    upstream = _required_mapping(
+        asset.metadata,
+        "upstream_package",
+        f"interactive scene asset {asset.asset_id}",
+    )
+    if upstream.get("producer") != "LabUtopia":
+        raise GenManipExportError("interactive scene producer must be LabUtopia")
+    metadata = _required_mapping(
+        upstream, "metadata", "interactive scene upstream_package"
+    )
+    if metadata.get("usage") != "interactive_composed_scene":
+        raise GenManipExportError("interactive scene usage mismatch")
+    entrypoints = _required_mapping(
+        metadata, "entrypoints", "interactive scene upstream metadata"
+    )
+    entrypoint = _as_mapping(
+        entrypoints.get(target), f"interactive scene {target} entrypoint"
+    )
+    if entrypoint.get("status") != "qualified":
+        raise GenManipExportError(f"interactive scene {target} entrypoint is not qualified")
+    if entrypoint.get("hidden_cube_overlay_applied") is not True:
+        raise GenManipExportError(f"interactive scene {target} overlay is not applied")
+    return entrypoint
+
+
+def _producer_entrypoint_reference(
+    asset: AssetManifestEntry, entrypoint: Mapping[str, Any]
+) -> str:
+    path = entrypoint.get("path")
+    if not isinstance(path, str) or not path:
+        raise GenManipExportError("producer entrypoint path must be non-empty")
+    relative = PurePosixPath(path)
+    if relative.is_absolute() or any(part in {"", ".", ".."} for part in relative.parts):
+        raise GenManipExportError("producer entrypoint path must be package-relative")
+    return (PurePosixPath(_asset_reference(asset)).parent / relative).as_posix()
+
+
+def _producer_entrypoint_scene_usda(
+    reference: str, *, physics_hz: int, scenario_prim: str
+) -> str:
+    parts = PurePosixPath(scenario_prim).parts
+    if len(parts) != 3 or parts[:2] != ("/", "World"):
+        raise GenManipExportError(
+            "producer GenManip scenario_prim must be a direct child of /World"
+        )
+    scenario_root_name = parts[2]
+    return "\n".join(
+        [
+            "#usda 1.0",
+            "(",
+            '    defaultPrim = "World"',
+            "    metersPerUnit = 1",
+            "    kilogramsPerUnit = 1",
+            f"    framesPerSecond = {physics_hz}",
+            f"    timeCodesPerSecond = {physics_hz}",
+            '    upAxis = "Z"',
+            f"    subLayers = [@{reference}@]",
+            ")",
+            "",
+            'over "World"',
+            "{",
+            f'    over "{scenario_root_name}"',
+            "    {",
+            '        def Xform "room"',
+            "        {",
+            "        }",
+            "    }",
+            "}",
+            "",
+        ]
+    )
 
 
 def _genmanip_collected_table_preload_path(scenario_id: str) -> str:

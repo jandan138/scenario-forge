@@ -149,6 +149,7 @@ class SceneSourceSpec:
     inactive_prim_paths: tuple[str, ...] = ()
     world_anchored_prim_paths: tuple[str, ...] = ()
     pose: PoseSpec | None = None
+    composition_mode: str = "referenced_assets"
 
     @classmethod
     def from_mapping(
@@ -176,6 +177,14 @@ class SceneSourceSpec:
         asset_id = _string(data.get("asset_id"), "scene.asset_id")
         if asset_id in overlay_asset_ids:
             raise ValueError("scene.overlay_asset_ids must not contain scene.asset_id")
+        composition_mode = data.get("composition_mode", "referenced_assets")
+        if composition_mode not in {"referenced_assets", "producer_entrypoint"}:
+            raise ValueError(
+                "scene.composition_mode must be 'referenced_assets' or "
+                "'producer_entrypoint'"
+            )
+        if composition_mode != "referenced_assets" and schema_version != "scenario-spec/v0.7":
+            raise ValueError("scene.composition_mode requires scenario-spec/v0.7")
         return cls(
             asset_id=asset_id,
             root_prim_path=_string(data.get("root_prim_path"), "scene.root_prim_path"),
@@ -192,6 +201,7 @@ class SceneSourceSpec:
                 if data.get("pose") is None
                 else PoseSpec.from_mapping(data.get("pose"), "scene.pose")
             ),
+            composition_mode=str(composition_mode),
         )
 
     def to_mapping(self) -> dict[str, object]:
@@ -209,6 +219,8 @@ class SceneSourceSpec:
             )
         if self.pose is not None:
             result["pose"] = self.pose.to_mapping()
+        if self.composition_mode != "referenced_assets":
+            result["composition_mode"] = self.composition_mode
         return result
 
 
@@ -221,9 +233,16 @@ class ObjectBindingSpec:
     pose: PoseSpec
     named_frames: tuple[tuple[str, PoseSpec], ...] = ()
     metadata: dict[str, JsonValue] | None = None
+    instance_mode: str = "referenced_asset"
 
     @classmethod
-    def from_mapping(cls, value: object, index: int = 0) -> ObjectBindingSpec:
+    def from_mapping(
+        cls,
+        value: object,
+        index: int = 0,
+        *,
+        schema_version: str = "scenario-spec/v0.1",
+    ) -> ObjectBindingSpec:
         field = f"objects[{index}]"
         data = _mapping(value, field)
         raw_frames = data.get("named_frames", {})
@@ -236,6 +255,14 @@ class ObjectBindingSpec:
         if len(named_frames) != len(frame_data):
             raise ValueError(f"{field}.named_frames keys must be non-empty strings")
         raw_metadata = data.get("metadata")
+        instance_mode = data.get("instance_mode", "referenced_asset")
+        if instance_mode not in {"referenced_asset", "embedded_scene_prim"}:
+            raise ValueError(
+                f"{field}.instance_mode must be 'referenced_asset' or "
+                "'embedded_scene_prim'"
+            )
+        if instance_mode != "referenced_asset" and schema_version != "scenario-spec/v0.7":
+            raise ValueError(f"{field}.instance_mode requires scenario-spec/v0.7")
         return cls(
             object_id=_string(data.get("id"), f"{field}.id"),
             asset_id=_string(data.get("asset_id"), f"{field}.asset_id"),
@@ -248,6 +275,7 @@ class ObjectBindingSpec:
                 if raw_metadata is None
                 else _json_mapping(raw_metadata, f"{field}.metadata")
             ),
+            instance_mode=str(instance_mode),
         )
 
     def to_mapping(self) -> dict[str, object]:
@@ -264,6 +292,8 @@ class ObjectBindingSpec:
             }
         if self.metadata is not None:
             result["metadata"] = _copy_json(self.metadata, "metadata")
+        if self.instance_mode != "referenced_asset":
+            result["instance_mode"] = self.instance_mode
         return result
 
 
@@ -475,7 +505,7 @@ class ProgressRubricItemSpec:
         condition_type = condition.get("type")
         supported_condition_types = (
             _V06_PROGRESS_RUBRIC_CONDITION_TYPES
-            if schema_version == "scenario-spec/v0.6"
+            if schema_version in {"scenario-spec/v0.6", "scenario-spec/v0.7"}
             else _PROGRESS_RUBRIC_CONDITION_TYPES
         )
         if condition_type not in supported_condition_types:
@@ -652,6 +682,7 @@ class ScenarioSpec:
             "scenario-spec/v0.4",
             "scenario-spec/v0.5",
             "scenario-spec/v0.6",
+            "scenario-spec/v0.7",
         }:
             raise ValueError("unsupported scenario spec schema_version")
         raw_objects = data.get("objects")
@@ -665,7 +696,10 @@ class ScenarioSpec:
             raise ValueError("invariants must be a list")
 
         objects = tuple(
-            ObjectBindingSpec.from_mapping(item, index) for index, item in enumerate(raw_objects)
+            ObjectBindingSpec.from_mapping(
+                item, index, schema_version=str(schema_version)
+            )
+            for index, item in enumerate(raw_objects)
         )
         steps = tuple(TaskStepSpec.from_mapping(item, index) for index, item in enumerate(raw_steps))
         invariants = tuple(
@@ -719,6 +753,26 @@ class ScenarioSpec:
         object_ids = {item.object_id for item in self.objects}
         step_ids = {step.step_id for step in self.steps}
         step_positions = {step.step_id: index for index, step in enumerate(self.steps)}
+
+        embedded = [
+            item for item in self.objects if item.instance_mode == "embedded_scene_prim"
+        ]
+        if self.scene.composition_mode == "producer_entrypoint":
+            if not embedded:
+                raise ValueError(
+                    "producer_entrypoint scene requires embedded_scene_prim objects"
+                )
+            for item in embedded:
+                if item.asset_id != self.scene.asset_id:
+                    raise ValueError(
+                        f"embedded_scene_prim object {item.object_id} asset_id must "
+                        "equal scene.asset_id"
+                    )
+        elif embedded:
+            raise ValueError(
+                "embedded_scene_prim objects require scene.composition_mode "
+                "producer_entrypoint"
+            )
 
         for step in self.steps:
             for actor in step.actors:
@@ -840,7 +894,11 @@ def _validate_progress_rubric_references(
     rubric = spec.success.progress_rubric
     if rubric is None:
         return
-    if spec.schema_version not in {"scenario-spec/v0.4", "scenario-spec/v0.6"}:
+    if spec.schema_version not in {
+        "scenario-spec/v0.4",
+        "scenario-spec/v0.6",
+        "scenario-spec/v0.7",
+    }:
         raise ValueError(
             "success.progress_rubric requires scenario-spec/v0.4 or v0.6, "
             f"got {spec.schema_version}"
@@ -926,7 +984,11 @@ def _validate_v05_success_predicate(
         if predicate.predicate_type == "object_at_initial_pose"
         else None
     )
-    if schema_version not in {"scenario-spec/v0.5", "scenario-spec/v0.6"}:
+    if schema_version not in {
+        "scenario-spec/v0.5",
+        "scenario-spec/v0.6",
+        "scenario-spec/v0.7",
+    }:
         if relative_to_part is not None or relative_axis_part is not None:
             raise ValueError(
                 "articulated axis part references require scenario-spec/v0.5 or v0.6"

@@ -118,6 +118,23 @@ def test_renderer_forces_room_visible_only_for_context_overview() -> None:
     ) == "inherited"
 
 
+def test_renderer_limits_physics_warmup_for_producer_pbd_scene() -> None:
+    module = _load_isaac_renderer_module()
+
+    request = {
+        "views": {
+            "workspace_closeup": {
+                "expected_scene_visibility": "producer_entrypoint_scene_inherited"
+            },
+            "scene_overview": {
+                "expected_scene_visibility": "producer_entrypoint_scene_inherited"
+            },
+        }
+    }
+    assert module._preview_timing(request) == (8, True)
+    assert module._preview_timing({"views": {}}) == (50, False)
+
+
 def test_renderer_keeps_profiled_camera_position_and_uses_runtime_target() -> None:
     module = _load_isaac_renderer_module()
     import numpy as np
