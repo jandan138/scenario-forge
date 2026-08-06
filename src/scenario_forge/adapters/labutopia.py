@@ -5,12 +5,14 @@ from hashlib import sha256
 import json
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
+import math
 
 from scenario_forge.assets.source import LocalUSDAssetSource, UpstreamPackageRef
 
 
-_SCHEMA_VERSION = "labutopia.interactive_scene_handoff/v0.1"
+_SCHEMA_VERSION = "labutopia.interactive_scene_handoff/v0.2"
 _EXPECTED_RATES = {"native": 600, "genmanip": 600, "vr": 60}
+_EMBEDDED_ROLES = {"source_container", "target_container", "support_table"}
 
 
 class LabUtopiaInteractiveSceneHandoffError(ValueError):
@@ -149,6 +151,52 @@ def load_labutopia_interactive_scene_handoff(
             raise LabUtopiaInteractiveSceneHandoffError(f"entrypoint is not qualified: {name}")
         if item.get("hidden_cube_overlay_applied") is not True:
             raise LabUtopiaInteractiveSceneHandoffError(f"overlay not applied: {name}")
+        object_prims = _mapping(
+            item.get("object_prims"), f"entrypoints.{name}.object_prims"
+        )
+        states = _mapping(
+            item.get("embedded_object_states"),
+            f"entrypoints.{name}.embedded_object_states",
+        )
+        if set(object_prims) != _EMBEDDED_ROLES or set(states) != _EMBEDDED_ROLES:
+            raise LabUtopiaInteractiveSceneHandoffError(
+                f"entrypoint embedded role set mismatch: {name}"
+            )
+        for role in sorted(_EMBEDDED_ROLES):
+            state = _mapping(
+                states[role], f"entrypoints.{name}.embedded_object_states.{role}"
+            )
+            if state.get("prim_path") != object_prims[role]:
+                raise LabUtopiaInteractiveSceneHandoffError(
+                    f"entrypoint embedded prim mismatch: {name}.{role}"
+                )
+            _finite_vector(state.get("position_xyz_m"), 3, f"{name}.{role}.position")
+            quaternion = _finite_vector(
+                state.get("orientation_wxyz"), 4, f"{name}.{role}.orientation"
+            )
+            if not math.isclose(
+                sum(value * value for value in quaternion),
+                1.0,
+                rel_tol=0.0,
+                abs_tol=1e-5,
+            ):
+                raise LabUtopiaInteractiveSceneHandoffError(
+                    f"entrypoint embedded quaternion is not unit: {name}.{role}"
+                )
+            scale = _finite_vector(
+                state.get("local_scale_xyz"), 3, f"{name}.{role}.scale"
+            )
+            if any(value <= 0.0 for value in scale):
+                raise LabUtopiaInteractiveSceneHandoffError(
+                    f"entrypoint embedded scale must be positive: {name}.{role}"
+                )
+            bound = _mapping(state.get("world_aabb_m"), f"{name}.{role}.world_aabb")
+            lower = _finite_vector(bound.get("min"), 3, f"{name}.{role}.world_aabb.min")
+            upper = _finite_vector(bound.get("max"), 3, f"{name}.{role}.world_aabb.max")
+            if any(lo >= hi for lo, hi in zip(lower, upper, strict=True)):
+                raise LabUtopiaInteractiveSceneHandoffError(
+                    f"entrypoint embedded world AABB is empty: {name}.{role}"
+                )
     qualification = _mapping(manifest.get("runtime_qualification"), "runtime_qualification")
     if qualification.get("status") != "qualified":
         raise LabUtopiaInteractiveSceneHandoffError("runtime qualification is not complete")
@@ -174,6 +222,23 @@ def _sha(value: object, field: str) -> str:
     if not isinstance(value, str) or len(value) != 71 or not value.startswith("sha256:"):
         raise LabUtopiaInteractiveSceneHandoffError(f"{field} must be sha256-prefixed")
     return value
+
+
+def _finite_vector(value: object, length: int, field: str) -> tuple[float, ...]:
+    if (
+        not isinstance(value, list)
+        or len(value) != length
+        or not all(
+            isinstance(item, (int, float))
+            and not isinstance(item, bool)
+            and math.isfinite(float(item))
+            for item in value
+        )
+    ):
+        raise LabUtopiaInteractiveSceneHandoffError(
+            f"{field} must contain {length} finite numbers"
+        )
+    return tuple(float(item) for item in value)
 
 
 def _digest(path: Path) -> str:

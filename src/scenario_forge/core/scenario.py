@@ -326,27 +326,57 @@ class RobotSpec:
     profile_ref: str
     spawn: PoseSpec
     actors: tuple[ActorSpec, ...]
+    initial_joint_positions: tuple[float, ...] | None = None
 
     @classmethod
-    def from_mapping(cls, value: object) -> RobotSpec:
+    def from_mapping(
+        cls, value: object, *, schema_version: str = "scenario-spec/v0.1"
+    ) -> RobotSpec:
         data = _mapping(value, "robot")
         raw_actors = data.get("actors")
         if not isinstance(raw_actors, list) or not raw_actors:
             raise ValueError("robot.actors must be a non-empty list")
         actors = tuple(ActorSpec.from_mapping(actor, index) for index, actor in enumerate(raw_actors))
         _require_unique((actor.actor_id for actor in actors), "actor")
+        raw_initial = data.get("initial_joint_positions")
+        if raw_initial is not None and schema_version != "scenario-spec/v0.7":
+            raise ValueError(
+                "robot.initial_joint_positions requires scenario-spec/v0.7"
+            )
+        if raw_initial is not None and (
+            not isinstance(raw_initial, list) or not raw_initial
+        ):
+            raise ValueError(
+                "robot.initial_joint_positions must be a non-empty list"
+            )
+        initial = (
+            None
+            if raw_initial is None
+            else tuple(
+                float(item)
+                for item in _number_tuple(
+                    raw_initial,
+                    "robot.initial_joint_positions",
+                    len(raw_initial),
+                )
+            )
+        )
         return cls(
             profile_ref=_string(data.get("profile_ref"), "robot.profile_ref"),
             spawn=PoseSpec.from_mapping(data.get("spawn"), "robot.spawn"),
             actors=actors,
+            initial_joint_positions=initial,
         )
 
     def to_mapping(self) -> dict[str, object]:
-        return {
+        result: dict[str, object] = {
             "profile_ref": self.profile_ref,
             "spawn": self.spawn.to_mapping(),
             "actors": [actor.to_mapping() for actor in self.actors],
         }
+        if self.initial_joint_positions is not None:
+            result["initial_joint_positions"] = list(self.initial_joint_positions)
+        return result
 
 
 @dataclass(frozen=True)
@@ -710,7 +740,9 @@ class ScenarioSpec:
         _require_unique((item.step_id for item in steps), "step")
         _require_unique((item.invariant_id for item in invariants), "invariant")
 
-        robot = RobotSpec.from_mapping(data.get("robot"))
+        robot = RobotSpec.from_mapping(
+            data.get("robot"), schema_version=str(schema_version)
+        )
         success = SuccessSpec.from_mapping(
             data.get("success"),
             schema_version=str(schema_version),

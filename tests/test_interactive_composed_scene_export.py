@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
@@ -34,7 +35,13 @@ def test_producer_scene_is_not_reinstanced_and_adapters_select_their_entrypoints
     )
     package = tmp_path / "compiled"
     compile_scenario_package(
-        ScenarioSpec.from_mapping(scenario_mapping()),
+        ScenarioSpec.from_mapping(
+            scenario_mapping(
+                handoff.manifest["entrypoints"]["genmanip"][
+                    "embedded_object_states"
+                ]
+            )
+        ),
         {
             ASSET_ID: handoff.to_local_usd_asset_source(
                 asset_id=ASSET_ID, attribution=("LabUtopia",)
@@ -61,6 +68,25 @@ def test_producer_scene_is_not_reinstanced_and_adapters_select_their_entrypoints
     layout = episode["task_data"]["initial_layout"]
     assert layout["beaker2"]["add_colliders"] is False
     assert layout["beaker2"]["add_rigid_body"] is False
+    assert layout["00000000000000000000000000000000"]["position"] == [
+        0.2427880660,
+        0.0,
+        0.0,
+    ]
+    assert layout["00000000000000000000000000000000"]["orientation"] == [
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+    ]
+    assert layout["00000000000000000000000000000000"]["scale"] == [
+        0.006,
+        0.005,
+        0.004000000059604645,
+    ]
+    assert layout["lift2"]["joint_positions"] == scenario_mapping()["robot"][
+        "initial_joint_positions"
+    ]
     preview_request = yaml.safe_load(
         (gen.output_dir / "evidence/render_request.yaml").read_text(encoding="utf-8")
     )
@@ -72,12 +98,14 @@ def test_producer_scene_is_not_reinstanced_and_adapters_select_their_entrypoints
         "scene_overview": "producer_entrypoint_scene_inherited",
         "task_object_closeup": "producer_entrypoint_scene_inherited",
     }
-    assert preview_request["views"]["scene_overview"]["camera_reference_view"] == (
-        "workspace_closeup"
+    assert "camera_reference_view" not in preview_request["views"]["scene_overview"]
+    assert set(preview_request["expected_runtime_geometry"]) == {"beaker1", "beaker2"}
+    beaker2_support = preview_request["expected_runtime_geometry"]["beaker2"][
+        "support_frame_local_matrix"
+    ][3]
+    assert beaker2_support[:3] == pytest.approx(
+        [0.0, -0.0433441144549751, 0.0], abs=1e-10
     )
-    assert preview_request["views"]["scene_overview"][
-        "camera_distance_multiplier"
-    ] == 1.6
 
     vr = export_vr_teleop_package(
         package, tmp_path / "vr", task_id=SCENARIO_ID

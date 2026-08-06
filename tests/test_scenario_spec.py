@@ -221,6 +221,40 @@ def test_v07_supports_producer_entrypoint_scene_with_embedded_objects() -> None:
     assert list(Draft202012Validator(schema).iter_errors(data)) == []
 
 
+def test_v07_round_trips_optional_robot_initial_joint_positions() -> None:
+    data = _scenario_mapping()
+    data["schema_version"] = "scenario-spec/v0.7"
+    robot = data["robot"]
+    assert isinstance(robot, dict)
+    robot["initial_joint_positions"] = [0.0] * 12 + [0.044] * 4
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.robot.initial_joint_positions == (0.0,) * 12 + (0.044,) * 4
+    assert spec.to_mapping()["robot"]["initial_joint_positions"] == robot[
+        "initial_joint_positions"
+    ]
+    schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.7.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert list(Draft202012Validator(schema).iter_errors(data)) == []
+
+
+@pytest.mark.parametrize("bad", [[], [0.0, float("inf")]])
+def test_v07_rejects_invalid_robot_initial_joint_positions(bad: list[float]) -> None:
+    data = _scenario_mapping()
+    data["schema_version"] = "scenario-spec/v0.7"
+    robot = data["robot"]
+    assert isinstance(robot, dict)
+    robot["initial_joint_positions"] = bad
+
+    with pytest.raises(ValueError, match="initial_joint_positions"):
+        ScenarioSpec.from_mapping(data)
+
+
 def test_v07_embedded_object_must_belong_to_scene_asset() -> None:
     data = _scenario_mapping()
     data["schema_version"] = "scenario-spec/v0.7"

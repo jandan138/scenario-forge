@@ -172,6 +172,11 @@
       "properties": {
         "profile_ref": {"$ref": "#/$defs/nonEmptyString"},
         "spawn": {"$ref": "#/$defs/pose"},
+        "initial_joint_positions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "number"}
+        },
         "actors": {
           "type": "array",
           "minItems": 1,
@@ -411,4 +416,3 @@
     }
   }
 }
-

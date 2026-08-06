@@ -135,7 +135,7 @@ def test_source_bindings_v04_resolves_interactive_producer_package(tmp_path: Pat
                 "package_dir": package.relative_to(tmp_path).as_posix(),
                 "manifest_path": manifest.relative_to(tmp_path).as_posix(),
                 "producer_revision": "producer-r1",
-                "expected_package_id": "lab001_pbd_beaker_to_beaker_step600_v1",
+                "expected_package_id": "lab001_pbd_beaker_to_beaker_step600_v2",
                 "expected_entrypoints": ["native", "genmanip", "vr"],
                 "license": "CC-BY-NC-4.0",
                 "attribution": ["LabUtopia"],

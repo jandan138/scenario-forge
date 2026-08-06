@@ -48,6 +48,38 @@ def write_interactive_handoff(
             "target_container": f"{scenario_prim}/obj_beaker1",
             "support_table": f"{scenario_prim}/obj_table",
         }
+        embedded_object_states = {
+            "source_container": {
+                "prim_path": object_prims["source_container"],
+                "position_xyz_m": [0.295, 0.075, 0.8233382266115852],
+                "orientation_wxyz": [0.6532814824, 0.6532814824, 0.2705980501, 0.2705980501],
+                "local_scale_xyz": [1.0, 1.0, 1.0],
+                "world_aabb_m": {
+                    "min": [0.2564758473, 0.0364758581, 0.7799941122],
+                    "max": [0.3671289439, 0.1471289547, 0.8703945490],
+                },
+            },
+            "target_container": {
+                "prim_path": object_prims["target_container"],
+                "position_xyz_m": [0.255, -0.245, 0.8406758673476564],
+                "orientation_wxyz": [0.6532814824, 0.6532814824, 0.2705980501, 0.2705980501],
+                "local_scale_xyz": [1.0, 1.0, 1.0],
+                "world_aabb_m": {
+                    "min": [0.2010661907, -0.2989337942, 0.7799941122],
+                    "max": [0.3559805131, -0.1440194718, 0.9065547133],
+                },
+            },
+            "support_table": {
+                "prim_path": object_prims["support_table"],
+                "position_xyz_m": [0.2427880660, 0.0, 0.0],
+                "orientation_wxyz": [0.0, -1.0, 0.0, 0.0],
+                "local_scale_xyz": [0.006, 0.005, 0.004000000059604645],
+                "world_aabb_m": {
+                    "min": [-0.9239185074, -1.3322193410, -0.3997177640],
+                    "max": [1.4210249282, 1.3124908584, 0.7727606155],
+                },
+            },
+        }
         entrypoints[name] = {
             "path": f"{name}.usd{'a' if name == 'native' else 'c'}",
             "sha256": _digest(package / f"{name}.usd{'a' if name == 'native' else 'c'}"),
@@ -57,12 +89,13 @@ def write_interactive_handoff(
             "hidden_cube_overlay_applied": True,
             "physics_scene_prim": "/World/PhysicsScene" if name == "native" else "/physicsScene",
             "object_prims": object_prims,
+            "embedded_object_states": embedded_object_states,
             "particle_prims": {"particles": "/World/task/Particles"},
             "scenario_prim": scenario_prim,
         }
     manifest = {
-        "schema_version": "labutopia.interactive_scene_handoff/v0.1",
-        "package_id": "lab001_pbd_beaker_to_beaker_step600_v1",
+        "schema_version": "labutopia.interactive_scene_handoff/v0.2",
+        "package_id": "lab001_pbd_beaker_to_beaker_step600_v2",
         "producer": "LabUtopia",
         "producer_revision": "producer-r1",
         "source_revision": "source-r1",
@@ -99,7 +132,7 @@ def test_loader_accepts_hash_bound_qualified_three_endpoint_handoff(tmp_path: Pa
         package,
         manifest,
         producer_revision="producer-r1",
-        expected_package_id="lab001_pbd_beaker_to_beaker_step600_v1",
+        expected_package_id="lab001_pbd_beaker_to_beaker_step600_v2",
         expected_entrypoints=("native", "genmanip", "vr"),
     )
 
@@ -113,7 +146,9 @@ def test_loader_accepts_hash_bound_qualified_three_endpoint_handoff(tmp_path: Pa
     assert source.upstream_package.metadata["entrypoints"]["genmanip"]["physics_hz"] == 600
 
 
-@pytest.mark.parametrize("mutation", ["tamper", "blocked", "rate", "overlay"])
+@pytest.mark.parametrize(
+    "mutation", ["tamper", "blocked", "rate", "overlay", "embedded_state"]
+)
 def test_loader_rejects_unqualified_or_mutated_handoff(tmp_path: Path, mutation: str) -> None:
     package, manifest_path = write_interactive_handoff(tmp_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -123,8 +158,12 @@ def test_loader_rejects_unqualified_or_mutated_handoff(tmp_path: Path, mutation:
         manifest["entrypoints"]["vr"]["status"] = "blocked"
     elif mutation == "rate":
         manifest["entrypoints"]["genmanip"]["physics_hz"] = 60
-    else:
+    elif mutation == "overlay":
         manifest["entrypoints"]["native"]["hidden_cube_overlay_applied"] = False
+    else:
+        del manifest["entrypoints"]["genmanip"]["embedded_object_states"][
+            "support_table"
+        ]
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
     with pytest.raises(LabUtopiaInteractiveSceneHandoffError):
@@ -132,6 +171,6 @@ def test_loader_rejects_unqualified_or_mutated_handoff(tmp_path: Path, mutation:
             package,
             manifest_path,
             producer_revision="producer-r1",
-            expected_package_id="lab001_pbd_beaker_to_beaker_step600_v1",
+            expected_package_id="lab001_pbd_beaker_to_beaker_step600_v2",
             expected_entrypoints=("native", "genmanip", "vr"),
         )

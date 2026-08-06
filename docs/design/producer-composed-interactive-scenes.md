@@ -14,13 +14,20 @@ composition.
   already exist in that entrypoint. The compiler and adapters must not re-instance
   them or author pose, collider, rigid-body, mass or material overrides.
 - The embedded object's `asset_id` must equal `scene.asset_id`.
+- `robot.initial_joint_positions` optionally carries a finite, non-empty reset
+  vector. Robot-specific adapters own DOF-count validation; the Lift2 GenManip
+  adapter requires 16 values. Omitting it preserves the adapter's legacy
+  default.
 
 The source binding remains outside the portable scenario recipe.
 `scenario-source-bindings/v0.4` adds `producer_package` with usage
 `interactive_composed_scene`. The current adapter admits a hash-bound LabUtopia
 handoff only when native, GenManip and VR entrypoints are independently qualified,
 the required hidden-cube overlay is applied, the closure is intact and the
-license remains non-redistributable.
+license remains non-redistributable. Handoff v0.2 additionally requires every
+entrypoint to bind each embedded object's prim path, composed pose, local scale
+and world AABB. Those states are reset authority: target adapters must use them
+instead of inventing identity transforms from missing consumer metadata.
 
 This does not turn Scenario Forge into a simulator or asset converter. The pure
 package layer copies the admitted closure and records provenance. Target adapters

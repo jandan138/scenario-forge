@@ -304,12 +304,6 @@ def write_genmanip_preview_request(
             view_name,
             producer_entrypoint_owned=producer_entrypoint_owned,
         )
-    if producer_entrypoint_owned:
-        # A producer-composed scene can carry distant utility geometry below its
-        # support-table prim.  Reuse the workcell camera instead of fitting the
-        # overview to that non-task geometry.
-        views["scene_overview"]["camera_reference_view"] = "workspace_closeup"
-        views["scene_overview"]["camera_distance_multiplier"] = 1.6
     if full_environment:
         common_room = {
             "resolution": [width, height],
@@ -708,6 +702,7 @@ def _expected_runtime_geometry(
     if not isinstance(raw_assets, list):
         raise GenManipPreviewError("package manifest source_assets must be a list")
     geometry_sources: list[tuple[str, Mapping[str, Any]]] = []
+    embedded_state_sources: dict[str, tuple[str, Mapping[str, Any], str]] = {}
     for index, raw_asset in enumerate(raw_assets):
         asset = _as_mapping(raw_asset, f"package source_assets[{index}]")
         upstream = asset.get("upstream_package")
@@ -716,6 +711,35 @@ def _expected_runtime_geometry(
         metadata = upstream.get("metadata")
         if not isinstance(metadata, Mapping):
             continue
+        if upstream.get("producer") == "LabUtopia":
+            entrypoints = metadata.get("entrypoints")
+            if isinstance(entrypoints, Mapping):
+                genmanip = entrypoints.get("genmanip")
+                if isinstance(genmanip, Mapping):
+                    states = genmanip.get("embedded_object_states")
+                    if isinstance(states, Mapping):
+                        digest = str(upstream.get("manifest_sha256", ""))
+                        digest = digest.removeprefix("sha256:")
+                        asset_id = _required_string(
+                            asset,
+                            "asset_id",
+                            f"package source_assets[{index}]",
+                        )
+                        for raw_state in states.values():
+                            state = _as_mapping(
+                                raw_state,
+                                f"package source_assets[{index}] embedded state",
+                            )
+                            prim_path = _required_string(
+                                state,
+                                "prim_path",
+                                f"package source_assets[{index}] embedded state",
+                            )
+                            embedded_state_sources[prim_path] = (
+                                asset_id,
+                                state,
+                                digest,
+                            )
         geometry = metadata.get("task_interactive_geometry")
         if geometry is None:
             continue
@@ -760,6 +784,52 @@ def _expected_runtime_geometry(
             "source_prim_path",
             f"runtime object {runtime_id}",
         )
+        embedded = embedded_state_sources.get(source_prim)
+        if embedded is not None:
+            asset_id, state, digest = embedded
+            bound = _required_mapping(
+                state,
+                "world_aabb_m",
+                f"runtime object {runtime_id} embedded state",
+            )
+            lower, upper, extent = _world_bound(
+                bound, f"runtime object {runtime_id} embedded state"
+            )
+            position = _number_vector(
+                state.get("position_xyz_m"),
+                f"runtime object {runtime_id} embedded state position",
+            )
+            orientation = _quaternion(
+                state.get("orientation_wxyz"),
+                f"runtime object {runtime_id} embedded state orientation",
+            )
+            support_local = _inverse_rotate_vector_wxyz(
+                orientation,
+                (0.0, 0.0, lower[2] - position[2]),
+            )
+            result[runtime_id] = {
+                "schema_version": "labutopia-embedded-object-state/v0.1",
+                "runtime_id": runtime_id,
+                "asset_id": asset_id,
+                "asset_entry_prim": source_prim,
+                "package_world_bound_m": {
+                    "min": list(lower),
+                    "max": list(upper),
+                },
+                "extent_m": list(extent),
+                "max_extent_relative_error": _MAX_EXTENT_RELATIVE_ERROR,
+                "support_frame": "world_aabb_bottom",
+                "support_frame_local_matrix": [
+                    [1.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0, 0.0],
+                    [*support_local, 1.0],
+                ],
+                "support_frame_source_sha256": digest,
+                "max_root_tilt_deg": _MAX_ROOT_TILT_DEG,
+                "max_support_gap_m": _TABLETOP_SUPPORT_TOLERANCE_M,
+            }
+            continue
         matches = [
             (asset_id, geometry)
             for asset_id, geometry in geometry_sources
@@ -881,6 +951,15 @@ def _expected_runtime_geometry(
                 "post_warmup": list(final_extent),
             }
     return result
+
+
+def _inverse_rotate_vector_wxyz(
+    quaternion: tuple[float, float, float, float],
+    vector: tuple[float, float, float],
+) -> tuple[float, float, float]:
+    """Express a world vector in a unit-quaternion local frame."""
+    w, x, y, z = quaternion
+    return _rotate_wxyz(vector, (w, -x, -y, -z))
 
 
 def _validate_runtime_geometry(

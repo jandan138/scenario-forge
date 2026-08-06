@@ -17,17 +17,73 @@ from scenario_forge.generation.package_compiler import compile_scenario_package
 
 SCENARIO_ID = "experimental_lab001_pbd_beaker_to_beaker_pour"
 ASSET_ID = "lab001_pbd_beaker_to_beaker_step600"
-PACKAGE_ID = "lab001_pbd_beaker_to_beaker_step600_v1"
+PACKAGE_ID = "lab001_pbd_beaker_to_beaker_step600_v2"
+
+_DEFAULT_EMBEDDED_STATES: dict[str, dict[str, Any]] = {
+    "support_table": {
+        "position_xyz_m": [0.24278806604031, 0.0, 0.0],
+        "orientation_wxyz": [0.0, -1.0, 0.0, 0.0],
+        "local_scale_xyz": [0.006, 0.005, 0.004000000059604645],
+    },
+    "source_container": {
+        "position_xyz_m": [0.295, 0.075, 0.8233382266115852],
+        "orientation_wxyz": [
+            0.6532814824381884,
+            0.6532814824381882,
+            0.2705980500730985,
+            0.27059805007309856,
+        ],
+        "local_scale_xyz": [1.0, 1.0, 1.0],
+    },
+    "target_container": {
+        "position_xyz_m": [0.255, -0.245, 0.8406758673476564],
+        "orientation_wxyz": [
+            0.6532814824381884,
+            0.6532814824381882,
+            0.2705980500730985,
+            0.27059805007309856,
+        ],
+        "local_scale_xyz": [1.0, 1.0, 1.0],
+    },
+}
+
+# Lift2 order is left arm(6), left gripper(2), right arm(6), right gripper(2).
+# These CuRobo solutions place the left tool above the filled source and park
+# the right tool away from both vessels. They are task initialization, not a
+# successful grasp or policy claim.
+LIFT2_INITIAL_JOINT_POSITIONS = [
+    -1.0030521154403687,
+    0.9941719174385071,
+    0.7586961984634399,
+    0.23549744486808777,
+    -1.0030428171157837,
+    1.1397801245038863e-05,
+    0.044,
+    0.044,
+    -1.2234256267547607,
+    1.0433391332626343,
+    0.7014200091362,
+    0.3419278860092163,
+    -1.2234159708023071,
+    3.900537649315083e-06,
+    0.044,
+    0.044,
+]
 
 
-def scenario_mapping() -> dict[str, Any]:
+def scenario_mapping(
+    embedded_object_states: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     prefix = "/World/_scene"
-    cup_orientation = [
-        0.6532814824381882,
-        0.6532814824381882,
-        0.2705980500730985,
-        0.2705980500730985,
-    ]
+    states = embedded_object_states or _DEFAULT_EMBEDDED_STATES
+
+    def pose(role: str) -> dict[str, list[float]]:
+        state = states[role]
+        return {
+            "xyz": list(state["position_xyz_m"]),
+            "wxyz": list(state["orientation_wxyz"]),
+            "scale_xyz": list(state["local_scale_xyz"]),
+        }
     return {
         "schema_version": "scenario-spec/v0.7",
         "scenario_id": SCENARIO_ID,
@@ -50,7 +106,7 @@ def scenario_mapping() -> dict[str, Any]:
                 "source_prim_path": f"{prefix}/obj_table",
                 "role": "table",
                 "instance_mode": "embedded_scene_prim",
-                "pose": {"xyz": [0.0, 0.0, 0.0], "wxyz": [1.0, 0.0, 0.0, 0.0]},
+                "pose": pose("support_table"),
             },
             {
                 "id": "beaker2",
@@ -58,10 +114,7 @@ def scenario_mapping() -> dict[str, Any]:
                 "source_prim_path": f"{prefix}/obj_beaker2",
                 "role": "source_container",
                 "instance_mode": "embedded_scene_prim",
-                "pose": {
-                    "xyz": [0.295, 0.075, 0.8233382266115852],
-                    "wxyz": cup_orientation,
-                },
+                "pose": pose("source_container"),
                 "named_frames": {
                     "opening": {
                         "xyz": [0.0237621889, -0.0433440953, 0.0904004],
@@ -75,10 +128,7 @@ def scenario_mapping() -> dict[str, Any]:
                 "source_prim_path": f"{prefix}/obj_beaker1",
                 "role": "target_container",
                 "instance_mode": "embedded_scene_prim",
-                "pose": {
-                    "xyz": [0.255, -0.245, 0.8406758673476564],
-                    "wxyz": cup_orientation,
-                },
+                "pose": pose("target_container"),
                 "named_frames": {
                     "opening": {
                         "xyz": [0.0237621889, -0.0433440953, 0.1265606],
@@ -90,6 +140,7 @@ def scenario_mapping() -> dict[str, Any]:
         "robot": {
             "profile_ref": "manip/lift2/R5a_isaac41_vr600_v1",
             "spawn": {"xyz": [0.0, 0.0, 0.0], "wxyz": [1.0, 0.0, 0.0, 0.0]},
+            "initial_joint_positions": LIFT2_INITIAL_JOINT_POSITIONS,
             "actors": [
                 {
                     "id": "operating_arm",
@@ -172,7 +223,19 @@ def generate(*, handoff_package: Path, output: Path) -> None:
         asset_id=ASSET_ID,
         attribution=("LabUtopia interactive PBD scene",),
     )
-    compile_scenario_package(ScenarioSpec.from_mapping(scenario_mapping()), {ASSET_ID: source}, output)
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(
+            scenario_mapping(
+                dict(
+                    handoff.manifest["entrypoints"]["genmanip"][
+                        "embedded_object_states"
+                    ]
+                )
+            )
+        ),
+        {ASSET_ID: source},
+        output,
+    )
     export_genmanip_collected_package(output)
     export_vr_teleop_package(output, output / "adapters/vr", task_id=SCENARIO_ID)
 

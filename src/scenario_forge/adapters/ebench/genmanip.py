@@ -374,6 +374,7 @@ def export_genmanip_collected_package(
         table=table,
         qualified_object_ids=qualified_object_ids,
         articulation_bindings=articulation_bindings,
+        producer_entrypoint=producer_entrypoint,
     )
     complete_runtime_contract = (
         runtime_contract if legacy_v01_transport else None
@@ -393,6 +394,7 @@ def export_genmanip_collected_package(
         complete_runtime_contract=complete_runtime_contract,
         qualified_object_ids=qualified_object_ids,
         articulation_bindings=articulation_bindings,
+        producer_entrypoint=producer_entrypoint,
     )
 
     output_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -812,6 +814,7 @@ def _episode_metadata(
     complete_runtime_contract: Mapping[str, Any] | None,
     qualified_object_ids: set[str],
     articulation_bindings: Mapping[str, _ArticulationObjectBinding],
+    producer_entrypoint: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     initial_layout: dict[str, Any] = {}
     table_id = _required_string(table, "id", "table object")
@@ -825,13 +828,36 @@ def _episode_metadata(
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
         asset = assets_by_id[asset_id]
         pose = _required_mapping(item, "pose", f"scenario object {object_id}")
+        embedded_state = (
+            None
+            if producer_entrypoint is None
+            else _embedded_object_state(producer_entrypoint, item)
+        )
         base_layout = {
-            "position": _number_list(pose.get("xyz"), 3, f"{object_id}.pose.xyz"),
+            "position": _number_list(
+                (
+                    pose.get("xyz")
+                    if embedded_state is None
+                    else embedded_state.get("position_xyz_m")
+                ),
+                3,
+                f"{object_id}.pose.xyz",
+            ),
             "orientation": _number_list(
-                pose.get("wxyz"), 4, f"{object_id}.pose.wxyz"
+                (
+                    pose.get("wxyz")
+                    if embedded_state is None
+                    else embedded_state.get("orientation_wxyz")
+                ),
+                4,
+                f"{object_id}.pose.wxyz",
             ),
             "scale": _number_list(
-                pose.get("scale_xyz", [1.0, 1.0, 1.0]),
+                (
+                    pose.get("scale_xyz", [1.0, 1.0, 1.0])
+                    if embedded_state is None
+                    else embedded_state.get("local_scale_xyz")
+                ),
                 3,
                 f"{object_id}.pose.scale_xyz",
             ),
@@ -873,7 +899,7 @@ def _episode_metadata(
         "orientation": _number_list(
             spawn.get("wxyz"), 4, "scenario robot spawn.wxyz"
         ),
-        "joint_positions": _lift2_default_joint_positions(),
+        "joint_positions": _lift2_initial_joint_positions(robot),
     }
     task_data = {
         "instruction": _required_string(scenario, "instruction", "scenario spec"),
@@ -927,6 +953,7 @@ def _runtime_contract(
     table: Mapping[str, Any],
     qualified_object_ids: set[str],
     articulation_bindings: Mapping[str, _ArticulationObjectBinding],
+    producer_entrypoint: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     table_id = _required_string(table, "id", "table object")
     contract_objects: list[dict[str, Any]] = []
@@ -979,6 +1006,18 @@ def _runtime_contract(
             available_frames.add(f"{object_id}.{raw_frame_id}")
 
         pose = _required_mapping(item, "pose", f"scenario object {object_id}")
+        embedded_state = (
+            None
+            if producer_entrypoint is None
+            else _embedded_object_state(producer_entrypoint, item)
+        )
+        initial_pose_source: Mapping[str, Any] = pose
+        if embedded_state is not None:
+            initial_pose_source = {
+                "xyz": embedded_state.get("position_xyz_m"),
+                "wxyz": embedded_state.get("orientation_wxyz"),
+                "scale_xyz": embedded_state.get("local_scale_xyz"),
+            }
         contract_object = {
                 "scenario_object_id": object_id,
                 "role": _required_string(item, "role", f"scenario object {object_id}"),
@@ -989,7 +1028,7 @@ def _runtime_contract(
                 ),
                 "runtime_uid": binding.runtime_uid,
                 "state_prim_path": binding.state_prim_path,
-                "initial_pose": _runtime_initial_pose(pose, object_id),
+                "initial_pose": _runtime_initial_pose(initial_pose_source, object_id),
                 "named_frames": named_frames,
             }
         if object_id in qualified_object_ids:
@@ -2368,7 +2407,60 @@ def _interactive_producer_entrypoint(
         raise GenManipExportError(f"interactive scene {target} entrypoint is not qualified")
     if entrypoint.get("hidden_cube_overlay_applied") is not True:
         raise GenManipExportError(f"interactive scene {target} overlay is not applied")
+    object_prims = _required_mapping(
+        entrypoint, "object_prims", f"interactive scene {target} entrypoint"
+    )
+    states = _required_mapping(
+        entrypoint,
+        "embedded_object_states",
+        f"interactive scene {target} entrypoint",
+    )
+    required_roles = {"support_table", "source_container", "target_container"}
+    if set(object_prims) != required_roles or set(states) != required_roles:
+        raise GenManipExportError(
+            f"interactive scene {target} embedded role set mismatch"
+        )
+    for role in required_roles:
+        state = _as_mapping(
+            states[role], f"interactive scene {target} state {role}"
+        )
+        if state.get("prim_path") != object_prims[role]:
+            raise GenManipExportError(
+                f"interactive scene {target} embedded state path mismatch for {role}"
+            )
+        _finite_number_list(state.get("position_xyz_m"), 3, f"{role}.position")
+        _finite_number_list(state.get("orientation_wxyz"), 4, f"{role}.orientation")
+        scale = _finite_number_list(state.get("local_scale_xyz"), 3, f"{role}.scale")
+        if any(value <= 0.0 for value in scale):
+            raise GenManipExportError(f"interactive scene {target} state scale is invalid")
     return entrypoint
+
+
+def _embedded_object_state(
+    entrypoint: Mapping[str, Any], item: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    object_id = _required_string(item, "id", "scenario object")
+    role = {
+        "table": "support_table",
+        "source_container": "source_container",
+        "target_container": "target_container",
+    }.get(_required_string(item, "role", f"scenario object {object_id}"))
+    if role is None:
+        raise GenManipExportError(
+            f"producer entrypoint has no embedded role for {object_id}"
+        )
+    states = _required_mapping(
+        entrypoint, "embedded_object_states", "producer entrypoint"
+    )
+    state = _as_mapping(states.get(role), f"producer state {role}")
+    source_path = _required_string(
+        item, "source_prim_path", f"scenario object {object_id}"
+    )
+    if state.get("prim_path") != source_path:
+        raise GenManipExportError(
+            f"producer embedded state path mismatch for {object_id}"
+        )
+    return state
 
 
 def _producer_entrypoint_reference(
@@ -2565,6 +2657,13 @@ def _action_contract() -> dict[str, Any]:
 def _lift2_default_joint_positions() -> list[float]:
     single_arm = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.044, 0.044]
     return single_arm + single_arm
+
+
+def _lift2_initial_joint_positions(robot: Mapping[str, Any]) -> list[float]:
+    raw = robot.get("initial_joint_positions")
+    if raw is None:
+        return _lift2_default_joint_positions()
+    return _finite_number_list(raw, 16, "scenario robot.initial_joint_positions")
 
 
 def _episode_name(value: object) -> str:
