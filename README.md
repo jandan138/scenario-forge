@@ -107,7 +107,8 @@ Scientific-workbench bimanual-pour example:
 python scripts/generate_scientific_workbench_bimanual_pour.py \
   --scene1-source-usd /path/to/hard_task/Scene1_hard.usd \
   --table-source-usd /path/to/lab_001.usd \
-  --vessel-source-usd /path/to/lab_001.usd \
+  --source-vessel-source-usd /path/to/conical_bottle_identity/facade.usda \
+  --target-vessel-source-usd /path/to/graduated_cylinder_identity/facade.usda \
   --scene1-environment-package /path/to/scene1_environment/package \
   --scene1-environment-manifest /path/to/scene1_environment/manifest.json \
   --table-package /path/to/ebench_table/package \
@@ -124,6 +125,21 @@ python scripts/generate_scientific_workbench_bimanual_pour.py \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$GENMANIP_ROOT"
 ```
+
+New canonical builds require a ConvertAsset `static_support` table. The eBench
+adapter explicitly disables GenManip collider authoring and consumes the qualified
+package collider. Export the same recipe for VR collection with:
+
+```bash
+PYTHONPATH=src python scripts/export_vr_teleop_package.py \
+  outputs/scientific_workbench_bimanual_pour_static_support_v1_20260806 \
+  --out outputs/scientific_workbench_bimanual_pour_vr_r2_20260806
+```
+
+The VR directory is relocatable and contains `scene.usd`, `task_config.py`, its
+relative `deps/` closure, and a parity manifest. The two adapters share the same
+Isaac/PhysX and robot-contact profile; the declared exception is robot joint
+initialization because the current VR config contract has no joint-position field.
 
 For a static build, the same portable compiler is available for any ScenarioSpec
 through a separate local source-binding file:

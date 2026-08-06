@@ -40,6 +40,7 @@ def _write_source_bound_handoff(
     interaction_root: str = "/World/DryingBox_03",
     interaction_profile_schema_version: str = "aan.object_interaction_profile.v1",
     entry_world_transform: list[list[float]] | None = None,
+    identity_facade_frames: bool = False,
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     if source_usd is None:
         source_usd = root / "source" / "lab_001.usd"
@@ -69,12 +70,20 @@ def Xform "World" {}
     )
     opening_pose = {
         "conical_bottle03": (
-            [0.0, 0.1965674179, 0.0],
-            [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+            [0.0, 0.0, 0.1965674179]
+            if identity_facade_frames
+            else [0.0, 0.1965674179, 0.0],
+            [1.0, 0.0, 0.0, 0.0]
+            if identity_facade_frames
+            else [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
         ),
         "graduated_cylinder_03": (
-            [0.0, 0.2722941904, 0.0],
-            [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+            [0.0, 0.0, 0.2722941904]
+            if identity_facade_frames
+            else [0.0, 0.2722941904, 0.0],
+            [1.0, 0.0, 0.0, 0.0]
+            if identity_facade_frames
+            else [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
         ),
     }.get(interaction_root_name, ([0.0, 0.0, 0.2], [1.0, 0.0, 0.0, 0.0]))
 
@@ -650,6 +659,160 @@ def Xform "World"
     manifest_path = root / "visual_static_manifest.json"
     embedded_manifest = package_dir / "evidence" / "manifest.json"
     embedded_manifest.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    manifest_path.write_text(payload, encoding="utf-8")
+    embedded_manifest.write_text(payload, encoding="utf-8")
+    return source_usd, package_dir, manifest_path, manifest
+
+
+def _write_static_support_handoff(
+    root: Path,
+) -> tuple[Path, Path, Path, dict[str, object]]:
+    """Write a minimal source-bound static-support consumer handoff."""
+    source_usd = root / "source" / "lab_001.usd"
+    source_usd.parent.mkdir(parents=True)
+    source_usd.write_text(
+        '#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n'
+        '    upAxis = "Z"\n)\n'
+        'def Xform "World"\n{\n    def Xform "table"\n    {\n    }\n}\n',
+        encoding="utf-8",
+    )
+    source_sha = _digest(source_usd)
+    package_dir = root / "static_support_package"
+    profile = package_dir / "static_support" / "profile.json"
+    profile.parent.mkdir(parents=True)
+    profile.write_text(
+        json.dumps({"schema_version": "aan.static_support_profile.v1"}) + "\n",
+        encoding="utf-8",
+    )
+    overlay = package_dir / "overlays" / "static_support.usda"
+    overlay.parent.mkdir(parents=True)
+    overlay.write_text('#usda 1.0\nover "World" { over "table" {} }\n', encoding="utf-8")
+    root_usd = package_dir / "asset.usd"
+    root_usd.write_text(
+        '#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n'
+        '    upAxis = "Z"\n    subLayers = [@overlays/static_support.usda@]\n)\n'
+        'def Xform "World"\n{\n    def Xform "table"\n    {\n    }\n}\n',
+        encoding="utf-8",
+    )
+    root_sha = _digest(root_usd)
+    qualification = {
+        "schema_version": "aan.static_support_runtime_qualification.v1",
+        "status": "pass",
+        "probe_count": 6,
+        "probe_results": [
+            {"probe": name, "status": "pass"}
+            for name in (
+                "center_drop",
+                "north_edge_drop",
+                "south_edge_drop",
+                "east_edge_drop",
+                "west_edge_drop",
+                "side_impact",
+            )
+        ],
+    }
+    qualification_path = (
+        package_dir / "evidence" / "static_support" / "runtime_qualification.json"
+    )
+    qualification_path.parent.mkdir(parents=True)
+    qualification_path.write_text(
+        json.dumps(qualification, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    scope = "/World/table"
+    required_probes = [item["probe"] for item in qualification["probe_results"]]
+    contract = {
+        "schema_version": "aan.static_support_contract.v1",
+        "status": "pass",
+        "profile_id": "tests.table.static-support",
+        "profile_revision": "r1",
+        "asset_entry_prim": scope,
+        "collider_policy": "prefer_source_then_proxy",
+        "collider_selection": "preserved_source",
+        "colliders": [
+            {
+                "prim_path": "/World/table/surface/mesh",
+                "collision_enabled": True,
+                "source": "qualified_source",
+            }
+        ],
+        "support_surface": {
+            "top_z": 0.8,
+            "x_range": [-1.0, 1.0],
+            "y_range": [-0.6, 0.6],
+            "edge_band_m": 0.05,
+        },
+        "physics_material": {
+            "prim_path": "/World/table/__aan_static_support_material",
+            "static_friction": 0.5,
+            "dynamic_friction": 0.5,
+            "restitution": 0.0,
+            "friction_combine_mode": "max",
+            "restitution_combine_mode": "multiply",
+            "calibration_status": "provisional_unmeasured",
+        },
+        "profile": {
+            "package_path": "static_support/profile.json",
+            "sha256": _digest(profile),
+            "source_usd_sha256": source_sha,
+        },
+        "overlay_path": "overlays/static_support.usda",
+        "qualification": {
+            "status": "pass",
+            "schema_version": "aan.static_support_runtime_qualification.v1",
+            "report_path": "evidence/static_support/runtime_qualification.json",
+            "report_sha256": _digest(qualification_path),
+            "probe_count": 6,
+            "required_probes": required_probes,
+        },
+    }
+    frame = {
+        "status": "pass",
+        "source": {"meters_per_unit": 1.0, "kilograms_per_unit": 1.0, "up_axis": "Z", "time_codes_per_second": 60.0, "frames_per_second": 24.0},
+        "package": {"meters_per_unit": 1.0, "kilograms_per_unit": 1.0, "up_axis": "Z", "time_codes_per_second": 60.0, "frames_per_second": 24.0},
+        "metric_mismatches": [],
+        "scope_bounds": [{"path": scope, "source_world_bound_m": {"min": [-1, -0.6, 0], "max": [1, 0.6, 0.8]}, "package_world_bound_m": {"min": [-1, -0.6, 0], "max": [1, 0.6, 0.8]}, "status": "pass"}],
+        "blocked_scope_prims": [],
+    }
+    manifest: dict[str, object] = {
+        "schema_version": "asset_application_normalizer.v1",
+        "package_id": "lab001_table_static_support",
+        "asset_id": "Lab001Table",
+        "asset_role": "static_support",
+        "overall_status": "pass",
+        "source": {"path": str(source_usd), "sha256": source_sha},
+        "target": {"target_runtime_profile": "isaac41", "target_benchmark_profile": "scenario-forge"},
+        "entrypoints": {"root_usd": "asset.usd", "default_prim": "World", "asset_entry_prim": scope, "asset_scope_prims": [scope], "consumer_profile": "scenario-forge"},
+        "asset_scope_prim_paths": [scope],
+        "source_integrity": {"sha256_before": source_sha, "sha256_after": source_sha, "unchanged": True},
+        "dependency_closure": {"scope_extraction": {"status": "pass", "retained_subtree_prims": [scope], "retained_material_prims": [], "preserved_stage_metadata": {"meters_per_unit": 1.0, "up_axis": "Z"}}},
+        "physics_closure": {
+            "status": "pass",
+            "role": "static_support",
+            "scope": {"mode": "asset_scope_prims", "asset_scope_prims": [scope]},
+            "physical_frame": frame,
+            "static_support_contract": {
+                **contract,
+                "qualification": {
+                    "status": "pending_runtime",
+                    "required_probes": required_probes,
+                },
+            },
+        },
+        "output_role_admission": {"status": "pass", "role": "static_support", "declared_colliders": ["/World/table/surface/mesh"], "observed_active_colliders": ["/World/table/surface/mesh"], "zero_dynamic_semantics": True},
+        "static_support_contract": contract,
+        "support_audit": {
+            "overall_status": "not_requested",
+            "blocked_reasons": [],
+            "support_closure": {},
+        },
+        "visual_preservation_fingerprint": {"status": "pass"},
+        "runtime_evidence": {"status": "pass", "runtime_profile": "isaac41", "expected_root_usd_sha256": root_sha, "root_usd_sha256": root_sha, "cold_load": {"status": "pass"}, "render_readback": {"status": "pass"}, "physics_step": {"status": "pass"}, "reset": {"status": "pass"}, "static_support_qualification": qualification, "physics_warning_gate": {"status": "pass", "scope_prims": [scope], "scope_validation": {"status": "pass", "scope_prims": [scope], "errors": []}, "binding_validation": {"status": "pass", "mapping_kind": "identity", "errors": []}, "summary": {"scoped_event_count": 0, "out_of_scope_event_count": 0, "unattributed_event_count": 0}}},
+        "claims_forbidden": ["Measured contact parameters are verified."],
+    }
+    manifest_path = root / "static_support_manifest.json"
+    embedded_manifest = package_dir / "evidence" / "manifest.json"
     payload = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     manifest_path.write_text(payload, encoding="utf-8")
     embedded_manifest.write_text(payload, encoding="utf-8")
@@ -1248,6 +1411,36 @@ def test_visual_static_handoff_maps_to_nonphysical_scene_sources(
     assert source.upstream_package is not None
     assert source.upstream_package.metadata["producer_asset_role"] == "visual_static"
     assert source.upstream_package.metadata["consumer_usage"] == usage
+
+
+def test_static_support_handoff_maps_qualified_table_contract(tmp_path: Path) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_static_support_handoff(tmp_path)
+
+    handoff = load_convert_asset_package_handoff(
+        package_dir,
+        manifest_path,
+        source_usd,
+        expected_scope_prims=("/World/table",),
+        producer_revision="static-support-r1",
+        usage="static_support_object",
+    )
+    source = handoff.to_local_usd_asset_source(
+        asset_id="scientific_workbench_ebench_table",
+        license="CC-BY-NC-4.0",
+    )
+
+    assert handoff.producer_asset_role == "static_support"
+    assert handoff.static_support_contract is not None
+    assert handoff.static_support_contract.collider_prims == (
+        "/World/table/surface/mesh",
+    )
+    assert handoff.static_support_contract.qualification_report_path == (
+        "evidence/static_support/runtime_qualification.json"
+    )
+    assert source.role == "static_support_object"
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["consumer_usage"] == "static_support_object"
+    assert source.upstream_package.metadata["static_support_contract"]["status"] == "pass"
 
 
 def test_visual_static_environment_producer_role_is_accepted(

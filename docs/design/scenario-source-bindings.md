@@ -1,10 +1,11 @@
 # Scenario Source Bindings
 
-`scenario-source-bindings/v0.2` is the current local build-input contract between a
+`scenario-source-bindings/v0.3` is the current local build-input contract between a
 portable `ScenarioSpec` and the USD closures used to compile it. It keeps machine
 paths and ConvertAsset delivery locations out of `scenario.yaml` while preserving
-the asset IDs used by the scenario. The resolver continues to accept v0.1 files;
-their ConvertAsset bindings retain the historical `scene_overlay` meaning.
+the asset IDs used by the scenario. The resolver continues to accept v0.1 and v0.2
+files; their ConvertAsset bindings retain the historical meanings and cannot opt
+into the v0.3 static-support contract.
 
 The dependency flow is:
 
@@ -48,10 +49,11 @@ bindings:
 ```
 
 `convert_asset_package` validates an existing source-bound ConvertAsset delivery
-through the existing inbound adapter. In v0.2 its `usage` explicitly selects the
+through the existing inbound adapter. Its `usage` explicitly selects the
 neutral role instead of inferring one. The available values are `scene_overlay`,
 `rigid_object`, `articulated_object`, `visual_static_environment`, and
-`visual_static_object`.
+`visual_static_object`. Version v0.3 additionally admits
+`static_support_object`.
 
 The two `visual_static_*` values require a ConvertAsset `asset_role:
 visual_static` manifest. Scenario Forge verifies the exact source and scope hashes,
@@ -61,16 +63,25 @@ collision, joint, or articulation residue. They map respectively to
 the neutral `environment` and `static_object` roles; neither may be used to smuggle
 asset-specific physics into a package.
 
-The current EBench/GenManip adapter accepts a `static_object` only for the scenario's
-declared table. It leaves that table out of the initial scene and supplies a thin
-runtime composition entry in the collected package, allowing GenManip recovery to
-use its existing static-table support policy (`add_colliders: true`,
-`add_rigid_body: false`). The entry preserves the producer package and complete
-material scope while neutralizing only the source scope's composed transform order;
-it does not add asset physics. A non-table visual-static object is rejected before
-export rather than falling through to GenManip's generic rigid-object defaults.
-Supporting visual-static fixtures later requires an explicit adapter policy, not a
-per-asset exception.
+A `static_support_object` must instead come from a ConvertAsset `asset_role:
+static_support` package. Scenario Forge verifies its source-bound identity, entry
+scope, collision ownership, physical-material values, support surface, edge
+geometry, and the six required runtime probes (centre drop, four edge drops, and a
+side impact). The accepted v0.1 support policy uses the source collider when one is
+already suitable, otherwise a package-owned proxy; it never delegates collider
+creation to the consumer. The current table material defaults are static/dynamic
+friction `0.5`, restitution `0.0`, friction combine `max`, and restitution combine
+`multiply`.
+These values are explicitly `provisional_unmeasured`; replacing them later means
+publishing a new ConvertAsset profile/package, not patching a task consumer.
+
+The EBench/GenManip adapter accepts a `static_object` or `static_support` only for
+the scenario's declared table. For v0.3 static support, its episode layout points
+at a thin runtime composition entry and explicitly sets `add_colliders: false` and
+`add_rigid_body: false`; the producer package remains the only owner of support
+physics. The historical v0.2 visual-static table path remains readable and retains
+its old GenManip-generated support collider for compatibility, but new canonical
+packages must not use it. A non-table static object is rejected before export.
 
 ```yaml
   scientific_workbench_scene1_hard_environment:
@@ -89,7 +100,7 @@ per-asset exception.
 
   scientific_workbench_ebench_table:
     resolver: convert_asset_package
-    usage: visual_static_object
+    usage: static_support_object
     source_usd: ./lab_001.usd
     package_dir: ./ebench_table/package
     manifest_path: ./ebench_table/manifest.json
@@ -97,7 +108,7 @@ per-asset exception.
     expected_scope_prims: [/World/table]
     license: CC-BY-NC-4.0
     attribution:
-      - EBench-compatible task table normalized by ConvertAsset
+      - EBench-compatible static support table qualified by ConvertAsset
     redistributable: false
 ```
 

@@ -679,6 +679,86 @@ def test_genmanip_export_rejects_non_table_visual_static_object(
     assert marker.read_text(encoding="utf-8") == "existing"
 
 
+def test_static_support_table_preserves_package_collider_and_uses_shared_runtime_profile(
+    tmp_path: Path,
+) -> None:
+    source_usd = _write_source_scene(tmp_path)
+    scenario = _scenario_mapping()
+    scenario["robot"] = dict(scenario["robot"])  # type: ignore[arg-type]
+    scenario["robot"]["profile_ref"] = "manip/lift2/R5a_isaac41_vr600_v1"  # type: ignore[index]
+    objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
+    objects[0]["asset_id"] = "qualified_static_support_table"
+    scenario["objects"] = objects
+    package_root = tmp_path / "package"
+    compile_scenario_package(
+        ScenarioSpec.from_mapping(scenario),
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            ),
+            "qualified_static_support_table": LocalUSDAssetSource(
+                asset_id="qualified_static_support_table",
+                source_usd=source_usd,
+                role="static_support_object",
+                license="CC-BY-NC-4.0",
+                source_uri="example://qualified-static-support-table",
+                redistributable=False,
+                root_prim_path="/World",
+            ),
+        },
+        package_root,
+    )
+
+    output = export_genmanip_collected_package(package_root).output_dir
+    config = yaml.safe_load((output / "tasks/config.yaml").read_text(encoding="utf-8"))
+    evaluation = config["evaluation_configs"][0]
+    assert evaluation["robots"] == [
+        {"type": "manip/lift2/R5a", "position": [0.0, 0.0, 0.0]}
+    ]
+    assert evaluation["physics_scene_config"]["SolverType"] == "TGS"
+    assert evaluation["physics_scene_config"]["TimeStepsPerSecond"] == 60
+    assert evaluation["physics_scene_config"]["EnableGPUDynamics"] is True
+    assert evaluation["preprocess_config"] == [
+        {
+            "type": "set_robot_physics_material",
+            "robot_type": "lift2",
+            "config": {
+                "Restitution": 0.0,
+                "DynamicFriction": 0.5,
+                "StaticFriction": 0.5,
+                "FrictionCombineMode": "max",
+                "RestitutionCombineMode": "multiply",
+                "ImprovePatchFriction": True,
+            },
+        },
+        {"type": "set_robot_contact_offset", "robot_type": "lift2", "config": 0.05},
+        {"type": "set_robot_rest_offset", "robot_type": "lift2", "config": 0.001},
+    ]
+    scene = (
+        output
+        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+    ).read_text(encoding="utf-8")
+    assert 'def Xform "_scene"' in scene
+    assert 'def Xform "scientific_workbench_bimanual_pour"' not in scene
+    episode = json.loads(
+        (
+            output
+            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        ).read_text(encoding="utf-8")
+    )
+    table = episode["task_data"]["initial_layout"][
+        "00000000000000000000000000000000"
+    ]
+    assert table["path"].endswith("scenario_forge_runtime/table.usd")
+    assert table["add_colliders"] is False
+    assert table["add_rigid_body"] is False
+
+
 def test_genmanip_runtime_contract_matches_its_json_schema(tmp_path: Path) -> None:
     package_root = _build_package(tmp_path)
     output = export_genmanip_collected_package(package_root).output_dir

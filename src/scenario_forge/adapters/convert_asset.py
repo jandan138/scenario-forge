@@ -70,6 +70,7 @@ _USAGE_ROLES = {
     "articulated_object": "articulated_object",
     "visual_static_environment": "environment",
     "visual_static_object": "static_object",
+    "static_support_object": "static_support_object",
 }
 _DYNAMIC_USAGES = frozenset(
     {"scene_overlay", "rigid_object", "articulated_object"}
@@ -79,6 +80,7 @@ _TASK_INTERACTIVE_IDENTITY_TOLERANCE = 1e-6
 _VISUAL_STATIC_USAGES = frozenset(
     {"visual_static_environment", "visual_static_object"}
 )
+_STATIC_SUPPORT_USAGES = frozenset({"static_support_object"})
 _VISUAL_STATIC_PRODUCER_ROLES = {
     "visual_static_environment": frozenset(
         {"visual_static", "visual_static_environment"}
@@ -104,6 +106,22 @@ class ConvertAssetInteractionContract:
 
     def to_mapping(self) -> dict[str, Any]:
         return _copy_json_mapping(self.payload, "interaction_contract")
+
+
+@dataclass(frozen=True)
+class ConvertAssetStaticSupportContract:
+    schema_version: str
+    asset_entry_prim: str
+    collider_prims: tuple[str, ...]
+    profile_id: str
+    profile_revision: str
+    profile_sha256: str
+    qualification_report_path: str
+    qualification_report_sha256: str
+    payload: Mapping[str, Any]
+
+    def to_mapping(self) -> dict[str, Any]:
+        return _copy_json_mapping(self.payload, "static_support_contract")
 
 
 @dataclass(frozen=True)
@@ -250,6 +268,7 @@ class ConvertAssetPackageHandoff:
     task_interactive_geometry: ConvertAssetTaskInteractiveGeometry | None = None
     task_qualifications: tuple[ConvertAssetTaskQualification, ...] = ()
     support_audit: ConvertAssetSupportAudit | None = None
+    static_support_contract: ConvertAssetStaticSupportContract | None = None
 
     def to_local_usd_asset_source(
         self,
@@ -331,6 +350,10 @@ class ConvertAssetPackageHandoff:
             )
         if self.support_audit is not None:
             upstream_metadata["support_audit"] = self.support_audit.to_mapping()
+        if self.static_support_contract is not None:
+            upstream_metadata["static_support_contract"] = (
+                self.static_support_contract.to_mapping()
+            )
         if self.task_interactive_geometry is not None:
             upstream_metadata["task_interactive_geometry"] = (
                 self.task_interactive_geometry.to_mapping()
@@ -403,7 +426,8 @@ def load_convert_asset_package_handoff(
     if usage not in _USAGE_ROLES:
         raise ConvertAssetHandoffError(
             "usage must be 'scene_overlay', 'rigid_object', 'articulated_object', "
-            "'visual_static_environment', or 'visual_static_object'"
+            "'visual_static_environment', 'visual_static_object', or "
+            "'static_support_object'"
         )
 
     manifest_bytes = external_manifest.read_bytes()
@@ -430,6 +454,8 @@ def load_convert_asset_package_handoff(
     producer_asset_role = _required_string(manifest, "asset_role", "manifest")
     if usage in _DYNAMIC_USAGES:
         accepted_asset_roles = frozenset({"dynamic"})
+    elif usage in _STATIC_SUPPORT_USAGES:
+        accepted_asset_roles = frozenset({"static_support"})
     else:
         accepted_asset_roles = _VISUAL_STATIC_PRODUCER_ROLES[usage]
     if producer_asset_role not in accepted_asset_roles:
@@ -549,6 +575,7 @@ def load_convert_asset_package_handoff(
         manifest.get("support_audit"),
         package_root=package_root,
     )
+    static_support_contract: ConvertAssetStaticSupportContract | None = None
 
     if usage in _DYNAMIC_USAGES:
         _require_value(physics, "role", "dynamic", "manifest.physics_closure")
@@ -668,6 +695,38 @@ def load_convert_asset_package_handoff(
                 manifest_sha256=manifest_digest,
                 asset_sha256=root_sha,
             )
+    elif usage in _STATIC_SUPPORT_USAGES:
+        _require_value(
+            physics,
+            "role",
+            "static_support",
+            "manifest.physics_closure",
+        )
+        static_support_contract = _load_static_support_contract(
+            manifest.get("static_support_contract"),
+            package_root=package_root,
+            source_sha256=source_digest,
+            asset_entry_prim=entry_scope,
+        )
+        nested_contract = _required_mapping(
+            physics,
+            "static_support_contract",
+            "manifest.physics_closure",
+        )
+        _validate_nested_static_support_contract(
+            nested_contract,
+            static_support_contract.payload,
+        )
+        output_admission = _required_mapping(
+            manifest,
+            "output_role_admission",
+            "manifest",
+        )
+        _require_value(output_admission, "status", "pass", "output_role_admission")
+        if output_admission.get("zero_dynamic_semantics") is not True:
+            raise ConvertAssetHandoffError(
+                "static support output admission must prove zero_dynamic_semantics"
+            )
     else:
         physics_role = _required_string(
             physics,
@@ -764,11 +823,23 @@ def load_convert_asset_package_handoff(
         "runtime_evidence",
     )
     runtime_gate_names = ["cold_load", "physics_step", "reset"]
-    if usage in _VISUAL_STATIC_USAGES:
+    if usage in _VISUAL_STATIC_USAGES or usage in _STATIC_SUPPORT_USAGES:
         runtime_gate_names.append("render_readback")
     for gate_name in runtime_gate_names:
         gate = _required_mapping(runtime, gate_name, "runtime_evidence")
         _require_value(gate, "status", "pass", f"runtime_evidence.{gate_name}")
+    if usage in _STATIC_SUPPORT_USAGES:
+        qualification = _required_mapping(
+            runtime,
+            "static_support_qualification",
+            "runtime_evidence",
+        )
+        _require_value(
+            qualification,
+            "status",
+            "pass",
+            "runtime_evidence.static_support_qualification",
+        )
     for field_name in ("expected_root_usd_sha256", "root_usd_sha256"):
         if _required_string(runtime, field_name, "runtime_evidence") != root_sha:
             raise ConvertAssetHandoffError(
@@ -855,6 +926,7 @@ def load_convert_asset_package_handoff(
         task_interactive_geometry=task_interactive_geometry,
         task_qualifications=task_qualifications,
         support_audit=support_audit,
+        static_support_contract=static_support_contract,
     )
 
 
@@ -866,6 +938,12 @@ def _load_support_audit(
     if value is None:
         return None
     audit = _required_mapping({"support_audit": value}, "support_audit", "manifest")
+    if audit.get("overall_status") == "not_requested":
+        if audit.get("blocked_reasons") != [] or audit.get("support_closure") != {}:
+            raise ConvertAssetHandoffError(
+                "manifest.support_audit not_requested marker must have no blockers or closure"
+            )
+        return None
     _require_value(
         audit,
         "schema_version",
@@ -943,6 +1021,262 @@ def _load_support_audit(
         report_sha256=_file_sha256(report_path),
         support_closure=closure,
     )
+
+
+def _load_static_support_contract(
+    value: Any,
+    *,
+    package_root: Path,
+    source_sha256: str,
+    asset_entry_prim: str,
+) -> ConvertAssetStaticSupportContract:
+    contract = _required_mapping(
+        {"static_support_contract": value},
+        "static_support_contract",
+        "manifest",
+    )
+    _require_value(
+        contract,
+        "schema_version",
+        "aan.static_support_contract.v1",
+        "manifest.static_support_contract",
+    )
+    _require_value(contract, "status", "pass", "manifest.static_support_contract")
+    _require_value(
+        contract,
+        "asset_entry_prim",
+        asset_entry_prim,
+        "manifest.static_support_contract",
+    )
+    _require_value(
+        contract,
+        "collider_policy",
+        "prefer_source_then_proxy",
+        "manifest.static_support_contract",
+    )
+    selection = _required_string(
+        contract,
+        "collider_selection",
+        "manifest.static_support_contract",
+    )
+    if selection not in {"preserved_source", "authored_proxy"}:
+        raise ConvertAssetHandoffError(
+            "static_support_contract.collider_selection is unsupported"
+        )
+    raw_colliders = contract.get("colliders")
+    if not isinstance(raw_colliders, list) or not raw_colliders:
+        raise ConvertAssetHandoffError(
+            "static_support_contract.colliders must be a non-empty list"
+        )
+    collider_prims: list[str] = []
+    for index, raw in enumerate(raw_colliders):
+        collider = _mapping(
+            raw,
+            f"manifest.static_support_contract.colliders[{index}]",
+        )
+        prim_path = _required_string(
+            collider,
+            "prim_path",
+            f"manifest.static_support_contract.colliders[{index}]",
+        )
+        if not (
+            prim_path == asset_entry_prim
+            or prim_path.startswith(asset_entry_prim.rstrip("/") + "/")
+        ):
+            raise ConvertAssetHandoffError(
+                "static support collider is outside asset_entry_prim"
+            )
+        if collider.get("collision_enabled") is not True:
+            raise ConvertAssetHandoffError(
+                "static support collider must be explicitly enabled"
+            )
+        collider_prims.append(prim_path)
+    if len(set(collider_prims)) != len(collider_prims):
+        raise ConvertAssetHandoffError("static support collider paths must be unique")
+
+    material = _required_mapping(
+        contract,
+        "physics_material",
+        "manifest.static_support_contract",
+    )
+    expected_material = {
+        "static_friction": 0.5,
+        "dynamic_friction": 0.5,
+        "restitution": 0.0,
+        "friction_combine_mode": "max",
+        "restitution_combine_mode": "multiply",
+        "calibration_status": "provisional_unmeasured",
+    }
+    for key, expected in expected_material.items():
+        if material.get(key) != expected:
+            raise ConvertAssetHandoffError(
+                f"static_support_contract.physics_material.{key} must be {expected!r}"
+            )
+
+    profile = _required_mapping(
+        contract,
+        "profile",
+        "manifest.static_support_contract",
+    )
+    profile_path = _safe_package_file(
+        package_root,
+        _required_string(profile, "package_path", "static_support_contract.profile"),
+        "static_support_contract.profile.package_path",
+    )
+    profile_sha = _required_sha256(
+        profile,
+        "sha256",
+        "static_support_contract.profile",
+    )
+    if _file_sha256(profile_path) != profile_sha:
+        raise ConvertAssetHandoffError(
+            "static support packaged profile SHA-256 does not match"
+        )
+    if _required_sha256(
+        profile,
+        "source_usd_sha256",
+        "static_support_contract.profile",
+    ) != source_sha256:
+        raise ConvertAssetHandoffError(
+            "static support profile source SHA-256 does not match"
+        )
+    _safe_package_file(
+        package_root,
+        _required_string(
+            contract,
+            "overlay_path",
+            "manifest.static_support_contract",
+        ),
+        "static_support_contract.overlay_path",
+    )
+
+    qualification = _required_mapping(
+        contract,
+        "qualification",
+        "manifest.static_support_contract",
+    )
+    _require_value(
+        qualification,
+        "status",
+        "pass",
+        "static_support_contract.qualification",
+    )
+    _require_value(
+        qualification,
+        "schema_version",
+        "aan.static_support_runtime_qualification.v1",
+        "static_support_contract.qualification",
+    )
+    report_relative = _required_string(
+        qualification,
+        "report_path",
+        "static_support_contract.qualification",
+    )
+    report_path = _safe_package_file(
+        package_root,
+        report_relative,
+        "static_support_contract.qualification.report_path",
+    )
+    report_sha = _required_sha256(
+        qualification,
+        "report_sha256",
+        "static_support_contract.qualification",
+    )
+    if _file_sha256(report_path) != report_sha:
+        raise ConvertAssetHandoffError(
+            "static support qualification report SHA-256 does not match"
+        )
+    report = _load_strict_json_mapping(
+        report_path.read_bytes(),
+        "static support qualification report",
+    )
+    _require_value(report, "status", "pass", "static support qualification report")
+    required_probes = (
+        "center_drop",
+        "north_edge_drop",
+        "south_edge_drop",
+        "east_edge_drop",
+        "west_edge_drop",
+        "side_impact",
+    )
+    if tuple(qualification.get("required_probes", [])) != required_probes:
+        raise ConvertAssetHandoffError(
+            "static support qualification must declare the six v1 probes"
+        )
+    if qualification.get("probe_count") != 6 or report.get("probe_count") != 6:
+        raise ConvertAssetHandoffError(
+            "static support qualification probe_count must be 6"
+        )
+    raw_results = report.get("probe_results")
+    if not isinstance(raw_results, list) or {
+        item.get("probe")
+        for item in raw_results
+        if isinstance(item, Mapping) and item.get("status") == "pass"
+    } != set(required_probes):
+        raise ConvertAssetHandoffError(
+            "static support qualification report must pass every v1 probe"
+        )
+    return ConvertAssetStaticSupportContract(
+        schema_version="aan.static_support_contract.v1",
+        asset_entry_prim=asset_entry_prim,
+        collider_prims=tuple(collider_prims),
+        profile_id=_required_string(
+            contract,
+            "profile_id",
+            "manifest.static_support_contract",
+        ),
+        profile_revision=_required_string(
+            contract,
+            "profile_revision",
+            "manifest.static_support_contract",
+        ),
+        profile_sha256=profile_sha,
+        qualification_report_path=report_relative,
+        qualification_report_sha256=report_sha,
+        payload=_copy_json_mapping(contract, "static_support_contract"),
+    )
+
+
+def _validate_nested_static_support_contract(
+    nested: Mapping[str, Any],
+    final: Mapping[str, Any],
+) -> None:
+    """Accept ConvertAsset's pre-runtime snapshot plus final qualification.
+
+    ``physics_closure`` records the authoring-time contract, where the runtime
+    qualification is intentionally pending.  The top-level contract is the
+    promoted, hash-bound result after the isolated Isaac worker succeeds.
+    Every non-qualification field must remain byte-for-byte equivalent.
+    """
+
+    if nested == final:
+        return
+    nested_without_qualification = dict(nested)
+    final_without_qualification = dict(final)
+    nested_qualification = _mapping(
+        nested_without_qualification.pop("qualification", None),
+        "manifest.physics_closure.static_support_contract.qualification",
+    )
+    final_qualification = _mapping(
+        final_without_qualification.pop("qualification", None),
+        "manifest.static_support_contract.qualification",
+    )
+    if nested_without_qualification != final_without_qualification:
+        raise ConvertAssetHandoffError(
+            "physics_closure.static_support_contract disagrees with the top-level contract"
+        )
+    _require_value(
+        nested_qualification,
+        "status",
+        "pending_runtime",
+        "manifest.physics_closure.static_support_contract.qualification",
+    )
+    if nested_qualification.get("required_probes") != final_qualification.get(
+        "required_probes"
+    ):
+        raise ConvertAssetHandoffError(
+            "static support authoring and final qualification probe sets disagree"
+        )
 
 
 def _load_task_interactive_geometry(

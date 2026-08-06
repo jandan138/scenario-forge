@@ -1,0 +1,385 @@
+"""Formal eBench VR-teleop export from a compiled Scenario Forge recipe."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from hashlib import sha256
+import json
+from pathlib import Path
+import shutil
+import tempfile
+from typing import Any, Mapping
+
+import yaml
+
+from scenario_forge.adapters.isaac41_vr600_profile import (
+    PROFILE_ID,
+    SOURCE_CONTRACT,
+    physx_scene_config,
+    vr_robot_contact_config,
+)
+from scenario_forge.assets.manifest import AssetManifestEntry, load_asset_manifest
+from scenario_forge.core.scenario import ScenarioSpec
+from scenario_forge.package import validate_package
+
+
+VR_TASK_ID = "scientific_workbench_pour_flask_to_cylinder"
+
+
+class VRTeleopExportError(ValueError):
+    pass
+
+
+@dataclass(frozen=True)
+class VRTeleopExportResult:
+    output_dir: Path
+    scene_usd: Path
+    task_config: Path
+    parity_manifest: Path
+
+
+def export_vr_teleop_package(
+    package_dir: str | Path,
+    out_dir: str | Path,
+    *,
+    task_id: str = VR_TASK_ID,
+) -> VRTeleopExportResult:
+    """Emit a relocatable VR directory with one scene USD and one config snippet."""
+    package_root = Path(package_dir)
+    validation = validate_package(package_root)
+    if not validation.ok:
+        raise VRTeleopExportError(
+            "compiled Scenario Forge package is invalid: "
+            + "; ".join(validation.messages)
+        )
+    try:
+        raw = yaml.safe_load((package_root / "scenario.yaml").read_text(encoding="utf-8"))
+        scenario = ScenarioSpec.from_mapping(raw).to_mapping()
+    except (OSError, yaml.YAMLError, ValueError) as exc:
+        raise VRTeleopExportError(f"cannot load canonical scenario recipe: {exc}") from exc
+    robot = _mapping(scenario.get("robot"), "scenario.robot")
+    if robot.get("profile_ref") != PROFILE_ID:
+        raise VRTeleopExportError(
+            f"VR r2 export requires shared profile {PROFILE_ID!r}"
+        )
+    objects = [_mapping(item, "scenario.objects") for item in scenario.get("objects", [])]
+    table = _one_object_by_role(objects, "table")
+    source = _one_object_by_role(objects, "source_container")
+    target = _one_object_by_role(objects, "target_container")
+    manifest = load_asset_manifest(package_root)
+    assets = {item.asset_id: item for item in manifest.assets}
+    environment_id = _string(
+        _mapping(scenario.get("scene"), "scenario.scene").get("asset_id"),
+        "scenario.scene.asset_id",
+    )
+    environment = _asset(assets, environment_id)
+    table_asset = _asset(assets, _string(table.get("asset_id"), "table.asset_id"))
+    source_asset = _asset(assets, _string(source.get("asset_id"), "source.asset_id"))
+    target_asset = _asset(assets, _string(target.get("asset_id"), "target.asset_id"))
+    _require_static_support_table(table_asset)
+
+    output = Path(out_dir)
+    output_parent = output.parent
+    output_parent.mkdir(parents=True, exist_ok=True)
+    if output.exists():
+        raise VRTeleopExportError(f"VR output already exists: {output}")
+    staging = Path(tempfile.mkdtemp(prefix=f".{output.name}.", dir=output_parent))
+    try:
+        asset_roles = {
+            "environment": environment,
+            "table": table_asset,
+            "source_container": source_asset,
+            "target_container": target_asset,
+        }
+        for role, asset in asset_roles.items():
+            source_root = (package_root / asset.canonical_usd).parent
+            if not source_root.is_dir():
+                raise VRTeleopExportError(
+                    f"compiled asset closure is missing for {asset.asset_id!r}"
+                )
+            shutil.copytree(source_root, staging / "deps" / role)
+
+        scene_path = staging / "scene.usd"
+        scene_path.write_text(
+            _scene_usda(
+                scenario=scenario,
+                table=table,
+                source=source,
+                target=target,
+                environment=environment,
+            ),
+            encoding="utf-8",
+        )
+        config_path = staging / "task_config.py"
+        config_path.write_text(
+            _task_config_python(
+                task_id=task_id,
+                robot=robot,
+                source_id=_string(source.get("id"), "source.id"),
+                target_id=_string(target.get("id"), "target.id"),
+            ),
+            encoding="utf-8",
+        )
+        parity_path = staging / "parity_manifest.json"
+        scenario_bytes = (package_root / "scenario.yaml").read_bytes()
+        table_contract = _static_support_contract(table_asset)
+        parity = {
+            "schema_version": "scenario-forge-vr-ebench-parity/v0.1",
+            "status": "pass_with_declared_exception",
+            "canonical_scenario_id": scenario["scenario_id"],
+            "canonical_scenario_sha256": "sha256:" + sha256(scenario_bytes).hexdigest(),
+            "vr_task_id": task_id,
+            "shared_runtime_profile": PROFILE_ID,
+            "source_contract": SOURCE_CONTRACT,
+            "equivalence": {
+                "environment": "same_asset_and_pose",
+                "table_static_support": "same_asset_and_pose",
+                "task_objects": "same_assets_poses_and_physics",
+                "robot_model": "same_runtime_robot_type",
+                "robot_base_pose": "same",
+                "physx_scene_config": "same_shared_profile",
+                "robot_material_and_offsets": "same_shared_profile",
+            },
+            "static_support_contract": {
+                "profile_id": table_contract["profile_id"],
+                "profile_revision": table_contract["profile_revision"],
+                "collider_paths": [
+                    item["prim_path"] for item in table_contract["colliders"]
+                ],
+                "qualification": table_contract["qualification"],
+            },
+            "allowed_exceptions": [
+                {
+                    "id": "robot_joint_initialization",
+                    "status": "accepted",
+                    "reason": (
+                        "The Feishu VR config contract exposes robot base pose but no joint-position field; "
+                        "the shared robot model and contact/PhysX profile remain identical."
+                    ),
+                }
+            ],
+            "claims_forbidden": [
+                "Complete pouring policy success is established by this adapter export.",
+                "Liquid-transfer benchmark success is established by this adapter export.",
+            ],
+            "artifacts": {
+                "scene_usd": {"path": "scene.usd", "sha256": _digest(scene_path)},
+                "task_config": {"path": "task_config.py", "sha256": _digest(config_path)},
+            },
+        }
+        parity_path.write_text(
+            json.dumps(parity, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        staging.rename(output)
+    except Exception:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
+    return VRTeleopExportResult(
+        output_dir=output,
+        scene_usd=output / "scene.usd",
+        task_config=output / "task_config.py",
+        parity_manifest=output / "parity_manifest.json",
+    )
+
+
+def _scene_usda(
+    *,
+    scenario: Mapping[str, Any],
+    table: Mapping[str, Any],
+    source: Mapping[str, Any],
+    target: Mapping[str, Any],
+    environment: AssetManifestEntry,
+) -> str:
+    scene = _mapping(scenario.get("scene"), "scenario.scene")
+    scene_pose = _mapping(scene.get("pose"), "scenario.scene.pose")
+    environment_root = _string(
+        environment.metadata.get("root_prim_path", scene.get("root_prim_path")),
+        "environment.root_prim_path",
+    )
+    lines = [
+        "#usda 1.0",
+        "(",
+        '    defaultPrim = "World"',
+        "    metersPerUnit = 1",
+        "    kilogramsPerUnit = 1",
+        '    upAxis = "Z"',
+        "    timeCodesPerSecond = 60",
+        "    framesPerSecond = 60",
+        ")",
+        "",
+        'def Xform "World"',
+        "{",
+        '    def Xform "_scene"',
+        "    {",
+        '        def Xform "background" (',
+        f"            prepend references = @deps/environment/asset.usd@<{environment_root}>",
+        "        )",
+        "        {",
+        *_pose_lines(scene_pose, indent=12),
+        "        }",
+        "",
+    ]
+    for wrapper, role, item in (
+        ("table", "table", table),
+        (_string(source.get("id"), "source.id"), "source_container", source),
+        (_string(target.get("id"), "target.id"), "target_container", target),
+    ):
+        source_prim = _string(item.get("source_prim_path"), f"{wrapper}.source_prim_path")
+        pose = _mapping(item.get("pose"), f"{wrapper}.pose")
+        lines.extend(
+            [
+                f'        def Xform "{wrapper}" (',
+                f"            prepend references = @deps/{role}/asset.usd@<{source_prim}>",
+                "        )",
+                "        {",
+                *_pose_lines(pose, indent=12),
+                "        }",
+                "",
+            ]
+        )
+    lines.extend(["    }", "}", ""])
+    return "\n".join(lines)
+
+
+def _pose_lines(pose: Mapping[str, Any], *, indent: int) -> list[str]:
+    prefix = " " * indent
+    xyz = _number_list(pose.get("xyz"), 3, "pose.xyz")
+    wxyz = _number_list(pose.get("wxyz"), 4, "pose.wxyz")
+    scale = _number_list(pose.get("scale_xyz", [1.0, 1.0, 1.0]), 3, "pose.scale_xyz")
+    return [
+        f"{prefix}double3 xformOp:translate = {_usd_tuple(xyz)}",
+        f"{prefix}quatd xformOp:orient = {_usd_tuple(wxyz)}",
+        f"{prefix}double3 xformOp:scale = {_usd_tuple(scale)}",
+        f'{prefix}uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]',
+    ]
+
+
+def _task_config_python(
+    *, task_id: str, robot: Mapping[str, Any], source_id: str, target_id: str
+) -> str:
+    spawn = _mapping(robot.get("spawn"), "scenario.robot.spawn")
+    config: dict[str, Any] = {
+        "scene_usd_file_path": {
+            "scene1": "__SCENE_PATH__",
+        },
+        "obj_prim_list": [
+            f"/World/_scene/{source_id}",
+            f"/World/_scene/{target_id}",
+        ],
+        "robot_cfg": {
+            "position": _number_list(spawn.get("xyz"), 3, "robot.spawn.xyz"),
+            "orientation": _number_list(spawn.get("wxyz"), 4, "robot.spawn.wxyz"),
+        },
+        "physx_scene_cfg": physx_scene_config(),
+        **vr_robot_contact_config(),
+    }
+    body = _python_literal(config, indent=0).replace(
+        '"__SCENE_PATH__"',
+        f'str(_ASSETS_DIR / "scenes/{task_id}/scene.usd")',
+    )
+    return (
+        "# Merge this TASKS entry into\n"
+        "# exts.vr_teleop/exts/vr_teleop/constants/tasks.py.\n"
+        "# This handoff is also a syntactically valid standalone Python module.\n"
+        "TASKS = {\n"
+        f"    {json.dumps(task_id)}: {body},\n"
+        "}\n"
+    )
+
+
+def _python_literal(value: Any, *, indent: int) -> str:
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        items = []
+        for key, item in value.items():
+            items.append(
+                " " * (indent + 4)
+                + json.dumps(str(key))
+                + ": "
+                + _python_literal(item, indent=indent + 4)
+                + ","
+            )
+        return "{\n" + "\n".join(items) + "\n" + " " * indent + "}"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        return (
+            "[\n"
+            + "\n".join(
+                " " * (indent + 4)
+                + _python_literal(item, indent=indent + 4)
+                + ","
+                for item in value
+            )
+            + " " * indent
+            + "]"
+        )
+    if isinstance(value, float) and value == float("inf"):
+        return 'float("inf")'
+    if isinstance(value, str):
+        return json.dumps(value)
+    return repr(value)
+
+
+def _require_static_support_table(asset: AssetManifestEntry) -> None:
+    if asset.role != "static_support_object":
+        raise VRTeleopExportError(
+            "VR r2 table must use a static_support_object ConvertAsset package"
+        )
+    contract = _static_support_contract(asset)
+    if contract.get("status") != "pass":
+        raise VRTeleopExportError("table static support contract did not pass")
+    qualification = _mapping(contract.get("qualification"), "table.qualification")
+    if qualification.get("status") != "pass" or qualification.get("probe_count") != 6:
+        raise VRTeleopExportError("table six-probe static support qualification did not pass")
+
+
+def _static_support_contract(asset: AssetManifestEntry) -> Mapping[str, Any]:
+    upstream = _mapping(asset.metadata.get("upstream_package"), "table.upstream_package")
+    metadata = _mapping(upstream.get("metadata"), "table.upstream_package.metadata")
+    return _mapping(metadata.get("static_support_contract"), "table.static_support_contract")
+
+
+def _one_object_by_role(objects: list[Mapping[str, Any]], role: str) -> Mapping[str, Any]:
+    matches = [item for item in objects if item.get("role") == role]
+    if len(matches) != 1:
+        raise VRTeleopExportError(f"VR r2 requires exactly one {role!r} object")
+    return matches[0]
+
+
+def _asset(assets: Mapping[str, AssetManifestEntry], asset_id: str) -> AssetManifestEntry:
+    try:
+        return assets[asset_id]
+    except KeyError as exc:
+        raise VRTeleopExportError(f"missing compiled asset {asset_id!r}") from exc
+
+
+def _mapping(value: Any, field: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise VRTeleopExportError(f"{field} must be a mapping")
+    return value
+
+
+def _string(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise VRTeleopExportError(f"{field} must be a non-empty string")
+    return value
+
+
+def _number_list(value: Any, length: int, field: str) -> list[float]:
+    if not isinstance(value, list) or len(value) != length:
+        raise VRTeleopExportError(f"{field} must contain {length} numbers")
+    try:
+        return [float(item) for item in value]
+    except (TypeError, ValueError) as exc:
+        raise VRTeleopExportError(f"{field} must contain numbers") from exc
+
+
+def _usd_tuple(values: list[float]) -> str:
+    return "(" + ", ".join(format(item, ".15g") for item in values) + ")"
+
+
+def _digest(path: Path) -> str:
+    return "sha256:" + sha256(path.read_bytes()).hexdigest()

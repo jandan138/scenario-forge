@@ -7,8 +7,8 @@ separate producer-owned inputs:
 | Layer | Exact source | Package role |
 | --- | --- | --- |
 | Complete visual room | `Scene1_hard.usd:/World/lab_015` | ConvertAsset `visual_static_environment` |
-| EBench worktable | `lab_001.usd:/World/table` | ConvertAsset `visual_static_object` |
-| Flask and cylinder | existing `lab_001` source-bound packages | dynamic manipulation objects |
+| EBench worktable | `lab_001.usd:/World/table` | ConvertAsset `static_support` |
+| Flask and cylinder | identity-root source-bound packages | dynamic manipulation objects |
 
 `/World/lab_015` is the one complete room payload under `Scene1_hard.usd`.
 ConvertAsset must extract that exact parent-layer scope: it retains the paper
@@ -25,36 +25,38 @@ claimed to repair it cannot be materialized here because its Git LFS object is
 404. That is an upstream asset-delivery problem, not a reason to add local
 textures, MDL fallbacks, or table-specific physics in Scenario Forge.
 
-Both visual-static packages must have zero package-authored rigid bodies,
-colliders, joints, or articulations. GenManip's ordinary table layout remains
-responsible for its generic support collider (`add_colliders: true`,
-`add_rigid_body: false`). Scenario Forge does not author mass, inertia, colliders,
-PhysX-warning suppression, or material repairs for these inputs.
+The visual room must have zero package-authored rigid bodies, colliders, joints,
+or articulations. The table is different: its ConvertAsset `static_support`
+package owns one qualified collider and its physical material. GenManip is
+explicitly configured with `add_colliders: false`, `add_rigid_body: false` for the
+table. Scenario Forge does not author a fallback slab, mass, inertia, collider,
+PhysX-warning suppression, or material repair.
 
-The collected scene intentionally does not pre-instantiate this visual-static
+The collected scene intentionally does not pre-instantiate this static-support
 table. Its episode layout instead points to
 `source_bundle/scenario_forge_runtime/table.usd`, a thin adapter composition layer
-that loads the complete table package for material closure while preserving the
-existing EBench episode pose and scale. This is what lets unmodified GenManip
-recovery execute its native static-table collider path.
+that loads the complete table package while preserving the existing EBench episode
+pose and scale. Unmodified GenManip still creates its normal wrapper, but the
+wrapper consumes producer physics rather than adding a second collider.
 
 ## Locked producer delivery
 
-ConvertAsset `main@73a84d3c2cfc8378cd5c255cf2282a20da017b8f`
-closed both producer blockers and delivered the exact source-bound packages used
-by this runbook:
+The room, table, and vessel deliveries are independently revision-locked; the
+exact revisions are listed below and must travel with the package provenance:
 
 | Input | Package | Manifest |
 | --- | --- | --- |
 | Scene1 room | `outputs/convertasset-scene1-hard-lab015-room-20260723` | `evidence/manifest.json` |
-| EBench table | `outputs/convertasset-lab001-table-visual-static-20260723` | `evidence/manifest.json` |
+| EBench table | ConvertAsset `outputs/labutopia_lab001_table_static_support_r2` | `evidence/manifest.json` |
+| Flask | ConvertAsset `outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/package` | `evidence/manifest.json` |
+| Cylinder | ConvertAsset `outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/package` | `evidence/manifest.json` |
 
-Both manifests have `overall_status: pass`, seven passing stage gates, no blocked
-reasons, no active physics residue, and zero scoped or unattributed PhysX warning
-events. The visual-static reset subgate is correctly `not_applicable` for the
-empty rigid-body set while the scope reset still passes. Dependency admission is
-scope-first: unresolved `table_hard` dependencies remain recorded as out of scope
-and are not part of either consumer claim.
+The room and all task inputs have `overall_status: pass` and no blockers. The table
+additionally has a passing static-support r1 contract and all six runtime probes:
+centre drop, four edge drops, and side impact. Its source scope is extracted before
+qualification, so unrelated physics elsewhere in `lab_001.usd` is not smuggled into
+the package. The two identity-root vessel facades remove the old axis correction
+from task poses; their interaction physics remains producer-owned.
 
 Do not rerun ConvertAsset from this workflow or reconstruct an external manifest.
 The package's own `evidence/manifest.json` is the delivered manifest consumed
@@ -73,25 +75,26 @@ GENMANIP_SOURCE=/cpfs/shared/simulation/zhuzihou/dev/GenManip
 CUROBO_SRC=/cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src
 CONVERT_ASSET_ROOT=/cpfs/user/zhuzihou/dev/ConvertAsset
 
-CONVERT_ASSET_REVISION=73a84d3c2cfc8378cd5c255cf2282a20da017b8f
-SOURCE_VESSEL_REVISION=ba4ac8ccbf3c32f257abdbb68a554a74a90003f1
-TARGET_VESSEL_REVISION=4bb541161a652cc4e5dd63253adffba018f17137
+ROOM_REVISION=73a84d3c2cfc8378cd5c255cf2282a20da017b8f
+TABLE_REVISION=77600fc529446eeea0a6abc8de04da4c484dbae8
+VESSEL_REVISION=db71fde4e97fa2698926b23a2a86af663eda6177
 GENMANIP_REVISION=014bf5435a373df9b3bcf5a69aa7fe22d17f613d
 
 SCENE1_HARD_ROOT="$LABUTOPIA_ROOT/assets/chemistry_lab/hard_task/Scene1_hard.usd"
 SCENE1_ENVIRONMENT_SOURCE="$SCENE1_HARD_ROOT"
 SCENE1_ENVIRONMENT_SCOPE=/World/lab_015
 TABLE_SOURCE="$LABUTOPIA_ROOT/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd"
-VESSEL_SOURCE="$TABLE_SOURCE"
-SOURCE_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-14-aan-labutopia-vessel-interaction-profile/conical_bottle03"
-TARGET_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/docs/records/evidence/2026-07-15-aan-graduated-cylinder-r3-grasp-section/graduated_cylinder_03"
+SOURCE_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/package"
+TARGET_VESSEL_DELIVERY="$CONVERT_ASSET_ROOT/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/package"
+SOURCE_VESSEL_SOURCE="$CONVERT_ASSET_ROOT/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/facade/facade.usda"
+TARGET_VESSEL_SOURCE="$CONVERT_ASSET_ROOT/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/facade/facade.usda"
 SCENE1_ENVIRONMENT_PACKAGE="$PWD/outputs/convertasset-scene1-hard-lab015-room-20260723"
 SCENE1_ENVIRONMENT_MANIFEST="$SCENE1_ENVIRONMENT_PACKAGE/evidence/manifest.json"
-TABLE_PACKAGE="$PWD/outputs/convertasset-lab001-table-visual-static-20260723"
+TABLE_PACKAGE="$CONVERT_ASSET_ROOT/outputs/labutopia_lab001_table_static_support_r2"
 TABLE_MANIFEST="$TABLE_PACKAGE/evidence/manifest.json"
 
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
-CANONICAL="$PWD/outputs/scientific_workbench_bimanual_pour"
+CANONICAL="$PWD/outputs/scientific_workbench_bimanual_pour_static_support_v1_20260806"
 CANDIDATE="$PWD/outputs/.scientific_workbench_bimanual_pour.candidate-$RUN_ID"
 BACKUP="$PWD/outputs/.scientific_workbench_bimanual_pour.backup-$RUN_ID"
 CANARY_ROOT="${TMPDIR:-/tmp}/scenario-forge-genmanip-canary-$RUN_ID"
@@ -143,19 +146,20 @@ closure before copying either asset.
 "$TEST_ENV/bin/python" scripts/generate_scientific_workbench_bimanual_pour.py \
   --scene1-source-usd "$SCENE1_ENVIRONMENT_SOURCE" \
   --table-source-usd "$TABLE_SOURCE" \
-  --vessel-source-usd "$VESSEL_SOURCE" \
+  --source-vessel-source-usd "$SOURCE_VESSEL_SOURCE" \
+  --target-vessel-source-usd "$TARGET_VESSEL_SOURCE" \
   --scene1-environment-package "$SCENE1_ENVIRONMENT_PACKAGE" \
   --scene1-environment-manifest "$SCENE1_ENVIRONMENT_MANIFEST" \
   --table-package "$TABLE_PACKAGE" \
   --table-manifest "$TABLE_MANIFEST" \
-  --source-vessel-package "$SOURCE_VESSEL_DELIVERY/package" \
-  --source-vessel-manifest "$SOURCE_VESSEL_DELIVERY/manifest.json" \
-  --target-vessel-package "$TARGET_VESSEL_DELIVERY/package" \
-  --target-vessel-manifest "$TARGET_VESSEL_DELIVERY/manifest.json" \
-  --scene1-environment-revision "$CONVERT_ASSET_REVISION" \
-  --table-revision "$CONVERT_ASSET_REVISION" \
-  --source-vessel-revision "$SOURCE_VESSEL_REVISION" \
-  --target-vessel-revision "$TARGET_VESSEL_REVISION" \
+  --source-vessel-package "$SOURCE_VESSEL_DELIVERY" \
+  --source-vessel-manifest "$SOURCE_VESSEL_DELIVERY/evidence/manifest.json" \
+  --target-vessel-package "$TARGET_VESSEL_DELIVERY" \
+  --target-vessel-manifest "$TARGET_VESSEL_DELIVERY/evidence/manifest.json" \
+  --scene1-environment-revision "$ROOM_REVISION" \
+  --table-revision "$TABLE_REVISION" \
+  --source-vessel-revision "$VESSEL_REVISION" \
+  --target-vessel-revision "$VESSEL_REVISION" \
   --out "$CANDIDATE" \
   --isaac-python "$ISAAC_ENV/bin/python" \
   --genmanip-root "$CANARY_ROOT"
@@ -167,10 +171,11 @@ PYTHONPATH=src "$TEST_ENV/bin/python" -m scenario_forge.cli \
   "$CANDIDATE/adapters/ebench/genmanip"
 ```
 
-The renderer writes two post-reset, pre-action images:
+The renderer writes three post-reset, pre-action images:
 
 - `workspace_closeup.png`: two vessels, both Lift2 end effectors, and work surface.
 - `scene_overview.png`: complete Scene1 room, robot, EBench table, and vessels.
+- `task_object_closeup.png`: the transparent flask and cylinder on the support.
 
 They verify scene composition only. They do not establish an oracle rollout,
 grasp success, full physics fidelity, policy success, or liquid transfer. Reject a

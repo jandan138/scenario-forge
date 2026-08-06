@@ -14,6 +14,7 @@ from scenario_forge.generation.source_resolver import (
 from tests.test_convert_asset_adapter import (
     _write_articulated_handoff,
     _write_source_bound_handoff,
+    _write_static_support_handoff,
     _write_visual_static_handoff,
 )
 from tests.test_scenario_package_compiler import _write_source_scene
@@ -84,6 +85,53 @@ def test_source_bindings_v02_schema_requires_explicit_convert_asset_usage() -> N
         "visual_static_environment",
         "visual_static_object",
     ]
+
+
+def test_source_bindings_v03_adds_static_support_without_changing_v02() -> None:
+    schema_path = (
+        REPO_ROOT
+        / "src/scenario_forge/schemas/jsonschema/scenario-source-bindings-v0.3.schema.json"
+    )
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    assert schema["properties"]["schema_version"]["const"] == (
+        "scenario-source-bindings/v0.3"
+    )
+    convert_asset = next(
+        variant
+        for variant in schema["$defs"]["binding"]["oneOf"]
+        if variant["properties"]["resolver"]["const"] == "convert_asset_package"
+    )
+    assert convert_asset["properties"]["usage"]["enum"][-1] == (
+        "static_support_object"
+    )
+
+
+def test_source_bindings_v03_resolves_static_support_package(tmp_path: Path) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_static_support_handoff(tmp_path)
+    bindings = _write_bindings(
+        tmp_path / "bindings.yaml",
+        {
+            "scientific_workbench_ebench_table": {
+                "resolver": "convert_asset_package",
+                "usage": "static_support_object",
+                "source_usd": str(source_usd),
+                "package_dir": str(package_dir),
+                "manifest_path": str(manifest_path),
+                "producer_revision": "static-support-r1",
+                "expected_scope_prims": ["/World/table"],
+                "license": "CC-BY-NC-4.0",
+            }
+        },
+        schema_version="scenario-source-bindings/v0.3",
+    )
+
+    source = resolve_scenario_source_bindings(bindings)[
+        "scientific_workbench_ebench_table"
+    ]
+
+    assert source.role == "static_support_object"
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["static_support_contract"]["status"] == "pass"
 
 
 def test_local_usd_binding_resolves_paths_relative_to_the_binding_file(

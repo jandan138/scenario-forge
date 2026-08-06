@@ -9,9 +9,13 @@ from scenario_forge.adapters.convert_asset import load_convert_asset_package_han
 from scenario_forge.assets.source import LocalUSDAssetSource
 
 
-SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.2"
+SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.3"
 SUPPORTED_SOURCE_BINDINGS_SCHEMA_VERSIONS = frozenset(
-    {"scenario-source-bindings/v0.1", SOURCE_BINDINGS_SCHEMA_VERSION}
+    {
+        "scenario-source-bindings/v0.1",
+        "scenario-source-bindings/v0.2",
+        SOURCE_BINDINGS_SCHEMA_VERSION,
+    }
 )
 _TOP_LEVEL_FIELDS = frozenset({"schema_version", "bindings"})
 _LOCAL_USD_FIELDS = frozenset(
@@ -105,7 +109,10 @@ def resolve_scenario_source_bindings(
                     binding,
                     (
                         _CONVERT_ASSET_V02_FIELDS
-                        if schema_version == SOURCE_BINDINGS_SCHEMA_VERSION
+                        if schema_version in {
+                            "scenario-source-bindings/v0.2",
+                            SOURCE_BINDINGS_SCHEMA_VERSION,
+                        }
                         else _CONVERT_ASSET_FIELDS
                     ),
                     field,
@@ -116,8 +123,11 @@ def resolve_scenario_source_bindings(
                     base_dir,
                     field,
                     usage=(
-                        _required_usage(binding, field)
-                        if schema_version == SOURCE_BINDINGS_SCHEMA_VERSION
+                        _required_usage(binding, field, schema_version)
+                        if schema_version in {
+                            "scenario-source-bindings/v0.2",
+                            SOURCE_BINDINGS_SCHEMA_VERSION,
+                        }
                         else "scene_overlay"
                     ),
                 )
@@ -208,19 +218,25 @@ def _resolve_convert_asset_package(
     )
 
 
-def _required_usage(data: Mapping[str, Any], field: str) -> str:
+def _required_usage(
+    data: Mapping[str, Any], field: str, schema_version: str
+) -> str:
     usage = _required_string(data, "usage", field)
-    if usage not in {
+    allowed = {
         "scene_overlay",
         "rigid_object",
         "articulated_object",
         "visual_static_environment",
         "visual_static_object",
-    }:
+    }
+    if schema_version == SOURCE_BINDINGS_SCHEMA_VERSION:
+        allowed.add("static_support_object")
+    if usage not in allowed:
         raise ScenarioSourceBindingError(
             f"{field}.usage must be 'scene_overlay', 'rigid_object', "
             "'articulated_object', "
-            "'visual_static_environment', or 'visual_static_object'"
+            "'visual_static_environment', 'visual_static_object', or "
+            "'static_support_object'"
         )
     return usage
 

@@ -46,7 +46,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--scene1-source-usd", type=Path, required=True)
     parser.add_argument("--table-source-usd", type=Path, required=True)
-    parser.add_argument("--vessel-source-usd", type=Path, required=True)
+    parser.add_argument(
+        "--vessel-source-usd",
+        type=Path,
+        help="Legacy shared source USD for both vessels.",
+    )
+    parser.add_argument("--source-vessel-source-usd", type=Path)
+    parser.add_argument("--target-vessel-source-usd", type=Path)
     parser.add_argument("--scene1-environment-package", type=Path, required=True)
     parser.add_argument("--scene1-environment-manifest", type=Path, required=True)
     parser.add_argument("--table-package", type=Path, required=True)
@@ -111,6 +117,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not isinstance(raw_spec, dict):
         raise ValueError(f"Scenario spec must be a mapping: {args.spec}")
     spec = ScenarioSpec.from_mapping(raw_spec)
+    source_vessel_source_usd = (
+        args.source_vessel_source_usd or args.vessel_source_usd
+    )
+    target_vessel_source_usd = (
+        args.target_vessel_source_usd or args.vessel_source_usd
+    )
+    if source_vessel_source_usd is None or target_vessel_source_usd is None:
+        parser.error(
+            "provide both --source-vessel-source-usd and "
+            "--target-vessel-source-usd, or legacy --vessel-source-usd"
+        )
     if spec.scene.asset_id != SCENE1_ENVIRONMENT_ASSET_ID:
         raise ValueError(
             "Golden spec must declare the source-bound Scene1_hard environment"
@@ -131,12 +148,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.table_source_usd,
         expected_scope_prims=(EBENCH_TABLE_SCOPE,),
         producer_revision=args.table_revision,
-        usage="visual_static_object",
+        usage="static_support_object",
     )
     source_vessel_handoff = load_convert_asset_package_handoff(
         args.source_vessel_package,
         args.source_vessel_manifest,
-        args.vessel_source_usd,
+        source_vessel_source_usd,
         expected_scope_prims=(SOURCE_VESSEL_SCOPE,),
         producer_revision=args.source_vessel_revision,
         usage="rigid_object",
@@ -144,7 +161,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     target_vessel_handoff = load_convert_asset_package_handoff(
         args.target_vessel_package,
         args.target_vessel_manifest,
-        args.vessel_source_usd,
+        target_vessel_source_usd,
         expected_scope_prims=(TARGET_VESSEL_SCOPE,),
         producer_revision=args.target_vessel_revision,
         usage="rigid_object",

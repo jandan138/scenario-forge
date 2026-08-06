@@ -10,6 +10,7 @@ import yaml
 from scripts import generate_scientific_workbench_bimanual_pour as generator
 from tests.test_convert_asset_adapter import (
     _write_source_bound_handoff,
+    _write_static_support_handoff,
     _write_visual_static_handoff,
 )
 from tests.test_scenario_package_compiler import _write_source_scene
@@ -42,43 +43,47 @@ def _stub_tabletop_policy_for_non_tabletop_fixture_packages(
 def _convert_asset_args(
     root: Path,
     scene1_source_usd: Path,
-    vessel_source_usd: Path,
+    source_vessel_source_usd: Path,
+    target_vessel_source_usd: Path | None = None,
     *,
     scene1_environment_revision: str = "54ff5660937c08cf3784c44a3f500757ab4eed78",
     table_revision: str = "54ff5660937c08cf3784c44a3f500757ab4eed78",
     source_vessel_revision: str = "source-vessel-profile-r1",
     target_vessel_revision: str = "target-vessel-profile-r3",
 ) -> list[str]:
+    target_vessel_source_usd = target_vessel_source_usd or source_vessel_source_usd
     _, environment_package, environment_manifest, _ = _write_visual_static_handoff(
         root / "scene1_environment_handoff",
         source_usd=scene1_source_usd,
         scope=_SCENE1_ENVIRONMENT_SCOPE,
     )
-    _, table_package, table_manifest, _ = _write_visual_static_handoff(
-        root / "table_handoff",
-        source_usd=vessel_source_usd,
-        scope=_EBENCH_TABLE_SCOPE,
+    table_source_usd, table_package, table_manifest, _ = (
+        _write_static_support_handoff(root / "table_handoff")
     )
     _, source_package, source_manifest, _ = _write_source_bound_handoff(
         root / "source_vessel_handoff",
-        source_usd=vessel_source_usd,
+        source_usd=source_vessel_source_usd,
         with_interaction_contract=True,
         observed_collider_approximation="sdf",
         interaction_root="/World/conical_bottle03",
+        identity_facade_frames=True,
     )
     _, target_package, target_manifest, _ = _write_source_bound_handoff(
         root / "target_vessel_handoff",
-        source_usd=vessel_source_usd,
+        source_usd=target_vessel_source_usd,
         with_interaction_contract=True,
         interaction_root="/World/graduated_cylinder_03",
+        identity_facade_frames=True,
     )
     return [
         "--scene1-source-usd",
         str(scene1_source_usd),
         "--table-source-usd",
-        str(vessel_source_usd),
-        "--vessel-source-usd",
-        str(vessel_source_usd),
+        str(table_source_usd),
+        "--source-vessel-source-usd",
+        str(source_vessel_source_usd),
+        "--target-vessel-source-usd",
+        str(target_vessel_source_usd),
         "--scene1-environment-package",
         str(environment_package),
         "--scene1-environment-manifest",
@@ -127,24 +132,18 @@ def Xform "World"
     return source
 
 
-def test_golden_opening_frames_follow_the_assets_local_positive_y_axis() -> None:
+def test_golden_opening_frames_follow_the_identity_facades_local_positive_z_axis() -> None:
     scenario = yaml.safe_load(generator.DEFAULT_SPEC.read_text(encoding="utf-8"))
     objects = {item["id"]: item for item in scenario["objects"]}
 
     expected = {
-        "obj_conical_bottle03": [0.0, 0.1965674179, 0.0],
-        "obj_graduated_cylinder_03": [0.0, 0.2722941904, 0.0],
+        "obj_conical_bottle03": [0.0, 0.0, 0.1965674179],
+        "obj_graduated_cylinder_03": [0.0, 0.0, 0.2722941904],
     }
     for object_id, position in expected.items():
         opening = objects[object_id]["named_frames"]["opening"]
         assert opening["xyz"] == position
-        # Opening-frame +Z is the outward normal; the mesh opens along local +Y.
-        assert opening["wxyz"] == [
-            0.7071067811865476,
-            -0.7071067811865475,
-            0.0,
-            0.0,
-        ]
+        assert opening["wxyz"] == [1.0, 0.0, 0.0, 0.0]
 
 
 def test_golden_actor_roles_use_same_side_arms_instead_of_crossing_midline() -> None:
@@ -161,12 +160,18 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     tmp_path: Path,
 ) -> None:
     scene1_source_usd = _write_scene1_hard_environment_source(tmp_path)
-    vessel_source_usd = _write_source_scene(tmp_path / "vessel-source")
+    source_vessel_source_usd = _write_source_scene(tmp_path / "source-vessel-source")
+    target_vessel_source_usd = _write_source_scene(tmp_path / "target-vessel-source")
     output = tmp_path / "output"
 
     result = generator.main(
         [
-            *_convert_asset_args(tmp_path, scene1_source_usd, vessel_source_usd),
+            *_convert_asset_args(
+                tmp_path,
+                scene1_source_usd,
+                source_vessel_source_usd,
+                target_vessel_source_usd,
+            ),
             "--out",
             str(output),
             "--static-only",
@@ -220,7 +225,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     ]["consumer_usage"] == "visual_static_environment"
     assert upstream_by_asset["scientific_workbench_ebench_table"][
         "metadata"
-    ]["consumer_usage"] == "visual_static_object"
+    ]["consumer_usage"] == "static_support_object"
 
     asset_manifest = yaml.safe_load(
         (output / "assets/asset_manifest.yaml").read_text(encoding="utf-8")
@@ -251,9 +256,13 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     task_config = yaml.safe_load(
         (collected / "tasks/config.yaml").read_text(encoding="utf-8")
     )
-    assert task_config["evaluation_configs"][0]["physics_scene_config"] == {
-        "EnableGPUDynamics": True
-    }
+    assert task_config["evaluation_configs"][0]["physics_scene_config"][
+        "SolverType"
+    ] == "TGS"
+    assert task_config["evaluation_configs"][0]["physics_scene_config"][
+        "TimeStepsPerSecond"
+    ] == 60
+    assert len(task_config["evaluation_configs"][0]["preprocess_config"]) == 3
     assert task_config["evaluation_configs"][0]["robots"] == [
         {"type": "manip/lift2/R5a", "position": [-1.02, 0.0, 0.31]}
     ]
@@ -277,7 +286,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/"
         "source_bundle/scenario_forge_runtime/table.usd"
     )
-    assert table_layout["add_colliders"] is True
+    assert table_layout["add_colliders"] is False
     assert table_layout["add_rigid_body"] is False
     assert initial_layout["obj_conical_bottle03"]["position"] == [-0.25, 0.16, 0.81]
     assert initial_layout["obj_graduated_cylinder_03"]["position"] == [
@@ -291,14 +300,14 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         item["scenario_object_id"]: item for item in contract["objects"]
     }
     assert contract_objects["obj_conical_bottle03"]["named_frames"]["opening"] == {
-        "xyz": [0.0, 0.1965674179, 0.0],
-        "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+        "xyz": [0.0, 0.0, 0.1965674179],
+        "wxyz": [1.0, 0.0, 0.0, 0.0],
     }
     assert contract_objects["obj_graduated_cylinder_03"]["named_frames"][
         "opening"
     ] == {
-        "xyz": [0.0, 0.2722941904, 0.0],
-        "wxyz": [0.7071067811865476, -0.7071067811865475, 0.0, 0.0],
+        "xyz": [0.0, 0.0, 0.2722941904],
+        "wxyz": [1.0, 0.0, 0.0, 0.0],
     }
     assert contract["schema_version"] == (
         "scenario-forge-genmanip-runtime-contract/v0.4"
@@ -486,15 +495,15 @@ def test_scene1_environment_and_table_scopes_are_composed_in_both_scenes(
         )
     )
     assert collected
-    room = "/World/scientific_workbench_bimanual_pour/room"
+    room = "/World/_scene/room"
     assert collected.GetPrimAtPath(f"{room}/lab_015").IsActive()
     assert not collected.GetPrimAtPath(f"{room}/table").IsActive()
     assert not collected.GetPrimAtPath(
-        "/World/scientific_workbench_bimanual_pour/obj_table"
+        "/World/_scene/obj_table"
     ).IsValid()
     for path in [
-        "/World/scientific_workbench_bimanual_pour/obj_obj_conical_bottle03",
-        "/World/scientific_workbench_bimanual_pour/obj_obj_graduated_cylinder_03",
+        "/World/_scene/obj_obj_conical_bottle03",
+        "/World/_scene/obj_obj_graduated_cylinder_03",
     ]:
         assert collected.GetPrimAtPath(path).IsActive(), path
     active_physics_scenes = [
@@ -557,16 +566,10 @@ def test_runbook_stages_canary_in_a_private_genmanip_workspace() -> None:
     assert "--table-revision" in runbook
     assert "--source-vessel-revision" in runbook
     assert "--target-vessel-revision" in runbook
-    assert (
-        "SOURCE_VESSEL_REVISION=ba4ac8ccbf3c32f257abdbb68a554a74a90003f1"
-        in runbook
-    )
-    assert (
-        "TARGET_VESSEL_REVISION=4bb541161a652cc4e5dd63253adffba018f17137"
-        in runbook
-    )
+    assert "TABLE_REVISION=77600fc529446eeea0a6abc8de04da4c484dbae8" in runbook
+    assert "VESSEL_REVISION=db71fde4e97fa2698926b23a2a86af663eda6177" in runbook
     assert "Scene1_hard.usd" in runbook
     assert "Scene1_hard.usd:/World/lab_015" in runbook
     assert "/World/table" in runbook
-    assert "2026-07-15-aan-graduated-cylinder-r3-grasp-section" in runbook
+    assert "graduated_cylinder_identity/package" in runbook
     assert 'VESSEL_REVISION="$(git -C "$CONVERT_ASSET_ROOT" rev-parse HEAD)"' not in runbook

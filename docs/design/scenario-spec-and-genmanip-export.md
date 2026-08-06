@@ -36,12 +36,15 @@ adapters/ebench/genmanip/
   package_manifest.json
 ```
 
-The adapter scene has one child below `/World` and immediate wrappers for embedded
-task objects. A ConvertAsset `visual_static_object` table is deliberately not
-pre-embedded: its episode layout points to the adapter-owned `table.usd` runtime
-composition layer so GenManip's existing recovery path can create `obj_table` and
-apply `add_colliders: true`, `add_rigid_body: false`. The Lift2 robot is likewise
-injected by GenManip and is not authored into the environment USD.
+The adapter scene has one child below `/World/_scene` and immediate wrappers for
+embedded task objects. `_scene` is the unmodified GenManip runtime namespace; the
+portable manifest retains the canonical scenario ID independently. A ConvertAsset
+`static_support` table is deliberately not pre-embedded: its episode layout points
+to the adapter-owned `table.usd` runtime composition layer so recovery creates the
+expected `obj_table` wrapper while applying `add_colliders: false` and
+`add_rigid_body: false`. The qualified producer package owns the collider and
+physical material. The Lift2 robot is likewise injected by GenManip and is not
+authored into the environment USD.
 `episode_metadata.json` is the authoritative episode description; the pickle is a
 deterministic compatibility encoding of the same JSON-safe data. Scenario Forge
 never loads an external pickle.
@@ -91,15 +94,16 @@ ConvertAsset-owned visual-static deliveries:
 
 - `Scene1_hard.usd:/World/lab_015` is the complete visual laboratory room under
   the GenManip `room` prim, with its parent-composed units and transform retained;
-- `lab_001.usd:/World/table` is the `visual_static_object` task table, placed with
+- `lab_001.usd:/World/table` is the `static_support` task table, placed with
   the existing EBench workspace transform and coordinate protocol.
 
 The split removes Clean Beaker's task clutter by construction rather than by a
-Scenario Forge list of LabUtopia-specific prim names. Both producer deliveries must
-have no active physics residue. The normal GenManip table layout still creates its
-generic support collider; this adapter permits a `visual_static_object` only for
-that declared table and rejects a non-table one before it could receive GenManip's
-generic rigid-body defaults. Scenario Forge neither authors nor repairs asset physics.
+Scenario Forge list of LabUtopia-specific prim names. The room must have no active
+physics residue. The table must carry a passing ConvertAsset static-support
+contract and six-probe runtime qualification. GenManip is explicitly forbidden to
+add another collider or rigid body, so no hidden slab competes with the table
+package. Scenario Forge validates and composes this contract; it neither authors
+nor repairs asset physics.
 
 GenManip can only apply that native collider policy when the table is absent from
 the initial scene. The adapter therefore emits a thin `.usd` preload entry under
@@ -107,8 +111,9 @@ the initial scene. The adapter therefore emits a thin `.usd` preload entry under
 root so sibling `Looks` materials remain in scope, then clears only the composed
 `xformOpOrder` on the referenced root and declared table-scope chain. The original
 transform attributes remain present as provenance, while the episode wrapper owns
-the effective table pose and scale. The layer contains no mesh, material, collider,
-rigid-body, mass, or inertia authoring. Because it lives below `source_bundle`, the
+the effective table pose and scale. The layer contains no new mesh, material,
+collider, rigid-body, mass, or inertia authoring; the referenced package already
+contains the qualified support physics. Because it lives below `source_bundle`, the
 preview's existing tree digest covers both this composition glue and every
 referenced USD/MDL/texture dependency.
 

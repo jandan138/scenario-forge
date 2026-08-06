@@ -51,9 +51,9 @@
 <body>
   <header>
     <div class="shell">
-      <p class="eyebrow">eBench bimanual pour · support-audited room survey v4</p>
+      <p class="eyebrow">eBench bimanual pour · static-support room survey v5</p>
       <h1>同一项任务，五个合格房间，七种证据视角</h1>
-      <p>每个卡片先用四张标准房间视角交代完整空间，再给出三张任务视角。机器人、深蓝操作台、锥形瓶和量筒始终来自同一个实际 eBench 任务包；点击任意图查看 1920 × 1080 原图。</p>
+      <p>每个卡片先用四张标准房间视角交代完整空间，再给出三张任务视角。机器人、深蓝操作台、透明锥形瓶和量筒始终来自同一个 v5 eBench 任务包；操作台碰撞由 ConvertAsset 静态支撑包统一提供。点击任意图查看 1920 × 1080 原图。</p>
       <div class="proof-strip" aria-label="五个已发布背景高位对角总览">
         <a href="assets/example4-room-corner-a.png"><img src="assets/example4-room-corner-a.png" alt="example4 高位对角总览"></a>
         <a href="assets/wet-chemistry-room-corner-a.png"><img src="assets/wet-chemistry-room-corner-a.png" alt="现代湿化学实验室高位对角总览"></a>
@@ -123,7 +123,7 @@
         </div>
       </article>
     </section>
-    <aside class="claim"><strong>证据边界：</strong>五个背景均绑定 Code-as-Room 支持关系清单、ConvertAsset 独立几何复核和同一源 USD 哈希；七张图证明任务包能通过真实 Isaac Sim / GenManip 场景路径加载、复位，并在房间视角中同时呈现完整背景和实际 eBench 工作单元。对角图会为取证临时隐藏相机最近的完整墙体根，且渲染后恢复；源任务状态和物理均未修改。这仍不等于机械臂可达、无碰规划、倒液或 benchmark 成功。</aside>
+    <aside class="claim"><strong>证据边界：</strong>五个背景均绑定 Code-as-Room 支持关系清单、ConvertAsset 独立几何复核和同一源 USD 哈希；七张图证明 v5 任务包能通过真实 Isaac Sim 4.1 / GenManip 场景路径加载、复位，并在房间视角中同时呈现完整背景和实际 eBench 工作单元。操作台使用同一个通过六项探针的 source-bound 静态支撑包，GenManip 不再添加桌面 collider。对角图会为取证临时隐藏相机最近的完整墙体根，且渲染后恢复；源任务状态和物理均未修改。这仍不等于机械臂可达、无碰规划、倒液或 benchmark 成功。</aside>
     <a class="back" href="../">← 返回 Scenario Forge 文档</a>
   </main>
 </body>

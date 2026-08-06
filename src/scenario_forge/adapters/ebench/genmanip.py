@@ -14,6 +14,12 @@ from typing import Any, Mapping, cast
 import yaml
 
 from scenario_forge.adapters.ebench.preview import write_genmanip_preview_request
+from scenario_forge.adapters.isaac41_vr600_profile import (
+    PROFILE_ID as _SHARED_ISAAC41_PROFILE,
+    RUNTIME_ROBOT_TYPE as _SHARED_RUNTIME_ROBOT_TYPE,
+    genmanip_preprocess_config,
+    physx_scene_config,
+)
 from scenario_forge.assets.manifest import AssetManifestEntry, load_asset_manifest
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.package import (
@@ -29,6 +35,7 @@ _GENMANIP_AXIS_ALIGN = "manip/default/sr_based_genmanip_axis_align"
 _GENMANIP_RELATIONSHIP = "manip/default/sr_based_genmanip_relationship"
 _GENMANIP_FRAME_AWARE = "manip/default/scenario_forge_runtime_predicate"
 _ROBOT_PROFILE = "manip/lift2/R5a"
+_SUPPORTED_ROBOT_PROFILES = frozenset({_ROBOT_PROFILE, _SHARED_ISAAC41_PROFILE})
 _TABLE_LAYOUT_UID = "00000000000000000000000000000000"
 _USD_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _PICKLE_PROTOCOL = 4
@@ -166,9 +173,10 @@ def export_genmanip_collected_package(
 
     robot = _required_mapping(scenario, "robot", "scenario spec")
     robot_profile = _required_string(robot, "profile_ref", "scenario robot")
-    if robot_profile != _ROBOT_PROFILE:
+    if robot_profile not in _SUPPORTED_ROBOT_PROFILES:
         raise GenManipExportError(
-            f"GenManip collected-package export supports {_ROBOT_PROFILE!r}, got {robot_profile!r}"
+            "GenManip collected-package export supports "
+            f"{sorted(_SUPPORTED_ROBOT_PROFILES)!r}, got {robot_profile!r}"
         )
     success = _required_mapping(scenario, "success", "scenario spec")
     claim_scope = _required_string(success, "claim_scope", "scenario success")
@@ -458,7 +466,7 @@ def _write_collected_package(
     table = _table_object(objects)
     table_asset_id = _required_string(table, "asset_id", "table object")
     table_asset = assets_by_id[table_asset_id]
-    if table_asset.role == "static_object":
+    if table_asset.role in {"static_object", "static_support_object"}:
         runtime_dir = source_bundle / "scenario_forge_runtime"
         runtime_dir.mkdir()
         (runtime_dir / "table.usd").write_text(
@@ -476,6 +484,14 @@ def _write_collected_package(
         source_room_pose=source_room_pose,
         assets_by_id=assets_by_id,
         objects=objects,
+        use_shared_runtime_namespace=(
+            _required_string(
+                _required_mapping(scenario, "robot", "scenario spec"),
+                "profile_ref",
+                "scenario robot",
+            )
+            == _SHARED_ISAAC41_PROFILE
+        ),
     )
     (scene_dir / "scene.usda").write_text(scene_text, encoding="utf-8")
 
@@ -559,7 +575,12 @@ def _write_collected_package(
         },
         "runtime_requirements": {
             "runtime": "GenManip-Sim",
-            "robot_profile": _ROBOT_PROFILE,
+            "robot_profile": _required_string(
+                _required_mapping(scenario, "robot", "scenario spec"),
+                "profile_ref",
+                "scenario robot",
+            ),
+            "runtime_robot_type": _SHARED_RUNTIME_ROBOT_TYPE,
             "robot_injection": "config_only",
             "task_dir": f"collected_packages/{scenario_id}/tasks",
             "registered_metrics": [
@@ -607,6 +628,7 @@ def _task_config(
     articulation_bindings: Mapping[str, _ArticulationObjectBinding],
 ) -> dict[str, Any]:
     robot = _required_mapping(scenario, "robot", "scenario spec")
+    robot_profile = _required_string(robot, "profile_ref", "scenario robot")
     spawn = _required_mapping(robot, "spawn", "scenario robot")
     position = _number_list(spawn.get("xyz"), 3, "scenario robot spawn.xyz")
     table_id = _required_string(table, "id", "table object")
@@ -651,7 +673,16 @@ def _task_config(
         "num_steps": _positive_int(scenario.get("max_steps"), "scenario max_steps"),
         "physics_dt": 1.0 / 60.0,
         "rendering_dt": 1.0 / 60.0,
-        "robots": [{"type": _ROBOT_PROFILE, "position": position}],
+        "robots": [
+            {
+                "type": (
+                    _SHARED_RUNTIME_ROBOT_TYPE
+                    if robot_profile == _SHARED_ISAAC41_PROFILE
+                    else _ROBOT_PROFILE
+                ),
+                "position": position,
+            }
+        ],
         "domain_randomization": {
             "cameras": {
                 "type": "fixed",
@@ -678,12 +709,18 @@ def _task_config(
             "planner": "curobo",
         },
         "object_config": object_config,
-        "preprocess_config": [],
+        "preprocess_config": (
+            genmanip_preprocess_config()
+            if robot_profile == _SHARED_ISAAC41_PROFILE
+            else []
+        ),
         "layout_config": {"ignored_objects": []},
         "instruction": _required_string(scenario, "instruction", "scenario spec"),
         "action_contract": _action_contract(),
     }
-    if requires_gpu_dynamics:
+    if robot_profile == _SHARED_ISAAC41_PROFILE:
+        evaluation["physics_scene_config"] = physx_scene_config()
+    elif requires_gpu_dynamics:
         evaluation["physics_scene_config"] = {"EnableGPUDynamics": True}
     return {"demonstration_configs": [], "evaluation_configs": [evaluation]}
 
@@ -740,10 +777,15 @@ def _episode_metadata(
             **base_layout,
             "path": (
                 _genmanip_collected_table_preload_path(scenario_id)
-                if binding.is_table and asset.role == "static_object"
+                if binding.is_table
+                and asset.role in {"static_object", "static_support_object"}
                 else ""
             ),
-            "add_colliders": object_id not in qualified_object_ids,
+            "add_colliders": (
+                False
+                if binding.is_table and asset.role == "static_support_object"
+                else object_id not in qualified_object_ids
+            ),
             "add_rigid_body": (
                 not binding.is_table and object_id not in qualified_object_ids
             ),
@@ -1639,14 +1681,15 @@ def _validate_visual_static_object_requirements(
     assets_by_id: Mapping[str, AssetManifestEntry],
     table: Mapping[str, Any],
 ) -> None:
-    """Route a visual-static table through GenManip's native static-table path.
+    """Route package-owned static tables through GenManip's preload path.
 
     GenManip gives non-table objects generic colliders and a generic rigid body.
     A ConvertAsset ``visual_static_object`` is intentionally nonphysical, so this
-    adapter supports it only for the declared table.  The collected scene leaves
-    that table uninstantiated so ``recovery_scene`` preloads the package root,
-    preserves its dependency scope, and applies GenManip's existing static-table
-    collider policy without adding a rigid body.
+    adapter supports it only for the declared table.  A v0.3
+    ``static_support_object`` already owns its qualified collider, so the
+    collected scene preloads the package with ``add_colliders: false`` and
+    ``add_rigid_body: false``. Historical ``visual_static_object`` packages keep
+    the old GenManip collider behavior for compatibility.
     """
 
     table_id = _required_string(table, "id", "table object")
@@ -1654,14 +1697,17 @@ def _validate_visual_static_object_requirements(
         object_id = _required_string(item, "id", "scenario object")
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
         asset = assets_by_id[asset_id]
-        if asset.role == "static_object" and object_id != table_id:
+        if (
+            asset.role in {"static_object", "static_support_object"}
+            and object_id != table_id
+        ):
             raise GenManipExportError(
                 "visual_static_object asset "
                 f"{asset_id!r} may only be bound to the declared table "
                 f"{table_id!r}; non-table objects would receive GenManip's "
                 "default rigid-body behavior"
             )
-        if asset.role == "static_object":
+        if asset.role in {"static_object", "static_support_object"}:
             _runtime_table_preload_usda(asset, item)
 
 
@@ -1911,8 +1957,10 @@ def _scene_usda(
     source_room_pose: Mapping[str, Any] | None,
     assets_by_id: Mapping[str, AssetManifestEntry],
     objects: list[Mapping[str, Any]],
+    use_shared_runtime_namespace: bool = False,
 ) -> str:
     _require_usd_identifier(scenario_id, "scenario_id")
+    scene_root_name = "_scene" if use_shared_runtime_namespace else scenario_id
     scene_asset_ids = [*overlay_asset_ids, source_asset_id]
     source_references = [
         _asset_reference(assets_by_id[asset_id]) for asset_id in scene_asset_ids
@@ -1946,7 +1994,7 @@ def _scene_usda(
         "",
         'def Xform "World"',
         "{",
-        f'    def Xform "{scenario_id}"',
+        f'    def Xform "{scene_root_name}"',
         "    {",
         '        def Xform "room" (',
         "            prepend references = [",
@@ -1996,7 +2044,10 @@ def _scene_usda(
         object_id = binding.scenario_object_id
         wrapper_name = binding.wrapper_name
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
-        if binding.is_table and assets_by_id[asset_id].role == "static_object":
+        if binding.is_table and assets_by_id[asset_id].role in {
+            "static_object",
+            "static_support_object",
+        }:
             continue
         source_prim = _required_string(
             item, "source_prim_path", f"scenario object {object_id}"
@@ -2034,7 +2085,7 @@ def _scene_usda(
         lines.extend(
             _material_binding_lines(
                 item,
-                material_root=f"/World/{scenario_id}/room/Looks",
+                material_root=f"/World/{scene_root_name}/room/Looks",
                 indent=12,
             )
         )

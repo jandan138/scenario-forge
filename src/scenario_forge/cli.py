@@ -99,7 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     package_compile_parser.add_argument(
         "--source-bindings",
         required=True,
-        help="scenario-source-bindings/v0.1 or v0.2 YAML",
+        help="scenario-source-bindings/v0.1, v0.2, or v0.3 YAML",
     )
     package_compile_parser.add_argument("--out", required=True, help="Output package directory")
     package_compile_parser.add_argument(
