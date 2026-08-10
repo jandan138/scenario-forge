@@ -65,6 +65,40 @@ def test_preview_orchestration_uses_argv_and_supports_paths_with_spaces(
     assert (collected_root / EVIDENCE_DIR / "scene_overview.png").is_file()
 
 
+def test_preview_orchestration_prepends_explicit_runtime_python_paths(
+    tmp_path: Path,
+) -> None:
+    collected_root = _build_collected_package(tmp_path / "package")
+    request = _load_yaml(collected_root / "evidence/render_request.yaml")
+    preset = collected_root / "fake preset evidence"
+    _write_passing_preview_evidence(collected_root, request).rename(preset)
+    isaac_python = _write_python_forwarder(tmp_path / "runtime" / "isaac-python")
+    renderer_script = _write_fake_renderer(
+        tmp_path / "renderer" / "environment.py",
+        mode="success",
+    )
+    genmanip_root = tmp_path / "GenManip"
+    genmanip_root.mkdir()
+    curobo_source = tmp_path / "curobo source"
+    curobo_source.mkdir()
+
+    _run_preview(
+        collected_root,
+        isaac_python=isaac_python,
+        renderer_script=renderer_script,
+        genmanip_root=genmanip_root,
+        timeout_seconds=5.0,
+        runtime_python_paths=(curobo_source,),
+    )
+
+    environment = json.loads(
+        (collected_root / "fake_renderer_environment.json").read_text()
+    )
+    assert environment["PYTHONPATH"].split(":", maxsplit=1)[0] == str(
+        curobo_source.resolve()
+    )
+
+
 def test_renderer_accepts_explicit_camera_pose() -> None:
     module = _load_isaac_renderer_module()
     import numpy as np
@@ -596,6 +630,7 @@ def _write_fake_renderer(path: Path, *, mode: str) -> Path:
             f"""\
             import argparse
             import json
+            import os
             from pathlib import Path
             import shutil
             import sys
@@ -608,6 +643,10 @@ def _write_fake_renderer(path: Path, *, mode: str) -> Path:
             args = parser.parse_args()
             (args.collected_root / "fake_renderer_argv.json").write_text(
                 json.dumps(sys.argv[1:]), encoding="utf-8"
+            )
+            (args.collected_root / "fake_renderer_environment.json").write_text(
+                json.dumps({{"PYTHONPATH": os.environ.get("PYTHONPATH", "")}}),
+                encoding="utf-8",
             )
 
             mode = {mode!r}
@@ -654,6 +693,7 @@ def _run_preview(
     renderer_script: Path,
     genmanip_root: Path,
     timeout_seconds: float,
+    runtime_python_paths: tuple[Path, ...] = (),
 ) -> object:
     from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
 
@@ -663,6 +703,7 @@ def _run_preview(
         renderer_script,
         genmanip_root,
         timeout_seconds=timeout_seconds,
+        runtime_python_paths=runtime_python_paths,
     )
 
 

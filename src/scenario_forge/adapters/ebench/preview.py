@@ -83,6 +83,7 @@ def run_genmanip_initial_preview(
     genmanip_root: str | Path,
     *,
     timeout_seconds: float = 900.0,
+    runtime_python_paths: tuple[str | Path, ...] = (),
 ) -> GenManipPreviewValidationResult:
     root = Path(collected_root).resolve()
     python_path = Path(isaac_python).resolve()
@@ -106,6 +107,12 @@ def run_genmanip_initial_preview(
         raise GenManipPreviewError(f"GenManip root does not exist: {runtime_root}")
     if timeout_seconds <= 0:
         raise GenManipPreviewError("preview timeout_seconds must be positive")
+    resolved_python_paths = tuple(Path(path).resolve() for path in runtime_python_paths)
+    for path in resolved_python_paths:
+        if not path.is_dir():
+            raise GenManipPreviewError(
+                f"runtime Python source path does not exist: {path}"
+            )
 
     command = [
         str(python_path),
@@ -123,6 +130,13 @@ def run_genmanip_initial_preview(
     # runtime's command-line tools discoverable.  This remains a process-bound
     # adapter concern; it does not modify GenManip or the package.
     environment = dict(os.environ)
+    inherited_pythonpath = environment.get("PYTHONPATH", "")
+    environment["PYTHONPATH"] = os.pathsep.join(
+        [
+            *[str(path) for path in resolved_python_paths],
+            *([inherited_pythonpath] if inherited_pythonpath else []),
+        ]
+    )
     runtime_bin = str(python_path.parent)
     inherited_path = environment.get("PATH", "")
     environment["PATH"] = (

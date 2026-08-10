@@ -525,15 +525,27 @@ def _write_collected_package(
     source_bundle = scene_dir / "source_bundle"
     shutil.copytree(package_root / "assets", source_bundle)
     table = _table_object(objects)
-    table_asset_id = _required_string(table, "asset_id", "table object")
-    table_asset = assets_by_id[table_asset_id]
-    if table_asset.role in {"static_object", "static_support_object"}:
+    static_items = [
+        item
+        for item in objects
+        if assets_by_id[
+            _required_string(item, "asset_id", "scenario object")
+        ].role
+        in {"static_object", "static_support_object"}
+    ]
+    if static_items:
         runtime_dir = source_bundle / "scenario_forge_runtime"
         runtime_dir.mkdir()
-        (runtime_dir / "table.usd").write_text(
-            _runtime_table_preload_usda(table_asset, table),
-            encoding="utf-8",
-        )
+        table_id = _required_string(table, "id", "table object")
+        for item in static_items:
+            object_id = _required_string(item, "id", "scenario object")
+            asset_id = _required_string(
+                item, "asset_id", f"scenario object {object_id}"
+            )
+            (runtime_dir / _static_preload_filename(object_id, table_id)).write_text(
+                _runtime_static_preload_usda(assets_by_id[asset_id], item),
+                encoding="utf-8",
+            )
 
     if producer_entrypoint is None:
         scene_text = _scene_usda(
@@ -875,18 +887,23 @@ def _episode_metadata(
             "type": "object",
             **base_layout,
             "path": (
-                _genmanip_collected_table_preload_path(scenario_id)
-                if binding.is_table
-                and asset.role in {"static_object", "static_support_object"}
+                _genmanip_collected_static_preload_path(
+                    scenario_id,
+                    object_id,
+                    table_id,
+                )
+                if asset.role in {"static_object", "static_support_object"}
                 else ""
             ),
             "add_colliders": (
                 False
-                if binding.is_table and asset.role == "static_support_object"
+                if asset.role in {"static_object", "static_support_object"}
                 else object_id not in qualified_object_ids
             ),
             "add_rigid_body": (
-                not binding.is_table and object_id not in qualified_object_ids
+                False
+                if asset.role in {"static_object", "static_support_object"}
+                else not binding.is_table and object_id not in qualified_object_ids
             ),
             "is_articulation_part": False,
         }
@@ -1805,34 +1822,21 @@ def _validate_visual_static_object_requirements(
     assets_by_id: Mapping[str, AssetManifestEntry],
     table: Mapping[str, Any],
 ) -> None:
-    """Route package-owned static tables through GenManip's preload path.
+    """Validate package-owned static objects for the preload path.
 
-    GenManip gives non-table objects generic colliders and a generic rigid body.
-    A ConvertAsset ``visual_static_object`` is intentionally nonphysical, so this
-    adapter supports it only for the declared table.  A v0.3
-    ``static_support_object`` already owns its qualified collider, so the
-    collected scene preloads the package with ``add_colliders: false`` and
-    ``add_rigid_body: false``. Historical ``visual_static_object`` packages keep
-    the old GenManip collider behavior for compatibility.
+    GenManip gives ordinary objects generic physics. Scenario Forge therefore
+    preloads every static object with both generic-physics switches disabled;
+    this preserves ConvertAsset-owned static-support colliders and keeps visual
+    fixtures intentionally nonphysical without modifying GenManip.
     """
 
-    table_id = _required_string(table, "id", "table object")
+    _required_string(table, "id", "table object")
     for item in objects:
         object_id = _required_string(item, "id", "scenario object")
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
         asset = assets_by_id[asset_id]
-        if (
-            asset.role in {"static_object", "static_support_object"}
-            and object_id != table_id
-        ):
-            raise GenManipExportError(
-                "visual_static_object asset "
-                f"{asset_id!r} may only be bound to the declared table "
-                f"{table_id!r}; non-table objects would receive GenManip's "
-                "default rigid-body behavior"
-            )
         if asset.role in {"static_object", "static_support_object"}:
-            _runtime_table_preload_usda(asset, item)
+            _runtime_static_preload_usda(asset, item)
 
 
 def _interaction_requires_gpu_dynamics(
@@ -2168,7 +2172,7 @@ def _scene_usda(
         object_id = binding.scenario_object_id
         wrapper_name = binding.wrapper_name
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
-        if binding.is_table and assets_by_id[asset_id].role in {
+        if assets_by_id[asset_id].role in {
             "static_object",
             "static_support_object",
         }:
@@ -2511,7 +2515,16 @@ def _producer_entrypoint_scene_usda(
     )
 
 
-def _genmanip_collected_table_preload_path(scenario_id: str) -> str:
+def _static_preload_filename(object_id: str, table_id: str) -> str:
+    _require_usd_identifier(object_id, "static preload object id")
+    return "table.usd" if object_id == table_id else f"{object_id}.usd"
+
+
+def _genmanip_collected_static_preload_path(
+    scenario_id: str,
+    object_id: str,
+    table_id: str,
+) -> str:
     return (
         PurePosixPath("collected_packages")
         / scenario_id
@@ -2521,20 +2534,20 @@ def _genmanip_collected_table_preload_path(scenario_id: str) -> str:
         / scenario_id
         / "source_bundle"
         / "scenario_forge_runtime"
-        / "table.usd"
+        / _static_preload_filename(object_id, table_id)
     ).as_posix()
 
 
-def _runtime_table_preload_usda(
+def _runtime_static_preload_usda(
     asset: AssetManifestEntry,
-    table: Mapping[str, Any],
+    item: Mapping[str, Any],
 ) -> str:
     root_prim = asset.metadata.get("root_prim_path")
     if not isinstance(root_prim, str) or not root_prim:
         raise GenManipExportError(
-            f"visual-static table asset {asset.asset_id!r} is missing root_prim_path"
+            f"static asset {asset.asset_id!r} is missing root_prim_path"
         )
-    source_prim = _required_string(table, "source_prim_path", "table object")
+    source_prim = _required_string(item, "source_prim_path", "static object")
     scope_parts = _relative_prim_parts(root_prim, source_prim)
     source_reference = PurePosixPath(_asset_reference(asset))
     relative_reference = PurePosixPath("..", *source_reference.parts[1:])

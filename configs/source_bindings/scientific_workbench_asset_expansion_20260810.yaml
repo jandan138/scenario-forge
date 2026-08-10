@@ -1,0 +1,200 @@
+schema_version: scenario-source-bindings/v0.3
+bindings:
+  scientific_environment_code_room_example4_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/example4/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/example4/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/example4/package/evidence/manifest.json
+    producer_revision: generated-scientific-labs-v2-20260804
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room example4; ConvertAsset v2 support remediation]
+    redistributable: true
+  scientific_environment_code_room_teaching_research_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/teaching_research/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/teaching_research/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/teaching_research/package/evidence/manifest.json
+    producer_revision: generated-scientific-labs-v2-20260804
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room teaching research; ConvertAsset v2]
+    redistributable: true
+  scientific_environment_code_room_wet_chemistry_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package/evidence/manifest.json
+    producer_revision: generated-scientific-labs-v2-20260804
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room modern wet chemistry; ConvertAsset v2 support remediation]
+    redistributable: true
+  scientific_environment_code_room_bioclean_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/bioclean/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/bioclean/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/bioclean/package/evidence/manifest.json
+    producer_revision: generated-scientific-labs-v2-20260804
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room bioclean; ConvertAsset v2 floating-prop remediation]
+    redistributable: true
+  scientific_environment_code_room_analytical_instrumentation_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/package/evidence/manifest.json
+    producer_revision: generated-scientific-labs-v2-20260804
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room analytical instrumentation; ConvertAsset v2]
+    redistributable: true
+  scientific_workbench_ebench_table_static_support:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: /cpfs/shared/simulation/zhuzihou/dev/LabUtopia/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labutopia_lab001_table_static_support_r2
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labutopia_lab001_table_static_support_r2/evidence/manifest.json
+    producer_revision: 77600fc529446eeea0a6abc8de04da4c484dbae8
+    expected_scope_prims: [/World/table]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [LabUtopia lab_001 table; ConvertAsset static-support r2]
+    redistributable: true
+  scientific_workbench_conical_bottle03_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/package/evidence/manifest.json
+    producer_revision: scientific-workbench-conical-bottle-identity-r2-20260731
+    expected_scope_prims: [/World/conical_bottle03]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [LabUtopia conical_bottle03; ConvertAsset identity facade]
+    redistributable: true
+  scientific_workbench_graduated_cylinder_03_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/graduated_cylinder_identity/package/evidence/manifest.json
+    producer_revision: scientific-workbench-graduated-cylinder-identity-r4-20260731
+    expected_scope_prims: [/World/graduated_cylinder_03]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [LabUtopia graduated_cylinder_03; ConvertAsset identity facade over source-bound r3]
+    redistributable: true
+  scientific_workbench_funnel_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/funnel/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/funnel/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/funnel/package/evidence/manifest.json
+    producer_revision: scientific-workbench-funnel-r2-20260731
+    expected_scope_prims: [/World/Funnel]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [valid_with_json archive funnel; ConvertAsset r2]
+    redistributable: true
+  scientific_workbench_beaker_dynamic_r3:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/beaker_transparent_r3/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/beaker_transparent_r3
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/beaker_transparent_r3/evidence/manifest.json
+    producer_revision: scientific-workbench-beaker-r3-20260810
+    expected_scope_prims: [/World/Beaker]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [valid_with_json archive beaker; ConvertAsset transparent r3 with interior region]
+    redistributable: true
+  scientific_workbench_glass_stirring_rod_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/glass_stirring_rod/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/glass_stirring_rod
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/glass_stirring_rod/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810
+    expected_scope_prims: [/World/GlassStirringRod]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 glass stirring rod; ConvertAsset source-bound package]
+    redistributable: true
+  scientific_workbench_centrifuge_tube_50ml_body_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/centrifuge_tube_50ml_body/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/centrifuge_tube_50ml_body
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/centrifuge_tube_50ml_body/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810
+    expected_scope_prims: [/World/CentrifugeTube50mlBody]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 50 mL centrifuge tube; ConvertAsset transparent body]
+    redistributable: true
+  scientific_workbench_centrifuge_tube_50ml_cap_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/centrifuge_tube_50ml_cap/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/centrifuge_tube_50ml_cap
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/centrifuge_tube_50ml_cap/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810
+    expected_scope_prims: [/World/CentrifugeTube50mlCap]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 red cap; ConvertAsset preview-surface cap]
+    redistributable: true
+  scientific_workbench_tube_rack_k125_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/tube_rack_k125/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/tube_rack_k125
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/tube_rack_k125/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810-k125-fit-pass
+    expected_scope_prims: [/World/TubeRack]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 aluminum tube rack; ConvertAsset uniform scale k1.25]
+    redistributable: true
+  scientific_workbench_magnetic_stir_bar_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/magnetic_stir_bar/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/magnetic_stir_bar
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/magnetic_stir_bar/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810
+    expected_scope_prims: [/World/MagneticStirBar]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 magnetic stir bar; ConvertAsset source-bound package]
+    redistributable: true
+  scientific_workbench_analytical_balance_static_support:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/analytical_balance/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/analytical_balance
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/analytical_balance/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810
+    expected_scope_prims: [/World/AnalyticalBalance]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 textured balance; ConvertAsset static support]
+    redistributable: true
+  scientific_workbench_petri_dish_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/petri_dish/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/petri_dish
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/petri_dish/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810
+    expected_scope_prims: [/World/PetriDish]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 Petri dish; ConvertAsset source-bound package]
+    redistributable: true
+  scientific_workbench_micro_spatula_visual_static:
+    resolver: convert_asset_package
+    usage: visual_static_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/facades/micro_spatula/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/micro_spatula
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_asset_library_20260810/packages/micro_spatula/evidence/manifest.json
+    producer_revision: scientific-workbench-asset-library-20260810
+    expected_scope_prims: [/World/MicroSpatula]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 micro spatula; ConvertAsset visual static]
+    redistributable: true

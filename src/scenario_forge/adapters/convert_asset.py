@@ -98,6 +98,7 @@ class ConvertAssetInteractionContract:
     active_rigid_body_prims: tuple[str, ...]
     collider_prims: tuple[str, ...]
     named_frames: Mapping[str, Mapping[str, Any]]
+    interaction_regions: Mapping[str, Mapping[str, Any]]
     contract_payload_sha256: str
     runtime_tree_sha256: str
     qualification_report_paths: tuple[str, ...]
@@ -3066,23 +3067,26 @@ def _load_interaction_contract(
                 "rigid_object usage requires a passing manifest.interaction_contract"
             )
         return None
+    contract_fields = {
+        "schema_version",
+        "status",
+        "profile",
+        "asset_entry_prim",
+        "runtime_identity",
+        "disabled_source_rigid_bodies",
+        "collider_prims",
+        "open_top",
+        "named_frames",
+        "closure",
+        "root_motion_gate",
+        "stable_support_gate",
+        "gripper_collision_gate",
+    }
+    if "interaction_regions" in contract:
+        contract_fields.add("interaction_regions")
     _require_exact_fields(
         contract,
-        {
-            "schema_version",
-            "status",
-            "profile",
-            "asset_entry_prim",
-            "runtime_identity",
-            "disabled_source_rigid_bodies",
-            "collider_prims",
-            "open_top",
-            "named_frames",
-            "closure",
-            "root_motion_gate",
-            "stable_support_gate",
-            "gripper_collision_gate",
-        },
+        contract_fields,
         "manifest.interaction_contract",
     )
     _require_value(
@@ -3315,6 +3319,83 @@ def _load_interaction_contract(
         _require_value(frame, "authoritative", True, field)
         normalized_frames[frame_name] = frame
 
+    normalized_regions: dict[str, Mapping[str, Any]] = {}
+    if "interaction_regions" in contract:
+        if profile_schema_version != "aan.object_interaction_profile.v2":
+            raise ConvertAssetHandoffError(
+                "interaction_contract.interaction_regions requires profile v2"
+            )
+        regions = _mapping(
+            contract.get("interaction_regions"),
+            "interaction_contract.interaction_regions",
+        )
+        if not regions:
+            raise ConvertAssetHandoffError(
+                "interaction_contract.interaction_regions must not be empty"
+            )
+        for region_name, raw_region in regions.items():
+            if (
+                not isinstance(region_name, str)
+                or not region_name
+                or "." in region_name
+                or "/" in region_name
+            ):
+                raise ConvertAssetHandoffError(
+                    "interaction_contract.interaction_regions keys must be path-safe"
+                )
+            field = f"interaction_contract.interaction_regions.{region_name}"
+            region = _mapping(raw_region, field)
+            _require_exact_fields(
+                region,
+                {
+                    "shape",
+                    "frame",
+                    "axis_frame_local",
+                    "radius_body_local_usd",
+                    "half_height_body_local_usd",
+                    "purpose",
+                    "authoritative",
+                },
+                field,
+            )
+            _require_value(region, "shape", "cylinder", field)
+            frame_name = _required_string(region, "frame", field)
+            if frame_name not in normalized_frames:
+                raise ConvertAssetHandoffError(
+                    f"{field}.frame must name an authoritative named frame"
+                )
+            axis = _finite_number_list(
+                region.get("axis_frame_local"), 3, f"{field}.axis_frame_local"
+            )
+            if not math.isclose(
+                sum(component * component for component in axis),
+                1.0,
+                rel_tol=0.0,
+                abs_tol=1e-6,
+            ):
+                raise ConvertAssetHandoffError(
+                    f"{field}.axis_frame_local must be a unit vector"
+                )
+            for size_field in (
+                "radius_body_local_usd",
+                "half_height_body_local_usd",
+            ):
+                if _finite_number(region.get(size_field), f"{field}.{size_field}") <= 0:
+                    raise ConvertAssetHandoffError(
+                        f"{field}.{size_field} must be positive"
+                    )
+            purpose = _string_list(region.get("purpose"), f"{field}.purpose")
+            if (
+                not purpose
+                or len(purpose) != len(set(purpose))
+                or not set(purpose).issubset({"containment", "tool_motion"})
+            ):
+                raise ConvertAssetHandoffError(
+                    f"{field}.purpose is not a supported unique non-empty set"
+                )
+            _require_value(region, "authoritative", True, field)
+            normalized_regions[region_name] = region
+
     open_top = _required_mapping(contract, "open_top", "manifest.interaction_contract")
     _require_exact_fields(
         open_top,
@@ -3424,6 +3505,7 @@ def _load_interaction_contract(
         active_rigid_body_prims=active_rigid_bodies,
         collider_prims=tuple(collider_paths),
         named_frames=normalized_frames,
+        interaction_regions=normalized_regions,
         contract_payload_sha256=_required_string(
             closure_payload,
             "contract_payload_sha256",
@@ -3489,6 +3571,8 @@ def _validate_interaction_closure(
             "named_frames",
         )
     }
+    if "interaction_regions" in contract:
+        expected_payload["interaction_regions"] = contract["interaction_regions"]
     expected_payload_sha = _canonical_json_sha256(expected_payload)
     if _required_sha256(
         closure,

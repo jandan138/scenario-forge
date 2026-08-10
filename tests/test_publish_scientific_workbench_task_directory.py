@@ -55,3 +55,50 @@ def test_publish_task_directory_copies_candidate_overview_and_rewrites_page_link
     html = output.read_text(encoding="utf-8")
     assert image_path not in html
     assert html.count("assets/pour-candidate-overview.png") == 2
+
+
+def test_publish_task_directory_copies_all_background_variant_overviews(
+    tmp_path: Path,
+) -> None:
+    module = _script_module()
+    source = tmp_path / "build/directory"
+    destination = tmp_path / "docs/task-directory"
+    source.mkdir(parents=True)
+    releases = []
+    links = []
+    for index in range(2):
+        image = tmp_path / "build" / f"variant-{index}.png"
+        image.write_bytes(f"variant-{index}".encode())
+        relative = f"../variant-{index}.png"
+        releases.append(
+            {
+                "release_id": f"pour.v{index}",
+                "evidence": {"overview_image": relative},
+            }
+        )
+        links.append(f'<a href="{relative}">variant {index}</a>')
+    (source / "task_directory.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "tasks": [
+                    {
+                        "task_id": "pour",
+                        "candidate_evidence": None,
+                        "latest_evidence": None,
+                        "releases": releases,
+                    }
+                ]
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    (source / "index.html").write_text("".join(links), encoding="utf-8")
+
+    output = module.publish_task_directory(source, destination)
+
+    assert (destination / "assets/pour-release-01-overview.png").read_bytes() == b"variant-0"
+    assert (destination / "assets/pour-release-02-overview.png").read_bytes() == b"variant-1"
+    html = output.read_text(encoding="utf-8")
+    assert "../variant-0.png" not in html
+    assert "../variant-1.png" not in html

@@ -1,0 +1,87 @@
+schema_version: scenario-spec/v0.7
+scenario_id: scientific_workbench_glass_rod_stir
+domain: scientific_workbench
+task_family: bimanual_stir
+instruction: 辅助臂固定烧杯；操作臂拿起玻璃棒，将工作端插入杯内安全区域，沿任一方向累计搅拌至少一周，最后将玻璃棒放回。
+scene:
+  asset_id: scientific_environment_code_room_example4_v2
+  root_prim_path: /World
+  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table_static_support
+    source_prim_path: /World/table
+    role: table
+    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+  - id: obj_beaker
+    asset_id: scientific_workbench_beaker_dynamic_r3
+    source_prim_path: /World/Beaker
+    role: target_container
+    pose: {xyz: [-0.15, -0.17, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.055], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      opening: {xyz: [0.0, 0.0, 0.10], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      interior_center: {xyz: [0.0, 0.0, 0.052], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_glass_rod
+    asset_id: scientific_workbench_glass_stirring_rod_dynamic
+    source_prim_path: /World/GlassStirringRod
+    role: stirring_tool
+    pose: {xyz: [-0.12, 0.25, 0.7763756155], wxyz: [0.7071067812, 0.7071067812, 0.0, 0.0]}
+    named_frames:
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.225], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      working_tip: {xyz: [0.0, 0.0, 0.008], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, hold, release]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, insert, stir, place, release]}
+steps:
+  - {id: hold_beaker, skill: grasp_and_hold, actors: [auxiliary_arm], parameters: {object: obj_beaker, grasp_frame: obj_beaker.grasp}}
+  - {id: pick_rod, skill: lift, actors: [operating_arm], parameters: {object: obj_glass_rod, grasp_frame: obj_glass_rod.grasp}, depends_on: [hold_beaker]}
+  - {id: insert_rod, skill: insert, actors: [operating_arm], parameters: {object: obj_glass_rod, source_frame: obj_glass_rod.working_tip, target_frame: obj_beaker.interior_center, containment_region: obj_beaker.interior_safe}, depends_on: [pick_rod]}
+  - id: stir_once
+    skill: stir
+    actors: [operating_arm]
+    parameters:
+      object: obj_glass_rod
+      tracked_frame: obj_glass_rod.working_tip
+      reference_frame: obj_beaker.interior_center
+      containment_region: obj_beaker.interior_safe
+      trajectory: {kind: accumulated_angular_sweep, min_angle_deg: 360.0, direction_accumulation: max_separate_signed}
+    depends_on: [insert_rod]
+  - {id: return_rod, skill: place_on_surface, actors: [operating_arm], parameters: {object: obj_glass_rod, support_surface: table}, depends_on: [stir_once]}
+  - {id: release_beaker, skill: release, actors: [auxiliary_arm], parameters: {object: obj_beaker}, depends_on: [return_rod]}
+invariants:
+  - {id: beaker_held_during_stir, type: maintain_grasp, actor: auxiliary_arm, object: obj_beaker, from_step: hold_beaker, through_step: stir_once}
+success:
+  operator: all
+  claim_scope: semantic_task_contract
+  predicates:
+    - id: rod_returned
+      type: object_at_initial_pose
+      sequence_index: 0
+      parameters: {object: obj_glass_rod, xyz_tolerance: [0.06, 0.06, 0.04]}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: stirring_trajectory_completed}
+    items:
+      - {id: rod_lifted, weight: 0.15, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_glass_rod, support_surface: table, min_clearance_m: 0.01, held_by: operating_arm}}, source_ref: {source_order: 7, item: 时序1}}
+      - {id: rod_tip_inside, weight: 0.20, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object: obj_glass_rod, tracked_frame: obj_glass_rod.working_tip, relative_to: obj_beaker, containment_region: obj_beaker.interior_safe}}, source_ref: {source_order: 7, item: 时序2}}
+      - id: stirring_trajectory_completed
+        weight: 0.35
+        temporal: {kind: sustained, window: {from_step: insert_rod, through_step: stir_once}}
+        condition:
+          type: motion_trajectory_completed
+          parameters:
+            object: obj_glass_rod
+            tracked_frame: obj_glass_rod.working_tip
+            reference_frame: obj_beaker.interior_center
+            containment_region: obj_beaker.interior_safe
+            trajectory: {kind: accumulated_angular_sweep, min_angle_deg: 360.0, direction_accumulation: max_separate_signed}
+        source_ref: {source_order: 7, item: 时序3}
+      - {id: rod_returned_supported, weight: 0.20, temporal: {kind: terminal}, condition: {type: object_released_on_support, parameters: {object: obj_glass_rod, support_surface: table, released: true}}, source_ref: {source_order: 7, item: 终帧-玻璃棒归还}}
+      - {id: beaker_terminal_stable, weight: 0.10, temporal: {kind: terminal}, condition: {type: object_released_on_support, parameters: {object: obj_beaker, support_surface: table, released: true, upright_max_tilt_deg: 10.0}}, source_ref: {source_order: 7, item: 终帧-烧杯稳定}}
+max_steps: 1500
+seed: "007"

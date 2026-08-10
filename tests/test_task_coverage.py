@@ -275,6 +275,53 @@ def test_task_directory_shows_candidate_evidence_without_promoting_it(tmp_path: 
     ).read_text(encoding="utf-8")
 
 
+def test_task_directory_exposes_release_tier_score_ceiling_and_variants(
+    tmp_path: Path,
+) -> None:
+    plan = build_task_coverage_plan(
+        catalog=_catalog(),
+        inventory=_inventory(),
+        binding_ids={"room", "table", "flask_asset", "cylinder_asset", "beaker_asset"},
+        canonical_recipe_ids={"pour"},
+    )
+    releases = []
+    for suffix, background in (("a", "room-a"), ("b", "room-b")):
+        releases.append(
+            {
+                "task_id": "pour",
+                "release_id": f"pour.v1.{suffix}",
+                "package_path": f"packages/pour-{suffix}",
+                "background_binding": background,
+                "release_status": "canonical_candidate",
+                "score_ceiling": 0.7,
+                "missing_capabilities": ["liquid transfer metric"],
+                "promotion": "candidate",
+                "evidence": {"overview_image": f"images/pour-{suffix}.png"},
+                "gates": {
+                    "self_contained_package": "pass",
+                    "runtime_reset": "pass",
+                    "tabletop_placement": "pass",
+                    "visual_review": "pass",
+                    "provisional_ik": "not_run",
+                },
+            }
+        )
+
+    result = write_task_directory(plan, releases, output_dir=tmp_path / "directory")
+    index = yaml.safe_load((result / "task_directory.yaml").read_text())
+    task = index["tasks"][0]
+
+    assert task["candidate_release_status"] == "canonical_candidate"
+    assert task["candidate_score_ceiling"] == 0.7
+    assert task["candidate_missing_capabilities"] == ["liquid transfer metric"]
+    html = (result / "index.html").read_text(encoding="utf-8")
+    assert "canonical_candidate" in html
+    assert "70%" in html
+    assert "liquid transfer metric" in html
+    assert "pour.v1.a — room-a" in html
+    assert "pour.v1.b — room-b" in html
+
+
 def test_task_directory_refuses_to_promote_partial_gate_release(tmp_path: Path) -> None:
     plan = build_task_coverage_plan(
         catalog=_catalog(),

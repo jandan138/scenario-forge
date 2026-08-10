@@ -38,6 +38,53 @@ class VRTeleopExportResult:
     parity_manifest: Path
 
 
+def _legacy_pour_objects(
+    task_objects: list[Mapping[str, Any]],
+) -> tuple[Mapping[str, Any], Mapping[str, Any]] | None:
+    sources = [item for item in task_objects if item.get("role") == "source_container"]
+    targets = [item for item in task_objects if item.get("role") == "target_container"]
+    if len(task_objects) == 2 and len(sources) == 1 and len(targets) == 1:
+        return sources[0], targets[0]
+    return None
+
+
+def _task_dependency_roles(
+    task_objects: list[Mapping[str, Any]],
+    *,
+    legacy_pour_objects: tuple[Mapping[str, Any], Mapping[str, Any]] | None,
+) -> dict[str, str]:
+    if legacy_pour_objects is not None:
+        source, target = legacy_pour_objects
+        return {
+            _string(source.get("id"), "source.id"): "source_container",
+            _string(target.get("id"), "target.id"): "target_container",
+        }
+    return {
+        _string(item.get("id"), "task object.id"): (
+            "objects/" + _string(item.get("id"), "task object.id")
+        )
+        for item in task_objects
+    }
+
+
+def _referenced_asset_roles(
+    environment: AssetManifestEntry,
+    table: AssetManifestEntry,
+    task_objects: list[Mapping[str, Any]],
+    task_assets: Mapping[str, AssetManifestEntry],
+    *,
+    legacy_pour_objects: tuple[Mapping[str, Any], Mapping[str, Any]] | None,
+) -> dict[str, AssetManifestEntry]:
+    dependency_roles = _task_dependency_roles(
+        task_objects,
+        legacy_pour_objects=legacy_pour_objects,
+    )
+    result = {"environment": environment, "table": table}
+    for object_id, dependency_role in dependency_roles.items():
+        result[dependency_role] = task_assets[object_id]
+    return result
+
+
 def export_vr_teleop_package(
     package_dir: str | Path,
     out_dir: str | Path,
@@ -64,8 +111,10 @@ def export_vr_teleop_package(
         )
     objects = [_mapping(item, "scenario.objects") for item in scenario.get("objects", [])]
     table = _one_object_by_role(objects, "table")
-    source = _one_object_by_role(objects, "source_container")
-    target = _one_object_by_role(objects, "target_container")
+    task_objects = [item for item in objects if item is not table]
+    if not task_objects:
+        raise VRTeleopExportError("VR export requires at least one non-table task object")
+    legacy_pour_objects = _legacy_pour_objects(task_objects)
     manifest = load_asset_manifest(package_root)
     assets = {item.asset_id: item for item in manifest.assets}
     environment_id = _string(
@@ -74,16 +123,25 @@ def export_vr_teleop_package(
     )
     environment = _asset(assets, environment_id)
     table_asset = _asset(assets, _string(table.get("asset_id"), "table.asset_id"))
-    source_asset = _asset(assets, _string(source.get("asset_id"), "source.asset_id"))
-    target_asset = _asset(assets, _string(target.get("asset_id"), "target.asset_id"))
+    task_assets = {
+        _string(item.get("id"), "task object.id"): _asset(
+            assets,
+            _string(item.get("asset_id"), "task object.asset_id"),
+        )
+        for item in task_objects
+    }
     scene_mapping = _mapping(scenario.get("scene"), "scenario.scene")
     composition_mode = scene_mapping.get("composition_mode", "referenced_assets")
     producer_entrypoint: Mapping[str, Any] | None = None
     if composition_mode == "producer_entrypoint":
+        if legacy_pour_objects is None:
+            raise VRTeleopExportError(
+                "producer entrypoint VR export currently requires one source and one target container"
+            )
         if any(
             item.get("instance_mode") != "embedded_scene_prim"
             or item.get("asset_id") != environment_id
-            for item in (table, source, target)
+            for item in objects
         ):
             raise VRTeleopExportError(
                 "producer entrypoint objects must be embedded in the scene asset"
@@ -102,12 +160,13 @@ def export_vr_teleop_package(
         asset_roles = (
             {"scene": environment}
             if producer_entrypoint is not None
-            else {
-                "environment": environment,
-                "table": table_asset,
-                "source_container": source_asset,
-                "target_container": target_asset,
-            }
+            else _referenced_asset_roles(
+                environment,
+                table_asset,
+                task_objects,
+                task_assets,
+                legacy_pour_objects=legacy_pour_objects,
+            )
         )
         for role, asset in asset_roles.items():
             source_root = (package_root / asset.canonical_usd).parent
@@ -125,8 +184,11 @@ def export_vr_teleop_package(
                 else _scene_usda(
                     scenario=scenario,
                     table=table,
-                    source=source,
-                    target=target,
+                    task_objects=task_objects,
+                    dependency_roles=_task_dependency_roles(
+                        task_objects,
+                        legacy_pour_objects=legacy_pour_objects,
+                    ),
                     environment=environment,
                 )
             ),
@@ -137,8 +199,9 @@ def export_vr_teleop_package(
             _task_config_python(
                 task_id=task_id,
                 robot=robot,
-                source_id=_string(source.get("id"), "source.id"),
-                target_id=_string(target.get("id"), "target.id"),
+                object_ids=[
+                    _string(item.get("id"), "task object.id") for item in task_objects
+                ],
                 object_prim_paths=(
                     None
                     if producer_entrypoint is None
@@ -240,8 +303,8 @@ def _scene_usda(
     *,
     scenario: Mapping[str, Any],
     table: Mapping[str, Any],
-    source: Mapping[str, Any],
-    target: Mapping[str, Any],
+    task_objects: list[Mapping[str, Any]],
+    dependency_roles: Mapping[str, str],
     environment: AssetManifestEntry,
 ) -> str:
     scene = _mapping(scenario.get("scene"), "scenario.scene")
@@ -273,11 +336,18 @@ def _scene_usda(
         "        }",
         "",
     ]
-    for wrapper, role, item in (
+    for wrapper, role, item in [
         ("table", "table", table),
-        (_string(source.get("id"), "source.id"), "source_container", source),
-        (_string(target.get("id"), "target.id"), "target_container", target),
-    ):
+        *[
+            (
+                object_id,
+                dependency_roles[object_id],
+                item,
+            )
+            for item in task_objects
+            for object_id in [_string(item.get("id"), "task object.id")]
+        ],
+    ]:
         source_prim = _string(item.get("source_prim_path"), f"{wrapper}.source_prim_path")
         pose = _mapping(item.get("pose"), f"{wrapper}.pose")
         lines.extend(
@@ -312,8 +382,7 @@ def _task_config_python(
     *,
     task_id: str,
     robot: Mapping[str, Any],
-    source_id: str,
-    target_id: str,
+    object_ids: list[str],
     object_prim_paths: list[str] | None = None,
 ) -> str:
     spawn = _mapping(robot.get("spawn"), "scenario.robot.spawn")
@@ -321,10 +390,8 @@ def _task_config_python(
         "scene_usd_file_path": {
             "scene1": "__SCENE_PATH__",
         },
-        "obj_prim_list": object_prim_paths or [
-            f"/World/_scene/{source_id}",
-            f"/World/_scene/{target_id}",
-        ],
+        "obj_prim_list": object_prim_paths
+        or [f"/World/_scene/{object_id}" for object_id in object_ids],
         "robot_cfg": {
             "position": _number_list(spawn.get("xyz"), 3, "robot.spawn.xyz"),
             "orientation": _number_list(spawn.get("wxyz"), 4, "robot.spawn.wxyz"),

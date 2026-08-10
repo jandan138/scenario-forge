@@ -1,0 +1,62 @@
+schema_version: scenario-spec/v0.7
+scenario_id: scientific_workbench_insert_stir_bar_prototype
+domain: scientific_workbench
+task_family: insert_stir_bar_and_closure
+instruction: 辅助臂固定烧杯；操作臂拿起磁力搅拌子，对准杯口并放入杯内。瓶塞闭合步骤因资产缺失暂不执行。
+scene:
+  asset_id: scientific_environment_code_room_example4_v2
+  root_prim_path: /World
+  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table_static_support
+    source_prim_path: /World/table
+    role: table
+    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+  - id: obj_beaker
+    asset_id: scientific_workbench_beaker_dynamic_r3
+    source_prim_path: /World/Beaker
+    role: target_container
+    pose: {xyz: [-0.15, -0.15, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      grasp: {xyz: [0.0, 0.0, 0.055], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      opening: {xyz: [0.0, 0.0, 0.10], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      interior_center: {xyz: [0.0, 0.0, 0.052], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_stir_bar
+    asset_id: scientific_workbench_magnetic_stir_bar_dynamic
+    source_prim_path: /World/MagneticStirBar
+    role: stir_bar
+    pose: {xyz: [-0.10, 0.15, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.004415], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, hold, release]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, place, release]}
+steps:
+  - {id: hold_beaker, skill: grasp_and_hold, actors: [auxiliary_arm], parameters: {object: obj_beaker, grasp_frame: obj_beaker.grasp}}
+  - {id: pick_stir_bar, skill: lift, actors: [operating_arm], parameters: {object: obj_stir_bar, grasp_frame: obj_stir_bar.grasp}, depends_on: [hold_beaker]}
+  - {id: align_stir_bar, skill: align, actors: [operating_arm], parameters: {object: obj_stir_bar, target_frame: obj_beaker.opening}, depends_on: [pick_stir_bar]}
+  - {id: place_stir_bar_inside, skill: place, actors: [operating_arm], parameters: {object: obj_stir_bar, target_frame: obj_beaker.interior_center, containment_region: obj_beaker.interior_safe}, depends_on: [align_stir_bar]}
+invariants:
+  - {id: beaker_held_during_insert, type: maintain_grasp, actor: auxiliary_arm, object: obj_beaker, from_step: hold_beaker, through_step: place_stir_bar_inside}
+success:
+  operator: all
+  claim_scope: asset_layout_prototype
+  predicates:
+    - {id: stir_bar_inside, type: relative_pose_reached, sequence_index: 0, parameters: {object: obj_stir_bar, relative_to: obj_beaker, xyz_range: {x: [-0.029, 0.029], y: [-0.029, 0.029], z: [0.013, 0.091]}}}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: stir_bar_inside}
+    items:
+      - {id: stir_bar_lifted, weight: 0.15, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_stir_bar, support_surface: table, min_clearance_m: 0.005, held_by: operating_arm}}, source_ref: {source_order: 4, item: 时序1}}
+      - {id: stir_bar_aligned, weight: 0.15, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object: obj_stir_bar, relative_to: obj_beaker, containment_region: obj_beaker.opening}}, source_ref: {source_order: 4, item: 时序2}}
+      - {id: stir_bar_inside, weight: 0.15, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object: obj_stir_bar, relative_to: obj_beaker, containment_region: obj_beaker.interior_safe}}, source_ref: {source_order: 4, item: 时序3}}
+      - {id: closure_lifted, weight: 0.10, active: false, requires: [asset.vessel_closure], temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object_role: vessel_closure}}, source_ref: {source_order: 4, item: 时序4}}
+      - {id: closure_aligned, weight: 0.15, active: false, requires: [asset.vessel_closure], temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object_role: vessel_closure, relative_to: obj_beaker}}, source_ref: {source_order: 4, item: 时序5}}
+      - {id: stir_bar_terminal_inside, weight: 0.10, temporal: {kind: terminal}, condition: {type: relative_pose_reached, parameters: {object: obj_stir_bar, relative_to: obj_beaker, containment_region: obj_beaker.interior_safe}}, source_ref: {source_order: 4, item: 终帧-磁子在容器内}}
+      - {id: closure_terminal_closed, weight: 0.20, active: false, requires: [asset.vessel_closure, closure.closed_state], temporal: {kind: terminal}, condition: {type: relative_pose_reached, parameters: {object_role: vessel_closure, relative_to: obj_beaker, state: closed}}, source_ref: {source_order: 4, item: 终帧-闭合}}
+max_steps: 900
+seed: "004"

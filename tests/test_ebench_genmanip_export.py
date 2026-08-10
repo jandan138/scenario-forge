@@ -637,7 +637,7 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
     }
 
 
-def test_genmanip_export_rejects_non_table_visual_static_object(
+def test_genmanip_export_preloads_non_table_visual_static_object_without_physics(
     tmp_path: Path,
 ) -> None:
     source_usd = _write_source_scene(tmp_path)
@@ -664,19 +664,33 @@ def test_genmanip_export_rejects_non_table_visual_static_object(
                 license="CC-BY-NC-4.0",
                 source_uri="example://visual-static-fixture",
                 redistributable=False,
+                root_prim_path="/World",
             ),
         },
         package_root,
     )
-    output = tmp_path / "collected"
-    output.mkdir()
-    marker = output / "keep.txt"
-    marker.write_text("existing", encoding="utf-8")
-
-    with pytest.raises(GenManipExportError, match="visual_static_object.*table"):
-        export_genmanip_collected_package(package_root, output)
-
-    assert marker.read_text(encoding="utf-8") == "existing"
+    output = export_genmanip_collected_package(package_root).output_dir
+    episode = json.loads(
+        next((output / "tasks").glob("**/episode_metadata.json")).read_text(
+            encoding="utf-8"
+        )
+    )
+    layout = episode["task_data"]["initial_layout"]["obj_conical_bottle03"]
+    assert layout["add_colliders"] is False
+    assert layout["add_rigid_body"] is False
+    assert layout["path"].endswith(
+        "/source_bundle/scenario_forge_runtime/obj_conical_bottle03.usd"
+    )
+    assert (
+        output
+        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/"
+        "source_bundle/scenario_forge_runtime/obj_conical_bottle03.usd"
+    ).is_file()
+    scene = (
+        output
+        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+    ).read_text(encoding="utf-8")
+    assert 'def Xform "obj_obj_conical_bottle03"' not in scene
 
 
 def test_static_support_table_preserves_package_collider_and_uses_shared_runtime_profile(

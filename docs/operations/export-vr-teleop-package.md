@@ -28,6 +28,11 @@ scientific_workbench_bimanual_pour_vr_r2_20260806/
     target_container/
 ```
 
+For generalized tabletop tasks, `deps/objects/<object-id>/` replaces the two
+legacy vessel roles. `task_config.py` lists every task-object prim in the same
+order as the canonical scenario. The legacy bimanual-pour shape above remains
+unchanged for compatibility.
+
 Give the entire directory to the VR engineer. `scene.usd` is the file to open;
 its USD, MDL, mesh, and texture references are package-relative under `deps/`.
 `task_config.py` is a valid standalone Python module containing one `TASKS`

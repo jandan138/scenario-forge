@@ -1,15 +1,20 @@
 schema_version: scientific-workbench-coverage-factory-input/v0.1
 catalog_path: configs/task_catalogs/scientific_workbench_phase1.yaml
-source_bindings_path: configs/source_bindings/scientific_workbench_layout_prototypes_20260731.yaml
+source_bindings_path: configs/source_bindings/scientific_workbench_asset_expansion_20260810.yaml
 canonical_recipe_ids:
   - scientific_workbench_pour_cylinder_to_beaker
   - scientific_workbench_funnel_pour_cylinder_to_flask
   - scientific_workbench_two_sample_mix
+  - scientific_workbench_insert_stir_bar_and_closure
+  - scientific_workbench_glass_rod_stir
+  - scientific_workbench_tighten_centrifuge_tube_cap
+  - scientific_workbench_funnel_pour_flask_to_centrifuge_tube
+  - scientific_workbench_solid_sample_weighing
 inventory:
   schema_version: task-coverage-asset-inventory/v0.1
   inventory_id: scientific_workbench_source_bound_assets_20260801
-  default_environment_binding: scientific_environment_code_room_example4_v1
-  default_table_binding: scientific_workbench_ebench_table
+  default_environment_binding: scientific_environment_code_room_example4_v2
+  default_table_binding: scientific_workbench_ebench_table_static_support
   assets:
     erlenmeyer_flask:
       binding_id: scientific_workbench_conical_bottle03_dynamic
@@ -20,9 +25,9 @@ inventory:
       admission_status: pass
       manifest_sha256: sha256:0e9340d27f93edd8fba61555d49149cf715a1b056f67dac86d3169094d70c690
     beaker:
-      binding_id: scientific_workbench_beaker_dynamic
+      binding_id: scientific_workbench_beaker_dynamic_r3
       admission_status: pass
-      manifest_sha256: sha256:61bd778f20644d9e0775ed71d426210ef603322ca26cfd3da2bbca897cb9e84f
+      manifest_sha256: sha256:7d4f7cfe0ac22aaf11a20d33fa15693593cf33cb1a44e2c6f3eb38248c9605e3
     funnel:
       binding_id: scientific_workbench_funnel_dynamic
       admission_status: pass
@@ -36,9 +41,37 @@ inventory:
       admission_status: pass
       manifest_sha256: sha256:b753cc17ed8cf90e5656095231beea215e6269a0862571c56b239b4bbcb22499
     target_vessel:
-      binding_id: scientific_workbench_beaker_dynamic
+      binding_id: scientific_workbench_beaker_dynamic_r3
       admission_status: pass
-      manifest_sha256: sha256:61bd778f20644d9e0775ed71d426210ef603322ca26cfd3da2bbca897cb9e84f
+      manifest_sha256: sha256:7d4f7cfe0ac22aaf11a20d33fa15693593cf33cb1a44e2c6f3eb38248c9605e3
+    stir_bar:
+      binding_id: scientific_workbench_magnetic_stir_bar_dynamic
+      admission_status: pass
+      manifest_sha256: sha256:108195266edbc380ac962119c47161f1790e572f241d163966bbdcb18f2406f3
+    glass_rod:
+      binding_id: scientific_workbench_glass_stirring_rod_dynamic
+      admission_status: pass
+      manifest_sha256: sha256:632b184cead8540eb8a766529a049da6edf08c747c82a344348ba511f64080fb
+    centrifuge_tube:
+      binding_id: scientific_workbench_centrifuge_tube_50ml_body_dynamic
+      admission_status: pass
+      manifest_sha256: sha256:22a43b1944a6ca38e3565dc4f942c972fd2870847f3a96dca9e0859541d03a1b
+    centrifuge_tube_cap:
+      binding_id: scientific_workbench_centrifuge_tube_50ml_cap_dynamic
+      admission_status: pass
+      manifest_sha256: sha256:c6de388bf0045ec2a6ce1e53c425ddfabb51ac48786e36312d1352db33148ade
+    balance:
+      binding_id: scientific_workbench_analytical_balance_static_support
+      admission_status: pass
+      manifest_sha256: sha256:f1f9007405f1abb792f62efb694ff9ba0c28c053791015dadbdd0c69fbac6524
+    weighing_container:
+      binding_id: scientific_workbench_petri_dish_dynamic
+      admission_status: pass
+      manifest_sha256: sha256:6bc9b215caaacd4e0910f3d7f0cfb1788321c65ccc8710fba2e0b47acb0457c7
+    spatula:
+      binding_id: scientific_workbench_micro_spatula_visual_static
+      admission_status: pass
+      manifest_sha256: sha256:f3f014b06bda90b3cad5b8af8eac2024b97626339db67f59ef0acffd6e3c5ce5
 releases:
   - task_id: scientific_workbench_pour_cylinder_to_beaker
     release_id: scientific_workbench_pour_cylinder_to_beaker.v4_20260801_r1
@@ -85,3 +118,125 @@ releases:
       tabletop_placement: pass
       visual_review: not_run
       provisional_ik: not_run
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v20260810.r4.01_teaching_research
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_teaching_research
+    background_binding: scientific_environment_code_room_teaching_research_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_teaching_research/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_teaching_research/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_teaching_research/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: &asset_expansion_pass_except_ik
+      self_contained_package: pass
+      runtime_reset: pass
+      tabletop_placement: pass
+      visual_review: pass
+      provisional_ik: not_run
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v20260810.r4.02_modern_wet_chemistry
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_modern_wet_chemistry
+    background_binding: scientific_environment_code_room_wet_chemistry_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v20260810.r4.03_bioclean
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_bioclean
+    background_binding: scientific_environment_code_room_bioclean_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_bioclean/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_bioclean/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_bioclean/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v20260810.r4.04_analytical_instrumentation
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_analytical_instrumentation
+    background_binding: scientific_environment_code_room_analytical_instrumentation_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir__background_analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v20260810.r4.05_example4
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir
+    background_binding: scientific_environment_code_room_example4_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_glass_rod_stir/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik
+  - task_id: scientific_workbench_insert_stir_bar_and_closure
+    release_id: scientific_workbench_insert_stir_bar_and_closure.v20260810.r4
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_insert_stir_bar_prototype
+    background_binding: scientific_environment_code_room_example4_v2
+    release_status: prototype
+    score_ceiling: 0.55
+    missing_capabilities: [vessel closure asset]
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_insert_stir_bar_prototype/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_insert_stir_bar_prototype/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_insert_stir_bar_prototype/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik
+  - task_id: scientific_workbench_tighten_centrifuge_tube_cap
+    release_id: scientific_workbench_tighten_centrifuge_tube_cap.v20260810.r4
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_tighten_centrifuge_tube_cap
+    background_binding: scientific_environment_code_room_example4_v2
+    release_status: canonical_candidate
+    score_ceiling: 0.70
+    missing_capabilities: [threaded closure interaction]
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_tighten_centrifuge_tube_cap/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_tighten_centrifuge_tube_cap/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_tighten_centrifuge_tube_cap/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik
+  - task_id: scientific_workbench_funnel_pour_flask_to_centrifuge_tube
+    release_id: scientific_workbench_funnel_pour_flask_to_centrifuge_tube.v20260810.r4
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_funnel_pour_flask_to_centrifuge_tube_prototype
+    background_binding: scientific_environment_code_room_example4_v2
+    release_status: prototype
+    score_ceiling: 0.65
+    missing_capabilities: [liquid flow and contained-volume metrics]
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_funnel_pour_flask_to_centrifuge_tube_prototype/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_funnel_pour_flask_to_centrifuge_tube_prototype/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_funnel_pour_flask_to_centrifuge_tube_prototype/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik
+  - task_id: scientific_workbench_solid_sample_weighing
+    release_id: scientific_workbench_solid_sample_weighing.v20260810.r4
+    package_path: outputs/scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_solid_sample_weighing_layout_prototype
+    background_binding: scientific_environment_code_room_example4_v2
+    release_status: prototype
+    score_ceiling: 0.0
+    missing_capabilities: [interactive tare button, dynamic micro-spatula, reagent bottle and solid sample]
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_solid_sample_weighing_layout_prototype/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_solid_sample_weighing_layout_prototype/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260810_r4/packages/scientific_workbench_solid_sample_weighing_layout_prototype/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *asset_expansion_pass_except_ik

@@ -1,0 +1,105 @@
+schema_version: scenario-spec/v0.7
+scenario_id: scientific_workbench_funnel_pour_flask_to_centrifuge_tube_prototype
+domain: scientific_workbench
+task_family: funnel_pour_and_closure
+instruction: 将漏斗插入 50 mL 离心管，拿起锥形瓶并对准漏斗完成倾倒动作；退出漏斗后，对准、套合并旋转红色管盖。液体比例暂不计分。
+scene:
+  asset_id: scientific_environment_code_room_example4_v2
+  root_prim_path: /World
+  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table_static_support
+    source_prim_path: /World/table
+    role: table
+    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+  - id: obj_tube_rack
+    asset_id: scientific_workbench_tube_rack_k125_dynamic
+    source_prim_path: /World/TubeRack
+    role: tube_rack
+    pose: {xyz: [-0.05, -0.24, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      socket_0_aperture: {xyz: [0.0, -0.0425, 0.0831375], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      socket_0_inserted_bottom: {xyz: [0.0, -0.0425, 0.003], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_centrifuge_tube
+    asset_id: scientific_workbench_centrifuge_tube_50ml_body_dynamic
+    source_prim_path: /World/CentrifugeTube50mlBody
+    role: target_container
+    pose: {xyz: [-0.05, -0.2825, 0.7757606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      grasp: {xyz: [0.0, 0.0, 0.06], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      mouth: {xyz: [0.0, 0.0, 0.1005], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      cap_seat: {xyz: [0.0, 0.0, 0.1009], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_funnel
+    asset_id: scientific_workbench_funnel_dynamic
+    source_prim_path: /World/Funnel
+    role: funnel
+    pose: {xyz: [-0.12, 0.20, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.12], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      outlet: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.055], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_conical_flask
+    asset_id: scientific_workbench_conical_bottle03_dynamic
+    source_prim_path: /World/conical_bottle03
+    role: source_container
+    pose: {xyz: [-0.15, 0.02, 0.7827606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      opening: {xyz: [0.0, 0.0, 0.1965674179], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.16], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_centrifuge_tube_cap
+    asset_id: scientific_workbench_centrifuge_tube_50ml_cap_dynamic
+    source_prim_path: /World/CentrifugeTube50mlCap
+    role: centrifuge_tube_cap
+    pose: {xyz: [-0.10, -0.08, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      grasp: {xyz: [0.0, 0.0, 0.00625], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      seat: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, lift, hold, place, release]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, insert, tilt, place, twist, release]}
+steps:
+  - {id: pick_funnel, skill: lift, actors: [operating_arm], parameters: {object: obj_funnel, grasp_frame: obj_funnel.grasp}}
+  - {id: pick_tube, skill: lift, actors: [auxiliary_arm], parameters: {object: obj_centrifuge_tube, grasp_frame: obj_centrifuge_tube.grasp}, depends_on: [pick_funnel]}
+  - {id: align_funnel, skill: align, actors: [operating_arm], parameters: {source_frame: obj_funnel.outlet, target_frame: obj_centrifuge_tube.mouth}, depends_on: [pick_tube]}
+  - {id: insert_funnel, skill: insert, actors: [operating_arm], parameters: {source_frame: obj_funnel.outlet, target_frame: obj_centrifuge_tube.mouth}, depends_on: [align_funnel]}
+  - {id: release_funnel, skill: release, actors: [operating_arm], parameters: {object: obj_funnel}, depends_on: [insert_funnel]}
+  - {id: pick_flask, skill: lift, actors: [operating_arm], parameters: {object: obj_conical_flask, grasp_frame: obj_conical_flask.grasp}, depends_on: [release_funnel]}
+  - {id: align_flask, skill: align, actors: [operating_arm], parameters: {source_frame: obj_conical_flask.opening, target_frame: obj_funnel.opening}, depends_on: [pick_flask]}
+  - {id: pour_action, skill: tilt_pour, actors: [operating_arm], parameters: {object: obj_conical_flask, min_tilt_deg: 65.0}, depends_on: [align_flask]}
+  - {id: return_flask, skill: place_on_surface, actors: [operating_arm], parameters: {object: obj_conical_flask, support_surface: table}, depends_on: [pour_action]}
+  - {id: remove_funnel, skill: lift, actors: [operating_arm], parameters: {object: obj_funnel}, depends_on: [return_flask]}
+  - {id: pick_cap, skill: lift, actors: [operating_arm], parameters: {object: obj_centrifuge_tube_cap, grasp_frame: obj_centrifuge_tube_cap.grasp}, depends_on: [remove_funnel]}
+  - {id: align_cap, skill: align, actors: [operating_arm], parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat}, depends_on: [pick_cap]}
+  - {id: mate_cap, skill: insert, actors: [operating_arm], parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat}, depends_on: [align_cap]}
+  - {id: rotate_cap, skill: twist, actors: [operating_arm], parameters: {object: obj_centrifuge_tube_cap, relative_to: obj_centrifuge_tube, axis: z, direction: tighten}, depends_on: [mate_cap]}
+invariants:
+  - {id: tube_held_during_sequence, type: maintain_grasp, actor: auxiliary_arm, object: obj_centrifuge_tube, from_step: pick_tube, through_step: rotate_cap}
+success:
+  operator: all
+  claim_scope: asset_layout_prototype
+  predicates:
+    - {id: funnel_insertion_pose_reached, type: relative_pose_reached, sequence_index: 0, parameters: {object: obj_funnel, relative_to: obj_centrifuge_tube, xyz_range: {x: [-0.01, 0.01], y: [-0.01, 0.01], z: [0.08, 0.14]}}}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: flask_aligned_to_funnel}
+    items:
+      - {id: funnel_lifted, weight: 0.05, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_funnel, support_surface: table, min_clearance_m: 0.01}}, source_ref: {source_order: 14, item: 时序1}}
+      - {id: funnel_aligned, weight: 0.05, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_funnel.outlet, target_frame: obj_centrifuge_tube.mouth, lateral_error_max_m: 0.005, axis_error_max_deg: 8.0}}, source_ref: {source_order: 14, item: 时序2}}
+      - {id: funnel_inserted, weight: 0.05, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_funnel.outlet, target_frame: obj_centrifuge_tube.mouth, insertion_depth_m: [0.005, 0.03]}}, source_ref: {source_order: 14, item: 时序3}}
+      - {id: flask_lifted, weight: 0.05, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_conical_flask, support_surface: table, min_clearance_m: 0.01}}, source_ref: {source_order: 14, item: 时序4}}
+      - {id: flask_aligned_to_funnel, weight: 0.10, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_conical_flask.opening, target_frame: obj_funnel.opening, lateral_error_max_m: 0.02}}, source_ref: {source_order: 14, item: 时序5}}
+      - {id: liquid_flows_through_funnel, weight: 0.10, active: false, requires: [liquid_sim.flow_path], temporal: {kind: instant}, condition: {type: liquid_transfer_ratio, parameters: {source: obj_conical_flask, target: obj_centrifuge_tube, via: obj_funnel, ratio_threshold: 0.01}}, source_ref: {source_order: 14, item: 时序6}}
+      - {id: funnel_removed, weight: 0.05, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object: obj_funnel, relative_to: obj_centrifuge_tube, minimum_clearance_m: 0.02}}, source_ref: {source_order: 14, item: 时序7}}
+      - {id: cap_lifted, weight: 0.05, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_centrifuge_tube_cap, support_surface: table, min_clearance_m: 0.005}}, source_ref: {source_order: 14, item: 时序8}}
+      - {id: cap_aligned, weight: 0.05, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat, axial_gap_m: [0.005, 0.03]}}, source_ref: {source_order: 14, item: 时序9}}
+      - {id: cap_mated, weight: 0.05, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat, axial_gap_m: [-0.002, 0.003]}}, source_ref: {source_order: 14, item: 时序10}}
+      - {id: cap_rotated_tighten_direction, weight: 0.05, temporal: {kind: instant}, condition: {type: motion_trajectory_completed, parameters: {object: obj_centrifuge_tube_cap, relative_to: obj_centrifuge_tube, trajectory: {kind: signed_rotation, direction: tighten, min_angle_deg: 20.0}}}, source_ref: {source_order: 14, item: 时序11}}
+      - {id: liquid_transfer_majority, weight: 0.10, active: false, requires: [liquid_sim.contained_volume_ratio], temporal: {kind: terminal}, condition: {type: liquid_transfer_ratio, parameters: {source: obj_conical_flask, target: obj_centrifuge_tube, ratio_threshold: 0.5}}, source_ref: {source_order: 14, item: 终帧-过半}}
+      - {id: liquid_transfer_complete, weight: 0.15, active: false, requires: [liquid_sim.contained_volume_ratio], temporal: {kind: terminal}, condition: {type: liquid_transfer_ratio, parameters: {source: obj_conical_flask, target: obj_centrifuge_tube, ratio_threshold: 0.9}}, source_ref: {source_order: 14, item: 终帧-全部阈值}}
+      - {id: cap_terminal_closed_pose, weight: 0.05, temporal: {kind: terminal}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat, axial_gap_m: [-0.002, 0.003]}}, source_ref: {source_order: 14, item: 终帧-管盖关闭}}
+      - {id: flask_returned, weight: 0.05, temporal: {kind: terminal}, condition: {type: object_released_on_support, parameters: {object: obj_conical_flask, support_surface: table, released: true, upright_max_tilt_deg: 15.0}}, source_ref: {source_order: 14, item: 终帧-锥形瓶归还}}
+max_steps: 2400
+seed: "014"

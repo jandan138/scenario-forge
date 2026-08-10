@@ -41,6 +41,7 @@ def _write_source_bound_handoff(
     interaction_profile_schema_version: str = "aan.object_interaction_profile.v1",
     entry_world_transform: list[list[float]] | None = None,
     identity_facade_frames: bool = False,
+    with_interaction_regions: bool = False,
 ) -> tuple[Path, Path, Path, dict[str, object]]:
     if source_usd is None:
         source_usd = root / "source" / "lab_001.usd"
@@ -312,6 +313,18 @@ def Xform "World"
                 ),
             },
         }
+        if with_interaction_regions:
+            interaction_contract["interaction_regions"] = {
+                "interior_safe": {
+                    "shape": "cylinder",
+                    "frame": "opening",
+                    "axis_frame_local": [0.0, 0.0, 1.0],
+                    "radius_body_local_usd": 0.08,
+                    "half_height_body_local_usd": 0.12,
+                    "purpose": ["containment", "tool_motion"],
+                    "authoritative": True,
+                }
+            }
         artifact_paths = [
             "asset.usd",
             "deps/usd/scoped_source.usda",
@@ -336,6 +349,10 @@ def Xform "World"
                 "named_frames",
             )
         }
+        if "interaction_regions" in interaction_contract:
+            contract_payload["interaction_regions"] = interaction_contract[
+                "interaction_regions"
+            ]
         interaction_contract["closure"] = {
             "status": "pass",
             "digest_algorithm": "sha256",
@@ -1672,6 +1689,7 @@ def test_task_ready_interaction_handoff_accepts_profile_v2(
         tmp_path,
         with_interaction_contract=True,
         interaction_profile_schema_version="aan.object_interaction_profile.v2",
+        with_interaction_regions=True,
     )
 
     handoff = load_convert_asset_package_handoff(
@@ -1688,6 +1706,54 @@ def test_task_ready_interaction_handoff_accepts_profile_v2(
         handoff.interaction_contract.payload["profile"]["schema_version"]
         == "aan.object_interaction_profile.v2"
     )
+    assert handoff.interaction_contract.interaction_regions["interior_safe"][
+        "frame"
+    ] == "opening"
+
+
+def test_task_ready_interaction_handoff_rejects_region_with_unknown_frame(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, manifest = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+        interaction_profile_schema_version="aan.object_interaction_profile.v2",
+        with_interaction_regions=True,
+    )
+    interaction = manifest["interaction_contract"]
+    assert isinstance(interaction, dict)
+    regions = interaction["interaction_regions"]
+    assert isinstance(regions, dict)
+    region = regions["interior_safe"]
+    assert isinstance(region, dict)
+    region["frame"] = "guessed_center"
+    closure = interaction["closure"]
+    assert isinstance(closure, dict)
+    contract_payload = {
+        key: interaction[key]
+        for key in (
+            "schema_version",
+            "asset_entry_prim",
+            "runtime_identity",
+            "disabled_source_rigid_bodies",
+            "collider_prims",
+            "open_top",
+            "named_frames",
+            "interaction_regions",
+        )
+    }
+    closure["contract_payload_sha256"] = _canonical_json_digest(contract_payload)
+    _persist_manifest(manifest, manifest_path, package_dir)
+
+    with pytest.raises(ConvertAssetHandoffError, match="interaction_regions.*frame"):
+        load_convert_asset_package_handoff(
+            package_dir,
+            manifest_path,
+            source_usd,
+            expected_scope_prims=("/World/DryingBox_03",),
+            producer_revision="interaction-region-unknown-frame",
+            usage="rigid_object",
+        )
 
 
 def test_task_interactive_handoff_rejects_missing_authoritative_support_frame(

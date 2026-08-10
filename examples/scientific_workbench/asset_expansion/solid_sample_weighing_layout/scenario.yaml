@@ -1,0 +1,61 @@
+schema_version: scenario-spec/v0.7
+scenario_id: scientific_workbench_solid_sample_weighing_layout_prototype
+domain: scientific_workbench
+task_family: solid_sample_weighing
+instruction: 将称量皿、分析天平和微量药匙布置在工作区。该包只验证静态摆放；去皮按钮、试剂瓶、固体样品和取样流程尚不可交互。
+scene:
+  asset_id: scientific_environment_code_room_example4_v2
+  root_prim_path: /World
+  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table_static_support
+    source_prim_path: /World/table
+    role: table
+    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+  - id: obj_balance
+    asset_id: scientific_workbench_analytical_balance_static_support
+    source_prim_path: /World/AnalyticalBalance
+    role: balance
+    pose: {xyz: [-0.05, -0.12, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      weighing_pan: {xyz: [0.0, 0.0, 0.076], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_weighing_dish
+    asset_id: scientific_workbench_petri_dish_dynamic
+    source_prim_path: /World/PetriDish
+    role: weighing_container
+    pose: {xyz: [-0.16, 0.08, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      dish_center: {xyz: [0.0, 0.0, 0.02032], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_micro_spatula
+    asset_id: scientific_workbench_micro_spatula_visual_static
+    source_prim_path: /World/MicroSpatula
+    role: spatula_visual_only
+    pose: {xyz: [-0.10, 0.25, 0.7767606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [press, grasp, hold]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, place, scoop, release]}
+steps:
+  - {id: inspect_layout_only, skill: inspect, actors: [operating_arm], parameters: {objects: [obj_balance, obj_weighing_dish, obj_micro_spatula]}}
+invariants: []
+success:
+  operator: all
+  claim_scope: asset_layout_prototype
+  predicates:
+    - {id: weighing_dish_staged_near_balance_layout, type: relative_pose_reached, sequence_index: 0, parameters: {object: obj_weighing_dish, relative_to: obj_balance, xyz_range: {x: [-0.16, -0.06], y: [0.15, 0.25], z: [-0.01, 0.04]}}}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: weighing_dish_on_pan}
+    items:
+      - {id: weighing_dish_on_pan, weight: 0.10, active: false, requires: [task_execution.dynamic_container_placement], temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object: obj_weighing_dish, relative_to: obj_balance}}, source_ref: {source_order: 15, item: 时序1}}
+      - {id: tare_button_pressed, weight: 0.10, active: false, requires: [asset.balance.tare_button_interaction], temporal: {kind: instant}, condition: {type: motion_trajectory_completed, parameters: {object: obj_balance, trajectory: {kind: button_press, control: tare}}}, source_ref: {source_order: 15, item: 时序2}}
+      - {id: spatula_lifted, weight: 0.10, active: false, requires: [asset.spatula.dynamic_interaction], temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_micro_spatula, support_surface: table}}, source_ref: {source_order: 15, item: 时序3}}
+      - {id: spatula_enters_sample, weight: 0.10, active: false, requires: [asset.reagent_bottle, asset.solid_sample], temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object: obj_micro_spatula, relative_to_role: reagent_bottle}}, source_ref: {source_order: 15, item: 时序4}}
+      - {id: spatula_carries_sample, weight: 0.20, active: false, requires: [asset.reagent_bottle, asset.solid_sample, metric.sample_attachment], temporal: {kind: instant}, condition: {type: motion_trajectory_completed, parameters: {object: obj_micro_spatula, trajectory: {kind: scoop_and_carry}}}, source_ref: {source_order: 15, item: 时序5}}
+      - {id: sample_in_weighing_dish, weight: 0.25, active: false, requires: [asset.solid_sample, metric.sample_containment], temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object_role: solid_sample, relative_to: obj_weighing_dish}}, source_ref: {source_order: 15, item: 时序6}}
+      - {id: spatula_returned, weight: 0.05, active: false, requires: [asset.spatula.dynamic_interaction], temporal: {kind: terminal}, condition: {type: object_released_on_support, parameters: {object: obj_micro_spatula, support_surface: table}}, source_ref: {source_order: 15, item: 终帧-药匙归还}}
+      - {id: weighing_dish_remains_on_pan, weight: 0.10, active: false, requires: [task_execution.dynamic_container_placement], temporal: {kind: terminal}, condition: {type: relative_pose_reached, parameters: {object: obj_weighing_dish, relative_to: obj_balance}}, source_ref: {source_order: 15, item: 终帧-容器在称量区}}
+max_steps: 600
+seed: "015"

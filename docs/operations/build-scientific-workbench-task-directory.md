@@ -30,6 +30,17 @@ candidate** and the separately-qualified `latest` package. A candidate stays
 visible while any required promotion gate is still `not_run` or failed; only an
 all-pass release becomes `latest`.
 
+Release records can declare:
+
+- `release_status: canonical_candidate | prototype`;
+- `score_ceiling` between 0 and 1;
+- `missing_capabilities` as an explicit list.
+
+The page also collapses multiple immutable background packages into a Variants
+cell. The publisher copies every referenced release overview, not only the
+current candidate image, so all reviewed variants remain inspectable after
+deployment.
+
 ## Publish the reviewed directory
 
 The repository's GitHub Pages source is `main:/docs`. After building the
@@ -77,3 +88,29 @@ Re-run the directory builder afterwards; it promotes the immutable package to
 evidence is only a fixed-base IK result. It does not authorize claims about
 approach collisions, grasp/lift, task execution, liquid transfer, or benchmark
 success.
+
+## Asset-expansion batch
+
+The 2026-08-10 asset-expansion batch is generated with:
+
+```bash
+PYTHONPATH=src python scripts/generate_scientific_workbench_asset_expansion.py \
+  --out outputs/scientific_workbench_asset_expansion_YYYYMMDD
+```
+
+The default runtime lane is the EOS-managed Isaac Sim 4.1 + GenManip Python.
+The generator adds the existing CuRobo source tree to `PYTHONPATH` through the
+preview adapter's `runtime_python_paths`; it does not install a new environment
+or modify GenManip. Use `--static-only` for package-contract tests that must not
+launch Isaac Sim.
+
+Each generated package contains the canonical Scenario Forge package plus
+eBench/GenManip and VR adapter exports. Static and static-support objects are
+preloaded package-first with GenManip's generic collider and rigid-body switches
+disabled. This preserves ConvertAsset-owned support collision and keeps visual
+fixtures nonphysical without adding object-specific adapter patches.
+
+The same task objects, table, robot, world poses, and PhysX profile are exported
+to eBench and VR. A non-pour task is represented in VR by one dependency role
+per task object under `deps/objects/<object-id>/`; the legacy two-vessel pour
+layout retains `source_container` and `target_container` paths for compatibility.

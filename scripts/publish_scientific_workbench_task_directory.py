@@ -46,6 +46,27 @@ def publish_task_directory(source: str | Path, destination: str | Path) -> Path:
             public_relative = Path("assets") / f"{task_id}-{release_kind}-overview{image.suffix}"
             shutil.copy2(image, destination_dir / public_relative)
             html = html.replace(overview, public_relative.as_posix())
+        releases = task.get("releases", [])
+        if not isinstance(releases, list):
+            raise ValueError("directory task.releases must be a list")
+        for index, release in enumerate(releases, start=1):
+            if not isinstance(release, Mapping):
+                raise ValueError("directory task.releases must contain mappings")
+            evidence = release.get("evidence")
+            if not isinstance(evidence, Mapping):
+                continue
+            overview = evidence.get("overview_image")
+            if not isinstance(overview, str) or not overview:
+                continue
+            image = (source_dir / overview).resolve()
+            if not image.is_file():
+                raise ValueError(f"release overview image does not exist: {overview}")
+            public_relative = (
+                Path("assets")
+                / f"{task_id}-release-{index:02d}-overview{image.suffix}"
+            )
+            shutil.copy2(image, destination_dir / public_relative)
+            html = html.replace(overview, public_relative.as_posix())
     destination_dir.mkdir(parents=True, exist_ok=True)
     output = destination_dir / "index.html"
     output.write_text(html, encoding="utf-8")

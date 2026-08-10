@@ -261,6 +261,15 @@ def write_task_directory(
                 else candidate["background_binding"],
                 "candidate_evidence": None if candidate is None else candidate["evidence"],
                 "candidate_gates": None if candidate is None else candidate["gates"],
+                "candidate_release_status": None
+                if candidate is None
+                else candidate["release_status"],
+                "candidate_score_ceiling": None
+                if candidate is None
+                else candidate["score_ceiling"],
+                "candidate_missing_capabilities": []
+                if candidate is None
+                else candidate["missing_capabilities"],
                 "releases": candidates,
             }
         )
@@ -360,6 +369,12 @@ def _release_mapping(raw_release: Mapping[str, object], task_ids: set[str]) -> d
         "evidence": evidence,
         "promotion": promotion,
         "gates": copied_gates,
+        "release_status": _optional_release_status(raw_release.get("release_status")),
+        "score_ceiling": _optional_score_ceiling(raw_release.get("score_ceiling")),
+        "missing_capabilities": _optional_string_list(
+            raw_release.get("missing_capabilities", []),
+            "release.missing_capabilities",
+        ),
     }
 
 
@@ -368,8 +383,8 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
     lines = [
         "# Scientific Workbench Task Directory",
         "",
-        "| # | Task | Queue | Current candidate | Latest qualified | Background | Evidence |",
-        "| ---: | --- | --- | --- | --- | --- | --- |",
+        "| # | Task | Queue | Current candidate | Latest qualified | Background | Evidence | Tier | Ceiling | Missing |",
+        "| ---: | --- | --- | --- | --- | --- | --- | --- | ---: | --- |",
     ]
     for task in tasks:
         latest = task["latest_release_id"] or "—"
@@ -379,7 +394,7 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
         assert isinstance(evidence, Mapping)
         overview = evidence.get("overview_image", "—")
         lines.append(
-            "| {source_order} | {title} | {queue} | `{candidate}` | `{latest}` | `{background}` | `{overview}` |".format(
+            "| {source_order} | {title} | {queue} | `{candidate}` | `{latest}` | `{background}` | `{overview}` | {tier} | {ceiling} | {missing} |".format(
                 source_order=task["source_order"],
                 title=task["title_zh"],
                 queue=task["queue_status"],
@@ -387,6 +402,9 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
                 latest=latest,
                 background=background,
                 overview=overview,
+                tier=task.get("candidate_release_status") or "—",
+                ceiling=_score_label(task.get("candidate_score_ceiling")),
+                missing=", ".join(task.get("candidate_missing_capabilities", [])) or "—",
             )
         )
     lines.extend(["", "## Claim boundary", "", str(payload["claim_boundary"]), ""])
@@ -396,7 +414,7 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
 def _directory_html(payload: Mapping[str, object]) -> str:
     tasks = _mappings(payload.get("tasks"), "directory.tasks")
     rows = "\n".join(
-        "<tr><td class=\"row-order\">{}</td><td class=\"task-title\">{}</td><td class=\"queue-status\">{}</td><td class=\"release-id\">{}</td><td class=\"latest-id\">{}</td><td class=\"background-binding\">{}</td><td class=\"evidence-thumb\">{}</td></tr>".format(
+        "<tr><td class=\"row-order\">{}</td><td class=\"task-title\">{}</td><td class=\"queue-status\">{}</td><td class=\"release-id\">{}</td><td class=\"latest-id\">{}</td><td class=\"background-binding\">{}</td><td class=\"release-tier\">{}</td><td class=\"score-ceiling\">{}</td><td class=\"missing-capabilities\">{}</td><td class=\"release-variants\">{}</td><td class=\"evidence-thumb\">{}</td></tr>".format(
             task["source_order"],
             _html(str(task["title_zh"])),
             _html(str(task["queue_status"])),
@@ -409,15 +427,19 @@ def _directory_html(payload: Mapping[str, object]) -> str:
                     or "—"
                 )
             ),
+            _html(str(task.get("candidate_release_status") or "—")),
+            _html(_score_label(task.get("candidate_score_ceiling"))),
+            _html(", ".join(task.get("candidate_missing_capabilities", [])) or "—"),
+            _release_variants(task.get("releases")),
             _evidence_thumbnail(task.get("latest_evidence") or task.get("candidate_evidence")),
         )
         for task in tasks
     )
     return """<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><title>Scientific Workbench Task Directory</title>
-<style>*{box-sizing:border-box}body{font-family:system-ui,sans-serif;margin:2rem;color:#18212f}.table-scroll{max-width:100%;overflow-x:auto}table{border-collapse:collapse;min-width:1080px;width:100%;table-layout:fixed}th,td{border-bottom:1px solid #d8dee9;padding:.6rem;text-align:left}.row-order{width:3rem}.task-title{width:12rem}.queue-status{width:6rem}.release-id{overflow-wrap:anywhere;width:20rem}.latest-id{overflow-wrap:anywhere;width:12rem}.background-binding{overflow-wrap:anywhere;width:15rem}.evidence-thumb{width:11rem}th{background:#f4f7fb}code{font-size:.9em}img{width:144px;height:81px;object-fit:cover;border-radius:4px}p{max-width:72rem;color:#4a5568}.scroll-hint{display:none}@media(max-width:700px){body{margin:1rem}th,td{padding:.5rem}img{width:120px;height:68px}.scroll-hint{display:block;color:#4a5568}}</style>
+<html lang="zh-CN"><head><meta charset="utf-8"><link rel="icon" href="data:,"><title>Scientific Workbench Task Directory</title>
+<style>*{box-sizing:border-box}body{font-family:system-ui,sans-serif;margin:2rem;color:#18212f}.table-scroll{max-width:100%;overflow-x:auto}table{border-collapse:collapse;min-width:1680px;width:100%;table-layout:fixed}th,td{border-bottom:1px solid #d8dee9;padding:.6rem;text-align:left;vertical-align:top}.row-order{width:3rem}.task-title{width:12rem}.queue-status{width:6rem}.release-id{overflow-wrap:anywhere;width:18rem}.latest-id{overflow-wrap:anywhere;width:10rem}.background-binding{overflow-wrap:anywhere;width:13rem}.release-tier{width:10rem;overflow-wrap:anywhere}.score-ceiling{width:5rem}.missing-capabilities{width:13rem}.release-variants{width:22rem;overflow-wrap:anywhere}.release-variants summary{cursor:pointer}.release-variants ul{margin:.5rem 0 0;padding-left:1.1rem}.evidence-thumb{width:11rem}th{background:#f4f7fb}code{font-size:.9em}img{width:144px;height:81px;object-fit:cover;border-radius:4px}p{max-width:72rem;color:#4a5568}.scroll-hint{display:none}@media(max-width:700px){body{margin:1rem}th,td{padding:.5rem}img{width:120px;height:68px}.scroll-hint{display:block;color:#4a5568}}</style>
 </head><body><h1>Scientific Workbench Task Directory</h1>
-<p class="scroll-hint">左右滑动查看全部列。</p><div class="table-scroll"><table><thead><tr><th class="row-order">#</th><th class="task-title">Task</th><th class="queue-status">Queue</th><th class="release-id">Current candidate</th><th class="latest-id">Latest qualified</th><th class="background-binding">Background</th><th class="evidence-thumb">Evidence</th></tr></thead><tbody>""" + rows + """</tbody></table></div>
+<p class="scroll-hint">左右滑动查看全部列。</p><div class="table-scroll"><table><thead><tr><th class="row-order">#</th><th class="task-title">Task</th><th class="queue-status">Queue</th><th class="release-id">Current candidate</th><th class="latest-id">Latest qualified</th><th class="background-binding">Background</th><th class="release-tier">Tier</th><th class="score-ceiling">Ceiling</th><th class="missing-capabilities">Missing</th><th class="release-variants">Variants</th><th class="evidence-thumb">Evidence</th></tr></thead><tbody>""" + rows + """</tbody></table></div>
 <h2>Claim boundary</h2><p>""" + _html(str(payload["claim_boundary"])) + """</p></body></html>
 """
 
@@ -454,6 +476,69 @@ def _evidence_thumbnail(value: object) -> str:
         return "—"
     safe = _html(overview)
     return f'<a href="{safe}"><img src="{safe}" alt="scene overview"></a>'
+
+
+def _release_variants(value: object) -> str:
+    if not isinstance(value, list) or not value:
+        return "—"
+    items: list[str] = []
+    for release in value:
+        if not isinstance(release, Mapping):
+            continue
+        release_id = release.get("release_id")
+        background = release.get("background_binding")
+        if isinstance(release_id, str) and isinstance(background, str):
+            label = f"{_html(release_id)} — {_html(background)}"
+            evidence = release.get("evidence")
+            overview = evidence.get("overview_image") if isinstance(evidence, Mapping) else None
+            if isinstance(overview, str) and overview:
+                safe = _html(overview)
+                label = f'<a href="{safe}">{label}</a>'
+            items.append(f"<li>{label}</li>")
+    if not items:
+        return "—"
+    count = len(items)
+    plural = "s" if count != 1 else ""
+    return (
+        f"<details><summary>{count} package{plural}</summary><ul>"
+        + "".join(items)
+        + "</ul></details>"
+    )
+
+
+def _score_label(value: object) -> str:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return "—"
+    return f"{float(value) * 100:g}%"
+
+
+def _optional_release_status(value: object) -> str:
+    if value is None:
+        return "unspecified"
+    if value not in {"canonical_candidate", "prototype"}:
+        raise CoveragePlanError(
+            "release.release_status must be 'canonical_candidate' or 'prototype'"
+        )
+    return str(value)
+
+
+def _optional_score_ceiling(value: object) -> float | None:
+    if value is None:
+        return None
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise CoveragePlanError("release.score_ceiling must be a number")
+    score = float(value)
+    if score < 0.0 or score > 1.0:
+        raise CoveragePlanError("release.score_ceiling must be between 0 and 1")
+    return score
+
+
+def _optional_string_list(value: object, field: str) -> list[str]:
+    if not isinstance(value, list) or not all(
+        isinstance(item, str) and item for item in value
+    ):
+        raise CoveragePlanError(f"{field} must be a list of non-empty strings")
+    return list(value)
 
 
 def _catalog_content_sha(catalog: Mapping[str, object]) -> str | None:

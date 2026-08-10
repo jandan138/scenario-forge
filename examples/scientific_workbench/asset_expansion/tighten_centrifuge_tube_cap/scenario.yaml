@@ -1,0 +1,84 @@
+schema_version: scenario-spec/v0.7
+scenario_id: scientific_workbench_tighten_centrifuge_tube_cap
+domain: scientific_workbench
+task_family: bimanual_threaded_closure
+instruction: 操作臂拿起红色离心管盖，辅助臂从试管架拿起 50 mL 离心管；对准并套合管盖，执行旋紧动作，最后将离心管正立放回试管架。
+scene:
+  asset_id: scientific_environment_code_room_example4_v2
+  root_prim_path: /World
+  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table_static_support
+    source_prim_path: /World/table
+    role: table
+    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+  - id: obj_tube_rack
+    asset_id: scientific_workbench_tube_rack_k125_dynamic
+    source_prim_path: /World/TubeRack
+    role: tube_rack
+    pose: {xyz: [-0.05, -0.15, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      socket_0_aperture: {xyz: [0.0, -0.0425, 0.0831375], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      socket_0_inserted_bottom: {xyz: [0.0, -0.0425, 0.003], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_centrifuge_tube
+    asset_id: scientific_workbench_centrifuge_tube_50ml_body_dynamic
+    source_prim_path: /World/CentrifugeTube50mlBody
+    role: centrifuge_tube
+    pose: {xyz: [-0.05, -0.1925, 0.7757606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.06], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      mouth: {xyz: [0.0, 0.0, 0.1005], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      cap_seat: {xyz: [0.0, 0.0, 0.1009], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_centrifuge_tube_cap
+    asset_id: scientific_workbench_centrifuge_tube_50ml_cap_dynamic
+    source_prim_path: /World/CentrifugeTube50mlCap
+    role: centrifuge_tube_cap
+    pose: {xyz: [-0.10, 0.18, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.00625], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      seat: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, lift, hold, place, release]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, mate, twist, release]}
+steps:
+  - {id: pick_cap, skill: lift, actors: [operating_arm], parameters: {object: obj_centrifuge_tube_cap, grasp_frame: obj_centrifuge_tube_cap.grasp}}
+  - {id: pick_tube, skill: lift, actors: [auxiliary_arm], parameters: {object: obj_centrifuge_tube, grasp_frame: obj_centrifuge_tube.grasp}, depends_on: [pick_cap]}
+  - {id: align_cap, skill: align, actors: [operating_arm, auxiliary_arm], parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat}, depends_on: [pick_tube]}
+  - {id: mate_cap, skill: insert, actors: [operating_arm], parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat}, depends_on: [align_cap]}
+  - {id: twist_cap, skill: twist, actors: [operating_arm], parameters: {object: obj_centrifuge_tube_cap, relative_to: obj_centrifuge_tube, axis: z, direction: tighten}, depends_on: [mate_cap]}
+  - {id: return_tube, skill: insert, actors: [auxiliary_arm], parameters: {object: obj_centrifuge_tube, target_frame: obj_tube_rack.socket_0_inserted_bottom}, depends_on: [twist_cap]}
+  - {id: release_tube, skill: release, actors: [auxiliary_arm, operating_arm], parameters: {object: obj_centrifuge_tube}, depends_on: [return_tube]}
+invariants:
+  - {id: tube_held_during_closure, type: maintain_grasp, actor: auxiliary_arm, object: obj_centrifuge_tube, from_step: pick_tube, through_step: twist_cap}
+success:
+  operator: all
+  claim_scope: semantic_task_contract_with_inactive_thread_gate
+  predicates:
+    - id: tube_returned_to_rack
+      type: relative_pose_reached
+      sequence_index: 0
+      parameters: {object: obj_centrifuge_tube, relative_to: obj_tube_rack, xyz_range: {x: [-0.01, 0.01], y: [-0.0525, -0.0325], z: [-0.002, 0.008]}}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: cap_and_tube_aligned}
+    items:
+      - {id: cap_lifted, weight: 0.10, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_centrifuge_tube_cap, support_surface: table, min_clearance_m: 0.005, held_by: operating_arm}}, source_ref: {source_order: 8, item: 时序1}}
+      - {id: tube_lifted, weight: 0.10, temporal: {kind: instant}, condition: {type: object_lifted, parameters: {object: obj_centrifuge_tube, support_surface: obj_tube_rack, min_clearance_m: 0.01, held_by: auxiliary_arm}}, source_ref: {source_order: 8, item: 时序2}}
+      - {id: cap_and_tube_aligned, weight: 0.15, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat, axial_gap_m: [0.005, 0.03], lateral_error_max_m: 0.005, axis_error_max_deg: 8.0}}, source_ref: {source_order: 8, item: 时序3}}
+      - {id: cap_initially_mated, weight: 0.15, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {source_frame: obj_centrifuge_tube_cap.seat, target_frame: obj_centrifuge_tube.cap_seat, axial_gap_m: [-0.002, 0.003], lateral_error_max_m: 0.004, contact_required: true}}, source_ref: {source_order: 8, item: 时序4}}
+      - id: cap_rotated_into_closed_state
+        weight: 0.30
+        active: false
+        requires: [threaded_closure.relative_rotation_and_axial_engagement]
+        temporal: {kind: terminal}
+        condition: {type: motion_trajectory_completed, parameters: {object: obj_centrifuge_tube_cap, relative_to: obj_centrifuge_tube, trajectory: {kind: threaded_closure, direction: tighten}}}
+        source_ref: {source_order: 8, item: 终帧-旋入}
+      - {id: tube_returned_released, weight: 0.20, temporal: {kind: terminal}, condition: {type: object_released_on_support, parameters: {object: obj_centrifuge_tube, support_surface: obj_tube_rack, released: true, upright_max_tilt_deg: 10.0}}, source_ref: {source_order: 8, item: 终帧-归还}}
+max_steps: 1800
+seed: "008"

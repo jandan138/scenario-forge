@@ -62,3 +62,16 @@ blockers. A candidate exposes useful render/reset evidence but is visibly
 separate from `latest`, so partial gates cannot be mistaken for qualification.
 The directory can be deployed as a read-only page. It remains a view over
 evidence rather than an authority that can override failed gates.
+
+Each release may also declare a product tier, a score ceiling, and missing
+capabilities. `canonical_candidate` means the package is intended to become the
+canonical task once every promotion gate passes. `prototype` means the package
+is useful for layout or integration work but is knowingly incomplete. The score
+ceiling is a contract limit derived from the currently representable rubric; it
+is not a measured benchmark score or policy success rate.
+
+One task may have multiple immutable background variants. The directory groups
+them under one task row, while every variant remains a separate self-contained
+package with its own evidence. Background switching is therefore a compile-time
+choice rather than a runtime USD variant that could invalidate previously
+reviewed evidence.
