@@ -29,7 +29,7 @@ SCENE1_ENVIRONMENT_ASSET_ID = "scientific_workbench_scene1_hard_environment"
 # ConvertAsset must extract this parent-layer scope so the package retains the
 # paper scene's meters-per-unit, placement, and rotation for the lab_015 payload.
 SCENE1_ENVIRONMENT_SCOPE = "/World/lab_015"
-EBENCH_TABLE_ASSET_ID = "scientific_workbench_ebench_table"
+EBENCH_TABLE_ASSET_ID = "scientific_workbench_ebench_table_static_support"
 EBENCH_TABLE_SCOPE = "/World/table"
 SOURCE_VESSEL_ASSET_ID = "scientific_workbench_conical_bottle03_dynamic"
 SOURCE_VESSEL_SCOPE = "/World/conical_bottle03"

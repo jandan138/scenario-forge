@@ -8,7 +8,7 @@ tabletop_placement:
   # The policy evaluates composed-world bounds. The robot-facing half is
   # derived from the table centre toward the declared robot base, not this
   # source coordinate frame.
-  support_surface_prim_path: /World/table/surface
+  support_surface_prim_path: /World/table/Surface
   min_edge_clearance_m: 0.10
   support_height_tolerance_m: 0.02
   exception_metadata_key: tabletop_placement_exception

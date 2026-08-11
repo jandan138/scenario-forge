@@ -58,13 +58,13 @@ bindings:
   scientific_workbench_ebench_table_static_support:
     resolver: convert_asset_package
     usage: static_support_object
-    source_usd: /cpfs/shared/simulation/zhuzihou/dev/LabUtopia/outputs/usd_asset_packages/lab_001_localized_20260707/lab_001.usd
-    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labutopia_lab001_table_static_support_r2
-    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labutopia_lab001_table_static_support_r2/evidence/manifest.json
-    producer_revision: 77600fc529446eeea0a6abc8de04da4c484dbae8
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package/evidence/manifest.json
+    producer_revision: scientific-workbench-standard-table-2000x800x755-20260811
     expected_scope_prims: [/World/table]
     license: LicenseRef-Team-Owned-Public-Redistribution
-    attribution: [LabUtopia lab_001 table; ConvertAsset static-support r2]
+    attribution: [LabUtopia lab_001 table visual; ConvertAsset exact 2000x800x755 mm facade and static support]
     redistributable: true
   scientific_workbench_conical_bottle03_dynamic:
     resolver: convert_asset_package
@@ -197,4 +197,37 @@ bindings:
     expected_scope_prims: [/World/MicroSpatula]
     license: LicenseRef-Team-Owned-Public-Redistribution
     attribution: [实验室资产库 micro spatula; ConvertAsset visual static]
+    redistributable: true
+  scientific_workbench_ground_glass_stopper_29_42_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/facades/ground_glass_stopper_29_42/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/packages/ground_glass_stopper_29_42
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/packages/ground_glass_stopper_29_42/evidence/manifest.json
+    producer_revision: scientific-workbench-closure-assets-20260811-r1
+    expected_scope_prims: [/World/GroundGlassStopper2942]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [ground_glass_stopper_29_42 source delivery; ConvertAsset source-bound interaction package]
+    redistributable: true
+  scientific_workbench_conical_flask_250ml_29_42_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/sources/conical_flask_250ml_29_42.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/packages/conical_flask_250ml_29_42
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/packages/conical_flask_250ml_29_42/evidence/manifest.json
+    producer_revision: scientific-workbench-closure-assets-20260811-r1
+    expected_scope_prims: [/World/ConicalFlask2942]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [ConvertAsset analytic 250 mL conical flask with 29/42 female joint]
+    redistributable: true
+  scientific_workbench_stopper_rack_k100_kinematic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/facades/stopper_rack_k100/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/packages/stopper_rack_k100
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/packages/stopper_rack_k100/evidence/manifest.json
+    producer_revision: scientific-workbench-closure-assets-20260811-r1
+    expected_scope_prims: [/World/StopperRack]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 aluminum rack at source scale; ConvertAsset stopper-holder profile]
     redistributable: true

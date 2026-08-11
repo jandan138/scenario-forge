@@ -33,11 +33,16 @@ from scenario_forge.package import validate_package
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TASK_SPECS = {
+    1: REPO_ROOT / "examples/scientific_workbench/bimanual_pour/scenario.yaml",
+    2: REPO_ROOT / "examples/scientific_workbench/layout_validated/pour_cylinder_to_beaker/scenario.yaml",
     4: REPO_ROOT / "examples/scientific_workbench/asset_expansion/insert_stir_bar/scenario.yaml",
+    5: REPO_ROOT / "examples/scientific_workbench/asset_expansion/remove_vessel_closure/scenario.yaml",
     7: REPO_ROOT / "examples/scientific_workbench/asset_expansion/glass_rod_stir/scenario.yaml",
     8: REPO_ROOT / "examples/scientific_workbench/asset_expansion/tighten_centrifuge_tube_cap/scenario.yaml",
+    13: REPO_ROOT / "examples/scientific_workbench/layout_validated/funnel_pour_cylinder_to_flask/scenario.yaml",
     14: REPO_ROOT / "examples/scientific_workbench/asset_expansion/funnel_pour_to_centrifuge_tube/scenario.yaml",
     15: REPO_ROOT / "examples/scientific_workbench/asset_expansion/solid_sample_weighing_layout/scenario.yaml",
+    16: REPO_ROOT / "examples/scientific_workbench/layout_validated/two_sample_mix/scenario.yaml",
 }
 DEFAULT_BINDINGS = (
     REPO_ROOT / "configs/source_bindings/scientific_workbench_asset_expansion_20260810.yaml"
@@ -95,9 +100,13 @@ BACKGROUND_VARIANTS = (
 )
 
 TASK_RELEASE = {
-    4: ("prototype", 0.55, ("vessel closure asset",)),
+    1: ("prototype", 0.60, ("liquid contained-volume metric",)),
+    2: ("prototype", 0.60, ("liquid contained-volume metric",)),
+    4: ("canonical_candidate", 1.0, ()),
+    5: ("canonical_candidate", 1.0, ()),
     7: ("canonical_candidate", 1.0, ()),
     8: ("canonical_candidate", 0.70, ("threaded closure interaction",)),
+    13: ("prototype", 0.60, ("liquid contained-volume metric",)),
     14: ("prototype", 0.65, ("liquid flow and contained-volume metrics",)),
     15: (
         "prototype",
@@ -108,6 +117,7 @@ TASK_RELEASE = {
             "reagent bottle and solid sample",
         ),
     ),
+    16: ("prototype", 0.70, ("liquid contained-volume metric",)),
 }
 
 
@@ -136,7 +146,7 @@ def _with_background(
     scene = deepcopy(dict(scenario["scene"]))
     scene["asset_id"] = str(background["asset_id"])
     pose = deepcopy(dict(scene.get("pose", {})))
-    pose["xyz"] = [0.2456705, -0.0069055, 0.0]
+    pose["xyz"] = [0.002882434, -0.0069055, 0.0]
     pose["wxyz"] = list(background["wxyz"])
     pose["scale_xyz"] = [1.0, 1.0, 1.0]
     scene["pose"] = pose
@@ -150,6 +160,27 @@ def _with_background(
         scenario["scenario_id"] = (
             str(scenario["scenario_id"]) + "__background_" + str(background["id"])
         )
+    return scenario
+
+
+def _with_r5_asset_substitutions(
+    task_number: int,
+    raw_scenario: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Select qualified replacement assets without mutating legacy task specs."""
+
+    scenario = deepcopy(dict(raw_scenario))
+    replaced = False
+    for raw_object in scenario.get("objects", []):
+        if not isinstance(raw_object, dict):
+            continue
+        if raw_object.get("asset_id") != "scientific_workbench_conical_bottle03_dynamic":
+            continue
+        raw_object["asset_id"] = "scientific_workbench_conical_flask_250ml_29_42_dynamic"
+        raw_object["source_prim_path"] = "/World/ConicalFlask2942"
+        replaced = True
+    if task_number in {1, 13, 16} and not replaced:
+        raise ValueError(f"task {task_number} does not declare its conical flask")
     return scenario
 
 
@@ -168,19 +199,32 @@ def load_generation_plans() -> list[GenerationPlan]:
                 scenario=_with_background(task7, background),
             )
         )
-    default_background = BACKGROUND_VARIANTS[0]
-    for task_number in (4, 8, 14, 15):
+    backgrounds_by_task = {
+        1: BACKGROUND_VARIANTS[2],
+        2: BACKGROUND_VARIANTS[2],
+        4: BACKGROUND_VARIANTS[1],
+        5: BACKGROUND_VARIANTS[1],
+        8: BACKGROUND_VARIANTS[3],
+        13: BACKGROUND_VARIANTS[2],
+        14: BACKGROUND_VARIANTS[3],
+        15: BACKGROUND_VARIANTS[4],
+        16: BACKGROUND_VARIANTS[2],
+    }
+    for task_number, background in backgrounds_by_task.items():
         release, ceiling, missing = TASK_RELEASE[task_number]
         plans.append(
             GenerationPlan(
                 task_number=task_number,
-                background_id="example4",
+                background_id=str(background["id"]),
                 release_status=release,
                 score_ceiling=ceiling,
                 missing_capabilities=missing,
                 scenario=_with_background(
-                    _load_yaml_mapping(TASK_SPECS[task_number]),
-                    default_background,
+                    _with_r5_asset_substitutions(
+                        task_number,
+                        _load_yaml_mapping(TASK_SPECS[task_number]),
+                    ),
+                    background,
                 ),
             )
         )
@@ -249,6 +293,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bindings", type=Path, default=DEFAULT_BINDINGS)
     parser.add_argument("--fit-report", type=Path, default=DEFAULT_FIT_REPORT)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--task-number",
+        type=int,
+        action="append",
+        help="Compile only the selected Feishu task number; repeat as needed.",
+    )
     parser.add_argument("--static-only", action="store_true")
     parser.add_argument("--isaac-python", type=Path, default=DEFAULT_ISAAC_PYTHON)
     parser.add_argument("--genmanip-root", type=Path, default=DEFAULT_GENMANIP_ROOT)
@@ -262,8 +312,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     sources = resolve_scenario_source_bindings(args.bindings)
     fit_evidence = _validate_fit_report(args.fit_report)
+    existing_manifest_path = args.out / "manifest.yaml"
+    existing_records: list[dict[str, Any]] = []
+    if existing_manifest_path.is_file():
+        existing = _load_yaml_mapping(existing_manifest_path)
+        raw_records = existing.get("packages", [])
+        if isinstance(raw_records, list):
+            existing_records = [dict(item) for item in raw_records if isinstance(item, Mapping)]
+    selected = set(args.task_number or [])
+    plans = [
+        plan
+        for plan in load_generation_plans()
+        if not selected or plan.task_number in selected
+    ]
+    if selected and not plans:
+        raise ValueError(f"no generation plan for task number(s): {sorted(selected)}")
     records: list[dict[str, Any]] = []
-    for plan in load_generation_plans():
+    for plan in plans:
         materialized = _materialize_authoritative_frames(plan.scenario, sources)
         spec = ScenarioSpec.from_mapping(materialized)
         package_root = args.out / "packages" / spec.scenario_id
@@ -309,6 +374,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
         )
     args.out.mkdir(parents=True, exist_ok=True)
+    replaced_ids = {str(record["scenario_id"]) for record in records}
+    records = [
+        record
+        for record in existing_records
+        if str(record.get("scenario_id")) not in replaced_ids
+    ] + records
+    records.sort(key=lambda item: (int(item.get("task_number", 999)), str(item.get("background_id", ""))))
     manifest = {
         "schema_version": "scenario-forge-scientific-workbench-asset-expansion/v0.1",
         "status": "static_complete" if args.static_only else "runtime_preview_complete",

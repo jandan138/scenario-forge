@@ -36,10 +36,11 @@ Release records can declare:
 - `score_ceiling` between 0 and 1;
 - `missing_capabilities` as an explicit list.
 
-The page also collapses multiple immutable background packages into a Variants
-cell. The publisher copies every referenced release overview, not only the
-current candidate image, so all reviewed variants remain inspectable after
-deployment.
+The page presents evidence-first task cards, tier/status filters, and a compact
+18-row coverage matrix in Feishu order. Multiple immutable background packages
+remain available from each card's variant disclosure. The publisher copies
+every referenced release overview, not only the current candidate image, so all
+reviewed variants remain inspectable after deployment.
 
 ## Publish the reviewed directory
 
@@ -114,3 +115,19 @@ The same task objects, table, robot, world poses, and PhysX profile are exported
 to eBench and VR. A non-pour task is represented in VR by one dependency role
 per task object under `deps/objects/<object-id>/`; the legacy two-vessel pour
 layout retains `source_container` and `target_container` paths for compatibility.
+
+## USD + config review handoff
+
+After the reviewed adapter exports exist, build the two colleague-facing ZIPs:
+
+```bash
+PYTHONPATH=src python scripts/export_scientific_workbench_usd_handoff.py \
+  --out outputs/scientific_workbench_usd_handoff_20260811
+```
+
+Task 1 is emitted in a separate bimanual-pour archive. Tasks 2, 4, 5, 7, 8,
+13, 14, 15, and 16 are emitted in the regular archive. Every task directory
+contains `scene.usd`, `task_config.py`, `parity_manifest.json`, and the exact
+package-relative `deps/` closure. Open `scene.usd` directly in Isaac Sim 4.1;
+keep `deps/` beside it. These review archives deliberately omit the robot model
+and do not claim task or benchmark success.

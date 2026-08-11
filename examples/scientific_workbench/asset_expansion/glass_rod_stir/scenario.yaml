@@ -6,18 +6,18 @@ instruction: 辅助臂固定烧杯；操作臂拿起玻璃棒，将工作端插�
 scene:
   asset_id: scientific_environment_code_room_example4_v2
   root_prim_path: /World
-  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+  pose: {xyz: [0.002882434, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
 objects:
   - id: table
     asset_id: scientific_workbench_ebench_table_static_support
     source_prim_path: /World/table
     role: table
-    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+    pose: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
   - id: obj_beaker
     asset_id: scientific_workbench_beaker_dynamic_r3
     source_prim_path: /World/Beaker
     role: target_container
-    pose: {xyz: [-0.15, -0.17, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    pose: {xyz: [-0.15, -0.17, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
     named_frames:
       support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
       grasp: {xyz: [0.0, 0.0, 0.055], wxyz: [1.0, 0.0, 0.0, 0.0]}
@@ -27,14 +27,14 @@ objects:
     asset_id: scientific_workbench_glass_stirring_rod_dynamic
     source_prim_path: /World/GlassStirringRod
     role: stirring_tool
-    pose: {xyz: [-0.12, 0.25, 0.7763756155], wxyz: [0.7071067812, 0.7071067812, 0.0, 0.0]}
+    pose: {xyz: [-0.12, 0.02, 0.758615], wxyz: [0.7071067812, 0.7071067812, 0.0, 0.0]}
     named_frames:
       support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
       grasp: {xyz: [0.0, 0.0, 0.225], wxyz: [1.0, 0.0, 0.0, 0.0]}
       working_tip: {xyz: [0.0, 0.0, 0.008], wxyz: [1.0, 0.0, 0.0, 0.0]}
 robot:
   profile_ref: manip/lift2/R5a_isaac41_vr600_v1
-  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  spawn: {xyz: [0.0, -1.02, 0.31], wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]}
   actors:
     - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, hold, release]}
     - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, insert, stir, place, release]}

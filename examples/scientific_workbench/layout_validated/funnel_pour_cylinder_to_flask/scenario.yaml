@@ -7,23 +7,22 @@ scene:
   asset_id: scientific_environment_code_room_example4_v1
   root_prim_path: /World
   pose:
-    xyz: [0.2456705, -0.0069055, 0.0]
+    xyz: [0.002882434, -0.0069055, 0.0]
     wxyz: [0.0, 0.0, 0.0, 1.0]
 objects:
   - id: table
-    asset_id: scientific_workbench_ebench_table
+    asset_id: scientific_workbench_ebench_table_static_support
     source_prim_path: /World/table
     role: table
     pose:
-      xyz: [0.242788066, 0.0, 0.0]
-      wxyz: [0.0, 1.0, 0.0, 0.0]
-      scale_xyz: [0.003, 0.0035, 0.004]
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
   - id: obj_funnel
     asset_id: scientific_workbench_funnel_dynamic
     source_prim_path: /World/Funnel
     role: funnel
     pose:
-      xyz: [0.10, 0.22, 0.7827606155]
+      xyz: [-0.16, -0.08, 0.755]
       wxyz: [1.0, 0.0, 0.0, 0.0]
     named_frames:
       opening: {xyz: [0.0, 0.0, 0.12], wxyz: [1.0, 0.0, 0.0, 0.0]}
@@ -35,7 +34,7 @@ objects:
     source_prim_path: /World/graduated_cylinder_03
     role: source_container
     pose:
-      xyz: [0.10, 0.02, 0.7827606155]
+      xyz: [0.16, -0.13, 0.755]
       wxyz: [1.0, 0.0, 0.0, 0.0]
     named_frames:
       opening: {xyz: [0.0, 0.0, 0.2722941904], wxyz: [1.0, 0.0, 0.0, 0.0]}
@@ -46,15 +45,15 @@ objects:
     source_prim_path: /World/conical_bottle03
     role: target_container
     pose:
-      xyz: [0.10, -0.20, 0.7827606155]
+      xyz: [-0.16, -0.19, 0.755]
       wxyz: [1.0, 0.0, 0.0, 0.0]
     named_frames:
       opening: {xyz: [0.0, 0.0, 0.1965674179], wxyz: [1.0, 0.0, 0.0, 0.0]}
       grasp: {xyz: [0.0, 0.0, 0.16], wxyz: [1.0, 0.0, 0.0, 0.0]}
       support: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
 robot:
-  profile_ref: manip/lift2/R5a
-  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [0.0, -1.02, 0.31], wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]}
   actors:
     - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, hold]}
     - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, align, insert, tilt, place, release]}

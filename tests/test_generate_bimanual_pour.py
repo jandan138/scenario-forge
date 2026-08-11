@@ -184,7 +184,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert (collected / "evidence/render_request.yaml").is_file()
     for asset_id in (
         "scientific_workbench_scene1_hard_environment",
-        "scientific_workbench_ebench_table",
+        "scientific_workbench_ebench_table_static_support",
     ):
         assert (output / "assets" / asset_id / "asset.usd").is_file()
         assert not (output / "assets" / asset_id / "evidence").exists()
@@ -211,7 +211,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         "scientific_workbench_scene1_hard_environment": (
             "54ff5660937c08cf3784c44a3f500757ab4eed78"
         ),
-        "scientific_workbench_ebench_table": (
+        "scientific_workbench_ebench_table_static_support": (
             "54ff5660937c08cf3784c44a3f500757ab4eed78"
         ),
         "scientific_workbench_conical_bottle03_dynamic": "source-vessel-profile-r1",
@@ -224,7 +224,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert upstream_by_asset["scientific_workbench_scene1_hard_environment"][
         "metadata"
     ]["consumer_usage"] == "visual_static_environment"
-    assert upstream_by_asset["scientific_workbench_ebench_table"][
+    assert upstream_by_asset["scientific_workbench_ebench_table_static_support"][
         "metadata"
     ]["consumer_usage"] == "static_support_object"
 
@@ -265,7 +265,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     ] == 60
     assert len(task_config["evaluation_configs"][0]["preprocess_config"]) == 3
     assert task_config["evaluation_configs"][0]["robots"] == [
-        {"type": "manip/lift2/R5a", "position": [-1.02, 0.0, 0.31]}
+        {"type": "manip/lift2/R5a", "position": [0.0, -1.02, 0.31]}
     ]
     episode = json.loads(
         (
@@ -274,14 +274,14 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         ).read_text(encoding="utf-8")
     )
     assert episode["task_data"]["initial_layout"]["lift2"]["position"] == [
-        -1.02,
         0.0,
+        -1.02,
         0.31,
     ]
     initial_layout = episode["task_data"]["initial_layout"]
     table_layout = initial_layout["00000000000000000000000000000000"]
-    assert table_layout["position"] == [0.242788066, 0.0, 0.0]
-    assert table_layout["scale"] == [0.003, 0.0035, 0.004]
+    assert table_layout["position"] == [0.0, 0.0, 0.0]
+    assert table_layout["scale"] == [1.0, 1.0, 1.0]
     assert table_layout["path"] == (
         "collected_packages/scientific_workbench_bimanual_pour/"
         "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/"
@@ -289,11 +289,15 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     )
     assert table_layout["add_colliders"] is False
     assert table_layout["add_rigid_body"] is False
-    assert initial_layout["obj_conical_bottle03"]["position"] == [-0.25, 0.16, 0.81]
+    assert initial_layout["obj_conical_bottle03"]["position"] == [
+        -0.18,
+        -0.12,
+        0.755,
+    ]
     assert initial_layout["obj_graduated_cylinder_03"]["position"] == [
-        -0.25,
-        -0.16,
-        0.81,
+        0.15,
+        -0.14,
+        0.755,
     ]
     contract = episode["task_data"]["scenario_forge_runtime_contract"]
     assert contract["contract_status"] == "transport_only"
@@ -339,7 +343,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
         / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
     ).read_text(encoding="utf-8")
     assert "scientific_workbench_scene1_hard_environment" in scene_text
-    assert "scientific_workbench_ebench_table" not in scene_text
+    assert "scientific_workbench_ebench_table_static_support" not in scene_text
     assert 'def Xform "obj_table"' not in scene_text
     assert 'over "table" (' in scene_text
     assert "double3 xformOp:translate = (0.621309, 0.462547, 0.061353)" in scene_text
@@ -363,7 +367,7 @@ def test_golden_generator_static_only_skips_runtime_and_excludes_upstream_report
     assert 'defaultPrim = "Asset"' in runtime_table_text
     assert (
         "prepend references = "
-        "@../scientific_workbench_ebench_table/asset.usd@</World>"
+        "@../scientific_workbench_ebench_table_static_support/asset.usd@</World>"
     ) in runtime_table_text
     assert runtime_table_text.count("uniform token[] xformOpOrder = []") == 2
     for forbidden_token in (
@@ -475,7 +479,7 @@ def test_scene1_environment_and_table_scopes_are_composed_in_both_scenes(
     assert scenario["scene"]["asset_id"] == "scientific_workbench_scene1_hard_environment"
     assert "overlay_asset_ids" not in scenario["scene"]
     table = next(item for item in scenario["objects"] if item["id"] == "table")
-    assert table["asset_id"] == "scientific_workbench_ebench_table"
+    assert table["asset_id"] == "scientific_workbench_ebench_table_static_support"
     assert table["source_prim_path"] == _EBENCH_TABLE_SCOPE
 
     portable = Usd.Stage.Open(str(output / "scene/main.usda"))

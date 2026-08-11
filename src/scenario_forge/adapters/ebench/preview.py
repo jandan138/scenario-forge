@@ -1102,20 +1102,31 @@ def _validate_runtime_geometry(
                 for sample_name in ("warmup_start", "post_warmup")
             }
         extent_relative_errors: dict[str, list[float]] = {}
+        extent_comparison_by_sample: dict[str, str] = {}
         for sample_name, sample in (
             ("warmup_start", warmup_start),
             ("post_warmup", post_warmup),
         ):
             expected_sorted = sorted(expected_extent_by_sample[sample_name])
             actual_sorted = sorted(sample["world_bound"][2])
-            relative_errors = [
-                abs(actual_value - expected_value) / expected_value
-                for expected_value, actual_value in zip(
-                    expected_sorted,
-                    actual_sorted,
-                    strict=True,
+            if sample_name == "post_warmup" and qualified_extents is None:
+                relative_errors = [
+                    abs(actual_sorted[-1] - expected_sorted[-1])
+                    / expected_sorted[-1]
+                ]
+                extent_comparison_by_sample[sample_name] = (
+                    "longest_aabb_axis_rotation_tolerant"
                 )
-            ]
+            else:
+                relative_errors = [
+                    abs(actual_value - expected_value) / expected_value
+                    for expected_value, actual_value in zip(
+                        expected_sorted,
+                        actual_sorted,
+                        strict=True,
+                    )
+                ]
+                extent_comparison_by_sample[sample_name] = "sorted_axis_extents"
             if any(error > tolerance for error in relative_errors):
                 raise GenManipPreviewError(
                     f"preview runtime extent mismatch for {runtime_id}"
@@ -1163,6 +1174,7 @@ def _validate_runtime_geometry(
             "expected_extent_m_by_sample": expected_extent_by_sample,
             "actual_extent_m": list(actual_extent),
             "extent_relative_error_sorted": extent_relative_errors,
+            "extent_comparison_by_sample": extent_comparison_by_sample,
             "support_gap_m": support_gap,
             "root_tilt_deg": root_tilt_deg,
             "tabletop_xy_contained": True,

@@ -104,7 +104,7 @@ def test_scientific_workbench_domain_pack_declares_the_robot_side_policy() -> No
     )
     assert constraints.tabletop_placement.policy.min_edge_clearance_m == 0.10
     assert constraints.tabletop_placement.support_surface_prim_path == (
-        "/World/table/surface"
+        "/World/table/Surface"
     )
 
 
@@ -184,7 +184,7 @@ def Xform "World"
 {{
     def Xform "table"
     {{
-        def Xform "surface"
+        def Xform "Surface"
         {{
             def Cube "mesh"
             {{

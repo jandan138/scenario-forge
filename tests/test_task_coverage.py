@@ -187,7 +187,7 @@ def test_task_directory_keeps_immutable_release_and_latest_separate(tmp_path: Pa
     )
 
 
-def test_task_directory_html_keeps_wide_tables_inside_a_scroll_container(tmp_path: Path) -> None:
+def test_task_directory_html_uses_responsive_cards_and_status_filters(tmp_path: Path) -> None:
     plan = {
         "catalog_id": "catalog",
         "default_environment_binding": "environment",
@@ -224,12 +224,14 @@ def test_task_directory_html_keeps_wide_tables_inside_a_scroll_container(tmp_pat
     result = write_task_directory(plan, releases, output_dir=tmp_path / "directory")
 
     html = (result / "index.html").read_text(encoding="utf-8")
-    assert '<div class="table-scroll"><table>' in html
-    assert ".table-scroll{max-width:100%;overflow-x:auto}" in html
-    assert 'class="task-title"' in html
-    assert 'class="release-id"' in html
-    assert ".release-id{overflow-wrap:anywhere" in html
-    assert 'class="scroll-hint"' in html
+    assert 'class="task-grid"' in html
+    assert 'class="task-card"' in html
+    assert 'data-filter="all"' in html
+    assert 'data-filter="queued"' in html
+    assert 'class="evidence-rail"' in html
+    assert 'class="coverage-matrix"' in html
+    assert "@media(max-width:760px)" in html
+    assert "function applyFilter" in html
 
 
 def test_task_directory_shows_candidate_evidence_without_promoting_it(tmp_path: Path) -> None:

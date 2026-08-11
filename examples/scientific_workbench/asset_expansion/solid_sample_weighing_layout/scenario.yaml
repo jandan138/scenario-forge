@@ -6,35 +6,35 @@ instruction: 将称量皿、分析天平和微量药匙布置在工作区。该�
 scene:
   asset_id: scientific_environment_code_room_example4_v2
   root_prim_path: /World
-  pose: {xyz: [0.2456705, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+  pose: {xyz: [0.002882434, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
 objects:
   - id: table
     asset_id: scientific_workbench_ebench_table_static_support
     source_prim_path: /World/table
     role: table
-    pose: {xyz: [0.242788066, 0.0, 0.0], wxyz: [0.0, 1.0, 0.0, 0.0], scale_xyz: [0.003, 0.0035, 0.004]}
+    pose: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
   - id: obj_balance
     asset_id: scientific_workbench_analytical_balance_static_support
     source_prim_path: /World/AnalyticalBalance
     role: balance
-    pose: {xyz: [-0.05, -0.12, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    pose: {xyz: [0.10, -0.10, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
     named_frames:
       weighing_pan: {xyz: [0.0, 0.0, 0.076], wxyz: [1.0, 0.0, 0.0, 0.0]}
   - id: obj_weighing_dish
     asset_id: scientific_workbench_petri_dish_dynamic
     source_prim_path: /World/PetriDish
     role: weighing_container
-    pose: {xyz: [-0.16, 0.08, 0.7727606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    pose: {xyz: [-0.20, -0.20, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
     named_frames:
       dish_center: {xyz: [0.0, 0.0, 0.02032], wxyz: [1.0, 0.0, 0.0, 0.0]}
   - id: obj_micro_spatula
     asset_id: scientific_workbench_micro_spatula_visual_static
     source_prim_path: /World/MicroSpatula
     role: spatula_visual_only
-    pose: {xyz: [-0.10, 0.25, 0.7767606155], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    pose: {xyz: [-0.16, -0.20, 0.77532], wxyz: [1.0, 0.0, 0.0, 0.0]}
 robot:
   profile_ref: manip/lift2/R5a_isaac41_vr600_v1
-  spawn: {xyz: [-1.02, 0.0, 0.31], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  spawn: {xyz: [0.0, -1.02, 0.31], wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]}
   actors:
     - {id: auxiliary_arm, end_effector: right, capabilities: [press, grasp, hold]}
     - {id: operating_arm, end_effector: left, capabilities: [grasp, lift, place, scoop, release]}

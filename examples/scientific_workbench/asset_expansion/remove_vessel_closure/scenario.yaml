@@ -1,0 +1,69 @@
+schema_version: scenario-spec/v0.7
+scenario_id: scientific_workbench_remove_vessel_closure
+domain: scientific_workbench
+task_family: remove_vessel_closure
+instruction: 辅助臂固定锥形瓶；操作臂抓住29/42磨口瓶塞，轻微扭转后向上取出，再把瓶塞放入桌面放置架。
+scene:
+  asset_id: scientific_environment_code_room_teaching_research_v2
+  root_prim_path: /World
+  pose: {xyz: [0.002882434, -0.0069055, 0.0], wxyz: [0.0, 0.0, 0.0, 1.0]}
+objects:
+  - id: table
+    asset_id: scientific_workbench_ebench_table_static_support
+    source_prim_path: /World/table
+    role: table
+    pose: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_flask
+    asset_id: scientific_workbench_conical_flask_250ml_29_42_dynamic
+    source_prim_path: /World/ConicalFlask2942
+    role: target_container
+    pose: {xyz: [-0.18, -0.14, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      grasp: {xyz: [0.0, 0.0, 0.075], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      opening: {xyz: [0.0, 0.0, 0.175], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      closure_seat: {xyz: [0.0, 0.0, 0.12814], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_stopper
+    asset_id: scientific_workbench_ground_glass_stopper_29_42_dynamic
+    source_prim_path: /World/GroundGlassStopper2942
+    role: vessel_closure
+    pose: {xyz: [-0.18, -0.14, 0.88314], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      joint_tip: {xyz: [0.0, 0.0, 0.0], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      joint_seat: {xyz: [0.0, 0.0, 0.04686], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      grasp: {xyz: [0.0, 0.0, 0.06918], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: obj_stopper_rack
+    asset_id: scientific_workbench_stopper_rack_k100_kinematic
+    source_prim_path: /World/StopperRack
+    role: closure_rack
+    pose: {xyz: [0.17, -0.12, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
+    named_frames:
+      socket_0_aperture: {xyz: [0.0, -0.034, 0.06651], wxyz: [1.0, 0.0, 0.0, 0.0]}
+      socket_0_retained: {xyz: [0.0, -0.034, 0.0125], wxyz: [1.0, 0.0, 0.0, 0.0]}
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [0.0, -1.02, 0.31], wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]}
+  actors:
+    - {id: auxiliary_arm, end_effector: right, capabilities: [grasp, hold, release]}
+    - {id: operating_arm, end_effector: left, capabilities: [grasp, twist, lift, align, place, release]}
+steps:
+  - {id: hold_flask, skill: grasp_and_hold, actors: [auxiliary_arm], parameters: {object: obj_flask, grasp_frame: obj_flask.grasp}}
+  - {id: grasp_and_twist_stopper, skill: twist, actors: [operating_arm], parameters: {object: obj_stopper, grasp_frame: obj_stopper.grasp, min_rotation_deg: 8.0}, depends_on: [hold_flask]}
+  - {id: lift_stopper, skill: lift, actors: [operating_arm], parameters: {object: obj_stopper, min_clearance_m: 0.04}, depends_on: [grasp_and_twist_stopper]}
+  - {id: place_stopper_in_rack, skill: place, actors: [operating_arm], parameters: {object: obj_stopper, source_frame: obj_stopper.joint_tip, target_frame: obj_stopper_rack.socket_0_retained}, depends_on: [lift_stopper]}
+invariants:
+  - {id: flask_held_during_removal, type: maintain_grasp, actor: auxiliary_arm, object: obj_flask, from_step: hold_flask, through_step: place_stopper_in_rack}
+success:
+  operator: all
+  claim_scope: semantic_task_contract_with_geometry_qualified_holder_fit
+  predicates:
+    - {id: stopper_removed, type: relative_pose_reached, sequence_index: 0, parameters: {object: obj_stopper, relative_to: obj_flask, xyz_range: {x: [-0.08, 0.08], y: [-0.08, 0.08], z: [0.22, 0.60]}}}
+    - {id: stopper_racked, type: relative_pose_reached, sequence_index: 1, parameters: {object: obj_stopper, relative_to: obj_stopper_rack, xyz_range: {x: [-0.02, 0.02], y: [-0.055, -0.015], z: [0.0, 0.04]}}}
+  progress_rubric:
+    aggregation: {type: weighted_progress_score, normalization: declared_sum, inactive_treatment: zero, primary_metric_id: stopper_removed}
+    items:
+      - {id: stopper_contact, weight: 0.20, temporal: {kind: instant}, condition: {type: pose_while_grasped, parameters: {grasp: {actor: operating_arm, object: obj_stopper}, predicate: {type: relative_pose_reached, parameters: {object: obj_stopper, relative_to: obj_flask}}}}, source_ref: {source_order: 5, item: 时序1}}
+      - {id: stopper_removed, weight: 0.40, temporal: {kind: instant}, condition: {type: relative_pose_reached, parameters: {object: obj_stopper, relative_to: obj_flask, xyz_range: {x: [-0.08, 0.08], y: [-0.08, 0.08], z: [0.22, 0.60]}}}, source_ref: {source_order: 5, item: 时序2}}
+      - {id: stopper_racked, weight: 0.25, temporal: {kind: terminal}, condition: {type: relative_pose_reached, parameters: {object: obj_stopper, relative_to: obj_stopper_rack, xyz_range: {x: [-0.02, 0.02], y: [-0.055, -0.015], z: [0.0, 0.04]}}}, source_ref: {source_order: 5, item: 终帧-瓶塞在架内}}
+      - {id: flask_upright, weight: 0.15, temporal: {kind: terminal}, condition: {type: object_at_initial_pose, parameters: {object: obj_flask, xyz_tolerance: [0.03, 0.03, 0.03]}}, source_ref: {source_order: 5, item: 终帧-容器正立}}
+max_steps: 900
+seed: "005"

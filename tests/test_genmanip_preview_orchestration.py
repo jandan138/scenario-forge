@@ -166,7 +166,7 @@ def test_renderer_limits_physics_warmup_for_producer_pbd_scene() -> None:
         }
     }
     assert module._preview_timing(request) == (8, True)
-    assert module._preview_timing({"views": {}}) == (50, False)
+    assert module._preview_timing({"views": {}}) == (50, True)
 
 
 def test_renderer_keeps_profiled_camera_position_and_uses_runtime_target() -> None:
@@ -205,6 +205,27 @@ def test_renderer_orients_runtime_target_camera_from_declared_direction() -> Non
     assert azimuth == pytest.approx(-45.0)
 
 
+def test_room_entrance_camera_stands_outside_the_reviewed_doorway() -> None:
+    module = _load_isaac_renderer_module()
+    import numpy as np
+
+    room = (np.asarray([-3.0, -2.0, 0.0]), np.asarray([3.0, 2.0, 3.0]))
+    workcell = (np.asarray([-1.0, -0.5, 0.0]), np.asarray([1.0, 0.5, 1.8]))
+    walls = [
+        {"side": "south", "coverage": (0.0, 0.4)},
+        {"side": "south", "coverage": (0.6, 1.0)},
+        *({"side": side, "coverage": (0.0, 1.0)} for side in ("north", "east", "west")),
+    ]
+
+    target, distance, elevation, azimuth, side = module._entrance_camera(
+        room, workcell, walls, camera_height_m=1.65, np=np
+    )
+    position = module._camera_position(target, distance, elevation, azimuth, np)
+
+    assert side == "south"
+    assert position[1] < room[0][1]
+
+
 def test_renderer_isolates_workspace_closeup_and_restores_background_overview() -> None:
     source = ISAAC_RENDERER.read_text(encoding="utf-8")
 
@@ -212,6 +233,14 @@ def test_renderer_isolates_workspace_closeup_and_restores_background_overview() 
     assert "scene_room_inherited" in source
     assert "UsdGeom.Tokens.invisible" in source
     assert "room_visibility_attr.Set(original_room_visibility)" in source
+
+
+def test_renderer_allocates_only_one_high_resolution_camera_at_a_time() -> None:
+    source = ISAAC_RENDERER.read_text(encoding="utf-8")
+
+    assert "create_camera_list(camera_data" not in source
+    assert "create_camera_list(\n                {view_name: camera_data[view_name]}" in source
+    assert "cleanup_camera(camera_data[view_name], camera)" in source
 
 
 def test_preview_orchestration_resolves_package_before_changing_runtime_cwd(

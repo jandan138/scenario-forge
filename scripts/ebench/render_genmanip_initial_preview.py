@@ -241,7 +241,11 @@ def _render_initial_scene(
         from genmanip.core.scene.scene import Scene
         from genmanip.core.scene.scene_config import SceneConfig
         from genmanip.utils.loader.domain_randomization import reset_scene
-        from genmanip.utils.loader.scene import create_camera_list, recovery_scene
+        from genmanip.utils.loader.scene import (
+            cleanup_camera,
+            create_camera_list,
+            recovery_scene,
+        )
         from genmanip.utils.standalone.file_utils import load_default_config
         from genmanip.utils.usd_utils.camera_utils import get_src, set_camera_look_at
 
@@ -346,12 +350,6 @@ def _render_initial_scene(
             view_name: _camera_config(view_name, request_views)
             for view_name in view_names
         }
-        preview_cameras = create_camera_list(
-            camera_data,
-            scene.uuid,
-            float(evaluation.get("rendering_dt", 1.0 / 60.0)),
-            only_color_rep_for_camera=True,
-        )
         runtime_geometry = _runtime_geometry_record(
             request=request,
             stage=stage,
@@ -483,25 +481,45 @@ def _render_initial_scene(
                     focal_length=focal_length,
                     np=np,
                 )
-            camera = preview_cameras[view_name]
-            set_camera_look_at(
-                camera,
+            position = _camera_position(
                 target,
                 distance=distance,
                 elevation=elevation,
                 azimuth=azimuth,
+                np=np,
             )
-            position, _ = camera.get_world_pose()
             camera_records[view_name] = {
                 "target": target,
                 "position": position,
                 "distance": distance,
+                "elevation": elevation,
+                "azimuth": azimuth,
                 "focal_length": focal_length,
                 "entrance_side": entrance_side,
             }
 
         manifest_views: dict[str, Any] = {}
         for view_name in view_names:
+            # GenManip's camera loader owns one RTX RenderProduct per camera.
+            # Seven simultaneous 1080p evidence cameras can exhaust the
+            # renderer even though only one image is consumed at a time. Keep
+            # the reviewed 1080p contract and allocate/capture/destroy each
+            # camera sequentially instead.
+            preview_cameras = create_camera_list(
+                {view_name: camera_data[view_name]},
+                scene.uuid,
+                float(evaluation.get("rendering_dt", 1.0 / 60.0)),
+                only_color_rep_for_camera=True,
+            )
+            camera = preview_cameras[view_name]
+            record = camera_records[view_name]
+            set_camera_look_at(
+                camera,
+                record["target"],
+                distance=float(record["distance"]),
+                elevation=float(record["elevation"]),
+                azimuth=float(record["azimuth"]),
+            )
             # Keep the task-focused image stable across room packages.  Some
             # admitted rooms contain a floor/wall that intersects the fixed
             # eBench camera after a visual-only fit.  The closeup is therefore
@@ -578,7 +596,6 @@ def _render_initial_scene(
                     scene.world.render()
                 else:
                     scene.world.step(render=True)
-            camera = preview_cameras[view_name]
             rgb = get_src(camera, "rgb")
             attempts = 0
             while rgb is None and attempts < 20:
@@ -592,6 +609,9 @@ def _render_initial_scene(
                 raise RuntimeError(f"camera returned no RGB frame: {view_name}")
             image_path = staging_dir / f"{view_name}.png"
             _save_rgb_png(image_path, rgb, np, Image)
+            cleanup_camera(camera_data[view_name], camera)
+            del preview_cameras
+            gc.collect()
             for visibility_attr, original_visibility in original_wall_visibility:
                 visibility_attr.Set(original_visibility)
 
@@ -608,7 +628,6 @@ def _render_initial_scene(
                 raise RuntimeError(
                     f"required runtime prims missing for {view_name}: {', '.join(missing)}"
                 )
-            record = camera_records[view_name]
             resolution = _resolution(view_request.get("resolution"), view_name)
             room_projection = _projected_bound_record(
                 room_bounds,
@@ -726,8 +745,6 @@ def _render_initial_scene(
 
         scene.world.stop()
         scene.world.clear_instance()
-        del camera
-        del preview_cameras
         del bbox_cache
         del xform_cache
         del stage
@@ -997,13 +1014,20 @@ def _entrance_camera(
     side, along = _entrance_side_from_wall_coverage(coverage)
     lower, upper = room_bounds
     position = np.asarray((lower + upper) / 2.0, dtype=float)
-    inset = min(0.55, 0.12 * min(float(upper[0] - lower[0]), float(upper[1] - lower[1])))
+    stand_off = max(
+        0.45,
+        0.08 * min(float(upper[0] - lower[0]), float(upper[1] - lower[1])),
+    )
     if side in {"north", "south"}:
         position[0] = lower[0] + along * (upper[0] - lower[0])
-        position[1] = upper[1] - inset if side == "north" else lower[1] + inset
+        position[1] = (
+            upper[1] + stand_off if side == "north" else lower[1] - stand_off
+        )
     else:
         position[1] = lower[1] + along * (upper[1] - lower[1])
-        position[0] = upper[0] - inset if side == "east" else lower[0] + inset
+        position[0] = (
+            upper[0] + stand_off if side == "east" else lower[0] - stand_off
+        )
     position[2] = lower[2] + camera_height_m
     target = (workcell_bounds[0] + workcell_bounds[1]) / 2.0
     target[2] = min(float(target[2]), float(lower[2] + 1.15))
@@ -1306,7 +1330,7 @@ def _preview_room_visibility_token(
 
 
 def _preview_timing(request: Mapping[str, Any]) -> tuple[int, bool]:
-    """Keep producer PBD evidence within its qualified eight-step window."""
+    """Settle once, then freeze physics so every camera records one moment."""
 
     raw_views = request.get("views")
     if isinstance(raw_views, Mapping) and raw_views:
@@ -1318,7 +1342,7 @@ def _preview_timing(request: Mapping[str, Any]) -> tuple[int, bool]:
         ]
         if all(inherited):
             return 8, True
-    return WARMUP_STEPS, False
+    return WARMUP_STEPS, True
 
 
 def _runtime_target_position_camera(

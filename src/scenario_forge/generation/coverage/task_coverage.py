@@ -413,35 +413,77 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
 
 def _directory_html(payload: Mapping[str, object]) -> str:
     tasks = _mappings(payload.get("tasks"), "directory.tasks")
-    rows = "\n".join(
-        "<tr><td class=\"row-order\">{}</td><td class=\"task-title\">{}</td><td class=\"queue-status\">{}</td><td class=\"release-id\">{}</td><td class=\"latest-id\">{}</td><td class=\"background-binding\">{}</td><td class=\"release-tier\">{}</td><td class=\"score-ceiling\">{}</td><td class=\"missing-capabilities\">{}</td><td class=\"release-variants\">{}</td><td class=\"evidence-thumb\">{}</td></tr>".format(
-            task["source_order"],
-            _html(str(task["title_zh"])),
-            _html(str(task["queue_status"])),
-            _html(str(task["candidate_release_id"] or "—")),
-            _html(str(task["latest_release_id"] or "—")),
-            _html(
-                str(
-                    task["latest_background_binding"]
-                    or task["candidate_background_binding"]
-                    or "—"
-                )
-            ),
-            _html(str(task.get("candidate_release_status") or "—")),
-            _html(_score_label(task.get("candidate_score_ceiling"))),
-            _html(", ".join(task.get("candidate_missing_capabilities", [])) or "—"),
-            _release_variants(task.get("releases")),
-            _evidence_thumbnail(task.get("latest_evidence") or task.get("candidate_evidence")),
-        )
+    gallery_tasks = [
+        task
         for task in tasks
+        if task.get("candidate_release_id") or task.get("latest_release_id")
+    ]
+    cards = "\n".join(_directory_task_card(task) for task in gallery_tasks)
+    rows = "\n".join(_directory_matrix_row(task) for task in tasks)
+    candidate_count = len(gallery_tasks)
+    canonical_count = sum(
+        task.get("candidate_release_status") == "canonical_candidate"
+        for task in gallery_tasks
+    )
+    prototype_count = sum(
+        task.get("candidate_release_status") == "prototype" for task in gallery_tasks
     )
     return """<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><link rel="icon" href="data:,"><title>Scientific Workbench Task Directory</title>
-<style>*{box-sizing:border-box}body{font-family:system-ui,sans-serif;margin:2rem;color:#18212f}.table-scroll{max-width:100%;overflow-x:auto}table{border-collapse:collapse;min-width:1680px;width:100%;table-layout:fixed}th,td{border-bottom:1px solid #d8dee9;padding:.6rem;text-align:left;vertical-align:top}.row-order{width:3rem}.task-title{width:12rem}.queue-status{width:6rem}.release-id{overflow-wrap:anywhere;width:18rem}.latest-id{overflow-wrap:anywhere;width:10rem}.background-binding{overflow-wrap:anywhere;width:13rem}.release-tier{width:10rem;overflow-wrap:anywhere}.score-ceiling{width:5rem}.missing-capabilities{width:13rem}.release-variants{width:22rem;overflow-wrap:anywhere}.release-variants summary{cursor:pointer}.release-variants ul{margin:.5rem 0 0;padding-left:1.1rem}.evidence-thumb{width:11rem}th{background:#f4f7fb}code{font-size:.9em}img{width:144px;height:81px;object-fit:cover;border-radius:4px}p{max-width:72rem;color:#4a5568}.scroll-hint{display:none}@media(max-width:700px){body{margin:1rem}th,td{padding:.5rem}img{width:120px;height:68px}.scroll-hint{display:block;color:#4a5568}}</style>
-</head><body><h1>Scientific Workbench Task Directory</h1>
-<p class="scroll-hint">左右滑动查看全部列。</p><div class="table-scroll"><table><thead><tr><th class="row-order">#</th><th class="task-title">Task</th><th class="queue-status">Queue</th><th class="release-id">Current candidate</th><th class="latest-id">Latest qualified</th><th class="background-binding">Background</th><th class="release-tier">Tier</th><th class="score-ceiling">Ceiling</th><th class="missing-capabilities">Missing</th><th class="release-variants">Variants</th><th class="evidence-thumb">Evidence</th></tr></thead><tbody>""" + rows + """</tbody></table></div>
-<h2>Claim boundary</h2><p>""" + _html(str(payload["claim_boundary"])) + """</p></body></html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Scientific Workbench · 任务目录</title>
+<style>
+:root{--ink:#10243b;--muted:#607083;--line:#d7e0e8;--paper:#f5f8fa;--card:#fff;--teal:#087f78;--teal-soft:#dff4f1;--amber:#b56708;--amber-soft:#fff0d5;--navy:#102f50}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,"Noto Sans SC","PingFang SC",system-ui,sans-serif}.shell{max-width:1440px;margin:auto;padding:0 32px 72px}.masthead{padding:68px 0 34px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;align-items:end}.eyebrow{color:var(--teal);font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.masthead h1{font-size:clamp(2.2rem,5vw,5rem);line-height:.98;letter-spacing:-.055em;margin:14px 0 20px;max-width:860px}.lead{color:var(--muted);font-size:1.05rem;line-height:1.75;max-width:760px;margin:0}.stats{display:grid;grid-template-columns:repeat(3,116px);border:1px solid var(--line);background:var(--card)}.stat{padding:20px;border-right:1px solid var(--line)}.stat:last-child{border:0}.stat strong{display:block;font:700 2rem/1 Georgia,serif;color:var(--navy)}.stat span{display:block;color:var(--muted);font-size:.75rem;margin-top:8px}.section-head{display:flex;justify-content:space-between;gap:24px;align-items:end;margin:50px 0 22px}.section-head h2{font-size:1.7rem;letter-spacing:-.03em;margin:0}.section-head p{color:var(--muted);margin:0;max-width:590px;line-height:1.6}.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}.filter{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 14px;border-radius:999px;font-weight:700;cursor:pointer}.filter[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}.task-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.task-card{background:var(--card);border:1px solid var(--line);display:grid;grid-template-columns:minmax(220px,42%) 1fr;min-height:270px;overflow:hidden;box-shadow:0 8px 28px rgba(16,47,80,.045)}.task-card[hidden]{display:none}.evidence-rail{display:block;background:#dfe7ec;min-height:270px;position:relative}.evidence-rail img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}.evidence-empty{height:100%;display:grid;place-items:center;color:var(--muted);font-weight:700}.card-body{padding:22px;display:flex;flex-direction:column}.card-kicker{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--teal);font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.tier{padding:5px 8px;background:var(--teal-soft);color:var(--teal);letter-spacing:0;text-transform:none}.tier.prototype{background:var(--amber-soft);color:var(--amber)}.card-body h3{font-size:1.3rem;line-height:1.25;margin:14px 0 10px}.release{font-family:ui-monospace,SFMono-Regular,monospace;color:var(--muted);font-size:.72rem;overflow-wrap:anywhere;margin:0 0 16px}.meter{height:5px;background:#e7edf1;margin:2px 0 8px}.meter span{display:block;height:100%;background:var(--teal)}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.78rem}.missing{margin:16px 0 0;color:var(--amber);font-size:.78rem;line-height:1.45}.release-variants{margin-top:auto;padding-top:12px;font-size:.75rem}.release-variants summary{cursor:pointer;color:var(--navy);font-weight:700}.release-variants ul{margin:8px 0 0;padding-left:18px}.release-variants a{color:var(--teal)}.matrix-wrap{overflow:auto;border:1px solid var(--line);background:#fff}.coverage-matrix{width:100%;border-collapse:collapse;min-width:940px}.coverage-matrix th,.coverage-matrix td{padding:15px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}.coverage-matrix th{background:var(--navy);color:#fff;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}.coverage-matrix td{font-size:.84rem}.coverage-matrix tr:last-child td{border:0}.matrix-order{font:700 1.1rem Georgia,serif;color:var(--teal)}.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:7px}.status-dot.has-release{background:var(--teal)}.matrix-code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.72rem;color:var(--muted);overflow-wrap:anywhere}.claim{margin-top:44px;border-left:4px solid var(--amber);background:var(--amber-soft);padding:20px 24px}.claim h2{font-size:1rem;margin:0 0 8px}.claim p{color:#704916;line-height:1.65;margin:0;font-size:.86rem}@media(max-width:1080px){.masthead{grid-template-columns:1fr}.stats{width:max-content}.task-grid{grid-template-columns:1fr}}@media(max-width:760px){.shell{padding:0 16px 48px}.masthead{padding-top:42px}.stats{grid-template-columns:repeat(3,1fr);width:100%}.stat{padding:14px}.task-card{grid-template-columns:1fr}.evidence-rail{min-height:210px}.section-head{align-items:start;flex-direction:column}.masthead h1{font-size:2.7rem}}
+</style></head><body><main class="shell"><header class="masthead"><div><div class="eyebrow">Scenario Forge / Scientific Workbench</div><h1>实验任务，<br>按证据说话。</h1><p class="lead">统一的 2 米工作台、eBench 双臂布局与可替换实验室背景。先看真实 Isaac Sim 图，再看哪些能力已经具备、哪些仍是原型。</p></div><div class="stats"><div class="stat"><strong>""" + str(len(tasks)) + """</strong><span>飞书任务总数</span></div><div class="stat"><strong>""" + str(candidate_count) + """</strong><span>已有场景候选</span></div><div class="stat"><strong>""" + str(canonical_count) + """</strong><span>完整语义候选</span></div></div></header>
+<section><div class="section-head"><div><div class="eyebrow">Evidence gallery</div><h2>可检查的任务场景</h2></div><p>卡片展示的是初始场景证据，不是机器人策略成功率。绿色代表完整语义候选，琥珀色代表仍缺交互或液体能力的原型。</p></div><div class="filters" role="group" aria-label="任务筛选"><button class="filter" data-filter="all" aria-pressed="true">全部 """ + str(candidate_count) + """</button><button class="filter" data-filter="canonical_candidate" aria-pressed="false">完整语义 """ + str(canonical_count) + """</button><button class="filter" data-filter="prototype" aria-pressed="false">原型 """ + str(prototype_count) + """</button><button class="filter" data-filter="queued" aria-pressed="false">已排队</button></div><div class="task-grid">""" + cards + """</div></section>
+<section><div class="section-head"><div><div class="eyebrow">Coverage matrix</div><h2>18 项任务全表</h2></div><p>保持飞书原始顺序。没有候选包的任务也不会从页面消失，阻塞原因原样展示。</p></div><div class="matrix-wrap"><table class="coverage-matrix"><thead><tr><th>#</th><th>任务</th><th>状态</th><th>候选层级</th><th>分数上限</th><th>背景 / 缺口</th></tr></thead><tbody>""" + rows + """</tbody></table></div></section>
+<aside class="claim"><h2>证据边界</h2><p>""" + _html(str(payload["claim_boundary"])) + """</p></aside></main><script>const buttons=[...document.querySelectorAll('.filter')],cards=[...document.querySelectorAll('.task-card')];function applyFilter(value){cards.forEach(card=>{card.hidden=value!=='all'&&card.dataset.tier!==value&&card.dataset.queue!==value});buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===value)))}buttons.forEach(button=>button.addEventListener('click',()=>applyFilter(button.dataset.filter)));</script></body></html>
 """
+
+
+def _directory_task_card(task: Mapping[str, object]) -> str:
+    evidence = task.get("latest_evidence") or task.get("candidate_evidence")
+    overview = evidence.get("overview_image") if isinstance(evidence, Mapping) else None
+    if isinstance(overview, str) and overview:
+        safe = _html(overview)
+        image = f'<a class="evidence-rail" href="{safe}"><img src="{safe}" alt="{_html(str(task["title_zh"]))} 场景总览" loading="eager"></a>'
+    else:
+        image = '<div class="evidence-rail"><div class="evidence-empty">暂无渲染证据</div></div>'
+    tier = str(task.get("candidate_release_status") or "unspecified")
+    tier_label = {
+        "canonical_candidate": "完整语义候选",
+        "prototype": "原型",
+    }.get(tier, "未分层")
+    ceiling = task.get("candidate_score_ceiling")
+    ceiling_number = float(ceiling) if isinstance(ceiling, (int, float)) else 0.0
+    missing = ", ".join(task.get("candidate_missing_capabilities", [])) or "无已知语义缺口"
+    release_id = task.get("candidate_release_id") or task.get("latest_release_id") or "—"
+    return (
+        f'<article class="task-card" data-tier="{_html(tier)}" data-queue="{_html(str(task["queue_status"]))}">'
+        + image
+        + '<div class="card-body">'
+        + f'<div class="card-kicker"><span>Task {task["source_order"]:02d}</span><span class="tier {_html(tier)}">{_html(tier_label)}</span></div>'
+        + f'<h3>{_html(str(task["title_zh"]))}</h3><p class="release">{_html(str(release_id))}</p>'
+        + f'<div class="meter" aria-label="可计分上限 {_score_label(ceiling)}"><span style="width:{ceiling_number * 100:g}%"></span></div>'
+        + f'<div class="meta"><span>可计分上限</span><strong>{_html(_score_label(ceiling))}</strong></div>'
+        + f'<p class="missing">能力边界：{_html(missing)}</p>'
+        + f'<div class="release-variants">{_release_variants(task.get("releases"))}</div></div></article>'
+    )
+
+
+def _directory_matrix_row(task: Mapping[str, object]) -> str:
+    has_release = bool(task.get("candidate_release_id") or task.get("latest_release_id"))
+    tier = task.get("candidate_release_status") or "—"
+    background = task.get("latest_background_binding") or task.get("candidate_background_binding")
+    missing = task.get("candidate_missing_capabilities", [])
+    detail = ", ".join(missing) if isinstance(missing, list) and missing else ", ".join(task.get("blockers", []))
+    detail = detail or "无已记录缺口"
+    context = f"{background or '未绑定背景'} · {detail}"
+    return (
+        f'<tr><td class="matrix-order">{task["source_order"]:02d}</td>'
+        f'<td><strong>{_html(str(task["title_zh"]))}</strong><div class="matrix-code">{_html(str(task["task_id"]))}</div></td>'
+        f'<td><span class="status-dot{" has-release" if has_release else ""}"></span>{_html(str(task["queue_status"]))}</td>'
+        f'<td>{_html(str(tier))}</td><td>{_html(_score_label(task.get("candidate_score_ceiling")))}</td>'
+        f'<td>{_html(context)}</td></tr>'
+    )
 
 
 def _asset_role_from_blocker(blocker: str) -> str | None:

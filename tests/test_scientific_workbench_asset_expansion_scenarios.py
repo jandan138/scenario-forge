@@ -58,7 +58,10 @@ def test_task8_keeps_twist_claim_inactive_until_thread_semantics_exist() -> None
 
 @pytest.mark.parametrize(
     ("name", "ceiling"),
-    [("insert_stir_bar", 0.55), ("funnel_pour_to_centrifuge_tube", 0.65), ("solid_sample_weighing_layout", 0.0)],
+    [
+        ("funnel_pour_to_centrifuge_tube", 0.65),
+        ("solid_sample_weighing_layout", 0.0),
+    ],
 )
 def test_prototype_claim_ceiling_is_explicit(name: str, ceiling: float) -> None:
     raw = _load(name)
@@ -69,3 +72,13 @@ def test_prototype_claim_ceiling_is_explicit(name: str, ceiling: float) -> None:
         float(item["weight"]) for item in rubric.values() if item.get("active", True)
     )
     assert active == pytest.approx(ceiling)
+
+
+def test_insert_stir_bar_uses_the_geometry_qualified_closure_contract() -> None:
+    raw = _load("insert_stir_bar")
+    success = raw["success"]
+    assert success["claim_scope"] == (
+        "semantic_task_contract_with_geometry_qualified_closure"
+    )
+    rubric = _rubric(raw)
+    assert sum(float(item["weight"]) for item in rubric.values()) == pytest.approx(1.0)
