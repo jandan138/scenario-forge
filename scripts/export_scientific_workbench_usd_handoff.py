@@ -10,7 +10,7 @@ from scenario_forge.artifacts.usd_handoff import build_usd_handoff_archive
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SOURCE = REPO_ROOT / "outputs/scientific_workbench_asset_expansion_20260811_r5/packages"
+DEFAULT_SOURCE = REPO_ROOT / "outputs/scientific_workbench_asset_expansion_20260812_r6_full/packages"
 TASK_PACKAGES = {
     1: "scientific_workbench_bimanual_pour__background_modern_wet_chemistry",
     2: "scientific_workbench_pour_cylinder_to_beaker__background_modern_wet_chemistry",
@@ -35,12 +35,12 @@ def main() -> int:
         for number, package in TASK_PACKAGES.items()
     }
     liquid = build_usd_handoff_archive(
-        archive_id="scientific_workbench_task01_bimanual_pour_20260811",
+        archive_id="scientific_workbench_task01_bimanual_pour_r6_20260812",
         task_adapters={1: adapters.pop(1)},
         output_dir=args.out,
     )
     regular = build_usd_handoff_archive(
-        archive_id="scientific_workbench_regular_tasks_20260811",
+        archive_id="scientific_workbench_regular_tasks_r6_20260812",
         task_adapters=adapters,
         output_dir=args.out,
     )

@@ -27,6 +27,7 @@ from scenario_forge.adapters.vr_teleop import export_vr_teleop_package
 from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.generation.package_compiler import compile_scenario_package
+from scenario_forge.generation.dressing import apply_dressing_preset, load_dressing_presets
 from scenario_forge.generation.source_resolver import resolve_scenario_source_bindings
 from scenario_forge.package import validate_package
 
@@ -60,6 +61,9 @@ DEFAULT_ISAAC_PYTHON = Path(
 DEFAULT_GENMANIP_ROOT = Path("/cpfs/shared/simulation/zhuzihou/dev/GenManip")
 DEFAULT_CUROBO_SRC = Path(
     "/cpfs/shared/simulation/mamengchen/curobo-wbc-backup/src"
+)
+DEFAULT_DRESSING_PRESETS = (
+    REPO_ROOT / "configs/dressing_presets/scientific_workbench_v1.yaml"
 )
 
 BACKGROUND_VARIANTS = (
@@ -98,6 +102,13 @@ BACKGROUND_VARIANTS = (
         ],
     },
 )
+BACKGROUND_DRESSING_PRESETS = {
+    "example4": "example4-default-v1",
+    "teaching_research": "teaching-research-default-v1",
+    "modern_wet_chemistry": "modern-wet-chemistry-default-v1",
+    "bioclean": "bioclean-default-v1",
+    "analytical_instrumentation": "analytical-instrumentation-default-v1",
+}
 
 TASK_RELEASE = {
     1: ("prototype", 0.60, ("liquid contained-volume metric",)),
@@ -184,7 +195,9 @@ def _with_r5_asset_substitutions(
     return scenario
 
 
-def load_generation_plans() -> list[GenerationPlan]:
+def load_generation_plans(
+    dressing_presets: Mapping[str, Mapping[str, Any]] | None = None,
+) -> list[GenerationPlan]:
     plans: list[GenerationPlan] = []
     task7 = _load_yaml_mapping(TASK_SPECS[7])
     release, ceiling, missing = TASK_RELEASE[7]
@@ -228,7 +241,25 @@ def load_generation_plans() -> list[GenerationPlan]:
                 ),
             )
         )
-    return plans
+    if dressing_presets is None:
+        return plans
+    return [
+        GenerationPlan(
+            task_number=plan.task_number,
+            background_id=plan.background_id,
+            release_status=plan.release_status,
+            score_ceiling=plan.score_ceiling,
+            missing_capabilities=plan.missing_capabilities,
+            scenario=apply_dressing_preset(
+                plan.scenario,
+                preset_id=BACKGROUND_DRESSING_PRESETS[plan.background_id],
+                preset=dressing_presets[
+                    BACKGROUND_DRESSING_PRESETS[plan.background_id]
+                ],
+            ),
+        )
+        for plan in plans
+    ]
 
 
 def _materialize_authoritative_frames(
@@ -300,6 +331,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Compile only the selected Feishu task number; repeat as needed.",
     )
     parser.add_argument("--static-only", action="store_true")
+    parser.add_argument(
+        "--render-existing",
+        action="store_true",
+        help="Render packages already listed in OUT/manifest.yaml without recompiling them.",
+    )
+    parser.add_argument("--with-dressing", action="store_true")
+    parser.add_argument(
+        "--dressing-presets", type=Path, default=DEFAULT_DRESSING_PRESETS
+    )
     parser.add_argument("--isaac-python", type=Path, default=DEFAULT_ISAAC_PYTHON)
     parser.add_argument("--genmanip-root", type=Path, default=DEFAULT_GENMANIP_ROOT)
     parser.add_argument("--renderer-script", type=Path, default=DEFAULT_RENDERER)
@@ -310,6 +350,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.render_existing:
+        return _render_existing_packages(args)
     sources = resolve_scenario_source_bindings(args.bindings)
     fit_evidence = _validate_fit_report(args.fit_report)
     existing_manifest_path = args.out / "manifest.yaml"
@@ -320,9 +362,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         if isinstance(raw_records, list):
             existing_records = [dict(item) for item in raw_records if isinstance(item, Mapping)]
     selected = set(args.task_number or [])
+    dressing_presets = (
+        load_dressing_presets(args.dressing_presets)
+        if args.with_dressing
+        else None
+    )
     plans = [
         plan
-        for plan in load_generation_plans()
+        for plan in load_generation_plans(dressing_presets)
         if not selected or plan.task_number in selected
     ]
     if selected and not plans:
@@ -371,6 +418,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "tabletop_placement": tabletop.overall_status,
                 "provisional_ik_request": str(ik_request.resolve()),
                 "initial_scene_preview": preview_status,
+                "dressing_preset_id": (
+                    BACKGROUND_DRESSING_PRESETS[plan.background_id]
+                    if args.with_dressing
+                    else None
+                ),
             }
         )
     args.out.mkdir(parents=True, exist_ok=True)
@@ -397,6 +449,57 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     for record in records:
         print(f"{record['scenario_id']}: {record['package_root']}")
+    return 0
+
+
+def _render_existing_packages(args: argparse.Namespace) -> int:
+    manifest_path = args.out / "manifest.yaml"
+    manifest = _load_yaml_mapping(manifest_path)
+    records = manifest.get("packages")
+    if not isinstance(records, list) or not records:
+        raise ValueError("existing generation manifest has no packages")
+    for raw_record in records:
+        if not isinstance(raw_record, dict):
+            raise ValueError("existing generation manifest package must be a mapping")
+        if args.task_number and raw_record.get("task_number") not in set(args.task_number):
+            continue
+        collected_root = Path(str(raw_record["ebench_root"]))
+        gate_path = collected_root / "evidence/initial_scene/visual_ready_gate.yaml"
+        if gate_path.is_file():
+            gate = _load_yaml_mapping(gate_path)
+        else:
+            gate = {}
+        if gate.get("status") == "passed":
+            raw_record["initial_scene_preview"] = "pass"
+            manifest_path.write_text(
+                yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False),
+                encoding="utf-8",
+            )
+            print(f"already rendered: {raw_record['scenario_id']}", flush=True)
+            continue
+        run_genmanip_initial_preview(
+            collected_root,
+            args.isaac_python,
+            args.renderer_script,
+            args.genmanip_root,
+            timeout_seconds=args.preview_timeout,
+            runtime_python_paths=(args.curobo_src,),
+        )
+        raw_record["initial_scene_preview"] = "pass"
+        manifest_path.write_text(
+            yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False),
+            encoding="utf-8",
+        )
+        print(f"rendered: {raw_record['scenario_id']}", flush=True)
+    manifest["status"] = (
+        "runtime_preview_complete"
+        if all(record.get("initial_scene_preview") == "pass" for record in records)
+        else "runtime_preview_partial"
+    )
+    manifest_path.write_text(
+        yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
     return 0
 
 

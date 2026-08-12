@@ -53,7 +53,14 @@ through the existing inbound adapter. Its `usage` explicitly selects the
 neutral role instead of inferring one. The available values are `scene_overlay`,
 `rigid_object`, `articulated_object`, `visual_static_environment`, and
 `visual_static_object`. Version v0.3 additionally admits
-`static_support_object`.
+`static_support_object` and v0.5 `dynamic_context_object`.
+
+`dynamic_context_object` is for physically present scene dressing. It accepts
+either a narrow passing `aan.dynamic_context_contract.v1` or the stronger
+passing `aan.interaction_contract.v1`. Scenario objects using it must have
+`role: context_prop`, fixed dressing preset/group metadata, and
+`metric_participation: none`; adapters load its producer-owned physics but do
+not add it to task metrics or the VR `obj_prim_list`.
 
 The two `visual_static_*` values require a ConvertAsset `asset_role:
 visual_static` manifest. Scenario Forge verifies the exact source and scope hashes,

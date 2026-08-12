@@ -323,7 +323,11 @@ def _table_and_task_objects(
     tables = [item for item in objects if item.get("role") == "table"]
     if len(tables) != 1:
         raise ValueError("scientific workbench tabletop policy requires exactly one table object")
-    return tables[0], tuple(item for item in objects if item is not tables[0])
+    return tables[0], tuple(
+        item
+        for item in objects
+        if item is not tables[0] and item.get("role") != "context_prop"
+    )
 
 
 def _robot_spawn_xy(scenario: Mapping[str, Any]) -> tuple[float, float]:

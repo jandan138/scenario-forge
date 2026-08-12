@@ -24,6 +24,7 @@ class _PrimOverride:
     pose: Mapping[str, Any] | None = None
     active: bool | None = None
     reset_xform_stack: bool = False
+    context_instances: list[dict[str, Any]] = field(default_factory=list)
 
 
 def compile_scenario_package(
@@ -324,7 +325,11 @@ def _compile_scene_usda(
         node.reset_xform_stack = True
 
     seen_paths: set[str] = set()
+    context_instances: list[tuple[int, Mapping[str, Any]]] = []
     for index, item in enumerate(objects):
+        if item.get("role") == "context_prop":
+            context_instances.append((index, item))
+            continue
         field_name = f"objects[{index}].source_prim_path"
         prim_path = _usd_prim_path(_string(item.get("source_prim_path"), field_name), field_name)
         if prim_path.parts[: len(root_prim_path.parts)] != root_prim_path.parts:
@@ -345,8 +350,53 @@ def _compile_scene_usda(
         cursor.pose = _mapping(item.get("pose"), f"objects[{index}].pose")
         cursor.reset_xform_stack = True
 
+    if context_instances:
+        for index, item in context_instances:
+            object_id = _string(item.get("id"), f"objects[{index}].id")
+            asset_id = _string(item.get("asset_id"), f"objects[{index}].asset_id")
+            source_prim = _string(
+                item.get("source_prim_path"), f"objects[{index}].source_prim_path"
+            )
+            pose = _mapping(item.get("pose"), f"objects[{index}].pose")
+            source = sources_by_id[asset_id]
+            reference = f"../assets/{asset_id}/{source.source_usd.name}"
+            root_node.context_instances.append(
+                {
+                    "object_id": object_id,
+                    "source_prim": source_prim,
+                    "reference": reference,
+                    "pose": pose,
+                }
+            )
     _render_prim_override(lines, root_prim_path.parts[-1], root_node, 0)
     return "\n".join(lines) + "\n"
+
+
+def _context_instance_usda(
+    *,
+    object_id: str,
+    source_prim: str,
+    reference: str,
+    pose: Mapping[str, Any],
+    indent: int,
+) -> list[str]:
+    prefix = "    " * indent
+    xyz = _number_list(pose.get("xyz"), "context pose.xyz", 3)
+    wxyz = _number_list(pose.get("wxyz"), "context pose.wxyz", 4)
+    scale = _number_list(
+        pose.get("scale_xyz", [1.0, 1.0, 1.0]), "context pose.scale_xyz", 3
+    )
+    return [
+        f'{prefix}def Xform "{_usd_escape(object_id)}" (',
+        f"{prefix}    prepend references = @{reference}@<{source_prim}>",
+        f"{prefix})",
+        f"{prefix}{{",
+        f"{prefix}    double3 xformOp:translate = {_usda_tuple(xyz)}",
+        f"{prefix}    quatd xformOp:orient = {_usda_tuple(wxyz)}",
+        f"{prefix}    double3 xformOp:scale = {_usda_tuple(scale)}",
+        f'{prefix}    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]',
+        f"{prefix}}}",
+    ]
 
 
 @dataclass(frozen=True)
@@ -420,7 +470,19 @@ def _render_prim_override(
         lines.append("")
     for child_index, (child_name, child) in enumerate(node.children.items()):
         _render_prim_override(lines, child_name, child, indentation + 1)
-        if child_index < len(node.children) - 1:
+        if child_index < len(node.children) - 1 or node.context_instances:
+            lines.append("")
+    for context_index, context in enumerate(node.context_instances):
+        lines.extend(
+            _context_instance_usda(
+                object_id=str(context["object_id"]),
+                source_prim=str(context["source_prim"]),
+                reference=str(context["reference"]),
+                pose=_mapping(context["pose"], "context pose"),
+                indent=indentation + 1,
+            )
+        )
+        if context_index < len(node.context_instances) - 1:
             lines.append("")
     lines.append(f"{indent}}}")
 
@@ -441,6 +503,7 @@ def _source_layer_asset_ids(scenario: Mapping[str, Any]) -> tuple[str, ...]:
         for index, item in enumerate(
             _mapping_list(scenario.get("objects"), "objects")
         )
+        if item.get("role") != "context_prop"
     ]
     # Dedicated object packages may delete or override opinions authored by the
     # full-scene source (for example a legacy nested rigid body). USD sublayers

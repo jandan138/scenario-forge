@@ -72,6 +72,7 @@ def _referenced_asset_roles(
     table: AssetManifestEntry,
     task_objects: list[Mapping[str, Any]],
     task_assets: Mapping[str, AssetManifestEntry],
+    context_objects: list[Mapping[str, Any]],
     *,
     legacy_pour_objects: tuple[Mapping[str, Any], Mapping[str, Any]] | None,
 ) -> dict[str, AssetManifestEntry]:
@@ -82,6 +83,9 @@ def _referenced_asset_roles(
     result = {"environment": environment, "table": table}
     for object_id, dependency_role in dependency_roles.items():
         result[dependency_role] = task_assets[object_id]
+    for item in context_objects:
+        object_id = _string(item.get("id"), "context object.id")
+        result[f"context/{object_id}"] = task_assets[object_id]
     return result
 
 
@@ -111,7 +115,9 @@ def export_vr_teleop_package(
         )
     objects = [_mapping(item, "scenario.objects") for item in scenario.get("objects", [])]
     table = _one_object_by_role(objects, "table")
-    task_objects = [item for item in objects if item is not table]
+    scene_objects = [item for item in objects if item is not table]
+    context_objects = [item for item in scene_objects if item.get("role") == "context_prop"]
+    task_objects = [item for item in scene_objects if item.get("role") != "context_prop"]
     if not task_objects:
         raise VRTeleopExportError("VR export requires at least one non-table task object")
     legacy_pour_objects = _legacy_pour_objects(task_objects)
@@ -128,7 +134,7 @@ def export_vr_teleop_package(
             assets,
             _string(item.get("asset_id"), "task object.asset_id"),
         )
-        for item in task_objects
+        for item in scene_objects
     }
     scene_mapping = _mapping(scenario.get("scene"), "scenario.scene")
     composition_mode = scene_mapping.get("composition_mode", "referenced_assets")
@@ -165,6 +171,7 @@ def export_vr_teleop_package(
                 table_asset,
                 task_objects,
                 task_assets,
+                context_objects,
                 legacy_pour_objects=legacy_pour_objects,
             )
         )
@@ -184,11 +191,19 @@ def export_vr_teleop_package(
                 else _scene_usda(
                     scenario=scenario,
                     table=table,
-                    task_objects=task_objects,
-                    dependency_roles=_task_dependency_roles(
-                        task_objects,
-                        legacy_pour_objects=legacy_pour_objects,
-                    ),
+                    task_objects=scene_objects,
+                    dependency_roles={
+                        **_task_dependency_roles(
+                            task_objects,
+                            legacy_pour_objects=legacy_pour_objects,
+                        ),
+                        **{
+                            _string(item.get("id"), "context object.id"): (
+                                "context/" + _string(item.get("id"), "context object.id")
+                            )
+                            for item in context_objects
+                        },
+                    },
                     environment=environment,
                 )
             ),
@@ -244,6 +259,7 @@ def export_vr_teleop_package(
                     if producer_entrypoint is not None
                     else "same_assets_poses_and_physics"
                 ),
+                "context_props": "same_assets_poses_and_physics_not_in_task_object_list",
                 "robot_model": "same_runtime_robot_type",
                 "robot_base_pose": "same",
                 "physx_scene_config": "same_shared_profile",

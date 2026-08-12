@@ -1,0 +1,51 @@
+schema_version: scenario-forge-dressing-presets/v0.1
+table:
+  size_m: [2.0, 0.8, 0.755]
+  edge_clearance_m: 0.10
+  task_keep_out_xy_m: {min: [-0.38, -0.30], max: [0.38, 0.20]}
+  preferred_context_center_y_min_m: 0.10
+presets:
+  example4-default-v1:
+    background_id: example4
+    objects:
+      - {id: context_beaker, asset_id: context_beaker, source_prim_path: /World/Beaker, group_id: right_glassware, pose: {xyz: [0.78, 0.20, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_cylinder, asset_id: context_cylinder, source_prim_path: /World/graduated_cylinder_03, group_id: left_measurement, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_petri, asset_id: context_petri, source_prim_path: /World/PetriDish, group_id: right_petri, pose: {xyz: [0.60, 0.24, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_rack, asset_id: context_rack, source_prim_path: /World/TubeRack, group_id: left_tubes, pose: {xyz: [-0.62, 0.20, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_tube_a, asset_id: context_tube, source_prim_path: /World/CentrifugeTube50mlBody, group_id: left_tubes, pose: {xyz: [-0.65, 0.20, 0.80], wxyz: [1, 0, 0, 0]}}
+      - {id: context_stir_bar, asset_id: context_stir_bar, source_prim_path: /World/MagneticStirBar, group_id: right_tools, pose: {xyz: [0.82, -0.08, 0.758], wxyz: [1, 0, 0, 0]}}
+  teaching-research-default-v1:
+    background_id: teaching_research
+    objects:
+      - {id: context_flask, asset_id: context_flask, source_prim_path: /World/ConicalFlask2942, group_id: left_flask, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_beaker, asset_id: context_beaker, source_prim_path: /World/Beaker, group_id: right_glassware, pose: {xyz: [0.78, 0.20, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_petri, asset_id: context_petri, source_prim_path: /World/PetriDish, group_id: right_petri, pose: {xyz: [0.60, 0.24, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_rack, asset_id: context_rack, source_prim_path: /World/TubeRack, group_id: left_tubes, pose: {xyz: [-0.61, 0.20, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_tube_a, asset_id: context_tube, source_prim_path: /World/CentrifugeTube50mlBody, group_id: left_tubes, pose: {xyz: [-0.64, 0.20, 0.80], wxyz: [1, 0, 0, 0]}}
+      - {id: context_rod, asset_id: context_glass_rod, source_prim_path: /World/GlassStirringRod, group_id: right_tools, pose: {xyz: [0.80, -0.08, 0.759], wxyz: [0.7071067812, 0.7071067812, 0, 0]}}
+  modern-wet-chemistry-default-v1:
+    background_id: modern_wet_chemistry
+    objects:
+      - {id: context_flask, asset_id: context_flask, source_prim_path: /World/ConicalFlask2942, group_id: left_flask, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_stopper, asset_id: context_stopper, source_prim_path: /World/GroundGlassStopper2942, group_id: left_closure, pose: {xyz: [-0.62, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_cylinder, asset_id: context_cylinder, source_prim_path: /World/graduated_cylinder_03, group_id: right_measurement, pose: {xyz: [0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_funnel, asset_id: context_funnel, source_prim_path: /World/Funnel, group_id: right_transfer, pose: {xyz: [0.60, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_beaker, asset_id: context_beaker, source_prim_path: /World/Beaker, group_id: right_transfer, pose: {xyz: [0.60, 0.05, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_stir_bar, asset_id: context_stir_bar, source_prim_path: /World/MagneticStirBar, group_id: left_tools, pose: {xyz: [-0.82, -0.08, 0.758], wxyz: [1, 0, 0, 0]}}
+  bioclean-default-v1:
+    background_id: bioclean
+    objects:
+      - {id: context_rack, asset_id: context_rack, source_prim_path: /World/TubeRack, group_id: left_tubes, pose: {xyz: [-0.72, 0.20, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_tube_a, asset_id: context_tube, source_prim_path: /World/CentrifugeTube50mlBody, group_id: left_tubes, pose: {xyz: [-0.75, 0.20, 0.80], wxyz: [1, 0, 0, 0]}}
+      - {id: context_tube_cap, asset_id: context_cap, source_prim_path: /World/CentrifugeTube50mlCap, group_id: left_caps, pose: {xyz: [-0.52, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_petri, asset_id: context_petri, source_prim_path: /World/PetriDish, group_id: right_petri, pose: {xyz: [0.60, 0.24, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_beaker, asset_id: context_beaker, source_prim_path: /World/Beaker, group_id: right_glassware, pose: {xyz: [0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_cylinder, asset_id: context_cylinder, source_prim_path: /World/graduated_cylinder_03, group_id: right_measurement, pose: {xyz: [0.82, -0.08, 0.755], wxyz: [1, 0, 0, 0]}}
+  analytical-instrumentation-default-v1:
+    background_id: analytical_instrumentation
+    objects:
+      - {id: context_petri, asset_id: context_petri, source_prim_path: /World/PetriDish, group_id: right_petri, pose: {xyz: [0.60, 0.24, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_cylinder, asset_id: context_cylinder, source_prim_path: /World/graduated_cylinder_03, group_id: right_measurement, pose: {xyz: [0.80, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_flask, asset_id: context_flask, source_prim_path: /World/ConicalFlask2942, group_id: left_flask, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_beaker, asset_id: context_beaker, source_prim_path: /World/Beaker, group_id: left_glassware, pose: {xyz: [-0.60, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: context_rod, asset_id: context_glass_rod, source_prim_path: /World/GlassStirringRod, group_id: right_tools, pose: {xyz: [0.80, -0.08, 0.759], wxyz: [0.7071067812, 0.7071067812, 0, 0]}}

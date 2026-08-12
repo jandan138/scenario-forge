@@ -78,6 +78,7 @@ def _build_qualified_object_package(
     source_collider_approximation: str = "sdf",
     scenario_mapping: dict[str, object] | None = None,
     with_overlay: bool = False,
+    with_context: bool = False,
 ) -> Path:
     source_usd = (
         _write_overlay_base_scene(tmp_path)
@@ -123,6 +124,34 @@ def _build_qualified_object_package(
         license="CC-BY-NC-4.0",
         redistributable=False,
     )
+    context_source: LocalUSDAssetSource | None = None
+    if with_context:
+        context_usd = tmp_path / "context.usda"
+        context_usd.write_text(
+            source_usd.read_text(encoding="utf-8").replace(
+                "conical_bottle03", "context_beaker"
+            ),
+            encoding="utf-8",
+        )
+        _, context_package, context_manifest, _ = _write_source_bound_handoff(
+            tmp_path / "context_handoff",
+            source_usd=context_usd,
+            with_interaction_contract=True,
+            interaction_root="/World/context_beaker",
+        )
+        context_handoff = load_convert_asset_package_handoff(
+            context_package,
+            context_manifest,
+            context_usd,
+            expected_scope_prims=("/World/context_beaker",),
+            producer_revision="324ce6e",
+            usage="dynamic_context_object",
+        )
+        context_source = context_handoff.to_local_usd_asset_source(
+            asset_id="context_vessel",
+            license="CC-BY-NC-4.0",
+            redistributable=False,
+        )
     scenario = (
         _scenario_mapping()
         if scenario_mapping is None
@@ -148,6 +177,24 @@ def _build_qualified_object_package(
     }
     objects[2].pop("metadata", None)
     scenario["objects"] = objects
+    if with_context:
+        context = {
+            "id": "context_beaker",
+            "asset_id": "context_vessel",
+            "source_prim_path": "/World/context_beaker",
+            "role": "context_prop",
+            "pose": {
+                "xyz": [0.72, 0.24, 0.82],
+                "wxyz": [1.0, 0.0, 0.0, 0.0],
+                "scale_xyz": [1.0, 1.0, 1.0],
+            },
+            "metadata": {
+                "dressing_preset_id": "example4-default-v1",
+                "group_id": "far-right-glassware",
+                "metric_participation": "none",
+            },
+        }
+        scenario["objects"] = [*objects, context]
     if exact_success and scenario_mapping is None:
         scenario["success"] = _exact_bimanual_success()
     package_root = tmp_path / "package"
@@ -163,6 +210,9 @@ def _build_qualified_object_package(
         "qualified_source_vessel": rigid_source,
         "qualified_target_vessel": rigid_target,
     }
+    if with_context:
+        assert context_source is not None
+        assets["context_vessel"] = context_source
     if with_overlay:
         overlay_usd = _write_scene_overlay(tmp_path)
         assets[_OVERLAY_ASSET_ID] = LocalUSDAssetSource(
@@ -181,6 +231,25 @@ def _build_qualified_object_package(
         package_root,
     )
     return package_root
+
+
+def test_context_prop_is_loaded_with_package_physics_but_absent_from_metrics(
+    tmp_path: Path,
+) -> None:
+    package = _build_qualified_object_package(tmp_path, with_context=True)
+    output = tmp_path / "export"
+
+    export_genmanip_collected_package(package, output)
+
+    episode_path = next(output.glob("tasks/*/*/000/episode_metadata.json"))
+    episode = json.loads(episode_path.read_text(encoding="utf-8"))
+    layout = episode["task_data"]["initial_layout"]["context_beaker"]
+    assert layout["add_colliders"] is False
+    assert layout["add_rigid_body"] is False
+    contract_objects = episode["task_data"]["scenario_forge_runtime_contract"]["objects"]
+    context = next(item for item in contract_objects if item["scenario_object_id"] == "context_beaker")
+    assert context["role"] == "context_prop"
+    assert "context_beaker" not in json.dumps(episode["task_data"]["goal"])
 
 
 def _articulation_metadata() -> dict[str, object]:

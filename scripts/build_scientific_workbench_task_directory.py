@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -45,6 +46,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     inventory = _mapping(config.get("inventory"), "config.inventory")
     recipes = _string_list(config.get("canonical_recipe_ids"), "canonical_recipe_ids")
     releases = _mappings(config.get("releases", []), "releases")
+    releases.extend(
+        _generated_releases(
+            config.get("generated_release_manifests", []),
+            catalog=catalog,
+            output_dir=args.out / "directory",
+        )
+    )
 
     # Resolve through the regular source boundary before a task is queued.  This
     # verifies the referenced ConvertAsset handoffs rather than trusting ids in
@@ -108,6 +116,85 @@ def _string_list(value: object, field: str) -> list[str]:
     if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
         raise ValueError(f"{field} must be a list of non-empty strings")
     return list(value)
+
+
+def _generated_releases(
+    value: object,
+    *,
+    catalog: Mapping[str, object],
+    output_dir: Path,
+) -> list[Mapping[str, object]]:
+    specs = _mappings(value, "generated_release_manifests")
+    tasks = _mappings(catalog.get("tasks"), "catalog.tasks")
+    task_ids = {
+        int(task["source_order"]): _required_string(task, "task_id") for task in tasks
+    }
+    releases: list[Mapping[str, object]] = []
+    for spec in specs:
+        manifest_path = _repo_path(
+            _required_string(spec, "path"), "generated_release_manifests.path"
+        )
+        manifest = _mapping(
+            yaml.safe_load(manifest_path.read_text(encoding="utf-8")),
+            "generated release manifest",
+        )
+        if manifest.get("status") != "runtime_preview_complete":
+            raise ValueError(f"generated release manifest is not preview-complete: {manifest_path}")
+        series = _required_string(spec, "series")
+        release_date = _required_string(spec, "release_date")
+        background_bindings = _mapping(
+            spec.get("background_bindings"),
+            "generated_release_manifests.background_bindings",
+        )
+        packages = _mappings(manifest.get("packages"), "generated release manifest.packages")
+        task_counts: dict[int, int] = {}
+        for package in packages:
+            task_number = int(package["task_number"])
+            task_counts[task_number] = task_counts.get(task_number, 0) + 1
+        for package in packages:
+            task_number = int(package["task_number"])
+            if task_number not in task_ids:
+                raise ValueError(f"generated release references unknown task number {task_number}")
+            background_id = _required_string(package, "background_id")
+            background_binding = _required_string(
+                background_bindings, background_id
+            )
+            package_root = Path(_required_string(package, "package_root")).resolve()
+            try:
+                package_path = package_root.relative_to(REPO_ROOT).as_posix()
+            except ValueError as exc:
+                raise ValueError(f"generated package is outside repository: {package_root}") from exc
+            evidence_root = package_root / "adapters/ebench/genmanip/evidence/initial_scene"
+            relative_evidence = Path(os.path.relpath(evidence_root, output_dir.resolve()))
+            suffix = f".{background_id}" if task_counts[task_number] > 1 else ""
+            releases.append(
+                {
+                    "task_id": task_ids[task_number],
+                    "release_id": (
+                        f"{task_ids[task_number]}.v{series.removeprefix('r')}_"
+                        f"{release_date}_{series}{suffix}"
+                    ),
+                    "package_path": package_path,
+                    "background_binding": background_binding,
+                    "release_status": _required_string(package, "release_status"),
+                    "score_ceiling": package.get("score_ceiling"),
+                    "missing_capabilities": package.get("missing_capabilities", []),
+                    "promotion": "candidate",
+                    "evidence": {
+                        "overview_image": (relative_evidence / "scene_overview.png").as_posix(),
+                        "closeup_image": (relative_evidence / "task_object_closeup.png").as_posix(),
+                        "runtime_reset_gate": (relative_evidence / "visual_ready_gate.yaml").as_posix(),
+                    },
+                    "gates": {
+                        "self_contained_package": "not_run",
+                        "runtime_reset": "not_run",
+                        "tabletop_placement": "not_run",
+                        "visual_review": "not_run",
+                        "provisional_ik": "not_run",
+                    },
+                }
+            )
+    return releases
 
 
 if __name__ == "__main__":

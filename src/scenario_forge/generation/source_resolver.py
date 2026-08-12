@@ -10,12 +10,13 @@ from scenario_forge.adapters.labutopia import load_labutopia_interactive_scene_h
 from scenario_forge.assets.source import LocalUSDAssetSource
 
 
-SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.4"
+SOURCE_BINDINGS_SCHEMA_VERSION = "scenario-source-bindings/v0.5"
 SUPPORTED_SOURCE_BINDINGS_SCHEMA_VERSIONS = frozenset(
     {
         "scenario-source-bindings/v0.1",
         "scenario-source-bindings/v0.2",
         "scenario-source-bindings/v0.3",
+        "scenario-source-bindings/v0.4",
         SOURCE_BINDINGS_SCHEMA_VERSION,
     }
 )
@@ -128,6 +129,7 @@ def resolve_scenario_source_bindings(
                         if schema_version in {
                             "scenario-source-bindings/v0.2",
                             "scenario-source-bindings/v0.3",
+                            "scenario-source-bindings/v0.4",
                             SOURCE_BINDINGS_SCHEMA_VERSION,
                         }
                         else _CONVERT_ASSET_FIELDS
@@ -144,13 +146,17 @@ def resolve_scenario_source_bindings(
                         if schema_version in {
                             "scenario-source-bindings/v0.2",
                             "scenario-source-bindings/v0.3",
+                            "scenario-source-bindings/v0.4",
                             SOURCE_BINDINGS_SCHEMA_VERSION,
                         }
                         else "scene_overlay"
                     ),
                 )
             elif resolver == "producer_package":
-                if schema_version != SOURCE_BINDINGS_SCHEMA_VERSION:
+                if schema_version not in {
+                    "scenario-source-bindings/v0.4",
+                    SOURCE_BINDINGS_SCHEMA_VERSION,
+                }:
                     raise ScenarioSourceBindingError(
                         f"{field}.resolver producer_package requires "
                         f"{SOURCE_BINDINGS_SCHEMA_VERSION}"
@@ -296,15 +302,18 @@ def _required_usage(
     }
     if schema_version in {
         "scenario-source-bindings/v0.3",
+        "scenario-source-bindings/v0.4",
         SOURCE_BINDINGS_SCHEMA_VERSION,
     }:
         allowed.add("static_support_object")
+    if schema_version == SOURCE_BINDINGS_SCHEMA_VERSION:
+        allowed.add("dynamic_context_object")
     if usage not in allowed:
         raise ScenarioSourceBindingError(
             f"{field}.usage must be 'scene_overlay', 'rigid_object', "
             "'articulated_object', "
             "'visual_static_environment', 'visual_static_object', or "
-            "'static_support_object'"
+            "'static_support_object', or 'dynamic_context_object'"
         )
     return usage
 

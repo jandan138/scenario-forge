@@ -134,7 +134,7 @@ def _write_deterministic_zip(root: Path, zip_path: Path) -> None:
             if not path.is_file():
                 continue
             relative = (Path(root.name) / path.relative_to(root)).as_posix()
-            info = zipfile.ZipInfo(relative, date_time=(2026, 8, 11, 0, 0, 0))
+            info = zipfile.ZipInfo(relative, date_time=(2026, 8, 12, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             archive.writestr(info, path.read_bytes(), compresslevel=9)

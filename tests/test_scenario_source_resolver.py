@@ -124,6 +124,55 @@ def test_source_bindings_v04_adds_producer_composed_scene_resolver() -> None:
     }
 
 
+def test_source_bindings_v05_adds_dynamic_context_usage() -> None:
+    schema_path = (
+        REPO_ROOT
+        / "src/scenario_forge/schemas/jsonschema/scenario-source-bindings-v0.5.schema.json"
+    )
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    assert schema["properties"]["schema_version"]["const"] == (
+        "scenario-source-bindings/v0.5"
+    )
+    convert_asset = schema["$defs"]["convertAsset"]
+    assert "dynamic_context_object" in convert_asset["properties"]["usage"]["enum"]
+
+
+def test_source_bindings_v05_accepts_stronger_interaction_asset_as_context(
+    tmp_path: Path,
+) -> None:
+    source_usd, package_dir, manifest_path, _ = _write_source_bound_handoff(
+        tmp_path,
+        with_interaction_contract=True,
+    )
+    bindings = _write_bindings(
+        tmp_path / "bindings.yaml",
+        {
+            "context_beaker": {
+                "resolver": "convert_asset_package",
+                "usage": "dynamic_context_object",
+                "source_usd": str(source_usd),
+                "package_dir": str(package_dir),
+                "manifest_path": str(manifest_path),
+                "producer_revision": "interaction-r1",
+                "expected_scope_prims": ["/World/DryingBox_03"],
+                "license": "CC-BY-NC-4.0",
+            }
+        },
+        schema_version="scenario-source-bindings/v0.5",
+    )
+
+    source = resolve_scenario_source_bindings(bindings)["context_beaker"]
+
+    assert source.role == "dynamic_context_object"
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["consumer_usage"] == (
+        "dynamic_context_object"
+    )
+    assert source.upstream_package.metadata["interaction_contract"]["status"] == (
+        "pass"
+    )
+
+
 def test_source_bindings_v04_resolves_interactive_producer_package(tmp_path: Path) -> None:
     package, manifest = write_interactive_handoff(tmp_path / "producer")
     bindings = _write_bindings(

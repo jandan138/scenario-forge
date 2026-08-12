@@ -1418,8 +1418,18 @@ def _qualified_rigid_requirements(
         object_id = _required_string(item, "id", "scenario object")
         asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
         asset = assets_by_id[asset_id]
-        if asset.role != "rigid_object":
+        scenario_role = _required_string(item, "role", f"scenario object {object_id}")
+        if asset.role not in {"rigid_object", "dynamic_context_object"}:
+            if scenario_role == "context_prop":
+                raise GenManipExportError(
+                    f"context_prop {object_id!r} requires a dynamic_context_object asset"
+                )
             continue
+        is_context = asset.role == "dynamic_context_object"
+        if is_context != (scenario_role == "context_prop"):
+            raise GenManipExportError(
+                f"dynamic context asset {asset_id!r} must be used only with role 'context_prop'"
+            )
         upstream = _as_mapping(
             asset.metadata.get("upstream_package"),
             f"rigid object asset {asset_id}.upstream_package",
@@ -1433,29 +1443,55 @@ def _qualified_rigid_requirements(
             "metadata",
             f"rigid object asset {asset_id}.upstream_package",
         )
-        interaction = _required_mapping(
-            upstream_metadata,
-            "interaction_contract",
-            f"rigid object asset {asset_id}",
+        interaction = upstream_metadata.get("interaction_contract")
+        context_contract = upstream_metadata.get("dynamic_context_contract")
+        contract = _as_mapping(
+            interaction if interaction is not None else context_contract,
+            f"dynamic object asset {asset_id}.producer_contract",
         )
-        if interaction.get("schema_version") != "aan.interaction_contract.v1":
+        expected_schemas = (
+            {"aan.interaction_contract.v1", "aan.dynamic_context_contract.v1"}
+            if is_context
+            else {"aan.interaction_contract.v1"}
+        )
+        if contract.get("schema_version") not in expected_schemas:
             raise GenManipExportError(
-                f"rigid object asset {asset_id!r} has unsupported interaction_contract"
+                f"dynamic object asset {asset_id!r} has unsupported producer contract"
             )
-        if _interaction_requires_gpu_dynamics(interaction, asset_id):
+        if is_context and contract.get("status") != "pass":
+            raise GenManipExportError(
+                f"dynamic object asset {asset_id!r} producer contract must pass"
+            )
+        if _interaction_requires_gpu_dynamics(contract, asset_id):
             requires_gpu_dynamics = True
         source_prim = _required_string(
             item,
             "source_prim_path",
             f"scenario object {object_id}",
         )
-        if interaction.get("asset_entry_prim") != source_prim:
+        if contract.get("asset_entry_prim") != source_prim:
             raise GenManipExportError(
                 f"scenario object {object_id} source_prim_path must equal its "
                 "interaction_contract asset_entry_prim"
             )
+        if is_context:
+            metadata = _required_mapping(
+                item, "metadata", f"context_prop {object_id}"
+            )
+            for key in ("dressing_preset_id", "group_id"):
+                _required_string(metadata, key, f"context_prop {object_id}.metadata")
+            if metadata.get("metric_participation") != "none":
+                raise GenManipExportError(
+                    f"context_prop {object_id!r} metadata.metric_participation must be 'none'"
+                )
+            if item.get("named_frames"):
+                raise GenManipExportError(
+                    f"context_prop {object_id!r} must not declare named task frames"
+                )
+            qualified.add(object_id)
+            continue
         contract_frames = _required_mapping(
-            interaction,
+            contract,
             "named_frames",
             f"rigid object asset {asset_id}.interaction_contract",
         )

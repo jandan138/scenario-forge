@@ -42,6 +42,11 @@ remain available from each card's variant disclosure. The publisher copies
 every referenced release overview, not only the current candidate image, so all
 reviewed variants remain inspectable after deployment.
 
+`generated_release_manifests` may bind a preview-complete generation manifest
+to a release series. The current page defaults to r6 dynamic tabletop dressing
+and exposes r5 as a reader-controlled comparison; neither version toggle is a
+benchmark-success claim.
+
 ## Publish the reviewed directory
 
 The repository's GitHub Pages source is `main:/docs`. After building the
@@ -122,7 +127,7 @@ After the reviewed adapter exports exist, build the two colleague-facing ZIPs:
 
 ```bash
 PYTHONPATH=src python scripts/export_scientific_workbench_usd_handoff.py \
-  --out outputs/scientific_workbench_usd_handoff_20260811
+  --out outputs/scientific_workbench_usd_handoff_r6_20260812
 ```
 
 Task 1 is emitted in a separate bimanual-pour archive. Tasks 2, 4, 5, 7, 8,
@@ -131,3 +136,8 @@ contains `scene.usd`, `task_config.py`, `parity_manifest.json`, and the exact
 package-relative `deps/` closure. Open `scene.usd` directly in Isaac Sim 4.1;
 keep `deps/` beside it. These review archives deliberately omit the robot model
 and do not claim task or benchmark success.
+
+For r6 the expected archives are
+`scientific_workbench_task01_bimanual_pour_r6_20260812.zip` and
+`scientific_workbench_regular_tasks_r6_20260812.zip`. Validate both with
+`unzip -t` before handoff.

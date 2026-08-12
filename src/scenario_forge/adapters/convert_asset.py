@@ -71,9 +71,10 @@ _USAGE_ROLES = {
     "visual_static_environment": "environment",
     "visual_static_object": "static_object",
     "static_support_object": "static_support_object",
+    "dynamic_context_object": "dynamic_context_object",
 }
 _DYNAMIC_USAGES = frozenset(
-    {"scene_overlay", "rigid_object", "articulated_object"}
+    {"scene_overlay", "rigid_object", "articulated_object", "dynamic_context_object"}
 )
 _TASK_INTERACTIVE_USAGES = frozenset({"rigid_object", "articulated_object"})
 _TASK_INTERACTIVE_IDENTITY_TOLERANCE = 1e-6
@@ -123,6 +124,19 @@ class ConvertAssetStaticSupportContract:
 
     def to_mapping(self) -> dict[str, Any]:
         return _copy_json_mapping(self.payload, "static_support_contract")
+
+
+@dataclass(frozen=True)
+class ConvertAssetDynamicContextContract:
+    schema_version: str
+    asset_entry_prim: str
+    rigid_root_prim: str
+    collider_prims: tuple[str, ...]
+    support_frame: Mapping[str, Any]
+    payload: Mapping[str, Any]
+
+    def to_mapping(self) -> dict[str, Any]:
+        return _copy_json_mapping(self.payload, "dynamic_context_contract")
 
 
 @dataclass(frozen=True)
@@ -270,6 +284,7 @@ class ConvertAssetPackageHandoff:
     task_qualifications: tuple[ConvertAssetTaskQualification, ...] = ()
     support_audit: ConvertAssetSupportAudit | None = None
     static_support_contract: ConvertAssetStaticSupportContract | None = None
+    dynamic_context_contract: ConvertAssetDynamicContextContract | None = None
 
     def to_local_usd_asset_source(
         self,
@@ -355,6 +370,10 @@ class ConvertAssetPackageHandoff:
             upstream_metadata["static_support_contract"] = (
                 self.static_support_contract.to_mapping()
             )
+        if self.dynamic_context_contract is not None:
+            upstream_metadata["dynamic_context_contract"] = (
+                self.dynamic_context_contract.to_mapping()
+            )
         if self.task_interactive_geometry is not None:
             upstream_metadata["task_interactive_geometry"] = (
                 self.task_interactive_geometry.to_mapping()
@@ -428,7 +447,7 @@ def load_convert_asset_package_handoff(
         raise ConvertAssetHandoffError(
             "usage must be 'scene_overlay', 'rigid_object', 'articulated_object', "
             "'visual_static_environment', 'visual_static_object', or "
-            "'static_support_object'"
+            "'static_support_object', or 'dynamic_context_object'"
         )
 
     manifest_bytes = external_manifest.read_bytes()
@@ -577,6 +596,7 @@ def load_convert_asset_package_handoff(
         package_root=package_root,
     )
     static_support_contract: ConvertAssetStaticSupportContract | None = None
+    dynamic_context_contract: ConvertAssetDynamicContextContract | None = None
 
     if usage in _DYNAMIC_USAGES:
         _require_value(physics, "role", "dynamic", "manifest.physics_closure")
@@ -684,6 +704,13 @@ def load_convert_asset_package_handoff(
             asset_entry_prim=entry_scope,
             required=usage == "rigid_object",
         )
+        if usage == "dynamic_context_object" and interaction_contract is None:
+            dynamic_context_contract = _load_dynamic_context_contract(
+                manifest.get("dynamic_context_contract"),
+                package_root=package_root,
+                source_sha256=source_digest,
+                asset_entry_prim=entry_scope,
+            )
         if usage == "articulated_object":
             articulation_contract = _load_articulation_contract(
                 manifest.get("articulation_contract"),
@@ -928,6 +955,136 @@ def load_convert_asset_package_handoff(
         task_qualifications=task_qualifications,
         support_audit=support_audit,
         static_support_contract=static_support_contract,
+        dynamic_context_contract=dynamic_context_contract,
+    )
+
+
+def _load_dynamic_context_contract(
+    value: object,
+    *,
+    package_root: Path,
+    source_sha256: str,
+    asset_entry_prim: str,
+) -> ConvertAssetDynamicContextContract:
+    contract = _mapping(value, "manifest.dynamic_context_contract")
+    _require_exact_fields(
+        contract,
+        {
+            "schema_version",
+            "status",
+            "profile",
+            "asset_entry_prim",
+            "runtime_identity",
+            "collider_prims",
+            "support_frame",
+            "stable_support_gate",
+            "closure",
+            "claim_boundary",
+        },
+        "manifest.dynamic_context_contract",
+    )
+    _require_value(
+        contract,
+        "schema_version",
+        "aan.dynamic_context_contract.v1",
+        "manifest.dynamic_context_contract",
+    )
+    _require_value(contract, "status", "pass", "manifest.dynamic_context_contract")
+    profile = _required_mapping(
+        contract, "profile", "manifest.dynamic_context_contract"
+    )
+    _require_value(
+        profile,
+        "schema_version",
+        "aan.dynamic_context_profile.v1",
+        "dynamic_context_contract.profile",
+    )
+    if _required_sha256(
+        profile, "source_sha256", "dynamic_context_contract.profile"
+    ) != source_sha256:
+        raise ConvertAssetHandoffError(
+            "dynamic_context_contract.profile.source_sha256 does not match source USD"
+        )
+    profile_path = _safe_package_file(
+        package_root,
+        _required_string(
+            profile, "package_path", "dynamic_context_contract.profile"
+        ),
+        "dynamic_context_contract.profile.package_path",
+    )
+    if _file_sha256(profile_path) != _required_sha256(
+        profile, "profile_sha256", "dynamic_context_contract.profile"
+    ):
+        raise ConvertAssetHandoffError(
+            "dynamic_context_contract profile SHA-256 does not match packaged profile"
+        )
+    _safe_package_file(
+        package_root,
+        _required_string(
+            profile, "overlay_path", "dynamic_context_contract.profile"
+        ),
+        "dynamic_context_contract.profile.overlay_path",
+    )
+    entry = _required_string(
+        contract, "asset_entry_prim", "manifest.dynamic_context_contract"
+    )
+    if entry != asset_entry_prim:
+        raise ConvertAssetHandoffError(
+            "dynamic_context_contract.asset_entry_prim must match manifest asset_entry_prim"
+        )
+    identity = _required_mapping(
+        contract, "runtime_identity", "manifest.dynamic_context_contract"
+    )
+    rigid_root = _required_string(
+        identity, "rigid_root_prim", "dynamic_context_contract.runtime_identity"
+    )
+    if rigid_root != entry or identity.get("exactly_one_active_rigid_body") is not True:
+        raise ConvertAssetHandoffError(
+            "dynamic_context_contract requires one active rigid root at asset_entry_prim"
+        )
+    active = _required_string_tuple(
+        identity,
+        "active_rigid_body_prims",
+        "dynamic_context_contract.runtime_identity",
+    )
+    if active != (rigid_root,):
+        raise ConvertAssetHandoffError(
+            "dynamic_context_contract active rigid body must equal its entry prim"
+        )
+    colliders = tuple(
+        _required_string(item, "prim_path", f"dynamic_context_contract.collider_prims[{index}]")
+        for index, item in enumerate(
+            _required_mapping_list(
+                contract.get("collider_prims"),
+                "dynamic_context_contract.collider_prims",
+            )
+        )
+    )
+    if not colliders:
+        raise ConvertAssetHandoffError(
+            "dynamic_context_contract.collider_prims must not be empty"
+        )
+    support = _required_mapping(
+        contract, "support_frame", "manifest.dynamic_context_contract"
+    )
+    if support.get("parent_prim") != entry or support.get("authoritative") is not True:
+        raise ConvertAssetHandoffError(
+            "dynamic_context_contract requires an authoritative root-local support frame"
+        )
+    closure = _required_mapping(
+        contract, "closure", "manifest.dynamic_context_contract"
+    )
+    _require_value(closure, "status", "pass", "dynamic_context_contract.closure")
+    _required_string(
+        contract, "claim_boundary", "manifest.dynamic_context_contract"
+    )
+    return ConvertAssetDynamicContextContract(
+        schema_version="aan.dynamic_context_contract.v1",
+        asset_entry_prim=entry,
+        rigid_root_prim=rigid_root,
+        collider_prims=colliders,
+        support_frame=_copy_json_mapping(support, "dynamic_context_contract.support_frame"),
+        payload=_copy_json_mapping(contract, "dynamic_context_contract"),
     )
 
 

@@ -14,13 +14,42 @@ from tests.test_scenario_spec import _scenario_mapping
 from tests.test_convert_asset_adapter import _write_static_support_handoff
 
 
-def _build_shared_profile_package(tmp_path: Path) -> Path:
+def _build_shared_profile_package(tmp_path: Path, *, with_context: bool = False) -> Path:
     source = _write_source_scene(tmp_path)
     scenario = _scenario_mapping()
     scenario["robot"] = dict(scenario["robot"])  # type: ignore[arg-type]
     scenario["robot"]["profile_ref"] = "manip/lift2/R5a_isaac41_vr600_v1"  # type: ignore[index]
     objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
     objects[0]["asset_id"] = "qualified_table"
+    context_source = source
+    if with_context:
+        context_dir = tmp_path / "context_source"
+        context_dir.mkdir()
+        context_source = context_dir / "context.usda"
+        context_source.write_text(
+            source.read_text(encoding="utf-8").replace(
+                "conical_bottle03", "context_beaker"
+            ),
+            encoding="utf-8",
+        )
+        objects.append(
+            {
+                "id": "context_beaker",
+                "asset_id": "context_prop_asset",
+                "source_prim_path": "/World/context_beaker",
+                "role": "context_prop",
+                "pose": {
+                    "xyz": [0.72, 0.24, 0.82],
+                    "wxyz": [1.0, 0.0, 0.0, 0.0],
+                    "scale_xyz": [1.0, 1.0, 1.0],
+                },
+                "metadata": {
+                    "dressing_preset_id": "example4-default-v1",
+                    "group_id": "far-right-glassware",
+                    "metric_participation": "none",
+                },
+            }
+        )
     scenario["objects"] = objects
     table_source, table_package, table_manifest, _ = _write_static_support_handoff(
         tmp_path / "table_handoff"
@@ -49,10 +78,40 @@ def _build_shared_profile_package(tmp_path: Path) -> Path:
                 redistributable=False,
             ),
             "qualified_table": table,
+            **(
+                {
+                    "context_prop_asset": LocalUSDAssetSource(
+                        asset_id="context_prop_asset",
+                        source_usd=context_source,
+                        role="dynamic_context_object",
+                        license="CC-BY-NC-4.0",
+                        source_uri="example://context-prop",
+                        redistributable=False,
+                    )
+                }
+                if with_context
+                else {}
+            ),
         },
         package_root,
     )
     return package_root
+
+
+def test_vr_context_prop_is_in_scene_but_not_obj_prim_list(tmp_path: Path) -> None:
+    package_root = _build_shared_profile_package(tmp_path, with_context=True)
+
+    result = export_vr_teleop_package(package_root, tmp_path / "vr-context")
+
+    scene = result.scene_usd.read_text(encoding="utf-8")
+    config = result.task_config.read_text(encoding="utf-8")
+    parity = json.loads(result.parity_manifest.read_text(encoding="utf-8"))
+    assert "@deps/context/context_beaker/asset.usd@" in scene
+    assert 'def Xform "context_beaker"' in scene
+    assert '"/World/_scene/context_beaker"' not in config
+    assert parity["equivalence"]["context_props"] == (
+        "same_assets_poses_and_physics_not_in_task_object_list"
+    )
 
 
 def _build_generic_task_package(tmp_path: Path) -> Path:

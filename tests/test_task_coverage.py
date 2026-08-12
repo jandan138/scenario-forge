@@ -234,6 +234,51 @@ def test_task_directory_html_uses_responsive_cards_and_status_filters(tmp_path: 
     assert "function applyFilter" in html
 
 
+def test_task_directory_defaults_to_r6_and_can_switch_to_r5(tmp_path: Path) -> None:
+    plan = {
+        "catalog_id": "catalog",
+        "default_environment_binding": "environment",
+        "default_table_binding": "table",
+        "tasks": [
+            {
+                "task_id": "pour",
+                "source_order": 1,
+                "title_zh": "倒液",
+                "status": "queued",
+                "blockers": [],
+            }
+        ],
+    }
+    releases = []
+    for series in ("r5", "r6"):
+        releases.append(
+            {
+                "task_id": "pour",
+                "release_id": f"pour.v{series[-1]}_20260812_{series}",
+                "package_path": f"packages/{series}",
+                "background_binding": "environment",
+                "promotion": "candidate",
+                "evidence": {"overview_image": f"images/{series}.png"},
+                "gates": {
+                    "self_contained_package": "not_run",
+                    "runtime_reset": "not_run",
+                    "tabletop_placement": "not_run",
+                    "visual_review": "not_run",
+                    "provisional_ik": "not_run",
+                },
+            }
+        )
+
+    result = write_task_directory(plan, releases, output_dir=tmp_path / "directory")
+    html = (result / "index.html").read_text(encoding="utf-8")
+
+    assert 'data-version="r6" aria-pressed="true"' in html
+    assert 'data-version="r5" aria-pressed="false"' in html
+    assert 'data-release-version="r6" href="images/r6.png"' in html
+    assert 'data-release-version="r5" hidden href="images/r5.png"' in html
+    assert "applyVersion('r6')" in html
+
+
 def test_task_directory_shows_candidate_evidence_without_promoting_it(tmp_path: Path) -> None:
     plan = build_task_coverage_plan(
         catalog=_catalog(),
