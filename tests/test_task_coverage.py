@@ -234,7 +234,7 @@ def test_task_directory_html_uses_responsive_cards_and_status_filters(tmp_path: 
     assert "function applyFilter" in html
 
 
-def test_task_directory_defaults_to_r6_and_can_switch_to_r5(tmp_path: Path) -> None:
+def test_task_directory_defaults_to_r7_and_falls_back_explicitly(tmp_path: Path) -> None:
     plan = {
         "catalog_id": "catalog",
         "default_environment_binding": "environment",
@@ -250,7 +250,7 @@ def test_task_directory_defaults_to_r6_and_can_switch_to_r5(tmp_path: Path) -> N
         ],
     }
     releases = []
-    for series in ("r5", "r6"):
+    for series in ("r5", "r6", "r7"):
         releases.append(
             {
                 "task_id": "pour",
@@ -272,11 +272,37 @@ def test_task_directory_defaults_to_r6_and_can_switch_to_r5(tmp_path: Path) -> N
     result = write_task_directory(plan, releases, output_dir=tmp_path / "directory")
     html = (result / "index.html").read_text(encoding="utf-8")
 
-    assert 'data-version="r6" aria-pressed="true"' in html
+    assert 'data-version="r7" aria-pressed="true"' in html
+    assert 'data-version="r6" aria-pressed="false"' in html
     assert 'data-version="r5" aria-pressed="false"' in html
-    assert 'data-release-version="r6" href="images/r6.png"' in html
+    assert 'data-release-version="r7" href="images/r7.png"' in html
+    assert 'data-release-version="r6" hidden href="images/r6.png"' in html
     assert 'data-release-version="r5" hidden href="images/r5.png"' in html
-    assert "applyVersion('r6')" in html
+    assert "applyVersion('r7')" in html
+
+
+def test_task_directory_marks_missing_r7_instead_of_renaming_r6(tmp_path: Path) -> None:
+    plan = build_task_coverage_plan(
+        catalog=_catalog(),
+        inventory=_inventory(),
+        binding_ids={"room", "table", "flask_asset", "cylinder_asset", "beaker_asset"},
+        canonical_recipe_ids={"pour"},
+    )
+    release = {
+        "task_id": "pour", "release_id": "pour.v6_20260812_r6",
+        "package_path": "packages/r6", "background_binding": "environment",
+        "promotion": "candidate", "evidence": {"overview_image": "images/r6.png"},
+        "gates": {gate: "not_run" for gate in (
+            "self_contained_package", "runtime_reset", "tabletop_placement",
+            "visual_review", "provisional_ik",
+        )},
+    }
+    result = write_task_directory(plan, [release], output_dir=tmp_path / "directory")
+    html = (result / "index.html").read_text(encoding="utf-8")
+
+    assert 'data-release-version="r7"' in html
+    assert "该任务无 r7，展示最新有效版本" in html
+    assert "pour.v6_20260812_r6" in html
 
 
 def test_task_directory_shows_candidate_evidence_without_promoting_it(tmp_path: Path) -> None:

@@ -43,9 +43,10 @@ every referenced release overview, not only the current candidate image, so all
 reviewed variants remain inspectable after deployment.
 
 `generated_release_manifests` may bind a preview-complete generation manifest
-to a release series. The current page defaults to r6 dynamic tabletop dressing
-and exposes r5 as a reader-controlled comparison; neither version toggle is a
-benchmark-success claim.
+to a release series. The current page defaults to the partial r7 release:
+tasks 2, 7, and 8 show their r7 packages, while every other task explicitly
+falls back to its latest valid r6/r5 package. The r6 and r5 controls remain
+reader-selectable comparisons; no version toggle is a benchmark-success claim.
 
 ## Publish the reviewed directory
 

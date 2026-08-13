@@ -1,0 +1,113 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_environment_code_room_example4_v2: &room_example4
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/example4/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/example4/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/example4/package/evidence/manifest.json
+    producer_revision: generated-scientific-labs-v2-20260804
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room example4; ConvertAsset]
+    redistributable: true
+  scientific_environment_code_room_teaching_research_v2:
+    <<: *room_example4
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/teaching_research/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/teaching_research/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/teaching_research/package/evidence/manifest.json
+    attribution: [Code-as-Room teaching research; ConvertAsset]
+  scientific_environment_code_room_wet_chemistry_v2:
+    <<: *room_example4
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package/evidence/manifest.json
+    attribution: [Code-as-Room modern wet chemistry; ConvertAsset]
+  scientific_environment_code_room_bioclean_v2:
+    <<: *room_example4
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/bioclean/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/bioclean/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/bioclean/package/evidence/manifest.json
+    attribution: [Code-as-Room bioclean; ConvertAsset]
+  scientific_environment_code_room_analytical_instrumentation_v2:
+    <<: *room_example4
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/package/evidence/manifest.json
+    attribution: [Code-as-Room analytical instrumentation; ConvertAsset]
+  scientific_workbench_ebench_table_static_support:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package/evidence/manifest.json
+    producer_revision: scientific-workbench-standard-table-2000x800x755-20260811
+    expected_scope_prims: [/World/table]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [LabUtopia table; ConvertAsset 2000x800x755 static support]
+    redistributable: true
+  scientific_workbench_r7_graduated_cylinder_250ml: &cylinder
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/graduated_cylinder_250ml/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/graduated_cylinder_250ml
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/graduated_cylinder_250ml/evidence/manifest.json
+    producer_revision: scientific-workbench-r7-20260813
+    expected_scope_prims: [/World/GraduatedCylinder250ml]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 250 mL graduated cylinder; ConvertAsset r7]
+    redistributable: true
+  scientific_workbench_r7_beaker_325ml:
+    <<: *cylinder
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/beaker_325ml/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/beaker_325ml
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/beaker_325ml/evidence/manifest.json
+    expected_scope_prims: [/World/Beaker325ml]
+    attribution: [实验室资产库 325 mL beaker; ConvertAsset r7]
+  scientific_workbench_r7_glass_stirring_rod_300mm:
+    <<: *cylinder
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/glass_stirring_rod_300mm/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/glass_stirring_rod_300mm
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/glass_stirring_rod_300mm/evidence/manifest.json
+    expected_scope_prims: [/World/GlassStirringRod]
+    attribution: [实验室资产库 300 mm glass rod; ConvertAsset r7]
+  scientific_workbench_r7_centrifuge_tube_15ml_body:
+    <<: *cylinder
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/centrifuge_tube_15ml_body/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_body
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_body/evidence/manifest.json
+    expected_scope_prims: [/World/CentrifugeTube15mlBody]
+    attribution: [实验室资产库 15 mL red-cap tube body; ConvertAsset r7]
+  scientific_workbench_r7_centrifuge_tube_15ml_cap:
+    <<: *cylinder
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/centrifuge_tube_15ml_cap/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_cap
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_cap/evidence/manifest.json
+    expected_scope_prims: [/World/CentrifugeTube15mlCap]
+    attribution: [实验室资产库 15 mL red cap; ConvertAsset r7]
+  scientific_workbench_r7_tube_rack: &rack
+    <<: *cylinder
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/test_tube_rack_aluminum/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/test_tube_rack_aluminum
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/test_tube_rack_aluminum/evidence/manifest.json
+    expected_scope_prims: [/World/TubeRack]
+    attribution: [实验室资产库 aluminum tube rack k1.0; ConvertAsset r7]
+  scientific_workbench_r7_glass_test_tube_150mm_context:
+    <<: *cylinder
+    usage: dynamic_context_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/glass_test_tube_150mm/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/glass_test_tube_150mm
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/glass_test_tube_150mm/evidence/manifest.json
+    expected_scope_prims: [/World/GlassTestTube150mm]
+    attribution: [实验室资产库 150 mm glass tube; ConvertAsset r7]
+  scientific_workbench_r7_closed_15ml_tube_context:
+    <<: *cylinder
+    usage: dynamic_context_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/centrifuge_tube_15ml_closed/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_closed
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_closed/evidence/manifest.json
+    expected_scope_prims: [/World/CentrifugeTube15mlClosed]
+    attribution: [实验室资产库 closed 15 mL red-cap tube; ConvertAsset r7 context]
+  scientific_workbench_r7_context_rack:
+    <<: *rack
+    usage: dynamic_context_object

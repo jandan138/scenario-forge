@@ -86,6 +86,83 @@ def build_usd_handoff_archive(
     )
 
 
+def build_usd_handoff_bundle(
+    *,
+    archive_id: str,
+    packages: Sequence[tuple[int, str, Path]],
+    output_dir: Path,
+) -> USDHandoffArchive:
+    """Build one review ZIP that preserves background variants as separate packages."""
+    if not archive_id or not packages:
+        raise ValueError("archive_id and packages are required")
+    root = output_dir / archive_id
+    if root.exists():
+        shutil.rmtree(root)
+    package_root = root / "packages"
+    package_root.mkdir(parents=True)
+    records: list[dict[str, object]] = []
+    seen: set[str] = set()
+    for task_number, label, adapter in packages:
+        safe_label = "".join(char if char.isalnum() or char in "-_" else "_" for char in label)
+        directory = f"task_{task_number:02d}__{safe_label}"
+        if directory in seen:
+            raise ValueError(f"duplicate handoff package label: {directory}")
+        seen.add(directory)
+        source = Path(adapter).resolve()
+        required = ("scene.usd", "task_config.py", "deps", "parity_manifest.json")
+        missing = [name for name in required if not (source / name).exists()]
+        if missing:
+            raise ValueError(f"{directory} VR adapter is incomplete: {', '.join(missing)}")
+        destination = package_root / directory
+        destination.mkdir()
+        for name in ("scene.usd", "task_config.py", "parity_manifest.json"):
+            shutil.copy2(source / name, destination / name)
+        shutil.copytree(source / "deps", destination / "deps")
+        scene_text = (destination / "scene.usd").read_text(encoding="utf-8")
+        if "@/" in scene_text or "@file:" in scene_text:
+            raise ValueError(f"{directory} scene.usd contains an absolute asset path")
+        records.append({
+            "task_number": task_number,
+            "variant": label,
+            "directory": f"packages/{directory}",
+            "open_usd": f"packages/{directory}/scene.usd",
+            "config": f"packages/{directory}/task_config.py",
+            "scene_sha256": _sha256(destination / "scene.usd"),
+            "robot_included": False,
+        })
+    manifest = {
+        "schema_version": "scenario-forge-usd-review-handoff/v0.2",
+        "archive_id": archive_id,
+        "package_count": len(records),
+        "packages": records,
+        "claim_boundary": (
+            "USD opening and downstream configuration handoff only; no robot model, "
+            "IK, policy-success, interaction-success, liquid-transfer, or benchmark claim."
+        ),
+    }
+    (root / "manifest.yaml").write_text(
+        yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False), encoding="utf-8"
+    )
+    (root / "README_CN.md").write_text(_bundle_readme(archive_id, records), encoding="utf-8")
+    _write_checksums(root)
+    zip_path = output_dir / f"{archive_id}.zip"
+    _write_deterministic_zip(root, zip_path)
+    return USDHandoffArchive(root=root, zip_path=zip_path, task_numbers=tuple(item[0] for item in packages))
+
+
+def _bundle_readme(archive_id: str, records: Sequence[Mapping[str, object]]) -> str:
+    lines = [
+        f"# {archive_id}", "",
+        "这是 R7 USD/VR 可用性检查包，共 7 个独立场景。每个目录都必须整体保留。", "",
+        "打开方法：在 Isaac Sim 4.1 中打开对应目录的 `scene.usd`；VR 配置为同目录 `task_config.py`。", "",
+        "| 飞书序号 | 变体 | 打开的 USD | 配置 |", "| ---: | --- | --- | --- |",
+    ]
+    for record in records:
+        lines.append(f"| {record['task_number']} | {record['variant']} | `{record['open_usd']}` | `{record['config']}` |")
+    lines.extend(["", "## 边界", "", "不含机器人；R7 未运行 IK，不证明动作、液体、螺纹或 benchmark 成功。", ""])
+    return "\n".join(lines)
+
+
 def _readme(archive_id: str, records: Sequence[Mapping[str, object]]) -> str:
     lines = [
         f"# {archive_id}",

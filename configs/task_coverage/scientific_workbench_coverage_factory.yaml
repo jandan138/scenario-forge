@@ -2,6 +2,15 @@ schema_version: scientific-workbench-coverage-factory-input/v0.1
 catalog_path: configs/task_catalogs/scientific_workbench_phase1.yaml
 source_bindings_path: configs/source_bindings/scientific_workbench_asset_expansion_20260810.yaml
 generated_release_manifests:
+  - path: outputs/scientific_workbench_asset_expansion_20260813_r7_full/manifest.yaml
+    series: r7
+    release_date: '20260813'
+    background_bindings:
+      example4: scientific_environment_code_room_example4_v2
+      teaching_research: scientific_environment_code_room_teaching_research_v2
+      modern_wet_chemistry: scientific_environment_code_room_wet_chemistry_v2
+      bioclean: scientific_environment_code_room_bioclean_v2
+      analytical_instrumentation: scientific_environment_code_room_analytical_instrumentation_v2
   - path: outputs/scientific_workbench_asset_expansion_20260812_r6_full/manifest.yaml
     series: r6
     release_date: '20260812'

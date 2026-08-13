@@ -5,7 +5,10 @@ import zipfile
 
 import yaml
 
-from scenario_forge.artifacts.usd_handoff import build_usd_handoff_archive
+from scenario_forge.artifacts.usd_handoff import (
+    build_usd_handoff_archive,
+    build_usd_handoff_bundle,
+)
 
 
 def test_usd_handoff_archive_contains_scene_config_deps_and_no_robot(tmp_path: Path) -> None:
@@ -32,3 +35,25 @@ def test_usd_handoff_archive_contains_scene_config_deps_and_no_robot(tmp_path: P
     assert (result.root / "SHA256SUMS").is_file()
     with zipfile.ZipFile(result.zip_path) as archive:
         assert "regular_tasks/tasks/task_02/scene.usd" in archive.namelist()
+
+
+def test_usd_handoff_bundle_keeps_multiple_variants_of_one_task(tmp_path: Path) -> None:
+    packages = []
+    for label in ("example4", "bioclean"):
+        adapter = tmp_path / label
+        (adapter / "deps").mkdir(parents=True)
+        (adapter / "scene.usd").write_text("#usda 1.0\n", encoding="utf-8")
+        (adapter / "task_config.py").write_text("TASKS = {}\n", encoding="utf-8")
+        (adapter / "parity_manifest.json").write_text("{}\n", encoding="utf-8")
+        packages.append((7, label, adapter))
+
+    result = build_usd_handoff_bundle(
+        archive_id="r7_bundle",
+        packages=packages,
+        output_dir=tmp_path / "out",
+    )
+
+    assert (result.root / "packages/task_07__example4/scene.usd").is_file()
+    assert (result.root / "packages/task_07__bioclean/scene.usd").is_file()
+    manifest = yaml.safe_load((result.root / "manifest.yaml").read_text())
+    assert len(manifest["packages"]) == 2
