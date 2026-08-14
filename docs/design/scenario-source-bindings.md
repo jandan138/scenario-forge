@@ -237,6 +237,15 @@ author physics, copy ConvertAsset implementation code, or weaken the producer's
 source/hash/runtime gates. A replacement calibrated profile is selected by changing
 the external binding to a new delivery, not by changing the ScenarioSpec.
 
+GPU-PBD static containers use a separate narrow handoff because their producer
+manifest binds a collision profile, a three-cold-run qualification report, and
+an exact initial particle state. `load_gpu_pbd_static_container_handoff`
+validates those package-local artifacts and their hashes, then exposes the USD
+through the same neutral `LocalUSDAssetSource` boundary. Consumers must not add
+asset-specific collision, scale, rest-offset, mass/inertia, or warning
+suppression logic. The contract proves only the named static-containment claim;
+it does not infer pouring or benchmark readiness.
+
 ## Compile command
 
 ```bash

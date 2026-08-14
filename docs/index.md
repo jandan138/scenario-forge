@@ -75,4 +75,5 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [2026-07-31 Task Design Authority Correction](records/2026-07-31-scientific-workbench-task-design-correction.md)
 - [2026-08-01 Scientific Workbench Coverage Factory v1](records/2026-08-01-scientific-workbench-coverage-factory-v1.md)
 - [2026-08-01 Scientific Workbench v4 Candidate Evidence](records/2026-08-01-scientific-workbench-v4-candidate-evidence.md)
+- [2026-08-14 Graduated Cylinder GPU-PBD Container Handoff](records/2026-08-14-graduated-cylinder-gpu-pbd-container-handoff.md)
 - [2026-07-06 Phase 13 S2D-12 Soap-to-Dish Static Candidate Evidence](https://github.com/jandan138/scenario-forge/blob/main/docs/records/evidence/2026-07-05-phase13-image-grounded-task-factory/phase13_s2d12_soap_to_dish_static_candidate/generated_package_summary.yaml)

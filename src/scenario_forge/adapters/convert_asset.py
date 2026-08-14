@@ -413,6 +413,84 @@ class ConvertAssetPackageHandoff:
         )
 
 
+@dataclass(frozen=True)
+class ConvertAssetGPUPBDStaticContainerHandoff:
+    """Qualified source-bound GPU-PBD container and its bound initial state."""
+
+    package_dir: Path
+    package_id: str
+    manifest_sha256: str
+    root_usd: Path
+    root_usd_sha256: str
+    entry_prim: str
+    profile_path: Path
+    profile_sha256: str
+    qualification_report_path: str
+    qualification_report_sha256: str
+    fixture_path: str
+    fixture_sha256: str
+    initial_particle_state_path: str
+    initial_particle_state_sha256: str
+    particle_count: int
+    collision_strategy: str
+    claim_boundary: str
+
+    def to_local_usd_asset_source(
+        self,
+        *,
+        asset_id: str,
+        license: str,
+        attribution: tuple[str, ...] = (),
+        redistributable: bool = False,
+    ) -> LocalUSDAssetSource:
+        upstream = UpstreamPackageRef(
+            producer="ConvertAsset",
+            schema_version="aan.source_bound_package_manifest.v1",
+            package_id=self.package_id,
+            revision=f"sha256:{self.profile_sha256}",
+            manifest_uri=(
+                f"convert-asset://{self.package_id}/manifest/"
+                f"sha256:{self.manifest_sha256}"
+            ),
+            manifest_sha256=f"sha256:{self.manifest_sha256}",
+            metadata={
+                "consumer_usage": "gpu_pbd_static_container",
+                "consumer_physics_patch_allowed": False,
+                "runtime_profile": "isaac41",
+                "particle_count": self.particle_count,
+                "collision_strategy": self.collision_strategy,
+                "profile_path": self.profile_path.name,
+                "profile_sha256": f"sha256:{self.profile_sha256}",
+                "qualification_report_path": self.qualification_report_path,
+                "qualification_report_sha256": (
+                    f"sha256:{self.qualification_report_sha256}"
+                ),
+                "fixture_path": self.fixture_path,
+                "fixture_sha256": f"sha256:{self.fixture_sha256}",
+                "initial_particle_state_path": self.initial_particle_state_path,
+                "initial_particle_state_sha256": (
+                    f"sha256:{self.initial_particle_state_sha256}"
+                ),
+                "claim_boundary": self.claim_boundary,
+            },
+        )
+        return LocalUSDAssetSource(
+            asset_id=asset_id,
+            source_usd=self.root_usd,
+            role="rigid_object",
+            license=license,
+            source_uri=(
+                f"convert-asset://{self.package_id}/asset/"
+                f"sha256:{self.root_usd_sha256}"
+            ),
+            attribution=attribution,
+            redistributable=redistributable,
+            root_prim_path=self.entry_prim,
+            expected_sha256=f"sha256:{self.root_usd_sha256}",
+            upstream_package=upstream,
+        )
+
+
 def load_convert_asset_package_handoff(
     package_dir: str | Path,
     manifest_path: str | Path,
@@ -4304,3 +4382,189 @@ def _validate_stage_metrics(
         raise ConvertAssetHandoffError(
             "source-bound and preserved stage metrics do not match"
         )
+
+
+def load_gpu_pbd_static_container_handoff(
+    package_dir: str | Path,
+    manifest_path: str | Path,
+) -> ConvertAssetGPUPBDStaticContainerHandoff:
+    """Fail closed on the narrow ConvertAsset GPU-PBD container claim."""
+
+    package = Path(package_dir).resolve()
+    external_manifest = Path(manifest_path).resolve()
+    embedded_manifest = package / "evidence" / "manifest.json"
+    if not package.is_dir() or not embedded_manifest.is_file():
+        raise ConvertAssetHandoffError("GPU-PBD container package is incomplete")
+    if not external_manifest.is_file():
+        raise ConvertAssetHandoffError("GPU-PBD container manifest is missing")
+    if external_manifest.read_bytes() != embedded_manifest.read_bytes():
+        raise ConvertAssetHandoffError(
+            "external and embedded GPU-PBD manifests do not match"
+        )
+    manifest = _load_strict_json_mapping(
+        embedded_manifest.read_bytes(), "GPU-PBD container manifest"
+    )
+    _require_value(
+        manifest,
+        "schema_version",
+        "aan.source_bound_package_manifest.v1",
+        "manifest",
+    )
+    _require_value(manifest, "overall_status", "pass", "manifest")
+    promotion = _required_mapping(manifest, "promotion", "manifest")
+    if promotion.get("allowed") is not True:
+        raise ConvertAssetHandoffError("GPU-PBD container promotion is not allowed")
+    _require_value(
+        promotion,
+        "claim",
+        "gpu_pbd_static_container",
+        "manifest.promotion",
+    )
+    package_id = _required_string(manifest, "package_id", "manifest")
+    entrypoints = _required_mapping(manifest, "entrypoints", "manifest")
+    root_usd = _safe_package_file(
+        package,
+        _required_string(entrypoints, "root_usd", "manifest.entrypoints"),
+        "root_usd",
+    )
+    entry_prim = _required_string(
+        entrypoints, "asset_entry_prim", "manifest.entrypoints"
+    )
+    if not entry_prim.startswith("/"):
+        raise ConvertAssetHandoffError("asset_entry_prim must be absolute")
+
+    contract = _required_mapping(
+        manifest, "gpu_pbd_static_container", "manifest"
+    )
+    _require_value(contract, "status", "qualified", "gpu_pbd_static_container")
+    profile_path = _safe_package_file(
+        package,
+        _required_string(contract, "profile", "gpu_pbd_static_container"),
+        "profile",
+    )
+    profile = _load_strict_json_mapping(
+        profile_path.read_bytes(), "GPU-PBD container profile"
+    )
+    _require_value(
+        profile,
+        "schema_version",
+        "aan.gpu_pbd_static_container_profile.v1",
+        "profile",
+    )
+    _require_value(profile, "role", "gpu_pbd_static_container", "profile")
+    _require_value(profile, "claim", "gpu_pbd_static_container", "profile")
+    _require_value(profile, "entrypoint", root_usd.name, "profile")
+    _require_value(profile, "entry_prim", entry_prim, "profile")
+    profile_promotion = _required_mapping(profile, "promotion", "profile")
+    _require_value(profile_promotion, "status", "qualified", "profile.promotion")
+    collision = _required_mapping(profile, "collision", "profile")
+    if collision.get("source_derived_not_primitive_proxy") is not True:
+        raise ConvertAssetHandoffError(
+            "GPU-PBD collision must be source-derived, not a primitive proxy"
+        )
+    _require_value(
+        collision,
+        "piece_approximation",
+        "convexDecomposition",
+        "profile.collision",
+    )
+    collision_strategy = _required_string(
+        collision, "strategy", "profile.collision"
+    )
+
+    resolved_artifacts: dict[str, tuple[Path, str]] = {}
+    for path_key, sha_key in (
+        ("report", "report_sha256"),
+        ("fixture", "fixture_sha256"),
+        ("initial_particle_state", "initial_particle_state_sha256"),
+    ):
+        relative = _required_string(contract, path_key, "gpu_pbd_static_container")
+        expected_sha = _required_sha256(
+            contract, sha_key, "gpu_pbd_static_container"
+        )
+        path = _safe_package_file(package, relative, path_key)
+        if _file_sha256(path) != expected_sha:
+            raise ConvertAssetHandoffError(
+                f"GPU-PBD {path_key} SHA-256 does not match manifest"
+            )
+        if profile_promotion.get(path_key) != relative or profile_promotion.get(
+            sha_key
+        ) != expected_sha:
+            raise ConvertAssetHandoffError(
+                f"GPU-PBD {path_key} binding differs between profile and manifest"
+            )
+        resolved_artifacts[path_key] = (path, expected_sha)
+
+    report = _load_strict_json_mapping(
+        resolved_artifacts["report"][0].read_bytes(), "GPU-PBD report"
+    )
+    runs = report.get("runs")
+    if (
+        report.get("overall_status") != "pass"
+        or report.get("required_cold_runs") != 3
+        or not isinstance(runs, list)
+        or len(runs) != 3
+    ):
+        raise ConvertAssetHandoffError("GPU-PBD report must contain three cold passes")
+    for run in runs:
+        if not isinstance(run, Mapping):
+            raise ConvertAssetHandoffError("GPU-PBD run must be a mapping")
+        semantics = run.get("resolved_particle_semantics")
+        hold = run.get("static_hold")
+        performance = run.get("performance")
+        if not all(isinstance(value, Mapping) for value in (semantics, hold, performance)):
+            raise ConvertAssetHandoffError("GPU-PBD run evidence is incomplete")
+        assert isinstance(semantics, Mapping)
+        assert isinstance(hold, Mapping)
+        assert isinstance(performance, Mapping)
+        final = hold.get("final")
+        valid = (
+            run.get("overall_status") == "pass"
+            and semantics.get("fluid") is True
+            and semantics.get("self_collision") is True
+            and hold.get("minimum_inside_ratio", 0.0) >= 0.95
+            and hold.get("maximum_below_support") == 0
+            and isinstance(final, Mapping)
+            and final.get("particle_count") == 548
+            and performance.get("mean_rtx_fps", 0.0) >= 40.0
+            and run.get("hard_runtime_errors") == []
+        )
+        if not valid:
+            raise ConvertAssetHandoffError("GPU-PBD cold run failed a required gate")
+    fixture = _load_strict_json_mapping(
+        resolved_artifacts["fixture"][0].read_bytes(), "GPU-PBD fixture"
+    )
+    particle_count = fixture.get("particle_count")
+    if particle_count != 548:
+        raise ConvertAssetHandoffError("GPU-PBD fixture particle_count must be 548")
+    particle_parameters = _required_mapping(
+        fixture, "particle_parameters", "GPU-PBD fixture"
+    )
+    initial_state = _required_mapping(
+        particle_parameters, "initial_state", "GPU-PBD fixture.particle_parameters"
+    )
+    _require_value(
+        initial_state,
+        "kind",
+        "normalized_reference_particle_cloud",
+        "GPU-PBD fixture initial state",
+    )
+    return ConvertAssetGPUPBDStaticContainerHandoff(
+        package_dir=package,
+        package_id=package_id,
+        manifest_sha256=_file_sha256(embedded_manifest),
+        root_usd=root_usd,
+        root_usd_sha256=_file_sha256(root_usd),
+        entry_prim=entry_prim,
+        profile_path=profile_path,
+        profile_sha256=_file_sha256(profile_path),
+        qualification_report_path=resolved_artifacts["report"][0].relative_to(package).as_posix(),
+        qualification_report_sha256=resolved_artifacts["report"][1],
+        fixture_path=resolved_artifacts["fixture"][0].relative_to(package).as_posix(),
+        fixture_sha256=resolved_artifacts["fixture"][1],
+        initial_particle_state_path=resolved_artifacts["initial_particle_state"][0].relative_to(package).as_posix(),
+        initial_particle_state_sha256=resolved_artifacts["initial_particle_state"][1],
+        particle_count=particle_count,
+        collision_strategy=collision_strategy,
+        claim_boundary=_required_string(profile, "claim_boundary", "profile"),
+    )

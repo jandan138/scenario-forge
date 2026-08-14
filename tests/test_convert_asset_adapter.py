@@ -12,6 +12,7 @@ from scenario_forge.adapters.convert_asset import (
     ConvertAssetHandoffError,
     NormalizeAssetCommandPlan,
     load_convert_asset_package_handoff,
+    load_gpu_pbd_static_container_handoff,
 )
 
 
@@ -2752,3 +2753,139 @@ def test_load_source_bound_handoff_rejects_root_or_profile_hash_mismatch(
             expected_scope_prims=("/World/DryingBox_03",),
             producer_revision="324ce6e",
         )
+
+
+def _write_gpu_pbd_static_container_handoff(root: Path) -> tuple[Path, Path]:
+    package = root / "gpu_pbd_container"
+    evidence = package / "evidence"
+    evidence.mkdir(parents=True)
+    (package / "asset.usd").write_text("#usda 1.0\n", encoding="utf-8")
+    report = evidence / "gpu_pbd_static_qualification_report.json"
+    run = {
+        "overall_status": "pass",
+        "resolved_particle_semantics": {"fluid": True, "self_collision": True},
+        "static_hold": {
+            "minimum_inside_ratio": 1.0,
+            "maximum_below_support": 0,
+            "final": {"particle_count": 548},
+        },
+        "performance": {"mean_rtx_fps": 80.0},
+        "hard_runtime_errors": [],
+    }
+    report.write_text(
+        json.dumps(
+            {
+                "overall_status": "pass",
+                "required_cold_runs": 3,
+                "runs": [run, run, run],
+            }
+        ),
+        encoding="utf-8",
+    )
+    fixture = evidence / "gpu_pbd_static_fixture.json"
+    fixture.write_text(
+        json.dumps(
+            {
+                "particle_count": 548,
+                "particle_parameters": {
+                    "initial_state": {"kind": "normalized_reference_particle_cloud"}
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    points = evidence / "gpu_pbd_initial_particle_state.json"
+    points.write_text(json.dumps([[0.0, 0.0, 0.02]]), encoding="utf-8")
+    profile = package / "gpu_pbd_static_container_profile.json"
+    profile.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_static_container_profile.v1",
+                "entrypoint": "asset.usd",
+                "entry_prim": "/World/GraduatedCylinder250ml",
+                "role": "gpu_pbd_static_container",
+                "claim": "gpu_pbd_static_container",
+                "collision": {
+                    "strategy": "source_derived_low_vertex_gpu_convex_partition",
+                    "source_derived_not_primitive_proxy": True,
+                    "piece_approximation": "convexDecomposition",
+                },
+                "promotion": {
+                    "status": "qualified",
+                    "report": str(report.relative_to(package)),
+                    "report_sha256": _digest(report),
+                    "fixture": str(fixture.relative_to(package)),
+                    "fixture_sha256": _digest(fixture),
+                    "initial_particle_state": str(points.relative_to(package)),
+                    "initial_particle_state_sha256": _digest(points),
+                    "cold_runs": 3,
+                    "runtime": "isaac41",
+                },
+                "claim_boundary": "Static containment only.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest = evidence / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.source_bound_package_manifest.v1",
+                "package_id": "graduated-cylinder-250ml.gpu-pbd-static.r1",
+                "overall_status": "pass",
+                "entrypoints": {
+                    "root_usd": "asset.usd",
+                    "asset_entry_prim": "/World/GraduatedCylinder250ml",
+                },
+                "gpu_pbd_static_container": {
+                    "status": "qualified",
+                    "profile": profile.name,
+                    "report": str(report.relative_to(package)),
+                    "report_sha256": _digest(report),
+                    "fixture": str(fixture.relative_to(package)),
+                    "fixture_sha256": _digest(fixture),
+                    "initial_particle_state": str(points.relative_to(package)),
+                    "initial_particle_state_sha256": _digest(points),
+                    "cold_runs": 3,
+                    "runtime": "isaac41",
+                },
+                "promotion": {
+                    "allowed": True,
+                    "claim": "gpu_pbd_static_container",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return package, manifest
+
+
+def test_loads_qualified_gpu_pbd_container_without_consumer_physics_patch(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_static_container_handoff(tmp_path)
+
+    handoff = load_gpu_pbd_static_container_handoff(package, manifest)
+    source = handoff.to_local_usd_asset_source(
+        asset_id="graduated-cylinder-250ml-gpu-pbd",
+        license="internal",
+    )
+
+    assert handoff.particle_count == 548
+    assert handoff.collision_strategy == (
+        "source_derived_low_vertex_gpu_convex_partition"
+    )
+    assert source.role == "rigid_object"
+    assert source.upstream_package is not None
+    assert source.upstream_package.metadata["consumer_physics_patch_allowed"] is False
+
+
+def test_gpu_pbd_container_handoff_rejects_tampered_qualification(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_static_container_handoff(tmp_path)
+    report = package / "evidence/gpu_pbd_static_qualification_report.json"
+    report.write_text("{}\n", encoding="utf-8")
+
+    with pytest.raises(ConvertAssetHandoffError, match="SHA-256"):
+        load_gpu_pbd_static_container_handoff(package, manifest)
