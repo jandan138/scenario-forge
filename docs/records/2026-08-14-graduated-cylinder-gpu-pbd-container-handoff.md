@@ -17,7 +17,11 @@ Sim or reproduce ConvertAsset mesh conversion.
 
 The accepted producer package is:
 
-`/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/graduated_cylinder_250ml_gpu_pbd_remesh_20260814_v3/final_package/graduated_cylinder_250ml_gpu_pbd_static_r1`
+`/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/graduated_cylinder_250ml_gpu_pbd_remesh_20260814_v3/final_package/graduated_cylinder_250ml_gpu_pbd_static_r2_visual_bound`
+
+This r2 handoff has the same qualified collider and bound particle state as r1,
+and additionally binds three reviewed 960 x 540 views rendered from the final
+promoted package. It supersedes r1 for consumer handoff without mutating r1.
 
 The accepted claim remains static containment with the package-bound initial
 particle state. This change does not promote Task 02, claim a successful pour,
