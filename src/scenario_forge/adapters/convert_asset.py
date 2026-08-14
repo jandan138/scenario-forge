@@ -4520,6 +4520,7 @@ def load_gpu_pbd_static_container_handoff(
         final = hold.get("final")
         valid = (
             run.get("overall_status") == "pass"
+            and run.get("particle_readback_attribute") == "points"
             and semantics.get("fluid") is True
             and semantics.get("self_collision") is True
             and hold.get("minimum_inside_ratio", 0.0) >= 0.95

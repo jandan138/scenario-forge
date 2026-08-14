@@ -246,6 +246,11 @@ asset-specific collision, scale, rest-offset, mass/inertia, or warning
 suppression logic. The contract proves only the named static-containment claim;
 it does not infer pouring or benchmark readiness.
 
+Each cold run must also record `particle_readback_attribute: points`. Isaac Sim
+4.1's `physxParticle:simulationPoints` is an authored rest-state buffer, not
+live PBD evidence; reports based on it are rejected even if all artifact hashes
+and older promotion fields are otherwise valid.
+
 ## Compile command
 
 ```bash

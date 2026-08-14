@@ -2763,6 +2763,7 @@ def _write_gpu_pbd_static_container_handoff(root: Path) -> tuple[Path, Path]:
     report = evidence / "gpu_pbd_static_qualification_report.json"
     run = {
         "overall_status": "pass",
+        "particle_readback_attribute": "points",
         "resolved_particle_semantics": {"fluid": True, "self_collision": True},
         "static_hold": {
             "minimum_inside_ratio": 1.0,
@@ -2888,4 +2889,26 @@ def test_gpu_pbd_container_handoff_rejects_tampered_qualification(
     report.write_text("{}\n", encoding="utf-8")
 
     with pytest.raises(ConvertAssetHandoffError, match="SHA-256"):
+        load_gpu_pbd_static_container_handoff(package, manifest)
+
+
+def test_gpu_pbd_container_handoff_rejects_rest_state_readback(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_static_container_handoff(tmp_path)
+    report_path = package / "evidence/gpu_pbd_static_qualification_report.json"
+    report = json.loads(report_path.read_text())
+    for run in report["runs"]:
+        run["particle_readback_attribute"] = "physxParticle:simulationPoints"
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    digest = _digest(report_path)
+    profile_path = package / "gpu_pbd_static_container_profile.json"
+    profile = json.loads(profile_path.read_text())
+    profile["promotion"]["report_sha256"] = digest
+    profile_path.write_text(json.dumps(profile), encoding="utf-8")
+    manifest_payload = json.loads(manifest.read_text())
+    manifest_payload["gpu_pbd_static_container"]["report_sha256"] = digest
+    manifest.write_text(json.dumps(manifest_payload), encoding="utf-8")
+
+    with pytest.raises(ConvertAssetHandoffError, match="cold run"):
         load_gpu_pbd_static_container_handoff(package, manifest)
