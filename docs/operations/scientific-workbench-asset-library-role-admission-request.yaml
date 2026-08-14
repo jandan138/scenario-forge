@@ -1,0 +1,46 @@
+schema_version: scenario-forge-convertasset-role-admission-request/v0.1
+request_id: scientific_workbench_asset_library_role_admission_20260814
+producer: ConvertAsset
+consumer: scenario-forge
+source:
+  archive_uri: external_artifacts/incoming/实验室资产库.zip
+  archive_sha256: ab0e286972551f728f73d62054c5b46c00e9056c99e1d402eccb6819cad5f955
+  source_policy: archive_immutable_derived_source_bound_packages
+  included_single_assets: 29
+  excluded_combo_scenes: 6
+role_contract:
+  phase_1:
+    liquid_container: 12
+    liquid_conduit: 1
+  phase_2:
+    rigid_tool: 10
+    receptacle_support: 4
+    instrument_static: 2
+repair_policy:
+  trigger: measured_role_gate_failure_only
+  conservative_container_rule: close_coplanar_concentric_dual_rim_loops.v1
+  forbidden_consumer_actions:
+    - add_asset_specific_collision_proxy
+    - change_asset_scale
+    - patch_mass_or_inertia
+    - suppress_physx_warnings
+promotion_policy:
+  mode: automatic_after_all_required_gates_pass
+  partial_audit_is_not_promotion: true
+task02_r82_gate:
+  source_container: graduated_cylinder_250ml
+  target_container: beaker_325ml
+  required:
+    cold_runs: 3
+    updates_per_run: 5
+    static_hold_seconds: 8
+    minimum_source_retention_ratio: 0.95
+    maximum_below_support_count: 0
+    oracle_tilt_local_y_degrees: -110
+    minimum_target_ratio: 0.80
+    maximum_tabletop_spill_ratio: 0.05
+    minimum_mean_rtx_fps_960x540: 40
+  scenario_forge_action_if_blocked: record_result_without_generating_r82_task_package
+claim_boundary: >-
+  Scenario Forge declares roles and consumes promoted packages. USD/mesh/MDL
+  repair and Isaac runtime qualification remain ConvertAsset-owned.

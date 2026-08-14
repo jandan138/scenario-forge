@@ -15,19 +15,27 @@ def publish(index: Path, image: Path) -> Path:
     html = index.read_text(encoding="utf-8")
     asset = index.parent / "assets/task02-r8-static-overview.png"
     asset.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(image, asset)
+    if image != asset.resolve():
+        shutil.copy2(image, asset)
 
     r8_button = (
         '<button class="version" data-version="r8" aria-pressed="true">'
-        'r8 · 液体诊断原型（blocked）</button>'
+        "r8 · 液体诊断原型（blocked）</button>"
     )
     if 'data-version="r8"' not in html:
         html = html.replace(
             '<button class="version" data-version="r7" aria-pressed="true">',
-            r8_button
-            + '<button class="version" data-version="r7" aria-pressed="false">',
+            r8_button + '<button class="version" data-version="r7" aria-pressed="false">',
             1,
         )
+    html = html.replace(
+        "r8 · 液体诊断原型（blocked）",
+        "r8.2 · 严格视觉网格实验（blocked）",
+    )
+    html = html.replace(
+        "Task 02 r8 液体诊断原型 · 视觉 mesh convexDecomposition GPU 粒子碰撞 blocked",
+        "Task 02 r8.2 严格视觉网格实验 · 三次启动通过；GPU 粒子碰撞 blocked，未生成任务包",
+    )
     html = html.replace(
         "r7 目前只更新任务 2、7、8；其他任务明确回退到自己的最新有效版本。",
         "r8 目前只更新任务 2；其他任务明确回退到自己的 r7 最新有效版本。",
@@ -39,21 +47,17 @@ def publish(index: Path, image: Path) -> Path:
         nonlocal found_task02
         card = match.group(0)
         if 'data-release-version="r8"' in card:
-            found_task02 = found_task02 or bool(
-                re.search(r'<span>Task 02</span>', card)
-            )
+            found_task02 = found_task02 or bool(re.search(r"<span>Task 02</span>", card))
             return card
         rail = re.search(
             r'<a class="evidence-rail" data-release-version="r7".*?</a>',
             card,
             flags=re.DOTALL,
         )
-        release = re.search(
-            r'<span data-release-version="r7">.*?</span>', card, flags=re.DOTALL
-        )
+        release = re.search(r'<span data-release-version="r7">.*?</span>', card, flags=re.DOTALL)
         if rail is None or release is None:
             raise ValueError("task card r7 release elements were not found")
-        if re.search(r'<span>Task 02</span>', card):
+        if re.search(r"<span>Task 02</span>", card):
             found_task02 = True
             r8_rail = (
                 '<a class="evidence-rail" data-release-version="r8" '
@@ -63,8 +67,8 @@ def publish(index: Path, image: Path) -> Path:
                 'loading="eager"></a>'
             )
             r8_release = (
-                '<span data-release-version="r8">Task 02 r8 液体诊断原型 · '
-                '视觉 mesh convexDecomposition GPU 粒子碰撞 blocked</span>'
+                '<span data-release-version="r8">Task 02 r8.2 严格视觉网格实验 · '
+                "三次启动通过；GPU 粒子碰撞 blocked，未生成任务包</span>"
             )
         else:
             r8_rail = rail.group(0).replace(
