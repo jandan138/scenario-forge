@@ -251,6 +251,22 @@ Each cold run must also record `particle_readback_attribute: points`. Isaac Sim
 live PBD evidence; reports based on it are rejected even if all artifact hashes
 and older promotion fields are otherwise valid.
 
+A qualified source/target transfer pair uses the adjacent
+`load_gpu_pbd_transfer_pair_handoff` boundary. The loader verifies the promoted
+component USD, package-local dependency tree, exact 548-particle initial state,
+selected trajectory candidate, and three independent cold-run observations.
+Each observation must use live `points` readback, retain all particles before
+the pour, deliver at least half of them to the target, sustain at least 40 FPS,
+and report no hard runtime error. Spill and below-support counts remain recorded
+evidence rather than additional consumer policy gates.
+
+This handoff proves prescribed-kinematic transfer feasibility only. Scenario
+Forge may compose the producer component into an eBench scene, but it does not
+turn the prescribed trajectory into a robot policy or activate a liquid metric.
+Consumers must not patch either vessel's collider, scale, rest offset, or PBD
+parameters. Robot transfer, metric correctness, and benchmark success remain
+separate downstream claims.
+
 ## Compile command
 
 ```bash

@@ -1332,6 +1332,12 @@ def _preview_room_visibility_token(
 def _preview_timing(request: Mapping[str, Any]) -> tuple[int, bool]:
     """Settle once, then freeze physics so every camera records one moment."""
 
+    explicit_steps = request.get("zero_action_warmup_steps")
+    if explicit_steps is not None:
+        if not isinstance(explicit_steps, int) or not 0 <= explicit_steps <= 3600:
+            raise ValueError("zero_action_warmup_steps must be an integer in [0, 3600]")
+        return explicit_steps, True
+
     raw_views = request.get("views")
     if isinstance(raw_views, Mapping) and raw_views:
         inherited = [

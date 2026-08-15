@@ -13,6 +13,7 @@ from scenario_forge.adapters.convert_asset import (
     NormalizeAssetCommandPlan,
     load_convert_asset_package_handoff,
     load_gpu_pbd_static_container_handoff,
+    load_gpu_pbd_transfer_pair_handoff,
 )
 
 
@@ -2912,3 +2913,157 @@ def test_gpu_pbd_container_handoff_rejects_rest_state_readback(
 
     with pytest.raises(ConvertAssetHandoffError, match="cold run"):
         load_gpu_pbd_static_container_handoff(package, manifest)
+
+
+def test_gpu_pbd_container_handoff_accepts_v2_final_outside_gate(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_static_container_handoff(tmp_path)
+    profile_path = package / "gpu_pbd_static_container_profile.json"
+    profile = json.loads(profile_path.read_text())
+    profile["schema_version"] = "aan.gpu_pbd_static_container_profile.v2"
+    profile["promotion"]["final_maximum_outside_particles"] = 10
+    report_path = package / "evidence/gpu_pbd_static_qualification_report.json"
+    report = json.loads(report_path.read_text())
+    report["schema_version"] = "aan.gpu_pbd_static_admission.v2"
+    report["qualification_tier"] = "final"
+    for run in report["runs"]:
+        run["qualification_tier"] = "final"
+        run["static_hold"]["maximum_outside"] = 2
+        run["static_hold"]["maximum_below_support"] = 1
+        run["static_hold"]["final"]["outside"] = 1
+        run["static_hold"]["final"]["below_support"] = 1
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    report_sha = _digest(report_path)
+    profile["promotion"]["report_sha256"] = report_sha
+    profile_path.write_text(json.dumps(profile), encoding="utf-8")
+    payload = json.loads(manifest.read_text())
+    payload["gpu_pbd_static_container"]["report_sha256"] = report_sha
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
+
+    assert load_gpu_pbd_static_container_handoff(package, manifest).particle_count == 548
+
+
+def _write_gpu_pbd_transfer_pair_handoff(root: Path) -> tuple[Path, Path]:
+    package = root / "gpu_pbd_transfer_pair"
+    evidence = package / "evidence"
+    (package / "deps/source").mkdir(parents=True)
+    (package / "deps/target").mkdir(parents=True)
+    evidence.mkdir()
+    (package / "component.usda").write_text("#usda 1.0\n", encoding="utf-8")
+    (package / "deps/source/asset.usd").write_text("source", encoding="utf-8")
+    (package / "deps/target/asset.usd").write_text("target", encoding="utf-8")
+    candidate = {
+        "candidate_id": "c03",
+        "dwell_seconds": 3.0,
+        "rim_gap_m": 0.01,
+        "rim_offset_x_m": 0.0,
+        "tilt_deg": -115.0,
+    }
+    profile = package / "transfer_fixture_profile.json"
+    profile.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_transfer_fixture.v1",
+                "members": {
+                    "source": "/World/Transfer/Source",
+                    "target": "/World/Transfer/Target",
+                    "particles": "/World/Transfer/ParticleSet",
+                    "particle_system": "/World/Transfer/ParticleSystem",
+                },
+                "liquid_parameters": {"particle_count": 548},
+                "bounded_search": {"candidates": [candidate]},
+                "qualification": {
+                    "minimum_target_reception_ratio": 0.5,
+                    "required_cold_runs": 3,
+                    "spill_is_blocking": False,
+                },
+                "claim_boundary": "Prescribed transfer only; no robot claim.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    cold = {
+        "overall_status": "pass",
+        "particle_readback_attribute": "points",
+        "static_hold": {"minimum_source_ratio": 1.0},
+        "pour": {"particle_count": 548, "target_ratio": 0.95},
+        "performance": {"mean_rtx_fps": 80.0},
+        "hard_runtime_errors": [],
+    }
+    report = evidence / "gpu_pbd_transfer_admission_report.json"
+    report.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_transfer_admission.v1",
+                "overall_status": "pass",
+                "selected_candidate": candidate,
+                "cold_runs": [cold, cold, cold],
+                "promotion": {
+                    "allowed": True,
+                    "claim": "gpu_pbd_prescribed_transfer_pair",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    digest = sha256()
+    for item in sorted(p for p in (package / "deps").rglob("*") if p.is_file()):
+        digest.update(item.relative_to(package / "deps").as_posix().encode())
+        digest.update(b"\0")
+        digest.update(bytes.fromhex(_digest(item)))
+    manifest = evidence / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_transfer_pair_manifest.v1",
+                "package_id": "task02-cylinder-to-beaker.gpu-pbd-transfer.r1",
+                "overall_status": "pass",
+                "entrypoints": {
+                    "root_usd": "component.usda",
+                    "asset_entry_prim": "/World/Transfer",
+                },
+                "gpu_pbd_transfer_pair": {
+                    "status": "qualified",
+                    "profile": profile.name,
+                    "profile_sha256": _digest(profile),
+                    "report": str(report.relative_to(package)),
+                    "report_sha256": _digest(report),
+                    "component_sha256": _digest(package / "component.usda"),
+                    "dependency_tree_sha256": digest.hexdigest(),
+                    "particle_count": 548,
+                    "cold_runs": 3,
+                    "runtime": "isaac41",
+                    "selected_candidate": candidate,
+                },
+                "promotion": {
+                    "allowed": True,
+                    "claim": "gpu_pbd_prescribed_transfer_pair",
+                    "claim_boundary": "Prescribed transfer only; no robot claim.",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return package, manifest
+
+
+def test_loads_qualified_gpu_pbd_transfer_pair(tmp_path: Path) -> None:
+    package, manifest = _write_gpu_pbd_transfer_pair_handoff(tmp_path)
+
+    handoff = load_gpu_pbd_transfer_pair_handoff(package, manifest)
+
+    assert handoff.particle_count == 548
+    assert handoff.entry_prim == "/World/Transfer"
+    assert handoff.selected_candidate["tilt_deg"] == -115.0
+    assert handoff.component_usd == package / "component.usda"
+
+
+def test_gpu_pbd_transfer_pair_rejects_tampered_report(tmp_path: Path) -> None:
+    package, manifest = _write_gpu_pbd_transfer_pair_handoff(tmp_path)
+    (package / "evidence/gpu_pbd_transfer_admission_report.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
+
+    with pytest.raises(ConvertAssetHandoffError, match="report SHA-256"):
+        load_gpu_pbd_transfer_pair_handoff(package, manifest)

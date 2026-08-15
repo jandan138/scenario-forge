@@ -491,6 +491,26 @@ class ConvertAssetGPUPBDStaticContainerHandoff:
         )
 
 
+@dataclass(frozen=True)
+class ConvertAssetGPUPBDTransferPairHandoff:
+    """Qualified package-local prescribed GPU-PBD transfer pair."""
+
+    package_dir: Path
+    package_id: str
+    manifest_sha256: str
+    component_usd: Path
+    component_sha256: str
+    entry_prim: str
+    profile_path: Path
+    profile_sha256: str
+    qualification_report_path: str
+    qualification_report_sha256: str
+    dependency_tree_sha256: str
+    particle_count: int
+    selected_candidate: Mapping[str, Any]
+    claim_boundary: str
+
+
 def load_convert_asset_package_handoff(
     package_dir: str | Path,
     manifest_path: str | Path,
@@ -4445,12 +4465,14 @@ def load_gpu_pbd_static_container_handoff(
     profile = _load_strict_json_mapping(
         profile_path.read_bytes(), "GPU-PBD container profile"
     )
-    _require_value(
-        profile,
-        "schema_version",
+    profile_schema = _required_string(profile, "schema_version", "profile")
+    if profile_schema not in {
         "aan.gpu_pbd_static_container_profile.v1",
-        "profile",
-    )
+        "aan.gpu_pbd_static_container_profile.v2",
+    }:
+        raise ConvertAssetHandoffError(
+            "profile.schema_version is not a supported GPU-PBD container profile"
+        )
     _require_value(profile, "role", "gpu_pbd_static_container", "profile")
     _require_value(profile, "claim", "gpu_pbd_static_container", "profile")
     _require_value(profile, "entrypoint", root_usd.name, "profile")
@@ -4518,13 +4540,18 @@ def load_gpu_pbd_static_container_handoff(
         assert isinstance(hold, Mapping)
         assert isinstance(performance, Mapping)
         final = hold.get("final")
+        hold_gate = (
+            hold.get("maximum_outside", 11) <= 10
+            if profile_schema == "aan.gpu_pbd_static_container_profile.v2"
+            else hold.get("maximum_below_support") == 0
+        )
         valid = (
             run.get("overall_status") == "pass"
             and run.get("particle_readback_attribute") == "points"
             and semantics.get("fluid") is True
             and semantics.get("self_collision") is True
             and hold.get("minimum_inside_ratio", 0.0) >= 0.95
-            and hold.get("maximum_below_support") == 0
+            and hold_gate
             and isinstance(final, Mapping)
             and final.get("particle_count") == 548
             and performance.get("mean_rtx_fps", 0.0) >= 40.0
@@ -4568,4 +4595,182 @@ def load_gpu_pbd_static_container_handoff(
         particle_count=particle_count,
         collision_strategy=collision_strategy,
         claim_boundary=_required_string(profile, "claim_boundary", "profile"),
+    )
+
+
+def load_gpu_pbd_transfer_pair_handoff(
+    package_dir: str | Path,
+    manifest_path: str | Path,
+) -> ConvertAssetGPUPBDTransferPairHandoff:
+    """Validate a ConvertAsset prescribed-transfer pair without simulator imports."""
+
+    package = Path(package_dir).resolve()
+    external_manifest = Path(manifest_path).resolve()
+    embedded_manifest = package / "evidence/manifest.json"
+    if not package.is_dir() or not embedded_manifest.is_file():
+        raise ConvertAssetHandoffError("GPU-PBD transfer package is incomplete")
+    if not external_manifest.is_file():
+        raise ConvertAssetHandoffError("GPU-PBD transfer manifest is missing")
+    if external_manifest.read_bytes() != embedded_manifest.read_bytes():
+        raise ConvertAssetHandoffError(
+            "external and embedded GPU-PBD transfer manifests do not match"
+        )
+    manifest = _load_strict_json_mapping(
+        embedded_manifest.read_bytes(), "GPU-PBD transfer manifest"
+    )
+    _require_value(
+        manifest,
+        "schema_version",
+        "aan.gpu_pbd_transfer_pair_manifest.v1",
+        "manifest",
+    )
+    _require_value(manifest, "overall_status", "pass", "manifest")
+    promotion = _required_mapping(manifest, "promotion", "manifest")
+    if promotion.get("allowed") is not True:
+        raise ConvertAssetHandoffError("GPU-PBD transfer promotion is not allowed")
+    _require_value(
+        promotion,
+        "claim",
+        "gpu_pbd_prescribed_transfer_pair",
+        "manifest.promotion",
+    )
+    package_id = _required_string(manifest, "package_id", "manifest")
+    entrypoints = _required_mapping(manifest, "entrypoints", "manifest")
+    component = _safe_package_file(
+        package,
+        _required_string(entrypoints, "root_usd", "manifest.entrypoints"),
+        "root_usd",
+    )
+    entry_prim = _required_string(
+        entrypoints, "asset_entry_prim", "manifest.entrypoints"
+    )
+    if entry_prim != "/World/Transfer":
+        raise ConvertAssetHandoffError("GPU-PBD transfer entry prim must be /World/Transfer")
+
+    contract = _required_mapping(manifest, "gpu_pbd_transfer_pair", "manifest")
+    _require_value(contract, "status", "qualified", "gpu_pbd_transfer_pair")
+    if contract.get("particle_count") != 548 or contract.get("cold_runs") != 3:
+        raise ConvertAssetHandoffError(
+            "GPU-PBD transfer contract must bind 548 particles and three cold runs"
+        )
+    component_sha = _required_sha256(
+        contract, "component_sha256", "gpu_pbd_transfer_pair"
+    )
+    if _file_sha256(component) != component_sha:
+        raise ConvertAssetHandoffError("GPU-PBD component SHA-256 does not match manifest")
+    profile_path = _safe_package_file(
+        package,
+        _required_string(contract, "profile", "gpu_pbd_transfer_pair"),
+        "profile",
+    )
+    profile_sha = _required_sha256(
+        contract, "profile_sha256", "gpu_pbd_transfer_pair"
+    )
+    if _file_sha256(profile_path) != profile_sha:
+        raise ConvertAssetHandoffError("GPU-PBD profile SHA-256 does not match manifest")
+    report_path = _safe_package_file(
+        package,
+        _required_string(contract, "report", "gpu_pbd_transfer_pair"),
+        "report",
+    )
+    report_sha = _required_sha256(
+        contract, "report_sha256", "gpu_pbd_transfer_pair"
+    )
+    if _file_sha256(report_path) != report_sha:
+        raise ConvertAssetHandoffError("GPU-PBD report SHA-256 does not match manifest")
+
+    deps = package / "deps"
+    if not deps.is_dir():
+        raise ConvertAssetHandoffError("GPU-PBD transfer dependency closure is missing")
+    digest = sha256()
+    for item in sorted(candidate for candidate in deps.rglob("*") if candidate.is_file()):
+        digest.update(item.relative_to(deps).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(bytes.fromhex(_file_sha256(item)))
+    dependency_sha = _required_sha256(
+        contract, "dependency_tree_sha256", "gpu_pbd_transfer_pair"
+    )
+    if digest.hexdigest() != dependency_sha:
+        raise ConvertAssetHandoffError(
+            "GPU-PBD dependency tree SHA-256 does not match manifest"
+        )
+
+    profile = _load_strict_json_mapping(
+        profile_path.read_bytes(), "GPU-PBD transfer profile"
+    )
+    _require_value(
+        profile,
+        "schema_version",
+        "aan.gpu_pbd_transfer_fixture.v1",
+        "profile",
+    )
+    if profile.get("liquid_parameters", {}).get("particle_count") != 548:
+        raise ConvertAssetHandoffError("GPU-PBD transfer profile particle_count must be 548")
+    qualification = _required_mapping(profile, "qualification", "profile")
+    if (
+        qualification.get("minimum_target_reception_ratio") != 0.5
+        or qualification.get("required_cold_runs") != 3
+        or qualification.get("spill_is_blocking") is not False
+    ):
+        raise ConvertAssetHandoffError("GPU-PBD transfer qualification contract differs")
+    selected = _required_mapping(
+        contract, "selected_candidate", "gpu_pbd_transfer_pair"
+    )
+    candidates = profile.get("bounded_search", {}).get("candidates", [])
+    if selected not in candidates:
+        raise ConvertAssetHandoffError("selected transfer candidate is not in the profile")
+
+    report = _load_strict_json_mapping(
+        report_path.read_bytes(), "GPU-PBD transfer report"
+    )
+    cold_runs = report.get("cold_runs")
+    report_promotion = report.get("promotion")
+    if (
+        report.get("overall_status") != "pass"
+        or not isinstance(report_promotion, Mapping)
+        or report_promotion.get("allowed") is not True
+        or report_promotion.get("claim") != "gpu_pbd_prescribed_transfer_pair"
+        or report.get("selected_candidate") != dict(selected)
+        or not isinstance(cold_runs, list)
+        or len(cold_runs) != 3
+    ):
+        raise ConvertAssetHandoffError("GPU-PBD transfer report is not promotable")
+    for run in cold_runs:
+        if not isinstance(run, Mapping):
+            raise ConvertAssetHandoffError("GPU-PBD transfer cold run is incomplete")
+        hold = run.get("static_hold")
+        pour = run.get("pour")
+        performance = run.get("performance")
+        valid = (
+            run.get("overall_status") == "pass"
+            and run.get("particle_readback_attribute") == "points"
+            and isinstance(hold, Mapping)
+            and hold.get("minimum_source_ratio", 0.0) >= 0.95
+            and isinstance(pour, Mapping)
+            and pour.get("particle_count") == 548
+            and pour.get("target_ratio", 0.0) >= 0.5
+            and isinstance(performance, Mapping)
+            and performance.get("mean_rtx_fps", 0.0) >= 40.0
+            and run.get("hard_runtime_errors") == []
+        )
+        if not valid:
+            raise ConvertAssetHandoffError("GPU-PBD transfer cold run failed a required gate")
+
+    return ConvertAssetGPUPBDTransferPairHandoff(
+        package_dir=package,
+        package_id=package_id,
+        manifest_sha256=_file_sha256(embedded_manifest),
+        component_usd=component,
+        component_sha256=component_sha,
+        entry_prim=entry_prim,
+        profile_path=profile_path,
+        profile_sha256=profile_sha,
+        qualification_report_path=report_path.relative_to(package).as_posix(),
+        qualification_report_sha256=report_sha,
+        dependency_tree_sha256=dependency_sha,
+        particle_count=548,
+        selected_candidate=dict(selected),
+        claim_boundary=_required_string(
+            promotion, "claim_boundary", "manifest.promotion"
+        ),
     )

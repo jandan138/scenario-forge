@@ -13,6 +13,7 @@ import yaml
 from scripts.ebench.render_genmanip_initial_preview import (
     _entrance_side_from_wall_coverage,
     _opposite_room_corner_azimuths,
+    _preview_timing,
     _room_cutaway_sides,
     _runtime_prim,
     _task_data_with_preserved_articulation_parts,
@@ -35,6 +36,10 @@ from tests.test_ebench_genmanip_export import (
 
 _TABLE_RUNTIME_ID = "00000000000000000000000000000000"
 _TASK_RUNTIME_IDS = ["obj_conical_bottle03", "obj_graduated_cylinder_03"]
+
+
+def test_preview_timing_accepts_explicit_zero_action_smoke_steps() -> None:
+    assert _preview_timing({"zero_action_warmup_steps": 960}) == (960, True)
 
 
 def test_preview_recovery_keeps_genmanip_articulation_parts_active() -> None:
