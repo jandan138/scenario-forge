@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Overlay the qualified Task 02 r8.3 candidate on the generated task page."""
+"""Overlay the qualified Task 02 r8.7 candidate on the generated task page."""
 
 from __future__ import annotations
 
@@ -13,14 +13,14 @@ def publish(index: Path, image: Path) -> Path:
     index = index.resolve()
     image = image.resolve()
     html = index.read_text(encoding="utf-8")
-    asset = index.parent / "assets/task02-r83-scene-overview.png"
+    asset = index.parent / "assets/task02-r87-scene-overview.png"
     asset.parent.mkdir(parents=True, exist_ok=True)
     if image != asset.resolve():
         shutil.copy2(image, asset)
 
     r8_button = (
         '<button class="version" data-version="r8" aria-pressed="true">'
-        "r8.3 · GPU-PBD 倒液候选包</button>"
+        "r8.7 · 动态装液起始候选包</button>"
     )
     if 'data-version="r8"' not in html:
         html = html.replace(
@@ -49,15 +49,16 @@ def publish(index: Path, image: Path) -> Path:
             found_task02 = True
             r8_rail = (
                 '<a class="evidence-rail" data-release-version="r8" '
-                'href="assets/task02-r83-scene-overview.png">'
-                '<img src="assets/task02-r83-scene-overview.png" '
-                'alt="Task 02 r8.3 eBench 初始场景总览" '
+                'href="assets/task02-r87-scene-overview.png">'
+                '<img src="assets/task02-r87-scene-overview.png" '
+                'alt="Task 02 r8.7 eBench 初始场景总览" '
                 'loading="eager"></a>'
             )
             r8_release = (
-                '<span data-release-version="r8">Task 02 r8.3 GPU-PBD 倒液候选包 · '
-                "正确方向预设轨迹转移三次冷启动 94%+；eBench 加载、复位与 "
-                "8 秒空动作运行通过；机器人倒液与 benchmark 未验证</span>"
+                '<span data-release-version="r8">Task 02 r8.7 动态装液起始候选包 · '
+                "580 粒子三次动态冷启动均保持在量筒内；eBench 加载、复位与 "
+                "8 秒零动作运行通过；机器人完整 3/3 倒液、液体 metric 与 "
+                "benchmark 未验证</span>"
             )
             existing_rail = re.search(
                 r'<a class="evidence-rail" data-release-version="r8".*?</a>',
@@ -72,12 +73,19 @@ def publish(index: Path, image: Path) -> Path:
             if existing_rail is not None and existing_release is not None:
                 card = card.replace(existing_rail.group(0), r8_rail, 1)
                 card = card.replace(existing_release.group(0), r8_release, 1)
-                if "scientific_workbench_task02_r83_20260815" not in card:
-                    card = card.replace("<summary>4 packages</summary>", "<summary>5 packages</summary>", 1)
+                if "scientific_workbench_task02_r87_20260816" not in card:
+                    card = re.sub(
+                        r"<summary>(\d+) packages</summary>",
+                        lambda item: (
+                            f"<summary>{int(item.group(1)) + 1} packages</summary>"
+                        ),
+                        card,
+                        count=1,
+                    )
                     card = card.replace(
                         "<ul>",
-                        '<ul><li><a href="assets/task02-r83-scene-overview.png">'
-                        "scientific_workbench_task02_r83_20260815 — "
+                        '<ul><li><a href="assets/task02-r87-scene-overview.png">'
+                        "scientific_workbench_task02_r87_20260816 — "
                         "scientific_environment_code_room_wet_chemistry_v2</a></li>",
                         1,
                     )

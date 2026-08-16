@@ -231,6 +231,8 @@ def test_task_directory_html_uses_responsive_cards_and_status_filters(tmp_path: 
     assert 'class="evidence-rail"' in html
     assert 'class="coverage-matrix"' in html
     assert "@media(max-width:760px)" in html
+    assert ".card-body{min-width:0}" in html
+    assert ".release-variants a{overflow-wrap:anywhere}" in html
     assert "function applyFilter" in html
 
 

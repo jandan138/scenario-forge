@@ -51,6 +51,10 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-08-16 Task 02 r8.7 Dynamic-loaded-start Package](records/2026-08-16-task02-r87-dynamic-loaded-start.md)
+- [2026-08-16 Task 02 r8.5 40% Liquid Package](records/2026-08-16-task02-r85-40pct-liquid-package.md)
+- [2026-08-15 Task 02 r8.4 World-baked PBD and Preloaded Support](records/2026-08-15-task02-r84-world-baked-pbd-and-preloaded-support.md)
+- [2026-08-11 Cold-output OSS Archive](records/2026-08-11-cold-output-oss-archive.md)
 - [2026-07-03 Bootstrap Decisions](records/2026-07-03-bootstrap-decisions.md)
 - [2026-07-04 Phase 10.x EOS Environment and Gates](records/2026-07-04-phase10x-eos-environment-and-gates.md)
 - [2026-07-05 Phase 12 Registry / Viewer / Handoff / Policy Evidence](records/2026-07-05-phase12-registry-viewer-handoff-policy.md)
