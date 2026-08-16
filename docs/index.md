@@ -52,6 +52,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-08-16 Scientific Workbench r9 Rich Tabletop](records/2026-08-16-scientific-workbench-r9-rich-tabletop.md)
 - [2026-08-16 Task 02 r8.7 Dynamic-loaded-start Package](records/2026-08-16-task02-r87-dynamic-loaded-start.md)
 - [2026-08-16 Task 02 r8.5 40% Liquid Package](records/2026-08-16-task02-r85-40pct-liquid-package.md)
 - [2026-08-15 Task 02 r8.4 World-baked PBD and Preloaded Support](records/2026-08-15-task02-r84-world-baked-pbd-and-preloaded-support.md)

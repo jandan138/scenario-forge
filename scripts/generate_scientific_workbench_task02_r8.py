@@ -19,11 +19,20 @@ from scenario_forge.adapters.convert_asset import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_R7 = REPO_ROOT / "outputs/scientific_workbench_asset_expansion_20260813_r7_full/packages/scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
-DEFAULT_TRANSFER = Path("/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task02_gpu_pbd_dynamic_loaded_start_20260816_r59/final_package/task02_cylinder_to_beaker_gpu_pbd_transfer_pair_r5")
+DEFAULT_R7 = (
+    REPO_ROOT
+    / "outputs/scientific_workbench_asset_expansion_20260813_r7_full/packages/scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
+)
+DEFAULT_TRANSFER = Path(
+    "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task02_gpu_pbd_dynamic_loaded_start_20260816_r59/final_package/task02_cylinder_to_beaker_gpu_pbd_transfer_pair_r5"
+)
 DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_task02_r87_20260816"
-SCENARIO_ID = "scientific_workbench_r87_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
-R7_SCENARIO_ID = "scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
+SCENARIO_ID = (
+    "scientific_workbench_r87_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
+)
+R7_SCENARIO_ID = (
+    "scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
+)
 
 
 def _sha(path: Path) -> str:
@@ -78,9 +87,7 @@ def _number(value: float) -> str:
     return f"{value:.9g}"
 
 
-def _source_matrix(
-    xyz: list[float], wxyz: list[float]
-) -> list[list[float]]:
+def _source_matrix(xyz: list[float], wxyz: list[float]) -> list[list[float]]:
     w, x, y, z = wxyz
     return [
         [1 - 2 * (y * y + z * z), 2 * (x * y + z * w), 2 * (x * z - y * w)],
@@ -124,10 +131,9 @@ def _composed_scene_usda(
         source_wxyz=source_wxyz,
     )
     point_text = ", ".join(
-        f"({_number(point[0])}, {_number(point[1])}, {_number(point[2])})"
-        for point in translated
+        f"({_number(point[0])}, {_number(point[1])}, {_number(point[2])})" for point in translated
     )
-    return f'''#usda 1.0
+    return f"""#usda 1.0
 (
     defaultPrim = "World"
     metersPerUnit = 1
@@ -192,20 +198,21 @@ over "physicsScene"
     token physxScene:solverType = "TGS"
     uint physxScene:timeStepsPerSecond = 120
 }}
-'''
+"""
 
 
-def _rewrite_ebench_config(source: Path, *, particle_count: int) -> dict[str, Any]:
+def _rewrite_ebench_config(
+    source: Path, *, particle_count: int, scenario_id: str = SCENARIO_ID
+) -> dict[str, Any]:
     config = yaml.safe_load(source.read_text(encoding="utf-8"))
     evaluations = config.get("evaluation_configs", [])
     if not evaluations:
-        evaluations = [{"task_name": f"scenario_forge/{SCENARIO_ID}"}]
+        evaluations = [{"task_name": f"scenario_forge/{scenario_id}"}]
         config["evaluation_configs"] = evaluations
     for item in evaluations:
-        item["task_name"] = f"scenario_forge/{SCENARIO_ID}"
+        item["task_name"] = f"scenario_forge/{scenario_id}"
         item["usd_name"] = (
-            f"collected_packages/{SCENARIO_ID}/assets/scene_usds/"
-            f"scenario_forge/{SCENARIO_ID}/scene"
+            f"collected_packages/{scenario_id}/assets/scene_usds/scenario_forge/{scenario_id}/scene"
         )
         item["physics_dt"] = 1.0 / 120.0
         item["rendering_dt"] = 1.0 / 60.0
@@ -215,7 +222,7 @@ def _rewrite_ebench_config(source: Path, *, particle_count: int) -> dict[str, An
         cameras = item.get("domain_randomization", {}).get("cameras")
         if isinstance(cameras, dict):
             cameras["config_path"] = (
-                f"collected_packages/{SCENARIO_ID}/cameras/fixed_camera_lift2.yml"
+                f"collected_packages/{scenario_id}/cameras/fixed_camera_lift2.yml"
             )
         item["prototype_fluid"] = {
             "status": "qualified_dynamic_loaded_start",
@@ -227,27 +234,35 @@ def _rewrite_ebench_config(source: Path, *, particle_count: int) -> dict[str, An
         item["preprocess_config"] = [
             entry
             for entry in item.get("preprocess_config", [])
-            if entry.get("type")
-            not in {"set_robot_contact_offset", "set_robot_rest_offset"}
+            if entry.get("type") not in {"set_robot_contact_offset", "set_robot_rest_offset"}
         ]
         goal = item.get("generation_config", {}).get("goal", [])
         for level1 in goal:
             for level2 in level1 if isinstance(level1, list) else []:
                 for predicate in level2 if isinstance(level2, list) else []:
-                    if isinstance(predicate, dict) and predicate.get("obj1_uid") == "obj_graduated_cylinder":
+                    if (
+                        isinstance(predicate, dict)
+                        and predicate.get("obj1_uid") == "obj_graduated_cylinder"
+                    ):
                         predicate["x_range"] = [0.05, 0.13]
                         predicate["y_range"] = [-0.21, -0.13]
     return config
 
 
 def _rewrite_episode(
-    source: Path, *, source_xyz: list[float], source_wxyz: list[float]
+    source: Path,
+    *,
+    source_xyz: list[float],
+    source_wxyz: list[float],
+    scenario_id: str = SCENARIO_ID,
+    base_scenario_id: str = R7_SCENARIO_ID,
 ) -> dict[str, Any]:
     episode = json.loads(source.read_text(encoding="utf-8"))
+
     def replace(value: Any) -> Any:
         if isinstance(value, str):
-            return value.replace(R7_SCENARIO_ID, SCENARIO_ID).replace(
-                f"/World/{SCENARIO_ID}/", "/World/_scene/"
+            return value.replace(base_scenario_id, scenario_id).replace(
+                f"/World/{scenario_id}/", "/World/_scene/"
             )
         if isinstance(value, list):
             return [replace(item) for item in value]
@@ -279,13 +294,16 @@ def _rewrite_episode(
         if isinstance(asset_path, str) and asset_path:
             rewritten = asset_path
             item["path"] = rewritten.replace(
-                f"assets/scene_usds/scenario_forge/{SCENARIO_ID}/source_bundle/",
-                f"assets/scene_usds/scenario_forge/{SCENARIO_ID}/source_bundle/r7_scene/source_bundle/",
+                f"assets/scene_usds/scenario_forge/{scenario_id}/source_bundle/",
+                f"assets/scene_usds/scenario_forge/{scenario_id}/source_bundle/r7_scene/source_bundle/",
             )
     for predicate_group in task_data.get("goal", []):
         for predicates in predicate_group if isinstance(predicate_group, list) else []:
             for predicate in predicates if isinstance(predicates, list) else []:
-                if isinstance(predicate, dict) and predicate.get("obj1_uid") == "obj_graduated_cylinder":
+                if (
+                    isinstance(predicate, dict)
+                    and predicate.get("obj1_uid") == "obj_graduated_cylinder"
+                ):
                     predicate["x_range"] = [0.05, 0.13]
                     predicate["y_range"] = [-0.21, -0.13]
     contract = task_data.get("scenario_forge_runtime_contract", {})
@@ -309,10 +327,12 @@ def _render_request(
     scene: Path,
     camera: Path,
     source_bundle: Path,
+    scenario_id: str = SCENARIO_ID,
+    release: str = "r8.7",
 ) -> dict[str, Any]:
     request = yaml.safe_load(source.read_text(encoding="utf-8"))
-    request["package_id"] = SCENARIO_ID
-    request["task_name"] = f"scenario_forge/{SCENARIO_ID}"
+    request["package_id"] = scenario_id
+    request["task_name"] = f"scenario_forge/{scenario_id}"
     request["episode_name"] = "002"
     request["zero_action_warmup_steps"] = 960
     entrance_view = request.get("views", {}).get("room_entrance_eye_level")
@@ -337,23 +357,23 @@ def _render_request(
         }
     request["inputs"] = inputs
     digest_payload = json.dumps(
-        {"package_id": SCENARIO_ID, "inputs": inputs},
+        {"package_id": scenario_id, "inputs": inputs},
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
     request["input_digest"] = "sha256:" + sha256(digest_payload).hexdigest()
     request["claim_boundary"] = (
-        "r8.7 initial-scene visual evidence only; not robot transfer, "
+        f"{release} initial-scene visual evidence only; not robot transfer, "
         "FPS, policy, or benchmark success."
     )
     return request
 
 
-def _vr_config(*, particle_count: int) -> str:
+def _vr_config(*, particle_count: int, scenario_id: str = SCENARIO_ID) -> str:
     return f'''# Merge this TASKS entry into the VR teleop task registry.
 TASKS = {{
-    "{SCENARIO_ID}": {{
-        "scene_usd_file_path": {{"scene1": str(_ASSETS_DIR / "scenes/{SCENARIO_ID}/scene.usd")}},
+    "{scenario_id}": {{
+        "scene_usd_file_path": {{"scene1": str(_ASSETS_DIR / "scenes/{scenario_id}/scene.usd")}},
         "obj_prim_list": [
             "/World/_scene/fluid_runtime/Source",
             "/World/_scene/fluid_runtime/Target",
@@ -381,7 +401,16 @@ TASKS = {{
 '''
 
 
-def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
+def build(
+    *,
+    r7_package: Path,
+    transfer_package: Path,
+    out: Path,
+    scenario_id: str = SCENARIO_ID,
+    base_scenario_id: str = R7_SCENARIO_ID,
+    release: str = "r8.7",
+    supersedes: str = "r8.6",
+) -> Path:
     r7_package = r7_package.resolve()
     transfer_package = transfer_package.resolve()
     out = out.resolve()
@@ -393,13 +422,9 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         transfer_package, transfer_manifest_path
     )
     transfer_handoff = dynamic_handoff.transfer
-    transfer_profile = json.loads(
-        transfer_handoff.profile_path.read_text(encoding="utf-8")
-    )
+    transfer_profile = json.loads(transfer_handoff.profile_path.read_text(encoding="utf-8"))
     liquid_profile = transfer_profile["liquid_parameters"]
-    particle_state = json.loads(
-        dynamic_handoff.particle_state_path.read_text(encoding="utf-8")
-    )
+    particle_state = json.loads(dynamic_handoff.particle_state_path.read_text(encoding="utf-8"))
     particle_points = particle_state["positions"]
     if len(particle_points) != transfer_handoff.particle_count:
         raise ValueError("source-local particle state does not match qualified particle count")
@@ -413,17 +438,11 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
     ]
     source_wxyz = [float(value) for value in support_pose["wxyz"]]
     r7_scene = _r7_ebench_scene(r7_package)
-    collected_scene_dir = (
-        out
-        / "ebench/assets/scene_usds/scenario_forge"
-        / SCENARIO_ID
-    )
+    collected_scene_dir = out / "ebench/assets/scene_usds/scenario_forge" / scenario_id
     source_bundle = collected_scene_dir / "source_bundle"
     _copy(r7_scene.parent, source_bundle / "r7_scene")
     _copy(transfer_package, source_bundle / "transfer")
-    ebench_bundle = (
-        f"assets/scene_usds/scenario_forge/{SCENARIO_ID}/source_bundle"
-    )
+    ebench_bundle = f"assets/scene_usds/scenario_forge/{scenario_id}/source_bundle"
     _write(
         out / "ebench/scene.usd",
         _composed_scene_usda(
@@ -431,9 +450,7 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
             particle_points,
             source_xyz=source_xyz,
             source_wxyz=source_wxyz,
-        ).replace(
-            "@deps/transfer/", f"@{ebench_bundle}/transfer/"
-        ),
+        ).replace("@deps/transfer/", f"@{ebench_bundle}/transfer/"),
     )
     _write(
         out / "vr/scene.usd",
@@ -442,15 +459,14 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
             particle_points,
             source_xyz=source_xyz,
             source_wxyz=source_wxyz,
-        ).replace(
-            "@deps/transfer/", f"@../ebench/{ebench_bundle}/transfer/"
-        ),
+        ).replace("@deps/transfer/", f"@../ebench/{ebench_bundle}/transfer/"),
     )
 
     r7_ebench = r7_package / "adapters/ebench/genmanip"
     config = _rewrite_ebench_config(
         r7_ebench / "tasks/config.yaml",
         particle_count=transfer_handoff.particle_count,
+        scenario_id=scenario_id,
     )
     _yaml(out / "ebench/config.yaml", config)
     _yaml(out / "ebench/tasks/config.yaml", config)
@@ -462,9 +478,7 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
             particle_points,
             source_xyz=source_xyz,
             source_wxyz=source_wxyz,
-        ).replace(
-            "@deps/transfer/", "@source_bundle/transfer/"
-        ),
+        ).replace("@deps/transfer/", "@source_bundle/transfer/"),
     )
     _write(
         collected_scene_dir / "scene_static_preview.usda",
@@ -473,22 +487,18 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
             particle_points,
             source_xyz=source_xyz,
             source_wxyz=source_wxyz,
-        )
-        .replace("@deps/transfer/", "@source_bundle/transfer/"),
+        ).replace("@deps/transfer/", "@source_bundle/transfer/"),
     )
-    r7_episode = next(
-        (r7_ebench / "tasks/scenario_forge").glob("*/002/episode_metadata.json")
-    )
-    episode_path = (
-        out
-        / "ebench/tasks/scenario_forge"
-        / SCENARIO_ID
-        / "002/episode_metadata.json"
-    )
+    r7_episode = next((r7_ebench / "tasks/scenario_forge").glob("*/002/episode_metadata.json"))
+    episode_path = out / "ebench/tasks/scenario_forge" / scenario_id / "002/episode_metadata.json"
     _json(
         episode_path,
         _rewrite_episode(
-            r7_episode, source_xyz=source_xyz, source_wxyz=source_wxyz
+            r7_episode,
+            source_xyz=source_xyz,
+            source_wxyz=source_wxyz,
+            scenario_id=scenario_id,
+            base_scenario_id=base_scenario_id,
         ),
     )
     r7_collected_manifest = json.loads(
@@ -543,15 +553,13 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         package_manifest,
         {
             "schema_version": "scenario-forge-genmanip-collected-package/v0.1",
-            "package_id": SCENARIO_ID,
-            "claim_scope": "r87_dynamic_loaded_start_candidate",
+            "package_id": scenario_id,
+            "claim_scope": f"{release.replace('.', '')}_dynamic_loaded_start_candidate",
             "entrypoints": {
-                "scene_usd": (
-                    f"assets/scene_usds/scenario_forge/{SCENARIO_ID}/scene.usda"
-                ),
+                "scene_usd": (f"assets/scene_usds/scenario_forge/{scenario_id}/scene.usda"),
                 "task_config": "tasks/config.yaml",
                 "episode_metadata": (
-                    f"tasks/scenario_forge/{SCENARIO_ID}/002/episode_metadata.json"
+                    f"tasks/scenario_forge/{scenario_id}/002/episode_metadata.json"
                 ),
                 "camera_config": "cameras/fixed_camera_lift2.yml",
                 "render_request": "evidence/render_request.yaml",
@@ -573,33 +581,33 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
             scene=collected_scene_dir / "scene.usda",
             camera=out / "ebench/cameras/fixed_camera_lift2.yml",
             source_bundle=source_bundle,
+            scenario_id=scenario_id,
+            release=release,
         ),
     )
     _write(
         out / "vr/config.py",
-        _vr_config(particle_count=transfer_handoff.particle_count),
+        _vr_config(
+            particle_count=transfer_handoff.particle_count,
+            scenario_id=scenario_id,
+        ),
     )
+    finalize_vr_review_adapter(out, scenario_id=scenario_id, release=release)
     _copy(r7_package / "scenario.yaml", out / "scenario_r7_semantics.yaml")
 
     manifest = {
-        "schema_version": "scenario-forge-task02-r87-handoff/v0.1",
-        "scenario_id": SCENARIO_ID,
-        "release": "r8.7",
-        "supersedes": "r8.6",
+        "schema_version": "scenario-forge-task02-dynamic-loaded-handoff/v0.2",
+        "scenario_id": scenario_id,
+        "release": release,
+        "supersedes": supersedes,
         "release_status": "physics_qualified_candidate",
         "score_ceiling": 0.60,
         "liquid_metrics_active": False,
         "particle_count": transfer_handoff.particle_count,
         "liquid_profile": {
-            "target_settled_fill_ratio": liquid_profile.get(
-                "target_settled_fill_ratio"
-            ),
-            "settled_fill_ratio_tolerance": liquid_profile.get(
-                "settled_fill_ratio_tolerance"
-            ),
-            "particle_parameter_selection": liquid_profile.get(
-                "particle_parameter_selection"
-            ),
+            "target_settled_fill_ratio": liquid_profile.get("target_settled_fill_ratio"),
+            "settled_fill_ratio_tolerance": liquid_profile.get("settled_fill_ratio_tolerance"),
+            "particle_parameter_selection": liquid_profile.get("particle_parameter_selection"),
             "appearance": liquid_profile.get("appearance"),
         },
         "transfer_package_id": transfer_handoff.package_id,
@@ -608,12 +616,8 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         "dynamic_loaded_start": {
             "contract_sha256": dynamic_handoff.contract_sha256,
             "particle_state_sha256": dynamic_handoff.particle_state_sha256,
-            "qualification_report_sha256": (
-                dynamic_handoff.qualification_report_sha256
-            ),
-            "support_plane_to_entry_root": dict(
-                dynamic_handoff.support_plane_to_entry_root
-            ),
+            "qualification_report_sha256": (dynamic_handoff.qualification_report_sha256),
+            "support_plane_to_entry_root": dict(dynamic_handoff.support_plane_to_entry_root),
             "maximum_outside_source_before_lift": (
                 dynamic_handoff.maximum_outside_source_before_lift
             ),
@@ -622,7 +626,7 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         "entrypoints": {"ebench": "ebench/scene.usd", "vr": "vr/scene.usd"},
         "configs": {"ebench": "ebench/config.yaml", "vr": "vr/config.py"},
         "composition": {
-            "background": "r7 modern wet chemistry Code-as-Room",
+            "background": f"{release} modern wet chemistry Code-as-Room rich tabletop",
             "table_m": [2.0, 0.8, 0.755],
             "robot": "manip/lift2/R5a_isaac41_vr600_v1",
             "transfer_component_translation_xyz_m": [-0.16, -0.17, 0.755],
@@ -647,7 +651,7 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         out / "evidence/product_smoke/report.json",
         {
             "schema_version": "scenario-forge-product-smoke-observation/v0.1",
-            "scenario_id": SCENARIO_ID,
+            "scenario_id": scenario_id,
             "runtime": "Isaac Sim 4.1 + GenManip 6ff55ed",
             "gpu": "NVIDIA GeForce RTX 4090",
             "requested_physics_rate_hz": 120,
@@ -670,14 +674,14 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
     )
     _write(
         out / "README_zh.md",
-        f"""# Task 02 r8.7 动态装液起始任务包
+        f"""# Task 02 {release} 动态装液起始任务包
 
-这是“250 mL 量筒 → 325 mL 烧杯”的 r8.7 候选包。它包含 r7 现代湿化学房间、标准工作台、eBench 双臂配置，以及由 ConvertAsset 交付的 {transfer_handoff.particle_count} 个 GPU-PBD 粒子和两个 source-derived convexDecomposition 容器。液体沿用 0812 的轻量粒子参数和蓝色 PreviewSurface。量筒先在 755 mm 支撑面自然落稳，液体再以量筒入口根局部坐标预沉降；Scenario Forge 用同一实测姿态烘焙容器与粒子世界坐标，不再使用旧版硬编码高度补偿。
+这是“250 mL 量筒 → 325 mL 烧杯”的 {release} 候选包。它包含现代湿化学房间、标准工作台、eBench 双臂配置、远侧两翼动态桌面道具，以及由 ConvertAsset 交付的 {transfer_handoff.particle_count} 个 GPU-PBD 粒子和两个 source-derived convexDecomposition 容器。液体沿用 0812 的轻量粒子参数和蓝色 PreviewSurface。量筒先在 755 mm 支撑面自然落稳，液体再以量筒入口根局部坐标预沉降；Scenario Forge 用同一实测姿态烘焙容器与粒子世界坐标，不再使用旧版硬编码高度补偿。
 
 - eBench：打开 `ebench/scene.usd`，使用 `ebench/config.yaml`。
 - VR：打开 `vr/scene.usd`，合并 `vr/config.py`。
 - ConvertAsset 已证明三次动态带液冷启动均为 580/580 粒子留在量筒内，并保留原固定运动轨迹转移证据；具体数值以随包 manifest/report 为准。
-- r8.5/r8.6 仍保留作历史证据；r8.7 只替代它们的初始化方式。
+- 旧版本仍保留作历史证据；{release} 不删除或篡改既有证据。
 - 这不等于机器人已经成功抓取和倒液；eBench 液体 metric 尚未资格化，因此液体指标仍不计分，任务可计分上限保持 60%。
 - `evidence/product_smoke/report.json` 只记录 eBench 加载、复位和零动作 8 秒检查，不扩展为策略或 benchmark 结论。
 """,
@@ -693,18 +697,73 @@ def refresh_hashes(out: Path) -> None:
     _write(out / "SHA256SUMS", "\n".join(closure))
 
 
-def finalize_product_smoke(out: Path) -> dict[str, Any]:
+def finalize_vr_review_adapter(
+    out: Path,
+    *,
+    scenario_id: str | None = None,
+    release: str | None = None,
+) -> dict[str, Any]:
+    """Make the custom liquid VR scene a self-contained USD+config review adapter."""
+
+    out = out.resolve()
+    if scenario_id is None or release is None:
+        package_manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+        scenario_id = str(package_manifest["scenario_id"])
+        release = str(package_manifest["release"])
+    source_bundle = out / "ebench/assets/scene_usds/scenario_forge" / scenario_id / "source_bundle"
+    destination = out / "vr/deps"
+    _copy(source_bundle, destination)
+    scene_path = out / "vr/scene.usd"
+    scene = scene_path.read_text(encoding="utf-8")
+    old_prefix = f"@../ebench/assets/scene_usds/scenario_forge/{scenario_id}/source_bundle/"
+    scene = scene.replace(old_prefix, "@deps/")
+    if "@../ebench/" in scene or "@/" in scene or "@file:" in scene:
+        raise ValueError("VR review scene retains a non-package asset reference")
+    _write(scene_path, scene)
+    _copy(out / "vr/config.py", out / "vr/task_config.py")
+    parity = {
+        "schema_version": "scenario-forge-vr-ebench-parity/v0.1",
+        "status": "pass_with_declared_exception",
+        "canonical_scenario_id": scenario_id,
+        "vr_task_id": scenario_id,
+        "release": release,
+        "equivalence": {
+            "environment": "same_asset_and_pose",
+            "table_static_support": "same_asset_and_pose",
+            "task_objects": "same_assets_poses_and_physics",
+            "context_props": "same_assets_poses_and_physics_not_in_task_object_list",
+        },
+        "allowed_exceptions": [
+            {
+                "id": "robot_not_embedded",
+                "status": "accepted",
+                "reason": "VR review handoff supplies scene USD and config; the runtime inserts the robot.",
+            }
+        ],
+        "claims_forbidden": [
+            "The review adapter proves policy or benchmark success.",
+            "The review adapter activates the liquid metric.",
+        ],
+        "artifacts": {
+            "scene_usd": {"path": "scene.usd", "sha256": "sha256:" + _sha(scene_path)},
+            "task_config": {
+                "path": "task_config.py",
+                "sha256": "sha256:" + _sha(out / "vr/task_config.py"),
+            },
+        },
+    }
+    _json(out / "vr/parity_manifest.json", parity)
+    if (out / "manifest.json").is_file():
+        refresh_hashes(out)
+    return parity
+
+
+def finalize_product_smoke(out: Path, *, scenario_id: str = SCENARIO_ID) -> dict[str, Any]:
     out = out.resolve()
     evidence = out / "ebench/evidence/initial_scene"
-    render_manifest = json.loads(
-        (evidence / "render_manifest.json").read_text(encoding="utf-8")
-    )
-    gate = yaml.safe_load(
-        (evidence / "visual_ready_gate.yaml").read_text(encoding="utf-8")
-    )
-    runtime_log = (evidence / "runtime.log").read_text(
-        encoding="utf-8", errors="replace"
-    )
+    render_manifest = json.loads((evidence / "render_manifest.json").read_text(encoding="utf-8"))
+    gate = yaml.safe_load((evidence / "visual_ready_gate.yaml").read_text(encoding="utf-8"))
+    runtime_log = (evidence / "runtime.log").read_text(encoding="utf-8", errors="replace")
     runtime = render_manifest.get("runtime", {})
     required_log_facts = (
         "genmanip_reset_scene=true",
@@ -718,7 +777,9 @@ def finalize_product_smoke(out: Path) -> dict[str, Any]:
         "Non-GPU-compatible convex mesh",
         "Particles feature is only supported on GPU",
     )
-    hard_errors = [line for line in runtime_log.splitlines() if any(marker in line for marker in hard_markers)]
+    hard_errors = [
+        line for line in runtime_log.splitlines() if any(marker in line for marker in hard_markers)
+    ]
     passed = bool(
         isinstance(gate, dict)
         and gate.get("status") == "passed"
@@ -737,7 +798,7 @@ def finalize_product_smoke(out: Path) -> dict[str, Any]:
     ]
     report = {
         "schema_version": "scenario-forge-product-smoke-observation/v0.2",
-        "scenario_id": SCENARIO_ID,
+        "scenario_id": scenario_id,
         "runtime": {
             "isaac_sim_version": runtime.get("isaac_sim_version"),
             "genmanip_revision": runtime.get("genmanip_revision"),
@@ -781,6 +842,66 @@ def finalize_product_smoke(out: Path) -> dict[str, Any]:
     return report
 
 
+def attach_robot_oracle_evidence(out: Path, evidence: Path) -> dict[str, Any]:
+    """Bind validated EOS scripted-oracle evidence without widening claims."""
+
+    out = out.resolve()
+    evidence = evidence.resolve()
+    source_manifest_path = evidence / "robot_oracle_evidence.json"
+    validation_path = evidence / "validation_report.json"
+    source_manifest = json.loads(source_manifest_path.read_text(encoding="utf-8"))
+    validation = json.loads(validation_path.read_text(encoding="utf-8"))
+    package_manifest_path = out / "manifest.json"
+    package_manifest = json.loads(package_manifest_path.read_text(encoding="utf-8"))
+
+    if validation.get("overall_status") != "pass" or not validation.get("robot_transfer_success"):
+        raise ValueError("EOS scripted robot oracle evidence is not validated")
+    if source_manifest.get("scenario_id") != package_manifest.get("scenario_id"):
+        raise ValueError("EOS robot evidence scenario_id does not match the package")
+    if source_manifest.get("release") != package_manifest.get("release"):
+        raise ValueError("EOS robot evidence release does not match the package")
+    if source_manifest.get("execution_mode") != "scripted_robot_oracle":
+        raise ValueError("EOS robot evidence is not a scripted oracle")
+    if source_manifest.get("policy_claim") or source_manifest.get("benchmark_claim"):
+        raise ValueError("EOS robot evidence improperly claims policy or benchmark success")
+    if source_manifest.get("liquid_metric_active"):
+        raise ValueError("EOS robot evidence improperly activates the liquid metric")
+    runs = source_manifest.get("runs")
+    if not isinstance(runs, list) or len(runs) != 3:
+        raise ValueError("EOS robot evidence must contain exactly three cold runs")
+
+    destination = out / "evidence/robot_oracle"
+    if destination.exists():
+        shutil.rmtree(destination)
+    shutil.copytree(evidence, destination)
+    receipt = {
+        "schema_version": "scenario-forge-external-oracle-binding/v0.1",
+        "status": "pass",
+        "producer": "embodied-eval-os",
+        "execution_mode": "scripted_robot_oracle",
+        "cold_runs": len(runs),
+        "manifest": "evidence/robot_oracle/robot_oracle_evidence.json",
+        "manifest_sha256": _sha(destination / "robot_oracle_evidence.json"),
+        "validation": "evidence/robot_oracle/validation_report.json",
+        "validation_sha256": _sha(destination / "validation_report.json"),
+        "evidence_tree_sha256": _tree_sha(destination),
+        "claim_boundary": (
+            "Scripted robot contact transfer only; not a learned policy, benchmark "
+            "result, or active liquid metric."
+        ),
+    }
+    _json(destination / "binding_receipt.json", receipt)
+    package_manifest["claims"]["visible_robot_transfer"] = True
+    package_manifest["claims"]["visible_scripted_robot_transfer"] = True
+    package_manifest["claims"]["robot_policy_success"] = False
+    package_manifest["claims"]["benchmark_success"] = False
+    package_manifest["liquid_metrics_active"] = False
+    package_manifest["scripted_robot_oracle"] = receipt
+    _json(package_manifest_path, package_manifest)
+    refresh_hashes(out)
+    return receipt
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--r7-package", type=Path, default=DEFAULT_R7)
@@ -788,6 +909,8 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--refresh-hashes", action="store_true")
     parser.add_argument("--finalize-product-smoke", action="store_true")
+    parser.add_argument("--attach-robot-evidence", type=Path)
+    parser.add_argument("--finalize-vr-review-adapter", action="store_true")
     args = parser.parse_args()
     if args.refresh_hashes:
         refresh_hashes(args.out.resolve())
@@ -795,6 +918,17 @@ def main() -> int:
         return 0
     if args.finalize_product_smoke:
         print(json.dumps(finalize_product_smoke(args.out), ensure_ascii=False))
+        return 0
+    if args.attach_robot_evidence is not None:
+        print(
+            json.dumps(
+                attach_robot_oracle_evidence(args.out, args.attach_robot_evidence),
+                ensure_ascii=False,
+            )
+        )
+        return 0
+    if args.finalize_vr_review_adapter:
+        print(json.dumps(finalize_vr_review_adapter(args.out), ensure_ascii=False))
         return 0
     print(
         build(

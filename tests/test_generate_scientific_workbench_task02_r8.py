@@ -59,38 +59,99 @@ def _transfer_package(root: Path, *, particle_count: int = 548) -> Path:
     )
     _file(package / "deps/source/asset.usd", "source")
     _file(package / "deps/target/asset.usd", "target")
-    candidate = {"candidate_id": "c03", "dwell_seconds": 3.0, "rim_gap_m": 0.01, "rim_offset_x_m": 0.0, "tilt_deg": -115.0}
+    candidate = {
+        "candidate_id": "c03",
+        "dwell_seconds": 3.0,
+        "rim_gap_m": 0.01,
+        "rim_offset_x_m": 0.0,
+        "tilt_deg": -115.0,
+    }
     profile = package / "transfer_fixture_profile.json"
-    _file(profile, json.dumps({
-        "schema_version": (
-            "aan.gpu_pbd_transfer_fixture.v1"
-            if particle_count == 548
-            else "aan.gpu_pbd_transfer_fixture.v2"
+    _file(
+        profile,
+        json.dumps(
+            {
+                "schema_version": (
+                    "aan.gpu_pbd_transfer_fixture.v1"
+                    if particle_count == 548
+                    else "aan.gpu_pbd_transfer_fixture.v2"
+                ),
+                "source": {"initial_xyz_m": [0.25, 0.0, 0.0]},
+                "members": {
+                    "source": "/World/Transfer/Source",
+                    "target": "/World/Transfer/Target",
+                    "particles": "/World/Transfer/ParticleSet",
+                    "particle_system": "/World/Transfer/ParticleSystem",
+                },
+                "liquid_parameters": {"particle_count": particle_count},
+                "bounded_search": {"candidates": [candidate]},
+                "qualification": {
+                    "minimum_target_reception_ratio": 0.5,
+                    "required_cold_runs": 3,
+                    "spill_is_blocking": False,
+                },
+                "claim_boundary": "Prescribed transfer only; no robot claim.",
+            }
         ),
-        "source": {"initial_xyz_m": [0.25, 0.0, 0.0]},
-        "members": {"source": "/World/Transfer/Source", "target": "/World/Transfer/Target", "particles": "/World/Transfer/ParticleSet", "particle_system": "/World/Transfer/ParticleSystem"},
-        "liquid_parameters": {"particle_count": particle_count},
-        "bounded_search": {"candidates": [candidate]},
-        "qualification": {"minimum_target_reception_ratio": 0.5, "required_cold_runs": 3, "spill_is_blocking": False},
-        "claim_boundary": "Prescribed transfer only; no robot claim.",
-    }))
-    cold = {"overall_status": "pass", "particle_readback_attribute": "points", "static_hold": {"minimum_source_ratio": 1.0}, "pour": {"particle_count": particle_count, "target_ratio": 0.95}, "performance": {"mean_rtx_fps": 80.0}, "hard_runtime_errors": []}
+    )
+    cold = {
+        "overall_status": "pass",
+        "particle_readback_attribute": "points",
+        "static_hold": {"minimum_source_ratio": 1.0},
+        "pour": {"particle_count": particle_count, "target_ratio": 0.95},
+        "performance": {"mean_rtx_fps": 80.0},
+        "hard_runtime_errors": [],
+    }
     report = evidence / "gpu_pbd_transfer_admission_report.json"
-    _file(report, json.dumps({"overall_status": "pass", "selected_candidate": candidate, "cold_runs": [cold, cold, cold], "promotion": {"allowed": True, "claim": "gpu_pbd_prescribed_transfer_pair"}}))
+    _file(
+        report,
+        json.dumps(
+            {
+                "overall_status": "pass",
+                "selected_candidate": candidate,
+                "cold_runs": [cold, cold, cold],
+                "promotion": {"allowed": True, "claim": "gpu_pbd_prescribed_transfer_pair"},
+            }
+        ),
+    )
     digest = sha256()
     for item in sorted(p for p in (package / "deps").rglob("*") if p.is_file()):
         digest.update(item.relative_to(package / "deps").as_posix().encode())
         digest.update(b"\0")
         digest.update(bytes.fromhex(_digest(item)))
     manifest = evidence / "manifest.json"
-    _file(manifest, json.dumps({
-        "schema_version": "aan.gpu_pbd_transfer_pair_manifest.v1",
-        "package_id": "task02-transfer.r1",
-        "overall_status": "pass",
-        "entrypoints": {"root_usd": "component.usda", "asset_entry_prim": "/World/Transfer"},
-        "gpu_pbd_transfer_pair": {"status": "qualified", "profile": profile.name, "profile_sha256": _digest(profile), "report": str(report.relative_to(package)), "report_sha256": _digest(report), "component_sha256": _digest(package / "component.usda"), "dependency_tree_sha256": digest.hexdigest(), "particle_count": particle_count, "cold_runs": 3, "runtime": "isaac41", "selected_candidate": candidate},
-        "promotion": {"allowed": True, "claim": "gpu_pbd_prescribed_transfer_pair", "claim_boundary": "Prescribed transfer only; no robot claim."},
-    }))
+    _file(
+        manifest,
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_transfer_pair_manifest.v1",
+                "package_id": "task02-transfer.r1",
+                "overall_status": "pass",
+                "entrypoints": {
+                    "root_usd": "component.usda",
+                    "asset_entry_prim": "/World/Transfer",
+                },
+                "gpu_pbd_transfer_pair": {
+                    "status": "qualified",
+                    "profile": profile.name,
+                    "profile_sha256": _digest(profile),
+                    "report": str(report.relative_to(package)),
+                    "report_sha256": _digest(report),
+                    "component_sha256": _digest(package / "component.usda"),
+                    "dependency_tree_sha256": digest.hexdigest(),
+                    "particle_count": particle_count,
+                    "cold_runs": 3,
+                    "runtime": "isaac41",
+                    "selected_candidate": candidate,
+                },
+                "promotion": {
+                    "allowed": True,
+                    "claim": "gpu_pbd_prescribed_transfer_pair",
+                    "claim_boundary": "Prescribed transfer only; no robot claim.",
+                },
+            }
+        ),
+    )
     dynamic_evidence = evidence / "dynamic_loaded_start"
     state = _file(
         dynamic_evidence / "dynamic_loaded_particle_state.json",
@@ -219,30 +280,39 @@ def test_r83_handoff_is_self_contained_and_keeps_liquid_metrics_inactive(tmp_pat
     assert (result / "ebench/scene.usd").is_file()
     assert (result / "ebench/config.yaml").is_file()
     assert (
-        result
-        / f"ebench/assets/scene_usds/scenario_forge/{module.SCENARIO_ID}/scene.usda"
+        result / f"ebench/assets/scene_usds/scenario_forge/{module.SCENARIO_ID}/scene.usda"
     ).is_file()
     assert (
         result
         / f"ebench/assets/scene_usds/scenario_forge/{module.SCENARIO_ID}/scene_static_preview.usda"
     ).is_file()
     assert (
-        result
-        / f"ebench/tasks/scenario_forge/{module.SCENARIO_ID}/002/episode_metadata.json"
+        result / f"ebench/tasks/scenario_forge/{module.SCENARIO_ID}/002/episode_metadata.json"
     ).is_file()
     assert (result / "ebench/evidence/render_request.yaml").is_file()
     assert (result / "vr/scene.usd").is_file()
     assert (result / "vr/config.py").is_file()
+    assert (result / "vr/task_config.py").is_file()
+    assert (result / "vr/parity_manifest.json").is_file()
+    assert (result / "vr/deps/r7_scene/scene.usda").is_file()
+    assert (result / "vr/deps/transfer/component.usda").is_file()
+    assert "@../ebench/" not in (result / "vr/scene.usd").read_text()
     assert "/source_bundle/r7_scene/scene.usda@" in (result / "ebench/scene.usd").read_text()
-    assert "/source_bundle/transfer/component.usda@</World/Transfer>" in (result / "ebench/scene.usd").read_text()
+    assert (
+        "/source_bundle/transfer/component.usda@</World/Transfer>"
+        in (result / "ebench/scene.usd").read_text()
+    )
     scene_text = (result / "ebench/scene.usd").read_text()
     assert 'over "obj_obj_graduated_cylinder" (' in scene_text
-    assert 'source_bundle/transfer/component.usda@</World/Transfer/Source>' in scene_text
+    assert "source_bundle/transfer/component.usda@</World/Transfer/Source>" in scene_text
     assert 'over "obj_obj_beaker" (' in scene_text
-    assert 'source_bundle/transfer/component.usda@</World/Transfer/Target>' in scene_text
+    assert "source_bundle/transfer/component.usda@</World/Transfer/Target>" in scene_text
     assert scene_text.count("active = false") == 2
     assert 'def Xform "obj_table"' in scene_text
-    assert '/source_bundle/r7_scene/source_bundle/scenario_forge_runtime/table.usd@</Asset>' in scene_text
+    assert (
+        "/source_bundle/r7_scene/source_bundle/scenario_forge_runtime/table.usd@</Asset>"
+        in scene_text
+    )
     assert "double3 xformOp:translate = (0.09, -0.17, 0.7481)" in scene_text
     assert "double3 xformOp:translate = (-0.16, -0.17, 0.755)" in scene_text
     assert scene_text.count("point3f[] physxParticle:simulationPoints") == 1
@@ -261,7 +331,9 @@ def test_r83_handoff_is_self_contained_and_keeps_liquid_metrics_inactive(tmp_pat
     assert "set_robot_rest_offset" not in config_text
 
 
-def test_r87_composition_bakes_one_measured_pose_for_container_and_particles(tmp_path: Path) -> None:
+def test_r87_composition_bakes_one_measured_pose_for_container_and_particles(
+    tmp_path: Path,
+) -> None:
     module = _module()
     text = module._composed_scene_usda(
         "deps/r7_scene/scene.usda",
@@ -279,7 +351,7 @@ def test_r87_composition_bakes_one_measured_pose_for_container_and_particles(tmp
     assert "obj_obj_beaker" in text
     world_block, physics_block = text.split('\nover "physicsScene"', maxsplit=1)
     assert 'over "physicsScene"' not in world_block
-    assert 'physxScene:enableGPUDynamics' in physics_block
+    assert "physxScene:enableGPUDynamics" in physics_block
     assert 'over "PhysicsScene"' not in text
 
 
@@ -298,9 +370,12 @@ def test_r87_particle_transform_uses_usd_wxyz_rotation_convention() -> None:
 def test_r85_package_uses_transfer_handoff_particle_count(tmp_path: Path) -> None:
     module = _module()
     transfer = _transfer_package(tmp_path, particle_count=580)
-    assert module.load_gpu_pbd_transfer_pair_handoff(
-        transfer, transfer / "evidence/manifest.json"
-    ).particle_count == 580
+    assert (
+        module.load_gpu_pbd_transfer_pair_handoff(
+            transfer, transfer / "evidence/manifest.json"
+        ).particle_count
+        == 580
+    )
 
 
 def test_r87_build_fails_closed_without_dynamic_loaded_start(tmp_path: Path) -> None:
@@ -319,7 +394,10 @@ def test_r83_render_request_keeps_entrance_camera_inside_the_room(tmp_path: Path
     module = _module()
     source = _render_request_fixture(tmp_path)
     root = tmp_path / "package"
-    paths = {name: _file(root / name) for name in ("manifest.json", "config.yaml", "episode.json", "scene.usd", "camera.yml")}
+    paths = {
+        name: _file(root / name)
+        for name in ("manifest.json", "config.yaml", "episode.json", "scene.usd", "camera.yml")
+    }
     bundle = root / "source_bundle"
     _file(bundle / "asset.usd")
 
@@ -385,3 +463,56 @@ def test_finalizes_only_the_ebench_load_reset_eight_second_claim(tmp_path: Path)
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["claims"]["ebench_load_reset_8s"] is True
     assert manifest["claims"]["robot_policy_success"] is False
+
+
+def test_attaches_validated_scripted_robot_evidence_without_policy_claim(
+    tmp_path: Path,
+) -> None:
+    module = _module()
+    scenario_id = "scientific_workbench_r9_task02_fixture"
+    out = tmp_path / "package"
+    _file(
+        out / "manifest.json",
+        json.dumps(
+            {
+                "scenario_id": scenario_id,
+                "release": "r9",
+                "liquid_metrics_active": False,
+                "claims": {
+                    "visible_robot_transfer": False,
+                    "robot_policy_success": False,
+                    "benchmark_success": False,
+                },
+            }
+        ),
+    )
+    evidence = tmp_path / "oracle"
+    _file(
+        evidence / "robot_oracle_evidence.json",
+        json.dumps(
+            {
+                "schema_id": "eeos.task02_robot_oracle_evidence.v2",
+                "scenario_id": scenario_id,
+                "release": "r9",
+                "execution_mode": "scripted_robot_oracle",
+                "policy_claim": False,
+                "benchmark_claim": False,
+                "liquid_metric_active": False,
+                "runs": [{"run_index": index} for index in range(1, 4)],
+            }
+        ),
+    )
+    _file(
+        evidence / "validation_report.json",
+        json.dumps({"overall_status": "pass", "robot_transfer_success": True}),
+    )
+
+    receipt = module.attach_robot_oracle_evidence(out, evidence)
+
+    assert receipt["status"] == "pass"
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["claims"]["visible_scripted_robot_transfer"] is True
+    assert manifest["claims"]["robot_policy_success"] is False
+    assert manifest["claims"]["benchmark_success"] is False
+    assert manifest["liquid_metrics_active"] is False
+    assert (out / "evidence/robot_oracle/robot_oracle_evidence.json").is_file()

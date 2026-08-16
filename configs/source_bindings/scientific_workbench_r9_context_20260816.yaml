@@ -1,0 +1,46 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_r9_context_amber_reagent_bottle: &context
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/source/refined_assets/amber_reagent_bottle/asset.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/amber_reagent_bottle
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/amber_reagent_bottle/evidence/manifest.json
+    producer_revision: scientific-workbench-r9-context-20260816
+    expected_scope_prims: [/ObjectRoot]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [refined_assets_on_table_no_operation.zip; ConvertAsset]
+    redistributable: true
+  scientific_workbench_r9_context_clear_reagent_bottle:
+    <<: *context
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/source/refined_assets/clear_reagent_bottle/asset.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/clear_reagent_bottle
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/clear_reagent_bottle/evidence/manifest.json
+  scientific_workbench_r9_context_pipette_carousel:
+    <<: *context
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/source/refined_assets/pipette_carousel/asset.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/pipette_carousel
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/pipette_carousel/evidence/manifest.json
+  scientific_workbench_r9_context_pipette_tip_box:
+    <<: *context
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/source/refined_assets/pipette_tip_box/asset.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/pipette_tip_box
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/pipette_tip_box/evidence/manifest.json
+  scientific_workbench_r9_context_wash_bottle:
+    <<: *context
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/source/refined_assets/wash_bottle/asset.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/wash_bottle
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/wash_bottle/evidence/manifest.json
+  scientific_workbench_r9_context_graduated_cylinder_100ml:
+    <<: *context
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/source/refined_assets/library_graduated_cylinder_100ml/asset.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/library_graduated_cylinder_100ml
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r9_dynamic_context_assets_20260816/packages/library_graduated_cylinder_100ml/evidence/manifest.json
+  scientific_workbench_r9_context_centrifuge_tube_15ml_body:
+    <<: *context
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/centrifuge_tube_15ml_body/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_body
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/centrifuge_tube_15ml_body/evidence/manifest.json
+    producer_revision: scientific-workbench-r7-20260813
+    expected_scope_prims: [/World/CentrifugeTube15mlBody]
+    attribution: [实验室资产库 15 mL centrifuge tube body; ConvertAsset r7]

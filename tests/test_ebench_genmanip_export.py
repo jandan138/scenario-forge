@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator
 from scenario_forge.adapters.ebench.genmanip import (
     GenManipExportError,
     _exact_success_object_ids,
+    _relative_prim_parts_if_descendant,
     export_genmanip_collected_package,
 )
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
@@ -28,6 +29,13 @@ from tests.test_convert_asset_adapter import _write_source_bound_handoff
 
 
 _OVERLAY_ASSET_ID = "dryingbox_03_dynamic"
+
+
+def test_standalone_asset_entry_prim_is_not_treated_as_room_embedded() -> None:
+    assert _relative_prim_parts_if_descendant("/World", "/ObjectRoot") is None
+    assert _relative_prim_parts_if_descendant("/World", "/World/Beaker") == ("Beaker",)
+
+
 _RUNTIME_CONTRACT_SCHEMA = (
     Path(__file__).resolve().parents[1]
     / "src/scenario_forge/schemas/jsonschema"
@@ -81,9 +89,7 @@ def _build_qualified_object_package(
     with_context: bool = False,
 ) -> Path:
     source_usd = (
-        _write_overlay_base_scene(tmp_path)
-        if with_overlay
-        else _write_source_scene(tmp_path)
+        _write_overlay_base_scene(tmp_path) if with_overlay else _write_source_scene(tmp_path)
     )
     _, source_package_dir, source_manifest_path, _ = _write_source_bound_handoff(
         tmp_path / "source_handoff",
@@ -128,9 +134,7 @@ def _build_qualified_object_package(
     if with_context:
         context_usd = tmp_path / "context.usda"
         context_usd.write_text(
-            source_usd.read_text(encoding="utf-8").replace(
-                "conical_bottle03", "context_beaker"
-            ),
+            source_usd.read_text(encoding="utf-8").replace("conical_bottle03", "context_beaker"),
             encoding="utf-8",
         )
         _, context_package, context_manifest, _ = _write_source_bound_handoff(
@@ -152,11 +156,7 @@ def _build_qualified_object_package(
             license="CC-BY-NC-4.0",
             redistributable=False,
         )
-    scenario = (
-        _scenario_mapping()
-        if scenario_mapping is None
-        else scenario_mapping
-    )
+    scenario = _scenario_mapping() if scenario_mapping is None else scenario_mapping
     if scenario_mapping is None:
         scenario["schema_version"] = "scenario-spec/v0.2"
     objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
@@ -247,7 +247,9 @@ def test_context_prop_is_loaded_with_package_physics_but_absent_from_metrics(
     assert layout["add_colliders"] is False
     assert layout["add_rigid_body"] is False
     contract_objects = episode["task_data"]["scenario_forge_runtime_contract"]["objects"]
-    context = next(item for item in contract_objects if item["scenario_object_id"] == "context_beaker")
+    context = next(
+        item for item in contract_objects if item["scenario_object_id"] == "context_beaker"
+    )
     assert context["role"] == "context_prop"
     assert "context_beaker" not in json.dumps(episode["task_data"]["goal"])
 
@@ -350,27 +352,18 @@ def _build_articulated_object_package(
     scenario_mapping: dict[str, object] | None = None,
 ) -> Path:
     source_usd = _write_source_scene(tmp_path)
-    scenario = (
-        _scenario_mapping_v05()
-        if scenario_mapping is None
-        else scenario_mapping
-    )
+    scenario = _scenario_mapping_v05() if scenario_mapping is None else scenario_mapping
     objects = [dict(item) for item in scenario["objects"]]  # type: ignore[arg-type]
     objects[2]["asset_id"] = "qualified_centrifuge"
     objects[2]["role"] = "articulated_device"
     scenario["objects"] = objects
-    metadata = (
-        _articulation_metadata()
-        if articulation_metadata is None
-        else articulation_metadata
-    )
+    metadata = _articulation_metadata() if articulation_metadata is None else articulation_metadata
     articulated_source = LocalUSDAssetSource(
         asset_id="qualified_centrifuge",
         source_usd=source_usd,
         role="articulated_object",
         license="LicenseRef-Internal-Restricted",
-        source_uri="convert-asset://qualified-centrifuge/asset/sha256:"
-        + "1" * 64,
+        source_uri="convert-asset://qualified-centrifuge/asset/sha256:" + "1" * 64,
         redistributable=False,
         root_prim_path="/World/graduated_cylinder_03",
         upstream_package=UpstreamPackageRef(
@@ -378,8 +371,7 @@ def _build_articulated_object_package(
             schema_version="asset_application_normalizer.v1",
             package_id="qualified-centrifuge",
             revision="producer-revision",
-            manifest_uri="convert-asset://qualified-centrifuge/manifest/sha256:"
-            + "2" * 64,
+            manifest_uri="convert-asset://qualified-centrifuge/manifest/sha256:" + "2" * 64,
             manifest_sha256="sha256:" + "2" * 64,
             metadata={
                 "consumer_usage": "articulated_object",
@@ -512,9 +504,7 @@ def _room_references(scene_path: Path) -> list[object]:
     Sdf = pytest.importorskip("pxr.Sdf")
     layer = Sdf.Layer.FindOrOpen(str(scene_path))
     assert layer
-    room = layer.GetPrimAtPath(
-        "/World/scientific_workbench_bimanual_pour/room"
-    )
+    room = layer.GetPrimAtPath("/World/scientific_workbench_bimanual_pour/room")
     assert room
     return list(room.referenceList.GetAddedOrExplicitItems())
 
@@ -566,7 +556,9 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
         ("y", "y"),
     ]
 
-    scene_path = output / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+    scene_path = (
+        output / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+    )
     scene_text = scene_path.read_text(encoding="utf-8")
     assert 'defaultPrim = "World"' in scene_text
     assert 'def Xform "scientific_workbench_bimanual_pour"' in scene_text
@@ -594,14 +586,10 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
         0.0,
     )
     background_fixture = stage.GetPrimAtPath(f"{scene_uid}/room/background_fixture")
-    assert list(background_fixture.GetAttribute("xformOpOrder").Get())[0] == (
-        "!resetXformStack!"
-    )
+    assert list(background_fixture.GetAttribute("xformOpOrder").Get())[0] == ("!resetXformStack!")
     expected_materials = {
         f"{scene_uid}/obj_table/surface": f"{scene_uid}/room/Looks/TableMat",
-        f"{scene_uid}/obj_obj_conical_bottle03/mesh": (
-            f"{scene_uid}/room/Looks/GlassFlask"
-        ),
+        f"{scene_uid}/obj_obj_conical_bottle03/mesh": (f"{scene_uid}/room/Looks/GlassFlask"),
         f"{scene_uid}/obj_obj_graduated_cylinder_03/mesh": (
             f"{scene_uid}/room/Looks/GlassCylinder"
         ),
@@ -638,9 +626,7 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
     assert len(initial_layout["lift2"]["joint_positions"]) == 16
 
     contract = episode_json["task_data"]["scenario_forge_runtime_contract"]
-    assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.1"
-    )
+    assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.1")
     assert contract["contract_status"] == "transport_only"
     assert contract["coordinate_convention"] == {
         "translation_unit": "meter",
@@ -659,22 +645,14 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
         "robot_index": 0,
         "actors": _scenario_mapping()["robot"]["actors"],  # type: ignore[index]
     }
-    objects_by_id = {
-        item["scenario_object_id"]: item for item in contract["objects"]
-    }
+    objects_by_id = {item["scenario_object_id"]: item for item in contract["objects"]}
     for contract_object in contract["objects"]:
         runtime_uid = contract_object["runtime_uid"]
         assert runtime_uid in initial_layout
-        assert contract_object["state_prim_path"] == initial_layout[runtime_uid][
-            "prim_path"
-        ]
+        assert contract_object["state_prim_path"] == initial_layout[runtime_uid]["prim_path"]
         assert stage.GetPrimAtPath(contract_object["state_prim_path"])
-    assert objects_by_id["table"]["runtime_uid"] == (
-        "00000000000000000000000000000000"
-    )
-    assert objects_by_id["table"]["state_prim_path"] == (
-        f"{scene_uid}/obj_table"
-    )
+    assert objects_by_id["table"]["runtime_uid"] == ("00000000000000000000000000000000")
+    assert objects_by_id["table"]["state_prim_path"] == (f"{scene_uid}/obj_table")
     assert objects_by_id["table"]["named_frames"] == {}
     flask = objects_by_id["obj_conical_bottle03"]
     assert flask["runtime_uid"] == "obj_conical_bottle03"
@@ -693,14 +671,11 @@ def test_genmanip_export_writes_discoverable_scene_config_and_metadata(tmp_path:
     assert manifest["validation_scope"]["liquid_transfer"] is False
     assert manifest["runtime_requirements"]["robot_profile"] == "manip/lift2/R5a"
     assert manifest["success_contract"] == contract["success"]
-    assert manifest["success_contract_role"] == (
-        "validated_projection_of_semantic_contract"
-    )
+    assert manifest["success_contract_role"] == ("validated_projection_of_semantic_contract")
     assert manifest["semantic_contract"] == {
         "authority": "episode_metadata",
         "path": (
-            "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
-            "episode_metadata.json"
+            "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
         ),
         "json_pointer": "/task_data/scenario_forge_runtime_contract",
     }
@@ -740,24 +715,18 @@ def test_genmanip_export_preloads_non_table_visual_static_object_without_physics
     )
     output = export_genmanip_collected_package(package_root).output_dir
     episode = json.loads(
-        next((output / "tasks").glob("**/episode_metadata.json")).read_text(
-            encoding="utf-8"
-        )
+        next((output / "tasks").glob("**/episode_metadata.json")).read_text(encoding="utf-8")
     )
     layout = episode["task_data"]["initial_layout"]["obj_conical_bottle03"]
     assert layout["add_colliders"] is False
     assert layout["add_rigid_body"] is False
-    assert layout["path"].endswith(
-        "/source_bundle/scenario_forge_runtime/obj_conical_bottle03.usd"
-    )
+    assert layout["path"].endswith("/source_bundle/scenario_forge_runtime/obj_conical_bottle03.usd")
     assert (
-        output
-        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/"
+        output / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/"
         "source_bundle/scenario_forge_runtime/obj_conical_bottle03.usd"
     ).is_file()
     scene = (
-        output
-        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+        output / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
     ).read_text(encoding="utf-8")
     assert 'def Xform "obj_obj_conical_bottle03"' not in scene
 
@@ -800,9 +769,7 @@ def test_static_support_table_preserves_package_collider_and_uses_shared_runtime
     output = export_genmanip_collected_package(package_root).output_dir
     config = yaml.safe_load((output / "tasks/config.yaml").read_text(encoding="utf-8"))
     evaluation = config["evaluation_configs"][0]
-    assert evaluation["robots"] == [
-        {"type": "manip/lift2/R5a", "position": [0.0, 0.0, 0.0]}
-    ]
+    assert evaluation["robots"] == [{"type": "manip/lift2/R5a", "position": [0.0, 0.0, 0.0]}]
     assert evaluation["physics_scene_config"]["SolverType"] == "TGS"
     assert evaluation["physics_scene_config"]["TimeStepsPerSecond"] == 60
     assert evaluation["physics_scene_config"]["EnableGPUDynamics"] is True
@@ -823,8 +790,7 @@ def test_static_support_table_preserves_package_collider_and_uses_shared_runtime
         {"type": "set_robot_rest_offset", "robot_type": "lift2", "config": 0.001},
     ]
     scene = (
-        output
-        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+        output / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
     ).read_text(encoding="utf-8")
     assert 'def Xform "_scene"' in scene
     assert 'def Xform "scientific_workbench_bimanual_pour"' not in scene
@@ -834,9 +800,7 @@ def test_static_support_table_preserves_package_collider_and_uses_shared_runtime
             / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
         ).read_text(encoding="utf-8")
     )
-    table = episode["task_data"]["initial_layout"][
-        "00000000000000000000000000000000"
-    ]
+    table = episode["task_data"]["initial_layout"]["00000000000000000000000000000000"]
     assert table["path"].endswith("scenario_forge_runtime/table.usd")
     assert table["add_colliders"] is False
     assert table["add_rigid_body"] is False
@@ -846,8 +810,7 @@ def test_genmanip_runtime_contract_matches_its_json_schema(tmp_path: Path) -> No
     package_root = _build_package(tmp_path)
     output = export_genmanip_collected_package(package_root).output_dir
     episode_path = (
-        output
-        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
     )
     contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
         "scenario_forge_runtime_contract"
@@ -857,7 +820,9 @@ def test_genmanip_runtime_contract_matches_its_json_schema(tmp_path: Path) -> No
 
     validator.validate(contract)
     invalid = {**contract, "unexpected": True}
-    assert any(error.validator == "additionalProperties" for error in validator.iter_errors(invalid))
+    assert any(
+        error.validator == "additionalProperties" for error in validator.iter_errors(invalid)
+    )
 
 
 def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags(
@@ -867,13 +832,10 @@ def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags
 
     output = export_genmanip_collected_package(package_root).output_dir
     config = yaml.safe_load((output / "tasks" / "config.yaml").read_text(encoding="utf-8"))
-    assert config["evaluation_configs"][0]["physics_scene_config"] == {
-        "EnableGPUDynamics": True
-    }
+    assert config["evaluation_configs"][0]["physics_scene_config"] == {"EnableGPUDynamics": True}
     goal = config["evaluation_configs"][0]["generation_config"]["goal"]
     episode_path = (
-        output
-        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
     )
     episode = json.loads(episode_path.read_text(encoding="utf-8"))
     layout = episode["task_data"]["initial_layout"]
@@ -903,16 +865,12 @@ def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags
     assert layout["obj_conical_bottle03"]["add_rigid_body"] is False
     assert layout["obj_graduated_cylinder_03"]["add_colliders"] is False
     assert layout["obj_graduated_cylinder_03"]["add_rigid_body"] is False
-    assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.2"
-    )
+    assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.2")
     assert contract["contract_status"] == "transport_only"
     assert contract["execution"]["frame_aware_metric_active"] is False
     assert contract["execution"]["process_invariants_evaluated"] is False
     qualified = next(
-        item
-        for item in contract["objects"]
-        if item["scenario_object_id"] == "obj_conical_bottle03"
+        item for item in contract["objects"] if item["scenario_object_id"] == "obj_conical_bottle03"
     )
     assert qualified["physics_authoring"] == {
         "owner": "convert_asset_package",
@@ -922,9 +880,10 @@ def test_qualified_rigid_object_exports_v02_transport_and_no_local_physics_flags
     }
     assert contract["success"] == _exact_bimanual_success()
     manifest = json.loads((output / "package_manifest.json").read_text(encoding="utf-8"))
-    assert "manip/default/scenario_forge_runtime_predicate" in manifest[
-        "runtime_requirements"
-    ]["registered_metrics"]
+    assert (
+        "manip/default/scenario_forge_runtime_predicate"
+        in manifest["runtime_requirements"]["registered_metrics"]
+    )
     schema = json.loads(_RUNTIME_CONTRACT_V02_SCHEMA.read_text(encoding="utf-8"))
     Draft202012Validator(schema).validate(contract)
 
@@ -939,17 +898,14 @@ def test_v03_exact_runtime_contract_preserves_repeated_relative_predicates_in_se
 
     output = export_genmanip_collected_package(package_root).output_dir
     episode_path = (
-        output
-        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
     )
     contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
         "scenario_forge_runtime_contract"
     ]
     predicates = contract["success"]["predicates"]
 
-    assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.3"
-    )
+    assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.3")
     assert [predicate["id"] for predicate in predicates] == [
         "opening_prepour_pose_reached",
         "opening_pour_pose_reached",
@@ -1051,8 +1007,7 @@ def test_articulated_object_exports_native_genmanip_articulation_contract(
 
     episode = json.loads(
         (
-            output
-            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
+            output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
             "episode_metadata.json"
         ).read_text(encoding="utf-8")
     )
@@ -1063,15 +1018,10 @@ def test_articulated_object_exports_native_genmanip_articulation_contract(
         "orientation": [0.7071068, 0.7071068, 0.0, 0.0],
         "scale": [1.0, 1.0, 1.0],
         "joint_positions": [-1.5556521048753416, 0.0, 0.0],
-        "prim_path": (
-            "/World/scientific_workbench_bimanual_pour/"
-            "obj_obj_graduated_cylinder_03"
-        ),
+        "prim_path": ("/World/scientific_workbench_bimanual_pour/obj_obj_graduated_cylinder_03"),
     }
     contract = episode["task_data"]["scenario_forge_runtime_contract"]
-    assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.5"
-    )
+    assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.5")
     assert contract["execution"]["native_goal_role"] == (
         "native_articulation_status_with_diagnostic_compatibility_projection"
     )
@@ -1137,8 +1087,7 @@ def test_articulated_export_can_write_genmanip_v01_compatibility_projection(
     ).output_dir
     episode = json.loads(
         (
-            output
-            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
+            output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
             "episode_metadata.json"
         ).read_text(encoding="utf-8")
     )
@@ -1146,12 +1095,10 @@ def test_articulated_export_can_write_genmanip_v01_compatibility_projection(
     compatibility = task_data["scenario_forge_runtime_contract"]
     complete = task_data["scenario_forge_runtime_contract_v05"]
 
-    Draft202012Validator(
-        json.loads(_RUNTIME_CONTRACT_SCHEMA.read_text(encoding="utf-8"))
-    ).validate(compatibility)
-    assert compatibility["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.1"
+    Draft202012Validator(json.loads(_RUNTIME_CONTRACT_SCHEMA.read_text(encoding="utf-8"))).validate(
+        compatibility
     )
+    assert compatibility["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.1")
     assert compatibility["execution"] == {
         "native_goal_role": "diagnostic_compatibility_projection",
         "frame_aware_metric_active": False,
@@ -1165,9 +1112,7 @@ def test_articulated_export_can_write_genmanip_v01_compatibility_projection(
     Draft202012Validator(
         json.loads(_RUNTIME_CONTRACT_V05_SCHEMA.read_text(encoding="utf-8"))
     ).validate(complete)
-    assert complete["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.5"
-    )
+    assert complete["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.5")
     centrifuge = next(
         item
         for item in complete["objects"]
@@ -1259,19 +1204,14 @@ def test_v05_qualified_rigid_objects_can_use_native_relative_pose_metrics(
     output = export_genmanip_collected_package(package_root).output_dir
     episode = json.loads(
         (
-            output
-            / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
+            output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/"
             "episode_metadata.json"
         ).read_text(encoding="utf-8")
     )
     contract = episode["task_data"]["scenario_forge_runtime_contract"]
 
-    assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.5"
-    )
-    assert contract["execution"]["native_goal_role"] == (
-        "diagnostic_compatibility_projection"
-    )
+    assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.5")
+    assert contract["execution"]["native_goal_role"] == ("diagnostic_compatibility_projection")
     Draft202012Validator(
         json.loads(_RUNTIME_CONTRACT_V05_SCHEMA.read_text(encoding="utf-8"))
     ).validate(contract)
@@ -1376,9 +1316,7 @@ def test_articulated_object_export_rejects_non_root_authoritative_frame(
 ) -> None:
     metadata = json.loads(json.dumps(_articulation_metadata()))
     root = metadata["articulation_contract"]["articulation_root_prim"]
-    metadata["articulation_contract"]["named_frames"]["opening"]["parent_prim"] = (
-        f"{root}/rotor"
-    )
+    metadata["articulation_contract"]["named_frames"]["opening"]["parent_prim"] = f"{root}/rotor"
     package_root = _build_articulated_object_package(
         tmp_path,
         articulation_metadata=metadata,
@@ -1397,12 +1335,11 @@ def test_v02_runtime_contract_schema_rejects_reordered_exact_success(
     package_root = _build_qualified_object_package(tmp_path)
     output = export_genmanip_collected_package(package_root).output_dir
     episode_path = (
-        output
-        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
     )
-    contract = json.loads(episode_path.read_text(encoding="utf-8"))[
-        "task_data"
-    ]["scenario_forge_runtime_contract"]
+    contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
+        "scenario_forge_runtime_contract"
+    ]
     predicates = contract["success"]["predicates"]
     predicates[0], predicates[1] = predicates[1], predicates[0]
     schema = json.loads(_RUNTIME_CONTRACT_V02_SCHEMA.read_text(encoding="utf-8"))
@@ -1416,9 +1353,7 @@ def test_exact_success_export_rejects_missing_explicit_diagnostic_projection(
     package_root = _build_qualified_object_package(tmp_path)
     scenario_path = package_root / "scenario.yaml"
     scenario = yaml.safe_load(scenario_path.read_text(encoding="utf-8"))
-    scenario["success"]["predicates"][0]["parameters"].pop(
-        "diagnostic_compatibility_projection"
-    )
+    scenario["success"]["predicates"][0]["parameters"].pop("diagnostic_compatibility_projection")
     scenario_path.write_text(yaml.safe_dump(scenario, sort_keys=False), encoding="utf-8")
 
     with pytest.raises(
@@ -1533,14 +1468,16 @@ def test_genmanip_runtime_contract_supports_tasks_without_named_frames_or_invari
     package_root = tmp_path / "package"
     compile_scenario_package(
         ScenarioSpec.from_mapping(scenario),
-        {"scientific_workbench_environment": LocalUSDAssetSource(
-            asset_id="scientific_workbench_environment",
-            source_usd=source_usd,
-            role="environment",
-            license="CC-BY-NC-4.0",
-            source_uri="example://scientific-workbench-scene",
-            redistributable=False,
-        )},
+        {
+            "scientific_workbench_environment": LocalUSDAssetSource(
+                asset_id="scientific_workbench_environment",
+                source_usd=source_usd,
+                role="environment",
+                license="CC-BY-NC-4.0",
+                source_uri="example://scientific-workbench-scene",
+                redistributable=False,
+            )
+        },
         package_root,
     )
 
@@ -1680,9 +1617,7 @@ def test_genmanip_export_composes_scene_overlay_before_base_without_local_physic
     Usd = pytest.importorskip("pxr.Usd")
     stage = Usd.Stage.Open(str(scene_path))
     assert stage
-    drying_box_path = (
-        "/World/scientific_workbench_bimanual_pour/room/DryingBox_03"
-    )
+    drying_box_path = "/World/scientific_workbench_bimanual_pour/room/DryingBox_03"
     drying_box = stage.GetPrimAtPath(drying_box_path)
     assert drying_box and drying_box.IsActive()
     assert [
@@ -1695,11 +1630,15 @@ def test_genmanip_export_composes_scene_overlay_before_base_without_local_physic
     assert winner.Get() == "overlay"
     property_stack = winner.GetPropertyStack()
     assert len(property_stack) == 2
-    assert Path(property_stack[0].layer.realPath).as_posix().endswith(
-        f"/source_bundle/{_OVERLAY_ASSET_ID}/asset.usda"
+    assert (
+        Path(property_stack[0].layer.realPath)
+        .as_posix()
+        .endswith(f"/source_bundle/{_OVERLAY_ASSET_ID}/asset.usda")
     )
-    assert Path(property_stack[1].layer.realPath).as_posix().endswith(
-        "/source_bundle/scientific_workbench_environment/scene.usda"
+    assert (
+        Path(property_stack[1].layer.realPath)
+        .as_posix()
+        .endswith("/source_bundle/scientific_workbench_environment/scene.usda")
     )
     assert drying_box.GetAttribute("physics:mass").Get() == pytest.approx(1.0)
 
@@ -1727,22 +1666,18 @@ def test_genmanip_export_allows_scene_overlays_for_v03_contracts(
 
     output = export_genmanip_collected_package(package_root).output_dir
     scene_path = (
-        output
-        / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
+        output / "assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour/scene.usda"
     )
     references = _room_references(scene_path)
     episode_path = (
-        output
-        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
     )
     contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
         "scenario_forge_runtime_contract"
     ]
 
     assert len(references) == 2
-    assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.3"
-    )
+    assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.3")
 
 
 def test_genmanip_export_rejects_overlay_missing_from_asset_manifest(
@@ -1783,9 +1718,7 @@ def test_genmanip_export_rejects_overlay_asset_with_wrong_role(tmp_path: Path) -
     package_root = _build_overlay_package(tmp_path)
     manifest_path = package_root / "assets/asset_manifest.yaml"
     manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
-    overlay = next(
-        item for item in manifest["assets"] if item["asset_id"] == _OVERLAY_ASSET_ID
-    )
+    overlay = next(item for item in manifest["assets"] if item["asset_id"] == _OVERLAY_ASSET_ID)
     overlay["role"] = "object"
     manifest_path.write_text(
         yaml.safe_dump(manifest, sort_keys=False),
@@ -1908,9 +1841,7 @@ def test_genmanip_export_rejects_aliased_default_path_through_parent_symlink(
     marker = existing_output / "belongs-to-user.txt"
     marker.write_text("keep", encoding="utf-8")
     (package_root / "adapters").symlink_to(external, target_is_directory=True)
-    aliased_default = (
-        package_root / "adapters" / "ebench" / ".." / "ebench" / "genmanip"
-    )
+    aliased_default = package_root / "adapters" / "ebench" / ".." / "ebench" / "genmanip"
 
     with pytest.raises(GenManipExportError, match="default adapter path.*symlink|symlink"):
         export_genmanip_collected_package(package_root, aliased_default)
@@ -2014,8 +1945,7 @@ def test_v04_export_transports_progress_rubric_as_unevaluated(tmp_path: Path) ->
 
     output = export_genmanip_collected_package(package_root).output_dir
     episode_path = (
-        output
-        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
     )
     contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
         "scenario_forge_runtime_contract"
@@ -2057,19 +1987,17 @@ def test_v06_export_transports_generic_success_and_rubric_as_unevaluated(
 
     output = export_genmanip_collected_package(package_root).output_dir
     episode_path = (
-        output
-        / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
+        output / "tasks/scenario_forge/scientific_workbench_bimanual_pour/000/episode_metadata.json"
     )
     contract = json.loads(episode_path.read_text(encoding="utf-8"))["task_data"][
         "scenario_forge_runtime_contract"
     ]
 
-    assert contract["schema_version"] == (
-        "scenario-forge-genmanip-runtime-contract/v0.6"
+    assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.6")
+    assert (
+        contract["success"]["progress_rubric"]["items"][-1]["condition"]["type"]
+        == "motion_trajectory_completed"
     )
-    assert contract["success"]["progress_rubric"]["items"][-1]["condition"][
-        "type"
-    ] == "motion_trajectory_completed"
     assert contract["execution"]["progress_rubric"]["scored_here"] is False
     Draft202012Validator(
         json.loads(_RUNTIME_CONTRACT_V06_SCHEMA.read_text(encoding="utf-8"))

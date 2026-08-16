@@ -76,6 +76,14 @@ The room keeps the complete source `/World` reference so backgrounds and the sha
 their declared material bindings are rebound to that shared scope; this avoids the
 out-of-scope material targets produced by narrow USD references.
 
+An object package may expose a standalone entry prim such as `/ObjectRoot` instead
+of a descendant of the room entry `/World`. The adapter still references that prim
+into its object wrapper, but does not author an inactive override for `/ObjectRoot`
+inside the room reference: it is not present there. Only object source prims that
+are actual descendants of the room entry are suppressed in the room composition.
+This keeps independently admitted dynamic tabletop context assets visible without
+weakening the existing descendant-path validation used for embedded room objects.
+
 `scene.pose` can align a source environment cluster with the EBench workspace, and
 `scene.inactive_prim_paths` can suppress source prims that would duplicate task
 objects. `scene.world_anchored_prim_paths` is deliberately narrow: it lets an

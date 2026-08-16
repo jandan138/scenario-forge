@@ -45,9 +45,7 @@ _RUNTIME_CONTRACT_SCHEMA_V03 = "scenario-forge-genmanip-runtime-contract/v0.3"
 _RUNTIME_CONTRACT_SCHEMA_V04 = "scenario-forge-genmanip-runtime-contract/v0.4"
 _RUNTIME_CONTRACT_SCHEMA_V05 = "scenario-forge-genmanip-runtime-contract/v0.5"
 _RUNTIME_CONTRACT_SCHEMA_V06 = "scenario-forge-genmanip-runtime-contract/v0.6"
-_ARTICULATION_CONTRACT_SCHEMA_V01 = (
-    "scenario-forge-articulation-contract/v0.1"
-)
+_ARTICULATION_CONTRACT_SCHEMA_V01 = "scenario-forge-articulation-contract/v0.1"
 _GENMANIP_UNBOUNDED_DOF_RANGE = (-100_000_000.0, 100_000_000.0)
 _EXACT_PREDICATE_TYPES = frozenset(
     {
@@ -116,30 +114,19 @@ def export_genmanip_collected_package(
 
     package_root = Path(package_dir)
     default_output_dir = package_root / "adapters" / "ebench" / "genmanip"
-    output_dir = (
-        Path(out_dir)
-        if out_dir is not None
-        else default_output_dir
-    )
+    output_dir = Path(out_dir) if out_dir is not None else default_output_dir
     resolved_package_root = package_root.resolve()
     resolved_output_dir = output_dir.resolve()
     resolved_default_output_dir = default_output_dir.resolve()
-    managed_default = (
-        out_dir is None
-        or resolved_output_dir == resolved_default_output_dir
-    )
+    managed_default = out_dir is None or resolved_output_dir == resolved_default_output_dir
     if managed_default:
         current = package_root
         for part in ("adapters", "ebench", "genmanip"):
             current = current / part
             if current.is_symlink():
-                raise GenManipExportError(
-                    "default adapter path must not traverse a symlink"
-                )
+                raise GenManipExportError("default adapter path must not traverse a symlink")
         if resolved_package_root not in resolved_output_dir.parents:
-            raise GenManipExportError(
-                "default adapter path must remain inside package_dir"
-            )
+            raise GenManipExportError("default adapter path must remain inside package_dir")
     if (
         resolved_output_dir == resolved_package_root
         or resolved_output_dir in resolved_package_root.parents
@@ -149,9 +136,7 @@ def export_genmanip_collected_package(
         resolved_package_root in resolved_output_dir.parents
         and resolved_output_dir != resolved_default_output_dir
     ):
-        raise GenManipExportError(
-            "out_dir inside package_dir must be the default adapter path"
-        )
+        raise GenManipExportError("out_dir inside package_dir must be the default adapter path")
 
     manifest = _validated_manifest(package_root)
     raw_scenario = _load_mapping(package_root / "scenario.yaml", "scenario spec")
@@ -167,9 +152,7 @@ def export_genmanip_collected_package(
     scenario_id = _required_string(scenario, "scenario_id", "scenario spec")
     _require_usd_identifier(scenario_id, "scenario_id")
     if manifest.package_id != scenario_id:
-        raise GenManipExportError(
-            "compiled package manifest package_id does not match scenario_id"
-        )
+        raise GenManipExportError("compiled package manifest package_id does not match scenario_id")
 
     robot = _required_mapping(scenario, "robot", "scenario spec")
     robot_profile = _required_string(robot, "profile_ref", "scenario robot")
@@ -185,13 +168,9 @@ def export_genmanip_collected_package(
     object_by_id = {_required_string(item, "id", "scenario object"): item for item in objects}
     table = _table_object(objects)
     scene_source = _required_mapping(scenario, "scene", "scenario spec")
-    composition_mode = str(
-        scene_source.get("composition_mode", "referenced_assets")
-    )
+    composition_mode = str(scene_source.get("composition_mode", "referenced_assets"))
     source_asset_id = _required_string(scene_source, "asset_id", "scenario scene")
-    source_root_prim = _required_string(
-        scene_source, "root_prim_path", "scenario scene"
-    )
+    source_root_prim = _required_string(scene_source, "root_prim_path", "scenario scene")
     raw_overlay_asset_ids = scene_source.get("overlay_asset_ids", [])
     if not isinstance(raw_overlay_asset_ids, list) or not all(
         isinstance(asset_id, str) and asset_id for asset_id in raw_overlay_asset_ids
@@ -213,15 +192,9 @@ def export_genmanip_collected_package(
         "scenario-spec/v0.5",
         "scenario-spec/v0.6",
     }:
-        raise GenManipExportError(
-            "scenario scene overlays require scenario-spec/v0.2 or later"
-        )
-    object_asset_ids = {
-        _required_string(item, "asset_id", "scenario object") for item in objects
-    }
-    overlay_object_conflicts = sorted(
-        set(overlay_asset_ids).intersection(object_asset_ids)
-    )
+        raise GenManipExportError("scenario scene overlays require scenario-spec/v0.2 or later")
+    object_asset_ids = {_required_string(item, "asset_id", "scenario object") for item in objects}
+    overlay_object_conflicts = sorted(set(overlay_asset_ids).intersection(object_asset_ids))
     if overlay_object_conflicts:
         raise GenManipExportError(
             "scene overlay assets cannot also be object assets: "
@@ -235,9 +208,7 @@ def export_genmanip_collected_package(
             "scenario scene.inactive_prim_paths must be a list of non-empty strings"
         )
     inactive_source_prims = list(raw_inactive_source_prims)
-    raw_world_anchored_source_prims = scene_source.get(
-        "world_anchored_prim_paths", []
-    )
+    raw_world_anchored_source_prims = scene_source.get("world_anchored_prim_paths", [])
     if not isinstance(raw_world_anchored_source_prims, list) or not all(
         isinstance(path, str) and path for path in raw_world_anchored_source_prims
     ):
@@ -256,23 +227,18 @@ def export_genmanip_collected_package(
     embedded_object_ids: set[str] = set()
     if composition_mode == "producer_entrypoint":
         if scenario_schema_version != "scenario-spec/v0.7":
-            raise GenManipExportError(
-                "producer_entrypoint composition requires scenario-spec/v0.7"
-            )
+            raise GenManipExportError("producer_entrypoint composition requires scenario-spec/v0.7")
         if overlay_asset_ids:
             raise GenManipExportError(
                 "producer_entrypoint composition cannot add consumer overlays"
             )
         source_asset = assets_by_id[source_asset_id]
-        producer_entrypoint = _interactive_producer_entrypoint(
-            source_asset, "genmanip"
-        )
+        producer_entrypoint = _interactive_producer_entrypoint(source_asset, "genmanip")
         for item in objects:
             object_id = _required_string(item, "id", "scenario object")
             if item.get("instance_mode") != "embedded_scene_prim":
                 raise GenManipExportError(
-                    f"producer entrypoint object {object_id} must use "
-                    "embedded_scene_prim"
+                    f"producer entrypoint object {object_id} must use embedded_scene_prim"
                 )
             if item.get("asset_id") != source_asset_id:
                 raise GenManipExportError(
@@ -288,13 +254,9 @@ def export_genmanip_collected_package(
                 "object_prims",
                 "producer genmanip entrypoint",
             ).get(producer_role)
-            source_path = _required_string(
-                item, "source_prim_path", f"scenario object {object_id}"
-            )
+            source_path = _required_string(item, "source_prim_path", f"scenario object {object_id}")
             if expected_path != source_path:
-                raise GenManipExportError(
-                    f"producer entrypoint path mismatch for {object_id}"
-                )
+                raise GenManipExportError(f"producer entrypoint path mismatch for {object_id}")
             embedded_object_ids.add(object_id)
     for overlay_asset_id in overlay_asset_ids:
         overlay_asset = assets_by_id[overlay_asset_id]
@@ -324,14 +286,10 @@ def export_genmanip_collected_package(
         "scenario-spec/v0.5",
         "scenario-spec/v0.6",
     }:
-        raise GenManipExportError(
-            "articulated_object export requires scenario-spec/v0.5 or v0.6"
-        )
+        raise GenManipExportError("articulated_object export requires scenario-spec/v0.5 or v0.6")
     qualified_object_ids.update(articulation_bindings)
     required_exact_object_ids = _exact_success_object_ids(success)
-    unqualified_exact_objects = sorted(
-        required_exact_object_ids.difference(qualified_object_ids)
-    )
+    unqualified_exact_objects = sorted(required_exact_object_ids.difference(qualified_object_ids))
     if unqualified_exact_objects:
         raise GenManipExportError(
             "exact frame success requires qualified rigid object packages for: "
@@ -346,8 +304,7 @@ def export_genmanip_collected_package(
     seed = _episode_name(scenario.get("seed", "000"))
     task_name = f"scenario_forge/{scenario_id}"
     usd_name = (
-        f"collected_packages/{scenario_id}/assets/scene_usds/"
-        f"scenario_forge/{scenario_id}/scene"
+        f"collected_packages/{scenario_id}/assets/scene_usds/scenario_forge/{scenario_id}/scene"
     )
     config = _task_config(
         scenario=scenario,
@@ -360,9 +317,7 @@ def export_genmanip_collected_package(
         requires_gpu_dynamics=requires_gpu_dynamics,
         articulation_bindings=articulation_bindings,
         physics_hz=(
-            int(producer_entrypoint["physics_hz"])
-            if producer_entrypoint is not None
-            else 60
+            int(producer_entrypoint["physics_hz"]) if producer_entrypoint is not None else 60
         ),
     )
     runtime_contract = _runtime_contract(
@@ -376,9 +331,7 @@ def export_genmanip_collected_package(
         articulation_bindings=articulation_bindings,
         producer_entrypoint=producer_entrypoint,
     )
-    complete_runtime_contract = (
-        runtime_contract if legacy_v01_transport else None
-    )
+    complete_runtime_contract = runtime_contract if legacy_v01_transport else None
     if legacy_v01_transport:
         runtime_contract = _legacy_v01_transport_projection(runtime_contract)
     episode = _episode_metadata(
@@ -471,9 +424,7 @@ def _validate_asset_provenance(
         item = _as_mapping(raw_asset, "package provenance asset")
         asset_id = _required_string(item, "asset_id", "package provenance asset")
         if asset_id in provenance_by_id:
-            raise GenManipExportError(
-                f"duplicate package provenance asset: {asset_id}"
-            )
+            raise GenManipExportError(f"duplicate package provenance asset: {asset_id}")
         provenance_by_id[asset_id] = item
 
     if set(provenance_by_id) != {asset.asset_id for asset in assets}:
@@ -514,13 +465,7 @@ def _write_collected_package(
     claim_scope: str,
     producer_entrypoint: Mapping[str, Any] | None,
 ) -> None:
-    scene_dir = (
-        staging_dir
-        / "assets"
-        / "scene_usds"
-        / "scenario_forge"
-        / scenario_id
-    )
+    scene_dir = staging_dir / "assets" / "scene_usds" / "scenario_forge" / scenario_id
     scene_dir.mkdir(parents=True, exist_ok=True)
     source_bundle = scene_dir / "source_bundle"
     shutil.copytree(package_root / "assets", source_bundle)
@@ -528,9 +473,7 @@ def _write_collected_package(
     static_items = [
         item
         for item in objects
-        if assets_by_id[
-            _required_string(item, "asset_id", "scenario object")
-        ].role
+        if assets_by_id[_required_string(item, "asset_id", "scenario object")].role
         in {"static_object", "static_support_object"}
     ]
     if static_items:
@@ -539,9 +482,7 @@ def _write_collected_package(
         table_id = _required_string(table, "id", "table object")
         for item in static_items:
             object_id = _required_string(item, "id", "scenario object")
-            asset_id = _required_string(
-                item, "asset_id", f"scenario object {object_id}"
-            )
+            asset_id = _required_string(item, "asset_id", f"scenario object {object_id}")
             (runtime_dir / _static_preload_filename(object_id, table_id)).write_text(
                 _runtime_static_preload_usda(assets_by_id[asset_id], item),
                 encoding="utf-8",
@@ -646,15 +587,9 @@ def _write_collected_package(
         },
         "entrypoints": {
             "task_config": "tasks/config.yaml",
-            "episode_metadata": (
-                f"tasks/{task_name}/{episode_name}/episode_metadata.json"
-            ),
-            "genmanip_episode_metadata": (
-                f"tasks/{task_name}/{episode_name}/meta_info.pkl"
-            ),
-            "scene_usd": (
-                f"assets/scene_usds/scenario_forge/{scenario_id}/scene.usda"
-            ),
+            "episode_metadata": (f"tasks/{task_name}/{episode_name}/episode_metadata.json"),
+            "genmanip_episode_metadata": (f"tasks/{task_name}/{episode_name}/meta_info.pkl"),
+            "scene_usd": (f"assets/scene_usds/scenario_forge/{scenario_id}/scene.usda"),
             "camera_config": "cameras/fixed_camera_lift2.yml",
             "render_request": "evidence/render_request.yaml",
         },
@@ -735,10 +670,7 @@ def _task_config(
                     "target_positions": articulation.reset_joint_positions,
                     "articulation_info": {
                         "is_articulated": True,
-                        "part": {
-                            dof.semantic_joint: dof.part_path
-                            for dof in articulation.dofs
-                        },
+                        "part": {dof.semantic_joint: dof.part_path for dof in articulation.dofs},
                     },
                 }
             )
@@ -773,8 +705,7 @@ def _task_config(
             "cameras": {
                 "type": "fixed",
                 "config_path": (
-                    f"saved/assets/collected_packages/{scenario_id}/"
-                    "cameras/fixed_camera_lift2.yml"
+                    f"saved/assets/collected_packages/{scenario_id}/cameras/fixed_camera_lift2.yml"
                 ),
             },
             "random_environment": {
@@ -796,9 +727,7 @@ def _task_config(
         },
         "object_config": object_config,
         "preprocess_config": (
-            genmanip_preprocess_config()
-            if robot_profile == _SHARED_ISAAC41_PROFILE
-            else []
+            genmanip_preprocess_config() if robot_profile == _SHARED_ISAAC41_PROFILE else []
         ),
         "layout_config": {"ignored_objects": []},
         "instruction": _required_string(scenario, "instruction", "scenario spec"),
@@ -913,9 +842,7 @@ def _episode_metadata(
     initial_layout["lift2"] = {
         "type": "robot",
         "position": _number_list(spawn.get("xyz"), 3, "scenario robot spawn.xyz"),
-        "orientation": _number_list(
-            spawn.get("wxyz"), 4, "scenario robot spawn.wxyz"
-        ),
+        "orientation": _number_list(spawn.get("wxyz"), 4, "scenario robot spawn.wxyz"),
         "joint_positions": _lift2_initial_joint_positions(robot),
     }
     task_data = {
@@ -994,9 +921,7 @@ def _runtime_contract(
                     f"scenario object {object_id}.named_frames keys must be non-empty strings"
                 )
             if "." in raw_frame_id:
-                raise GenManipExportError(
-                    f"named frame id {raw_frame_id!r} must not contain '.'"
-                )
+                raise GenManipExportError(f"named frame id {raw_frame_id!r} must not contain '.'")
             pose = _as_mapping(
                 raw_pose,
                 f"scenario object {object_id}.named_frames.{raw_frame_id}",
@@ -1036,18 +961,18 @@ def _runtime_contract(
                 "scale_xyz": embedded_state.get("local_scale_xyz"),
             }
         contract_object = {
-                "scenario_object_id": object_id,
-                "role": _required_string(item, "role", f"scenario object {object_id}"),
-                "source_prim_path": _required_string(
-                    item,
-                    "source_prim_path",
-                    f"scenario object {object_id}",
-                ),
-                "runtime_uid": binding.runtime_uid,
-                "state_prim_path": binding.state_prim_path,
-                "initial_pose": _runtime_initial_pose(initial_pose_source, object_id),
-                "named_frames": named_frames,
-            }
+            "scenario_object_id": object_id,
+            "role": _required_string(item, "role", f"scenario object {object_id}"),
+            "source_prim_path": _required_string(
+                item,
+                "source_prim_path",
+                f"scenario object {object_id}",
+            ),
+            "runtime_uid": binding.runtime_uid,
+            "state_prim_path": binding.state_prim_path,
+            "initial_pose": _runtime_initial_pose(initial_pose_source, object_id),
+            "named_frames": named_frames,
+        }
         if object_id in qualified_object_ids:
             contract_object["physics_authoring"] = {
                 "owner": (
@@ -1075,8 +1000,7 @@ def _runtime_contract(
                 "reset_joint_positions": articulation.reset_joint_positions,
                 "states": {
                     dof.semantic_joint: {
-                        state: list(value_range)
-                        for state, value_range in dof.states.items()
+                        state: list(value_range) for state, value_range in dof.states.items()
                     }
                     for dof in articulation.dofs
                 },
@@ -1087,10 +1011,7 @@ def _runtime_contract(
     raw_actors = robot.get("actors")
     if not isinstance(raw_actors, list) or not raw_actors:
         raise GenManipExportError("scenario robot.actors must be a non-empty list")
-    actors = [
-        _json_safe_copy(_as_mapping(actor, "scenario robot actor"))
-        for actor in raw_actors
-    ]
+    actors = [_json_safe_copy(_as_mapping(actor, "scenario robot actor")) for actor in raw_actors]
     raw_steps = scenario.get("steps")
     if not isinstance(raw_steps, list) or not raw_steps:
         raise GenManipExportError("scenario steps must be a non-empty list")
@@ -1111,9 +1032,7 @@ def _runtime_contract(
         "schema_version",
         "scenario spec",
     )
-    qualified_rigid_object_ids = qualified_object_ids.difference(
-        articulation_bindings
-    )
+    qualified_rigid_object_ids = qualified_object_ids.difference(articulation_bindings)
     if (
         qualified_rigid_object_ids
         and not exact_success
@@ -1224,16 +1143,12 @@ def _legacy_v01_transport_projection(
     return cast(dict[str, Any], _json_safe_copy(projection))
 
 
-def _runtime_initial_pose(
-    pose: Mapping[str, Any], object_id: str
-) -> dict[str, list[float]]:
+def _runtime_initial_pose(pose: Mapping[str, Any], object_id: str) -> dict[str, list[float]]:
     label = f"scenario object {object_id} initial pose"
     xyz = _finite_number_list(pose.get("xyz"), 3, f"{label}.xyz")
     wxyz = _finite_number_list(pose.get("wxyz"), 4, f"{label}.wxyz")
     if sum(value * value for value in wxyz) == 0.0:
-        raise GenManipExportError(
-            f"{label} must use a non-zero quaternion"
-        )
+        raise GenManipExportError(f"{label} must use a non-zero quaternion")
     result = {"xyz": xyz, "wxyz": wxyz}
     if "scale_xyz" in pose:
         result["scale_xyz"] = _finite_number_list(
@@ -1279,9 +1194,7 @@ def _genmanip_goal(
 ) -> list[list[list[dict[str, Any]]]]:
     operator = _required_string(success, "operator", "scenario success")
     if operator != "all":
-        raise GenManipExportError(
-            "GenManip export requires scenario success.operator to be 'all'"
-        )
+        raise GenManipExportError("GenManip export requires scenario success.operator to be 'all'")
     raw_predicates = success.get("predicates")
     if not isinstance(raw_predicates, list) or not raw_predicates:
         raise GenManipExportError("scenario success.predicates must be a non-empty list")
@@ -1350,8 +1263,7 @@ def _success_uses_exact_predicates(success: Mapping[str, Any]) -> bool:
     if not isinstance(raw_predicates, list):
         return False
     return any(
-        isinstance(predicate, Mapping)
-        and predicate.get("type") in _EXACT_PREDICATE_TYPES
+        isinstance(predicate, Mapping) and predicate.get("type") in _EXACT_PREDICATE_TYPES
         for predicate in raw_predicates
     )
 
@@ -1402,9 +1314,7 @@ def _exact_success_object_ids(success: Mapping[str, Any]) -> set[str]:
                 )
             result.add(frame_ref.rpartition(".")[0])
         for field in object_fields:
-            result.add(
-                _required_string(parameters, field, "exact success predicate")
-            )
+            result.add(_required_string(parameters, field, "exact success predicate"))
     return result
 
 
@@ -1475,9 +1385,7 @@ def _qualified_rigid_requirements(
                 "interaction_contract asset_entry_prim"
             )
         if is_context:
-            metadata = _required_mapping(
-                item, "metadata", f"context_prop {object_id}"
-            )
+            metadata = _required_mapping(item, "metadata", f"context_prop {object_id}")
             for key in ("dressing_preset_id", "group_id"):
                 _required_string(metadata, key, f"context_prop {object_id}.metadata")
             if metadata.get("metric_participation") != "none":
@@ -1555,8 +1463,7 @@ def _articulation_requirements(
         )
         if contract.get("schema_version") != _ARTICULATION_CONTRACT_SCHEMA_V01:
             raise GenManipExportError(
-                f"articulated object asset {asset_id!r} has unsupported "
-                "articulation_contract"
+                f"articulated object asset {asset_id!r} has unsupported articulation_contract"
             )
         closure = _required_mapping(
             upstream_metadata,
@@ -1738,8 +1645,7 @@ def _articulation_requirements(
             )
             if not math.isfinite(reset_value) or joint_prim in reset_prims:
                 raise GenManipExportError(
-                    f"articulated object asset {asset_id!r} reset values must "
-                    "be finite and unique"
+                    f"articulated object asset {asset_id!r} reset values must be finite and unique"
                 )
             reset_prims.add(joint_prim)
         if reset_prims != set(dof_by_prim):
@@ -1781,17 +1687,14 @@ def _articulation_requirements(
             dof_index = dof_by_prim[joint_prim]
             if dof_index in semantic_by_index:
                 raise GenManipExportError(
-                    f"articulated object asset {asset_id!r} semantic joints "
-                    "must map to unique DOFs"
+                    f"articulated object asset {asset_id!r} semantic joints must map to unique DOFs"
                 )
             part_prim = _required_string(
                 semantic,
                 "part_prim",
                 f"articulated object asset {asset_id}.joints.{semantic_joint}",
             )
-            part_path = "/" + "/".join(
-                _relative_prim_parts(root_prim, part_prim)
-            )
+            part_path = "/" + "/".join(_relative_prim_parts(root_prim, part_prim))
             raw_states = _required_mapping(
                 semantic,
                 "states",
@@ -1822,8 +1725,7 @@ def _articulation_requirements(
                 )
             runtime_reset_value = _number(
                 semantic.get("runtime_reset_value"),
-                f"articulated object asset {asset_id}.joints."
-                f"{semantic_joint}.runtime_reset_value",
+                f"articulated object asset {asset_id}.joints.{semantic_joint}.runtime_reset_value",
             )
             if not math.isfinite(runtime_reset_value):
                 raise GenManipExportError(
@@ -1846,9 +1748,7 @@ def _articulation_requirements(
         bindings[object_id] = _ArticulationObjectBinding(
             root_prim_path=root_prim,
             runtime_units=expected_runtime_units,
-            dofs=tuple(
-                semantic_by_index[index] for index in range(len(semantic_by_index))
-            ),
+            dofs=tuple(semantic_by_index[index] for index in range(len(semantic_by_index))),
         )
     return bindings
 
@@ -1882,8 +1782,7 @@ def _interaction_requires_gpu_dynamics(
     raw_colliders = interaction.get("collider_prims")
     if not isinstance(raw_colliders, list):
         raise GenManipExportError(
-            f"rigid object asset {asset_id}.interaction_contract.collider_prims "
-            "must be a list"
+            f"rigid object asset {asset_id}.interaction_contract.collider_prims must be a list"
         )
     return any(
         collider.get("collision_enabled") is True
@@ -1924,11 +1823,7 @@ def _articulation_joint_state_metric(
         "articulation joint state predicate",
     )
     target_dof = next(
-        (
-            dof
-            for dof in articulation.dofs
-            if dof.semantic_joint == semantic_joint
-        ),
+        (dof for dof in articulation.dofs if dof.semantic_joint == semantic_joint),
         None,
     )
     if target_dof is None:
@@ -1962,9 +1857,7 @@ def _relative_pose_metrics(
     articulation_bindings: Mapping[str, _ArticulationObjectBinding],
 ) -> list[dict[str, Any]]:
     object_id = _required_string(parameters, "object", "relative pose predicate")
-    relative_to = _required_string(
-        parameters, "relative_to", "relative pose predicate"
-    )
+    relative_to = _required_string(parameters, "relative_to", "relative pose predicate")
     raw_ranges = _required_mapping(parameters, "xyz_range", "relative pose predicate")
     metric_range: dict[str, Any] = {
         "type": _GENMANIP_RANGE,
@@ -1994,15 +1887,9 @@ def _relative_pose_metrics(
                 "type": _GENMANIP_AXIS_ALIGN,
                 "obj1_uid": object_id,
                 "obj2_uid": axis_target_uid,
-                "obj1_axis": _required_string(
-                    alignment, "object_axis", "axis_alignment"
-                ),
-                "obj2_axis": _required_string(
-                    alignment, "target_axis", "axis_alignment"
-                ),
-                "comparison": _required_string(
-                    alignment, "comparison", "axis_alignment"
-                ),
+                "obj1_axis": _required_string(alignment, "object_axis", "axis_alignment"),
+                "obj2_axis": _required_string(alignment, "target_axis", "axis_alignment"),
+                "comparison": _required_string(alignment, "comparison", "axis_alignment"),
                 "threshold_deg": _number(
                     alignment.get("threshold_deg"), "axis_alignment.threshold_deg"
                 ),
@@ -2080,23 +1967,18 @@ def _axis_target_uid(
     if articulation is None:
         if semantic_part is not None:
             raise GenManipExportError(
-                f"{part_field} may only be used when axis target "
-                f"{object_id!r} is articulated"
+                f"{part_field} may only be used when axis target {object_id!r} is articulated"
             )
         return object_id
     if semantic_part is None:
         raise GenManipExportError(
-            f"{part_field} is required when axis target {object_id!r} "
-            "is articulated"
+            f"{part_field} is required when axis target {object_id!r} is articulated"
         )
     if not isinstance(semantic_part, str) or not semantic_part:
         raise GenManipExportError(f"{part_field} must be a non-empty string")
-    if semantic_part not in {
-        dof.semantic_joint for dof in articulation.dofs
-    }:
+    if semantic_part not in {dof.semantic_joint for dof in articulation.dofs}:
         raise GenManipExportError(
-            f"unknown articulation part {semantic_part!r} for axis target "
-            f"{object_id!r}"
+            f"unknown articulation part {semantic_part!r} for axis target {object_id!r}"
         )
     return f"{object_id}_{semantic_part}"
 
@@ -2104,9 +1986,7 @@ def _axis_target_uid(
 def _optional_axis(parameters: Mapping[str, Any], key: str, default: str) -> str:
     value = parameters.get(key, default)
     if not isinstance(value, str) or value not in {"x", "y", "z", "-x", "-y", "-z"}:
-        raise GenManipExportError(
-            f"initial pose predicate.{key} must be a signed USD axis"
-        )
+        raise GenManipExportError(f"initial pose predicate.{key} must be a signed USD axis")
     return value
 
 
@@ -2126,14 +2006,13 @@ def _scene_usda(
     _require_usd_identifier(scenario_id, "scenario_id")
     scene_root_name = "_scene" if use_shared_runtime_namespace else scenario_id
     scene_asset_ids = [*overlay_asset_ids, source_asset_id]
-    source_references = [
-        _asset_reference(assets_by_id[asset_id]) for asset_id in scene_asset_ids
-    ]
+    source_references = [_asset_reference(assets_by_id[asset_id]) for asset_id in scene_asset_ids]
     source_override_tree: dict[str, Any] = {}
     for item in objects:
         source_prim = _required_string(item, "source_prim_path", "scenario object")
-        parts = _relative_prim_parts(source_root_prim, source_prim)
-        _add_source_override(source_override_tree, parts, inactive=True)
+        parts = _relative_prim_parts_if_descendant(source_root_prim, source_prim)
+        if parts is not None:
+            _add_source_override(source_override_tree, parts, inactive=True)
     for source_prim in inactive_source_prims:
         _add_source_override(
             source_override_tree,
@@ -2162,19 +2041,14 @@ def _scene_usda(
         "    {",
         '        def Xform "room" (',
         "            prepend references = [",
-        *[
-            f"                @{reference}@<{source_root_prim}>,"
-            for reference in source_references
-        ],
+        *[f"                @{reference}@<{source_root_prim}>," for reference in source_references],
         "            ]",
         "        )",
         "        {",
     ]
     if source_room_pose is not None:
         xyz = _number_list(source_room_pose.get("xyz"), 3, "scenario scene.pose.xyz")
-        wxyz = _number_list(
-            source_room_pose.get("wxyz"), 4, "scenario scene.pose.wxyz"
-        )
+        wxyz = _number_list(source_room_pose.get("wxyz"), 4, "scenario scene.pose.wxyz")
         scale = _number_list(
             source_room_pose.get("scale_xyz", [1.0, 1.0, 1.0]),
             3,
@@ -2213,9 +2087,7 @@ def _scene_usda(
             "static_support_object",
         }:
             continue
-        source_prim = _required_string(
-            item, "source_prim_path", f"scenario object {object_id}"
-        )
+        source_prim = _required_string(item, "source_prim_path", f"scenario object {object_id}")
         pose = _required_mapping(item, "pose", f"scenario object {object_id}")
         xyz = _number_list(pose.get("xyz"), 3, f"{object_id}.pose.xyz")
         wxyz = _number_list(pose.get("wxyz"), 4, f"{object_id}.pose.wxyz")
@@ -2317,9 +2189,7 @@ def _render_material_binding_tree(
         if material is not None:
             if not isinstance(material, str):
                 raise GenManipExportError("invalid internal material binding target")
-            lines.append(
-                f"{prefix}    rel material:binding = <{material_root}/{material}>"
-            )
+            lines.append(f"{prefix}    rel material:binding = <{material_root}/{material}>")
         lines.extend(
             _render_material_binding_tree(
                 child,
@@ -2387,14 +2257,21 @@ def _add_source_override(
 
 
 def _relative_prim_parts(root_prim: str, source_prim: str) -> tuple[str, ...]:
+    parts = _relative_prim_parts_if_descendant(root_prim, source_prim)
+    if parts is None:
+        raise GenManipExportError(
+            f"source prim {source_prim!r} is not below scene root {root_prim!r}"
+        )
+    return parts
+
+
+def _relative_prim_parts_if_descendant(root_prim: str, source_prim: str) -> tuple[str, ...] | None:
     root_parts = tuple(part for part in root_prim.split("/") if part)
     source_parts = tuple(part for part in source_prim.split("/") if part)
     if not root_prim.startswith("/") or not source_prim.startswith("/"):
         raise GenManipExportError("USD prim paths must be absolute")
     if source_parts[: len(root_parts)] != root_parts or len(source_parts) <= len(root_parts):
-        raise GenManipExportError(
-            f"source prim {source_prim!r} is not below scene root {root_prim!r}"
-        )
+        return None
     parts = source_parts[len(root_parts) :]
     for part in parts:
         _require_usd_identifier(part, "source prim component")
@@ -2411,16 +2288,13 @@ def _asset_reference(asset: AssetManifestEntry) -> str:
         or path.as_posix() != asset.canonical_usd
     ):
         raise GenManipExportError(
-            "asset canonical_usd must be a normalized path below assets/: "
-            f"{asset.canonical_usd}"
+            f"asset canonical_usd must be a normalized path below assets/: {asset.canonical_usd}"
         )
     relative = PurePosixPath(*path.parts[1:])
     return (PurePosixPath("source_bundle") / relative).as_posix()
 
 
-def _interactive_producer_entrypoint(
-    asset: AssetManifestEntry, target: str
-) -> Mapping[str, Any]:
+def _interactive_producer_entrypoint(asset: AssetManifestEntry, target: str) -> Mapping[str, Any]:
     if asset.role != "interactive_composed_scene":
         raise GenManipExportError(
             "producer_entrypoint scene asset must have role interactive_composed_scene"
@@ -2432,17 +2306,11 @@ def _interactive_producer_entrypoint(
     )
     if upstream.get("producer") != "LabUtopia":
         raise GenManipExportError("interactive scene producer must be LabUtopia")
-    metadata = _required_mapping(
-        upstream, "metadata", "interactive scene upstream_package"
-    )
+    metadata = _required_mapping(upstream, "metadata", "interactive scene upstream_package")
     if metadata.get("usage") != "interactive_composed_scene":
         raise GenManipExportError("interactive scene usage mismatch")
-    entrypoints = _required_mapping(
-        metadata, "entrypoints", "interactive scene upstream metadata"
-    )
-    entrypoint = _as_mapping(
-        entrypoints.get(target), f"interactive scene {target} entrypoint"
-    )
+    entrypoints = _required_mapping(metadata, "entrypoints", "interactive scene upstream metadata")
+    entrypoint = _as_mapping(entrypoints.get(target), f"interactive scene {target} entrypoint")
     if entrypoint.get("status") != "qualified":
         raise GenManipExportError(f"interactive scene {target} entrypoint is not qualified")
     if entrypoint.get("hidden_cube_overlay_applied") is not True:
@@ -2457,13 +2325,9 @@ def _interactive_producer_entrypoint(
     )
     required_roles = {"support_table", "source_container", "target_container"}
     if set(object_prims) != required_roles or set(states) != required_roles:
-        raise GenManipExportError(
-            f"interactive scene {target} embedded role set mismatch"
-        )
+        raise GenManipExportError(f"interactive scene {target} embedded role set mismatch")
     for role in required_roles:
-        state = _as_mapping(
-            states[role], f"interactive scene {target} state {role}"
-        )
+        state = _as_mapping(states[role], f"interactive scene {target} state {role}")
         if state.get("prim_path") != object_prims[role]:
             raise GenManipExportError(
                 f"interactive scene {target} embedded state path mismatch for {role}"
@@ -2486,26 +2350,16 @@ def _embedded_object_state(
         "target_container": "target_container",
     }.get(_required_string(item, "role", f"scenario object {object_id}"))
     if role is None:
-        raise GenManipExportError(
-            f"producer entrypoint has no embedded role for {object_id}"
-        )
-    states = _required_mapping(
-        entrypoint, "embedded_object_states", "producer entrypoint"
-    )
+        raise GenManipExportError(f"producer entrypoint has no embedded role for {object_id}")
+    states = _required_mapping(entrypoint, "embedded_object_states", "producer entrypoint")
     state = _as_mapping(states.get(role), f"producer state {role}")
-    source_path = _required_string(
-        item, "source_prim_path", f"scenario object {object_id}"
-    )
+    source_path = _required_string(item, "source_prim_path", f"scenario object {object_id}")
     if state.get("prim_path") != source_path:
-        raise GenManipExportError(
-            f"producer embedded state path mismatch for {object_id}"
-        )
+        raise GenManipExportError(f"producer embedded state path mismatch for {object_id}")
     return state
 
 
-def _producer_entrypoint_reference(
-    asset: AssetManifestEntry, entrypoint: Mapping[str, Any]
-) -> str:
+def _producer_entrypoint_reference(asset: AssetManifestEntry, entrypoint: Mapping[str, Any]) -> str:
     path = entrypoint.get("path")
     if not isinstance(path, str) or not path:
         raise GenManipExportError("producer entrypoint path must be non-empty")
@@ -2515,9 +2369,7 @@ def _producer_entrypoint_reference(
     return (PurePosixPath(_asset_reference(asset)).parent / relative).as_posix()
 
 
-def _producer_entrypoint_scene_usda(
-    reference: str, *, physics_hz: int, scenario_prim: str
-) -> str:
+def _producer_entrypoint_scene_usda(reference: str, *, physics_hz: int, scenario_prim: str) -> str:
     parts = PurePosixPath(scenario_prim).parts
     if len(parts) != 3 or parts[:2] != ("/", "World"):
         raise GenManipExportError(
@@ -2580,9 +2432,7 @@ def _runtime_static_preload_usda(
 ) -> str:
     root_prim = asset.metadata.get("root_prim_path")
     if not isinstance(root_prim, str) or not root_prim:
-        raise GenManipExportError(
-            f"static asset {asset.asset_id!r} is missing root_prim_path"
-        )
+        raise GenManipExportError(f"static asset {asset.asset_id!r} is missing root_prim_path")
     source_prim = _required_string(item, "source_prim_path", "static object")
     scope_parts = _relative_prim_parts(root_prim, source_prim)
     source_reference = PurePosixPath(_asset_reference(asset))
@@ -2596,10 +2446,7 @@ def _runtime_static_preload_usda(
         ")",
         "",
         'def Xform "Asset" (',
-        (
-            "    prepend references = "
-            f"@{relative_reference.as_posix()}@<{root_prim}>"
-        ),
+        (f"    prepend references = @{relative_reference.as_posix()}@<{root_prim}>"),
         ")",
         "{",
         "    uniform token[] xformOpOrder = []",
@@ -2628,9 +2475,7 @@ def _runtime_preload_scope_reset_lines(
     ]
     if len(parts) > 1:
         lines.append("")
-        lines.extend(
-            _runtime_preload_scope_reset_lines(parts[1:], indent=indent + 4)
-        )
+        lines.extend(_runtime_preload_scope_reset_lines(parts[1:], indent=indent + 4))
     lines.append(f"{prefix}}}")
     return lines
 
@@ -2649,11 +2494,7 @@ def _require_assets(
 
 
 def _table_object(objects: list[Mapping[str, Any]]) -> Mapping[str, Any]:
-    tables = [
-        item
-        for item in objects
-        if item.get("role") == "table" or item.get("id") == "table"
-    ]
+    tables = [item for item in objects if item.get("role") == "table" or item.get("id") == "table"]
     if len(tables) != 1:
         raise GenManipExportError("scenario must define exactly one table object")
     return tables[0]
@@ -2723,9 +2564,7 @@ def _episode_name(value: object) -> str:
     if isinstance(value, str) and value:
         episode_name = value.zfill(3) if value.isdigit() else value
         if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", episode_name) is None:
-            raise GenManipExportError(
-                "scenario seed must be a portable package path segment"
-            )
+            raise GenManipExportError("scenario seed must be a portable package path segment")
         return episode_name
     raise GenManipExportError("scenario seed must be a string or integer")
 
@@ -2746,15 +2585,10 @@ def _as_mapping(value: object, label: str) -> Mapping[str, Any]:
 def _mapping_list(value: object, label: str) -> list[Mapping[str, Any]]:
     if not isinstance(value, list):
         raise GenManipExportError(f"{label} must be a list")
-    return [
-        _as_mapping(item, f"{label}[{index}]")
-        for index, item in enumerate(value)
-    ]
+    return [_as_mapping(item, f"{label}[{index}]") for index, item in enumerate(value)]
 
 
-def _required_mapping(
-    data: Mapping[str, Any], key: str, label: str
-) -> Mapping[str, Any]:
+def _required_mapping(data: Mapping[str, Any], key: str, label: str) -> Mapping[str, Any]:
     return _as_mapping(data.get(key), f"{label}.{key}")
 
 

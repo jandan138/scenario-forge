@@ -1,0 +1,36 @@
+schema_version: scenario-forge-dressing-presets/v0.1
+presets:
+  example4-r9:
+    background_id: example4
+    objects: &full_wet_set
+      - {id: r9_amber_bottle, asset_id: scientific_workbench_r9_context_amber_reagent_bottle, source_prim_path: /ObjectRoot, group_id: left_amber, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_tip_box, asset_id: scientific_workbench_r9_context_pipette_tip_box, source_prim_path: /ObjectRoot, group_id: left_tips, pose: {xyz: [-0.58, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_wash_bottle, asset_id: scientific_workbench_r9_context_wash_bottle, source_prim_path: /ObjectRoot, group_id: right_wash, pose: {xyz: [0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_clear_bottle, asset_id: scientific_workbench_r9_context_clear_reagent_bottle, source_prim_path: /ObjectRoot, group_id: right_clear, pose: {xyz: [0.58, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_pipette_carousel, asset_id: scientific_workbench_r9_context_pipette_carousel, source_prim_path: /ObjectRoot, group_id: right_pipettes, pose: {xyz: [0.82, -0.04, 0.755], wxyz: [1, 0, 0, 0]}}
+  teaching-research-r9:
+    background_id: teaching_research
+    objects:
+      - {id: r9_amber_bottle, asset_id: scientific_workbench_r9_context_amber_reagent_bottle, source_prim_path: /ObjectRoot, group_id: left_amber, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_tip_box, asset_id: scientific_workbench_r9_context_pipette_tip_box, source_prim_path: /ObjectRoot, group_id: left_tips, pose: {xyz: [-0.58, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_wash_bottle, asset_id: scientific_workbench_r9_context_wash_bottle, source_prim_path: /ObjectRoot, group_id: right_wash, pose: {xyz: [0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_clear_bottle, asset_id: scientific_workbench_r9_context_clear_reagent_bottle, source_prim_path: /ObjectRoot, group_id: right_clear, pose: {xyz: [0.58, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_context_cylinder, asset_id: scientific_workbench_r9_context_graduated_cylinder_100ml, source_prim_path: /ObjectRoot, group_id: left_measurement, pose: {xyz: [-0.82, -0.04, 0.755], wxyz: [1, 0, 0, 0]}}
+  modern-wet-chemistry-r9:
+    background_id: modern_wet_chemistry
+    objects: *full_wet_set
+  bioclean-r9:
+    background_id: bioclean
+    objects:
+      - {id: r9_clear_bottle, asset_id: scientific_workbench_r9_context_clear_reagent_bottle, source_prim_path: /ObjectRoot, group_id: left_clear, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_tip_box, asset_id: scientific_workbench_r9_context_pipette_tip_box, source_prim_path: /ObjectRoot, group_id: left_tips, pose: {xyz: [-0.58, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_wash_bottle, asset_id: scientific_workbench_r9_context_wash_bottle, source_prim_path: /ObjectRoot, group_id: right_wash, pose: {xyz: [0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_pipette_carousel, asset_id: scientific_workbench_r9_context_pipette_carousel, source_prim_path: /ObjectRoot, group_id: right_pipettes, pose: {xyz: [0.62, 0.20, 0.755], wxyz: [1, 0, 0, 0]}}
+  analytical-instrumentation-r9:
+    background_id: analytical_instrumentation
+    objects:
+      - {id: r9_amber_bottle, asset_id: scientific_workbench_r9_context_amber_reagent_bottle, source_prim_path: /ObjectRoot, group_id: left_amber, pose: {xyz: [-0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_tip_box, asset_id: scientific_workbench_r9_context_pipette_tip_box, source_prim_path: /ObjectRoot, group_id: left_tips, pose: {xyz: [-0.58, 0.22, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_clear_bottle, asset_id: scientific_workbench_r9_context_clear_reagent_bottle, source_prim_path: /ObjectRoot, group_id: right_clear, pose: {xyz: [0.78, 0.18, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_pipette_carousel, asset_id: scientific_workbench_r9_context_pipette_carousel, source_prim_path: /ObjectRoot, group_id: right_pipettes, pose: {xyz: [0.58, 0.20, 0.755], wxyz: [1, 0, 0, 0]}}
+      - {id: r9_context_cylinder, asset_id: scientific_workbench_r9_context_graduated_cylinder_100ml, source_prim_path: /ObjectRoot, group_id: right_measurement, pose: {xyz: [0.82, -0.04, 0.755], wxyz: [1, 0, 0, 0]}}
