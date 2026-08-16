@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从开边薄壳到 GPU-PBD 容器：Scenario Forge Task 02 r8.7 量筒液体修复教程。">
+  <link rel="icon" href="data:,">
+  <title>让量筒真正装得住液体 · Scenario Forge</title>
+  <style>
+    :root{
+      --ink:#071c29;--ink-2:#0d2d3c;--glass:#dff9f5;--glass-2:#a8ddd7;
+      --liquid:#32c7ed;--liquid-deep:#1586b7;--pass:#6de3a5;--warn:#f1b84b;
+      --paper:#f2f7f6;--white:#fbfefd;--muted:#56717b;--line:#bfd4d3;
+      --display:"Arial Narrow","Roboto Condensed","Noto Sans SC","Microsoft YaHei",sans-serif;
+      --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+      --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:84px}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.72}
+    a{color:inherit}
+    img,video{display:block;max-width:100%}
+    button{font:inherit}
+    .shell{width:min(1240px,calc(100% - 48px));margin-inline:auto}
+    .topbar{position:sticky;top:0;z-index:20;background:rgba(7,28,41,.94);color:#fff;border-bottom:1px solid rgba(168,221,215,.25);backdrop-filter:blur(14px)}
+    .topbar .shell{height:62px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-family:var(--display);font-weight:900;letter-spacing:.04em}
+    .brand-mark{width:17px;height:28px;border:2px solid var(--glass-2);border-top:0;border-radius:0 0 8px 8px;position:relative;overflow:hidden}
+    .brand-mark::after{content:"";position:absolute;inset:13px 2px 2px;background:var(--liquid);border-radius:0 0 5px 5px}
+    .topbar nav{display:flex;gap:20px;color:#b9d2d6;font:700 .73rem/1 var(--mono);letter-spacing:.04em}
+    .topbar nav a{text-decoration:none}
+    .topbar nav a:hover{color:var(--liquid)}
+    .hero{overflow:hidden;background:var(--ink);color:#fff;position:relative}
+    .hero::before{content:"";position:absolute;width:660px;height:660px;right:-180px;top:-260px;border-radius:50%;background:radial-gradient(circle,rgba(50,199,237,.18),rgba(50,199,237,0) 68%)}
+    .hero-grid{min-height:720px;display:grid;grid-template-columns:minmax(0,.92fr) minmax(480px,1.08fr);gap:70px;align-items:center;padding-block:78px}
+    .eyebrow{margin:0 0 22px;color:var(--glass-2);font:800 .76rem/1.3 var(--mono);letter-spacing:.16em;text-transform:uppercase}
+    h1,h2,h3{font-family:var(--display)}
+    h1{max-width:680px;margin:0;font-size:clamp(3.4rem,7vw,7.1rem);line-height:.88;letter-spacing:-.065em;font-weight:900}
+    h1 span{display:block;color:var(--liquid)}
+    .hero-thesis{max-width:650px;margin:30px 0 0;padding-left:18px;border-left:3px solid var(--liquid);font-size:1.08rem;color:#d4e5e7}
+    .hero-thesis strong{color:#fff}
+    .hero-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+    .button-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border:1px solid var(--glass-2);color:#fff;text-decoration:none;font-weight:800;font-size:.84rem}
+    .button-link.primary{background:var(--liquid);border-color:var(--liquid);color:var(--ink)}
+    .hero-media{position:relative;padding:18px 18px 60px;border:1px solid rgba(168,221,215,.32);background:#0b222e;box-shadow:28px 30px 0 rgba(50,199,237,.08)}
+    .hero-media::before{content:"R8.7 / LIVE POINTS";position:absolute;left:18px;bottom:22px;color:var(--glass-2);font:700 .72rem/1 var(--mono);letter-spacing:.08em}
+    .hero-media img{width:100%;aspect-ratio:16/9;object-fit:cover}
+    .proof-band{background:var(--ink-2);color:#fff;border-top:1px solid rgba(168,221,215,.2)}
+    .proof-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+    .proof{padding:26px 24px;border-right:1px solid rgba(168,221,215,.2)}
+    .proof:first-child{border-left:1px solid rgba(168,221,215,.2)}
+    .proof strong{display:block;color:var(--liquid);font:900 clamp(1.8rem,3vw,3rem)/1 var(--display);letter-spacing:-.04em}
+    .proof span{display:block;margin-top:8px;color:#b9d2d6;font-size:.78rem}
+    main{padding-bottom:90px}
+    .section{position:relative;padding:96px 0;border-bottom:1px solid var(--line)}
+    .section-grid{display:grid;grid-template-columns:190px minmax(0,1fr);gap:56px}
+    .section-grid>*{min-width:0}
+    .scale{position:relative;padding-left:52px;min-height:160px;color:var(--muted);font:800 .72rem/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+    .scale::before{content:"";position:absolute;left:13px;top:4px;bottom:0;width:2px;background:var(--ink)}
+    .scale::after{content:"";position:absolute;left:14px;top:4px;width:24px;height:1px;background:var(--ink);box-shadow:0 24px 0 -0.2px var(--line),0 48px 0 -0.2px var(--line),0 72px 0 -0.2px var(--line),0 96px 0 -0.2px var(--line),0 120px 0 -0.2px var(--line)}
+    .scale b{display:block;margin-bottom:10px;color:var(--liquid-deep);font:900 2.8rem/1 var(--display);letter-spacing:-.04em}
+    .section h2{max-width:800px;margin:0;font-size:clamp(2.25rem,5vw,4.8rem);line-height:.96;letter-spacing:-.055em}
+    .lede{max-width:840px;margin:24px 0 0;color:var(--muted);font-size:1.06rem}
+    .lede strong{color:var(--ink)}
+    .diagnosis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:40px;background:var(--line);border:1px solid var(--line)}
+    .diagnosis-card{background:var(--white);padding:28px}
+    .diagnosis-card .label{color:var(--liquid-deep);font:800 .7rem/1 var(--mono);letter-spacing:.09em}
+    .diagnosis-card h3{font-size:1.35rem;margin:14px 0 10px}
+    .diagnosis-card p{margin:0;color:var(--muted);font-size:.9rem}
+    .evidence-line{margin-top:34px;padding:18px 22px;background:#fff3d8;border-left:4px solid var(--warn);color:#6c4c16;font-size:.92rem}
+    .cutaway{margin-top:44px;background:var(--ink);color:#fff;display:grid;grid-template-columns:minmax(380px,.9fr) 1.1fr;min-height:650px;overflow:hidden}
+    .cutaway-visual{padding:30px;display:grid;place-items:center;background:radial-gradient(circle at 50% 46%,rgba(50,199,237,.12),transparent 52%)}
+    .cutaway svg{width:min(100%,430px);height:auto;max-height:590px}
+    .cutaway-copy{padding:58px 50px;border-left:1px solid rgba(168,221,215,.22)}
+    .cutaway-copy h3{font-size:2rem;line-height:1.05;margin:0 0 16px}
+    .cutaway-copy>p{color:#bdd1d5;margin:0}
+    .layer-controls{display:grid;gap:10px;margin:30px 0}
+    .layer-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:15px 16px;background:transparent;color:#fff;border:1px solid #46616a;text-align:left;cursor:pointer}
+    .layer-toggle[aria-pressed="true"]{border-color:var(--liquid);background:rgba(50,199,237,.1)}
+    .layer-toggle small{font:700 .68rem/1 var(--mono);color:var(--glass-2)}
+    .spec-list{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#29434d;border:1px solid #29434d;margin-top:28px}
+    .spec{padding:16px;background:#0d2733}
+    .spec span{display:block;color:#8fb1b6;font-size:.68rem}
+    .spec strong{font:800 .88rem/1.35 var(--mono);color:#fff}
+    .photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:42px}
+    figure{margin:0;background:var(--white);border:1px solid var(--line)}
+    figure img{width:100%;aspect-ratio:16/9;object-fit:cover}
+    figcaption{padding:12px 14px;color:var(--muted);font:700 .72rem/1.5 var(--mono)}
+    .liquid-stack{display:grid;grid-template-columns:1.08fr .92fr;gap:22px;margin-top:42px;align-items:stretch}
+    .liquid-panel{padding:34px;background:#dff7fa;border:1px solid #91d8e4}
+    .liquid-panel h3{margin:0 0 14px;font-size:1.55rem}
+    .liquid-panel p{margin:0;color:#365e69}
+    .param-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px}
+    .param{padding:14px;background:rgba(255,255,255,.65)}
+    .param span{display:block;color:#4d7780;font-size:.7rem}
+    .param strong{font:900 1rem/1.3 var(--mono)}
+    .pose-flow{display:grid;gap:0;background:var(--white);border:1px solid var(--line);padding:8px 24px}
+    .pose-step{display:grid;grid-template-columns:48px 1fr;gap:14px;padding:20px 0;border-bottom:1px solid var(--line)}
+    .pose-step:last-child{border:0}
+    .pose-step b{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--liquid);font:900 .82rem/1 var(--mono)}
+    .pose-step strong{display:block;font-size:.93rem}
+    .pose-step span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
+    .pipeline{display:grid;grid-template-columns:repeat(3,1fr);margin-top:42px;border:1px solid var(--line);background:var(--white)}
+    .pipeline article{position:relative;padding:28px;border-right:1px solid var(--line)}
+    .pipeline article:last-child{border:0}
+    .pipeline article:not(:last-child)::after{content:"→";position:absolute;right:-14px;top:28px;z-index:2;width:28px;height:28px;display:grid;place-items:center;background:var(--liquid);font-weight:900}
+    .pipeline .owner{color:var(--liquid-deep);font:800 .72rem/1 var(--mono)}
+    .pipeline h3{font-size:1.25rem;margin:12px 0 8px}
+    .pipeline p{color:var(--muted);font-size:.86rem;margin:0}
+    .video-wrap{margin-top:42px;background:var(--ink);padding:18px}
+    .video-wrap video{width:100%;aspect-ratio:16/9;background:#000}
+    .video-meta{display:flex;justify-content:space-between;gap:24px;padding:16px 4px 0;color:#b9d2d6;font-size:.82rem}
+    .video-meta strong{color:var(--pass)}
+    .results{width:100%;border-collapse:collapse;margin-top:28px;background:var(--white);border:1px solid var(--line)}
+    .results th,.results td{padding:15px 18px;border-bottom:1px solid var(--line);text-align:left}
+    .results th{background:var(--ink);color:#fff;font:800 .7rem/1.3 var(--mono);letter-spacing:.06em}
+    .results td{font-size:.88rem}
+    .results tr:last-child td{border:0}
+    .pass{color:#087c51;font-weight:900}
+    .five-moves{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:32px}
+    .move{padding:18px 14px;background:var(--white);border-top:4px solid var(--liquid)}
+    .move b{font:900 .78rem/1 var(--mono);color:var(--liquid-deep)}
+    .move strong{display:block;margin-top:10px;font-size:.88rem}
+    .move span{display:block;margin-top:5px;color:var(--muted);font-size:.75rem}
+    .repro-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:42px}
+    .repro-card{background:var(--white);border:1px solid var(--line);padding:28px;min-width:0}
+    .repro-card h3{font-size:1.35rem;margin:0 0 15px}
+    .checklist{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+    .checklist li{position:relative;padding-left:28px;color:var(--muted);font-size:.88rem}
+    .checklist li::before{content:"✓";position:absolute;left:0;top:1px;width:19px;height:19px;display:grid;place-items:center;background:#dff5e8;color:#087c51;font-weight:900}
+    .code-wrap{position:relative;margin-top:16px}
+    pre{margin:0;padding:46px 18px 18px;overflow:auto;background:var(--ink);color:#d9f5f1;font:500 .73rem/1.75 var(--mono);white-space:pre}
+    .copy{position:absolute;right:8px;top:8px;z-index:2;padding:7px 10px;border:1px solid #4b6770;background:#102f3d;color:#fff;font:700 .68rem/1 var(--mono);cursor:pointer}
+    .copy[data-copied="true"]{border-color:var(--pass);color:var(--pass)}
+    details{margin-top:16px;border:1px solid var(--line);background:var(--white)}
+    summary{cursor:pointer;padding:15px 18px;font-weight:800}
+    details .detail-body{padding:0 18px 18px;color:var(--muted);font-size:.86rem}
+    .dont{margin-top:34px;background:#fff3d8;border:1px solid #e8c679;padding:28px}
+    .dont h3{margin:0 0 15px;font-size:1.35rem;color:#5f4415}
+    .dont ul{margin:0;padding-left:20px;color:#6c4c16;columns:2;column-gap:48px}
+    .dont li{break-inside:avoid;margin:7px 0}
+    .claim{margin-top:42px;padding:28px;background:var(--ink);color:#bfd4d8;border-left:6px solid var(--warn)}
+    .claim strong{color:#fff}
+    .claim p{margin:0}
+    footer{background:var(--ink);color:#abc5ca;padding:34px 0;font-size:.82rem}
+    footer .shell{display:flex;justify-content:space-between;gap:28px}
+    footer a{color:var(--liquid)}
+    :focus-visible{outline:3px solid var(--warn);outline-offset:3px}
+    @media(max-width:980px){
+      .hero-grid{grid-template-columns:1fr;min-height:0}.hero-media{max-width:760px}.section-grid{grid-template-columns:120px minmax(0,1fr);gap:30px}
+      .cutaway{grid-template-columns:1fr}.cutaway-copy{border-left:0;border-top:1px solid rgba(168,221,215,.22)}
+      .diagnosis-grid,.pipeline{grid-template-columns:1fr}.pipeline article{border-right:0;border-bottom:1px solid var(--line)}.pipeline article:last-child{border:0}.pipeline article:not(:last-child)::after{content:"↓";right:28px;top:auto;bottom:-14px}
+      .five-moves{grid-template-columns:repeat(3,1fr)}
+    }
+    @media(max-width:720px){
+      .shell{width:min(100% - 28px,1240px)}.topbar nav a:not(:last-child){display:none}.hero-grid{padding-block:52px;gap:42px}.hero-media{padding:10px 10px 48px;box-shadow:12px 14px 0 rgba(50,199,237,.08)}
+      h1{font-size:clamp(3.1rem,17vw,5rem)}.proof-grid{grid-template-columns:1fr 1fr}.proof:nth-child(odd){border-left:1px solid rgba(168,221,215,.2)}.proof{border-bottom:1px solid rgba(168,221,215,.2)}
+      .section{padding:68px 0}.section-grid{grid-template-columns:1fr}.scale{min-height:0;padding:0 0 0 54px}.scale::before{bottom:auto;height:44px}.scale::after{box-shadow:0 14px 0 -0.2px var(--line),0 28px 0 -0.2px var(--line)}
+      .diagnosis-grid,.photo-pair,.liquid-stack,.repro-grid{grid-template-columns:1fr}.cutaway-visual{padding:22px}.cutaway-copy{padding:36px 24px}.spec-list{grid-template-columns:1fr 1fr}.param-grid{grid-template-columns:1fr 1fr}
+      .five-moves{grid-template-columns:1fr 1fr}.results{display:block;overflow-x:auto}.video-wrap{padding:8px}.video-meta{display:block}.video-meta span{display:block;margin-top:6px}.dont ul{columns:1}.topbar .shell{height:56px}
+      footer .shell{display:block}footer p{margin:8px 0}
+    }
+    @media(max-width:420px){.proof-grid,.five-moves,.spec-list,.param-grid{grid-template-columns:1fr}.proof{border-left:1px solid rgba(168,221,215,.2)}.button-link{width:100%}.topbar nav{display:none}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="../task-directory/index.html"><span class="brand-mark" aria-hidden="true"></span>SCENARIO FORGE</a>
+      <nav aria-label="页面导航"><a href="#diagnosis">诊断</a><a href="#collision-shell">碰撞壳</a><a href="#robot-proof">机器人证据</a><a href="../task-directory/index.html">任务目录 ↗</a></nav>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="shell hero-grid">
+      <div>
+        <p class="eyebrow">Task 02 · r8.7 · GPU-PBD vessel repair</p>
+        <h1>让量筒真正<span>装得住液体</span></h1>
+        <p class="hero-thesis"><strong>不是把碰撞参数一味调大。</strong>正确做法是保留透明量筒的外观，再给它做一个 GPU 算得动、内部真正中空的隐形碰撞内胆。</p>
+        <div class="hero-links"><a class="button-link primary" href="#diagnosis">从失败开始学</a><a class="button-link" href="#robot-proof">先看最终视频</a></div>
+      </div>
+      <figure class="hero-media">
+        <img src="assets/vessel-closeup.png" alt="标准工作台上的透明量筒、蓝色粒子液体与目标烧杯">
+      </figure>
+    </div>
+  </header>
+
+  <div class="proof-band" aria-label="最终结果摘要">
+    <div class="shell proof-grid">
+      <div class="proof"><strong>580</strong><span>GPU-PBD 液体粒子</span></div>
+      <div class="proof"><strong>3 / 3</strong><span>正式冷启动机器人实验通过</span></div>
+      <div class="proof"><strong>560–570</strong><span>每次进入目标烧杯的粒子</span></div>
+      <div class="proof"><strong>0</strong><span>三次实验洒出或掉到桌下</span></div>
+    </div>
+  </div>
+
+  <main>
+    <section class="section" id="diagnosis">
+      <div class="shell section-grid">
+        <aside class="scale"><b>01</b>先找准病因</aside>
+        <div>
+          <h2>它看起来像杯子，物理上却不一定是杯子</h2>
+          <p class="lede">视觉模型只负责“像不像量筒”；液体碰撞模型负责“能不能把粒子留在里面”。原资产是适合渲染的<strong>开边薄壳</strong>，直接交给 GPU 做凸分解时，内腔无法得到稳定表达。</p>
+          <div class="diagnosis-grid">
+            <article class="diagnosis-card"><span class="label">VISIBLE MESH</span><h3>眼睛看到的是对的</h3><p>透明筒壁、刻度、底座都正常，尺寸也没有错。它不该因为物理问题被替换或改粗。</p></article>
+            <article class="diagnosis-card"><span class="label">COLLISION MESH</span><h3>GPU 摸到的是错的</h3><p>薄面、开口边和不稳定的分解结果，会让粒子穿壁、从底部漏出，甚至触发 GPU cooking 错误。</p></article>
+            <article class="diagnosis-card"><span class="label">LIVE READBACK</span><h3>旧证据读错了状态</h3><p><code>simulationPoints</code> 是写入的初值；真正判断是否漏液必须读运行中的 <code>points</code>。</p></article>
+          </div>
+          <div class="evidence-line"><strong>纠错证据：</strong>改用实时 <code>points</code> 后，旧量筒三次只留下 43–45 / 548 粒。问题不是“液体颜色太淡”，而是碰撞容器根本没有成立。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="collision-shell">
+      <div class="shell section-grid">
+        <aside class="scale"><b>02</b>重建隐形内胆</aside>
+        <div>
+          <h2>外观不动，只重做液体真正接触的那一层</h2>
+          <p class="lede">我们没有拿圆柱体粗暴套住量筒，也没有修改原始视觉 mesh。ConvertAsset 参考已经跑通的 LabUtopia 0812 容器拓扑，把模板按量筒的实测半径和高度变形，生成一个<strong>source-derived、封闭、可三角化</strong>的隐藏碰撞网格。</p>
+          <div class="cutaway">
+            <div class="cutaway-visual">
+              <svg viewBox="0 0 520 700" role="img" aria-labelledby="cutaway-title cutaway-desc">
+                <title id="cutaway-title">量筒视觉层、碰撞层和液体粒子剖面</title>
+                <desc id="cutaway-desc">可通过右侧按钮分别强调透明视觉外壳、隐藏碰撞内胆和液体粒子。</desc>
+                <defs>
+                  <linearGradient id="glassFill" x1="0" x2="1"><stop offset="0" stop-color="#dff9f5" stop-opacity=".08"/><stop offset=".55" stop-color="#dff9f5" stop-opacity=".28"/><stop offset="1" stop-color="#dff9f5" stop-opacity=".05"/></linearGradient>
+                  <linearGradient id="liquidFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#54d9f7" stop-opacity=".62"/><stop offset="1" stop-color="#1586b7" stop-opacity=".86"/></linearGradient>
+                  <clipPath id="cavityClip"><path d="M191 141 L329 141 L321 545 Q260 567 199 545 Z"/></clipPath>
+                </defs>
+                <g id="svg-visual">
+                  <path d="M165 105 Q260 77 355 105 L342 571 Q260 606 178 571 Z" fill="url(#glassFill)" stroke="#dff9f5" stroke-width="6"/>
+                  <ellipse cx="260" cy="105" rx="95" ry="27" fill="#071c29" fill-opacity=".45" stroke="#dff9f5" stroke-width="6"/>
+                  <path d="M174 584 L346 584 L383 627 L137 627 Z" fill="#dff9f5" fill-opacity=".16" stroke="#dff9f5" stroke-width="5"/>
+                  <g stroke="#a8ddd7" stroke-width="3" opacity=".85">
+                    <path d="M335 184h35"/><path d="M337 224h22"/><path d="M336 264h34"/><path d="M337 304h22"/><path d="M334 344h36"/><path d="M333 384h24"/><path d="M331 424h39"/><path d="M330 464h25"/>
+                  </g>
+                  <text x="389" y="350" transform="rotate(90 389 350)" fill="#a8ddd7" font-family="monospace" font-size="16" letter-spacing="3">VISUAL / UNCHANGED</text>
+                </g>
+                <g id="svg-collider">
+                  <path d="M188 131 Q260 111 332 131 L324 551 Q260 574 196 551 Z" fill="none" stroke="#f1b84b" stroke-width="7" stroke-dasharray="13 9"/>
+                  <path d="M196 551 Q260 574 324 551" fill="none" stroke="#f1b84b" stroke-width="7"/>
+                  <text x="95" y="350" transform="rotate(-90 95 350)" fill="#f1b84b" font-family="monospace" font-size="16" letter-spacing="3">HIDDEN COLLISION SHELL</text>
+                </g>
+                <g id="svg-particles" clip-path="url(#cavityClip)">
+                  <path d="M175 327 Q260 306 345 327 V565 H175 Z" fill="url(#liquidFill)"/>
+                  <g fill="#b9f0ff" opacity=".92">
+                    <circle cx="210" cy="350" r="6"/><circle cx="240" cy="342" r="6"/><circle cx="272" cy="351" r="6"/><circle cx="305" cy="341" r="6"/>
+                    <circle cx="223" cy="377" r="6"/><circle cx="257" cy="375" r="6"/><circle cx="292" cy="379" r="6"/><circle cx="318" cy="367" r="6"/>
+                    <circle cx="207" cy="407" r="6"/><circle cx="241" cy="405" r="6"/><circle cx="277" cy="409" r="6"/><circle cx="309" cy="405" r="6"/>
+                    <circle cx="220" cy="438" r="6"/><circle cx="255" cy="436" r="6"/><circle cx="292" cy="440" r="6"/><circle cx="317" cy="428" r="6"/>
+                    <circle cx="205" cy="470" r="6"/><circle cx="238" cy="468" r="6"/><circle cx="272" cy="472" r="6"/><circle cx="306" cy="468" r="6"/>
+                    <circle cx="218" cy="500" r="6"/><circle cx="253" cy="502" r="6"/><circle cx="289" cy="499" r="6"/><circle cx="315" cy="489" r="6"/>
+                    <circle cx="207" cy="530" r="6"/><circle cx="242" cy="532" r="6"/><circle cx="278" cy="529" r="6"/><circle cx="307" cy="526" r="6"/>
+                  </g>
+                </g>
+                <text x="260" y="668" text-anchor="middle" fill="#8fb1b6" font-family="monospace" font-size="14">剖面示意 · 实际运行 580 粒子</text>
+              </svg>
+            </div>
+            <div class="cutaway-copy">
+              <p class="eyebrow">Interactive cutaway</p>
+              <h3>分别看看三层各做什么</h3>
+              <p>关闭一层不会改变仿真，只帮助你理解：好看的玻璃和可靠的液体碰撞，本来就应该各司其职。</p>
+              <div class="layer-controls" aria-label="量筒剖面图层">
+                <button class="layer-toggle" type="button" data-layer="visual" aria-pressed="true"><span>透明视觉外壳</span><small>LOOKS RIGHT</small></button>
+                <button class="layer-toggle" type="button" data-layer="collider" aria-pressed="true"><span>隐藏碰撞内胆</span><small>COOKS RIGHT</small></button>
+                <button class="layer-toggle" type="button" data-layer="particles" aria-pressed="true"><span>GPU-PBD 液体</span><small>MOVES RIGHT</small></button>
+              </div>
+              <div class="spec-list">
+                <div class="spec"><span>边界边</span><strong>0</strong></div><div class="spec"><span>非流形边</span><strong>0</strong></div>
+                <div class="spec"><span>碰撞策略</span><strong>convexDecomposition</strong></div><div class="spec"><span>内腔半径</span><strong>16.5 mm</strong></div>
+                <div class="spec"><span>内腔底面</span><strong>16 mm</strong></div><div class="spec"><span>内腔杯口</span><strong>278.24 mm</strong></div>
+              </div>
+            </div>
+          </div>
+          <details><summary>为什么这不是“一个实心 GPU 凸包”？</summary><div class="detail-body">入口只有一个隐藏 mesh prim，但 <code>convexDecomposition</code> 会把它烹饪为若干可由 GPU 处理的凸组成部分，从而共同表达杯壁和中空内腔。若直接把整个量筒做成单一 convex hull，杯口会被封住，液体反而进不去也倒不出。</div></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="liquid-start">
+      <div class="shell section-grid">
+        <aside class="scale"><b>03</b>让初值和容器对齐</aside>
+        <div>
+          <h2>粒子参数不乱改，先让它们站在正确的位置</h2>
+          <p class="lede">最终方案沿用 0812 已验证的轻量液体参数，只把外观调成更易观察的蓝色。真正解决“刚抬量筒就冒出一坨液体”的关键，是先让量筒在 755 mm 桌面上自然落稳，再把预沉降粒子保存到量筒的<strong>局部坐标</strong>中。</p>
+          <div class="liquid-stack">
+            <article class="liquid-panel">
+              <h3>沿用的液体基线</h3>
+              <p>不增加体积光、不增加额外灯光，也不靠高成本材质掩盖粒子。颜色只影响看见什么，不影响碰撞。</p>
+              <div class="param-grid">
+                <div class="param"><span>粒子数</span><strong>580</strong></div><div class="param"><span>粒子宽度</span><strong>5.94 mm</strong></div>
+                <div class="param"><span>contact offset</span><strong>5 mm</strong></div><div class="param"><span>rest offset</span><strong>0 mm</strong></div>
+                <div class="param"><span>颜色 RGB</span><strong>.32 / .72 / .95</strong></div><div class="param"><span>透明度 / IOR</span><strong>.34 / 1.333</strong></div>
+              </div>
+            </article>
+            <div class="pose-flow" aria-label="动态装液初始状态流程">
+              <div class="pose-step"><b>A</b><div><strong>空量筒自然沉降</strong><span>测出真实支撑姿态，不猜高度。</span></div></div>
+              <div class="pose-step"><b>B</b><div><strong>液体在该姿态内预沉降</strong><span>保存稳定粒子分布。</span></div></div>
+              <div class="pose-step"><b>C</b><div><strong>转为量筒局部坐标</strong><span>容器移动，液体初值跟着移动。</span></div></div>
+              <div class="pose-step"><b>D</b><div><strong>一起映射到任务桌面</strong><span>Scenario Forge 不再加 −7 mm 补偿。</span></div></div>
+            </div>
+          </div>
+          <div class="photo-pair">
+            <figure><img src="assets/scene-overview.png" alt="现代湿化学房间、标准工作台和 eBench 双臂机器人组成的 r8.7 场景"><figcaption>完整场景：背景、标准桌、双臂机器人、量筒和烧杯</figcaption></figure>
+            <figure><img src="assets/vessel-closeup.png" alt="蓝色液体稳定保留在透明量筒内的特写"><figcaption>初始状态：量筒竖直、液体无外部团块、烧杯为空</figcaption></figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="package">
+      <div class="shell section-grid">
+        <aside class="scale"><b>04</b>按职责组装</aside>
+        <div>
+          <h2>修物理的人、装场景的人、跑机器人的人不要互相越界</h2>
+          <p class="lede">这条边界让修复可以复用，也防止任务包里悄悄出现量筒专用补丁。</p>
+          <div class="pipeline">
+            <article><span class="owner">CONVERTASSET</span><h3>修好器皿</h3><p>生成隐藏碰撞壳，做 GPU cooking、三次冷启动、静态保液和规定轨迹倒液资格验证。</p></article>
+            <article><span class="owner">SCENARIO FORGE</span><h3>组装任务包</h3><p>消费合格 package/manifest，把房间、桌子、机器人、容器和粒子放进同一个自包含场景。</p></article>
+            <article><span class="owner">EOS / GENMANIP</span><h3>执行机器人</h3><p>规划双臂动作，记录真实接触、粒子归属和视频；不回头修改 GenManip 或资产物理。</p></article>
+          </div>
+          <div class="evidence-line"><strong>Scenario Forge 的关键动作只有一个：</strong>把生产方测得的量筒姿态和 580 个局部粒子使用同一变换写入任务场景。它没有添加 collider、mass、friction、rest offset 或 PhysX 警告抑制。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="robot-proof">
+      <div class="shell section-grid">
+        <aside class="scale"><b>05</b>再让机器人动</aside>
+        <div>
+          <h2>液体没漏之后，剩下的问题其实是机器人动作</h2>
+          <p class="lede">早期快速抬升让量筒在闭合夹爪里滑了约 101.7 mm。液体本身没有先坏，是容器从机器人预期的抓取位姿中滑走了。最终修复没有再动碰撞或液体参数，而是把 100 mm 抬升拉长到 2 秒。</p>
+          <div class="five-moves">
+            <div class="move"><b>01</b><strong>左臂固定烧杯</strong><span>保持上一控制指令</span></div>
+            <div class="move"><b>02</b><strong>右臂慢抬量筒</strong><span>100 mm / 2 s</span></div>
+            <div class="move"><b>03</b><strong>杯口精确对准</strong><span>横向误差 ≤ 0.329 mm</span></div>
+            <div class="move"><b>04</b><strong>倾斜并停留</strong><span>约 114° / 3 s</span></div>
+            <div class="move"><b>05</b><strong>回正、放回、松开</strong><span>无直接物体位姿写入</span></div>
+          </div>
+          <div class="video-wrap">
+            <video controls playsinline preload="metadata" poster="assets/robot-keyframes.png" aria-label="Task 02 r8.7 双臂机器人量筒向烧杯倒液视频">
+              <source src="assets/robot-pour.mp4" type="video/mp4">
+              浏览器无法播放该视频，请查看下方关键帧与结果表。
+            </video>
+            <div class="video-meta"><strong>17.7 秒 · H.264 · 1920×1080</strong><span>左：房间与机器人　右：夹爪与液体</span></div>
+          </div>
+          <table class="results">
+            <thead><tr><th>正式冷启动</th><th>进入烧杯</th><th>留在量筒</th><th>洒出</th><th>对口误差</th><th>结果</th></tr></thead>
+            <tbody>
+              <tr><td>Run 01</td><td>570 / 580</td><td>10</td><td>0</td><td>0.325 mm</td><td class="pass">PASS</td></tr>
+              <tr><td>Run 02</td><td>560 / 580</td><td>20</td><td>0</td><td>0.327 mm</td><td class="pass">PASS</td></tr>
+              <tr><td>Run 03</td><td>569 / 580</td><td>11</td><td>0</td><td>0.329 mm</td><td class="pass">PASS</td></tr>
+            </tbody>
+          </table>
+          <details><summary>为什么等待 3 秒，而不是一直等？</summary><div class="detail-body">实验每 0.25 秒统计一次粒子归属。候选停留时间为 3、4、5、6、8 秒；3 秒已经是三次冷启动全部通过的最早候选。另一条流动 canary 在 2 秒达到 556 / 580，继续等到 8 秒也没有改善，所以更长等待只会增加动作时间。</div></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reproduce">
+      <div class="shell section-grid">
+        <aside class="scale"><b>06</b>照着复现</aside>
+        <div>
+          <h2>把这套方法迁移到下一个容器</h2>
+          <p class="lede">不要复制量筒的固定尺寸；复制的是工作方法：先拓扑、再静态保液、再规定轨迹、再打包、最后跑机器人。</p>
+          <div class="repro-grid">
+            <article class="repro-card">
+              <h3>生产方必须交付</h3>
+              <ul class="checklist">
+                <li>视觉 mesh 保持不变，隐藏碰撞 mesh 可追溯到源资产或已验证模板。</li>
+                <li>边界边和非流形边为 0，并记录 cavity 半径、底面和杯口。</li>
+                <li>Isaac Sim 4.1 使用实时 <code>points</code> 完成三次冷启动。</li>
+                <li>容器静态保液、GPU cooking、最低帧率和规定轨迹倒液均通过。</li>
+                <li>package、profile、report、particle state 和 SHA-256 互相绑定。</li>
+              </ul>
+            </article>
+            <article class="repro-card">
+              <h3>Scenario Forge 组包</h3>
+              <p style="color:var(--muted);font-size:.86rem;margin:0">显式传入已经 promotion 的 ConvertAsset package；生成器会 fail closed，不接受缺少动态装液证据的旧包。</p>
+              <div class="code-wrap">
+                <button class="copy" type="button" data-copy="build-command">复制命令</button>
+                <pre id="build-command">PYTHONPATH=src python \
+  scripts/generate_scientific_workbench_task02_r8.py \
+  --r7-package outputs/&lt;r7-task02-package&gt; \
+  --transfer-package ../ConvertAsset/outputs/&lt;promoted-r8.7-package&gt; \
+  --out outputs/scientific_workbench_task02_r87</pre>
+              </div>
+            </article>
+          </div>
+          <details><summary>关键参数清单</summary><div class="detail-body"><code>convexDecomposition</code>；碰撞 contact offset 5 mm；碰撞 rest offset 3 mm；minimum thickness 1 mm；voxel resolution 500000；液体 580 粒；粒子宽度 5.94 mm；粒子 contact offset 5 mm；粒子 rest offset 0。它们是本资产的验证结果，不是所有容器的通用常数。</div></details>
+          <div class="dont">
+            <h3>五件不要做的事</h3>
+            <ul>
+              <li>不要先靠增大 rest offset 救一个开边薄壳。</li>
+              <li>不要把单一实心 convex hull 当作中空容器。</li>
+              <li>不要读取 <code>simulationPoints</code> 冒充实时保液结果。</li>
+              <li>不要分别修正容器高度和粒子高度。</li>
+              <li>不要在 Scenario Forge 或 GenManip 写量筒专用物理补丁。</li>
+            </ul>
+          </div>
+          <aside class="claim"><p><strong>我们已经证明：</strong>这个精确 r8.7 任务包能在 Isaac Sim 4.1 中完成 3 / 3 脚本机器人接触倒液（scripted oracle）。<br><strong>我们还没有证明：</strong>学习策略成功、正式 eBench benchmark 成功、液体 metric 已激活，或仿真参数与真实液体完成标定。</p></aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><p>Scenario Forge · Task 02 r8.7 engineering tutorial</p><p><a href="../task-directory/index.html">返回任务目录</a> · <a href="assets/provenance.json">媒体证据清单</a></p></div></footer>
+
+  <script>
+    const layerMap={visual:'svg-visual',collider:'svg-collider',particles:'svg-particles'};
+    document.querySelectorAll('.layer-toggle').forEach(button=>button.addEventListener('click',()=>{
+      const pressed=button.getAttribute('aria-pressed')==='true';
+      button.setAttribute('aria-pressed',String(!pressed));
+      document.getElementById(layerMap[button.dataset.layer]).style.opacity=pressed?'.08':'1';
+    }));
+    document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',async()=>{
+      const target=document.getElementById(button.dataset.copy);
+      try{await navigator.clipboard.writeText(target.textContent);button.textContent='已复制';button.dataset.copied='true';setTimeout(()=>{button.textContent='复制命令';button.dataset.copied='false'},1600)}
+      catch(error){button.textContent='请手动复制'}
+    }));
+  </script>
+</body>
+</html>

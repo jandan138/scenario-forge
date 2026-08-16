@@ -1,0 +1,36 @@
+{
+  "schema_version": "scenario-forge-tutorial-media/v0.1",
+  "scenario_id": "scientific_workbench_task02_r87",
+  "claim_boundary": {
+    "benchmark_success": false,
+    "liquid_metric_active": false,
+    "policy_success": false,
+    "scripted_robot_oracle": true
+  },
+  "media": [
+    {
+      "path": "assets/scene-overview.png",
+      "role": "initial_scene_overview",
+      "sha256": "b2429db68851fe0ba0f260e9c6f29ce548a76dcdf9124d575ae1ac37afac269c",
+      "source_evidence_id": "scenario-forge.task02-r87.initial-scene"
+    },
+    {
+      "path": "assets/vessel-closeup.png",
+      "role": "task_object_closeup",
+      "sha256": "7266318b223bd5f48a18fa87c9a01a2cfce2be91c34951e767298d48a478c05f",
+      "source_evidence_id": "scenario-forge.task02-r87.initial-scene"
+    },
+    {
+      "path": "assets/robot-keyframes.png",
+      "role": "robot_oracle_keyframes",
+      "sha256": "febdefb0454c06251bb941451adda6d32a3f2193f4dd321111c03a7f16c3893e",
+      "source_evidence_id": "embodied-eval-os.task02-r87.formal-video"
+    },
+    {
+      "path": "assets/robot-pour.mp4",
+      "role": "robot_oracle_video",
+      "sha256": "2c0a50d9f7f44ceae9564b8f37d3a73ef1fcf293258ff8901b5c1a827482a55d",
+      "source_evidence_id": "embodied-eval-os.task02-r87.formal-video"
+    }
+  ]
+}

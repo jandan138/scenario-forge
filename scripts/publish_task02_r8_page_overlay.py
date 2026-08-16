@@ -57,8 +57,8 @@ def publish(index: Path, image: Path) -> Path:
             r8_release = (
                 '<span data-release-version="r8">Task 02 r8.7 动态装液起始候选包 · '
                 "580 粒子三次动态冷启动均保持在量筒内；eBench 加载、复位与 "
-                "8 秒零动作运行通过；机器人完整 3/3 倒液、液体 metric 与 "
-                "benchmark 未验证</span>"
+                "8 秒零动作运行通过；EOS 脚本机器人倒液 3/3 通过；学习策略、"
+                "液体 metric 与 benchmark 未验证</span>"
             )
             existing_rail = re.search(
                 r'<a class="evidence-rail" data-release-version="r8".*?</a>',
@@ -89,6 +89,14 @@ def publish(index: Path, image: Path) -> Path:
                         "scientific_environment_code_room_wet_chemistry_v2</a></li>",
                         1,
                     )
+                if "liquid-cylinder-tutorial" not in card:
+                    card = card.replace(
+                        "</div></article>",
+                        '<div class="release-variants task02-tutorial"><a '
+                        'href="../liquid-cylinder-tutorial/">'
+                        "查看量筒液体修复教程 →</a></div></div></article>",
+                        1,
+                    )
                 return card
         elif 'data-release-version="r8"' in card:
             return card
@@ -110,7 +118,16 @@ def publish(index: Path, image: Path) -> Path:
                 f"{r7_text}</span>"
             )
         card = card.replace(rail.group(0), r8_rail + rail.group(0), 1)
-        return card.replace(release.group(0), r8_release + release.group(0), 1)
+        card = card.replace(release.group(0), r8_release + release.group(0), 1)
+        if is_task02 and "liquid-cylinder-tutorial" not in card:
+            card = card.replace(
+                "</div></article>",
+                '<div class="release-variants task02-tutorial"><a '
+                'href="../liquid-cylinder-tutorial/">'
+                "查看量筒液体修复教程 →</a></div></div></article>",
+                1,
+            )
+        return card
 
     html = re.sub(
         r'<article class="task-card"[^>]*>.*?</article>',

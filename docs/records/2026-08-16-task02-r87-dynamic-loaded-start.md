@@ -28,11 +28,18 @@ and no external initial clump.
 - No simulator SDK entered a pure package layer and no ConvertAsset conversion
   or physics repair was reimplemented.
 
-EOS verified the main r8.7 objective in the first frozen formal attempt: over
-766 consecutive warmup/grasp/lift samples, maximum particles outside the source
-was zero. The separate three-of-three full robot gate is still blocked by
-cylinder pose instability during tilt/return; r8.7 must not be described as
-3/3 robot-task success.
+EOS first verified the loaded-start objective over 766 consecutive
+warmup/grasp/lift samples with zero particles outside the source. It then fixed
+the downstream robot-control instability without changing the package,
+GenManip, vessel physics, or liquid parameters. The frozen scripted-oracle
+protocol passed three of three fresh Isaac Sim 4.1 cold starts: 570, 560, and
+569 of 580 particles reached the target beaker, with zero spill and zero
+below-support particles in every run. This is scripted robot-oracle evidence;
+it is not learned-policy success, an active liquid metric, a benchmark result,
+or real-liquid calibration.
+
+The public, reader-oriented explanation is the
+[graduated-cylinder GPU-PBD liquid tutorial](../liquid-cylinder-tutorial/).
 
 ## Publication and CI closure
 

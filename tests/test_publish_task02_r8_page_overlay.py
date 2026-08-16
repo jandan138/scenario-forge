@@ -35,10 +35,13 @@ def test_overlay_makes_r8_default_and_keeps_r7_switch(tmp_path: Path) -> None:
     assert "Task 02 r8.7 动态装液起始候选包" in result
     assert "580 粒子三次动态冷启动均保持在量筒内" in result
     assert "eBench 加载、复位与 8 秒零动作运行通过" in result
-    assert "机器人完整 3/3 倒液、液体 metric 与 benchmark 未验证" in result
+    assert "EOS 脚本机器人倒液 3/3 通过" in result
+    assert "学习策略、液体 metric 与 benchmark 未验证" in result
     assert "该任务无 r8，展示 r7 最新有效版本 · task 01 r7" in result
     assert result.count('data-release-version="r8"') == 4
     assert (tmp_path / "assets/task02-r87-scene-overview.png").is_file()
+    assert 'href="../liquid-cylinder-tutorial/"' in result
+    assert "量筒液体修复教程" in result
 
 
 def test_overlay_upgrades_existing_r83_card_and_keeps_it_in_history(tmp_path: Path) -> None:
@@ -60,9 +63,11 @@ def test_overlay_upgrades_existing_r83_card_and_keeps_it_in_history(tmp_path: Pa
     assert "scientific_workbench_task02_r87_20260816" in result
     assert "scientific_workbench_task02_r83_20260815" in result
     assert result.count('data-release-version="r8"') == 2
+    assert result.count('href="../liquid-cylinder-tutorial/"') == 1
 
     _module().publish(source, image)
 
     repeated = source.read_text(encoding="utf-8")
     assert repeated.count("scientific_workbench_task02_r87_20260816") == 1
     assert "6 packages" in repeated
+    assert repeated.count('href="../liquid-cylinder-tutorial/"') == 1

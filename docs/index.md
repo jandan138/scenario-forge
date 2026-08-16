@@ -31,6 +31,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 - [Artifact Policy](operations/artifact-policy.md)
 - [Scientific Workbench Task Directory](task-directory/)
+- [量筒 GPU-PBD 液体修复教程](liquid-cylinder-tutorial/)
 - [Scientific Workbench Background Gallery](background-gallery/)
 - [Build the Scientific Workbench Task Directory](operations/build-scientific-workbench-task-directory.md)
 - [Generate Scientific Workbench Layout Prototypes](operations/generate-scientific-workbench-layout-prototypes.md)
