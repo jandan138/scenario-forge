@@ -5,6 +5,8 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
+import pytest
+
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/generate_scientific_workbench_task02_r8.py"
 
@@ -27,26 +29,52 @@ def _digest(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
 
 
-def _transfer_package(root: Path) -> Path:
+def _render_request_fixture(root: Path) -> Path:
+    return _file(
+        root / "render_request.yaml",
+        "schema_version: scenario-forge-genmanip-preview-request/v0.3\n"
+        "package_id: fixture\n"
+        "task_name: scenario_forge/fixture\n"
+        "episode_name: '002'\n"
+        "views:\n"
+        "  room_entrance_eye_level:\n"
+        "    position_xyz: [9.0, 9.0, 9.0]\n"
+        "    target_xyz: [8.0, 8.0, 8.0]\n"
+        "output:\n"
+        "  directory: evidence/initial_scene\n"
+        "  manifest: evidence/initial_scene/render_manifest.json\n",
+    )
+
+
+def _transfer_package(root: Path, *, particle_count: int = 548) -> Path:
     package = root / "transfer"
     evidence = package / "evidence"
     (package / "deps/source").mkdir(parents=True)
     (package / "deps/target").mkdir(parents=True)
     evidence.mkdir()
     _file(package / "component.usda", '#usda 1.0\ndef Xform "World" {}\n')
+    _file(
+        package / "initial_particle_state.json",
+        json.dumps([[0.25, 0.0, 0.02] for _ in range(particle_count)]),
+    )
     _file(package / "deps/source/asset.usd", "source")
     _file(package / "deps/target/asset.usd", "target")
     candidate = {"candidate_id": "c03", "dwell_seconds": 3.0, "rim_gap_m": 0.01, "rim_offset_x_m": 0.0, "tilt_deg": -115.0}
     profile = package / "transfer_fixture_profile.json"
     _file(profile, json.dumps({
-        "schema_version": "aan.gpu_pbd_transfer_fixture.v1",
+        "schema_version": (
+            "aan.gpu_pbd_transfer_fixture.v1"
+            if particle_count == 548
+            else "aan.gpu_pbd_transfer_fixture.v2"
+        ),
+        "source": {"initial_xyz_m": [0.25, 0.0, 0.0]},
         "members": {"source": "/World/Transfer/Source", "target": "/World/Transfer/Target", "particles": "/World/Transfer/ParticleSet", "particle_system": "/World/Transfer/ParticleSystem"},
-        "liquid_parameters": {"particle_count": 548},
+        "liquid_parameters": {"particle_count": particle_count},
         "bounded_search": {"candidates": [candidate]},
         "qualification": {"minimum_target_reception_ratio": 0.5, "required_cold_runs": 3, "spill_is_blocking": False},
         "claim_boundary": "Prescribed transfer only; no robot claim.",
     }))
-    cold = {"overall_status": "pass", "particle_readback_attribute": "points", "static_hold": {"minimum_source_ratio": 1.0}, "pour": {"particle_count": 548, "target_ratio": 0.95}, "performance": {"mean_rtx_fps": 80.0}, "hard_runtime_errors": []}
+    cold = {"overall_status": "pass", "particle_readback_attribute": "points", "static_hold": {"minimum_source_ratio": 1.0}, "pour": {"particle_count": particle_count, "target_ratio": 0.95}, "performance": {"mean_rtx_fps": 80.0}, "hard_runtime_errors": []}
     report = evidence / "gpu_pbd_transfer_admission_report.json"
     _file(report, json.dumps({"overall_status": "pass", "selected_candidate": candidate, "cold_runs": [cold, cold, cold], "promotion": {"allowed": True, "claim": "gpu_pbd_prescribed_transfer_pair"}}))
     digest = sha256()
@@ -54,14 +82,93 @@ def _transfer_package(root: Path) -> Path:
         digest.update(item.relative_to(package / "deps").as_posix().encode())
         digest.update(b"\0")
         digest.update(bytes.fromhex(_digest(item)))
-    _file(evidence / "manifest.json", json.dumps({
+    manifest = evidence / "manifest.json"
+    _file(manifest, json.dumps({
         "schema_version": "aan.gpu_pbd_transfer_pair_manifest.v1",
         "package_id": "task02-transfer.r1",
         "overall_status": "pass",
         "entrypoints": {"root_usd": "component.usda", "asset_entry_prim": "/World/Transfer"},
-        "gpu_pbd_transfer_pair": {"status": "qualified", "profile": profile.name, "profile_sha256": _digest(profile), "report": str(report.relative_to(package)), "report_sha256": _digest(report), "component_sha256": _digest(package / "component.usda"), "dependency_tree_sha256": digest.hexdigest(), "particle_count": 548, "cold_runs": 3, "runtime": "isaac41", "selected_candidate": candidate},
+        "gpu_pbd_transfer_pair": {"status": "qualified", "profile": profile.name, "profile_sha256": _digest(profile), "report": str(report.relative_to(package)), "report_sha256": _digest(report), "component_sha256": _digest(package / "component.usda"), "dependency_tree_sha256": digest.hexdigest(), "particle_count": particle_count, "cold_runs": 3, "runtime": "isaac41", "selected_candidate": candidate},
         "promotion": {"allowed": True, "claim": "gpu_pbd_prescribed_transfer_pair", "claim_boundary": "Prescribed transfer only; no robot claim."},
     }))
+    dynamic_evidence = evidence / "dynamic_loaded_start"
+    state = _file(
+        dynamic_evidence / "dynamic_loaded_particle_state.json",
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_source_local_particle_state.v1",
+                "coordinate_space": "source_entry_root_local",
+                "particle_count": particle_count,
+                "positions": [[0.0, 0.0, 0.02] for _ in range(particle_count)],
+                "outside_source_count": 0,
+            }
+        ),
+    )
+    contract = _file(
+        dynamic_evidence / "dynamic_loaded_start_contract.json",
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_dynamic_loaded_start.v1",
+                "support_plane_z_m": 0.755,
+                "support_plane_to_entry_root": {
+                    "xyz_m": [0.25, 0.0, -0.0069],
+                    "wxyz": [1.0, 0.0, 0.0, 0.0],
+                },
+                "particle_state": state.name,
+                "particle_state_sha256": _digest(state),
+                "particle_count": particle_count,
+                "qualification": {
+                    "required_cold_runs": 3,
+                    "maximum_outside_source_before_lift": 2,
+                    "maximum_entry_root_tail_drift_m": 0.001,
+                    "maximum_entry_root_tilt_deg": 2.0,
+                },
+            }
+        ),
+    )
+    dynamic_run = {
+        "overall_status": "pass",
+        "particle_count": particle_count,
+        "maximum_outside_source_count": 0,
+        "entry_root_tail_drift_m": 0.0001,
+        "maximum_entry_root_tilt_deg": 0.1,
+        "hard_runtime_errors": [],
+    }
+    dynamic_report = _file(
+        dynamic_evidence / "dynamic_loaded_start_report.json",
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_dynamic_loaded_start_report.v1",
+                "overall_status": "pass",
+                "contract_sha256": _digest(contract),
+                "particle_state_sha256": _digest(state),
+                "cold_runs": [dynamic_run, dynamic_run, dynamic_run],
+                "promotion": {
+                    "allowed": True,
+                    "claim": "gpu_pbd_dynamic_loaded_start",
+                },
+            }
+        ),
+    )
+    payload = json.loads(manifest.read_text())
+    payload["gpu_pbd_dynamic_loaded_start"] = {
+        "status": "qualified",
+        "contract": contract.relative_to(package).as_posix(),
+        "contract_sha256": _digest(contract),
+        "particle_state": state.relative_to(package).as_posix(),
+        "particle_state_sha256": _digest(state),
+        "report": dynamic_report.relative_to(package).as_posix(),
+        "report_sha256": _digest(dynamic_report),
+        "particle_count": particle_count,
+        "cold_runs": 3,
+        "maximum_outside_source_before_lift": 2,
+        "support_plane_to_entry_root": {
+            "xyz_m": [0.25, 0.0, -0.0069],
+            "wxyz": [1.0, 0.0, 0.0, 0.0],
+        },
+        "runtime": "isaac41",
+    }
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
     return package
 
 
@@ -78,19 +185,21 @@ def test_r83_handoff_is_self_contained_and_keeps_liquid_metrics_inactive(tmp_pat
         "- task_name: old\n"
         "  domain_randomization:\n"
         "    cameras:\n"
-        "      config_path: collected_packages/old/cameras/fixed_camera_lift2.yml\n",
+        "      config_path: collected_packages/old/cameras/fixed_camera_lift2.yml\n"
+        "  preprocess_config:\n"
+        "  - type: set_robot_physics_material\n"
+        "    config: {}\n"
+        "  - type: set_robot_contact_offset\n"
+        "    config: 0.05\n"
+        "  - type: set_robot_rest_offset\n"
+        "    config: 0.001\n",
     )
     _file(ebench / "cameras/fixed_camera_lift2.yml", "cameras: []\n")
     _file(
         ebench / "tasks/scenario_forge/r7/002/episode_metadata.json",
         json.dumps({"episode_name": "002", "task_data": {"initial_layout": {}}}),
     )
-    request = (
-        Path(__file__).resolve().parents[1]
-        / "outputs/scientific_workbench_asset_expansion_20260813_r7_full/packages/"
-        "scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry/"
-        "adapters/ebench/genmanip/evidence/render_request.yaml"
-    )
+    request = _render_request_fixture(tmp_path)
     _file(ebench / "evidence/render_request.yaml", request.read_text())
     _file(ebench / "package_manifest.json", json.dumps({"source_assets": []}))
     _file(vr / "scene.usd", '#usda 1.0\n(defaultPrim="World")\ndef Xform "World" {}\n')
@@ -127,23 +236,44 @@ def test_r83_handoff_is_self_contained_and_keeps_liquid_metrics_inactive(tmp_pat
     assert "/source_bundle/r7_scene/scene.usda@" in (result / "ebench/scene.usd").read_text()
     assert "/source_bundle/transfer/component.usda@</World/Transfer>" in (result / "ebench/scene.usd").read_text()
     scene_text = (result / "ebench/scene.usd").read_text()
-    assert 'over "obj_obj_graduated_cylinder" (active = false)' in scene_text
-    assert 'over "obj_obj_beaker" (active = false)' in scene_text
+    assert 'over "obj_obj_graduated_cylinder" (' in scene_text
+    assert 'source_bundle/transfer/component.usda@</World/Transfer/Source>' in scene_text
+    assert 'over "obj_obj_beaker" (' in scene_text
+    assert 'source_bundle/transfer/component.usda@</World/Transfer/Target>' in scene_text
+    assert scene_text.count("active = false") == 2
+    assert 'def Xform "obj_table"' in scene_text
+    assert '/source_bundle/r7_scene/source_bundle/scenario_forge_runtime/table.usd@</Asset>' in scene_text
+    assert "double3 xformOp:translate = (0.09, -0.17, 0.7481)" in scene_text
     assert "double3 xformOp:translate = (-0.16, -0.17, 0.755)" in scene_text
+    assert scene_text.count("point3f[] physxParticle:simulationPoints") == 1
+    assert scene_text.count("point3f[] points") == 1
+    assert scene_text.count("(0.09, -0.17, 0.7681)") == 1096
     assert 'def Xform "fluid_runtime"' in scene_text
-    assert 'over "Source"' in scene_text
-    assert 'over "Target"' in scene_text
+    assert 'over "Source" (active = false)' in scene_text
+    assert 'over "Target" (active = false)' in scene_text
     assert scene_text.count("bool physics:kinematicEnabled = 0") == 2
     assert str(tmp_path) not in (result / "ebench/scene.usd").read_text()
     config_text = (result / "ebench/config.yaml").read_text()
     assert f"collected_packages/{module.SCENARIO_ID}/cameras/fixed_camera_lift2.yml" in config_text
     assert "scientific_workbench_r7_task02" not in config_text
+    assert "set_robot_physics_material" in config_text
+    assert "set_robot_contact_offset" not in config_text
+    assert "set_robot_rest_offset" not in config_text
 
 
-def test_r83_composition_places_component_on_755mm_table(tmp_path: Path) -> None:
+def test_r87_composition_bakes_one_measured_pose_for_container_and_particles(tmp_path: Path) -> None:
     module = _module()
-    text = module._composed_scene_usda("deps/r7_scene/scene.usda")
+    text = module._composed_scene_usda(
+        "deps/r7_scene/scene.usda",
+        [[0.0, 0.0, 0.02]],
+        source_xyz=[0.09, -0.17, 0.7481],
+        source_wxyz=[1.0, 0.0, 0.0, 0.0],
+    )
+    assert "double3 xformOp:translate = (0.09, -0.17, 0.7481)" in text
     assert "double3 xformOp:translate = (-0.16, -0.17, 0.755)" in text
+    assert "point3f[] physxParticle:simulationPoints = [(0.09, -0.17, 0.7681)]" in text
+    assert "point3f[] points = [(0.09, -0.17, 0.7681)]" in text
+    assert 'uniform token[] xformOpOrder = ["!resetXformStack!"]' in text
     assert "fluid_runtime" in text
     assert "obj_obj_graduated_cylinder" in text
     assert "obj_obj_beaker" in text
@@ -153,9 +283,41 @@ def test_r83_composition_places_component_on_755mm_table(tmp_path: Path) -> None
     assert 'over "PhysicsScene"' not in text
 
 
+def test_r87_particle_transform_uses_usd_wxyz_rotation_convention() -> None:
+    module = _module()
+
+    transformed = module._world_particle_points(
+        [[1.0, 0.0, 0.0]],
+        source_xyz=[0.0, 0.0, 0.0],
+        source_wxyz=[0.7071067812, 0.0, 0.0, 0.7071067812],
+    )
+
+    assert transformed[0] == pytest.approx([0.0, 1.0, 0.0], abs=1e-8)
+
+
+def test_r85_package_uses_transfer_handoff_particle_count(tmp_path: Path) -> None:
+    module = _module()
+    transfer = _transfer_package(tmp_path, particle_count=580)
+    assert module.load_gpu_pbd_transfer_pair_handoff(
+        transfer, transfer / "evidence/manifest.json"
+    ).particle_count == 580
+
+
+def test_r87_build_fails_closed_without_dynamic_loaded_start(tmp_path: Path) -> None:
+    module = _module()
+    transfer = _transfer_package(tmp_path, particle_count=580)
+    manifest = transfer / "evidence/manifest.json"
+    payload = json.loads(manifest.read_text())
+    del payload["gpu_pbd_dynamic_loaded_start"]
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="gpu_pbd_dynamic_loaded_start"):
+        module.load_gpu_pbd_dynamic_loaded_start_handoff(transfer, manifest)
+
+
 def test_r83_render_request_keeps_entrance_camera_inside_the_room(tmp_path: Path) -> None:
     module = _module()
-    source = Path(__file__).resolve().parents[1] / "outputs/scientific_workbench_asset_expansion_20260813_r7_full/packages/scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry/adapters/ebench/genmanip/evidence/render_request.yaml"
+    source = _render_request_fixture(tmp_path)
     root = tmp_path / "package"
     paths = {name: _file(root / name) for name in ("manifest.json", "config.yaml", "episode.json", "scene.usd", "camera.yml")}
     bundle = root / "source_bundle"

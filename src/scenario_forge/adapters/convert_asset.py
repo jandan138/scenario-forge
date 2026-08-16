@@ -511,6 +511,21 @@ class ConvertAssetGPUPBDTransferPairHandoff:
     claim_boundary: str
 
 
+@dataclass(frozen=True)
+class ConvertAssetGPUPBDDynamicLoadedStartHandoff:
+    """Qualified source-local liquid initialization for a dynamic PBD vessel."""
+
+    transfer: ConvertAssetGPUPBDTransferPairHandoff
+    contract_path: Path
+    contract_sha256: str
+    particle_state_path: Path
+    particle_state_sha256: str
+    qualification_report_path: Path
+    qualification_report_sha256: str
+    support_plane_to_entry_root: Mapping[str, Any]
+    maximum_outside_source_before_lift: int
+
+
 def load_convert_asset_package_handoff(
     package_dir: str | Path,
     manifest_path: str | Path,
@@ -4649,9 +4664,15 @@ def load_gpu_pbd_transfer_pair_handoff(
 
     contract = _required_mapping(manifest, "gpu_pbd_transfer_pair", "manifest")
     _require_value(contract, "status", "qualified", "gpu_pbd_transfer_pair")
-    if contract.get("particle_count") != 548 or contract.get("cold_runs") != 3:
+    particle_count = contract.get("particle_count")
+    if (
+        not isinstance(particle_count, int)
+        or isinstance(particle_count, bool)
+        or particle_count <= 0
+        or contract.get("cold_runs") != 3
+    ):
         raise ConvertAssetHandoffError(
-            "GPU-PBD transfer contract must bind 548 particles and three cold runs"
+            "GPU-PBD transfer contract must bind a positive particle count and three cold runs"
         )
     component_sha = _required_sha256(
         contract, "component_sha256", "gpu_pbd_transfer_pair"
@@ -4698,14 +4719,24 @@ def load_gpu_pbd_transfer_pair_handoff(
     profile = _load_strict_json_mapping(
         profile_path.read_bytes(), "GPU-PBD transfer profile"
     )
-    _require_value(
-        profile,
-        "schema_version",
+    profile_schema = profile.get("schema_version")
+    if profile_schema not in {
         "aan.gpu_pbd_transfer_fixture.v1",
-        "profile",
-    )
-    if profile.get("liquid_parameters", {}).get("particle_count") != 548:
-        raise ConvertAssetHandoffError("GPU-PBD transfer profile particle_count must be 548")
+        "aan.gpu_pbd_transfer_fixture.v2",
+    }:
+        raise ConvertAssetHandoffError("GPU-PBD transfer profile schema differs")
+    if (
+        profile_schema == "aan.gpu_pbd_transfer_fixture.v1"
+        and particle_count != 548
+    ):
+        raise ConvertAssetHandoffError(
+            "GPU-PBD transfer v1 profile must bind 548 particles"
+        )
+    liquid = _required_mapping(profile, "liquid_parameters", "profile")
+    if liquid.get("particle_count") != particle_count:
+        raise ConvertAssetHandoffError(
+            "GPU-PBD transfer profile particle_count differs from manifest"
+        )
     qualification = _required_mapping(profile, "qualification", "profile")
     if (
         qualification.get("minimum_target_reception_ratio") != 0.5
@@ -4713,6 +4744,17 @@ def load_gpu_pbd_transfer_pair_handoff(
         or qualification.get("spill_is_blocking") is not False
     ):
         raise ConvertAssetHandoffError("GPU-PBD transfer qualification contract differs")
+    minimum_fps = (
+        40.0
+        if profile_schema == "aan.gpu_pbd_transfer_fixture.v1"
+        else float(qualification.get("minimum_mean_rtx_fps", 40.0))
+    )
+    target_fill = (
+        None
+        if profile_schema == "aan.gpu_pbd_transfer_fixture.v1"
+        else liquid.get("target_settled_fill_ratio")
+    )
+    fill_tolerance = float(liquid.get("settled_fill_ratio_tolerance", 0.05))
     selected = _required_mapping(
         contract, "selected_candidate", "gpu_pbd_transfer_pair"
     )
@@ -4741,16 +4783,23 @@ def load_gpu_pbd_transfer_pair_handoff(
         hold = run.get("static_hold")
         pour = run.get("pour")
         performance = run.get("performance")
+        fill_ok = target_fill is None or (
+            isinstance(hold, Mapping)
+            and hold.get("settled_fill_ratio") is not None
+            and abs(float(hold["settled_fill_ratio"]) - float(target_fill))
+            <= fill_tolerance
+        )
         valid = (
             run.get("overall_status") == "pass"
             and run.get("particle_readback_attribute") == "points"
             and isinstance(hold, Mapping)
             and hold.get("minimum_source_ratio", 0.0) >= 0.95
             and isinstance(pour, Mapping)
-            and pour.get("particle_count") == 548
+            and pour.get("particle_count") == particle_count
             and pour.get("target_ratio", 0.0) >= 0.5
             and isinstance(performance, Mapping)
-            and performance.get("mean_rtx_fps", 0.0) >= 40.0
+            and performance.get("mean_rtx_fps", 0.0) >= minimum_fps
+            and fill_ok
             and run.get("hard_runtime_errors") == []
         )
         if not valid:
@@ -4768,9 +4817,187 @@ def load_gpu_pbd_transfer_pair_handoff(
         qualification_report_path=report_path.relative_to(package).as_posix(),
         qualification_report_sha256=report_sha,
         dependency_tree_sha256=dependency_sha,
-        particle_count=548,
+        particle_count=particle_count,
         selected_candidate=dict(selected),
         claim_boundary=_required_string(
             promotion, "claim_boundary", "manifest.promotion"
         ),
+    )
+
+
+def load_gpu_pbd_dynamic_loaded_start_handoff(
+    package_dir: str | Path,
+    manifest_path: str | Path,
+) -> ConvertAssetGPUPBDDynamicLoadedStartHandoff:
+    """Validate a hash-bound dynamic-vessel start without simulator imports."""
+
+    transfer = load_gpu_pbd_transfer_pair_handoff(package_dir, manifest_path)
+    package = transfer.package_dir
+    manifest_file = package / "evidence/manifest.json"
+    manifest = _load_strict_json_mapping(
+        manifest_file.read_bytes(), "GPU-PBD dynamic loaded-start manifest"
+    )
+    binding = _required_mapping(
+        manifest, "gpu_pbd_dynamic_loaded_start", "manifest"
+    )
+    _require_value(binding, "status", "qualified", "gpu_pbd_dynamic_loaded_start")
+    _require_value(binding, "runtime", "isaac41", "gpu_pbd_dynamic_loaded_start")
+    if (
+        binding.get("particle_count") != transfer.particle_count
+        or binding.get("cold_runs") != 3
+        or binding.get("maximum_outside_source_before_lift") != 2
+    ):
+        raise ConvertAssetHandoffError(
+            "dynamic loaded-start manifest gates differ from the r8.7 contract"
+        )
+
+    def bound_file(role: str) -> tuple[Path, str]:
+        path = _safe_package_file(
+            package,
+            _required_string(binding, role, "gpu_pbd_dynamic_loaded_start"),
+            role,
+        )
+        expected = _required_sha256(
+            binding, f"{role}_sha256", "gpu_pbd_dynamic_loaded_start"
+        )
+        if _file_sha256(path) != expected:
+            label = role.replace("_", " ")
+            raise ConvertAssetHandoffError(
+                f"dynamic loaded-start {label} SHA-256 does not match manifest"
+            )
+        return path, expected
+
+    contract_path, contract_sha = bound_file("contract")
+    particle_state_path, particle_state_sha = bound_file("particle_state")
+    report_path, report_sha = bound_file("report")
+    contract = _load_strict_json_mapping(
+        contract_path.read_bytes(), "dynamic loaded-start contract"
+    )
+    _require_value(
+        contract,
+        "schema_version",
+        "aan.gpu_pbd_dynamic_loaded_start.v1",
+        "dynamic loaded-start contract",
+    )
+    if (
+        contract.get("particle_count") != transfer.particle_count
+        or contract.get("particle_state") != particle_state_path.name
+        or contract.get("particle_state_sha256") != particle_state_sha
+    ):
+        raise ConvertAssetHandoffError(
+            "dynamic loaded-start contract does not bind the particle state"
+        )
+    qualification = _required_mapping(
+        contract, "qualification", "dynamic loaded-start contract"
+    )
+    expected_qualification = {
+        "required_cold_runs": 3,
+        "maximum_outside_source_before_lift": 2,
+        "maximum_entry_root_tail_drift_m": 0.001,
+        "maximum_entry_root_tilt_deg": 2.0,
+    }
+    if any(qualification.get(key) != value for key, value in expected_qualification.items()):
+        raise ConvertAssetHandoffError(
+            "dynamic loaded-start qualification thresholds differ"
+        )
+    pose = _required_mapping(
+        contract, "support_plane_to_entry_root", "dynamic loaded-start contract"
+    )
+    manifest_pose = _required_mapping(
+        binding, "support_plane_to_entry_root", "gpu_pbd_dynamic_loaded_start"
+    )
+    if pose != manifest_pose:
+        raise ConvertAssetHandoffError(
+            "dynamic loaded-start support pose differs from manifest"
+        )
+    xyz = pose.get("xyz_m")
+    wxyz = pose.get("wxyz")
+    if (
+        not isinstance(xyz, list)
+        or len(xyz) != 3
+        or not isinstance(wxyz, list)
+        or len(wxyz) != 4
+        or not all(isinstance(value, (int, float)) for value in [*xyz, *wxyz])
+    ):
+        raise ConvertAssetHandoffError("dynamic loaded-start support pose is invalid")
+
+    state = _load_strict_json_mapping(
+        particle_state_path.read_bytes(), "dynamic loaded particle state"
+    )
+    _require_value(
+        state,
+        "schema_version",
+        "aan.gpu_pbd_source_local_particle_state.v1",
+        "dynamic loaded particle state",
+    )
+    _require_value(
+        state,
+        "coordinate_space",
+        "source_entry_root_local",
+        "dynamic loaded particle state",
+    )
+    positions = state.get("positions")
+    if (
+        state.get("particle_count") != transfer.particle_count
+        or state.get("outside_source_count") != 0
+        or not isinstance(positions, list)
+        or len(positions) != transfer.particle_count
+        or not all(
+            isinstance(point, list)
+            and len(point) == 3
+            and all(
+                isinstance(value, (int, float))
+                and not isinstance(value, bool)
+                and math.isfinite(float(value))
+                for value in point
+            )
+            for point in positions
+        )
+    ):
+        raise ConvertAssetHandoffError(
+            "dynamic loaded particle state failed static admission"
+        )
+
+    report = _load_strict_json_mapping(
+        report_path.read_bytes(), "dynamic loaded-start report"
+    )
+    promotion = report.get("promotion")
+    cold_runs = report.get("cold_runs")
+    if (
+        report.get("schema_version")
+        != "aan.gpu_pbd_dynamic_loaded_start_report.v1"
+        or report.get("overall_status") != "pass"
+        or report.get("contract_sha256") != contract_sha
+        or report.get("particle_state_sha256") != particle_state_sha
+        or not isinstance(promotion, Mapping)
+        or promotion.get("allowed") is not True
+        or promotion.get("claim") != "gpu_pbd_dynamic_loaded_start"
+        or not isinstance(cold_runs, list)
+        or len(cold_runs) != 3
+    ):
+        raise ConvertAssetHandoffError(
+            "dynamic loaded-start report is not promotable"
+        )
+    for run in cold_runs:
+        if not isinstance(run, Mapping) or not (
+            run.get("overall_status") == "pass"
+            and run.get("particle_count") == transfer.particle_count
+            and run.get("maximum_outside_source_count", 3) <= 2
+            and run.get("entry_root_tail_drift_m", math.inf) <= 0.001
+            and run.get("maximum_entry_root_tilt_deg", math.inf) <= 2.0
+            and run.get("hard_runtime_errors") == []
+        ):
+            raise ConvertAssetHandoffError(
+                "dynamic loaded-start cold run failed a required gate"
+            )
+    return ConvertAssetGPUPBDDynamicLoadedStartHandoff(
+        transfer=transfer,
+        contract_path=contract_path,
+        contract_sha256=contract_sha,
+        particle_state_path=particle_state_path,
+        particle_state_sha256=particle_state_sha,
+        qualification_report_path=report_path,
+        qualification_report_sha256=report_sha,
+        support_plane_to_entry_root=dict(pose),
+        maximum_outside_source_before_lift=2,
     )

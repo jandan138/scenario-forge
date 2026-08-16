@@ -12,6 +12,7 @@ from scenario_forge.adapters.convert_asset import (
     ConvertAssetHandoffError,
     NormalizeAssetCommandPlan,
     load_convert_asset_package_handoff,
+    load_gpu_pbd_dynamic_loaded_start_handoff,
     load_gpu_pbd_static_container_handoff,
     load_gpu_pbd_transfer_pair_handoff,
 )
@@ -2944,7 +2945,12 @@ def test_gpu_pbd_container_handoff_accepts_v2_final_outside_gate(
     assert load_gpu_pbd_static_container_handoff(package, manifest).particle_count == 548
 
 
-def _write_gpu_pbd_transfer_pair_handoff(root: Path) -> tuple[Path, Path]:
+def _write_gpu_pbd_transfer_pair_handoff(
+    root: Path,
+    *,
+    particle_count: int = 548,
+    profile_schema: str = "aan.gpu_pbd_transfer_fixture.v1",
+) -> tuple[Path, Path]:
     package = root / "gpu_pbd_transfer_pair"
     evidence = package / "evidence"
     (package / "deps/source").mkdir(parents=True)
@@ -2964,19 +2970,30 @@ def _write_gpu_pbd_transfer_pair_handoff(root: Path) -> tuple[Path, Path]:
     profile.write_text(
         json.dumps(
             {
-                "schema_version": "aan.gpu_pbd_transfer_fixture.v1",
+                "schema_version": profile_schema,
                 "members": {
                     "source": "/World/Transfer/Source",
                     "target": "/World/Transfer/Target",
                     "particles": "/World/Transfer/ParticleSet",
                     "particle_system": "/World/Transfer/ParticleSystem",
                 },
-                "liquid_parameters": {"particle_count": 548},
+                "liquid_parameters": {
+                    "particle_count": particle_count,
+                    **(
+                        {
+                            "target_settled_fill_ratio": 0.4,
+                            "settled_fill_ratio_tolerance": 0.05,
+                        }
+                        if profile_schema.endswith(".v2")
+                        else {}
+                    ),
+                },
                 "bounded_search": {"candidates": [candidate]},
                 "qualification": {
                     "minimum_target_reception_ratio": 0.5,
                     "required_cold_runs": 3,
                     "spill_is_blocking": False,
+                    "minimum_mean_rtx_fps": 20.0,
                 },
                 "claim_boundary": "Prescribed transfer only; no robot claim.",
             }
@@ -2986,8 +3003,15 @@ def _write_gpu_pbd_transfer_pair_handoff(root: Path) -> tuple[Path, Path]:
     cold = {
         "overall_status": "pass",
         "particle_readback_attribute": "points",
-        "static_hold": {"minimum_source_ratio": 1.0},
-        "pour": {"particle_count": 548, "target_ratio": 0.95},
+        "static_hold": {
+            "minimum_source_ratio": 1.0,
+            **(
+                {"settled_fill_ratio": 0.39}
+                if profile_schema.endswith(".v2")
+                else {}
+            ),
+        },
+        "pour": {"particle_count": particle_count, "target_ratio": 0.95},
         "performance": {"mean_rtx_fps": 80.0},
         "hard_runtime_errors": [],
     }
@@ -3031,7 +3055,7 @@ def _write_gpu_pbd_transfer_pair_handoff(root: Path) -> tuple[Path, Path]:
                     "report_sha256": _digest(report),
                     "component_sha256": _digest(package / "component.usda"),
                     "dependency_tree_sha256": digest.hexdigest(),
-                    "particle_count": 548,
+                    "particle_count": particle_count,
                     "cold_runs": 3,
                     "runtime": "isaac41",
                     "selected_candidate": candidate,
@@ -3059,6 +3083,33 @@ def test_loads_qualified_gpu_pbd_transfer_pair(tmp_path: Path) -> None:
     assert handoff.component_usd == package / "component.usda"
 
 
+def test_loads_v2_gpu_pbd_transfer_pair_with_dynamic_particle_count(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_transfer_pair_handoff(
+        tmp_path,
+        particle_count=580,
+        profile_schema="aan.gpu_pbd_transfer_fixture.v2",
+    )
+
+    handoff = load_gpu_pbd_transfer_pair_handoff(package, manifest)
+
+    assert handoff.particle_count == 580
+
+
+def test_v1_gpu_pbd_transfer_pair_keeps_legacy_particle_count(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_transfer_pair_handoff(
+        tmp_path,
+        particle_count=580,
+        profile_schema="aan.gpu_pbd_transfer_fixture.v1",
+    )
+
+    with pytest.raises(ConvertAssetHandoffError, match="v1 profile must bind 548"):
+        load_gpu_pbd_transfer_pair_handoff(package, manifest)
+
+
 def test_gpu_pbd_transfer_pair_rejects_tampered_report(tmp_path: Path) -> None:
     package, manifest = _write_gpu_pbd_transfer_pair_handoff(tmp_path)
     (package / "evidence/gpu_pbd_transfer_admission_report.json").write_text(
@@ -3067,3 +3118,117 @@ def test_gpu_pbd_transfer_pair_rejects_tampered_report(tmp_path: Path) -> None:
 
     with pytest.raises(ConvertAssetHandoffError, match="report SHA-256"):
         load_gpu_pbd_transfer_pair_handoff(package, manifest)
+
+
+def _add_dynamic_loaded_start(package: Path, manifest: Path) -> None:
+    evidence = package / "evidence/dynamic_loaded_start"
+    evidence.mkdir(parents=True)
+    state = evidence / "dynamic_loaded_particle_state.json"
+    state.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_source_local_particle_state.v1",
+                "coordinate_space": "source_entry_root_local",
+                "particle_count": 580,
+                "positions": [[0.0, 0.0, 0.02]] * 580,
+                "outside_source_count": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+    contract = evidence / "dynamic_loaded_start_contract.json"
+    contract.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_dynamic_loaded_start.v1",
+                "support_plane_z_m": 0.755,
+                "support_plane_to_entry_root": {
+                    "xyz_m": [0.25, 0.0, -0.0069],
+                    "wxyz": [1.0, 0.0, 0.0, 0.0],
+                },
+                "particle_state": state.name,
+                "particle_state_sha256": _digest(state),
+                "particle_count": 580,
+                "qualification": {
+                    "required_cold_runs": 3,
+                    "maximum_outside_source_before_lift": 2,
+                    "maximum_entry_root_tail_drift_m": 0.001,
+                    "maximum_entry_root_tilt_deg": 2.0,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    run = {
+        "overall_status": "pass",
+        "particle_count": 580,
+        "maximum_outside_source_count": 0,
+        "entry_root_tail_drift_m": 0.0001,
+        "maximum_entry_root_tilt_deg": 0.1,
+        "hard_runtime_errors": [],
+    }
+    report = evidence / "dynamic_loaded_start_report.json"
+    report.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.gpu_pbd_dynamic_loaded_start_report.v1",
+                "overall_status": "pass",
+                "contract_sha256": _digest(contract),
+                "particle_state_sha256": _digest(state),
+                "cold_runs": [run, run, run],
+                "promotion": {
+                    "allowed": True,
+                    "claim": "gpu_pbd_dynamic_loaded_start",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    payload = json.loads(manifest.read_text())
+    payload["gpu_pbd_dynamic_loaded_start"] = {
+        "status": "qualified",
+        "contract": contract.relative_to(package).as_posix(),
+        "contract_sha256": _digest(contract),
+        "particle_state": state.relative_to(package).as_posix(),
+        "particle_state_sha256": _digest(state),
+        "report": report.relative_to(package).as_posix(),
+        "report_sha256": _digest(report),
+        "particle_count": 580,
+        "cold_runs": 3,
+        "maximum_outside_source_before_lift": 2,
+        "support_plane_to_entry_root": {
+            "xyz_m": [0.25, 0.0, -0.0069],
+            "wxyz": [1.0, 0.0, 0.0, 0.0],
+        },
+        "runtime": "isaac41",
+    }
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_loads_hash_bound_dynamic_loaded_start(tmp_path: Path) -> None:
+    package, manifest = _write_gpu_pbd_transfer_pair_handoff(
+        tmp_path, particle_count=580, profile_schema="aan.gpu_pbd_transfer_fixture.v2"
+    )
+    _add_dynamic_loaded_start(package, manifest)
+
+    handoff = load_gpu_pbd_dynamic_loaded_start_handoff(package, manifest)
+
+    assert handoff.transfer.particle_count == 580
+    assert handoff.particle_state_path.name == "dynamic_loaded_particle_state.json"
+    assert handoff.support_plane_to_entry_root["xyz_m"][2] == -0.0069
+    assert handoff.maximum_outside_source_before_lift == 2
+
+
+def test_dynamic_loaded_start_fails_closed_on_tampered_local_particles(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_transfer_pair_handoff(
+        tmp_path, particle_count=580, profile_schema="aan.gpu_pbd_transfer_fixture.v2"
+    )
+    _add_dynamic_loaded_start(package, manifest)
+    (package / "evidence/dynamic_loaded_start/dynamic_loaded_particle_state.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
+
+    with pytest.raises(ConvertAssetHandoffError, match="particle state SHA-256"):
+        load_gpu_pbd_dynamic_loaded_start_handoff(package, manifest)

@@ -12,6 +12,7 @@ import copy
 import gc
 from hashlib import sha256
 import importlib.metadata
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -123,6 +124,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--collected-root", type=Path, required=True)
     parser.add_argument("--genmanip-root", type=Path, required=True)
     parser.add_argument(
+        "--curobo-extension-cache",
+        type=Path,
+        help=(
+            "Optional EOS-managed directory containing frozen CUDA CuRobo "
+            "extensions; avoids modifying or rebuilding GenManip."
+        ),
+    )
+    parser.add_argument(
         "--request",
         type=Path,
         default=Path("evidence/render_request.yaml"),
@@ -165,6 +174,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             request_sha256=_file_sha256(request_path),
             staging_dir=staging_dir,
             evidence_dir=evidence_dir,
+            curobo_extension_cache=(
+                None
+                if args.curobo_extension_cache is None
+                else args.curobo_extension_cache.resolve()
+            ),
         )
     except Exception:
         if staging_dir.exists() or staging_dir.is_symlink():
@@ -175,6 +189,34 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
+def _preload_curobo_extensions(cache: Path) -> list[str]:
+    """Load EOS-frozen CuRobo binaries without touching the GenManip checkout."""
+
+    if not cache.is_dir():
+        raise FileNotFoundError(f"missing CuRobo extension cache: {cache}")
+    __import__("curobo.curobolib")
+    loaded: list[str] = []
+    for name in (
+        "geom_cu",
+        "kinematics_fused_cu",
+        "lbfgs_step_cu",
+        "line_search_cu",
+        "tensor_step_cu",
+    ):
+        path = cache / name / f"{name}.so"
+        if not path.is_file():
+            raise FileNotFoundError(f"missing frozen CuRobo extension: {path}")
+        qualified = f"curobo.curobolib.{name}"
+        spec = importlib.util.spec_from_file_location(qualified, path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"cannot load frozen CuRobo extension: {path}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        sys.modules[qualified] = module
+        loaded.append(str(path))
+    return loaded
+
+
 def _render_initial_scene(
     *,
     collected_root: Path,
@@ -183,6 +225,7 @@ def _render_initial_scene(
     request_sha256: str,
     staging_dir: Path,
     evidence_dir: Path,
+    curobo_extension_cache: Path | None,
 ) -> None:
     if str(genmanip_root) not in sys.path:
         sys.path.insert(0, str(genmanip_root))
@@ -237,6 +280,15 @@ def _render_initial_scene(
         settings.set("/rtx/post/aa/autoExposureMode", 0)
         settings.set("/rtx/post/aa/exposureMultiplier", 0.8)
         settings.set("/rtx/post/histogram/enabled", False)
+
+        if curobo_extension_cache is not None:
+            loaded_extensions = _preload_curobo_extensions(
+                curobo_extension_cache
+            )
+            log_lines.append(
+                "curobo_extensions_preloaded=" + ",".join(loaded_extensions)
+            )
+            _flush_runtime_log(staging_dir, log_lines)
 
         from genmanip.core.scene.scene import Scene
         from genmanip.core.scene.scene_config import SceneConfig

@@ -99,6 +99,35 @@ def test_preview_orchestration_prepends_explicit_runtime_python_paths(
     )
 
 
+def test_preview_orchestration_passes_frozen_curobo_extension_cache(
+    tmp_path: Path,
+) -> None:
+    collected_root = _build_collected_package(tmp_path / "package")
+    request = _load_yaml(collected_root / "evidence/render_request.yaml")
+    preset = collected_root / "fake preset evidence"
+    _write_passing_preview_evidence(collected_root, request).rename(preset)
+    isaac_python = _write_python_forwarder(tmp_path / "runtime" / "isaac-python")
+    renderer_script = _write_fake_renderer(
+        tmp_path / "renderer" / "environment.py", mode="success"
+    )
+    genmanip_root = tmp_path / "GenManip"
+    genmanip_root.mkdir()
+    cache = tmp_path / "curobo cache"
+    cache.mkdir()
+
+    _run_preview(
+        collected_root,
+        isaac_python=isaac_python,
+        renderer_script=renderer_script,
+        genmanip_root=genmanip_root,
+        timeout_seconds=5.0,
+        curobo_extension_cache=cache,
+    )
+
+    argv = json.loads((collected_root / "fake_renderer_argv.json").read_text())
+    assert argv[-2:] == ["--curobo-extension-cache", str(cache.resolve())]
+
+
 def test_renderer_accepts_explicit_camera_pose() -> None:
     module = _load_isaac_renderer_module()
     import numpy as np
@@ -115,6 +144,23 @@ def test_renderer_accepts_explicit_camera_pose() -> None:
     assert distance == pytest.approx(3.0**0.5)
     assert elevation == pytest.approx(35.2643897)
     assert azimuth == pytest.approx(-45.0)
+
+
+def test_renderer_accepts_frozen_curobo_extension_cache() -> None:
+    module = _load_isaac_renderer_module()
+
+    args = module.build_parser().parse_args(
+        [
+            "--collected-root",
+            "/tmp/package",
+            "--genmanip-root",
+            "/tmp/genmanip",
+            "--curobo-extension-cache",
+            "/tmp/curobo-cache",
+        ]
+    )
+
+    assert args.curobo_extension_cache == Path("/tmp/curobo-cache")
 
 
 def test_renderer_reuses_recovered_workspace_camera_for_room_overview() -> None:
@@ -669,6 +715,7 @@ def _write_fake_renderer(path: Path, *, mode: str) -> Path:
             parser.add_argument("--collected-root", type=Path, required=True)
             parser.add_argument("--genmanip-root", type=Path, required=True)
             parser.add_argument("--request", required=True)
+            parser.add_argument("--curobo-extension-cache")
             args = parser.parse_args()
             (args.collected_root / "fake_renderer_argv.json").write_text(
                 json.dumps(sys.argv[1:]), encoding="utf-8"
@@ -723,6 +770,7 @@ def _run_preview(
     genmanip_root: Path,
     timeout_seconds: float,
     runtime_python_paths: tuple[Path, ...] = (),
+    curobo_extension_cache: Path | None = None,
 ) -> object:
     from scenario_forge.adapters.ebench.preview import run_genmanip_initial_preview
 
@@ -733,6 +781,7 @@ def _run_preview(
         genmanip_root,
         timeout_seconds=timeout_seconds,
         runtime_python_paths=runtime_python_paths,
+        curobo_extension_cache=curobo_extension_cache,
     )
 
 

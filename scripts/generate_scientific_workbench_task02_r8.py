@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Task 02 r8.3 from r7 semantics and a qualified transfer-pair handoff."""
+"""Build Task 02 r8.7 from r7 semantics and a dynamic-loaded PBD handoff."""
 
 from __future__ import annotations
 
@@ -12,14 +12,17 @@ from typing import Any
 
 import yaml
 
-from scenario_forge.adapters.convert_asset import load_gpu_pbd_transfer_pair_handoff
+from scenario_forge.adapters.convert_asset import (
+    load_gpu_pbd_dynamic_loaded_start_handoff,
+    load_gpu_pbd_transfer_pair_handoff as load_gpu_pbd_transfer_pair_handoff,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_R7 = REPO_ROOT / "outputs/scientific_workbench_asset_expansion_20260813_r7_full/packages/scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
-DEFAULT_TRANSFER = Path("/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task02_cylinder_to_beaker_gpu_pbd_transfer_20260815_r6/final_package/task02_cylinder_to_beaker_gpu_pbd_transfer_pair_r1")
-DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_task02_r83_20260815"
-SCENARIO_ID = "scientific_workbench_r83_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
+DEFAULT_TRANSFER = Path("/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task02_gpu_pbd_dynamic_loaded_start_20260816_r59/final_package/task02_cylinder_to_beaker_gpu_pbd_transfer_pair_r5")
+DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_task02_r87_20260816"
+SCENARIO_ID = "scientific_workbench_r87_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
 R7_SCENARIO_ID = "scientific_workbench_r7_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
 
 
@@ -71,7 +74,59 @@ def _r7_ebench_scene(r7_package: Path) -> Path:
     return candidates[0]
 
 
-def _composed_scene_usda(r7_reference: str) -> str:
+def _number(value: float) -> str:
+    return f"{value:.9g}"
+
+
+def _source_matrix(
+    xyz: list[float], wxyz: list[float]
+) -> list[list[float]]:
+    w, x, y, z = wxyz
+    return [
+        [1 - 2 * (y * y + z * z), 2 * (x * y + z * w), 2 * (x * z - y * w)],
+        [2 * (x * y - z * w), 1 - 2 * (x * x + z * z), 2 * (y * z + x * w)],
+        [2 * (x * z + y * w), 2 * (y * z - x * w), 1 - 2 * (x * x + y * y)],
+        xyz,
+    ]
+
+
+def _world_particle_points(
+    local_points: list[list[float]],
+    *,
+    source_xyz: list[float],
+    source_wxyz: list[float],
+) -> list[list[float]]:
+    matrix = _source_matrix(source_xyz, source_wxyz)
+    return [
+        [
+            point[0] * matrix[0][axis]
+            + point[1] * matrix[1][axis]
+            + point[2] * matrix[2][axis]
+            + matrix[3][axis]
+            for axis in range(3)
+        ]
+        for point in local_points
+    ]
+
+
+def _composed_scene_usda(
+    r7_reference: str,
+    local_particle_points: list[list[float]],
+    *,
+    source_xyz: list[float],
+    source_wxyz: list[float],
+) -> str:
+    r7_bundle = r7_reference.rsplit("/", 1)[0]
+    table_reference = f"{r7_bundle}/source_bundle/scenario_forge_runtime/table.usd"
+    translated = _world_particle_points(
+        local_particle_points,
+        source_xyz=source_xyz,
+        source_wxyz=source_wxyz,
+    )
+    point_text = ", ".join(
+        f"({_number(point[0])}, {_number(point[1])}, {_number(point[2])})"
+        for point in translated
+    )
     return f'''#usda 1.0
 (
     defaultPrim = "World"
@@ -87,21 +142,42 @@ over "World"
 {{
     over "_scene"
     {{
-        over "obj_obj_graduated_cylinder" (active = false) {{}}
-        over "obj_obj_beaker" (active = false) {{}}
+        def Xform "obj_table" (
+            prepend references = @{table_reference}@</Asset>
+        )
+        {{
+            uniform token[] xformOpOrder = ["!resetXformStack!"]
+        }}
+        over "obj_obj_graduated_cylinder" (
+            active = true
+            references = @deps/transfer/component.usda@</World/Transfer/Source>
+        )
+        {{
+            bool physics:kinematicEnabled = 0
+            double3 xformOp:translate = ({_number(source_xyz[0])}, {_number(source_xyz[1])}, {_number(source_xyz[2])})
+            quatf xformOp:orient = ({_number(source_wxyz[0])}, {_number(source_wxyz[1])}, {_number(source_wxyz[2])}, {_number(source_wxyz[3])})
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }}
+        over "obj_obj_beaker" (
+            active = true
+            references = @deps/transfer/component.usda@</World/Transfer/Target>
+        )
+        {{
+            bool physics:kinematicEnabled = 0
+            double3 xformOp:translate = (-0.16, -0.17, 0.755)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }}
         def Xform "fluid_runtime" (
             prepend references = @deps/transfer/component.usda@</World/Transfer>
         )
         {{
-            double3 xformOp:translate = (-0.16, -0.17, 0.755)
-            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate"]
-            over "Source"
+            uniform token[] xformOpOrder = ["!resetXformStack!"]
+            over "Source" (active = false) {{}}
+            over "Target" (active = false) {{}}
+            over "ParticleSet"
             {{
-                bool physics:kinematicEnabled = 0
-            }}
-            over "Target"
-            {{
-                bool physics:kinematicEnabled = 0
+                point3f[] physxParticle:simulationPoints = [{point_text}]
+                point3f[] points = [{point_text}]
             }}
         }}
     }}
@@ -119,7 +195,7 @@ over "physicsScene"
 '''
 
 
-def _rewrite_ebench_config(source: Path) -> dict[str, Any]:
+def _rewrite_ebench_config(source: Path, *, particle_count: int) -> dict[str, Any]:
     config = yaml.safe_load(source.read_text(encoding="utf-8"))
     evaluations = config.get("evaluation_configs", [])
     if not evaluations:
@@ -142,12 +218,18 @@ def _rewrite_ebench_config(source: Path) -> dict[str, Any]:
                 f"collected_packages/{SCENARIO_ID}/cameras/fixed_camera_lift2.yml"
             )
         item["prototype_fluid"] = {
-            "status": "qualified_prescribed_transfer",
-            "particle_count": 548,
+            "status": "qualified_dynamic_loaded_start",
+            "particle_count": particle_count,
             "liquid_metrics_active": False,
             "inactive_reason": "ebench_liquid_metric_adapter_not_qualified",
-            "producer_claim": "gpu_pbd_prescribed_transfer_pair",
+            "producer_claim": "gpu_pbd_dynamic_loaded_start",
         }
+        item["preprocess_config"] = [
+            entry
+            for entry in item.get("preprocess_config", [])
+            if entry.get("type")
+            not in {"set_robot_contact_offset", "set_robot_rest_offset"}
+        ]
         goal = item.get("generation_config", {}).get("goal", [])
         for level1 in goal:
             for level2 in level1 if isinstance(level1, list) else []:
@@ -158,7 +240,9 @@ def _rewrite_ebench_config(source: Path) -> dict[str, Any]:
     return config
 
 
-def _rewrite_episode(source: Path) -> dict[str, Any]:
+def _rewrite_episode(
+    source: Path, *, source_xyz: list[float], source_wxyz: list[float]
+) -> dict[str, Any]:
     episode = json.loads(source.read_text(encoding="utf-8"))
     def replace(value: Any) -> Any:
         if isinstance(value, str):
@@ -176,14 +260,16 @@ def _rewrite_episode(source: Path) -> dict[str, Any]:
     task_data = episode.get("task_data", {})
     layout = task_data.get("initial_layout", {})
     task_poses = {
-        "obj_graduated_cylinder": ([0.09, -0.17, 0.755], "/World/_scene/fluid_runtime/Source"),
-        "obj_beaker": ([-0.16, -0.17, 0.755], "/World/_scene/fluid_runtime/Target"),
+        "obj_graduated_cylinder": (source_xyz, "/World/_scene/obj_obj_graduated_cylinder"),
+        "obj_beaker": ([-0.16, -0.17, 0.755], "/World/_scene/obj_obj_beaker"),
     }
     for object_id, item in layout.items():
         if not isinstance(item, dict):
             continue
         if object_id in task_poses:
             item["position"], item["prim_path"] = task_poses[object_id]
+            if object_id == "obj_graduated_cylinder":
+                item["orientation"] = source_wxyz
             item["path"] = ""
             continue
         prim_path = item.get("prim_path")
@@ -208,6 +294,8 @@ def _rewrite_episode(source: Path) -> dict[str, Any]:
         if object_id in task_poses:
             position, prim_path = task_poses[object_id]
             item["initial_pose"]["xyz"] = position
+            if object_id == "obj_graduated_cylinder":
+                item["initial_pose"]["wxyz"] = source_wxyz
             item["state_prim_path"] = prim_path
     return episode
 
@@ -255,13 +343,13 @@ def _render_request(
     ).encode("utf-8")
     request["input_digest"] = "sha256:" + sha256(digest_payload).hexdigest()
     request["claim_boundary"] = (
-        "r8.3 initial-scene visual evidence only; not robot transfer, "
+        "r8.7 initial-scene visual evidence only; not robot transfer, "
         "FPS, policy, or benchmark success."
     )
     return request
 
 
-def _vr_config() -> str:
+def _vr_config(*, particle_count: int) -> str:
     return f'''# Merge this TASKS entry into the VR teleop task registry.
 TASKS = {{
     "{SCENARIO_ID}": {{
@@ -282,11 +370,11 @@ TASKS = {{
             "TimeStepsPerSecond": 120,
         }},
         "prototype_fluid": {{
-            "status": "qualified_prescribed_transfer",
-            "particle_count": 548,
+            "status": "qualified_dynamic_loaded_start",
+            "particle_count": {particle_count},
             "liquid_metrics_active": False,
             "inactive_reason": "vr_liquid_metric_adapter_not_qualified",
-            "producer_claim": "gpu_pbd_prescribed_transfer_pair",
+            "producer_claim": "gpu_pbd_dynamic_loaded_start",
         }},
     }},
 }}
@@ -301,9 +389,29 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         shutil.rmtree(out)
     out.mkdir(parents=True, exist_ok=True)
     transfer_manifest_path = transfer_package / "evidence/manifest.json"
-    transfer_handoff = load_gpu_pbd_transfer_pair_handoff(
+    dynamic_handoff = load_gpu_pbd_dynamic_loaded_start_handoff(
         transfer_package, transfer_manifest_path
     )
+    transfer_handoff = dynamic_handoff.transfer
+    transfer_profile = json.loads(
+        transfer_handoff.profile_path.read_text(encoding="utf-8")
+    )
+    liquid_profile = transfer_profile["liquid_parameters"]
+    particle_state = json.loads(
+        dynamic_handoff.particle_state_path.read_text(encoding="utf-8")
+    )
+    particle_points = particle_state["positions"]
+    if len(particle_points) != transfer_handoff.particle_count:
+        raise ValueError("source-local particle state does not match qualified particle count")
+    reference_xyz = transfer_profile["source"]["initial_xyz_m"]
+    support_pose = dynamic_handoff.support_plane_to_entry_root
+    support_xyz = support_pose["xyz_m"]
+    source_xyz = [
+        0.09 + float(support_xyz[0]) - float(reference_xyz[0]),
+        -0.17 + float(support_xyz[1]) - float(reference_xyz[1]),
+        0.755 + float(support_xyz[2]) - float(reference_xyz[2]),
+    ]
+    source_wxyz = [float(value) for value in support_pose["wxyz"]]
     r7_scene = _r7_ebench_scene(r7_package)
     collected_scene_dir = (
         out
@@ -318,33 +426,54 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
     )
     _write(
         out / "ebench/scene.usd",
-        _composed_scene_usda(f"{ebench_bundle}/r7_scene/scene.usda").replace(
+        _composed_scene_usda(
+            f"{ebench_bundle}/r7_scene/scene.usda",
+            particle_points,
+            source_xyz=source_xyz,
+            source_wxyz=source_wxyz,
+        ).replace(
             "@deps/transfer/", f"@{ebench_bundle}/transfer/"
         ),
     )
     _write(
         out / "vr/scene.usd",
         _composed_scene_usda(
-            f"../ebench/{ebench_bundle}/r7_scene/scene.usda"
+            f"../ebench/{ebench_bundle}/r7_scene/scene.usda",
+            particle_points,
+            source_xyz=source_xyz,
+            source_wxyz=source_wxyz,
         ).replace(
             "@deps/transfer/", f"@../ebench/{ebench_bundle}/transfer/"
         ),
     )
 
     r7_ebench = r7_package / "adapters/ebench/genmanip"
-    config = _rewrite_ebench_config(r7_ebench / "tasks/config.yaml")
+    config = _rewrite_ebench_config(
+        r7_ebench / "tasks/config.yaml",
+        particle_count=transfer_handoff.particle_count,
+    )
     _yaml(out / "ebench/config.yaml", config)
     _yaml(out / "ebench/tasks/config.yaml", config)
     _copy(r7_ebench / "cameras", out / "ebench/cameras")
     _write(
         collected_scene_dir / "scene.usda",
-        _composed_scene_usda("source_bundle/r7_scene/scene.usda").replace(
+        _composed_scene_usda(
+            "source_bundle/r7_scene/scene.usda",
+            particle_points,
+            source_xyz=source_xyz,
+            source_wxyz=source_wxyz,
+        ).replace(
             "@deps/transfer/", "@source_bundle/transfer/"
         ),
     )
     _write(
         collected_scene_dir / "scene_static_preview.usda",
-        _composed_scene_usda("source_bundle/r7_scene/scene.usda")
+        _composed_scene_usda(
+            "source_bundle/r7_scene/scene.usda",
+            particle_points,
+            source_xyz=source_xyz,
+            source_wxyz=source_wxyz,
+        )
         .replace("@deps/transfer/", "@source_bundle/transfer/"),
     )
     r7_episode = next(
@@ -356,7 +485,12 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         / SCENARIO_ID
         / "002/episode_metadata.json"
     )
-    _json(episode_path, _rewrite_episode(r7_episode))
+    _json(
+        episode_path,
+        _rewrite_episode(
+            r7_episode, source_xyz=source_xyz, source_wxyz=source_wxyz
+        ),
+    )
     r7_collected_manifest = json.loads(
         (r7_ebench / "package_manifest.json").read_text(encoding="utf-8")
     )
@@ -383,7 +517,7 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
                 ),
                 "manifest_sha256": "sha256:" + transfer_handoff.manifest_sha256,
                 "metadata": {
-                    "consumer_usage": "gpu_pbd_prescribed_transfer_pair",
+                    "consumer_usage": "gpu_pbd_dynamic_loaded_start",
                     "consumer_physics_patch_allowed": False,
                     "particle_count": transfer_handoff.particle_count,
                     "qualification_report_path": transfer_handoff.qualification_report_path,
@@ -391,6 +525,15 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
                         "sha256:" + transfer_handoff.qualification_report_sha256
                     ),
                     "claim_boundary": transfer_handoff.claim_boundary,
+                    "dynamic_loaded_start_contract_sha256": (
+                        "sha256:" + dynamic_handoff.contract_sha256
+                    ),
+                    "dynamic_loaded_particle_state_sha256": (
+                        "sha256:" + dynamic_handoff.particle_state_sha256
+                    ),
+                    "maximum_outside_source_before_lift": (
+                        dynamic_handoff.maximum_outside_source_before_lift
+                    ),
                 },
             },
         }
@@ -401,7 +544,7 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
         {
             "schema_version": "scenario-forge-genmanip-collected-package/v0.1",
             "package_id": SCENARIO_ID,
-            "claim_scope": "r83_physics_qualified_candidate",
+            "claim_scope": "r87_dynamic_loaded_start_candidate",
             "entrypoints": {
                 "scene_usd": (
                     f"assets/scene_usds/scenario_forge/{SCENARIO_ID}/scene.usda"
@@ -432,20 +575,49 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
             source_bundle=source_bundle,
         ),
     )
-    _write(out / "vr/config.py", _vr_config())
+    _write(
+        out / "vr/config.py",
+        _vr_config(particle_count=transfer_handoff.particle_count),
+    )
     _copy(r7_package / "scenario.yaml", out / "scenario_r7_semantics.yaml")
 
     manifest = {
-        "schema_version": "scenario-forge-task02-r83-handoff/v0.1",
+        "schema_version": "scenario-forge-task02-r87-handoff/v0.1",
         "scenario_id": SCENARIO_ID,
-        "release": "r8.3",
+        "release": "r8.7",
+        "supersedes": "r8.6",
         "release_status": "physics_qualified_candidate",
         "score_ceiling": 0.60,
         "liquid_metrics_active": False,
-        "particle_count": 548,
+        "particle_count": transfer_handoff.particle_count,
+        "liquid_profile": {
+            "target_settled_fill_ratio": liquid_profile.get(
+                "target_settled_fill_ratio"
+            ),
+            "settled_fill_ratio_tolerance": liquid_profile.get(
+                "settled_fill_ratio_tolerance"
+            ),
+            "particle_parameter_selection": liquid_profile.get(
+                "particle_parameter_selection"
+            ),
+            "appearance": liquid_profile.get("appearance"),
+        },
         "transfer_package_id": transfer_handoff.package_id,
         "transfer_manifest_sha256": transfer_handoff.manifest_sha256,
         "transfer_selected_candidate": dict(transfer_handoff.selected_candidate),
+        "dynamic_loaded_start": {
+            "contract_sha256": dynamic_handoff.contract_sha256,
+            "particle_state_sha256": dynamic_handoff.particle_state_sha256,
+            "qualification_report_sha256": (
+                dynamic_handoff.qualification_report_sha256
+            ),
+            "support_plane_to_entry_root": dict(
+                dynamic_handoff.support_plane_to_entry_root
+            ),
+            "maximum_outside_source_before_lift": (
+                dynamic_handoff.maximum_outside_source_before_lift
+            ),
+        },
         "blocked_reasons": [],
         "entrypoints": {"ebench": "ebench/scene.usd", "vr": "vr/scene.usd"},
         "configs": {"ebench": "ebench/config.yaml", "vr": "vr/config.py"},
@@ -454,13 +626,15 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
             "table_m": [2.0, 0.8, 0.755],
             "robot": "manip/lift2/R5a_isaac41_vr600_v1",
             "transfer_component_translation_xyz_m": [-0.16, -0.17, 0.755],
-            "source_initial_xyz_m": [0.09, -0.17, 0.755],
+            "source_initial_xyz_m": source_xyz,
+            "source_initial_wxyz": source_wxyz,
             "target_initial_xyz_m": [-0.16, -0.17, 0.755],
         },
         "claims": {
             "usd_dependency_closure": "package-relative",
             "producer_static_hold_8s": True,
             "prescribed_transfer_producer": True,
+            "producer_dynamic_loaded_start_3x": True,
             "ebench_load_reset_8s": "pending",
             "visible_robot_transfer": False,
             "product_fps_40_plus": False,
@@ -496,13 +670,14 @@ def build(*, r7_package: Path, transfer_package: Path, out: Path) -> Path:
     )
     _write(
         out / "README_zh.md",
-        """# Task 02 r8.3 物理候选任务包
+        f"""# Task 02 r8.7 动态装液起始任务包
 
-这是“250 mL 量筒 → 325 mL 烧杯”的 r8.3 候选包。它包含 r7 现代湿化学房间、标准工作台、eBench 双臂配置，以及由 ConvertAsset 0812 recipe 交付的 548 个 GPU-PBD 粒子和两个 source-derived convexDecomposition 容器。
+这是“250 mL 量筒 → 325 mL 烧杯”的 r8.7 候选包。它包含 r7 现代湿化学房间、标准工作台、eBench 双臂配置，以及由 ConvertAsset 交付的 {transfer_handoff.particle_count} 个 GPU-PBD 粒子和两个 source-derived convexDecomposition 容器。液体沿用 0812 的轻量粒子参数和蓝色 PreviewSurface。量筒先在 755 mm 支撑面自然落稳，液体再以量筒入口根局部坐标预沉降；Scenario Forge 用同一实测姿态烘焙容器与粒子世界坐标，不再使用旧版硬编码高度补偿。
 
 - eBench：打开 `ebench/scene.usd`，使用 `ebench/config.yaml`。
 - VR：打开 `vr/scene.usd`，合并 `vr/config.py`。
-- ConvertAsset 已证明量筒/烧杯分别静置 8 秒，并证明固定运动轨迹的量筒→烧杯转移三次冷启动达到 94.5%–96.0%。
+- ConvertAsset 已证明三次动态带液冷启动均为 580/580 粒子留在量筒内，并保留原固定运动轨迹转移证据；具体数值以随包 manifest/report 为准。
+- r8.5/r8.6 仍保留作历史证据；r8.7 只替代它们的初始化方式。
 - 这不等于机器人已经成功抓取和倒液；eBench 液体 metric 尚未资格化，因此液体指标仍不计分，任务可计分上限保持 60%。
 - `evidence/product_smoke/report.json` 只记录 eBench 加载、复位和零动作 8 秒检查，不扩展为策略或 benchmark 结论。
 """,

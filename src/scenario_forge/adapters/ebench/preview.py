@@ -84,6 +84,7 @@ def run_genmanip_initial_preview(
     *,
     timeout_seconds: float = 900.0,
     runtime_python_paths: tuple[str | Path, ...] = (),
+    curobo_extension_cache: str | Path | None = None,
 ) -> GenManipPreviewValidationResult:
     root = Path(collected_root).resolve()
     python_path = Path(isaac_python).resolve()
@@ -113,6 +114,15 @@ def run_genmanip_initial_preview(
             raise GenManipPreviewError(
                 f"runtime Python source path does not exist: {path}"
             )
+    resolved_curobo_cache = (
+        None
+        if curobo_extension_cache is None
+        else Path(curobo_extension_cache).resolve()
+    )
+    if resolved_curobo_cache is not None and not resolved_curobo_cache.is_dir():
+        raise GenManipPreviewError(
+            f"CuRobo extension cache does not exist: {resolved_curobo_cache}"
+        )
 
     command = [
         str(python_path),
@@ -124,6 +134,10 @@ def run_genmanip_initial_preview(
         "--request",
         PREVIEW_REQUEST_PATH.as_posix(),
     ]
+    if resolved_curobo_cache is not None:
+        command.extend(
+            ["--curobo-extension-cache", str(resolved_curobo_cache)]
+        )
     # Calling an interpreter by absolute path does not itself put its bin
     # directory on PATH.  CuRobo's extension loader invokes the `ninja`
     # executable, so preserve the caller environment but make the selected

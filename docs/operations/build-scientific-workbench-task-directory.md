@@ -111,6 +111,13 @@ preview adapter's `runtime_python_paths`; it does not install a new environment
 or modify GenManip. Use `--static-only` for package-contract tests that must not
 launch Isaac Sim.
 
+When the selected EOS runtime uses a source tree whose native CuRobo extensions
+would otherwise rebuild, pass its EOS-managed frozen extension directory through
+`run_genmanip_initial_preview(..., curobo_extension_cache=...)`. The renderer
+loads those package modules process-locally before importing GenManip. The cache
+is an external runtime input: it is not copied into the scenario package and no
+GenManip source file is changed.
+
 Each generated package contains the canonical Scenario Forge package plus
 eBench/GenManip and VR adapter exports. Static and static-support objects are
 preloaded package-first with GenManip's generic collider and rigid-body switches

@@ -253,8 +253,12 @@ and older promotion fields are otherwise valid.
 
 A qualified source/target transfer pair uses the adjacent
 `load_gpu_pbd_transfer_pair_handoff` boundary. The loader verifies the promoted
-component USD, package-local dependency tree, exact 548-particle initial state,
+component USD, package-local dependency tree, profile-bound particle count,
 selected trajectory candidate, and three independent cold-run observations.
+The v1 profile remains the original 548-particle, 40-FPS contract. A v2 profile
+may bind a different positive particle count, settled-fill target, tolerance,
+and declared minimum performance gate without changing the manifest identity
+or weakening v1 consumers.
 Each observation must use live `points` readback, retain all particles before
 the pour, deliver at least half of them to the target, sustain at least 40 FPS,
 and report no hard runtime error. Spill and below-support counts remain recorded
@@ -266,6 +270,15 @@ turn the prescribed trajectory into a robot policy or activate a liquid metric.
 Consumers must not patch either vessel's collider, scale, rest offset, or PBD
 parameters. Robot transfer, metric correctness, and benchmark success remain
 separate downstream claims.
+
+Dynamic loaded starts add the narrower
+`load_gpu_pbd_dynamic_loaded_start_handoff` boundary on top of a qualified
+transfer pair. It verifies the package-local source-root particle state,
+support-plane-to-entry-root pose, hashes, three cold starts, maximum outside
+particle count, entry-root drift, tilt, and absence of hard runtime errors.
+Scenario Forge may use the accepted pose to transform the vessel and its
+source-local particles into one scene frame. It may not reinterpret that
+evidence as a robot grasp, pour, policy, liquid metric, or benchmark claim.
 
 ## Compile command
 
