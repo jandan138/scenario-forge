@@ -93,6 +93,7 @@ class _ArticulationObjectBinding:
     root_prim_path: str
     runtime_units: Mapping[str, str]
     dofs: tuple[_ArticulationDofBinding, ...]
+    named_frames: Mapping[str, Mapping[str, Any]]
 
     @property
     def reset_joint_positions(self) -> list[float]:
@@ -821,6 +822,19 @@ def _episode_metadata(
                 **base_layout,
                 "joint_positions": articulation.reset_joint_positions,
             }
+            # GenManip replaces an articulated root in object_list with one
+            # entry per declared part during Scene._parse_articulation().  Its
+            # generic recovery pass deactivates any object-list entry absent
+            # from initial_layout, so retaining these no-pose-write sentinels
+            # is required to keep the articulation backend valid.  Recovery
+            # recognizes is_articulation_part and deliberately skips pose,
+            # scale, velocity, collider, and rigid-body authoring for them.
+            for dof in articulation.dofs:
+                initial_layout[f"{binding.runtime_uid}_{dof.semantic_joint}"] = {
+                    "type": "object",
+                    "prim_path": binding.state_prim_path + dof.part_path,
+                    "is_articulation_part": True,
+                }
             continue
         initial_layout[binding.runtime_uid] = {
             "type": "object",
@@ -1103,6 +1117,7 @@ def _runtime_contract(
                     }
                     for dof in articulation.dofs
                 },
+                "named_frames": _json_safe_copy(articulation.named_frames),
             }
         contract_objects.append(contract_object)
 
@@ -1622,6 +1637,50 @@ def _articulation_requirements(
             "named_frames",
             f"articulated object asset {asset_id}.articulation_contract",
         )
+        runtime_frames: dict[str, dict[str, Any]] = {}
+        for frame_name, raw_contract_frame in contract_frames.items():
+            if not isinstance(frame_name, str) or not frame_name or "." in frame_name:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} named frame ids must "
+                    "be non-empty strings without '.'"
+                )
+            frame_label = (
+                f"articulated object asset {asset_id}.articulation_contract."
+                f"named_frames.{frame_name}"
+            )
+            contract_frame = _as_mapping(raw_contract_frame, frame_label)
+            parent_prim = _required_string(contract_frame, "parent_prim", frame_label)
+            if parent_prim != source_prim and not parent_prim.startswith(source_prim + "/"):
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} named frame "
+                    f"{frame_name!r} parent_prim must be within asset_entry_prim"
+                )
+            translation = _finite_number_list(
+                contract_frame.get("translation_parent_local_m"),
+                3,
+                f"{frame_label}.translation_parent_local_m",
+            )
+            rotation = _finite_number_list(
+                contract_frame.get("rotation_parent_local_wxyz"),
+                4,
+                f"{frame_label}.rotation_parent_local_wxyz",
+            )
+            if sum(value * value for value in rotation) == 0.0:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} named frame "
+                    f"{frame_name!r} must use a non-zero quaternion"
+                )
+            if contract_frame.get("authoritative") is not True:
+                raise GenManipExportError(
+                    f"articulated object asset {asset_id!r} named frame "
+                    f"{frame_name!r} must be authoritative"
+                )
+            runtime_frames[frame_name] = {
+                "parent_prim": parent_prim,
+                "translation_parent_local_m": translation,
+                "rotation_parent_local_wxyz": rotation,
+                "authoritative": True,
+            }
         scenario_frames = _as_mapping(
             item.get("named_frames", {}),
             f"scenario object {object_id}.named_frames",
@@ -1848,6 +1907,7 @@ def _articulation_requirements(
             root_prim_path=root_prim,
             runtime_units=expected_runtime_units,
             dofs=tuple(semantic_by_index[index] for index in range(len(semantic_by_index))),
+            named_frames=runtime_frames,
         )
     return bindings
 

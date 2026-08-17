@@ -52,6 +52,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-08-18 Task 05 / Task 09 r11.1 Prequalification](records/2026-08-18-scientific-workbench-r11-1-prequalification.md)
 - [2026-08-17 r10.1 VR Root, Randomization, and Task 07 Rack](records/2026-08-17-r10-1-vr-root-randomization-and-task07-rack.md)
 - [2026-08-16 Scientific Workbench r9 Rich Tabletop](records/2026-08-16-scientific-workbench-r9-rich-tabletop.md)
 - [2026-08-16 Task 02 r8.7 Dynamic-loaded-start Package](records/2026-08-16-task02-r87-dynamic-loaded-start.md)

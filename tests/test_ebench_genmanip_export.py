@@ -1045,6 +1045,17 @@ def test_articulated_object_exports_native_genmanip_articulation_contract(
         "joint_positions": [-1.5556521048753416, 0.0, 0.0],
         "prim_path": ("/World/scientific_workbench_bimanual_pour/obj_obj_graduated_cylinder_03"),
     }
+    articulation_part = episode["task_data"]["initial_layout"][
+        "obj_graduated_cylinder_03_lid"
+    ]
+    assert articulation_part == {
+        "type": "object",
+        "prim_path": (
+            "/World/scientific_workbench_bimanual_pour/"
+            "obj_obj_graduated_cylinder_03/lid"
+        ),
+        "is_articulation_part": True,
+    }
     contract = episode["task_data"]["scenario_forge_runtime_contract"]
     assert contract["schema_version"] == ("scenario-forge-genmanip-runtime-contract/v0.5")
     assert contract["execution"]["native_goal_role"] == (
@@ -1092,6 +1103,14 @@ def test_articulated_object_exports_native_genmanip_articulation_contract(
                 "released": [-0.001, 0.001],
                 "pressed": [-0.011, -0.009],
             },
+        },
+        "named_frames": {
+            "opening": {
+                "parent_prim": "/World/graduated_cylinder_03",
+                "translation_parent_local_m": [0.0, 0.0, 0.20],
+                "rotation_parent_local_wxyz": [1.0, 0.0, 0.0, 0.0],
+                "authoritative": True,
+            }
         },
     }
     manifest = json.loads((output / "package_manifest.json").read_text(encoding="utf-8"))

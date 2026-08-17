@@ -101,6 +101,23 @@
         "wxyz": {"$ref": "#/$defs/quaternion"}
       }
     },
+    "articulationFrame": {
+      "description": "An authoritative frame expressed in the local coordinates of an articulation prim. Unlike object named_frames, the parent may be a moving articulation part.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parent_prim",
+        "translation_parent_local_m",
+        "rotation_parent_local_wxyz",
+        "authoritative"
+      ],
+      "properties": {
+        "parent_prim": {"type": "string", "pattern": "^/"},
+        "translation_parent_local_m": {"$ref": "#/$defs/number3"},
+        "rotation_parent_local_wxyz": {"$ref": "#/$defs/quaternion"},
+        "authoritative": {"const": true}
+      }
+    },
     "numberRange": {
       "type": "array",
       "prefixItems": [
@@ -266,6 +283,12 @@
         "states": {
           "description": "Inclusive runtime-unit ranges keyed by semantic joint and state; revolute values are radians and prismatic values are meters.",
           "$ref": "#/$defs/articulationStates"
+        },
+        "named_frames": {
+          "description": "Authoritative interaction frames retained from the ConvertAsset articulation contract, including frames parented to moving parts.",
+          "type": "object",
+          "propertyNames": {"type": "string", "minLength": 1, "pattern": "^[^.]+$"},
+          "additionalProperties": {"$ref": "#/$defs/articulationFrame"}
         }
       }
     },
