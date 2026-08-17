@@ -60,7 +60,9 @@ either a narrow passing `aan.dynamic_context_contract.v1` or the stronger
 passing `aan.interaction_contract.v1`. Scenario objects using it must have
 `role: context_prop`, fixed dressing preset/group metadata, and
 `metric_participation: none`; adapters load its producer-owned physics but do
-not add it to task metrics or the VR `obj_prim_list`.
+not add it to task metrics. The r10.1 VR adapter does add tabletop context props
+to `obj_prim_list`, because the collection contract requires every tabletop
+`obj_*` prim to participate in bounded local randomization.
 
 The two `visual_static_*` values require a ConvertAsset `asset_role:
 visual_static` manifest. Scenario Forge verifies the exact source and scope hashes,

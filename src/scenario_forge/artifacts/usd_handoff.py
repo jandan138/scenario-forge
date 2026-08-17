@@ -299,6 +299,159 @@ def build_dual_consumer_variant_bundle(
     )
 
 
+def build_multi_task_dual_consumer_bundle(
+    *,
+    archive_id: str,
+    variants: Sequence[tuple[int, str, Path, Path]],
+    output_dir: Path,
+) -> USDHandoffArchive:
+    """Bundle independently portable eBench and VR exports for several tasks."""
+
+    if not archive_id or not variants:
+        raise ValueError("archive_id and variants are required")
+    keys = [(task_number, label) for task_number, label, _ebench, _vr in variants]
+    if len(keys) != len(set(keys)):
+        raise ValueError("task and variant pairs must be unique")
+    root = output_dir / archive_id
+    if root.exists():
+        shutil.rmtree(root)
+    root.mkdir(parents=True)
+    records: list[dict[str, object]] = []
+    counts: dict[str, int] = {}
+    for task_number, label, ebench_path, vr_path in variants:
+        safe_label = "".join(char if char.isalnum() or char in "-_" else "_" for char in label)
+        if not safe_label:
+            raise ValueError("variant labels must contain a portable character")
+        ebench = Path(ebench_path).resolve()
+        vr = Path(vr_path).resolve()
+        package_manifest_path = ebench / "package_manifest.json"
+        if not package_manifest_path.is_file():
+            raise ValueError(f"task {task_number} {label} lacks eBench package_manifest.json")
+        package_manifest = yaml.safe_load(package_manifest_path.read_text(encoding="utf-8"))
+        entrypoints = package_manifest.get("entrypoints", {})
+        scene_relative = str(entrypoints.get("scene_usd", ""))
+        config_relative = str(entrypoints.get("task_config", ""))
+        missing_ebench = [
+            relative
+            for relative in (scene_relative, config_relative)
+            if not relative or not (ebench / relative).is_file()
+        ]
+        if missing_ebench:
+            raise ValueError(
+                f"task {task_number} {label} has incomplete eBench entrypoints: "
+                + ", ".join(missing_ebench)
+            )
+        required_vr = (
+            vr / "scene.usd",
+            vr / "task_config.py",
+            vr / "parity_manifest.json",
+            vr / "evidence/open_smoke/report.json",
+        )
+        missing_vr = [path.relative_to(vr).as_posix() for path in required_vr if not path.is_file()]
+        if missing_vr:
+            raise ValueError(
+                f"task {task_number} {label} has incomplete VR export: "
+                + ", ".join(missing_vr)
+            )
+        vr_report = yaml.safe_load(required_vr[-1].read_text(encoding="utf-8"))
+        if vr_report.get("status") != "pass":
+            raise ValueError(f"task {task_number} {label} VR open smoke did not pass")
+        relative_root = Path(f"task{task_number:02d}") / safe_label
+        destination = root / relative_root
+        shutil.copytree(
+            ebench,
+            destination / "ebench",
+            ignore=lambda _directory, names: {"robot_oracle"} & set(names),
+        )
+        shutil.copytree(
+            vr,
+            destination / "vr",
+            ignore=lambda _directory, names: {"robot_oracle"} & set(names),
+        )
+        task_key = f"task{task_number:02d}"
+        counts[task_key] = counts.get(task_key, 0) + 1
+        prefix = relative_root.as_posix()
+        records.append(
+            {
+                "task_number": task_number,
+                "variant": label,
+                "directory": prefix,
+                "ebench": {
+                    "open_usd": f"{prefix}/ebench/{scene_relative}",
+                    "config": f"{prefix}/ebench/{config_relative}",
+                },
+                "vr": {
+                    "open_usd": f"{prefix}/vr/scene.usd",
+                    "config": f"{prefix}/vr/task_config.py",
+                },
+                "robot_embedded_in_usd": False,
+                "vr_open_smoke": "pass",
+            }
+        )
+    manifest = {
+        "schema_version": "scenario-forge-multi-task-dual-consumer-handoff/v0.1",
+        "archive_id": archive_id,
+        "package_count": len(records),
+        "task_counts": counts,
+        "packages": records,
+        "claim_boundary": (
+            "Portable eBench and VR packages with attached runtime evidence. "
+            "No new robot-policy, task-success, liquid-metric, or benchmark claim."
+        ),
+    }
+    (root / "manifest.yaml").write_text(
+        yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False), encoding="utf-8"
+    )
+    (root / "README_CN.md").write_text(
+        _multi_task_dual_consumer_readme(archive_id, records), encoding="utf-8"
+    )
+    _write_checksums(root)
+    zip_path = output_dir / f"{archive_id}.zip"
+    _write_deterministic_zip(root, zip_path)
+    return USDHandoffArchive(
+        root=root,
+        zip_path=zip_path,
+        task_numbers=tuple(int(record["task_number"]) for record in records),
+    )
+
+
+def _multi_task_dual_consumer_readme(
+    archive_id: str, records: Sequence[Mapping[str, object]]
+) -> str:
+    lines = [
+        f"# {archive_id}",
+        "",
+        "这是 Task 02 / 07 / 08 的 r10.1 双端交付。每个变体目录均为独立包，",
+        "请整体复制，不要跨目录混用 `assets/`、`deps/` 或配置。运行时为 Isaac Sim 4.1。",
+        "",
+        "USD 不内嵌机器人；eBench 与 VR 分别按同目录配置插入双臂机器人。",
+        "VR 源 USD 的 defaultPrim 是 `/World`；加载器运行时再挂到 `/World/_scene`。",
+        "",
+        "| 任务 | 变体 | eBench USD / config | VR USD / config |",
+        "| ---: | --- | --- | --- |",
+    ]
+    for record in records:
+        ebench = record["ebench"]
+        vr = record["vr"]
+        assert isinstance(ebench, Mapping) and isinstance(vr, Mapping)
+        lines.append(
+            f"| {record['task_number']} | {record['variant']} | "
+            f"`{ebench['open_usd']}` / `{ebench['config']}` | "
+            f"`{vr['open_usd']}` / `{vr['config']}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## 证据边界",
+            "",
+            "Task 02 保留四档液位既有的带液物理/渲染证据；Task 07/08 本次证明包闭包、",
+            "初始摆放、960 步零动作稳定性和 VR 直接打开。未新增机器人 oracle、任务成功率或 benchmark 声明。",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def _bundle_readme(archive_id: str, records: Sequence[Mapping[str, object]]) -> str:
     lines = [
         f"# {archive_id}",

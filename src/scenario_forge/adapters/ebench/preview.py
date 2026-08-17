@@ -726,6 +726,8 @@ def _expected_runtime_geometry(
             )
         objects_by_runtime_id[runtime_id] = item
 
+    fixture_support_relations = _initial_fixture_support_relations(runtime_contract)
+
     raw_assets = package_manifest.get("source_assets")
     if not isinstance(raw_assets, list):
         raise GenManipPreviewError("package manifest source_assets must be a list")
@@ -927,6 +929,9 @@ def _expected_runtime_geometry(
             "max_root_tilt_deg": _MAX_ROOT_TILT_DEG,
             "max_support_gap_m": _TABLETOP_SUPPORT_TOLERANCE_M,
         }
+        support_relation = fixture_support_relations.get(runtime_id)
+        if support_relation is not None:
+            result[runtime_id]["support_relation"] = support_relation
         mounting = geometry.get("mounting")
         if mounting is not None:
             mounting_mapping = _as_mapping(
@@ -978,6 +983,62 @@ def _expected_runtime_geometry(
                 "warmup_start": list(warmup_extent),
                 "post_warmup": list(final_extent),
             }
+    return result
+
+
+def _initial_fixture_support_relations(
+    runtime_contract: Mapping[str, Any],
+) -> dict[str, dict[str, Any]]:
+    """Derive initial non-table support from an existing source-fixture step."""
+
+    raw_objects = runtime_contract.get("objects")
+    raw_steps = runtime_contract.get("steps")
+    if not isinstance(raw_objects, list) or not isinstance(raw_steps, list):
+        return {}
+    objects: dict[str, Mapping[str, Any]] = {}
+    for raw_object in raw_objects:
+        if not isinstance(raw_object, Mapping):
+            continue
+        object_id = raw_object.get("scenario_object_id")
+        if isinstance(object_id, str) and object_id:
+            objects[object_id] = raw_object
+    result: dict[str, dict[str, Any]] = {}
+    for raw_step in raw_steps:
+        if not isinstance(raw_step, Mapping):
+            continue
+        parameters = raw_step.get("parameters")
+        if not isinstance(parameters, Mapping):
+            continue
+        object_id = parameters.get("object")
+        fixture_id = parameters.get("source_fixture")
+        frame_ref = parameters.get("source_frame")
+        if not all(isinstance(value, str) and value for value in (object_id, fixture_id, frame_ref)):
+            continue
+        expected_prefix = f"{fixture_id}."
+        if not frame_ref.startswith(expected_prefix):
+            continue
+        fixture = objects.get(fixture_id)
+        if fixture is None:
+            continue
+        frame_id = frame_ref[len(expected_prefix):]
+        named_frames = fixture.get("named_frames")
+        if not isinstance(named_frames, Mapping):
+            continue
+        frame = named_frames.get(frame_id)
+        if not isinstance(frame, Mapping):
+            continue
+        xyz = frame.get("xyz")
+        if not isinstance(xyz, list) or len(xyz) != 3:
+            continue
+        target_runtime_id = fixture.get("runtime_uid")
+        if not isinstance(target_runtime_id, str) or not target_runtime_id:
+            continue
+        result[object_id] = {
+            "kind": "fixture_frame_support_height",
+            "target_runtime_id": target_runtime_id,
+            "target_frame": frame_ref,
+            "target_frame_local_xyz": [float(value) for value in xyz],
+        }
     return result
 
 
@@ -1173,7 +1234,63 @@ def _validate_runtime_geometry(
             expected_item.get("max_support_gap_m"),
             f"preview expected runtime geometry {runtime_id} support tolerance",
         )
-        support_gap = post_warmup["support_world_point"][2] - table_upper[2]
+        support_relation = expected_item.get("support_relation")
+        support_reference: dict[str, Any]
+        if support_relation is None:
+            support_height = table_upper[2]
+            support_reference = {
+                "kind": "tabletop",
+                "runtime_id": table_runtime_id,
+            }
+        else:
+            relation = _as_mapping(
+                support_relation,
+                f"preview expected runtime geometry {runtime_id}.support_relation",
+            )
+            if relation.get("kind") != "fixture_frame_support_height":
+                raise GenManipPreviewError(
+                    f"preview expected runtime geometry {runtime_id} has unsupported support relation"
+                )
+            target_runtime_id = _required_string(
+                relation,
+                "target_runtime_id",
+                f"preview expected runtime geometry {runtime_id}.support_relation",
+            )
+            target_actual = _as_mapping(
+                task_objects.get(target_runtime_id),
+                f"preview runtime geometry support target {target_runtime_id}",
+            )
+            target_post = _required_mapping(
+                target_actual,
+                "post_warmup",
+                f"preview runtime geometry support target {target_runtime_id}",
+            )
+            target_pose = _required_mapping(
+                target_post,
+                "root_pose",
+                f"preview runtime geometry support target {target_runtime_id}.post_warmup",
+            )
+            target_xyz = _number_vector(
+                target_pose.get("xyz_m"),
+                f"preview runtime geometry support target {target_runtime_id}.xyz_m",
+            )
+            target_wxyz = _quaternion(
+                target_pose.get("wxyz"),
+                f"preview runtime geometry support target {target_runtime_id}.wxyz",
+            )
+            frame_local = _number_vector(
+                relation.get("target_frame_local_xyz"),
+                f"preview expected runtime geometry {runtime_id}.support target frame",
+            )
+            frame_offset = _rotate_wxyz(frame_local, target_wxyz)
+            support_height = target_xyz[2] + frame_offset[2]
+            support_reference = {
+                "kind": "fixture_frame_support_height",
+                "runtime_id": target_runtime_id,
+                "target_frame": relation.get("target_frame"),
+                "world_height_m": support_height,
+            }
+        support_gap = post_warmup["support_world_point"][2] - support_height
         if not (
             -max_support_gap
             <= support_gap
@@ -1190,6 +1307,7 @@ def _validate_runtime_geometry(
             "extent_relative_error_sorted": extent_relative_errors,
             "extent_comparison_by_sample": extent_comparison_by_sample,
             "support_gap_m": support_gap,
+            "support_reference": support_reference,
             "root_tilt_deg": root_tilt_deg,
             "tabletop_xy_contained": True,
             "overall_aabb_support_gap_diagnostic_m": (

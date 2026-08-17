@@ -8,6 +8,7 @@ import yaml
 
 from scenario_forge.artifacts.usd_handoff import (
     build_dual_consumer_variant_bundle,
+    build_multi_task_dual_consumer_bundle,
     build_usd_handoff_archive,
     build_usd_handoff_bundle,
 )
@@ -161,3 +162,59 @@ def test_deterministic_zip_replacement_is_atomic_on_write_failure(
 
     assert destination.read_bytes() == b"previous published archive"
     assert not (tmp_path / "bundle.zip.tmp").exists()
+
+
+def test_multi_task_dual_consumer_bundle_preserves_variants_and_entrypoints(
+    tmp_path: Path,
+) -> None:
+    variants = []
+    for task_number, label in ((2, "fill40"), (7, "bioclean"), (8, "bioclean")):
+        package = tmp_path / f"task{task_number:02d}_{label}"
+        ebench = package / "ebench"
+        vr = package / "vr"
+        (ebench / "assets").mkdir(parents=True)
+        (ebench / "tasks").mkdir()
+        (ebench / "assets/scene.usda").write_text("#usda 1.0\n", encoding="utf-8")
+        (ebench / "tasks/config.yaml").write_text("task: config\n", encoding="utf-8")
+        (ebench / "package_manifest.json").write_text(
+            json.dumps(
+                {
+                    "entrypoints": {
+                        "scene_usd": "assets/scene.usda",
+                        "task_config": "tasks/config.yaml",
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        (vr / "deps").mkdir(parents=True)
+        (vr / "scene.usd").write_text("#usda 1.0\n", encoding="utf-8")
+        (vr / "task_config.py").write_text("TASKS = {}\n", encoding="utf-8")
+        (vr / "parity_manifest.json").write_text("{}\n", encoding="utf-8")
+        report = vr / "evidence/open_smoke/report.json"
+        report.parent.mkdir(parents=True)
+        report.write_text('{"status":"pass"}\n', encoding="utf-8")
+        variants.append((task_number, label, ebench, vr))
+
+    result = build_multi_task_dual_consumer_bundle(
+        archive_id="tasks_02_07_08_r10_1",
+        variants=variants,
+        output_dir=tmp_path / "handoff",
+    )
+
+    manifest = yaml.safe_load((result.root / "manifest.yaml").read_text())
+    assert manifest["package_count"] == 3
+    assert manifest["task_counts"] == {"task02": 1, "task07": 1, "task08": 1}
+    assert manifest["packages"][1]["ebench"]["open_usd"] == (
+        "task07/bioclean/ebench/assets/scene.usda"
+    )
+    assert manifest["packages"][1]["vr"]["config"] == (
+        "task07/bioclean/vr/task_config.py"
+    )
+    assert (result.root / "task02/fill40/ebench/assets/scene.usda").is_file()
+    assert (result.root / "task08/bioclean/vr/scene.usd").is_file()
+    with zipfile.ZipFile(result.zip_path) as archive:
+        assert (
+            "tasks_02_07_08_r10_1/task07/bioclean/vr/task_config.py"
+            in archive.namelist()
+        )

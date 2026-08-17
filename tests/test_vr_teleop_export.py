@@ -98,7 +98,7 @@ def _build_shared_profile_package(tmp_path: Path, *, with_context: bool = False)
     return package_root
 
 
-def test_vr_context_prop_is_in_scene_but_not_obj_prim_list(tmp_path: Path) -> None:
+def test_vr_context_prop_is_a_randomizable_object(tmp_path: Path) -> None:
     package_root = _build_shared_profile_package(tmp_path, with_context=True)
 
     result = export_vr_teleop_package(package_root, tmp_path / "vr-context")
@@ -107,10 +107,14 @@ def test_vr_context_prop_is_in_scene_but_not_obj_prim_list(tmp_path: Path) -> No
     config = result.task_config.read_text(encoding="utf-8")
     parity = json.loads(result.parity_manifest.read_text(encoding="utf-8"))
     assert "@deps/context/context_beaker/asset.usd@" in scene
-    assert 'def Xform "context_beaker"' in scene
-    assert '"/World/_scene/context_beaker"' not in config
+    assert 'def Xform "obj_context_beaker"' in scene
+    assert '"/World/_scene/obj_context_beaker"' in config
+    namespace: dict[str, object] = {"_ASSETS_DIR": Path("/tmp/assets")}
+    exec(config, namespace)
+    task = namespace["TASKS"]["scientific_workbench_pour_flask_to_cylinder"]  # type: ignore[index]
+    assert {"objs": ["obj_context_beaker"], "mode": "local", "yaw_range_degrees": [0.0, 0.0], "x_offset_range": [-0.01, 0.01], "y_offset_range": [-0.01, 0.01]} in task["layout_randomization"]["objects"]  # type: ignore[index]
     assert parity["equivalence"]["context_props"] == (
-        "same_assets_poses_and_physics_not_in_task_object_list"
+        "same_assets_poses_and_physics_in_randomizable_object_list"
     )
 
 
@@ -172,6 +176,11 @@ def test_vr_export_uses_same_recipe_and_never_authors_a_local_table_slab(
     assert "@deps/environment/asset.usd@</World>" in scene
     assert "@deps/source_container/asset.usd@</World/conical_bottle03>" in scene
     assert "@deps/target_container/asset.usd@</World/graduated_cylinder_03>" in scene
+    assert 'def Xform "_scene"' not in scene
+    assert 'def Xform "background"' in scene
+    assert 'def Xform "table"' in scene
+    assert 'def DomeLight "vr_direct_open_light"' in scene
+    assert "float inputs:intensity = 750" in scene
     assert (result.output_dir / "deps/table/asset.usd").is_file()
 
     task_config = (result.output_dir / "task_config.py").read_text(encoding="utf-8")
@@ -180,6 +189,15 @@ def test_vr_export_uses_same_recipe_and_never_authors_a_local_table_slab(
     assert "TASKS = {" in task_config
     assert '"scene_usd_file_path"' in task_config
     assert '"/World/_scene/obj_conical_bottle03"' in task_config
+    assert '"table": "table"' in task_config
+    assert '"mode": "local"' in task_config
+    namespace: dict[str, object] = {"_ASSETS_DIR": Path("/tmp/assets")}
+    exec(task_config, namespace)
+    randomization = namespace["TASKS"]["scientific_workbench_pour_flask_to_cylinder"]["layout_randomization"]  # type: ignore[index]
+    assert randomization["table"] == "table"
+    assert all(item["x_offset_range"] == [-0.01, 0.01] for item in randomization["objects"])
+    assert all(item["y_offset_range"] == [-0.01, 0.01] for item in randomization["objects"])
+    assert all(item["yaw_range_degrees"] == [0.0, 0.0] for item in randomization["objects"])
     assert '"SolverType": "TGS"' in task_config
     assert '"TimeStepsPerSecond": 60' in task_config
     assert '"set_robot_contact_offset": 0.05' in task_config
@@ -217,3 +235,34 @@ def test_vr_export_supports_generic_non_pour_task_objects(tmp_path: Path) -> Non
     ast.parse(task_config)
     assert '"/World/_scene/obj_conical_bottle03"' in task_config
     assert '"/World/_scene/obj_graduated_cylinder_03"' in task_config
+    assert "obj_obj_" not in scene
+
+
+def test_vr_randomization_groups_objects_from_metadata(tmp_path: Path) -> None:
+    package_root = _build_generic_task_package(tmp_path)
+    recipe = package_root / "scenario.yaml"
+    raw = __import__("yaml").safe_load(recipe.read_text(encoding="utf-8"))
+    for item in raw["objects"]:
+        if item["id"] in {"obj_conical_bottle03", "obj_graduated_cylinder_03"}:
+            item.setdefault("metadata", {})["vr_randomization_group"] = "assembly"
+    recipe.write_text(__import__("yaml").safe_dump(raw, sort_keys=False), encoding="utf-8")
+
+    result = export_vr_teleop_package(
+        package_root,
+        tmp_path / "vr-grouped",
+        task_id="scientific_workbench_generic_task",
+    )
+
+    namespace: dict[str, object] = {"_ASSETS_DIR": Path("/tmp/assets")}
+    exec(result.task_config.read_text(encoding="utf-8"), namespace)
+    config = namespace["TASKS"]["scientific_workbench_generic_task"]  # type: ignore[index]
+    groups = config["layout_randomization"]["objects"]  # type: ignore[index]
+    assert groups == [
+        {
+            "objs": ["obj_conical_bottle03", "obj_graduated_cylinder_03"],
+            "mode": "local",
+            "yaw_range_degrees": [0.0, 0.0],
+            "x_offset_range": [-0.01, 0.01],
+            "y_offset_range": [-0.01, 0.01],
+        }
+    ]

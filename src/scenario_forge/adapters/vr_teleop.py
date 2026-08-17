@@ -214,9 +214,7 @@ def export_vr_teleop_package(
             _task_config_python(
                 task_id=task_id,
                 robot=robot,
-                object_ids=[
-                    _string(item.get("id"), "task object.id") for item in task_objects
-                ],
+                objects=scene_objects,
                 object_prim_paths=(
                     None
                     if producer_entrypoint is None
@@ -259,7 +257,7 @@ def export_vr_teleop_package(
                     if producer_entrypoint is not None
                     else "same_assets_poses_and_physics"
                 ),
-                "context_props": "same_assets_poses_and_physics_not_in_task_object_list",
+                "context_props": "same_assets_poses_and_physics_in_randomizable_object_list",
                 "robot_model": "same_runtime_robot_type",
                 "robot_base_pose": "same",
                 "physx_scene_config": "same_shared_profile",
@@ -342,14 +340,12 @@ def _scene_usda(
         "",
         'def Xform "World"',
         "{",
-        '    def Xform "_scene"',
+        '    def Xform "background" (',
+        f"        prepend references = @deps/environment/asset.usd@<{environment_root}>",
+        "    )",
         "    {",
-        '        def Xform "background" (',
-        f"            prepend references = @deps/environment/asset.usd@<{environment_root}>",
-        "        )",
-        "        {",
-        *_pose_lines(scene_pose, indent=12),
-        "        }",
+        *_pose_lines(scene_pose, indent=8),
+        "    }",
         "",
     ]
     for wrapper, role, item in [
@@ -366,18 +362,30 @@ def _scene_usda(
     ]:
         source_prim = _string(item.get("source_prim_path"), f"{wrapper}.source_prim_path")
         pose = _mapping(item.get("pose"), f"{wrapper}.pose")
+        vr_wrapper = wrapper if wrapper == "table" else _vr_prim_name(wrapper)
         lines.extend(
             [
-                f'        def Xform "{wrapper}" (',
-                f"            prepend references = @deps/{role}/asset.usd@<{source_prim}>",
-                "        )",
-                "        {",
-                *_pose_lines(pose, indent=12),
-                "        }",
+                f'    def Xform "{vr_wrapper}" (',
+                f"        prepend references = @deps/{role}/asset.usd@<{source_prim}>",
+                "    )",
+                "    {",
+                *_pose_lines(pose, indent=8),
+                "    }",
                 "",
             ]
         )
-    lines.extend(["    }", "}", ""])
+    lines.extend(
+        [
+            '    def DomeLight "vr_direct_open_light"',
+            "    {",
+            "        color3f inputs:color = (1, 1, 1)",
+            "        float inputs:exposure = 0",
+            "        float inputs:intensity = 750",
+            "    }",
+            "}",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -398,16 +406,43 @@ def _task_config_python(
     *,
     task_id: str,
     robot: Mapping[str, Any],
-    object_ids: list[str],
+    objects: list[Mapping[str, Any]],
     object_prim_paths: list[str] | None = None,
 ) -> str:
     spawn = _mapping(robot.get("spawn"), "scenario.robot.spawn")
+    object_names = [
+        _vr_prim_name(_string(item.get("id"), "task object.id")) for item in objects
+    ]
+    randomization_groups: dict[str, list[str]] = {}
+    for item, object_name in zip(objects, object_names, strict=True):
+        metadata = item.get("metadata", {})
+        if not isinstance(metadata, Mapping):
+            raise VRTeleopExportError("task object.metadata must be a mapping")
+        group = metadata.get("vr_randomization_group", object_name)
+        if not isinstance(group, str) or not group:
+            raise VRTeleopExportError(
+                "task object.metadata.vr_randomization_group must be a non-empty string"
+            )
+        randomization_groups.setdefault(group, []).append(object_name)
     config: dict[str, Any] = {
         "scene_usd_file_path": {
             "scene1": "__SCENE_PATH__",
         },
         "obj_prim_list": object_prim_paths
-        or [f"/World/_scene/{object_id}" for object_id in object_ids],
+        or [f"/World/_scene/{object_name}" for object_name in object_names],
+        "layout_randomization": {
+            "table": "table",
+            "objects": [
+                {
+                    "objs": grouped_names,
+                    "mode": "local",
+                    "yaw_range_degrees": [0.0, 0.0],
+                    "x_offset_range": [-0.01, 0.01],
+                    "y_offset_range": [-0.01, 0.01],
+                }
+                for grouped_names in randomization_groups.values()
+            ],
+        },
         "robot_cfg": {
             "position": _number_list(spawn.get("xyz"), 3, "robot.spawn.xyz"),
             "orientation": _number_list(spawn.get("wxyz"), 4, "robot.spawn.wxyz"),
@@ -427,6 +462,14 @@ def _task_config_python(
         f"    {json.dumps(task_id)}: {body},\n"
         "}\n"
     )
+
+
+def _vr_prim_name(object_id: str) -> str:
+    """Return the single-prefix VR object name required by the collection runtime."""
+    result = object_id
+    while result.startswith("obj_obj_"):
+        result = result[4:]
+    return result if result.startswith("obj_") else f"obj_{result}"
 
 
 def _python_literal(value: Any, *, indent: int) -> str:

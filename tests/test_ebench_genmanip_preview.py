@@ -21,6 +21,7 @@ from scripts.ebench.render_genmanip_initial_preview import (
 from scenario_forge.adapters.ebench.genmanip import export_genmanip_collected_package
 from scenario_forge.adapters.ebench.preview import (
     GenManipPreviewError,
+    _initial_fixture_support_relations,
     _validate_runtime_geometry,
     compute_preview_input_digest,
     run_genmanip_initial_preview,
@@ -36,6 +37,47 @@ from tests.test_ebench_genmanip_export import (
 
 _TABLE_RUNTIME_ID = "00000000000000000000000000000000"
 _TASK_RUNTIME_IDS = ["obj_conical_bottle03", "obj_graduated_cylinder_03"]
+
+
+def test_preview_derives_initial_fixture_support_from_pick_step() -> None:
+    contract = {
+        "objects": [
+            {
+                "scenario_object_id": "obj_rod",
+                "runtime_uid": "obj_rod",
+                "named_frames": {},
+            },
+            {
+                "scenario_object_id": "obj_rack",
+                "runtime_uid": "obj_rack",
+                "named_frames": {
+                    "middle_socket_04_inserted_bottom": {
+                        "xyz": [0.0, 0.0, 0.01743],
+                        "wxyz": [1.0, 0.0, 0.0, 0.0],
+                    }
+                },
+            },
+        ],
+        "steps": [
+            {
+                "id": "pick_rod",
+                "parameters": {
+                    "object": "obj_rod",
+                    "source_fixture": "obj_rack",
+                    "source_frame": "obj_rack.middle_socket_04_inserted_bottom",
+                },
+            }
+        ],
+    }
+
+    assert _initial_fixture_support_relations(contract) == {
+        "obj_rod": {
+            "kind": "fixture_frame_support_height",
+            "target_runtime_id": "obj_rack",
+            "target_frame": "obj_rack.middle_socket_04_inserted_bottom",
+            "target_frame_local_xyz": [0.0, 0.0, 0.01743],
+        }
+    }
 
 
 def test_preview_timing_accepts_explicit_zero_action_smoke_steps() -> None:

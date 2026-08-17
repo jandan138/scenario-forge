@@ -1,0 +1,13 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_r10_1_acrylic_spoon_rack:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_acrylic_spoon_rack_r1_20260817/input_v4/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_acrylic_spoon_rack_r1_20260817/package_v4
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_acrylic_spoon_rack_r1_20260817/package_v4/evidence/manifest.json
+    producer_revision: scientific-workbench-acrylic-spoon-rack-r1-20260817-v4
+    expected_scope_prims: [/World/AcrylicSpoonRack]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 transparent acrylic spoon rack; ConvertAsset r1]
+    redistributable: true
