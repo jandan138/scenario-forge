@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/generate_scientific_workbench_task02_r8.py"
@@ -46,8 +47,64 @@ def _render_request_fixture(root: Path) -> Path:
     )
 
 
-def _transfer_package(root: Path, *, particle_count: int = 548) -> Path:
-    package = root / "transfer"
+def _rich_base_package(root: Path) -> Path:
+    r7 = root / "rich_base"
+    ebench = r7 / "adapters/ebench/genmanip"
+    vr = r7 / "adapters/vr_teleop"
+    scene_rel = Path("assets/scene_usds/scenario_forge/r7/scene.usda")
+    _file(ebench / scene_rel, '#usda 1.0\n(defaultPrim="World")\ndef Xform "World" {}\n')
+    _file(
+        ebench / "tasks/config.yaml",
+        "evaluation_configs:\n"
+        "- task_name: old\n"
+        "  domain_randomization:\n"
+        "    cameras:\n"
+        "      config_path: collected_packages/old/cameras/fixed_camera_lift2.yml\n"
+        "  preprocess_config:\n"
+        "  - type: set_robot_physics_material\n"
+        "    config: {}\n"
+        "  - type: set_robot_contact_offset\n"
+        "    config: 0.05\n"
+        "  - type: set_robot_rest_offset\n"
+        "    config: 0.001\n",
+    )
+    _file(ebench / "cameras/fixed_camera_lift2.yml", "cameras: []\n")
+    _file(
+        ebench / "tasks/scenario_forge/r7/002/episode_metadata.json",
+        json.dumps({"episode_name": "002", "task_data": {"initial_layout": {}}}),
+    )
+    request = _render_request_fixture(root)
+    _file(ebench / "evidence/render_request.yaml", request.read_text())
+    _file(ebench / "package_manifest.json", json.dumps({"source_assets": []}))
+    _file(vr / "scene.usd", '#usda 1.0\n(defaultPrim="World")\ndef Xform "World" {}\n')
+    _file(vr / "task_config.py", "TASKS = {}\n")
+    _file(r7 / "scenario.yaml", "scenario_id: r7\n")
+    return r7
+
+
+def _transfer_package(
+    root: Path,
+    *,
+    particle_count: int = 548,
+    fill_level_id: str | None = None,
+    target_settled_fill_ratio: float | None = None,
+    measured_settled_fill_ratio: float | None = None,
+) -> Path:
+    is_v2 = fill_level_id is not None
+    if is_v2:
+        if target_settled_fill_ratio is None or measured_settled_fill_ratio is None:
+            raise ValueError("v2 fill packages require target and measured ratios")
+    fill_profile = (
+        {
+            "fill_level_id": fill_level_id,
+            "measurement": "live_points_source_local_z_q95",
+            "target_settled_fill_ratio": target_settled_fill_ratio,
+            "settled_fill_ratio_tolerance": 0.05,
+        }
+        if is_v2
+        else None
+    )
+    package = root / f"transfer_{fill_level_id or particle_count}"
     evidence = package / "evidence"
     (package / "deps/source").mkdir(parents=True)
     (package / "deps/target").mkdir(parents=True)
@@ -165,27 +222,41 @@ def _transfer_package(root: Path, *, particle_count: int = 548) -> Path:
             }
         ),
     )
+    qualification = {
+        "required_cold_runs": 3,
+        "maximum_outside_source_before_lift": 2,
+        "maximum_entry_root_tail_drift_m": 0.001,
+        "maximum_entry_root_tilt_deg": 2.0,
+    }
+    if is_v2:
+        qualification.update(
+            {
+                "maximum_below_source_floor_count": 0,
+                "target_settled_fill_ratio": target_settled_fill_ratio,
+                "settled_fill_ratio_tolerance": 0.05,
+            }
+        )
+    contract_payload = {
+        "schema_version": (
+            "aan.gpu_pbd_dynamic_loaded_start.v2"
+            if is_v2
+            else "aan.gpu_pbd_dynamic_loaded_start.v1"
+        ),
+        "support_plane_z_m": 0.755,
+        "support_plane_to_entry_root": {
+            "xyz_m": [0.25, 0.0, -0.0069],
+            "wxyz": [1.0, 0.0, 0.0, 0.0],
+        },
+        "particle_state": state.name,
+        "particle_state_sha256": _digest(state),
+        "particle_count": particle_count,
+        "qualification": qualification,
+    }
+    if is_v2:
+        contract_payload["fill_profile"] = fill_profile
     contract = _file(
         dynamic_evidence / "dynamic_loaded_start_contract.json",
-        json.dumps(
-            {
-                "schema_version": "aan.gpu_pbd_dynamic_loaded_start.v1",
-                "support_plane_z_m": 0.755,
-                "support_plane_to_entry_root": {
-                    "xyz_m": [0.25, 0.0, -0.0069],
-                    "wxyz": [1.0, 0.0, 0.0, 0.0],
-                },
-                "particle_state": state.name,
-                "particle_state_sha256": _digest(state),
-                "particle_count": particle_count,
-                "qualification": {
-                    "required_cold_runs": 3,
-                    "maximum_outside_source_before_lift": 2,
-                    "maximum_entry_root_tail_drift_m": 0.001,
-                    "maximum_entry_root_tilt_deg": 2.0,
-                },
-            }
-        ),
+        json.dumps(contract_payload),
     )
     dynamic_run = {
         "overall_status": "pass",
@@ -195,11 +266,18 @@ def _transfer_package(root: Path, *, particle_count: int = 548) -> Path:
         "maximum_entry_root_tilt_deg": 0.1,
         "hard_runtime_errors": [],
     }
+    if is_v2:
+        dynamic_run["maximum_below_source_floor_count"] = 0
+        dynamic_run["settled_fill_ratio"] = measured_settled_fill_ratio
     dynamic_report = _file(
         dynamic_evidence / "dynamic_loaded_start_report.json",
         json.dumps(
             {
-                "schema_version": "aan.gpu_pbd_dynamic_loaded_start_report.v1",
+                "schema_version": (
+                    "aan.gpu_pbd_dynamic_loaded_start_report.v2"
+                    if is_v2
+                    else "aan.gpu_pbd_dynamic_loaded_start_report.v1"
+                ),
                 "overall_status": "pass",
                 "contract_sha256": _digest(contract),
                 "particle_state_sha256": _digest(state),
@@ -229,43 +307,20 @@ def _transfer_package(root: Path, *, particle_count: int = 548) -> Path:
         },
         "runtime": "isaac41",
     }
+    if is_v2:
+        payload["gpu_pbd_dynamic_loaded_start"]["fill_profile"] = fill_profile
+        payload["gpu_pbd_dynamic_loaded_start"]["measured_settled_fill_ratio_range"] = [
+            measured_settled_fill_ratio,
+            measured_settled_fill_ratio,
+        ]
+        payload["gpu_pbd_dynamic_loaded_start"]["maximum_below_source_floor_count"] = 0
     manifest.write_text(json.dumps(payload), encoding="utf-8")
     return package
 
 
 def test_r83_handoff_is_self_contained_and_keeps_liquid_metrics_inactive(tmp_path: Path) -> None:
     module = _module()
-    r7 = tmp_path / "r7"
-    ebench = r7 / "adapters/ebench/genmanip"
-    vr = r7 / "adapters/vr_teleop"
-    scene_rel = Path("assets/scene_usds/scenario_forge/r7/scene.usda")
-    _file(ebench / scene_rel, '#usda 1.0\n(defaultPrim="World")\ndef Xform "World" {}\n')
-    _file(
-        ebench / "tasks/config.yaml",
-        "evaluation_configs:\n"
-        "- task_name: old\n"
-        "  domain_randomization:\n"
-        "    cameras:\n"
-        "      config_path: collected_packages/old/cameras/fixed_camera_lift2.yml\n"
-        "  preprocess_config:\n"
-        "  - type: set_robot_physics_material\n"
-        "    config: {}\n"
-        "  - type: set_robot_contact_offset\n"
-        "    config: 0.05\n"
-        "  - type: set_robot_rest_offset\n"
-        "    config: 0.001\n",
-    )
-    _file(ebench / "cameras/fixed_camera_lift2.yml", "cameras: []\n")
-    _file(
-        ebench / "tasks/scenario_forge/r7/002/episode_metadata.json",
-        json.dumps({"episode_name": "002", "task_data": {"initial_layout": {}}}),
-    )
-    request = _render_request_fixture(tmp_path)
-    _file(ebench / "evidence/render_request.yaml", request.read_text())
-    _file(ebench / "package_manifest.json", json.dumps({"source_assets": []}))
-    _file(vr / "scene.usd", '#usda 1.0\n(defaultPrim="World")\ndef Xform "World" {}\n')
-    _file(vr / "task_config.py", "TASKS = {}\n")
-    _file(r7 / "scenario.yaml", "scenario_id: r7\n")
+    r7 = _rich_base_package(tmp_path)
     transfer = _transfer_package(tmp_path)
 
     result = module.build(r7_package=r7, transfer_package=transfer, out=tmp_path / "out")
@@ -431,26 +486,31 @@ def test_finalizes_only_the_ebench_load_reset_eight_second_claim(tmp_path: Path)
             }
         ),
     )
-    evidence = out / "ebench/evidence/initial_scene"
+    evidence = out / "ebench/evidence/product_smoke"
     _file(
-        evidence / "render_manifest.json",
+        evidence / "report.json",
         json.dumps(
             {
+                "schema_version": "scenario-forge-genmanip-zero-action-physics-smoke/v0.1",
+                "status": "pass",
+                "physics_steps": 960,
+                "action_count": 0,
                 "runtime": {
-                    "warmup_steps": 960,
-                    "action_count": 0,
                     "isaac_sim_version": "4.1.0.0",
                     "genmanip_revision": "abc123",
-                }
+                    "render_without_physics": False,
+                },
+                "phases": {
+                    "genmanip_scene_constructed": "pass",
+                    "physics_initialized": "pass",
+                    "reset_and_recovery": "pass",
+                    "zero_action_physics": "pass",
+                },
             }
         ),
     )
-    _file(evidence / "visual_ready_gate.yaml", "status: passed\n")
     _file(
         evidence / "runtime.log",
-        "genmanip_reset_scene=true\n"
-        "genmanip_recovery_scene=true\n"
-        "zero_action_warmup_steps=960\n"
         "[Error] Collision contact offset must be positive, prim: /World/_scene/lift2/link7\n",
     )
 
@@ -463,6 +523,34 @@ def test_finalizes_only_the_ebench_load_reset_eight_second_claim(tmp_path: Path)
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["claims"]["ebench_load_reset_8s"] is True
     assert manifest["claims"]["robot_policy_success"] is False
+
+
+def test_product_smoke_rejects_visual_only_960_step_metadata(tmp_path: Path) -> None:
+    module = _module()
+    out = tmp_path / "out"
+    _file(out / "manifest.json", json.dumps({"claims": {"ebench_load_reset_8s": "pending"}}))
+    evidence = out / "ebench/evidence/product_smoke"
+    _file(
+        evidence / "report.json",
+        json.dumps(
+            {
+                "schema_version": "scenario-forge-genmanip-zero-action-physics-smoke/v0.1",
+                "status": "pass",
+                "physics_steps": 960,
+                "action_count": 0,
+                "runtime": {"render_without_physics": True},
+                "phases": {
+                    "genmanip_scene_constructed": "pass",
+                    "physics_initialized": "pass",
+                    "reset_and_recovery": "pass",
+                    "zero_action_physics": "pass",
+                },
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="physical smoke"):
+        module.finalize_product_smoke(out)
 
 
 def test_attaches_validated_scripted_robot_evidence_without_policy_claim(
@@ -516,3 +604,97 @@ def test_attaches_validated_scripted_robot_evidence_without_policy_claim(
     assert manifest["claims"]["benchmark_success"] is False
     assert manifest["liquid_metrics_active"] is False
     assert (out / "evidence/robot_oracle/robot_oracle_evidence.json").is_file()
+
+
+R10_SCRIPT = Path(__file__).resolve().parents[1] / (
+    "scripts/generate_scientific_workbench_task02_r10_fill_sweep.py"
+)
+
+
+def _r10_module() -> object:
+    spec = importlib.util.spec_from_file_location("generate_task02_r10", R10_SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_r10_fill_sweep_builds_independent_dual_consumer_variants(tmp_path: Path) -> None:
+    module = _r10_module()
+
+    def fake_runtime_gates(packages, **_kwargs):
+        for package in packages.values():
+            physics = package / "ebench/evidence/product_smoke/report.json"
+            physics.parent.mkdir(parents=True)
+            physics.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "scenario-forge-genmanip-zero-action-physics-smoke/v0.1",
+                        "status": "pass",
+                        "physics_steps": 960,
+                        "action_count": 0,
+                        "runtime": {"render_without_physics": False},
+                        "phases": {"zero_action_physics": "pass"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            vr = package / "vr/evidence/open_smoke/report.json"
+            vr.parent.mkdir(parents=True)
+            vr.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "scenario-forge-vr-usd-open-smoke/v0.1",
+                        "status": "pass",
+                        "physics_steps": 0,
+                        "default_prim": "/World",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            module.finalize_runtime_gates(package)
+
+    module.run_runtime_gates = fake_runtime_gates
+    rich_base = _rich_base_package(tmp_path)
+    fill20 = _transfer_package(
+        tmp_path,
+        particle_count=290,
+        fill_level_id="fill20",
+        target_settled_fill_ratio=0.2,
+        measured_settled_fill_ratio=0.216,
+    )
+    fill40 = _transfer_package(
+        tmp_path,
+        particle_count=580,
+        fill_level_id="fill40",
+        target_settled_fill_ratio=0.4,
+        measured_settled_fill_ratio=0.389,
+    )
+    result = module.build_r10_fill_sweep(
+        r9_package=rich_base,
+        transfer_packages={"fill20": fill20, "fill40": fill40},
+        output_dir=tmp_path / "r10",
+        fill_level_ids=("fill20", "fill40"),
+        default_variant="fill40",
+        base_scenario_id="r7",
+    )
+
+    fill20_manifest = json.loads(
+        (result.root / "variants/fill20/manifest.json").read_text()
+    )
+    fill40_manifest = json.loads(
+        (result.root / "variants/fill40/manifest.json").read_text()
+    )
+    assert fill20_manifest["release"] == "r10"
+    assert fill40_manifest["release"] == "r10"
+    assert fill20_manifest["liquid_profile"]["fill_level_id"] == "fill20"
+    assert fill40_manifest["liquid_profile"]["fill_level_id"] == "fill40"
+    assert fill20_manifest["particle_count"] == 290
+    assert fill40_manifest["particle_count"] == 580
+    assert fill20_manifest["claims"]["robot_policy_success"] is False
+    assert not list((tmp_path / "r10").rglob("robot_oracle"))
+    assert (result.root / "variants/fill20/vr/task_config.py").is_file()
+    assert (result.root / "variants/fill40/vr/task_config.py").is_file()
+    archive = yaml.safe_load((result.root / "manifest.yaml").read_text())
+    assert archive["default_variant"] == "fill40"
+    assert "960-step zero-action physics smoke" in archive["claim_boundary"]

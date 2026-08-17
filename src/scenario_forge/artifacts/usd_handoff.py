@@ -6,6 +6,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
+import os
 import shutil
 import zipfile
 
@@ -152,6 +153,152 @@ def build_usd_handoff_bundle(
     )
 
 
+def build_dual_consumer_variant_bundle(
+    *,
+    archive_id: str,
+    variants: Sequence[tuple[str, Path]],
+    default_variant: str,
+    output_dir: Path,
+) -> USDHandoffArchive:
+    """Bundle independent eBench+VR variants with compact review evidence."""
+
+    if not archive_id or not variants:
+        raise ValueError("archive_id and variants are required")
+    labels = [label for label, _ in variants]
+    if len(labels) != len(set(labels)):
+        raise ValueError("fill-level labels must be unique")
+    if default_variant not in labels:
+        raise ValueError("default_variant must name one bundled variant")
+    root = output_dir / archive_id
+    if root.exists():
+        shutil.rmtree(root)
+    variants_root = root / "variants"
+    variants_root.mkdir(parents=True)
+    records: list[dict[str, object]] = []
+    for label, package_path in variants:
+        package = Path(package_path).resolve()
+        required = (
+            package / "ebench/scene.usd",
+            package / "ebench/config.yaml",
+            package / "ebench/evidence/product_smoke/report.json",
+            package / "vr/scene.usd",
+            package / "vr/task_config.py",
+            package / "vr/evidence/open_smoke/report.json",
+            package / "manifest.json",
+        )
+        missing = [path.relative_to(package).as_posix() for path in required if not path.is_file()]
+        if missing:
+            raise ValueError(f"{label} dual-consumer package is incomplete: {', '.join(missing)}")
+        destination = variants_root / label
+        destination.mkdir()
+        shutil.copytree(
+            package / "ebench",
+            destination / "ebench",
+            ignore=lambda _directory, names: {"robot_oracle"} & set(names),
+        )
+        shutil.copytree(
+            package / "vr",
+            destination / "vr",
+            ignore=lambda _directory, names: {"robot_oracle"} & set(names),
+        )
+        shutil.copy2(package / "manifest.json", destination / "manifest.json")
+        if (package / "README_zh.md").is_file():
+            shutil.copy2(package / "README_zh.md", destination / "README_zh.md")
+        evidence_destination = destination / "evidence"
+        for source in (
+            package / "ebench/evidence/initial_scene",
+            package / "evidence/initial_scene",
+        ):
+            if source.is_dir():
+                evidence_destination.mkdir(parents=True, exist_ok=True)
+                for item in source.iterdir():
+                    target = evidence_destination / item.name
+                    if item.is_dir():
+                        shutil.copytree(item, target, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(item, target)
+                break
+        smoke = package / "evidence/product_smoke/report.json"
+        if not smoke.is_file():
+            smoke = package / "ebench/evidence/product_smoke/report.json"
+        if smoke.is_file():
+            evidence_destination.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(smoke, evidence_destination / "product_smoke_report.json")
+        vr_smoke = package / "vr/evidence/open_smoke/report.json"
+        evidence_destination.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(vr_smoke, evidence_destination / "vr_open_smoke_report.json")
+        for consumer in ("ebench", "vr"):
+            scene = destination / consumer / "scene.usd"
+            text = scene.read_text(encoding="utf-8")
+            if "@/" in text or "@file:" in text:
+                raise ValueError(f"{label} {consumer} scene contains an absolute asset path")
+        records.append(
+            {
+                "fill_level_id": label,
+                "directory": f"variants/{label}",
+                "ebench": {
+                    "open_usd": f"variants/{label}/ebench/scene.usd",
+                    "config": f"variants/{label}/ebench/config.yaml",
+                },
+                "vr": {
+                    "open_usd": f"variants/{label}/vr/scene.usd",
+                    "config": f"variants/{label}/vr/task_config.py",
+                },
+                "robot_embedded_in_usd": False,
+                "robot_inserted_by_consumer_runtime": True,
+                "runtime_gates": {
+                    "ebench_zero_action_physics_8s": "pass",
+                    "vr_usd_open": "pass",
+                },
+            }
+        )
+    manifest = {
+        "schema_version": "scenario-forge-dual-consumer-variant-handoff/v0.1",
+        "archive_id": archive_id,
+        "task_number": 2,
+        "default_variant": default_variant,
+        "variants": records,
+        "claim_boundary": (
+            "Four independently qualified liquid-start packages; each passed an "
+            "eBench 960-step zero-action physics smoke and an Isaac 4.1 VR USD-open "
+            "smoke. No robot transfer, policy, liquid-metric, or benchmark claim."
+        ),
+    }
+    (root / "manifest.yaml").write_text(
+        yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False), encoding="utf-8"
+    )
+    lines = [
+        f"# {archive_id}",
+        "",
+        "Task 02 四档液位交付；每个 `variants/fillXX/` 都是独立目录，不能混用依赖。",
+        f"默认档位：`{default_variant}`。",
+        "",
+        "| 液位 | eBench USD / config | VR USD / config |",
+        "| --- | --- | --- |",
+    ]
+    for record in records:
+        lines.append(
+            f"| {record['fill_level_id']} | `{record['ebench']['open_usd']}` / "
+            f"`{record['ebench']['config']}` | `{record['vr']['open_usd']}` / "
+            f"`{record['vr']['config']}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "USD 不内嵌机器人；eBench/VR 运行时按各自 config 插入机器人。",
+            "液体 metric 仍未启用，r10 不继承 r9 的机器人成功声明。",
+            "",
+        ]
+    )
+    (root / "README_CN.md").write_text("\n".join(lines), encoding="utf-8")
+    _write_checksums(root)
+    zip_path = output_dir / f"{archive_id}.zip"
+    _write_deterministic_zip(root, zip_path)
+    return USDHandoffArchive(
+        root=root, zip_path=zip_path, task_numbers=tuple(2 for _ in variants)
+    )
+
+
 def _bundle_readme(archive_id: str, records: Sequence[Mapping[str, object]]) -> str:
     lines = [
         f"# {archive_id}",
@@ -200,6 +347,13 @@ def _readme(archive_id: str, records: Sequence[Mapping[str, object]]) -> str:
     return "\n".join(lines)
 
 
+def refresh_usd_handoff_archive(archive: USDHandoffArchive) -> None:
+    """Rewrite checksums and the deterministic ZIP after extra handoff files."""
+
+    _write_checksums(archive.root)
+    _write_deterministic_zip(archive.root, archive.zip_path)
+
+
 def _write_checksums(root: Path) -> None:
     paths = [
         path for path in sorted(root.rglob("*")) if path.is_file() and path.name != "SHA256SUMS"
@@ -210,19 +364,25 @@ def _write_checksums(root: Path) -> None:
 
 def _write_deterministic_zip(root: Path, zip_path: Path) -> None:
     zip_path.parent.mkdir(parents=True, exist_ok=True)
-    if zip_path.exists():
-        zip_path.unlink()
-    with zipfile.ZipFile(
-        zip_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
-    ) as archive:
-        for path in sorted(root.rglob("*")):
-            if not path.is_file():
-                continue
-            relative = (Path(root.name) / path.relative_to(root)).as_posix()
-            info = zipfile.ZipInfo(relative, date_time=(2026, 8, 12, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, path.read_bytes(), compresslevel=9)
+    temporary = zip_path.with_suffix(zip_path.suffix + ".tmp")
+    if temporary.exists():
+        temporary.unlink()
+    try:
+        with zipfile.ZipFile(
+            temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+        ) as archive:
+            for path in sorted(root.rglob("*")):
+                if not path.is_file():
+                    continue
+                relative = (Path(root.name) / path.relative_to(root)).as_posix()
+                info = zipfile.ZipInfo(relative, date_time=(2026, 8, 12, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.external_attr = 0o100644 << 16
+                archive.writestr(info, path.read_bytes(), compresslevel=9)
+        os.replace(temporary, zip_path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
 
 
 def _sha256(path: Path) -> str:

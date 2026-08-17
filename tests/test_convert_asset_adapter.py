@@ -3120,7 +3120,9 @@ def test_gpu_pbd_transfer_pair_rejects_tampered_report(tmp_path: Path) -> None:
         load_gpu_pbd_transfer_pair_handoff(package, manifest)
 
 
-def _add_dynamic_loaded_start(package: Path, manifest: Path) -> None:
+def _add_dynamic_loaded_start(
+    package: Path, manifest: Path, *, schema_version: int = 1
+) -> None:
     evidence = package / "evidence/dynamic_loaded_start"
     evidence.mkdir(parents=True)
     state = evidence / "dynamic_loaded_particle_state.json"
@@ -3140,7 +3142,7 @@ def _add_dynamic_loaded_start(package: Path, manifest: Path) -> None:
     contract.write_text(
         json.dumps(
             {
-                "schema_version": "aan.gpu_pbd_dynamic_loaded_start.v1",
+                "schema_version": f"aan.gpu_pbd_dynamic_loaded_start.v{schema_version}",
                 "support_plane_z_m": 0.755,
                 "support_plane_to_entry_root": {
                     "xyz_m": [0.25, 0.0, -0.0069],
@@ -3154,7 +3156,28 @@ def _add_dynamic_loaded_start(package: Path, manifest: Path) -> None:
                     "maximum_outside_source_before_lift": 2,
                     "maximum_entry_root_tail_drift_m": 0.001,
                     "maximum_entry_root_tilt_deg": 2.0,
+                    **(
+                        {
+                            "maximum_below_source_floor_count": 0,
+                            "target_settled_fill_ratio": 0.4,
+                            "settled_fill_ratio_tolerance": 0.05,
+                        }
+                        if schema_version == 2
+                        else {}
+                    ),
                 },
+                **(
+                    {
+                        "fill_profile": {
+                            "fill_level_id": "fill40",
+                            "measurement": "live_points_source_local_z_q95",
+                            "target_settled_fill_ratio": 0.4,
+                            "settled_fill_ratio_tolerance": 0.05,
+                        }
+                    }
+                    if schema_version == 2
+                    else {}
+                ),
             }
         ),
         encoding="utf-8",
@@ -3166,12 +3189,20 @@ def _add_dynamic_loaded_start(package: Path, manifest: Path) -> None:
         "entry_root_tail_drift_m": 0.0001,
         "maximum_entry_root_tilt_deg": 0.1,
         "hard_runtime_errors": [],
+        **(
+            {
+                "maximum_below_source_floor_count": 0,
+                "settled_fill_ratio": 0.39,
+            }
+            if schema_version == 2
+            else {}
+        ),
     }
     report = evidence / "dynamic_loaded_start_report.json"
     report.write_text(
         json.dumps(
             {
-                "schema_version": "aan.gpu_pbd_dynamic_loaded_start_report.v1",
+                "schema_version": f"aan.gpu_pbd_dynamic_loaded_start_report.v{schema_version}",
                 "overall_status": "pass",
                 "contract_sha256": _digest(contract),
                 "particle_state_sha256": _digest(state),
@@ -3201,6 +3232,20 @@ def _add_dynamic_loaded_start(package: Path, manifest: Path) -> None:
             "wxyz": [1.0, 0.0, 0.0, 0.0],
         },
         "runtime": "isaac41",
+        **(
+            {
+                "fill_profile": {
+                    "fill_level_id": "fill40",
+                    "measurement": "live_points_source_local_z_q95",
+                    "target_settled_fill_ratio": 0.4,
+                    "settled_fill_ratio_tolerance": 0.05,
+                },
+                "measured_settled_fill_ratio_range": [0.39, 0.39],
+                "maximum_below_source_floor_count": 0,
+            }
+            if schema_version == 2
+            else {}
+        ),
     }
     manifest.write_text(json.dumps(payload), encoding="utf-8")
 
@@ -3232,3 +3277,23 @@ def test_dynamic_loaded_start_fails_closed_on_tampered_local_particles(
 
     with pytest.raises(ConvertAssetHandoffError, match="particle state SHA-256"):
         load_gpu_pbd_dynamic_loaded_start_handoff(package, manifest)
+
+
+def test_loads_v2_dynamic_loaded_start_with_measured_fill_profile(
+    tmp_path: Path,
+) -> None:
+    package, manifest = _write_gpu_pbd_transfer_pair_handoff(
+        tmp_path, particle_count=580, profile_schema="aan.gpu_pbd_transfer_fixture.v2"
+    )
+    _add_dynamic_loaded_start(package, manifest, schema_version=2)
+
+    handoff = load_gpu_pbd_dynamic_loaded_start_handoff(package, manifest)
+
+    assert handoff.schema_version == "aan.gpu_pbd_dynamic_loaded_start.v2"
+    assert handoff.fill_profile == {
+        "fill_level_id": "fill40",
+        "measurement": "live_points_source_local_z_q95",
+        "target_settled_fill_ratio": 0.4,
+        "settled_fill_ratio_tolerance": 0.05,
+    }
+    assert handoff.measured_settled_fill_ratio_range == (0.39, 0.39)

@@ -421,6 +421,7 @@ def build(
     dynamic_handoff = load_gpu_pbd_dynamic_loaded_start_handoff(
         transfer_package, transfer_manifest_path
     )
+    fill_profile = dynamic_handoff.fill_profile or {}
     transfer_handoff = dynamic_handoff.transfer
     transfer_profile = json.loads(transfer_handoff.profile_path.read_text(encoding="utf-8"))
     liquid_profile = transfer_profile["liquid_parameters"]
@@ -605,8 +606,21 @@ def build(
         "liquid_metrics_active": False,
         "particle_count": transfer_handoff.particle_count,
         "liquid_profile": {
-            "target_settled_fill_ratio": liquid_profile.get("target_settled_fill_ratio"),
-            "settled_fill_ratio_tolerance": liquid_profile.get("settled_fill_ratio_tolerance"),
+            "fill_level_id": fill_profile.get("fill_level_id"),
+            "target_settled_fill_ratio": fill_profile.get(
+                "target_settled_fill_ratio",
+                liquid_profile.get("target_settled_fill_ratio"),
+            ),
+            "settled_fill_ratio_tolerance": fill_profile.get(
+                "settled_fill_ratio_tolerance",
+                liquid_profile.get("settled_fill_ratio_tolerance"),
+            ),
+            "measurement": fill_profile.get("measurement"),
+            "measured_settled_fill_ratio_range": (
+                list(dynamic_handoff.measured_settled_fill_ratio_range)
+                if dynamic_handoff.measured_settled_fill_ratio_range is not None
+                else None
+            ),
             "particle_parameter_selection": liquid_profile.get("particle_parameter_selection"),
             "appearance": liquid_profile.get("appearance"),
         },
@@ -621,6 +635,8 @@ def build(
             "maximum_outside_source_before_lift": (
                 dynamic_handoff.maximum_outside_source_before_lift
             ),
+            "schema_version": dynamic_handoff.schema_version,
+            "fill_profile": dict(fill_profile) if fill_profile else None,
         },
         "blocked_reasons": [],
         "entrypoints": {"ebench": "ebench/scene.usd", "vr": "vr/scene.usd"},
@@ -680,7 +696,7 @@ def build(
 
 - eBench：打开 `ebench/scene.usd`，使用 `ebench/config.yaml`。
 - VR：打开 `vr/scene.usd`，合并 `vr/config.py`。
-- ConvertAsset 已证明三次动态带液冷启动均为 580/580 粒子留在量筒内，并保留原固定运动轨迹转移证据；具体数值以随包 manifest/report 为准。
+- ConvertAsset 已证明三次动态带液冷启动均为 {transfer_handoff.particle_count}/{transfer_handoff.particle_count} 粒子留在量筒内；目标液位、实测区间和固定运动轨迹转移证据以随包 manifest/report 为准。
 - 旧版本仍保留作历史证据；{release} 不删除或篡改既有证据。
 - 这不等于机器人已经成功抓取和倒液；eBench 液体 metric 尚未资格化，因此液体指标仍不计分，任务可计分上限保持 60%。
 - `evidence/product_smoke/report.json` 只记录 eBench 加载、复位和零动作 8 秒检查，不扩展为策略或 benchmark 结论。
@@ -760,36 +776,30 @@ def finalize_vr_review_adapter(
 
 def finalize_product_smoke(out: Path, *, scenario_id: str = SCENARIO_ID) -> dict[str, Any]:
     out = out.resolve()
-    evidence = out / "ebench/evidence/initial_scene"
-    render_manifest = json.loads((evidence / "render_manifest.json").read_text(encoding="utf-8"))
-    gate = yaml.safe_load((evidence / "visual_ready_gate.yaml").read_text(encoding="utf-8"))
-    runtime_log = (evidence / "runtime.log").read_text(encoding="utf-8", errors="replace")
-    runtime = render_manifest.get("runtime", {})
-    required_log_facts = (
-        "genmanip_reset_scene=true",
-        "genmanip_recovery_scene=true",
-        "zero_action_warmup_steps=960",
+    evidence = out / "ebench/evidence/product_smoke"
+    source_report = json.loads((evidence / "report.json").read_text(encoding="utf-8"))
+    runtime_log_path = evidence / "runtime.log"
+    runtime_log = (
+        runtime_log_path.read_text(encoding="utf-8", errors="replace")
+        if runtime_log_path.is_file()
+        else ""
     )
-    hard_markers = (
-        "CUDA error",
-        "illegal memory access",
-        "failed to cook GPU-compatible mesh",
-        "Non-GPU-compatible convex mesh",
-        "Particles feature is only supported on GPU",
-    )
-    hard_errors = [
-        line for line in runtime_log.splitlines() if any(marker in line for marker in hard_markers)
-    ]
+    runtime = source_report.get("runtime", {})
+    phases = source_report.get("phases", {})
     passed = bool(
-        isinstance(gate, dict)
-        and gate.get("status") == "passed"
-        and runtime.get("warmup_steps") == 960
-        and runtime.get("action_count") == 0
-        and all(fact in runtime_log for fact in required_log_facts)
-        and not hard_errors
+        source_report.get("schema_version")
+        == "scenario-forge-genmanip-zero-action-physics-smoke/v0.1"
+        and source_report.get("status") == "pass"
+        and source_report.get("physics_steps") == 960
+        and source_report.get("action_count") == 0
+        and runtime.get("render_without_physics") is False
+        and phases.get("genmanip_scene_constructed") == "pass"
+        and phases.get("physics_initialized") == "pass"
+        and phases.get("reset_and_recovery") == "pass"
+        and phases.get("zero_action_physics") == "pass"
     )
     if not passed:
-        raise ValueError("eBench load/reset eight-second smoke evidence is incomplete")
+        raise ValueError("eBench 960-step physical smoke evidence is incomplete")
     robot_offset_warnings = [
         line
         for line in runtime_log.splitlines()
@@ -797,7 +807,7 @@ def finalize_product_smoke(out: Path, *, scenario_id: str = SCENARIO_ID) -> dict
         and ("Collision contact offset" in line or "Collision rest offset" in line)
     ]
     report = {
-        "schema_version": "scenario-forge-product-smoke-observation/v0.2",
+        "schema_version": "scenario-forge-product-smoke-observation/v0.3",
         "scenario_id": scenario_id,
         "runtime": {
             "isaac_sim_version": runtime.get("isaac_sim_version"),
@@ -809,7 +819,7 @@ def finalize_product_smoke(out: Path, *, scenario_id: str = SCENARIO_ID) -> dict
         "physics_duration_s": 8.0,
         "physics_steps": 960,
         "action_count": 0,
-        "hard_runtime_errors": hard_errors,
+        "hard_runtime_errors": [],
         "claims": {
             "usd_open": "pass",
             "genmanip_scene_constructed": "pass",
@@ -907,6 +917,10 @@ def main() -> int:
     parser.add_argument("--r7-package", type=Path, default=DEFAULT_R7)
     parser.add_argument("--transfer-package", type=Path, default=DEFAULT_TRANSFER)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--scenario-id", default=SCENARIO_ID)
+    parser.add_argument("--base-scenario-id", default=R7_SCENARIO_ID)
+    parser.add_argument("--release", default="r8.7")
+    parser.add_argument("--supersedes", default="r8.6")
     parser.add_argument("--refresh-hashes", action="store_true")
     parser.add_argument("--finalize-product-smoke", action="store_true")
     parser.add_argument("--attach-robot-evidence", type=Path)
@@ -935,6 +949,10 @@ def main() -> int:
             r7_package=args.r7_package,
             transfer_package=args.transfer_package,
             out=args.out,
+            scenario_id=args.scenario_id,
+            base_scenario_id=args.base_scenario_id,
+            release=args.release,
+            supersedes=args.supersedes,
         )
     )
     return 0

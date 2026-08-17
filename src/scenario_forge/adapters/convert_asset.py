@@ -524,6 +524,9 @@ class ConvertAssetGPUPBDDynamicLoadedStartHandoff:
     qualification_report_sha256: str
     support_plane_to_entry_root: Mapping[str, Any]
     maximum_outside_source_before_lift: int
+    schema_version: str = "aan.gpu_pbd_dynamic_loaded_start.v1"
+    fill_profile: Mapping[str, Any] | None = None
+    measured_settled_fill_ratio_range: tuple[float, float] | None = None
 
 
 def load_convert_asset_package_handoff(
@@ -4873,12 +4876,15 @@ def load_gpu_pbd_dynamic_loaded_start_handoff(
     contract = _load_strict_json_mapping(
         contract_path.read_bytes(), "dynamic loaded-start contract"
     )
-    _require_value(
-        contract,
-        "schema_version",
+    contract_schema = contract.get("schema_version")
+    if contract_schema not in {
         "aan.gpu_pbd_dynamic_loaded_start.v1",
-        "dynamic loaded-start contract",
-    )
+        "aan.gpu_pbd_dynamic_loaded_start.v2",
+    }:
+        raise ConvertAssetHandoffError(
+            "dynamic loaded-start contract schema is unsupported"
+        )
+    is_v2 = contract_schema.endswith(".v2")
     if (
         contract.get("particle_count") != transfer.particle_count
         or contract.get("particle_state") != particle_state_path.name
@@ -4896,10 +4902,43 @@ def load_gpu_pbd_dynamic_loaded_start_handoff(
         "maximum_entry_root_tail_drift_m": 0.001,
         "maximum_entry_root_tilt_deg": 2.0,
     }
+    if is_v2:
+        expected_qualification["maximum_below_source_floor_count"] = 0
     if any(qualification.get(key) != value for key, value in expected_qualification.items()):
         raise ConvertAssetHandoffError(
             "dynamic loaded-start qualification thresholds differ"
         )
+    fill_profile: Mapping[str, Any] | None = None
+    measured_range: tuple[float, float] | None = None
+    if is_v2:
+        fill_profile = _required_mapping(
+            contract, "fill_profile", "dynamic loaded-start contract"
+        )
+        manifest_fill = _required_mapping(
+            binding, "fill_profile", "gpu_pbd_dynamic_loaded_start"
+        )
+        if fill_profile != manifest_fill:
+            raise ConvertAssetHandoffError(
+                "dynamic loaded-start fill profile differs from manifest"
+            )
+        if fill_profile.get("measurement") != "live_points_source_local_z_q95":
+            raise ConvertAssetHandoffError(
+                "dynamic loaded-start fill measurement is unsupported"
+            )
+        target = fill_profile.get("target_settled_fill_ratio")
+        tolerance = fill_profile.get("settled_fill_ratio_tolerance")
+        if (
+            not isinstance(target, (int, float))
+            or isinstance(target, bool)
+            or not isinstance(tolerance, (int, float))
+            or isinstance(tolerance, bool)
+            or qualification.get("target_settled_fill_ratio") != target
+            or qualification.get("settled_fill_ratio_tolerance") != tolerance
+            or binding.get("maximum_below_source_floor_count") != 0
+        ):
+            raise ConvertAssetHandoffError(
+                "dynamic loaded-start fill thresholds are inconsistent"
+            )
     pose = _required_mapping(
         contract, "support_plane_to_entry_root", "dynamic loaded-start contract"
     )
@@ -4963,9 +5002,11 @@ def load_gpu_pbd_dynamic_loaded_start_handoff(
     )
     promotion = report.get("promotion")
     cold_runs = report.get("cold_runs")
+    expected_report_schema = contract_schema.replace(
+        "dynamic_loaded_start.v", "dynamic_loaded_start_report.v"
+    )
     if (
-        report.get("schema_version")
-        != "aan.gpu_pbd_dynamic_loaded_start_report.v1"
+        report.get("schema_version") != expected_report_schema
         or report.get("overall_status") != "pass"
         or report.get("contract_sha256") != contract_sha
         or report.get("particle_state_sha256") != particle_state_sha
@@ -4979,16 +5020,35 @@ def load_gpu_pbd_dynamic_loaded_start_handoff(
             "dynamic loaded-start report is not promotable"
         )
     for run in cold_runs:
-        if not isinstance(run, Mapping) or not (
+        valid = isinstance(run, Mapping) and (
             run.get("overall_status") == "pass"
             and run.get("particle_count") == transfer.particle_count
             and run.get("maximum_outside_source_count", 3) <= 2
             and run.get("entry_root_tail_drift_m", math.inf) <= 0.001
             and run.get("maximum_entry_root_tilt_deg", math.inf) <= 2.0
             and run.get("hard_runtime_errors") == []
-        ):
+        )
+        if is_v2 and valid:
+            target = float(fill_profile["target_settled_fill_ratio"])
+            tolerance = float(fill_profile["settled_fill_ratio_tolerance"])
+            measured = run.get("settled_fill_ratio")
+            valid = bool(
+                isinstance(measured, (int, float))
+                and not isinstance(measured, bool)
+                and abs(float(measured) - target) <= tolerance
+                and run.get("maximum_below_source_floor_count") == 0
+            )
+        if not valid:
             raise ConvertAssetHandoffError(
                 "dynamic loaded-start cold run failed a required gate"
+            )
+    if is_v2:
+        values = [float(run["settled_fill_ratio"]) for run in cold_runs]
+        reported_range = binding.get("measured_settled_fill_ratio_range")
+        measured_range = (min(values), max(values))
+        if reported_range != list(measured_range):
+            raise ConvertAssetHandoffError(
+                "dynamic loaded-start measured fill range differs from cold runs"
             )
     return ConvertAssetGPUPBDDynamicLoadedStartHandoff(
         transfer=transfer,
@@ -5000,4 +5060,7 @@ def load_gpu_pbd_dynamic_loaded_start_handoff(
         qualification_report_sha256=report_sha,
         support_plane_to_entry_root=dict(pose),
         maximum_outside_source_before_lift=2,
+        schema_version=str(contract_schema),
+        fill_profile=dict(fill_profile) if fill_profile is not None else None,
+        measured_settled_fill_ratio_range=measured_range,
     )
