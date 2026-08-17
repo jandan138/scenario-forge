@@ -1,0 +1,73 @@
+schema_version: scenario-forge-visual-static-liquid-prototype/v0.1
+prototype_id: visual_static_liquid_beaker_flask_v1
+
+vessel_profiles:
+  beaker_325ml:
+    source_id: scientific_workbench_r7_beaker_325ml
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/beaker_325ml
+    entry_prim: /World/Beaker325ml
+    destination: deps/containers/beaker_325ml
+    axial_profile_m:
+      - [0.004, 0.0335]
+      - [0.109, 0.0335]
+  conical_flask_250ml_29_42:
+    source_id: scientific_workbench_conical_flask_250ml_29_42_dynamic
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_closure_assets_20260811/packages/conical_flask_250ml_29_42
+    entry_prim: /World/ConicalFlask2942
+    destination: deps/containers/conical_flask_250ml_29_42
+    axial_profile_m:
+      - [0.004, 0.0602]
+      - [0.110, 0.0005]
+
+environment:
+  package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package
+  entry_prim: /World
+  destination: deps/environment
+  translate_xyz_m: [0.002882434, -0.0069055, 0.0]
+
+table:
+  package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package
+  # Compose the package root so its /World/Looks bindings stay inside the reference.
+  entry_prim: /World
+  destination: deps/table
+
+material:
+  ior: 1.333
+  # Near-opaque color survives the admitted vessel's transparent glass layer.
+  # This is a visual solution, not a transmission/volume simulation.
+  roughness: 0.12
+  body_opacity: 1.0
+  surface_opacity: 1.0
+  emissive_gain: 0.18
+  metallic: 0.0
+  meniscus_depth_m: 0.0006
+  radial_segments: 32
+
+instances:
+  - id: blue_beaker_30
+    profile: beaker_325ml
+    fill_fraction: 0.30
+    color: [0.03, 0.34, 0.82]
+    pose: {xyz: [-0.18, -0.10, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: green_beaker_60
+    profile: beaker_325ml
+    fill_fraction: 0.60
+    color: [0.04, 0.52, 0.20]
+    pose: {xyz: [0.18, -0.10, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: yellow_flask_45
+    profile: conical_flask_250ml_29_42
+    fill_fraction: 0.45
+    color: [0.92, 0.48, 0.03]
+    pose: {xyz: [-0.18, 0.12, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
+  - id: purple_flask_70
+    profile: conical_flask_250ml_29_42
+    fill_fraction: 0.70
+    color: [0.46, 0.08, 0.76]
+    pose: {xyz: [0.18, 0.12, 0.755], wxyz: [1.0, 0.0, 0.0, 0.0]}
+
+render:
+  resolution: [1920, 1080]
+  fps: 30
+  duration_seconds: 8.0
+  tilt_degrees: 55.0
+  representative_instances: [blue_beaker_30, purple_flask_70]

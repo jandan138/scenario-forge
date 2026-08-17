@@ -68,6 +68,34 @@
     .diagnosis-card h3{font-size:1.35rem;margin:14px 0 10px}
     .diagnosis-card p{margin:0;color:var(--muted);font-size:.9rem}
     .evidence-line{margin-top:34px;padding:18px 22px;background:#fff3d8;border-left:4px solid var(--warn);color:#6c4c16;font-size:.92rem}
+    .history-intro{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:22px;margin-top:40px}
+    .history-intro article{padding:28px;background:var(--white);border:1px solid var(--line)}
+    .history-intro article:last-child{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .history-intro h3{margin:0 0 10px;font-size:1.42rem}
+    .history-intro p{margin:0;color:var(--muted);font-size:.9rem}
+    .history-intro article:last-child p{color:#bdd1d5}
+    .history-track{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:32px;padding-top:30px}
+    .history-track::before{content:"";position:absolute;left:8%;right:8%;top:10px;height:3px;background:linear-gradient(90deg,var(--warn) 0 73%,var(--liquid) 73%)}
+    .history-step{position:relative;min-height:320px;padding:26px 20px 22px;background:var(--white);border:1px solid var(--line);border-top:5px solid var(--warn)}
+    .history-step::before{content:"";position:absolute;width:15px;height:15px;left:50%;top:-49px;transform:translateX(-50%);border:4px solid var(--paper);border-radius:50%;background:var(--warn);box-shadow:0 0 0 2px var(--warn)}
+    .history-step.final{border-top-color:var(--liquid);background:#e6f9fb}
+    .history-step.final::before{background:var(--liquid);box-shadow:0 0 0 2px var(--liquid)}
+    .history-kicker{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--liquid-deep);font:800 .68rem/1.2 var(--mono);letter-spacing:.05em}
+    .history-kicker em{padding:5px 7px;background:#fff3d8;color:#765014;font-style:normal}
+    .history-step.final .history-kicker em{background:#c7f2f7;color:#075f78}
+    .history-step h3{margin:16px 0 10px;font-size:1.18rem;line-height:1.08}
+    .history-step p{margin:0;color:var(--muted);font-size:.82rem}
+    .history-metric{display:block;margin:16px 0 10px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink);font:900 .76rem/1.55 var(--mono)}
+    .history-lesson{display:block;margin-top:14px;color:#715017;font-size:.78rem;font-weight:800}
+    .history-step.final .history-lesson{color:#07617a}
+    .vessel-compare{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:32px;background:var(--line);border:1px solid var(--line)}
+    .vessel-compare article{padding:28px;background:var(--white)}
+    .vessel-compare article:first-child{border-top:4px solid var(--pass)}
+    .vessel-compare article:last-child{border-top:4px solid var(--warn)}
+    .vessel-compare h3{margin:0 0 10px;font-size:1.28rem}
+    .vessel-compare p{margin:0;color:var(--muted);font-size:.88rem}
+    .compare-verdict{margin-top:1px;padding:18px 22px;background:var(--ink);color:#c7dadd;font-size:.9rem}
+    .compare-verdict strong{color:var(--liquid)}
     .cutaway{margin-top:44px;background:var(--ink);color:#fff;display:grid;grid-template-columns:minmax(380px,.9fr) 1.1fr;min-height:650px;overflow:hidden}
     .cutaway-visual{padding:30px;display:grid;place-items:center;background:radial-gradient(circle at 50% 46%,rgba(50,199,237,.12),transparent 52%)}
     .cutaway svg{width:min(100%,430px);height:auto;max-height:590px}
@@ -122,6 +150,14 @@
     .move b{font:900 .78rem/1 var(--mono);color:var(--liquid-deep)}
     .move strong{display:block;margin-top:10px;font-size:.88rem}
     .move span{display:block;margin-top:5px;color:var(--muted);font-size:.75rem}
+    .gate-ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:38px;background:var(--line);border:1px solid var(--line)}
+    .gate{position:relative;padding:26px;background:var(--white)}
+    .gate::after{content:"→";position:absolute;right:-15px;top:28px;z-index:2;width:29px;height:29px;display:grid;place-items:center;background:var(--ink);color:var(--liquid);font-weight:900}
+    .gate:last-child::after{display:none}
+    .gate b{color:var(--liquid-deep);font:900 .7rem/1 var(--mono)}
+    .gate h3{margin:12px 0 8px;font-size:1.2rem}
+    .gate p{margin:0;color:var(--muted);font-size:.82rem}
+    .gate small{display:block;margin-top:14px;color:#087c51;font:800 .68rem/1.45 var(--mono)}
     .repro-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:42px}
     .repro-card{background:var(--white);border:1px solid var(--line);padding:28px;min-width:0}
     .repro-card h3{font-size:1.35rem;margin:0 0 15px}
@@ -142,6 +178,13 @@
     .claim{margin-top:42px;padding:28px;background:var(--ink);color:#bfd4d8;border-left:6px solid var(--warn)}
     .claim strong{color:#fff}
     .claim p{margin:0}
+    .decision-tree{margin-top:40px;border:1px solid var(--line);background:var(--white)}
+    .decision-head{display:grid;grid-template-columns:1fr 1.2fr 1.2fr;background:var(--ink);color:#fff;font:800 .68rem/1.3 var(--mono);letter-spacing:.06em}
+    .decision-head span{padding:14px 18px;border-right:1px solid #34515c}.decision-head span:last-child{border:0}
+    .decision-row{display:grid;grid-template-columns:1fr 1.2fr 1.2fr;border-top:1px solid var(--line)}
+    .decision-row>*{margin:0;padding:18px;border-right:1px solid var(--line);font-size:.84rem}.decision-row>*:last-child{border:0}
+    .decision-row strong{color:var(--ink)}.decision-row p{color:var(--muted)}
+    .decision-row .route{color:#087c51;font-weight:800}
     footer{background:var(--ink);color:#abc5ca;padding:34px 0;font-size:.82rem}
     footer .shell{display:flex;justify-content:space-between;gap:28px}
     footer a{color:var(--liquid)}
@@ -151,16 +194,18 @@
       .cutaway{grid-template-columns:1fr}.cutaway-copy{border-left:0;border-top:1px solid rgba(168,221,215,.22)}
       .diagnosis-grid,.pipeline{grid-template-columns:1fr}.pipeline article{border-right:0;border-bottom:1px solid var(--line)}.pipeline article:last-child{border:0}.pipeline article:not(:last-child)::after{content:"↓";right:28px;top:auto;bottom:-14px}
       .five-moves{grid-template-columns:repeat(3,1fr)}
+      .history-track{grid-template-columns:repeat(2,1fr);padding-top:0}.history-track::before,.history-step::before{display:none}.history-step{min-height:0}.history-step.final{grid-column:1/-1}
     }
     @media(max-width:720px){
       .shell{width:min(100% - 28px,1240px)}.topbar nav a:not(:last-child){display:none}.hero-grid{padding-block:52px;gap:42px}.hero-media{padding:10px 10px 48px;box-shadow:12px 14px 0 rgba(50,199,237,.08)}
       h1{font-size:clamp(3.1rem,17vw,5rem)}.proof-grid{grid-template-columns:1fr 1fr}.proof:nth-child(odd){border-left:1px solid rgba(168,221,215,.2)}.proof{border-bottom:1px solid rgba(168,221,215,.2)}
       .section{padding:68px 0}.section-grid{grid-template-columns:1fr}.scale{min-height:0;padding:0 0 0 54px}.scale::before{bottom:auto;height:44px}.scale::after{box-shadow:0 14px 0 -0.2px var(--line),0 28px 0 -0.2px var(--line)}
-      .diagnosis-grid,.photo-pair,.liquid-stack,.repro-grid{grid-template-columns:1fr}.cutaway-visual{padding:22px}.cutaway-copy{padding:36px 24px}.spec-list{grid-template-columns:1fr 1fr}.param-grid{grid-template-columns:1fr 1fr}
+      .diagnosis-grid,.photo-pair,.liquid-stack,.repro-grid,.history-intro,.vessel-compare,.gate-ladder{grid-template-columns:1fr}.cutaway-visual{padding:22px}.cutaway-copy{padding:36px 24px}.spec-list{grid-template-columns:1fr 1fr}.param-grid{grid-template-columns:1fr 1fr}
       .five-moves{grid-template-columns:1fr 1fr}.results{display:block;overflow-x:auto}.video-wrap{padding:8px}.video-meta{display:block}.video-meta span{display:block;margin-top:6px}.dont ul{columns:1}.topbar .shell{height:56px}
+      .gate::after{content:"↓";right:24px;top:auto;bottom:-15px}.decision-head{display:none}.decision-row{grid-template-columns:1fr;padding:18px}.decision-row>*{padding:5px 0;border:0}.decision-row strong::before{content:"现象 · ";color:var(--liquid-deep);font:800 .66rem/1 var(--mono)}.decision-row .route::before{content:"下一步 · ";color:var(--liquid-deep);font:800 .66rem/1 var(--mono)}
       footer .shell{display:block}footer p{margin:8px 0}
     }
-    @media(max-width:420px){.proof-grid,.five-moves,.spec-list,.param-grid{grid-template-columns:1fr}.proof{border-left:1px solid rgba(168,221,215,.2)}.button-link{width:100%}.topbar nav{display:none}}
+    @media(max-width:420px){.proof-grid,.five-moves,.spec-list,.param-grid,.history-track{grid-template-columns:1fr}.history-step.final{grid-column:auto}.proof{border-left:1px solid rgba(168,221,215,.2)}.button-link{width:100%}.topbar nav{display:none}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
   </style>
 </head>
@@ -168,7 +213,7 @@
   <div class="topbar">
     <div class="shell">
       <a class="brand" href="../task-directory/index.html"><span class="brand-mark" aria-hidden="true"></span>SCENARIO FORGE</a>
-      <nav aria-label="页面导航"><a href="#diagnosis">诊断</a><a href="#collision-shell">碰撞壳</a><a href="#robot-proof">机器人证据</a><a href="../task-directory/index.html">任务目录 ↗</a></nav>
+      <nav aria-label="页面导航"><a href="#diagnosis">诊断</a><a href="#repair-history">修复历程</a><a href="#collision-shell">最终碰撞壳</a><a href="#robot-proof">机器人证据</a><a href="../task-directory/index.html">任务目录 ↗</a></nav>
     </div>
   </div>
 
@@ -212,9 +257,83 @@
       </div>
     </section>
 
+    <section class="section" id="repair-history">
+      <div class="shell section-grid">
+        <aside class="scale"><b>02</b>五轮修复历程</aside>
+        <div>
+          <h2>真正的突破，不是把参数越调越大</h2>
+          <p class="lede">这只量筒经历了两条失败路线、一次证据纠错，最后才回到 0812 已验证的容器拓扑。把过程保留下来很重要：它告诉我们<strong>何时应继续查参数，何时必须停止调参并重做几何</strong>。</p>
+          <div class="history-intro">
+            <article>
+              <h3>先分清三件事</h3>
+              <p><strong>闭合</strong>只说明网格没有洞；<strong>GPU 可烹饪</strong>说明 PhysX 能把它变成 GPU 可处理的碰撞组成；<strong>能装液</strong>还要靠运行时实时粒子验证。三者不能互相代替。</p>
+            </article>
+            <article>
+              <h3>最终判断</h3>
+              <p>原量筒的问题来自“高而薄、开边、视觉面片密集”的拓扑。0812 烧杯能工作，是因为它使用了简单、封闭、明确保留内腔的专用碰撞拓扑。</p>
+            </article>
+          </div>
+
+          <div class="history-track" aria-label="量筒碰撞体五阶段修复时间线">
+            <article class="history-step" data-history-stage="source-shell">
+              <div class="history-kicker"><span>STAGE 01</span><em>原始资产</em></div>
+              <h3>把视觉薄壳直接当容器</h3>
+              <span class="history-metric">384 个点 · 288 个四边形 · 192 条边界边</span>
+              <p>网格适合透明渲染，却有大量开口边。GPU 凸分解无法稳定得到既有筒壁、又保留内腔的碰撞结构。</p>
+              <span class="history-lesson">结论：这是几何前提不成立，不应先调 rest offset。</span>
+            </article>
+
+            <article class="history-step" data-history-stage="visible-partitions">
+              <div class="history-kicker"><span>STAGE 02 · r8.1</span><em>失败</em></div>
+              <h3>给视觉筒壁加分区</h3>
+              <span class="history-metric">p12 / p24 / p48：每次冷启动只更新 1 帧后超时</span>
+              <p>分区越密，GPU cooking 与接触计算越不稳定。关闭这些分区的负对照反而连续通过 5 次更新。</p>
+              <span class="history-lesson">结论：更多分片不等于更好的 GPU 容器。</span>
+            </article>
+
+            <article class="history-step" data-history-stage="annular-rim">
+              <div class="history-kicker"><span>STAGE 03 · r8.2</span><em>仍失败</em></div>
+              <h3>补双层环口，让薄壳闭合</h3>
+              <span class="history-metric">新增 96 个环口面 · 58 / 548 留存 · 548 / 548 洒出</span>
+              <p>网格成为 closed manifold，中央杯口也保留了，但仍无法成为合格的 GPU-PBD 容器。静态保液率只有 10.58%。</p>
+              <span class="history-lesson">结论：拓扑闭合是必要条件，却不是充分条件。</span>
+            </article>
+
+            <article class="history-step" data-history-stage="readback-correction">
+              <div class="history-kicker"><span>STAGE 04</span><em>证据纠错</em></div>
+              <h3>发现我们读错了粒子状态</h3>
+              <span class="history-metric">旧：simulationPoints　新：points = 43–45 / 548</span>
+              <p><code>simulationPoints</code> 只是写入的初值，不能证明粒子还在杯中。改读运行中的 <code>points</code> 后，旧“通过”结论被撤销。</p>
+              <span class="history-lesson">结论：验证管线也可能错；错误证据必须公开作废。</span>
+            </article>
+
+            <article class="history-step final" data-history-stage="0812-warp">
+              <div class="history-kicker"><span>STAGE 05 · FINAL</span><em>通过</em></div>
+              <h3>把 0812 容器拓扑变形到量筒尺寸</h3>
+              <span class="history-metric">50 个点 · 96 个三角面 · 边界 0 · 非流形 0</span>
+              <p>视觉 mesh 完全不动，只增加一个隐藏闭合碰撞 mesh：内腔半径 16.5 mm、底面 16 mm、杯口高度 278.24 mm。</p>
+              <span class="history-lesson">实时 points：至少 546 / 548；87–88 FPS。</span>
+            </article>
+          </div>
+
+          <div class="vessel-compare">
+            <article>
+              <h3>为什么 0812 烧杯能跑？</h3>
+              <p>它的液体碰撞层本来就是低复杂度、封闭、带明确内腔的专用网格。GPU 看到的是一只“物理杯子”，而不是透明视觉表皮。</p>
+            </article>
+            <article>
+              <h3>为什么原量筒不行？</h3>
+              <p>量筒又高又窄，视觉模型是开边薄壳；直接凸分解容易封住杯口、丢失内腔或退化为不稳定的碰撞组成。</p>
+            </article>
+          </div>
+          <div class="compare-verdict"><strong>一句话：</strong>拓扑不同，不是少调了一个 PhysX 参数。正确迁移方式是复用 0812 的<strong>容器拓扑经验</strong>，再按源量筒尺寸做可追溯变形，而不是照抄一个固定碰撞体。</div>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="collision-shell">
       <div class="shell section-grid">
-        <aside class="scale"><b>02</b>重建隐形内胆</aside>
+        <aside class="scale"><b>03</b>重建隐形内胆</aside>
         <div>
           <h2>外观不动，只重做液体真正接触的那一层</h2>
           <p class="lede">我们没有拿圆柱体粗暴套住量筒，也没有修改原始视觉 mesh。ConvertAsset 参考已经跑通的 LabUtopia 0812 容器拓扑，把模板按量筒的实测半径和高度变形，生成一个<strong>source-derived、封闭、可三角化</strong>的隐藏碰撞网格。</p>
@@ -269,7 +388,7 @@
               <div class="spec-list">
                 <div class="spec"><span>边界边</span><strong>0</strong></div><div class="spec"><span>非流形边</span><strong>0</strong></div>
                 <div class="spec"><span>碰撞策略</span><strong>convexDecomposition</strong></div><div class="spec"><span>内腔半径</span><strong>16.5 mm</strong></div>
-                <div class="spec"><span>内腔底面</span><strong>16 mm</strong></div><div class="spec"><span>内腔杯口</span><strong>278.24 mm</strong></div>
+                <div class="spec"><span>内腔底面</span><strong>16 mm</strong></div><div class="spec"><span>杯口高度</span><strong>278.24 mm</strong></div>
               </div>
             </div>
           </div>
@@ -280,7 +399,7 @@
 
     <section class="section" id="liquid-start">
       <div class="shell section-grid">
-        <aside class="scale"><b>03</b>让初值和容器对齐</aside>
+        <aside class="scale"><b>04</b>让初值和容器对齐</aside>
         <div>
           <h2>粒子参数不乱改，先让它们站在正确的位置</h2>
           <p class="lede">最终方案沿用 0812 已验证的轻量液体参数，只把外观调成更易观察的蓝色。真正解决“刚抬量筒就冒出一坨液体”的关键，是先让量筒在 755 mm 桌面上自然落稳，再把预沉降粒子保存到量筒的<strong>局部坐标</strong>中。</p>
@@ -311,7 +430,7 @@
 
     <section class="section" id="package">
       <div class="shell section-grid">
-        <aside class="scale"><b>04</b>按职责组装</aside>
+        <aside class="scale"><b>05</b>按职责组装</aside>
         <div>
           <h2>修物理的人、装场景的人、跑机器人的人不要互相越界</h2>
           <p class="lede">这条边界让修复可以复用，也防止任务包里悄悄出现量筒专用补丁。</p>
@@ -327,10 +446,15 @@
 
     <section class="section" id="robot-proof">
       <div class="shell section-grid">
-        <aside class="scale"><b>05</b>再让机器人动</aside>
+        <aside class="scale"><b>06</b>再让机器人动</aside>
         <div>
           <h2>液体没漏之后，剩下的问题其实是机器人动作</h2>
           <p class="lede">早期快速抬升让量筒在闭合夹爪里滑了约 101.7 mm。液体本身没有先坏，是容器从机器人预期的抓取位姿中滑走了。最终修复没有再动碰撞或液体参数，而是把 100 mm 抬升拉长到 2 秒。</p>
+          <div class="gate-ladder" aria-label="从碰撞体到机器人执行的三级证据">
+            <article class="gate"><b>GATE A</b><h3>碰撞容器资格</h3><p>GPU cooking 成功，三次冷启动读取实时 <code>points</code>，静止量筒能稳定保液。</p><small>证明：器皿物理层成立</small></article>
+            <article class="gate"><b>GATE B</b><h3>装液初值资格</h3><p>容器与预沉降粒子使用同一个局部坐标变换；加载后没有外部液团或初始爆散。</p><small>证明：任务初态成立</small></article>
+            <article class="gate"><b>GATE C</b><h3>机器人执行资格</h3><p>夹爪真实接触，慢抬、对口、倾倒与放回；不直接写容器位姿，也不靠隐藏传送。</p><small>证明：这条 scripted oracle 成立</small></article>
+          </div>
           <div class="five-moves">
             <div class="move"><b>01</b><strong>左臂固定烧杯</strong><span>保持上一控制指令</span></div>
             <div class="move"><b>02</b><strong>右臂慢抬量筒</strong><span>100 mm / 2 s</span></div>
@@ -360,10 +484,17 @@
 
     <section class="section" id="reproduce">
       <div class="shell section-grid">
-        <aside class="scale"><b>06</b>照着复现</aside>
+        <aside class="scale"><b>07</b>照着复现</aside>
         <div>
           <h2>把这套方法迁移到下一个容器</h2>
           <p class="lede">不要复制量筒的固定尺寸；复制的是工作方法：先拓扑、再静态保液、再规定轨迹、再打包、最后跑机器人。</p>
+          <div class="decision-tree" aria-label="液体容器故障分流表">
+            <div class="decision-head"><span>你看到的现象</span><span>先查什么</span><span>应该往哪条线修</span></div>
+            <div class="decision-row"><strong>GPU cooking 失败</strong><p>边界边、非流形边、薄面与凸分解结果。</p><p class="route">重做简洁封闭拓扑；不要先调 offset。</p></div>
+            <div class="decision-row"><strong>烹饪通过，但仍漏液</strong><p>读取实时 <code>points</code>；检查初始穿插与 self-collision。</p><p class="route">先修证据与初态，再判断是否需要改几何。</p></div>
+            <div class="decision-row"><strong>静态保液通过，但装液初始状态漂移</strong><p>容器支撑姿态、粒子局部坐标和共同场景变换。</p><p class="route">修统一坐标映射；不要分别给容器和液体加高度补偿。</p></div>
+            <div class="decision-row"><strong>液体稳定，但夹爪打滑</strong><p>抓取高度、夹爪接触、抬升速度和控制轨迹。</p><p class="route">进入机器人控制线；不要回头改已通过的容器碰撞体。</p></div>
+          </div>
           <div class="repro-grid">
             <article class="repro-card">
               <h3>生产方必须交付</h3>

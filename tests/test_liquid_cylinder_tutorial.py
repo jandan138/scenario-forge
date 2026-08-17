@@ -24,6 +24,7 @@ def test_tutorial_is_a_self_contained_evidence_bound_page() -> None:
 
     for section_id in (
         "diagnosis",
+        "repair-history",
         "collision-shell",
         "liquid-start",
         "package",
@@ -31,6 +32,31 @@ def test_tutorial_is_a_self_contained_evidence_bound_page() -> None:
         "reproduce",
     ):
         assert f'id="{section_id}"' in html
+
+    assert 'href="#repair-history"' in html
+    assert html.count('data-history-stage="') == 5
+    for fact in (
+        "384 个点 · 288 个四边形 · 192 条边界边",
+        "p12 / p24 / p48",
+        "96 个环口面",
+        "58 / 548",
+        "548 / 548",
+        "43–45 / 548",
+        "50 个点 · 96 个三角面",
+        "至少 546 / 548",
+        "87–88 FPS",
+        "拓扑不同，不是少调了一个 PhysX 参数",
+    ):
+        assert fact in html
+
+    assert "杯口高度" in html
+    assert "内腔杯口" not in html
+    assert "GPU cooking 失败" in html
+    assert "静态保液通过，但装液初始状态漂移" in html
+    assert "液体稳定，但夹爪打滑" in html
+    assert "碰撞容器资格" in html
+    assert "装液初值资格" in html
+    assert "机器人执行资格" in html
 
     assert html.count('class="layer-toggle"') == 3
     assert '<video controls playsinline preload="metadata"' in html
