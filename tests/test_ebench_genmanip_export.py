@@ -11,6 +11,7 @@ from jsonschema import Draft202012Validator
 
 from scenario_forge.adapters.ebench.genmanip import (
     GenManipExportError,
+    _compose_fixed_base_mount_pose,
     _exact_success_object_ids,
     _relative_prim_parts_if_descendant,
     export_genmanip_collected_package,
@@ -34,6 +35,30 @@ _OVERLAY_ASSET_ID = "dryingbox_03_dynamic"
 def test_standalone_asset_entry_prim_is_not_treated_as_room_embedded() -> None:
     assert _relative_prim_parts_if_descendant("/World", "/ObjectRoot") is None
     assert _relative_prim_parts_if_descendant("/World", "/World/Beaker") == ("Beaker",)
+
+
+def test_fixed_base_mount_pose_composes_support_plane_and_root_mount() -> None:
+    position, orientation = _compose_fixed_base_mount_pose(
+        [0.35, 0.0, 0.755],
+        [1.0, 0.0, 0.0, 0.0],
+        {
+            "schema_version": "aan.articulated_mounting.v1",
+            "status": "pass",
+            "motion_mode": "fixed_base",
+            "support_plane_to_root_mount_pose": {
+                "translation_m": [0.0, 0.0, 0.4666],
+                "rotation_wxyz": [
+                    0.7071067811865476,
+                    0.7071067811865475,
+                    0.0,
+                    0.0,
+                ],
+            },
+        },
+    )
+
+    assert position == pytest.approx([0.35, 0.0, 1.2216])
+    assert orientation == pytest.approx([0.7071067811865476, 0.7071067811865475, 0.0, 0.0])
 
 
 _RUNTIME_CONTRACT_SCHEMA = (

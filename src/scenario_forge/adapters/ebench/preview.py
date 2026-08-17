@@ -111,13 +111,9 @@ def run_genmanip_initial_preview(
     resolved_python_paths = tuple(Path(path).resolve() for path in runtime_python_paths)
     for path in resolved_python_paths:
         if not path.is_dir():
-            raise GenManipPreviewError(
-                f"runtime Python source path does not exist: {path}"
-            )
+            raise GenManipPreviewError(f"runtime Python source path does not exist: {path}")
     resolved_curobo_cache = (
-        None
-        if curobo_extension_cache is None
-        else Path(curobo_extension_cache).resolve()
+        None if curobo_extension_cache is None else Path(curobo_extension_cache).resolve()
     )
     if resolved_curobo_cache is not None and not resolved_curobo_cache.is_dir():
         raise GenManipPreviewError(
@@ -135,9 +131,7 @@ def run_genmanip_initial_preview(
         PREVIEW_REQUEST_PATH.as_posix(),
     ]
     if resolved_curobo_cache is not None:
-        command.extend(
-            ["--curobo-extension-cache", str(resolved_curobo_cache)]
-        )
+        command.extend(["--curobo-extension-cache", str(resolved_curobo_cache)])
     # Calling an interpreter by absolute path does not itself put its bin
     # directory on PATH.  CuRobo's extension loader invokes the `ninja`
     # executable, so preserve the caller environment but make the selected
@@ -160,8 +154,7 @@ def run_genmanip_initial_preview(
     native_library_paths = [
         runtime_prefix / "lib/python3.10/site-packages/torch/lib",
         runtime_prefix / "lib/python3.10/site-packages/nvidia/cuda_runtime/lib",
-        runtime_prefix
-        / "lib/python3.10/site-packages/isaacsim/extscache/omni.cuda.libs/bin",
+        runtime_prefix / "lib/python3.10/site-packages/isaacsim/extscache/omni.cuda.libs/bin",
     ]
     inherited_ld = environment.get("LD_LIBRARY_PATH", "")
     environment["LD_LIBRARY_PATH"] = os.pathsep.join(
@@ -244,12 +237,8 @@ def write_genmanip_preview_request(
     checked against the resulting PNGs.
     """
     root = Path(collected_root).resolve()
-    if (
-        len(resolution) != 2
-        or any(
-            not isinstance(value, int) or isinstance(value, bool) or value <= 0
-            for value in resolution
-        )
+    if len(resolution) != 2 or any(
+        not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in resolution
     ):
         raise GenManipPreviewError("preview request resolution must contain two positive integers")
     width, height = resolution
@@ -416,9 +405,7 @@ def write_genmanip_preview_request(
             "physics fidelity, or liquid-transfer evidence."
         ),
     }
-    request_path = _safe_package_path(
-        root, PREVIEW_REQUEST_PATH, "preview render request"
-    )
+    request_path = _safe_package_path(root, PREVIEW_REQUEST_PATH, "preview render request")
     return write_yaml_artifact(request_path, request)
 
 
@@ -452,9 +439,7 @@ def validate_genmanip_preview_evidence(
     collected_root: str | Path,
 ) -> GenManipPreviewValidationResult:
     root = Path(collected_root).resolve()
-    evidence_dir = _safe_package_path(
-        root, PREVIEW_EVIDENCE_DIR, "preview evidence directory"
-    )
+    evidence_dir = _safe_package_path(root, PREVIEW_EVIDENCE_DIR, "preview evidence directory")
     gate_path = _safe_package_path(
         root,
         PREVIEW_EVIDENCE_DIR / "visual_ready_gate.yaml",
@@ -488,18 +473,12 @@ def validate_genmanip_preview_evidence(
             LEGACY_PREVIEW_GATE_SCHEMA_VERSION,
         ),
     }
-    preview_view_names, expected_evidence_schema, gate_schema = schema_contracts[
-        request_schema
-    ]
+    preview_view_names, expected_evidence_schema, gate_schema = schema_contracts[request_schema]
     package_id = _required_string(request, "package_id", "preview request")
     package_manifest = _load_json(root / "package_manifest.json", "package manifest")
-    manifest_package_id = _required_string(
-        package_manifest, "package_id", "package manifest"
-    )
+    manifest_package_id = _required_string(package_manifest, "package_id", "package manifest")
     if package_id != manifest_package_id:
-        raise GenManipPreviewError(
-            "preview request package_id does not match package manifest"
-        )
+        raise GenManipPreviewError("preview request package_id does not match package manifest")
     current_inputs = _current_preview_inputs(root, package_manifest)
     expected_digest = _digest_inputs(package_id, current_inputs)
     request_digest = _required_string(request, "input_digest", "preview request")
@@ -542,9 +521,7 @@ def validate_genmanip_preview_evidence(
         "preview request",
     )
     if request_expected_geometry != current_expected_geometry:
-        raise GenManipPreviewError(
-            "preview request expected runtime geometry is stale"
-        )
+        raise GenManipPreviewError("preview request expected runtime geometry is stale")
 
     manifest = _load_json(evidence_dir / "render_manifest.json", "preview render manifest")
     if manifest.get("schema_version") != expected_evidence_schema:
@@ -562,18 +539,14 @@ def validate_genmanip_preview_evidence(
     if manifest.get("render_status") != "pass":
         raise GenManipPreviewError("preview evidence render_status must be pass")
 
-    runtime_scan = _required_mapping(
-        manifest, "runtime_log_scan", "preview render manifest"
-    )
+    runtime_scan = _required_mapping(manifest, "runtime_log_scan", "preview render manifest")
     blocking_signals = _string_list(
         runtime_scan.get("blocking_signals", []),
         "preview render manifest.runtime_log_scan.blocking_signals",
     )
     if runtime_scan.get("status") != "pass":
         suffix = f": {blocking_signals[0]}" if blocking_signals else ""
-        raise GenManipPreviewError(
-            f"preview runtime log contains blocking material signal{suffix}"
-        )
+        raise GenManipPreviewError(f"preview runtime log contains blocking material signal{suffix}")
     if runtime_scan.get("scope") != "known_blocking_material_signals":
         raise GenManipPreviewError("preview runtime log scan scope is unsupported")
     runtime_log_path = _safe_relative_path(
@@ -613,8 +586,7 @@ def validate_genmanip_preview_evidence(
             )
         if view.get("scene_visibility") != expected_visibility:
             raise GenManipPreviewError(
-                f"preview view {view_name} scene_visibility must be "
-                f"{expected_visibility}"
+                f"preview view {view_name} scene_visibility must be {expected_visibility}"
             )
         image_path = _safe_relative_path(
             evidence_dir,
@@ -655,9 +627,7 @@ def validate_genmanip_preview_evidence(
             view,
             manifest_views,
         )
-        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION and view_name.startswith(
-            "room_"
-        ):
+        if request_schema == PREVIEW_REQUEST_SCHEMA_VERSION and view_name.startswith("room_"):
             _validate_room_survey_view(view_name, view_request, view)
         gate_views[view_name] = {
             "image_path": image_path.relative_to(evidence_dir).as_posix(),
@@ -676,9 +646,7 @@ def validate_genmanip_preview_evidence(
         "moment": "post_reset_pre_action",
         "views": gate_views,
         "runtime_geometry": runtime_geometry,
-        "verification_scope": (
-            "structural_runtime_geometry_and_camera_composition_metadata"
-        ),
+        "verification_scope": ("structural_runtime_geometry_and_camera_composition_metadata"),
         "next_stage": "clean_room_visual_review",
         "claim_boundary": (
             "Structural initial-scene evidence readiness only; does not verify "
@@ -709,9 +677,7 @@ def _expected_runtime_geometry(
         return {}
     raw_objects = runtime_contract.get("objects")
     if not isinstance(raw_objects, list):
-        raise GenManipPreviewError(
-            "runtime contract objects must be a list for geometry mapping"
-        )
+        raise GenManipPreviewError("runtime contract objects must be a list for geometry mapping")
     objects_by_runtime_id: dict[str, Mapping[str, Any]] = {}
     for index, raw_object in enumerate(raw_objects):
         item = _as_mapping(raw_object, f"runtime contract objects[{index}]")
@@ -721,9 +687,7 @@ def _expected_runtime_geometry(
             f"runtime contract objects[{index}]",
         )
         if runtime_id in objects_by_runtime_id:
-            raise GenManipPreviewError(
-                f"runtime contract repeats runtime_uid {runtime_id!r}"
-            )
+            raise GenManipPreviewError(f"runtime contract repeats runtime_uid {runtime_id!r}")
         objects_by_runtime_id[runtime_id] = item
 
     fixture_support_relations = _initial_fixture_support_relations(runtime_contract)
@@ -782,16 +746,12 @@ def _expected_runtime_geometry(
             "scenario-forge-task-interactive-geometry/v0.1",
             "scenario-forge-task-interactive-geometry/v0.2",
         }:
+            raise GenManipPreviewError("unsupported task-interactive geometry schema_version")
+        if (geometry_schema == "scenario-forge-task-interactive-geometry/v0.2") != (
+            "mounting" in geometry_mapping
+        ):
             raise GenManipPreviewError(
-                "unsupported task-interactive geometry schema_version"
-            )
-        if (
-            geometry_schema
-            == "scenario-forge-task-interactive-geometry/v0.2"
-        ) != ("mounting" in geometry_mapping):
-            raise GenManipPreviewError(
-                "task-interactive geometry v0.2 requires exactly one mounting "
-                "contract extension"
+                "task-interactive geometry v0.2 requires exactly one mounting contract extension"
             )
         geometry_sources.append(
             (
@@ -899,14 +859,10 @@ def _expected_runtime_geometry(
             )
         support_matrix = _matrix4(
             geometry.get("support_frame_local_matrix"),
-            f"runtime object {runtime_id} producer geometry."
-            "support_frame_local_matrix",
+            f"runtime object {runtime_id} producer geometry.support_frame_local_matrix",
         )
         source_sha256 = geometry.get("support_frame_source_sha256")
-        if (
-            not isinstance(source_sha256, str)
-            or _SHA256_HEX.fullmatch(source_sha256) is None
-        ):
+        if not isinstance(source_sha256, str) or _SHA256_HEX.fullmatch(source_sha256) is None:
             raise GenManipPreviewError(
                 f"runtime object {runtime_id!r} support frame must be hash-bound"
             )
@@ -922,9 +878,7 @@ def _expected_runtime_geometry(
             "extent_m": list(extent),
             "max_extent_relative_error": _MAX_EXTENT_RELATIVE_ERROR,
             "support_frame": "support",
-            "support_frame_local_matrix": [
-                list(row) for row in support_matrix
-            ],
+            "support_frame_local_matrix": [list(row) for row in support_matrix],
             "support_frame_source_sha256": source_sha256,
             "max_root_tilt_deg": _MAX_ROOT_TILT_DEG,
             "max_support_gap_m": _TABLETOP_SUPPORT_TOLERANCE_M,
@@ -939,8 +893,7 @@ def _expected_runtime_geometry(
                 f"runtime object {runtime_id} producer geometry.mounting",
             )
             if (
-                mounting_mapping.get("schema_version")
-                != "aan.articulated_mounting.v1"
+                mounting_mapping.get("schema_version") != "aan.articulated_mounting.v1"
                 or mounting_mapping.get("status") != "pass"
                 or mounting_mapping.get("motion_mode") != "fixed_base"
             ):
@@ -953,13 +906,9 @@ def _expected_runtime_geometry(
                 "runtime_report_sha256",
             ):
                 digest = mounting_mapping.get(field_name)
-                if (
-                    not isinstance(digest, str)
-                    or _SHA256_HEX.fullmatch(digest) is None
-                ):
+                if not isinstance(digest, str) or _SHA256_HEX.fullmatch(digest) is None:
                     raise GenManipPreviewError(
-                        f"runtime object {runtime_id!r} mounting {field_name} "
-                        "must be hash-bound"
+                        f"runtime object {runtime_id!r} mounting {field_name} must be hash-bound"
                     )
             reset_geometry = _required_mapping(
                 mounting_mapping,
@@ -1012,7 +961,9 @@ def _initial_fixture_support_relations(
         object_id = parameters.get("object")
         fixture_id = parameters.get("source_fixture")
         frame_ref = parameters.get("source_frame")
-        if not all(isinstance(value, str) and value for value in (object_id, fixture_id, frame_ref)):
+        if not all(
+            isinstance(value, str) and value for value in (object_id, fixture_id, frame_ref)
+        ):
             continue
         expected_prefix = f"{fixture_id}."
         if not frame_ref.startswith(expected_prefix):
@@ -1020,7 +971,7 @@ def _initial_fixture_support_relations(
         fixture = objects.get(fixture_id)
         if fixture is None:
             continue
-        frame_id = frame_ref[len(expected_prefix):]
+        frame_id = frame_ref[len(expected_prefix) :]
         named_frames = fixture.get("named_frames")
         if not isinstance(named_frames, Mapping):
             continue
@@ -1030,6 +981,11 @@ def _initial_fixture_support_relations(
         xyz = frame.get("xyz")
         if not isinstance(xyz, list) or len(xyz) != 3:
             continue
+        offset = parameters.get("source_support_offset_xyz_m", [0.0, 0.0, 0.0])
+        offset_xyz = _number_vector(
+            offset,
+            f"runtime support offset for {object_id}",
+        )
         target_runtime_id = fixture.get("runtime_uid")
         if not isinstance(target_runtime_id, str) or not target_runtime_id:
             continue
@@ -1037,7 +993,9 @@ def _initial_fixture_support_relations(
             "kind": "fixture_frame_support_height",
             "target_runtime_id": target_runtime_id,
             "target_frame": frame_ref,
-            "target_frame_local_xyz": [float(value) for value in xyz],
+            "target_frame_local_xyz": [
+                round(float(value) + offset_xyz[index], 9) for index, value in enumerate(xyz)
+            ],
         }
     return result
 
@@ -1087,9 +1045,7 @@ def _validate_runtime_geometry(
         "preview render manifest.runtime_geometry",
     )
     if table.get("runtime_id") != table_runtime_id:
-        raise GenManipPreviewError(
-            "preview runtime geometry table id does not match request"
-        )
+        raise GenManipPreviewError("preview runtime geometry table id does not match request")
     table_lower, table_upper, table_extent = _world_bound(
         _required_mapping(
             table,
@@ -1108,9 +1064,7 @@ def _validate_runtime_geometry(
     gate_objects: dict[str, Any] = {}
     for runtime_id, raw_expected in expected.items():
         if not isinstance(runtime_id, str) or not runtime_id:
-            raise GenManipPreviewError(
-                "preview expected runtime geometry keys must be runtime ids"
-            )
+            raise GenManipPreviewError("preview expected runtime geometry keys must be runtime ids")
         expected_item = _as_mapping(
             raw_expected,
             f"preview expected runtime geometry {runtime_id}",
@@ -1137,9 +1091,7 @@ def _validate_runtime_geometry(
             expected_item,
             f"preview runtime geometry task object {runtime_id}.post_warmup",
         )
-        actual_lower, actual_upper, actual_extent = post_warmup[
-            "world_bound"
-        ]
+        actual_lower, actual_upper, actual_extent = post_warmup["world_bound"]
         default_expected_extent = _number_vector(
             expected_item.get("extent_m"),
             f"preview expected runtime geometry {runtime_id}.extent_m",
@@ -1158,8 +1110,7 @@ def _validate_runtime_geometry(
         else:
             raw_extents = _as_mapping(
                 qualified_extents,
-                f"preview expected runtime geometry {runtime_id} "
-                "qualified_extent_m_by_sample",
+                f"preview expected runtime geometry {runtime_id} qualified_extent_m_by_sample",
             )
             if set(raw_extents) != {"warmup_start", "post_warmup"}:
                 raise GenManipPreviewError(
@@ -1170,8 +1121,7 @@ def _validate_runtime_geometry(
                 sample_name: list(
                     _number_vector(
                         raw_extents.get(sample_name),
-                        f"preview expected runtime geometry {runtime_id} "
-                        f"{sample_name} extent",
+                        f"preview expected runtime geometry {runtime_id} {sample_name} extent",
                     )
                 )
                 for sample_name in ("warmup_start", "post_warmup")
@@ -1186,12 +1136,9 @@ def _validate_runtime_geometry(
             actual_sorted = sorted(sample["world_bound"][2])
             if sample_name == "post_warmup" and qualified_extents is None:
                 relative_errors = [
-                    abs(actual_sorted[-1] - expected_sorted[-1])
-                    / expected_sorted[-1]
+                    abs(actual_sorted[-1] - expected_sorted[-1]) / expected_sorted[-1]
                 ]
-                extent_comparison_by_sample[sample_name] = (
-                    "longest_aabb_axis_rotation_tolerant"
-                )
+                extent_comparison_by_sample[sample_name] = "longest_aabb_axis_rotation_tolerant"
             else:
                 relative_errors = [
                     abs(actual_value - expected_value) / expected_value
@@ -1203,17 +1150,13 @@ def _validate_runtime_geometry(
                 ]
                 extent_comparison_by_sample[sample_name] = "sorted_axis_extents"
             if any(error > tolerance for error in relative_errors):
-                raise GenManipPreviewError(
-                    f"preview runtime extent mismatch for {runtime_id}"
-                )
+                raise GenManipPreviewError(f"preview runtime extent mismatch for {runtime_id}")
             extent_relative_errors[sample_name] = relative_errors
 
         for axis_index in (0, 1):
             if (
-                actual_lower[axis_index]
-                < table_lower[axis_index] - _TABLETOP_XY_TOLERANCE_M
-                or actual_upper[axis_index]
-                > table_upper[axis_index] + _TABLETOP_XY_TOLERANCE_M
+                actual_lower[axis_index] < table_lower[axis_index] - _TABLETOP_XY_TOLERANCE_M
+                or actual_upper[axis_index] > table_upper[axis_index] + _TABLETOP_XY_TOLERANCE_M
             ):
                 raise GenManipPreviewError(
                     f"preview runtime object {runtime_id} is outside tabletop XY"
@@ -1291,11 +1234,7 @@ def _validate_runtime_geometry(
                 "world_height_m": support_height,
             }
         support_gap = post_warmup["support_world_point"][2] - support_height
-        if not (
-            -max_support_gap
-            <= support_gap
-            <= max_support_gap
-        ):
+        if not (-max_support_gap <= support_gap <= max_support_gap):
             raise GenManipPreviewError(
                 f"preview runtime support gap exceeds tolerance for {runtime_id}"
             )
@@ -1310,9 +1249,7 @@ def _validate_runtime_geometry(
             "support_reference": support_reference,
             "root_tilt_deg": root_tilt_deg,
             "tabletop_xy_contained": True,
-            "overall_aabb_support_gap_diagnostic_m": (
-                actual_lower[2] - table_upper[2]
-            ),
+            "overall_aabb_support_gap_diagnostic_m": (actual_lower[2] - table_upper[2]),
         }
     return {
         "status": "passed",
@@ -1363,8 +1300,7 @@ def _runtime_geometry_snapshot(
     )
     rotated_support = _rotate_wxyz(support_local, root_wxyz)
     computed_support = tuple(
-        origin + offset
-        for origin, offset in zip(root_xyz, rotated_support, strict=True)
+        origin + offset for origin, offset in zip(root_xyz, rotated_support, strict=True)
     )
     if any(
         not math.isclose(recorded, computed, rel_tol=0.0, abs_tol=1e-6)
@@ -1394,10 +1330,7 @@ def _world_bound(
 ]:
     lower = _number_vector(value.get("min"), f"{label}.min")
     upper = _number_vector(value.get("max"), f"{label}.max")
-    extent = tuple(
-        maximum - minimum
-        for minimum, maximum in zip(lower, upper, strict=True)
-    )
+    extent = tuple(maximum - minimum for minimum, maximum in zip(lower, upper, strict=True))
     if any(value <= 0.0 for value in extent):
         raise GenManipPreviewError(f"{label} must have positive extent")
     return lower, upper, extent
@@ -1445,9 +1378,7 @@ def _matrix4(
         )
         for index, expected in enumerate(expected_last_column)
     ):
-        raise GenManipPreviewError(
-            f"{label} must use the USD row-vector affine convention"
-        )
+        raise GenManipPreviewError(f"{label} must use the USD row-vector affine convention")
     return tuple(rows)
 
 
@@ -1487,9 +1418,7 @@ def _root_tilt_deg(
     local_up = (0.0, 0.0, 1.0)
     start_up = _rotate_wxyz(local_up, start_wxyz)
     post_up = _rotate_wxyz(local_up, post_wxyz)
-    cosine = sum(
-        left * right for left, right in zip(start_up, post_up, strict=True)
-    )
+    cosine = sum(left * right for left, right in zip(start_up, post_up, strict=True))
     return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
 
 
@@ -1552,9 +1481,7 @@ def _validate_room_survey_view(
             f"preview room-survey view {view_name} must hide complete wall roots"
         )
     if not corner and hidden_paths:
-        raise GenManipPreviewError(
-            f"preview room-survey view {view_name} cannot hide room prims"
-        )
+        raise GenManipPreviewError(f"preview room-survey view {view_name} cannot hide room prims")
     for path in hidden_paths:
         if "/room/" not in path or not Path(path).name.lower().startswith("wall_"):
             raise GenManipPreviewError(
@@ -1565,9 +1492,7 @@ def _validate_room_survey_view(
         raise GenManipPreviewError(
             f"preview room-survey view {view_name} framing status must be pass"
         )
-    workcell = _required_mapping(
-        framing, "workcell", f"evidence view {view_name}.framing"
-    )
+    workcell = _required_mapping(framing, "workcell", f"evidence view {view_name}.framing")
     if workcell.get("fully_in_frame") is not True:
         raise GenManipPreviewError(
             f"preview room-survey view {view_name} must fully frame the workcell"
@@ -1684,8 +1609,10 @@ def _current_preview_inputs(
     entrypoints = _required_mapping(package_manifest, "entrypoints", "package manifest")
     result: dict[str, dict[str, str]] = {}
     for role, entrypoint in _INPUT_ENTRYPOINTS.items():
-        relative = Path("package_manifest.json") if entrypoint is None else Path(
-            _required_string(entrypoints, entrypoint, "package manifest entrypoints")
+        relative = (
+            Path("package_manifest.json")
+            if entrypoint is None
+            else Path(_required_string(entrypoints, entrypoint, "package manifest entrypoints"))
         )
         path = _safe_package_path(root, relative, role)
         if not path.is_file():
@@ -1696,9 +1623,7 @@ def _current_preview_inputs(
         }
     scene_relative = Path(result["scene_usd"]["path"])
     source_bundle_relative = scene_relative.parent / "source_bundle"
-    source_bundle = _safe_package_path(
-        root, source_bundle_relative, _SOURCE_BUNDLE_INPUT
-    )
+    source_bundle = _safe_package_path(root, source_bundle_relative, _SOURCE_BUNDLE_INPUT)
     if not source_bundle.is_dir():
         raise GenManipPreviewError(
             f"missing preview input source_bundle: {source_bundle_relative.as_posix()}"
@@ -1720,14 +1645,10 @@ def _digest_inputs(package_id: str, inputs: Mapping[str, Any]) -> str:
 
 
 def _latest_staging_failure(root: Path) -> str | None:
-    evidence_root = _safe_package_path(
-        root, PREVIEW_EVIDENCE_DIR.parent, "preview evidence root"
-    )
+    evidence_root = _safe_package_path(root, PREVIEW_EVIDENCE_DIR.parent, "preview evidence root")
     candidates = [
         path
-        for path in evidence_root.glob(
-            f".{PREVIEW_EVIDENCE_DIR.name}.staging-*/runtime.log"
-        )
+        for path in evidence_root.glob(f".{PREVIEW_EVIDENCE_DIR.name}.staging-*/runtime.log")
         if path.is_file()
     ]
     if not candidates:
@@ -1741,9 +1662,7 @@ def _latest_staging_failure(root: Path) -> str | None:
 
 
 def _finalize_runtime_log_scan(root: Path, stdout: str, stderr: str) -> None:
-    evidence_dir = _safe_package_path(
-        root, PREVIEW_EVIDENCE_DIR, "preview evidence directory"
-    )
+    evidence_dir = _safe_package_path(root, PREVIEW_EVIDENCE_DIR, "preview evidence directory")
     manifest_path = _safe_package_path(
         root,
         PREVIEW_EVIDENCE_DIR / "render_manifest.json",
@@ -1813,9 +1732,7 @@ def _tree_sha256(root: Path) -> str:
     paths = sorted(root.rglob("*"))
     for path in paths:
         if path.is_symlink():
-            raise GenManipPreviewError(
-                f"preview source bundle must not contain symlinks: {path}"
-            )
+            raise GenManipPreviewError(f"preview source bundle must not contain symlinks: {path}")
         if not path.is_file():
             continue
         digest.update(path.relative_to(root).as_posix().encode("utf-8"))
@@ -1858,7 +1775,9 @@ def _resolution(value: object, label: str) -> tuple[int, int]:
     if (
         not isinstance(value, list)
         or len(value) != 2
-        or not all(isinstance(item, int) and not isinstance(item, bool) and item > 0 for item in value)
+        or not all(
+            isinstance(item, int) and not isinstance(item, bool) and item > 0 for item in value
+        )
     ):
         raise GenManipPreviewError(f"{label} resolution must contain two positive integers")
     return value[0], value[1]
@@ -1891,9 +1810,7 @@ def _as_mapping(value: object, label: str) -> Mapping[str, Any]:
     return value
 
 
-def _required_mapping(
-    data: Mapping[str, Any], key: str, label: str
-) -> Mapping[str, Any]:
+def _required_mapping(data: Mapping[str, Any], key: str, label: str) -> Mapping[str, Any]:
     return _as_mapping(data.get(key), f"{label}.{key}")
 
 

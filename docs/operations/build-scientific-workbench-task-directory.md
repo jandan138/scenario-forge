@@ -43,10 +43,15 @@ every referenced release overview, not only the current candidate image, so all
 reviewed variants remain inspectable after deployment.
 
 `generated_release_manifests` may bind a preview-complete generation manifest
-to a release series. The current page defaults to the partial r7 release:
-tasks 2, 7, and 8 show their r7 packages, while every other task explicitly
-falls back to its latest valid r6/r5 package. The r6 and r5 controls remain
-reader-selectable comparisons; no version toggle is a benchmark-success claim.
+to a release series. The current page defaults to r11: tasks 5 and 9 show their
+r11 packages, while every other task explicitly falls back to its latest valid
+r7/r6/r5 package. The r7, r6, and r5 controls remain reader-selectable
+comparisons; no version toggle is a benchmark-success claim.
+
+Task-specific releases may also be listed directly in `releases`.  The r11
+Task 05/09 entries use this route because they are a bounded two-task release,
+not a replacement for the existing multi-background r7 series.  Their cards
+remain candidates until provisional IK and robot rollout evidence are supplied.
 
 ## Publish the reviewed directory
 

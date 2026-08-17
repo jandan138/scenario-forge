@@ -46,6 +46,7 @@ class TabletopPlacementObjectResult:
     bounds: TabletopBounds
     edge_clearances_m: dict[str, float]
     minimum_edge_clearance_m: float
+    required_edge_clearance_m: float
     edge_clearance_status: str
     robot_facing_half: bool
     robot_side_status: str
@@ -79,6 +80,7 @@ def evaluate_tabletop_placement(
     object_bounds: Mapping[str, TabletopBounds],
     policy: TabletopPlacementPolicy,
     robot_side_exceptions: Mapping[str, str] | None = None,
+    min_edge_clearance_overrides_m: Mapping[str, float] | None = None,
 ) -> TabletopPlacementReport:
     """Evaluate the hard edge margin and default robot-facing-half preference.
 
@@ -93,6 +95,8 @@ def evaluate_tabletop_placement(
     robot = _xy(robot_xy, "robot_xy")
     exceptions = dict(robot_side_exceptions or {})
     _validate_exceptions(exceptions, object_bounds)
+    margin_overrides = dict(min_edge_clearance_overrides_m or {})
+    _validate_margin_overrides(margin_overrides, object_bounds)
     robot_direction = _robot_direction(table_bounds.center_xy, robot)
 
     results: list[TabletopPlacementObjectResult] = []
@@ -104,11 +108,8 @@ def evaluate_tabletop_placement(
             "y_max": table_bounds.y_max - bounds.y_max,
         }
         minimum = min(edge_clearances.values())
-        edge_status = (
-            "pass"
-            if minimum >= policy.min_edge_clearance_m
-            else "blocked"
-        )
+        required_margin = margin_overrides.get(object_id, policy.min_edge_clearance_m)
+        edge_status = "pass" if minimum >= required_margin else "blocked"
         object_center = bounds.center_xy
         robot_facing_half = _in_robot_facing_half(
             table_bounds.center_xy,
@@ -117,20 +118,15 @@ def evaluate_tabletop_placement(
         )
         exception = exceptions.get(object_id)
         robot_side_status = (
-            "pass"
-            if robot_facing_half
-            else "exception"
-            if exception is not None
-            else "blocked"
+            "pass" if robot_facing_half else "exception" if exception is not None else "blocked"
         )
         results.append(
             TabletopPlacementObjectResult(
                 object_id=object_id,
                 bounds=bounds,
-                edge_clearances_m={
-                    key: round(value, 9) for key, value in edge_clearances.items()
-                },
+                edge_clearances_m={key: round(value, 9) for key, value in edge_clearances.items()},
                 minimum_edge_clearance_m=round(minimum, 9),
+                required_edge_clearance_m=round(required_margin, 9),
                 edge_clearance_status=edge_status,
                 robot_facing_half=robot_facing_half,
                 robot_side_status=robot_side_status,
@@ -168,6 +164,29 @@ def _validate_exceptions(
     if invalid:
         raise ValueError(
             "tabletop placement exceptions require non-empty reasons: " + ", ".join(invalid)
+        )
+
+
+def _validate_margin_overrides(
+    overrides: Mapping[str, float],
+    object_bounds: Mapping[str, TabletopBounds],
+) -> None:
+    unknown = sorted(set(overrides).difference(object_bounds))
+    if unknown:
+        raise ValueError(
+            "tabletop placement margin overrides reference unknown objects: " + ", ".join(unknown)
+        )
+    invalid = sorted(
+        object_id
+        for object_id, value in overrides.items()
+        if not isinstance(value, int | float)
+        or not math.isfinite(float(value))
+        or float(value) < 0.0
+    )
+    if invalid:
+        raise ValueError(
+            "tabletop placement margin overrides must be finite and non-negative: "
+            + ", ".join(invalid)
         )
 
 

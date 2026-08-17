@@ -214,8 +214,7 @@ def test_v07_supports_producer_entrypoint_scene_with_embedded_objects() -> None:
     assert spec.to_mapping()["scene"]["composition_mode"] == "producer_entrypoint"
     schema = json.loads(
         (
-            REPO_ROOT
-            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.7.schema.json"
+            REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.7.schema.json"
         ).read_text(encoding="utf-8")
     )
     assert list(Draft202012Validator(schema).iter_errors(data)) == []
@@ -231,13 +230,10 @@ def test_v07_round_trips_optional_robot_initial_joint_positions() -> None:
     spec = ScenarioSpec.from_mapping(data)
 
     assert spec.robot.initial_joint_positions == (0.0,) * 12 + (0.044,) * 4
-    assert spec.to_mapping()["robot"]["initial_joint_positions"] == robot[
-        "initial_joint_positions"
-    ]
+    assert spec.to_mapping()["robot"]["initial_joint_positions"] == robot["initial_joint_positions"]
     schema = json.loads(
         (
-            REPO_ROOT
-            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.7.schema.json"
+            REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.7.schema.json"
         ).read_text(encoding="utf-8")
     )
     assert list(Draft202012Validator(schema).iter_errors(data)) == []
@@ -282,9 +278,7 @@ def _scenario_mapping_v02(
     data["schema_version"] = "scenario-spec/v0.2"
     scene = dict(data["scene"])  # type: ignore[arg-type]
     scene["overlay_asset_ids"] = (
-        list(overlay_asset_ids)
-        if isinstance(overlay_asset_ids, tuple)
-        else overlay_asset_ids
+        list(overlay_asset_ids) if isinstance(overlay_asset_ids, tuple) else overlay_asset_ids
     )
     data["scene"] = scene
     return data
@@ -780,9 +774,7 @@ def test_scenario_spec_rejects_unknown_step_actor() -> None:
         ("seed", -1),
     ],
 )
-def test_scenario_spec_rejects_unsafe_package_path_segments(
-    field: str, value: object
-) -> None:
+def test_scenario_spec_rejects_unsafe_package_path_segments(field: str, value: object) -> None:
     data = _scenario_mapping()
     data[field] = value
 
@@ -800,28 +792,18 @@ def test_scenario_spec_schema_artifact_exists_and_parses() -> None:
     assert {"scene", "objects", "robot", "steps", "success"}.issubset(schema["required"])
     assert "inactive_prim_paths" in schema["$defs"]["sceneSource"]["properties"]
     assert "world_anchored_prim_paths" in schema["$defs"]["sceneSource"]["properties"]
-    assert schema["$defs"]["sceneSource"]["properties"]["pose"] == {
-        "$ref": "#/$defs/pose"
-    }
+    assert schema["$defs"]["sceneSource"]["properties"]["pose"] == {"$ref": "#/$defs/pose"}
     assert "liquid_transfer_claim_allowed" not in schema["$defs"]["success"]["properties"]
 
 
 def test_scenario_spec_v02_schema_declares_unique_scene_overlays_without_mutating_v01() -> None:
-    v01_path = (
-        REPO_ROOT
-        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.1.schema.json"
-    )
-    v02_path = (
-        REPO_ROOT
-        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
-    )
+    v01_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.1.schema.json"
+    v02_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
 
     assert v02_path.is_file()
     v01_schema = json.loads(v01_path.read_text(encoding="utf-8"))
     v02_schema = json.loads(v02_path.read_text(encoding="utf-8"))
-    overlay_schema = v02_schema["$defs"]["sceneSource"]["properties"][
-        "overlay_asset_ids"
-    ]
+    overlay_schema = v02_schema["$defs"]["sceneSource"]["properties"]["overlay_asset_ids"]
 
     assert v02_schema["properties"]["schema_version"]["const"] == "scenario-spec/v0.2"
     assert overlay_schema["type"] == "array"
@@ -849,12 +831,8 @@ def test_golden_bimanual_pour_example_is_a_valid_scenario_spec() -> None:
         "named_frames_relative_pose_reached",
         "object_returned_to_post_warmup_pose",
     ]
-    assert predicates[0].parameters[
-        "source_normal_polar_angle_range_deg"
-    ] == [55.0, 60.0]
-    assert predicates[1].parameters[
-        "source_normal_polar_angle_range_deg"
-    ] == [70.0, 80.0]
+    assert predicates[0].parameters["source_normal_polar_angle_range_deg"] == [55.0, 60.0]
+    assert predicates[1].parameters["source_normal_polar_angle_range_deg"] == [70.0, 80.0]
     rubric = spec.success.progress_rubric
     assert rubric is not None
     assert rubric.aggregation["normalization"] == "declared_sum"
@@ -1123,10 +1101,7 @@ def test_v02_json_schema_validates_exact_predicate_parameter_shapes() -> None:
     scene.pop("overlay_asset_ids", None)
     data["scene"] = scene
     data["success"] = _exact_bimanual_success()
-    schema_path = (
-        REPO_ROOT
-        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
-    )
+    schema_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     validator = Draft202012Validator(schema)
 
@@ -1136,20 +1111,13 @@ def test_v02_json_schema_validates_exact_predicate_parameter_shapes() -> None:
     errors = list(validator.iter_errors(invalid))
     assert errors
     assert any(
-        nested.validator == "additionalProperties"
-        for error in errors
-        for nested in error.context
+        nested.validator == "additionalProperties" for error in errors for nested in error.context
     )
 
 
 def test_v02_json_schema_rejects_reordered_exact_success_and_accepts_legacy() -> None:
-    schema_path = (
-        REPO_ROOT
-        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
-    )
-    validator = Draft202012Validator(
-        json.loads(schema_path.read_text(encoding="utf-8"))
-    )
+    schema_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.2.schema.json"
+    validator = Draft202012Validator(json.loads(schema_path.read_text(encoding="utf-8")))
     legacy = _scenario_mapping_v02([])
     legacy_scene = dict(legacy["scene"])  # type: ignore[arg-type]
     legacy_scene.pop("overlay_asset_ids", None)
@@ -1352,8 +1320,7 @@ def test_v04_rejects_grasp_condition_duplicated_by_invariant() -> None:
 def test_v04_json_schema_validates_rubric_and_rejects_bad_weight() -> None:
     schema = json.loads(
         (
-            REPO_ROOT
-            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.4.schema.json"
+            REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.4.schema.json"
         ).read_text(encoding="utf-8")
     )
     validator = Draft202012Validator(schema)
@@ -1511,8 +1478,7 @@ def test_relative_axis_part_requires_relative_axis_object() -> None:
 def test_v05_json_schema_accepts_only_supported_generic_predicates() -> None:
     schema = json.loads(
         (
-            REPO_ROOT
-            / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.5.schema.json"
+            REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.5.schema.json"
         ).read_text(encoding="utf-8")
     )
     validator = Draft202012Validator(schema)
@@ -1529,9 +1495,7 @@ def test_v05_json_schema_accepts_only_supported_generic_predicates() -> None:
     assert list(validator.iter_errors(unsupported))
 
     empty_part = json.loads(json.dumps(data))
-    empty_part["success"]["predicates"][0]["parameters"]["axis_alignment"][
-        "relative_to_part"
-    ] = ""
+    empty_part["success"]["predicates"][0]["parameters"]["axis_alignment"]["relative_to_part"] = ""
     assert list(validator.iter_errors(empty_part))
 
 
@@ -1548,11 +1512,36 @@ def test_v06_combines_generic_success_and_weighted_progress_rubric() -> None:
     assert spec.to_mapping() == data
 
 
-def test_v06_json_schema_validates_generic_predicates_and_rubric() -> None:
-    schema_path = (
-        REPO_ROOT
-        / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.6.schema.json"
+def test_v06_progress_rubric_accepts_articulation_joint_state() -> None:
+    data = _scenario_mapping_v06()
+    success = dict(data["success"])  # type: ignore[arg-type]
+    rubric = dict(success["progress_rubric"])
+    items = [dict(item) for item in rubric["items"]]
+    items[-1] = {
+        **items[-1],
+        "condition": {
+            "type": "articulation_joint_state_reached",
+            "parameters": {
+                "object": "obj_graduated_cylinder_03",
+                "joint": "lid",
+                "state": "closed",
+            },
+        },
+    }
+    rubric["items"] = items
+    success["progress_rubric"] = rubric
+    data["success"] = success
+
+    spec = ScenarioSpec.from_mapping(data)
+
+    assert spec.success.progress_rubric is not None
+    assert spec.success.progress_rubric.items[-1].condition["type"] == (
+        "articulation_joint_state_reached"
     )
+
+
+def test_v06_json_schema_validates_generic_predicates_and_rubric() -> None:
+    schema_path = REPO_ROOT / "src/scenario_forge/schemas/jsonschema/scenario-spec-v0.6.schema.json"
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
     Draft202012Validator(schema).validate(_scenario_mapping_v06())

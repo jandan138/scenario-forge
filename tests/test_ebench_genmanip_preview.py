@@ -65,6 +65,7 @@ def test_preview_derives_initial_fixture_support_from_pick_step() -> None:
                     "object": "obj_rod",
                     "source_fixture": "obj_rack",
                     "source_frame": "obj_rack.middle_socket_04_inserted_bottom",
+                    "source_support_offset_xyz_m": [0.0, 0.0, -0.004],
                 },
             }
         ],
@@ -75,7 +76,7 @@ def test_preview_derives_initial_fixture_support_from_pick_step() -> None:
             "kind": "fixture_frame_support_height",
             "target_runtime_id": "obj_rack",
             "target_frame": "obj_rack.middle_socket_04_inserted_bottom",
-            "target_frame_local_xyz": [0.0, 0.0, 0.01743],
+            "target_frame_local_xyz": [0.0, 0.0, 0.01343],
         }
     }
 
@@ -101,15 +102,9 @@ def test_preview_recovery_keeps_genmanip_articulation_parts_active() -> None:
         "centrifuge": {"type": "articulation"},
         "test_tube": {"type": "object"},
     }
-    assert recovered["initial_layout"]["centrifuge_lid"] == {
-        "type": "articulation_part"
-    }
-    assert recovered["initial_layout"]["centrifuge_rotor"] == {
-        "type": "articulation_part"
-    }
-    assert recovered["initial_layout"]["centrifuge_start_button"] == {
-        "type": "articulation_part"
-    }
+    assert recovered["initial_layout"]["centrifuge_lid"] == {"type": "articulation_part"}
+    assert recovered["initial_layout"]["centrifuge_rotor"] == {"type": "articulation_part"}
+    assert recovered["initial_layout"]["centrifuge_start_button"] == {"type": "articulation_part"}
 
 
 def test_preview_runtime_prim_resolves_articulation_root() -> None:
@@ -171,9 +166,7 @@ def test_export_writes_evidence_only_preview_request_without_changing_policy_cam
         "scene_overview",
         "task_object_closeup",
     }
-    assert request["views"]["task_object_closeup"]["required_runtime_ids"] == (
-        _TASK_RUNTIME_IDS
-    )
+    assert request["views"]["task_object_closeup"]["required_runtime_ids"] == (_TASK_RUNTIME_IDS)
     assert request["views"]["workspace_closeup"]["required_runtime_ids"] == [
         "lift2",
         _TABLE_RUNTIME_ID,
@@ -340,9 +333,7 @@ def test_preview_request_carries_convertasset_expected_task_geometry(
         "obj_graduated_cylinder_03",
     }
     for runtime_id, item in expected.items():
-        assert item["schema_version"] == (
-            "scenario-forge-task-interactive-geometry/v0.1"
-        )
+        assert item["schema_version"] == ("scenario-forge-task-interactive-geometry/v0.1")
         assert item["asset_entry_prim"] in {
             "/World/conical_bottle03",
             "/World/graduated_cylinder_03",
@@ -409,15 +400,11 @@ def test_preview_geometry_gate_uses_qualified_extent_for_each_runtime_sample(
         "post_warmup": [0.34, 0.36, 0.24],
     }
     evidence_dir = _write_passing_evidence(collected_package, request)
-    manifest = json.loads(
-        (evidence_dir / "render_manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((evidence_dir / "render_manifest.json").read_text(encoding="utf-8"))
 
     gate = _validate_runtime_geometry(request, manifest)
 
-    assert gate["task_objects"][runtime_id][
-        "expected_extent_m_by_sample"
-    ] == {
+    assert gate["task_objects"][runtime_id]["expected_extent_m_by_sample"] == {
         "warmup_start": [0.32, 0.35, 0.226],
         "post_warmup": [0.34, 0.36, 0.24],
     }
@@ -431,18 +418,13 @@ def test_preview_geometry_gate_allows_rotated_post_warmup_aabb_without_profile(
     ).output_dir
     request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
     runtime_id = next(iter(request["expected_runtime_geometry"]))
-    request["expected_runtime_geometry"][runtime_id].pop(
-        "qualified_extent_m_by_sample", None
-    )
+    request["expected_runtime_geometry"][runtime_id].pop("qualified_extent_m_by_sample", None)
     evidence_dir = _write_passing_evidence(collected_package, request)
-    manifest = json.loads(
-        (evidence_dir / "render_manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((evidence_dir / "render_manifest.json").read_text(encoding="utf-8"))
     post = manifest["runtime_geometry"]["task_objects"][runtime_id]["post_warmup"]
     lower = post["world_bound_m"]["min"]
     center = [
-        (low + high) / 2.0
-        for low, high in zip(lower, post["world_bound_m"]["max"], strict=True)
+        (low + high) / 2.0 for low, high in zip(lower, post["world_bound_m"]["max"], strict=True)
     ]
     rotated_extent = [0.36, 0.31, 0.226]
     post["world_bound_m"] = {
@@ -663,19 +645,20 @@ def test_preview_evidence_rejects_missing_stale_or_mismatched_artifacts(
         request_path = collected_package / "evidence" / "render_request.yaml"
         wrong_request = _load_yaml(request_path)
         wrong_request["package_id"] = "wrong-package"
-        wrong_request["input_digest"] = "sha256:" + sha256(
-            json.dumps(
-                {
-                    "package_id": wrong_request["package_id"],
-                    "inputs": wrong_request["inputs"],
-                },
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode("utf-8")
-        ).hexdigest()
-        request_path.write_text(
-            yaml.safe_dump(wrong_request, sort_keys=False), encoding="utf-8"
+        wrong_request["input_digest"] = (
+            "sha256:"
+            + sha256(
+                json.dumps(
+                    {
+                        "package_id": wrong_request["package_id"],
+                        "inputs": wrong_request["inputs"],
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()
         )
+        request_path.write_text(yaml.safe_dump(wrong_request, sort_keys=False), encoding="utf-8")
         manifest_path = evidence_dir / "render_manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         manifest["package_id"] = wrong_request["package_id"]
@@ -693,9 +676,7 @@ def test_preview_evidence_rejects_missing_stale_or_mismatched_artifacts(
         overview = views["scene_overview"]
         assert isinstance(overview, dict)
         overview["elevation_deg"] = 12.0
-        request_path.write_text(
-            yaml.safe_dump(stale_request, sort_keys=False), encoding="utf-8"
-        )
+        request_path.write_text(yaml.safe_dump(stale_request, sort_keys=False), encoding="utf-8")
     else:
         manifest_path = evidence_dir / "render_manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -823,9 +804,7 @@ def _write_passing_evidence(
                     "ndc_bounds": [-0.4, -0.4, 0.4, 0.4],
                     "occupancy_ratio": 0.16,
                 },
-                "entrance_side": (
-                    "south" if view_name == "room_entrance_eye_level" else None
-                ),
+                "entrance_side": ("south" if view_name == "room_entrance_eye_level" else None),
             }
 
     overview_request = request_views["scene_overview"]
@@ -909,15 +888,12 @@ def _write_passing_evidence(
     manifest = {
         "schema_version": (
             "scenario-forge-genmanip-preview-evidence/v0.3"
-            if request["schema_version"]
-            == "scenario-forge-genmanip-preview-request/v0.3"
+            if request["schema_version"] == "scenario-forge-genmanip-preview-request/v0.3"
             else "scenario-forge-genmanip-preview-evidence/v0.2"
         ),
         "package_id": request["package_id"],
         "input_digest": request["input_digest"],
-        "request_sha256": _file_sha256(
-            collected_package / "evidence" / "render_request.yaml"
-        ),
+        "request_sha256": _file_sha256(collected_package / "evidence" / "render_request.yaml"),
         "purpose": "evidence_only",
         "moment": "post_reset_pre_action",
         "render_status": "pass",

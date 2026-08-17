@@ -31,6 +31,7 @@ canonical_recipe_ids:
   - scientific_workbench_tighten_centrifuge_tube_cap
   - scientific_workbench_funnel_pour_flask_to_centrifuge_tube
   - scientific_workbench_solid_sample_weighing
+  - scientific_workbench_oven_load_start
 inventory:
   schema_version: task-coverage-asset-inventory/v0.1
   inventory_id: scientific_workbench_source_bound_assets_20260801
@@ -62,9 +63,9 @@ inventory:
       admission_status: pass
       manifest_sha256: sha256:b753cc17ed8cf90e5656095231beea215e6269a0862571c56b239b4bbcb22499
     target_vessel:
-      binding_id: scientific_workbench_conical_flask_250ml_29_42_dynamic
+      binding_id: scientific_workbench_r11_flat_bottom_flask_250ml_29_42
       admission_status: pass
-      manifest_sha256: sha256:d2a1261f3f8333bc6d93cb56fafa0a6d0caa4be796d9be40a9972200fa26f5e2
+      manifest_sha256: sha256:3799d18fd2048d715575b8cac867f7a6a2dd338bea38a1c1f8c0f7ef2ada1581
     stir_bar:
       binding_id: scientific_workbench_magnetic_stir_bar_dynamic
       admission_status: pass
@@ -101,6 +102,17 @@ inventory:
       binding_id: scientific_workbench_micro_spatula_visual_static
       admission_status: pass
       manifest_sha256: sha256:f3f014b06bda90b3cad5b8af8eac2024b97626339db67f59ef0acffd6e3c5ce5
+    sample_vessel:
+      binding_id: scientific_workbench_beaker_dynamic_r3
+      admission_status: pass
+      manifest_sha256: sha256:7d4f7cfe0ac22aaf11a20d33fa15693593cf33cb1a44e2c6f3eb38248c9605e3
+    oven: &r11_oven_inventory
+      binding_id: scientific_workbench_r11_analog_oven
+      admission_status: pass
+      manifest_sha256: sha256:3b41886cb3ccc3b2ab1a90b410dc09f8b587677491f8fd5864a73ae695187130
+    oven_door: *r11_oven_inventory
+    temperature_control: *r11_oven_inventory
+    start_button: *r11_oven_inventory
 releases:
   - task_id: scientific_workbench_pour_cylinder_to_beaker
     release_id: scientific_workbench_pour_cylinder_to_beaker.v4_20260801_r1
@@ -456,3 +468,34 @@ releases:
       closeup_image: ../../scientific_workbench_asset_expansion_20260811_r5/packages/scientific_workbench_two_sample_mix__background_modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
       runtime_reset_gate: ../../scientific_workbench_asset_expansion_20260811_r5/packages/scientific_workbench_two_sample_mix__background_modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
     gates: *r5_pass_except_ik
+  - task_id: scientific_workbench_remove_vessel_closure
+    release_id: scientific_workbench_remove_vessel_closure.v11_20260818_r11
+    package_path: outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05
+    background_binding: scientific_environment_code_room_teaching_research_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: [robot task rollout]
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: &r11_pass_except_ik
+      self_contained_package: pass
+      runtime_reset: pass
+      tabletop_placement: pass
+      visual_review: pass
+      provisional_ik: not_run
+  - task_id: scientific_workbench_oven_load_start
+    release_id: scientific_workbench_oven_load_start.v11_20260818_r11
+    package_path: outputs/scientific_workbench_task05_task09_r11_20260817/packages/task09
+    background_binding: scientific_environment_code_room_analytical_instrumentation_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: [robot task rollout, thermal behavior]
+    promotion: candidate
+    evidence:
+      overview_image: ../../scientific_workbench_task05_task09_r11_20260817/packages/task09/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_task05_task09_r11_20260817/packages/task09/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_task05_task09_r11_20260817/packages/task09/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *r11_pass_except_ik

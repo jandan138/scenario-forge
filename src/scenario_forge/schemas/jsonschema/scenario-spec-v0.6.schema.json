@@ -398,7 +398,8 @@
                 "liquid_transfer_ratio",
                 "relative_pose_reached",
                 "object_at_initial_pose",
-                "motion_trajectory_completed"
+                "motion_trajectory_completed",
+                "articulation_joint_state_reached"
               ]
             },
             "parameters": {"type": "object"}

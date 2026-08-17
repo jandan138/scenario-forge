@@ -294,9 +294,7 @@ def build_dual_consumer_variant_bundle(
     _write_checksums(root)
     zip_path = output_dir / f"{archive_id}.zip"
     _write_deterministic_zip(root, zip_path)
-    return USDHandoffArchive(
-        root=root, zip_path=zip_path, task_numbers=tuple(2 for _ in variants)
-    )
+    return USDHandoffArchive(root=root, zip_path=zip_path, task_numbers=tuple(2 for _ in variants))
 
 
 def build_multi_task_dual_consumer_bundle(
@@ -350,8 +348,7 @@ def build_multi_task_dual_consumer_bundle(
         missing_vr = [path.relative_to(vr).as_posix() for path in required_vr if not path.is_file()]
         if missing_vr:
             raise ValueError(
-                f"task {task_number} {label} has incomplete VR export: "
-                + ", ".join(missing_vr)
+                f"task {task_number} {label} has incomplete VR export: " + ", ".join(missing_vr)
             )
         vr_report = yaml.safe_load(required_vr[-1].read_text(encoding="utf-8"))
         if vr_report.get("status") != "pass":
@@ -421,7 +418,7 @@ def _multi_task_dual_consumer_readme(
     lines = [
         f"# {archive_id}",
         "",
-        "这是 Task 02 / 07 / 08 的 r10.1 双端交付。每个变体目录均为独立包，",
+        f"这是可移植的 eBench / VR 双端交付，共 {len(records)} 个双端任务包。每个变体目录均为独立包，",
         "请整体复制，不要跨目录混用 `assets/`、`deps/` 或配置。运行时为 Isaac Sim 4.1。",
         "",
         "USD 不内嵌机器人；eBench 与 VR 分别按同目录配置插入双臂机器人。",
@@ -444,8 +441,8 @@ def _multi_task_dual_consumer_readme(
             "",
             "## 证据边界",
             "",
-            "Task 02 保留四档液位既有的带液物理/渲染证据；Task 07/08 本次证明包闭包、",
-            "初始摆放、960 步零动作稳定性和 VR 直接打开。未新增机器人 oracle、任务成功率或 benchmark 声明。",
+            "每个目录保留其自身已有的包闭包、初始场景和 VR 直接打开证据。",
+            "未新增机器人 oracle、任务成功率、液体 metric 或 benchmark 声明。",
             "",
         ]
     )

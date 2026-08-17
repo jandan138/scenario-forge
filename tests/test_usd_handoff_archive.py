@@ -79,18 +79,14 @@ def test_dual_consumer_bundle_contains_independent_ebench_and_vr_variants(
         smoke.parent.mkdir(parents=True)
         smoke.write_text('{"status":"pass"}\n', encoding="utf-8")
         (package / "ebench/deps/asset.usd").write_text("asset", encoding="utf-8")
-        (package / "vr/scene.usd").write_text(
-            '#usda 1.0\ndef Xform "World" {}\n', encoding="utf-8"
-        )
+        (package / "vr/scene.usd").write_text('#usda 1.0\ndef Xform "World" {}\n', encoding="utf-8")
         (package / "vr/config.py").write_text("TASKS = {}\n", encoding="utf-8")
         (package / "vr/task_config.py").write_text("TASKS = {}\n", encoding="utf-8")
         vr_smoke = package / "vr/evidence/open_smoke/report.json"
         vr_smoke.parent.mkdir(parents=True)
         vr_smoke.write_text('{"status":"pass"}\n', encoding="utf-8")
         (package / "vr/deps/asset.usd").write_text("asset", encoding="utf-8")
-        (package / "manifest.json").write_text(
-            json.dumps({"scenario_id": label}), encoding="utf-8"
-        )
+        (package / "manifest.json").write_text(json.dumps({"scenario_id": label}), encoding="utf-8")
         overview = package / "ebench/evidence/initial_scene/scene_overview.png"
         overview.parent.mkdir(parents=True)
         overview.write_bytes(b"png")
@@ -112,9 +108,7 @@ def test_dual_consumer_bundle_contains_independent_ebench_and_vr_variants(
         "fill80",
     ]
     assert "960-step zero-action physics smoke" in manifest["claim_boundary"]
-    assert manifest["variants"][0]["vr"]["config"] == (
-        "variants/fill20/vr/task_config.py"
-    )
+    assert manifest["variants"][0]["vr"]["config"] == ("variants/fill20/vr/task_config.py")
     assert (result.root / "variants/fill20/ebench/scene.usd").is_file()
     assert (result.root / "variants/fill20/vr/scene.usd").is_file()
     assert (result.root / "variants/fill20/vr/task_config.py").is_file()
@@ -208,13 +202,11 @@ def test_multi_task_dual_consumer_bundle_preserves_variants_and_entrypoints(
     assert manifest["packages"][1]["ebench"]["open_usd"] == (
         "task07/bioclean/ebench/assets/scene.usda"
     )
-    assert manifest["packages"][1]["vr"]["config"] == (
-        "task07/bioclean/vr/task_config.py"
-    )
+    assert manifest["packages"][1]["vr"]["config"] == ("task07/bioclean/vr/task_config.py")
     assert (result.root / "task02/fill40/ebench/assets/scene.usda").is_file()
     assert (result.root / "task08/bioclean/vr/scene.usd").is_file()
+    readme = (result.root / "README_CN.md").read_text(encoding="utf-8")
+    assert "共 3 个双端任务包" in readme
+    assert "Task 02 / 07 / 08 的 r10.1" not in readme
     with zipfile.ZipFile(result.zip_path) as archive:
-        assert (
-            "tasks_02_07_08_r10_1/task07/bioclean/vr/task_config.py"
-            in archive.namelist()
-        )
+        assert "tasks_02_07_08_r10_1/task07/bioclean/vr/task_config.py" in archive.namelist()

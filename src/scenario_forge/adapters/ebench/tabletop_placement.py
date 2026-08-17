@@ -92,8 +92,9 @@ def derive_official_tabletop_placement(
 ) -> OfficialTabletopPlacement:
     table_min, table_max = _combined_usd_bbox(
         scene_path,
-        include_prim=lambda prim: "obj_table" in str(prim.GetPath()).lower()
-        or prim.GetName().lower() == "table",
+        include_prim=lambda prim: (
+            "obj_table" in str(prim.GetPath()).lower() or prim.GetName().lower() == "table"
+        ),
     )
     apple_min, apple_max = _combined_usd_bbox(
         apple_path,
@@ -192,6 +193,9 @@ def validate_scientific_workbench_tabletop_placement(
     )
 
     applicable_bounds: dict[str, TabletopBounds] = {}
+    visual_bounds_xy: dict[str, TabletopBounds] = {}
+    footprint_sources: dict[str, str] = {}
+    margin_overrides: dict[str, float] = {}
     exceptions: dict[str, str] = {}
     not_applicable: list[dict[str, object]] = []
     for item in task_objects:
@@ -210,12 +214,19 @@ def validate_scientific_workbench_tabletop_placement(
                 }
             )
             continue
-        applicable_bounds[object_id] = TabletopBounds(
+        visual_bounds = TabletopBounds(
             object_bounds_3d[0][0],
             object_bounds_3d[1][0],
             object_bounds_3d[0][1],
             object_bounds_3d[1][1],
         )
+        applicable_bounds[object_id], footprint_sources[object_id] = _placement_footprint(
+            item, visual_bounds
+        )
+        visual_bounds_xy[object_id] = visual_bounds
+        margin_override = _edge_margin_override(item)
+        if margin_override is not None:
+            margin_overrides[object_id] = margin_override
         reason = _robot_side_exception(item, policy)
         if reason is not None:
             exceptions[object_id] = reason
@@ -227,12 +238,15 @@ def validate_scientific_workbench_tabletop_placement(
             object_bounds=applicable_bounds,
             policy=policy.policy,
             robot_side_exceptions=exceptions,
+            min_edge_clearance_overrides_m=margin_overrides,
         )
         evidence = _evidence_mapping(
             report,
             policy,
             table_bounds_3d,
             not_applicable,
+            visual_bounds_xy,
+            footprint_sources,
         )
     else:
         evidence = {
@@ -261,8 +275,7 @@ def validate_scientific_workbench_tabletop_placement(
     )
     if overall_status != "pass":
         raise TabletopPlacementValidationError(
-            "scientific workbench tabletop placement is blocked: "
-            + _blocked_summary(evidence),
+            "scientific workbench tabletop placement is blocked: " + _blocked_summary(evidence),
             evidence_path,
         )
     return result
@@ -272,9 +285,7 @@ def _open_stage_with_bbox_cache(scene_path: Path) -> tuple[object, object]:
     try:
         from pxr import Usd, UsdGeom
     except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            "OpenUSD is required for eBench tabletop placement validation"
-        ) from exc
+        raise RuntimeError("OpenUSD is required for eBench tabletop placement validation") from exc
     stage = Usd.Stage.Open(str(scene_path))
     if stage is None:
         raise RuntimeError(f"unable to open composed scene for tabletop policy: {scene_path}")
@@ -324,9 +335,7 @@ def _table_and_task_objects(
     if len(tables) != 1:
         raise ValueError("scientific workbench tabletop policy requires exactly one table object")
     return tables[0], tuple(
-        item
-        for item in objects
-        if item is not tables[0] and item.get("role") != "context_prop"
+        item for item in objects if item is not tables[0] and item.get("role") != "context_prop"
     )
 
 
@@ -364,11 +373,72 @@ def _robot_side_exception(
     return value.strip()
 
 
+def _edge_margin_override(item: Mapping[str, Any]) -> float | None:
+    metadata = item.get("metadata", {})
+    if not isinstance(metadata, Mapping):
+        raise ValueError("scenario object metadata must be a mapping")
+    value = metadata.get("tabletop_min_edge_clearance_m")
+    if value is None:
+        return None
+    if not isinstance(value, int | float) or not isfinite(float(value)) or value < 0:
+        raise ValueError(
+            "scenario object metadata.tabletop_min_edge_clearance_m must be finite and non-negative"
+        )
+    return float(value)
+
+
+def _placement_footprint(
+    item: Mapping[str, Any], visual_bounds: TabletopBounds
+) -> tuple[TabletopBounds, str]:
+    metadata = item.get("metadata", {})
+    if not isinstance(metadata, Mapping):
+        raise ValueError("scenario object metadata must be a mapping")
+    declared = metadata.get("tabletop_support_footprint")
+    if declared is None:
+        return visual_bounds, "composed_visual_bounds"
+    if metadata.get("tabletop_placement_class") != "fixed_benchtop_instrument":
+        raise ValueError("tabletop_support_footprint is reserved for fixed_benchtop_instrument")
+    if not isinstance(declared, Mapping):
+        raise ValueError("tabletop_support_footprint must be a mapping")
+    size = declared.get("size_xy_m")
+    offset = declared.get("center_offset_xy_m", [0.0, 0.0])
+    source = declared.get("source")
+    if (
+        not isinstance(size, list)
+        or len(size) != 2
+        or not all(isinstance(value, int | float) and value > 0 for value in size)
+    ):
+        raise ValueError("tabletop_support_footprint.size_xy_m must be two positive numbers")
+    if (
+        not isinstance(offset, list)
+        or len(offset) != 2
+        or not all(isinstance(value, int | float) and isfinite(value) for value in offset)
+    ):
+        raise ValueError("tabletop_support_footprint.center_offset_xy_m must be two finite numbers")
+    if not isinstance(source, str) or not source.strip():
+        raise ValueError("tabletop_support_footprint.source must be a non-empty string")
+    center_x, center_y = visual_bounds.center_xy
+    half_x, half_y = float(size[0]) / 2.0, float(size[1]) / 2.0
+    center_x += float(offset[0])
+    center_y += float(offset[1])
+    return (
+        TabletopBounds(
+            center_x - half_x,
+            center_x + half_x,
+            center_y - half_y,
+            center_y + half_y,
+        ),
+        "declared_support_footprint",
+    )
+
+
 def _evidence_mapping(
     report: TabletopPlacementReport,
     constraints: TabletopPlacementConstraints,
     table_bounds_3d: tuple[tuple[float, float, float], tuple[float, float, float]],
     not_applicable: list[dict[str, object]],
+    visual_bounds_xy: Mapping[str, TabletopBounds],
+    footprint_sources: Mapping[str, str],
 ) -> dict[str, object]:
     objects = [
         {
@@ -380,7 +450,19 @@ def _evidence_mapping(
             },
             "edge_clearances_m": item.edge_clearances_m,
             "minimum_edge_clearance_m": item.minimum_edge_clearance_m,
+            "required_edge_clearance_m": item.required_edge_clearance_m,
             "edge_clearance_status": item.edge_clearance_status,
+            "footprint_source": footprint_sources[item.object_id],
+            "visual_world_bounds_xy_m": {
+                "min": [
+                    round(visual_bounds_xy[item.object_id].x_min, 9),
+                    round(visual_bounds_xy[item.object_id].y_min, 9),
+                ],
+                "max": [
+                    round(visual_bounds_xy[item.object_id].x_max, 9),
+                    round(visual_bounds_xy[item.object_id].y_max, 9),
+                ],
+            },
             "robot_facing_half": item.robot_facing_half,
             "robot_side_status": item.robot_side_status,
             "robot_side_exception_reason": item.robot_side_exception_reason,

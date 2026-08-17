@@ -774,25 +774,36 @@ def _episode_metadata(
             if producer_entrypoint is None
             else _embedded_object_state(producer_entrypoint, item)
         )
+        layout_position = _number_list(
+            (pose.get("xyz") if embedded_state is None else embedded_state.get("position_xyz_m")),
+            3,
+            f"{object_id}.pose.xyz",
+        )
+        layout_orientation = _number_list(
+            (
+                pose.get("wxyz")
+                if embedded_state is None
+                else embedded_state.get("orientation_wxyz")
+            ),
+            4,
+            f"{object_id}.pose.wxyz",
+        )
+        articulation = articulation_bindings.get(object_id)
+        if articulation is not None and _uses_fixed_base_support_plane_pose(item):
+            mounting = _fixed_base_mounting(asset)
+            if mounting is None:
+                raise GenManipExportError(
+                    f"asset {asset.asset_id} declares a support-plane pose without qualified "
+                    "fixed-base mounting"
+                )
+            layout_position, layout_orientation = _compose_fixed_base_mount_pose(
+                layout_position,
+                layout_orientation,
+                mounting,
+            )
         base_layout = {
-            "position": _number_list(
-                (
-                    pose.get("xyz")
-                    if embedded_state is None
-                    else embedded_state.get("position_xyz_m")
-                ),
-                3,
-                f"{object_id}.pose.xyz",
-            ),
-            "orientation": _number_list(
-                (
-                    pose.get("wxyz")
-                    if embedded_state is None
-                    else embedded_state.get("orientation_wxyz")
-                ),
-                4,
-                f"{object_id}.pose.wxyz",
-            ),
+            "position": layout_position,
+            "orientation": layout_orientation,
             "scale": _number_list(
                 (
                     pose.get("scale_xyz", [1.0, 1.0, 1.0])
@@ -804,7 +815,6 @@ def _episode_metadata(
             ),
             "prim_path": binding.state_prim_path,
         }
-        articulation = articulation_bindings.get(object_id)
         if articulation is not None:
             initial_layout[binding.runtime_uid] = {
                 "type": "articulation",
@@ -862,6 +872,95 @@ def _episode_metadata(
         "episode_name": episode_name,
         "task_data": task_data,
     }
+
+
+def _fixed_base_mounting(
+    asset: AssetManifestEntry,
+) -> Mapping[str, Any] | None:
+    upstream = asset.metadata.get("upstream_package")
+    if not isinstance(upstream, Mapping):
+        return None
+    metadata = upstream.get("metadata")
+    if not isinstance(metadata, Mapping):
+        return None
+    geometry = metadata.get("task_interactive_geometry")
+    if not isinstance(geometry, Mapping):
+        return None
+    mounting = geometry.get("mounting")
+    if mounting is None:
+        return None
+    if not isinstance(mounting, Mapping):
+        raise GenManipExportError(f"asset {asset.asset_id} fixed-base mounting must be a mapping")
+    if (
+        mounting.get("schema_version") != "aan.articulated_mounting.v1"
+        or mounting.get("status") != "pass"
+        or mounting.get("motion_mode") != "fixed_base"
+    ):
+        raise GenManipExportError(f"asset {asset.asset_id} fixed-base mounting is not qualified")
+    return mounting
+
+
+def _uses_fixed_base_support_plane_pose(item: Mapping[str, Any]) -> bool:
+    metadata = item.get("metadata")
+    if not isinstance(metadata, Mapping):
+        return False
+    pose_frame = metadata.get("articulated_pose_frame")
+    if pose_frame is None:
+        return False
+    if pose_frame != "support_plane":
+        object_id = item.get("id", "<unknown>")
+        raise GenManipExportError(
+            f"scenario object {object_id} articulated_pose_frame must be support_plane"
+        )
+    return True
+
+
+def _compose_fixed_base_mount_pose(
+    support_position: list[float],
+    support_orientation: list[float],
+    mounting: Mapping[str, Any],
+) -> tuple[list[float], list[float]]:
+    """Compose a scenario support-plane pose with a qualified root mount."""
+
+    raw_pose = mounting.get("support_plane_to_root_mount_pose")
+    if not isinstance(raw_pose, Mapping):
+        raise GenManipExportError("fixed-base mounting requires support_plane_to_root_mount_pose")
+    translation = _number_list(
+        raw_pose.get("translation_m"),
+        3,
+        "fixed-base mount translation_m",
+    )
+    rotation = _number_list(
+        raw_pose.get("rotation_wxyz"),
+        4,
+        "fixed-base mount rotation_wxyz",
+    )
+    sw, sx, sy, sz = support_orientation
+    tx, ty, tz = translation
+    # Rotate the mount translation by the scenario's support-plane rotation.
+    dot = sx * tx + sy * ty + sz * tz
+    rotated = [
+        2.0 * dot * sx
+        + (sw * sw - sx * sx - sy * sy - sz * sz) * tx
+        + 2.0 * sw * (sy * tz - sz * ty),
+        2.0 * dot * sy
+        + (sw * sw - sx * sx - sy * sy - sz * sz) * ty
+        + 2.0 * sw * (sz * tx - sx * tz),
+        2.0 * dot * sz
+        + (sw * sw - sx * sx - sy * sy - sz * sz) * tz
+        + 2.0 * sw * (sx * ty - sy * tx),
+    ]
+    mw, mx, my, mz = rotation
+    orientation = [
+        sw * mw - sx * mx - sy * my - sz * mz,
+        sw * mx + sx * mw + sy * mz - sz * my,
+        sw * my - sx * mz + sy * mw + sz * mx,
+        sw * mz + sx * my - sy * mx + sz * mw,
+    ]
+    return (
+        [support_position[index] + rotated[index] for index in range(3)],
+        orientation,
+    )
 
 
 def _runtime_object_binding(

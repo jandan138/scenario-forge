@@ -1,0 +1,28 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_r11_flat_bottom_flask_250ml_29_42:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task05_task09_assets_r11_20260817/flat_bottom_flask_250ml_29_42/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task05_task09_assets_r11_20260817/packages/flat_bottom_flask_250ml_29_42_r11
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task05_task09_assets_r11_20260817/packages/flat_bottom_flask_250ml_29_42_r11/evidence/manifest.json
+    producer_revision: dc77e45
+    expected_scope_prims: [/World/FlatBottomFlask2942]
+    expected_consumer_profile: scenario-forge
+    expected_runtime_profile: isaac41
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 flat-bottom flask 250 mL 29/42; ConvertAsset r11]
+    redistributable: true
+  scientific_workbench_r11_analog_oven:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task05_task09_assets_r11_20260817/analog_gravity_convection_oven/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task05_task09_assets_r11_20260817/packages/analog_gravity_convection_oven_r11_release3
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task05_task09_assets_r11_20260817/packages/analog_gravity_convection_oven_r11_release3/evidence/manifest.json
+    producer_revision: dc77e45
+    expected_scope_prims: [/World/AnalogGravityConvectionOven]
+    expected_consumer_profile: scenario-forge
+    expected_runtime_profile: isaac41
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [drying_box 04 analog gravity convection source; ConvertAsset r11 release3]
+    redistributable: true

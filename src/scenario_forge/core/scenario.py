@@ -6,9 +6,7 @@ import re
 from typing import Any, Mapping, TypeAlias
 
 
-JsonValue: TypeAlias = (
-    None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
-)
+JsonValue: TypeAlias = None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
 
 _PACKAGE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _V02_EXACT_BIMANUAL_PREDICATE_TYPES = (
@@ -45,6 +43,7 @@ _V06_PROGRESS_RUBRIC_CONDITION_TYPES = frozenset(
         "relative_pose_reached",
         "object_at_initial_pose",
         "motion_trajectory_completed",
+        "articulation_joint_state_reached",
     }
 )
 
@@ -125,9 +124,7 @@ class PoseSpec:
             xyz=(xyz[0], xyz[1], xyz[2]),
             wxyz=(wxyz[0], wxyz[1], wxyz[2], wxyz[3]),
             scale_xyz=(
-                None
-                if scale is None
-                else tuple(_number_tuple(scale, f"{field}.scale_xyz", 3))  # type: ignore[arg-type]
+                None if scale is None else tuple(_number_tuple(scale, f"{field}.scale_xyz", 3))  # type: ignore[arg-type]
             ),
         )
 
@@ -161,9 +158,7 @@ class SceneSourceSpec:
         data = _mapping(value, "scene")
         raw_overlays = data.get("overlay_asset_ids")
         if schema_version == "scenario-spec/v0.1" and raw_overlays is not None:
-            raise ValueError(
-                "scene.overlay_asset_ids requires scenario-spec/v0.2"
-            )
+            raise ValueError("scene.overlay_asset_ids requires scenario-spec/v0.2")
         overlay_asset_ids: tuple[str, ...] = ()
         if raw_overlays is not None:
             overlay_asset_ids = _string_tuple(
@@ -180,8 +175,7 @@ class SceneSourceSpec:
         composition_mode = data.get("composition_mode", "referenced_assets")
         if composition_mode not in {"referenced_assets", "producer_entrypoint"}:
             raise ValueError(
-                "scene.composition_mode must be 'referenced_assets' or "
-                "'producer_entrypoint'"
+                "scene.composition_mode must be 'referenced_assets' or 'producer_entrypoint'"
             )
         if composition_mode != "referenced_assets" and schema_version != "scenario-spec/v0.7":
             raise ValueError("scene.composition_mode requires scenario-spec/v0.7")
@@ -214,9 +208,7 @@ class SceneSourceSpec:
         if self.inactive_prim_paths:
             result["inactive_prim_paths"] = list(self.inactive_prim_paths)
         if self.world_anchored_prim_paths:
-            result["world_anchored_prim_paths"] = list(
-                self.world_anchored_prim_paths
-            )
+            result["world_anchored_prim_paths"] = list(self.world_anchored_prim_paths)
         if self.pose is not None:
             result["pose"] = self.pose.to_mapping()
         if self.composition_mode != "referenced_assets":
@@ -258,8 +250,7 @@ class ObjectBindingSpec:
         instance_mode = data.get("instance_mode", "referenced_asset")
         if instance_mode not in {"referenced_asset", "embedded_scene_prim"}:
             raise ValueError(
-                f"{field}.instance_mode must be 'referenced_asset' or "
-                "'embedded_scene_prim'"
+                f"{field}.instance_mode must be 'referenced_asset' or 'embedded_scene_prim'"
             )
         if instance_mode != "referenced_asset" and schema_version != "scenario-spec/v0.7":
             raise ValueError(f"{field}.instance_mode requires scenario-spec/v0.7")
@@ -271,9 +262,7 @@ class ObjectBindingSpec:
             pose=PoseSpec.from_mapping(data.get("pose"), f"{field}.pose"),
             named_frames=named_frames,
             metadata=(
-                None
-                if raw_metadata is None
-                else _json_mapping(raw_metadata, f"{field}.metadata")
+                None if raw_metadata is None else _json_mapping(raw_metadata, f"{field}.metadata")
             ),
             instance_mode=str(instance_mode),
         )
@@ -287,9 +276,7 @@ class ObjectBindingSpec:
             "pose": self.pose.to_mapping(),
         }
         if self.named_frames:
-            result["named_frames"] = {
-                name: pose.to_mapping() for name, pose in self.named_frames
-            }
+            result["named_frames"] = {name: pose.to_mapping() for name, pose in self.named_frames}
         if self.metadata is not None:
             result["metadata"] = _copy_json(self.metadata, "metadata")
         if self.instance_mode != "referenced_asset":
@@ -336,19 +323,15 @@ class RobotSpec:
         raw_actors = data.get("actors")
         if not isinstance(raw_actors, list) or not raw_actors:
             raise ValueError("robot.actors must be a non-empty list")
-        actors = tuple(ActorSpec.from_mapping(actor, index) for index, actor in enumerate(raw_actors))
+        actors = tuple(
+            ActorSpec.from_mapping(actor, index) for index, actor in enumerate(raw_actors)
+        )
         _require_unique((actor.actor_id for actor in actors), "actor")
         raw_initial = data.get("initial_joint_positions")
         if raw_initial is not None and schema_version != "scenario-spec/v0.7":
-            raise ValueError(
-                "robot.initial_joint_positions requires scenario-spec/v0.7"
-            )
-        if raw_initial is not None and (
-            not isinstance(raw_initial, list) or not raw_initial
-        ):
-            raise ValueError(
-                "robot.initial_joint_positions must be a non-empty list"
-            )
+            raise ValueError("robot.initial_joint_positions requires scenario-spec/v0.7")
+        if raw_initial is not None and (not isinstance(raw_initial, list) or not raw_initial):
+            raise ValueError("robot.initial_joint_positions must be a non-empty list")
         initial = (
             None
             if raw_initial is None
@@ -456,7 +439,11 @@ class SuccessPredicateSpec:
         field = f"success.predicates[{index}]"
         data = _mapping(value, field)
         sequence_index = data.get("sequence_index")
-        if not isinstance(sequence_index, int) or isinstance(sequence_index, bool) or sequence_index < 0:
+        if (
+            not isinstance(sequence_index, int)
+            or isinstance(sequence_index, bool)
+            or sequence_index < 0
+        ):
             raise ValueError(f"{field}.sequence_index must be a non-negative integer")
         return cls(
             predicate_id=_string(data.get("id"), f"{field}.id"),
@@ -604,8 +591,7 @@ class ProgressRubricSpec:
             )
         if aggregation.get("inactive_treatment") not in {"zero", "exclude"}:
             raise ValueError(
-                "success.progress_rubric.aggregation.inactive_treatment must be "
-                "zero or exclude"
+                "success.progress_rubric.aggregation.inactive_treatment must be zero or exclude"
             )
         raw_items = data.get("items")
         if not isinstance(raw_items, list) or not raw_items:
@@ -621,8 +607,7 @@ class ProgressRubricSpec:
         weight_sum = sum(item.weight for item in items)
         if not math.isclose(weight_sum, 1.0, rel_tol=0.0, abs_tol=1e-6):
             raise ValueError(
-                "success.progress_rubric item weights must sum to 1.0, "
-                f"got {weight_sum:.6f}"
+                f"success.progress_rubric item weights must sum to 1.0, got {weight_sum:.6f}"
             )
         return cls(aggregation=aggregation, items=items)
 
@@ -726,23 +711,20 @@ class ScenarioSpec:
             raise ValueError("invariants must be a list")
 
         objects = tuple(
-            ObjectBindingSpec.from_mapping(
-                item, index, schema_version=str(schema_version)
-            )
+            ObjectBindingSpec.from_mapping(item, index, schema_version=str(schema_version))
             for index, item in enumerate(raw_objects)
         )
-        steps = tuple(TaskStepSpec.from_mapping(item, index) for index, item in enumerate(raw_steps))
+        steps = tuple(
+            TaskStepSpec.from_mapping(item, index) for index, item in enumerate(raw_steps)
+        )
         invariants = tuple(
-            TaskInvariantSpec.from_mapping(item, index)
-            for index, item in enumerate(raw_invariants)
+            TaskInvariantSpec.from_mapping(item, index) for index, item in enumerate(raw_invariants)
         )
         _require_unique((item.object_id for item in objects), "object")
         _require_unique((item.step_id for item in steps), "step")
         _require_unique((item.invariant_id for item in invariants), "invariant")
 
-        robot = RobotSpec.from_mapping(
-            data.get("robot"), schema_version=str(schema_version)
-        )
+        robot = RobotSpec.from_mapping(data.get("robot"), schema_version=str(schema_version))
         success = SuccessSpec.from_mapping(
             data.get("success"),
             schema_version=str(schema_version),
@@ -786,14 +768,10 @@ class ScenarioSpec:
         step_ids = {step.step_id for step in self.steps}
         step_positions = {step.step_id: index for index, step in enumerate(self.steps)}
 
-        embedded = [
-            item for item in self.objects if item.instance_mode == "embedded_scene_prim"
-        ]
+        embedded = [item for item in self.objects if item.instance_mode == "embedded_scene_prim"]
         if self.scene.composition_mode == "producer_entrypoint":
             if not embedded:
-                raise ValueError(
-                    "producer_entrypoint scene requires embedded_scene_prim objects"
-                )
+                raise ValueError("producer_entrypoint scene requires embedded_scene_prim objects")
             for item in embedded:
                 if item.asset_id != self.scene.asset_id:
                     raise ValueError(
@@ -802,8 +780,7 @@ class ScenarioSpec:
                     )
         elif embedded:
             raise ValueError(
-                "embedded_scene_prim objects require scene.composition_mode "
-                "producer_entrypoint"
+                "embedded_scene_prim objects require scene.composition_mode producer_entrypoint"
             )
 
         for step in self.steps:
@@ -812,9 +789,7 @@ class ScenarioSpec:
                     raise ValueError(f"step {step.step_id} references unknown actor {actor}")
             for dependency in step.depends_on:
                 if dependency not in step_ids:
-                    raise ValueError(
-                        f"step {step.step_id} depends on unknown step {dependency}"
-                    )
+                    raise ValueError(f"step {step.step_id} depends on unknown step {dependency}")
                 if dependency == step.step_id:
                     raise ValueError(f"step {step.step_id} cannot depend on itself")
             _validate_parameter_references(step.parameters, object_ids, self.objects, step.step_id)
@@ -837,9 +812,7 @@ class ScenarioSpec:
                     f"invariant {invariant.invariant_id} references unknown step {invariant.through_step}"
                 )
             if step_positions[invariant.from_step] > step_positions[invariant.through_step]:
-                raise ValueError(
-                    f"invariant {invariant.invariant_id} ends before it starts"
-                )
+                raise ValueError(f"invariant {invariant.invariant_id} ends before it starts")
 
         for predicate in self.success.predicates:
             _validate_v05_success_predicate(
@@ -1022,13 +995,9 @@ def _validate_v05_success_predicate(
         "scenario-spec/v0.7",
     }:
         if relative_to_part is not None or relative_axis_part is not None:
-            raise ValueError(
-                "articulated axis part references require scenario-spec/v0.5 or v0.6"
-            )
+            raise ValueError("articulated axis part references require scenario-spec/v0.5 or v0.6")
         if predicate.predicate_type == "articulation_joint_state_reached":
-            raise ValueError(
-                "articulation_joint_state_reached requires scenario-spec/v0.5 or v0.6"
-            )
+            raise ValueError("articulation_joint_state_reached requires scenario-spec/v0.5 or v0.6")
         return
     if predicate.predicate_type not in _V05_SUCCESS_PREDICATE_TYPES:
         raise ValueError(
@@ -1052,8 +1021,7 @@ def _validate_v05_success_predicate(
             )
             if relative_axis_object not in object_ids:
                 raise ValueError(
-                    f"{predicate.predicate_id} references unknown object "
-                    f"{relative_axis_object}"
+                    f"{predicate.predicate_id} references unknown object {relative_axis_object}"
                 )
         return
     _require_exact_fields(parameters, {"object", "joint", "state"}, field)
@@ -1081,17 +1049,13 @@ def _validate_explicit_bimanual_success(spec: ScenarioSpec) -> None:
     elif spec.schema_version in {"scenario-spec/v0.3", "scenario-spec/v0.4"}:
         expected_types = _V03_EXACT_BIMANUAL_PREDICATE_TYPES
     else:
-        raise ValueError(
-            "explicit bimanual predicates require scenario-spec/v0.2 or later"
-        )
+        raise ValueError("explicit bimanual predicates require scenario-spec/v0.2 or later")
     if spec.success.operator != "all":
         raise ValueError("explicit bimanual predicates require success.operator 'all'")
     if len(exact) != len(spec.success.predicates) or [
         predicate.predicate_type for predicate in exact
     ] != list(expected_types):
-        raise ValueError(
-            "explicit bimanual success list order must be align, tilt, then return"
-        )
+        raise ValueError("explicit bimanual success list order must be align, tilt, then return")
     if [predicate.sequence_index for predicate in exact] != [0, 1, 2]:
         raise ValueError(
             "explicit bimanual success predicate sequence_index values must be 0, 1, 2"
@@ -1144,9 +1108,7 @@ def _validate_explicit_predicate(
         _require_value(parameters.get("target_normal_axis"), "z", f"{field}.target_normal_axis")
     elif predicate.predicate_type == "named_frame_tilt_angle_reached":
         if schema_version != "scenario-spec/v0.2":
-            raise ValueError(
-                "named_frame_tilt_angle_reached is only valid in scenario-spec/v0.2"
-            )
+            raise ValueError("named_frame_tilt_angle_reached is only valid in scenario-spec/v0.2")
         _require_exact_fields(
             parameters,
             {
@@ -1246,17 +1208,13 @@ def _validate_v03_relative_pose_parameters(
         f"{field}.source_normal_polar_angle_range_deg",
     )
     if polar_range[0] < 0.0 or polar_range[1] > 180.0:
-        raise ValueError(
-            f"{field}.source_normal_polar_angle_range_deg must remain within [0, 180]"
-        )
+        raise ValueError(f"{field}.source_normal_polar_angle_range_deg must remain within [0, 180]")
     azimuth_range = _ordered_finite_range(
         parameters.get("source_normal_azimuth_range_deg"),
         f"{field}.source_normal_azimuth_range_deg",
     )
     if azimuth_range[0] < -180.0 or azimuth_range[1] > 180.0:
-        raise ValueError(
-            f"{field}.source_normal_azimuth_range_deg must remain within [-180, 180]"
-        )
+        raise ValueError(f"{field}.source_normal_azimuth_range_deg must remain within [-180, 180]")
     for axis, value, bounds in zip(
         ("x", "y", "z"),
         nominal.xyz,
@@ -1270,9 +1228,7 @@ def _validate_v03_relative_pose_parameters(
     normal = _rotate_local_z_by_quaternion(nominal.wxyz)
     horizontal_norm = math.hypot(normal[0], normal[1])
     if horizontal_norm <= 1e-9:
-        raise ValueError(
-            f"{field} nominal source normal must have a defined target-frame azimuth"
-        )
+        raise ValueError(f"{field} nominal source normal must have a defined target-frame azimuth")
     polar = math.degrees(math.atan2(horizontal_norm, normal[2]))
     azimuth = math.degrees(math.atan2(normal[1], normal[0]))
     _require_inside(
@@ -1292,10 +1248,9 @@ def _validate_v03_bimanual_relationships(
 ) -> None:
     pre_pour = predicates[0].parameters
     pour = predicates[1].parameters
-    if (
-        pre_pour.get("source_frame") != pour.get("source_frame")
-        or pre_pour.get("target_frame") != pour.get("target_frame")
-    ):
+    if pre_pour.get("source_frame") != pour.get("source_frame") or pre_pour.get(
+        "target_frame"
+    ) != pour.get("target_frame"):
         raise ValueError("v0.3 pre-pour and pour predicates must use the same frames")
     source_frame = _string(pre_pour.get("source_frame"), "v0.3 source_frame")
     source_object_id = source_frame.rpartition(".")[0]
@@ -1329,15 +1284,11 @@ def _validate_diagnostic_projection(value: object, field: str) -> None:
     _require_exact_fields(projection, {"type", "parameters"}, field)
     projection_type = _string(projection.get("type"), f"{field}.type")
     if projection_type not in {"relative_pose_reached", "object_at_initial_pose"}:
-        raise ValueError(
-            f"{field}.type must be a supported diagnostic compatibility predicate"
-        )
+        raise ValueError(f"{field}.type must be a supported diagnostic compatibility predicate")
     _json_mapping(projection.get("parameters"), f"{field}.parameters")
 
 
-def _require_exact_fields(
-    value: Mapping[str, object], expected: set[str], field: str
-) -> None:
+def _require_exact_fields(value: Mapping[str, object], expected: set[str], field: str) -> None:
     actual = set(value)
     missing = sorted(expected - actual)
     unexpected = sorted(actual - expected)
@@ -1348,11 +1299,7 @@ def _require_exact_fields(
 
 
 def _finite_number(value: object, field: str) -> float:
-    if (
-        not isinstance(value, (int, float))
-        or isinstance(value, bool)
-        or not math.isfinite(value)
-    ):
+    if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
         raise ValueError(f"{field} must be a finite number")
     return float(value)
 

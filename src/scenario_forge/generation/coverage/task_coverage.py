@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from pathlib import Path
+import re
 from typing import Iterable, Mapping
 
 import yaml
@@ -93,7 +94,9 @@ def build_task_coverage_plan(
     decisions: list[dict[str, object]] = []
     for task in sorted(catalog_tasks, key=lambda item: _required_int(item, "source_order", "task")):
         task_id = _required_string(task, "task_id", "task")
-        roles = _string_list(task.get("required_asset_roles"), f"task {task_id}.required_asset_roles")
+        roles = _string_list(
+            task.get("required_asset_roles"), f"task {task_id}.required_asset_roles"
+        )
         blockers: list[str] = []
         asset_bindings: dict[str, str] = {}
         for role in roles:
@@ -228,9 +231,7 @@ def write_task_directory(
     directory_tasks: list[dict[str, object]] = []
     for task in tasks:
         task_id = _required_string(task, "task_id", "coverage plan task")
-        candidates = sorted(
-            releases_by_task.get(task_id, []), key=lambda item: str(item["release_id"])
-        )
+        candidates = sorted(releases_by_task.get(task_id, []), key=_release_order_key)
         promoted = [item for item in candidates if item["promotion"] == "latest"]
         if len(promoted) > 1:
             raise CoveragePlanError(f"task '{task_id}' has more than one latest release")
@@ -297,9 +298,7 @@ def write_task_directory(
     return root
 
 
-def _inventory(
-    inventory: Mapping[str, object], binding_ids: set[str]
-) -> dict[str, object]:
+def _inventory(inventory: Mapping[str, object], binding_ids: set[str]) -> dict[str, object]:
     if inventory.get("schema_version") != ASSET_INVENTORY_SCHEMA_VERSION:
         raise CoveragePlanError(
             f"inventory.schema_version must be {ASSET_INVENTORY_SCHEMA_VERSION!r}"
@@ -378,6 +377,12 @@ def _release_mapping(raw_release: Mapping[str, object], task_ids: set[str]) -> d
     }
 
 
+def _release_order_key(release: Mapping[str, object]) -> tuple[int, str]:
+    release_id = str(release.get("release_id", ""))
+    match = re.search(r"\.v(\d+)(?:\D|$)", release_id)
+    return (int(match.group(1)) if match else -1, release_id)
+
+
 def _directory_markdown(payload: Mapping[str, object]) -> str:
     tasks = _mappings(payload.get("tasks"), "directory.tasks")
     lines = [
@@ -389,7 +394,9 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
     for task in tasks:
         latest = task["latest_release_id"] or "—"
         candidate = task["candidate_release_id"] or "—"
-        background = task["latest_background_binding"] or task["candidate_background_binding"] or "—"
+        background = (
+            task["latest_background_binding"] or task["candidate_background_binding"] or "—"
+        )
         evidence = task["latest_evidence"] or task["candidate_evidence"] or {}
         assert isinstance(evidence, Mapping)
         overview = evidence.get("overview_image", "—")
@@ -414,39 +421,57 @@ def _directory_markdown(payload: Mapping[str, object]) -> str:
 def _directory_html(payload: Mapping[str, object]) -> str:
     tasks = _mappings(payload.get("tasks"), "directory.tasks")
     gallery_tasks = [
-        task
-        for task in tasks
-        if task.get("candidate_release_id") or task.get("latest_release_id")
+        task for task in tasks if task.get("candidate_release_id") or task.get("latest_release_id")
     ]
     cards = "\n".join(_directory_task_card(task) for task in gallery_tasks)
     rows = "\n".join(_directory_matrix_row(task) for task in tasks)
     candidate_count = len(gallery_tasks)
     canonical_count = sum(
-        task.get("candidate_release_status") == "canonical_candidate"
-        for task in gallery_tasks
+        task.get("candidate_release_status") == "canonical_candidate" for task in gallery_tasks
     )
     prototype_count = sum(
         task.get("candidate_release_status") == "prototype" for task in gallery_tasks
     )
-    return """<!doctype html>
+    return (
+        """<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Scientific Workbench · 任务目录</title>
 <style>
 .card-body{min-width:0}.release-variants a{overflow-wrap:anywhere}
 :root{--ink:#10243b;--muted:#607083;--line:#d7e0e8;--paper:#f5f8fa;--card:#fff;--teal:#087f78;--teal-soft:#dff4f1;--amber:#b56708;--amber-soft:#fff0d5;--navy:#102f50}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,"Noto Sans SC","PingFang SC",system-ui,sans-serif}.shell{max-width:1440px;margin:auto;padding:0 32px 72px}.masthead{padding:68px 0 34px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;align-items:end}.eyebrow{color:var(--teal);font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.masthead h1{font-size:clamp(2.2rem,5vw,5rem);line-height:.98;letter-spacing:-.055em;margin:14px 0 20px;max-width:860px}.lead{color:var(--muted);font-size:1.05rem;line-height:1.75;max-width:760px;margin:0}.stats{display:grid;grid-template-columns:repeat(3,116px);border:1px solid var(--line);background:var(--card)}.stat{padding:20px;border-right:1px solid var(--line)}.stat:last-child{border:0}.stat strong{display:block;font:700 2rem/1 Georgia,serif;color:var(--navy)}.stat span{display:block;color:var(--muted);font-size:.75rem;margin-top:8px}.section-head{display:flex;justify-content:space-between;gap:24px;align-items:end;margin:50px 0 22px}.section-head h2{font-size:1.7rem;letter-spacing:-.03em;margin:0}.section-head p{color:var(--muted);margin:0;max-width:590px;line-height:1.6}.version-switch,.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;align-items:center}.version-switch{padding:10px 12px;background:#eaf0f4;border:1px solid var(--line);width:max-content}.version-switch span{font-size:.76rem;font-weight:800;color:var(--muted);margin-right:4px}.version,.filter{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 14px;border-radius:999px;font-weight:700;cursor:pointer}.version[aria-pressed="true"],.filter[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}.task-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.task-card{background:var(--card);border:1px solid var(--line);display:grid;grid-template-columns:minmax(220px,42%) 1fr;min-height:270px;overflow:hidden;box-shadow:0 8px 28px rgba(16,47,80,.045)}.task-card[hidden],[data-release-version][hidden]{display:none}.evidence-rail{display:block;background:#dfe7ec;min-height:270px;position:relative}.evidence-rail img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}.evidence-empty{height:100%;display:grid;place-items:center;color:var(--muted);font-weight:700}.card-body{padding:22px;display:flex;flex-direction:column}.card-kicker{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--teal);font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.tier{padding:5px 8px;background:var(--teal-soft);color:var(--teal);letter-spacing:0;text-transform:none}.tier.prototype{background:var(--amber-soft);color:var(--amber)}.card-body h3{font-size:1.3rem;line-height:1.25;margin:14px 0 10px}.release{font-family:ui-monospace,SFMono-Regular,monospace;color:var(--muted);font-size:.72rem;overflow-wrap:anywhere;margin:0 0 16px}.meter{height:5px;background:#e7edf1;margin:2px 0 8px}.meter span{display:block;height:100%;background:var(--teal)}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.78rem}.missing{margin:16px 0 0;color:var(--amber);font-size:.78rem;line-height:1.45}.release-variants{margin-top:auto;padding-top:12px;font-size:.75rem}.release-variants summary{cursor:pointer;color:var(--navy);font-weight:700}.release-variants ul{margin:8px 0 0;padding-left:18px}.release-variants a{color:var(--teal)}.matrix-wrap{overflow:auto;border:1px solid var(--line);background:#fff}.coverage-matrix{width:100%;border-collapse:collapse;min-width:940px}.coverage-matrix th,.coverage-matrix td{padding:15px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}.coverage-matrix th{background:var(--navy);color:#fff;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}.coverage-matrix td{font-size:.84rem}.coverage-matrix tr:last-child td{border:0}.matrix-order{font:700 1.1rem Georgia,serif;color:var(--teal)}.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:7px}.status-dot.has-release{background:var(--teal)}.matrix-code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.72rem;color:var(--muted);overflow-wrap:anywhere}.claim{margin-top:44px;border-left:4px solid var(--amber);background:var(--amber-soft);padding:20px 24px}.claim h2{font-size:1rem;margin:0 0 8px}.claim p{color:#704916;line-height:1.65;margin:0;font-size:.86rem}@media(max-width:1080px){.masthead{grid-template-columns:1fr}.stats{width:max-content}.task-grid{grid-template-columns:1fr}}@media(max-width:760px){.shell{padding:0 16px 48px}.masthead{padding-top:42px}.stats{grid-template-columns:repeat(3,1fr);width:100%}.stat{padding:14px}.task-card{grid-template-columns:1fr}.evidence-rail{min-height:210px}.section-head{align-items:start;flex-direction:column}.masthead h1{font-size:2.7rem}.version-switch{width:100%}}
-</style></head><body><main class="shell"><header class="masthead"><div><div class="eyebrow">Scenario Forge / Scientific Workbench</div><h1>实验任务，<br>按证据说话。</h1><p class="lead">统一的 2 米工作台、eBench 双臂布局与可替换实验室背景。先看真实 Isaac Sim 图，再看哪些能力已经具备、哪些仍是原型。</p></div><div class="stats"><div class="stat"><strong>""" + str(len(tasks)) + """</strong><span>飞书任务总数</span></div><div class="stat"><strong>""" + str(candidate_count) + """</strong><span>已有场景候选</span></div><div class="stat"><strong>""" + str(canonical_count) + """</strong><span>完整语义候选</span></div></div></header>
-<section><div class="section-head"><div><div class="eyebrow">Evidence gallery</div><h2>可检查的任务场景</h2></div><p>卡片展示的是初始场景证据，不是机器人策略成功率。r7 目前只更新任务 2、7、8；其他任务明确回退到自己的最新有效版本。</p></div><div class="version-switch" role="group" aria-label="任务包版本"><span>场景版本</span><button class="version" data-version="r7" aria-pressed="true">r7 · 新资产任务</button><button class="version" data-version="r6" aria-pressed="false">r6 · 动态桌面布景</button><button class="version" data-version="r5" aria-pressed="false">r5 · 基础桌面</button></div><div class="filters" role="group" aria-label="任务筛选"><button class="filter" data-filter="all" aria-pressed="true">全部 """ + str(candidate_count) + """</button><button class="filter" data-filter="canonical_candidate" aria-pressed="false">完整语义 """ + str(canonical_count) + """</button><button class="filter" data-filter="prototype" aria-pressed="false">原型 """ + str(prototype_count) + """</button><button class="filter" data-filter="queued" aria-pressed="false">已排队</button></div><div class="task-grid">""" + cards + """</div></section>
-<section><div class="section-head"><div><div class="eyebrow">Coverage matrix</div><h2>18 项任务全表</h2></div><p>保持飞书原始顺序。没有候选包的任务也不会从页面消失，阻塞原因原样展示。</p></div><div class="matrix-wrap"><table class="coverage-matrix"><thead><tr><th>#</th><th>任务</th><th>状态</th><th>候选层级</th><th>分数上限</th><th>背景 / 缺口</th></tr></thead><tbody>""" + rows + """</tbody></table></div></section>
-<aside class="claim"><h2>证据边界</h2><p>""" + _html(str(payload["claim_boundary"])) + """</p></aside></main><script>const buttons=[...document.querySelectorAll('.filter')],cards=[...document.querySelectorAll('.task-card')],versions=[...document.querySelectorAll('.version')];function applyFilter(value){cards.forEach(card=>{card.hidden=value!=='all'&&card.dataset.tier!==value&&card.dataset.queue!==value});buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===value)))}function applyVersion(value){document.querySelectorAll('[data-release-version]').forEach(node=>{node.hidden=node.dataset.releaseVersion!==value});versions.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.version===value)))}buttons.forEach(button=>button.addEventListener('click',()=>applyFilter(button.dataset.filter)));versions.forEach(button=>button.addEventListener('click',()=>applyVersion(button.dataset.version)));applyVersion('r7');</script></body></html>
+</style></head><body><main class="shell"><header class="masthead"><div><div class="eyebrow">Scenario Forge / Scientific Workbench</div><h1>实验任务，<br>按证据说话。</h1><p class="lead">统一的 2 米工作台、eBench 双臂布局与可替换实验室背景。先看真实 Isaac Sim 图，再看哪些能力已经具备、哪些仍是原型。</p></div><div class="stats"><div class="stat"><strong>"""
+        + str(len(tasks))
+        + """</strong><span>飞书任务总数</span></div><div class="stat"><strong>"""
+        + str(candidate_count)
+        + """</strong><span>已有场景候选</span></div><div class="stat"><strong>"""
+        + str(canonical_count)
+        + """</strong><span>完整语义候选</span></div></div></header>
+<section><div class="section-head"><div><div class="eyebrow">Evidence gallery</div><h2>可检查的任务场景</h2></div><p>卡片展示的是初始场景证据，不是机器人策略成功率。r11 新增任务 5、9；其他任务明确回退到自己的最新有效版本。<a href="../liquid-cylinder-tutorial/">量筒液体修复教程 →</a></p></div><div class="version-switch" role="group" aria-label="任务包版本"><span>场景版本</span><button class="version" data-version="r11" aria-pressed="true">r11 · 瓶塞与烘箱</button><button class="version" data-version="r7" aria-pressed="false">r7 · 新资产任务</button><button class="version" data-version="r6" aria-pressed="false">r6 · 动态桌面布景</button><button class="version" data-version="r5" aria-pressed="false">r5 · 基础桌面</button></div><div class="filters" role="group" aria-label="任务筛选"><button class="filter" data-filter="all" aria-pressed="true">全部 """
+        + str(candidate_count)
+        + """</button><button class="filter" data-filter="canonical_candidate" aria-pressed="false">完整语义 """
+        + str(canonical_count)
+        + """</button><button class="filter" data-filter="prototype" aria-pressed="false">原型 """
+        + str(prototype_count)
+        + """</button><button class="filter" data-filter="queued" aria-pressed="false">已排队</button></div><div class="task-grid">"""
+        + cards
+        + """</div></section>
+<section><div class="section-head"><div><div class="eyebrow">Coverage matrix</div><h2>18 项任务全表</h2></div><p>保持飞书原始顺序。没有候选包的任务也不会从页面消失，阻塞原因原样展示。</p></div><div class="matrix-wrap"><table class="coverage-matrix"><thead><tr><th>#</th><th>任务</th><th>状态</th><th>候选层级</th><th>分数上限</th><th>背景 / 缺口</th></tr></thead><tbody>"""
+        + rows
+        + """</tbody></table></div></section>
+<aside class="claim"><h2>证据边界</h2><p>"""
+        + _html(str(payload["claim_boundary"]))
+        + """</p></aside></main><script>const buttons=[...document.querySelectorAll('.filter')],cards=[...document.querySelectorAll('.task-card')],versions=[...document.querySelectorAll('.version')];function applyFilter(value){cards.forEach(card=>{card.hidden=value!=='all'&&card.dataset.tier!==value&&card.dataset.queue!==value});buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===value)))}function applyVersion(value){document.querySelectorAll('[data-release-version]').forEach(node=>{node.hidden=node.dataset.releaseVersion!==value});versions.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.version===value)))}buttons.forEach(button=>button.addEventListener('click',()=>applyFilter(button.dataset.filter)));versions.forEach(button=>button.addEventListener('click',()=>applyVersion(button.dataset.version)));applyVersion('r11');</script></body></html>
 """
+    )
 
 
 def _directory_task_card(task: Mapping[str, object]) -> str:
     releases = task.get("releases")
+    r11 = _preferred_series_release(releases, "r11")
     r7 = _preferred_series_release(releases, "r7")
     r6 = _preferred_series_release(releases, "r6")
     r5 = _preferred_series_release(releases, "r5")
-    fallback = r7 or r6 or r5 or _last_release(releases)
-    image = _versioned_evidence_rails(task, r7=r7, r6=r6, r5=r5, fallback=fallback)
+    fallback = r11 or r7 or r6 or r5 or _last_release(releases)
+    image = _versioned_evidence_rails(task, r11=r11, r7=r7, r6=r6, r5=r5, fallback=fallback)
     tier = str(task.get("candidate_release_status") or "unspecified")
     tier_label = {
         "canonical_candidate": "完整语义候选",
@@ -455,7 +480,7 @@ def _directory_task_card(task: Mapping[str, object]) -> str:
     ceiling = task.get("candidate_score_ceiling")
     ceiling_number = float(ceiling) if isinstance(ceiling, (int, float)) else 0.0
     missing = ", ".join(task.get("candidate_missing_capabilities", [])) or "无已知语义缺口"
-    release_labels = _versioned_release_labels(r7=r7, r6=r6, r5=r5, fallback=fallback)
+    release_labels = _versioned_release_labels(r11=r11, r7=r7, r6=r6, r5=r5, fallback=fallback)
     return (
         f'<article class="task-card" data-tier="{_html(tier)}" data-queue="{_html(str(task["queue_status"]))}">'
         + image
@@ -475,10 +500,11 @@ def _preferred_series_release(value: object, series: str) -> Mapping[str, object
     matching = [
         release
         for release in value
-        if isinstance(release, Mapping)
-        and f"_{series}" in str(release.get("release_id", ""))
+        if isinstance(release, Mapping) and f"_{series}" in str(release.get("release_id", ""))
     ]
-    return sorted(matching, key=lambda item: str(item.get("release_id", "")))[-1] if matching else None
+    return (
+        sorted(matching, key=lambda item: str(item.get("release_id", "")))[-1] if matching else None
+    )
 
 
 def _last_release(value: object) -> Mapping[str, object] | None:
@@ -491,16 +517,22 @@ def _last_release(value: object) -> Mapping[str, object] | None:
 def _versioned_evidence_rails(
     task: Mapping[str, object],
     *,
+    r11: Mapping[str, object] | None,
     r7: Mapping[str, object] | None,
     r6: Mapping[str, object] | None,
     r5: Mapping[str, object] | None,
     fallback: Mapping[str, object] | None,
 ) -> str:
     rails: list[str] = []
-    for series, release in (("r7", r7 or fallback), ("r6", r6 or fallback), ("r5", r5 or fallback)):
+    for series, release in (
+        ("r11", r11 or fallback),
+        ("r7", r7 or fallback),
+        ("r6", r6 or fallback),
+        ("r5", r5 or fallback),
+    ):
         evidence = release.get("evidence") if isinstance(release, Mapping) else None
         overview = evidence.get("overview_image") if isinstance(evidence, Mapping) else None
-        hidden = "" if series == "r7" else " hidden"
+        hidden = "" if series == "r11" else " hidden"
         if isinstance(overview, str) and overview:
             safe = _html(overview)
             rails.append(
@@ -517,16 +549,26 @@ def _versioned_evidence_rails(
 
 def _versioned_release_labels(
     *,
+    r11: Mapping[str, object] | None,
     r7: Mapping[str, object] | None,
     r6: Mapping[str, object] | None,
     r5: Mapping[str, object] | None,
     fallback: Mapping[str, object] | None,
 ) -> str:
     labels: list[str] = []
-    for series, release in (("r7", r7 or fallback), ("r6", r6 or fallback), ("r5", r5 or fallback)):
+    for series, release in (
+        ("r11", r11 or fallback),
+        ("r7", r7 or fallback),
+        ("r6", r6 or fallback),
+        ("r5", r5 or fallback),
+    ):
         release_id = release.get("release_id", "—") if isinstance(release, Mapping) else "—"
-        hidden = "" if series == "r7" else " hidden"
-        prefix = "该任务无 r7，展示最新有效版本 · " if series == "r7" and r7 is None and fallback is not None else ""
+        hidden = "" if series == "r11" else " hidden"
+        prefix = (
+            "该任务无 r11，展示最新有效版本 · "
+            if series == "r11" and r11 is None and fallback is not None
+            else ""
+        )
         labels.append(
             f'<span data-release-version="{series}"{hidden}>{_html(prefix + str(release_id))}</span>'
         )
@@ -538,15 +580,19 @@ def _directory_matrix_row(task: Mapping[str, object]) -> str:
     tier = task.get("candidate_release_status") or "—"
     background = task.get("latest_background_binding") or task.get("candidate_background_binding")
     missing = task.get("candidate_missing_capabilities", [])
-    detail = ", ".join(missing) if isinstance(missing, list) and missing else ", ".join(task.get("blockers", []))
+    detail = (
+        ", ".join(missing)
+        if isinstance(missing, list) and missing
+        else ", ".join(task.get("blockers", []))
+    )
     detail = detail or "无已记录缺口"
     context = f"{background or '未绑定背景'} · {detail}"
     return (
         f'<tr><td class="matrix-order">{task["source_order"]:02d}</td>'
         f'<td><strong>{_html(str(task["title_zh"]))}</strong><div class="matrix-code">{_html(str(task["task_id"]))}</div></td>'
         f'<td><span class="status-dot{" has-release" if has_release else ""}"></span>{_html(str(task["queue_status"]))}</td>'
-        f'<td>{_html(str(tier))}</td><td>{_html(_score_label(task.get("candidate_score_ceiling")))}</td>'
-        f'<td>{_html(context)}</td></tr>'
+        f"<td>{_html(str(tier))}</td><td>{_html(_score_label(task.get('candidate_score_ceiling')))}</td>"
+        f"<td>{_html(context)}</td></tr>"
     )
 
 
@@ -640,9 +686,7 @@ def _optional_score_ceiling(value: object) -> float | None:
 
 
 def _optional_string_list(value: object, field: str) -> list[str]:
-    if not isinstance(value, list) or not all(
-        isinstance(item, str) and item for item in value
-    ):
+    if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
         raise CoveragePlanError(f"{field} must be a list of non-empty strings")
     return list(value)
 

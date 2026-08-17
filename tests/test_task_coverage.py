@@ -236,7 +236,7 @@ def test_task_directory_html_uses_responsive_cards_and_status_filters(tmp_path: 
     assert "function applyFilter" in html
 
 
-def test_task_directory_defaults_to_r7_and_falls_back_explicitly(tmp_path: Path) -> None:
+def test_task_directory_defaults_to_r11_and_falls_back_explicitly(tmp_path: Path) -> None:
     plan = {
         "catalog_id": "catalog",
         "default_environment_binding": "environment",
@@ -252,7 +252,7 @@ def test_task_directory_defaults_to_r7_and_falls_back_explicitly(tmp_path: Path)
         ],
     }
     releases = []
-    for series in ("r5", "r6", "r7"):
+    for series in ("r5", "r6", "r7", "r11"):
         releases.append(
             {
                 "task_id": "pour",
@@ -274,16 +274,18 @@ def test_task_directory_defaults_to_r7_and_falls_back_explicitly(tmp_path: Path)
     result = write_task_directory(plan, releases, output_dir=tmp_path / "directory")
     html = (result / "index.html").read_text(encoding="utf-8")
 
-    assert 'data-version="r7" aria-pressed="true"' in html
+    assert 'data-version="r11" aria-pressed="true"' in html
+    assert 'data-version="r7" aria-pressed="false"' in html
     assert 'data-version="r6" aria-pressed="false"' in html
     assert 'data-version="r5" aria-pressed="false"' in html
-    assert 'data-release-version="r7" href="images/r7.png"' in html
+    assert 'data-release-version="r11" href="images/r11.png"' in html
+    assert 'data-release-version="r7" hidden href="images/r7.png"' in html
     assert 'data-release-version="r6" hidden href="images/r6.png"' in html
     assert 'data-release-version="r5" hidden href="images/r5.png"' in html
-    assert "applyVersion('r7')" in html
+    assert "applyVersion('r11')" in html
 
 
-def test_task_directory_marks_missing_r7_instead_of_renaming_r6(tmp_path: Path) -> None:
+def test_task_directory_marks_missing_r11_instead_of_renaming_r6(tmp_path: Path) -> None:
     plan = build_task_coverage_plan(
         catalog=_catalog(),
         inventory=_inventory(),
@@ -291,19 +293,28 @@ def test_task_directory_marks_missing_r7_instead_of_renaming_r6(tmp_path: Path) 
         canonical_recipe_ids={"pour"},
     )
     release = {
-        "task_id": "pour", "release_id": "pour.v6_20260812_r6",
-        "package_path": "packages/r6", "background_binding": "environment",
-        "promotion": "candidate", "evidence": {"overview_image": "images/r6.png"},
-        "gates": {gate: "not_run" for gate in (
-            "self_contained_package", "runtime_reset", "tabletop_placement",
-            "visual_review", "provisional_ik",
-        )},
+        "task_id": "pour",
+        "release_id": "pour.v6_20260812_r6",
+        "package_path": "packages/r6",
+        "background_binding": "environment",
+        "promotion": "candidate",
+        "evidence": {"overview_image": "images/r6.png"},
+        "gates": {
+            gate: "not_run"
+            for gate in (
+                "self_contained_package",
+                "runtime_reset",
+                "tabletop_placement",
+                "visual_review",
+                "provisional_ik",
+            )
+        },
     }
     result = write_task_directory(plan, [release], output_dir=tmp_path / "directory")
     html = (result / "index.html").read_text(encoding="utf-8")
 
-    assert 'data-release-version="r7"' in html
-    assert "该任务无 r7，展示最新有效版本" in html
+    assert 'data-release-version="r11"' in html
+    assert "该任务无 r11，展示最新有效版本" in html
     assert "pour.v6_20260812_r6" in html
 
 
@@ -447,13 +458,16 @@ def test_refresh_release_evidence_promotes_only_complete_candidate(tmp_path: Pat
         "package_path": str(package),
         "background_binding": "room",
         "promotion": "candidate",
-        "gates": {gate: "not_run" for gate in (
-            "self_contained_package",
-            "runtime_reset",
-            "tabletop_placement",
-            "visual_review",
-            "provisional_ik",
-        )},
+        "gates": {
+            gate: "not_run"
+            for gate in (
+                "self_contained_package",
+                "runtime_reset",
+                "tabletop_placement",
+                "visual_review",
+                "provisional_ik",
+            )
+        },
     }
 
     refreshed = refresh_release_evidence([release])
@@ -480,13 +494,16 @@ def test_refresh_release_evidence_retains_candidate_for_missing_gate(tmp_path: P
         "package_path": str(tmp_path / "missing-package"),
         "background_binding": "room",
         "promotion": "candidate",
-        "gates": {gate: "not_run" for gate in (
-            "self_contained_package",
-            "runtime_reset",
-            "tabletop_placement",
-            "visual_review",
-            "provisional_ik",
-        )},
+        "gates": {
+            gate: "not_run"
+            for gate in (
+                "self_contained_package",
+                "runtime_reset",
+                "tabletop_placement",
+                "visual_review",
+                "provisional_ik",
+            )
+        },
     }
 
     refreshed = refresh_release_evidence([release])
