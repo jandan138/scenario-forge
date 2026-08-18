@@ -44,6 +44,20 @@ it does not add a rack-specific collider or physics patch.
   acrylic rack is intentionally subtle. The small red Task 08 cap was confirmed
   tabletop-supported in the close-up.
 
+## Task-directory publication
+
+The public task directory now has an explicit `r10.1 · 玻璃棒架` view. Task 07
+uses the `teaching_research` task-object close-up as its card image so the glass
+rod, transparent rack, beaker, and both robot arms remain legible at card size.
+The variant disclosure retains the room-overview evidence for all five r10.1
+backgrounds: teaching research, modern wet chemistry, bioclean, analytical
+instrumentation, and example4.
+
+The site still defaults globally to r11. Because Task 07 has no r11 package, its
+r11 card says that it is displaying the latest valid r10.1 candidate. This is a
+display fallback only and does not promote the package or add robot-success
+evidence.
+
 ## Claim boundary
 
 This release proves portable package closure and the attached initial-state,

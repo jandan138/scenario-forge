@@ -30,6 +30,11 @@ candidate** and the separately-qualified `latest` package. A candidate stays
 visible while any required promotion gate is still `not_run` or failed; only an
 all-pass release becomes `latest`.
 
+Release evidence may provide both `overview_image` and an optional `card_image`.
+The card uses `card_image` when present, while the variant disclosure continues
+to link the full `overview_image`. This keeps a small interaction fixture legible
+without losing the room-level evidence.
+
 Release records can declare:
 
 - `release_status: canonical_candidate | prototype`;
@@ -45,8 +50,9 @@ reviewed variants remain inspectable after deployment.
 `generated_release_manifests` may bind a preview-complete generation manifest
 to a release series. The current page defaults to r11: tasks 5 and 9 show their
 r11 packages, while every other task explicitly falls back to its latest valid
-r7/r6/r5 package. The r7, r6, and r5 controls remain reader-selectable
-comparisons; no version toggle is a benchmark-success claim.
+package. The `r10.1` control exposes the Task 07 rack release, and the r7, r6,
+and r5 controls remain reader-selectable comparisons; no version toggle is a
+benchmark-success claim.
 
 Task-specific releases may also be listed directly in `releases`.  The r11
 Task 05/09 entries use this route because they are a bounded two-task release,

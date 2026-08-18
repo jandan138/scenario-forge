@@ -26,6 +26,13 @@ REQUIRED_LATEST_GATES = (
     "visual_review",
     "provisional_ik",
 )
+DIRECTORY_RELEASE_SERIES = (
+    ("r11", "r11", "r11 · 瓶塞与烘箱"),
+    ("r10_1", "r10.1", "r10.1 · 玻璃棒架"),
+    ("r7", "r7", "r7 · 新资产任务"),
+    ("r6", "r6", "r6 · 动态桌面布景"),
+    ("r5", "r5", "r5 · 基础桌面"),
+)
 _GATE_EVIDENCE = {
     "self_contained_package": ("evidence/package_closure.yaml", "status", "pass"),
     "runtime_reset": (
@@ -240,7 +247,10 @@ def write_task_directory(
         # Release identifiers are immutable, ordered version labels.  Showing the
         # newest candidate keeps reset/render evidence visible without letting a
         # partial gate set impersonate the qualified `latest` release.
-        candidate = candidate_releases[-1] if candidate_releases else None
+        r10_1_candidate = _preferred_series_release(candidate_releases, "r10_1")
+        candidate = r10_1_candidate or (
+            candidate_releases[-1] if candidate_releases else None
+        )
         directory_tasks.append(
             {
                 "task_id": task_id,
@@ -445,7 +455,9 @@ def _directory_html(payload: Mapping[str, object]) -> str:
         + """</strong><span>已有场景候选</span></div><div class="stat"><strong>"""
         + str(canonical_count)
         + """</strong><span>完整语义候选</span></div></div></header>
-<section><div class="section-head"><div><div class="eyebrow">Evidence gallery</div><h2>可检查的任务场景</h2></div><p>卡片展示的是初始场景证据，不是机器人策略成功率。r11 新增任务 5、9；其他任务明确回退到自己的最新有效版本。<a href="../liquid-cylinder-tutorial/">量筒液体修复教程 →</a></p></div><div class="version-switch" role="group" aria-label="任务包版本"><span>场景版本</span><button class="version" data-version="r11" aria-pressed="true">r11 · 瓶塞与烘箱</button><button class="version" data-version="r7" aria-pressed="false">r7 · 新资产任务</button><button class="version" data-version="r6" aria-pressed="false">r6 · 动态桌面布景</button><button class="version" data-version="r5" aria-pressed="false">r5 · 基础桌面</button></div><div class="filters" role="group" aria-label="任务筛选"><button class="filter" data-filter="all" aria-pressed="true">全部 """
+<section><div class="section-head"><div><div class="eyebrow">Evidence gallery</div><h2>可检查的任务场景</h2></div><p>卡片展示的是初始场景证据，不是机器人策略成功率。r11 新增任务 5、9；r10.1 更新 Task 07 玻璃棒架；其他任务明确回退到自己的最新有效版本。<a href="../liquid-cylinder-tutorial/">量筒液体修复教程 →</a></p></div><div class="version-switch" role="group" aria-label="任务包版本"><span>场景版本</span>"""
+        + _version_buttons()
+        + """</div><div class="filters" role="group" aria-label="任务筛选"><button class="filter" data-filter="all" aria-pressed="true">全部 """
         + str(candidate_count)
         + """</button><button class="filter" data-filter="canonical_candidate" aria-pressed="false">完整语义 """
         + str(canonical_count)
@@ -466,12 +478,19 @@ def _directory_html(payload: Mapping[str, object]) -> str:
 
 def _directory_task_card(task: Mapping[str, object]) -> str:
     releases = task.get("releases")
-    r11 = _preferred_series_release(releases, "r11")
-    r7 = _preferred_series_release(releases, "r7")
-    r6 = _preferred_series_release(releases, "r6")
-    r5 = _preferred_series_release(releases, "r5")
-    fallback = r11 or r7 or r6 or r5 or _last_release(releases)
-    image = _versioned_evidence_rails(task, r11=r11, r7=r7, r6=r6, r5=r5, fallback=fallback)
+    series_releases = {
+        series: _preferred_series_release(releases, series)
+        for series, _, _ in DIRECTORY_RELEASE_SERIES
+    }
+    fallback = next(
+        (series_releases[series] for series, _, _ in DIRECTORY_RELEASE_SERIES if series_releases[series]),
+        _last_release(releases),
+    )
+    image = _versioned_evidence_rails(
+        task,
+        series_releases=series_releases,
+        fallback=fallback,
+    )
     tier = str(task.get("candidate_release_status") or "unspecified")
     tier_label = {
         "canonical_candidate": "完整语义候选",
@@ -480,7 +499,10 @@ def _directory_task_card(task: Mapping[str, object]) -> str:
     ceiling = task.get("candidate_score_ceiling")
     ceiling_number = float(ceiling) if isinstance(ceiling, (int, float)) else 0.0
     missing = ", ".join(task.get("candidate_missing_capabilities", [])) or "无已知语义缺口"
-    release_labels = _versioned_release_labels(r11=r11, r7=r7, r6=r6, r5=r5, fallback=fallback)
+    release_labels = _versioned_release_labels(
+        series_releases=series_releases,
+        fallback=fallback,
+    )
     return (
         f'<article class="task-card" data-tier="{_html(tier)}" data-queue="{_html(str(task["queue_status"]))}">'
         + image
@@ -491,6 +513,14 @@ def _directory_task_card(task: Mapping[str, object]) -> str:
         + f'<div class="meta"><span>可计分上限</span><strong>{_html(_score_label(ceiling))}</strong></div>'
         + f'<p class="missing">能力边界：{_html(missing)}</p>'
         + f'<div class="release-variants">{_release_variants(task.get("releases"))}</div></div></article>'
+    )
+
+
+def _version_buttons() -> str:
+    return "".join(
+        f'<button class="version" data-version="{series}" '
+        f'aria-pressed="{"true" if series == "r11" else "false"}">{_html(label)}</button>'
+        for series, _, label in DIRECTORY_RELEASE_SERIES
     )
 
 
@@ -517,27 +547,25 @@ def _last_release(value: object) -> Mapping[str, object] | None:
 def _versioned_evidence_rails(
     task: Mapping[str, object],
     *,
-    r11: Mapping[str, object] | None,
-    r7: Mapping[str, object] | None,
-    r6: Mapping[str, object] | None,
-    r5: Mapping[str, object] | None,
+    series_releases: Mapping[str, Mapping[str, object] | None],
     fallback: Mapping[str, object] | None,
 ) -> str:
     rails: list[str] = []
-    for series, release in (
-        ("r11", r11 or fallback),
-        ("r7", r7 or fallback),
-        ("r6", r6 or fallback),
-        ("r5", r5 or fallback),
-    ):
+    for series, _, _ in DIRECTORY_RELEASE_SERIES:
+        release = series_releases.get(series) or fallback
         evidence = release.get("evidence") if isinstance(release, Mapping) else None
         overview = evidence.get("overview_image") if isinstance(evidence, Mapping) else None
+        card_image = evidence.get("card_image") if isinstance(evidence, Mapping) else None
+        if not isinstance(card_image, str) or not card_image:
+            card_image = overview
         hidden = "" if series == "r11" else " hidden"
-        if isinstance(overview, str) and overview:
-            safe = _html(overview)
+        if isinstance(card_image, str) and card_image:
+            link = overview if isinstance(overview, str) and overview else card_image
+            safe_link = _html(link)
+            safe_card = _html(card_image)
             rails.append(
-                f'<a class="evidence-rail" data-release-version="{series}"{hidden} href="{safe}">'
-                f'<img src="{safe}" alt="{_html(str(task["title_zh"]))} {series} 场景总览" loading="eager"></a>'
+                f'<a class="evidence-rail" data-release-version="{series}"{hidden} href="{safe_link}">'
+                f'<img src="{safe_card}" alt="{_html(str(task["title_zh"]))} {series} 任务场景" loading="eager"></a>'
             )
         else:
             rails.append(
@@ -549,24 +577,18 @@ def _versioned_evidence_rails(
 
 def _versioned_release_labels(
     *,
-    r11: Mapping[str, object] | None,
-    r7: Mapping[str, object] | None,
-    r6: Mapping[str, object] | None,
-    r5: Mapping[str, object] | None,
+    series_releases: Mapping[str, Mapping[str, object] | None],
     fallback: Mapping[str, object] | None,
 ) -> str:
     labels: list[str] = []
-    for series, release in (
-        ("r11", r11 or fallback),
-        ("r7", r7 or fallback),
-        ("r6", r6 or fallback),
-        ("r5", r5 or fallback),
-    ):
+    for series, display, _ in DIRECTORY_RELEASE_SERIES:
+        selected_release = series_releases.get(series)
+        release = selected_release or fallback
         release_id = release.get("release_id", "—") if isinstance(release, Mapping) else "—"
         hidden = "" if series == "r11" else " hidden"
         prefix = (
-            "该任务无 r11，展示最新有效版本 · "
-            if series == "r11" and r11 is None and fallback is not None
+            f"该任务无 {display}，展示最新有效版本 · "
+            if selected_release is None and fallback is not None
             else ""
         )
         labels.append(
@@ -608,7 +630,7 @@ def _asset_role_from_blocker(blocker: str) -> str | None:
 def _evidence_mapping(value: object, field: str) -> dict[str, str]:
     if not isinstance(value, Mapping):
         raise CoveragePlanError(f"{field} must be a mapping")
-    allowed = {"overview_image", "closeup_image", "runtime_reset_gate"}
+    allowed = {"card_image", "overview_image", "closeup_image", "runtime_reset_gate"}
     unknown = sorted(set(value).difference(allowed))
     if unknown:
         raise CoveragePlanError(f"{field} contains unsupported keys: {', '.join(unknown)}")

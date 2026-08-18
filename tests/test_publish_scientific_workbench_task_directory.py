@@ -102,3 +102,56 @@ def test_publish_task_directory_copies_all_background_variant_overviews(
     html = output.read_text(encoding="utf-8")
     assert "../variant-0.png" not in html
     assert "../variant-1.png" not in html
+
+
+def test_publish_task_directory_keeps_card_and_overview_images_distinct(
+    tmp_path: Path,
+) -> None:
+    module = _script_module()
+    source = tmp_path / "build/directory"
+    destination = tmp_path / "docs/task-directory"
+    source.mkdir(parents=True)
+    card = tmp_path / "build/task-card.png"
+    overview = tmp_path / "build/task-overview.png"
+    card.write_bytes(b"card-image")
+    overview.write_bytes(b"overview-image")
+    card_relative = "../task-card.png"
+    overview_relative = "../task-overview.png"
+    (source / "task_directory.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "tasks": [
+                    {
+                        "task_id": "stir",
+                        "candidate_evidence": None,
+                        "latest_evidence": None,
+                        "releases": [
+                            {
+                                "release_id": "stir.v10_1",
+                                "evidence": {
+                                    "card_image": card_relative,
+                                    "overview_image": overview_relative,
+                                },
+                            }
+                        ],
+                    }
+                ]
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    (source / "index.html").write_text(
+        f'<a href="{overview_relative}"><img src="{card_relative}"></a>',
+        encoding="utf-8",
+    )
+
+    output = module.publish_task_directory(source, destination)
+
+    assert (destination / "assets/stir-release-01-card.png").read_bytes() == b"card-image"
+    assert (destination / "assets/stir-release-01-overview.png").read_bytes() == (
+        b"overview-image"
+    )
+    html = output.read_text(encoding="utf-8")
+    assert 'href="assets/stir-release-01-overview.png"' in html
+    assert 'src="assets/stir-release-01-card.png"' in html

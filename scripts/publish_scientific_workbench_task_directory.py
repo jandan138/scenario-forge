@@ -37,15 +37,13 @@ def publish_task_directory(source: str | Path, destination: str | Path) -> Path:
             evidence = task.get(f"{release_kind}_evidence")
             if not isinstance(evidence, Mapping):
                 continue
-            overview = evidence.get("overview_image")
-            if not isinstance(overview, str) or not overview:
-                continue
-            image = (source_dir / overview).resolve()
-            if not image.is_file():
-                raise ValueError(f"overview image does not exist: {overview}")
-            public_relative = Path("assets") / f"{task_id}-{release_kind}-overview{image.suffix}"
-            shutil.copy2(image, destination_dir / public_relative)
-            html = html.replace(overview, public_relative.as_posix())
+            html = _publish_evidence_images(
+                html,
+                evidence=evidence,
+                source_dir=source_dir,
+                destination_dir=destination_dir,
+                public_stem=f"{task_id}-{release_kind}",
+            )
         releases = task.get("releases", [])
         if not isinstance(releases, list):
             raise ValueError("directory task.releases must be a list")
@@ -55,22 +53,38 @@ def publish_task_directory(source: str | Path, destination: str | Path) -> Path:
             evidence = release.get("evidence")
             if not isinstance(evidence, Mapping):
                 continue
-            overview = evidence.get("overview_image")
-            if not isinstance(overview, str) or not overview:
-                continue
-            image = (source_dir / overview).resolve()
-            if not image.is_file():
-                raise ValueError(f"release overview image does not exist: {overview}")
-            public_relative = (
-                Path("assets")
-                / f"{task_id}-release-{index:02d}-overview{image.suffix}"
+            html = _publish_evidence_images(
+                html,
+                evidence=evidence,
+                source_dir=source_dir,
+                destination_dir=destination_dir,
+                public_stem=f"{task_id}-release-{index:02d}",
             )
-            shutil.copy2(image, destination_dir / public_relative)
-            html = html.replace(overview, public_relative.as_posix())
     destination_dir.mkdir(parents=True, exist_ok=True)
     output = destination_dir / "index.html"
     output.write_text(html, encoding="utf-8")
     return output
+
+
+def _publish_evidence_images(
+    html: str,
+    *,
+    evidence: Mapping[str, object],
+    source_dir: Path,
+    destination_dir: Path,
+    public_stem: str,
+) -> str:
+    for key, suffix in (("card_image", "card"), ("overview_image", "overview")):
+        relative = evidence.get(key)
+        if not isinstance(relative, str) or not relative:
+            continue
+        image = (source_dir / relative).resolve()
+        if not image.is_file():
+            raise ValueError(f"{key} does not exist: {relative}")
+        public_relative = Path("assets") / f"{public_stem}-{suffix}{image.suffix}"
+        shutil.copy2(image, destination_dir / public_relative)
+        html = html.replace(relative, public_relative.as_posix())
+    return html
 
 
 def main(argv: Sequence[str] | None = None) -> int:

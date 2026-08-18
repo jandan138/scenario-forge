@@ -252,7 +252,7 @@ def test_task_directory_defaults_to_r11_and_falls_back_explicitly(tmp_path: Path
         ],
     }
     releases = []
-    for series in ("r5", "r6", "r7", "r11"):
+    for series in ("r5", "r6", "r7", "r10_1", "r11"):
         releases.append(
             {
                 "task_id": "pour",
@@ -275,14 +275,106 @@ def test_task_directory_defaults_to_r11_and_falls_back_explicitly(tmp_path: Path
     html = (result / "index.html").read_text(encoding="utf-8")
 
     assert 'data-version="r11" aria-pressed="true"' in html
+    assert 'data-version="r10_1" aria-pressed="false"' in html
+    assert "r10.1 · 玻璃棒架" in html
     assert 'data-version="r7" aria-pressed="false"' in html
     assert 'data-version="r6" aria-pressed="false"' in html
     assert 'data-version="r5" aria-pressed="false"' in html
     assert 'data-release-version="r11" href="images/r11.png"' in html
+    assert 'data-release-version="r10_1" hidden href="images/r10_1.png"' in html
     assert 'data-release-version="r7" hidden href="images/r7.png"' in html
     assert 'data-release-version="r6" hidden href="images/r6.png"' in html
     assert 'data-release-version="r5" hidden href="images/r5.png"' in html
     assert "applyVersion('r11')" in html
+
+
+def test_task_directory_prefers_r10_1_card_image_when_r11_is_missing(
+    tmp_path: Path,
+) -> None:
+    plan = build_task_coverage_plan(
+        catalog=_catalog(),
+        inventory=_inventory(),
+        binding_ids={"room", "table", "flask_asset", "cylinder_asset", "beaker_asset"},
+        canonical_recipe_ids={"pour"},
+    )
+    release = {
+        "task_id": "pour",
+        "release_id": "pour.v10_1_20260817_r10_1.teaching_research",
+        "package_path": "packages/r10_1/teaching_research",
+        "background_binding": "teaching_research",
+        "promotion": "candidate",
+        "evidence": {
+            "card_image": "images/r10_1-card.png",
+            "overview_image": "images/r10_1-overview.png",
+        },
+        "gates": {
+            gate: "not_run"
+            for gate in (
+                "self_contained_package",
+                "runtime_reset",
+                "tabletop_placement",
+                "visual_review",
+                "provisional_ik",
+            )
+        },
+    }
+
+    result = write_task_directory(plan, [release], output_dir=tmp_path / "directory")
+    html = (result / "index.html").read_text(encoding="utf-8")
+
+    assert (
+        'data-release-version="r11" href="images/r10_1-overview.png">'
+        '<img src="images/r10_1-card.png"' in html
+    )
+    assert 'data-release-version="r10_1" hidden href="images/r10_1-overview.png"' in html
+    assert "该任务无 r11，展示最新有效版本" in html
+    assert "该任务无 r10.1" not in html
+    assert '<a href="images/r10_1-overview.png">pour.v10_1' in html
+
+
+def test_task_directory_orders_series_above_legacy_date_prefixed_versions(
+    tmp_path: Path,
+) -> None:
+    plan = build_task_coverage_plan(
+        catalog=_catalog(),
+        inventory=_inventory(),
+        binding_ids={"room", "table", "flask_asset", "cylinder_asset", "beaker_asset"},
+        canonical_recipe_ids={"pour"},
+    )
+
+    def release(release_id: str) -> dict[str, object]:
+        return {
+            "task_id": "pour",
+            "release_id": release_id,
+            "package_path": f"packages/{release_id}",
+            "background_binding": "environment",
+            "promotion": "candidate",
+            "evidence": {"overview_image": f"images/{release_id}.png"},
+            "gates": {
+                gate: "not_run"
+                for gate in (
+                    "self_contained_package",
+                    "runtime_reset",
+                    "tabletop_placement",
+                    "visual_review",
+                    "provisional_ik",
+                )
+            },
+        }
+
+    result = write_task_directory(
+        plan,
+        [
+            release("pour.v20260810.r4.05_example4"),
+            release("pour.v10_1_20260817_r10_1.teaching_research"),
+        ],
+        output_dir=tmp_path / "directory",
+    )
+    data = yaml.safe_load((result / "task_directory.yaml").read_text(encoding="utf-8"))
+
+    assert data["tasks"][0]["candidate_release_id"] == (
+        "pour.v10_1_20260817_r10_1.teaching_research"
+    )
 
 
 def test_task_directory_marks_missing_r11_instead_of_renaming_r6(tmp_path: Path) -> None:

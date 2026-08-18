@@ -114,6 +114,81 @@ inventory:
     temperature_control: *r11_oven_inventory
     start_button: *r11_oven_inventory
 releases:
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v10_1_20260817_r10_1.analytical_instrumentation
+    package_path: outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation
+    background_binding: scientific_environment_code_room_analytical_instrumentation_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      card_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      overview_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: &r10_1_task07_directory_gates
+      self_contained_package: not_run
+      runtime_reset: pass
+      tabletop_placement: pass
+      visual_review: not_run
+      provisional_ik: not_run
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v10_1_20260817_r10_1.bioclean
+    package_path: outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/bioclean
+    background_binding: scientific_environment_code_room_bioclean_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      card_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/bioclean/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      overview_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/bioclean/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/bioclean/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/bioclean/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *r10_1_task07_directory_gates
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v10_1_20260817_r10_1.example4
+    package_path: outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/example4
+    background_binding: scientific_environment_code_room_example4_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      card_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/example4/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      overview_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/example4/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/example4/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/example4/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *r10_1_task07_directory_gates
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v10_1_20260817_r10_1.modern_wet_chemistry
+    package_path: outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/modern_wet_chemistry
+    background_binding: scientific_environment_code_room_wet_chemistry_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      card_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      overview_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/modern_wet_chemistry/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *r10_1_task07_directory_gates
+  - task_id: scientific_workbench_glass_rod_stir
+    release_id: scientific_workbench_glass_rod_stir.v10_1_20260817_r10_1.teaching_research
+    package_path: outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research
+    background_binding: scientific_environment_code_room_teaching_research_v2
+    release_status: canonical_candidate
+    score_ceiling: 1.0
+    missing_capabilities: []
+    promotion: candidate
+    evidence:
+      card_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png
+      overview_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research/adapters/ebench/genmanip/evidence/initial_scene/scene_overview.png
+      closeup_image: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research/adapters/ebench/genmanip/evidence/initial_scene/workspace_closeup.png
+      runtime_reset_gate: ../../scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research/adapters/ebench/genmanip/evidence/initial_scene/visual_ready_gate.yaml
+    gates: *r10_1_task07_directory_gates
   - task_id: scientific_workbench_pour_cylinder_to_beaker
     release_id: scientific_workbench_pour_cylinder_to_beaker.v4_20260801_r1
     package_path: outputs/scientific_workbench_layout_validated_prototypes_v4_20260801_r1/scientific_workbench_pour_cylinder_to_beaker
