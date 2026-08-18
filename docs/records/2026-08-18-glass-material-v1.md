@@ -9,3 +9,7 @@ Four source-bound ConvertAsset `_glass_v1` packages were consumed without reimpl
 - Task boundary: no existing eBench or VR task package was upgraded.
 
 The page media is hash-locked in `docs/glass-material-guide/assets/provenance.json`. The authoritative package evidence remains in ConvertAsset; the Scenario Forge ZIP is a consumer handoff, not a second conversion authority.
+
+## Visual QA
+
+The eight source renders were inspected locally as four fixed-pose pairs; this was a local review, not an independent reviewer. The published page was then opened in real Chromium at 1440×1000, 1024×768, and 390×844. Full-page captures showed no broken media, horizontal overflow, clipped sections, or mobile layout failure. The draggable split was exercised after synchronizing the overlay image to the rendered stage width.
