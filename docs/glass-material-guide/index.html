@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Scenario Forge 实验玻璃器皿 OmniGlass 材质升级教程与四组可复现实景 A/B 证据。">
+  <title>玻璃器皿材质升级 · Scenario Forge</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../">SCENARIO FORGE <span>/ OPTICS NOTE 01</span></a>
+    <nav aria-label="页面导航"><a href="#compare">看对比</a><a href="#recipe">看参数</a><a href="#handoff">工程交付</a></nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">VISUAL MATERIAL / GLASS V1 · 让实验玻璃真正像玻璃</p>
+        <h1>让实验玻璃<br><em>真正像玻璃</em></h1>
+        <p class="lead">我们没有重做模型，也没有碰物理。只把一组经过实景验证的 OmniGlass 参数，严谨地绑定到四种常用玻璃器皿的正确 mesh 上。</p>
+        <a class="primary" href="#compare">拖动查看前后差异 ↓</a>
+      </div>
+      <div class="hero-board" aria-label="本次交付摘要">
+        <div><strong>04</strong><span>玻璃资产</span></div><div><strong>05</strong><span>显式 MDL 参数</span></div>
+        <div><strong>00</strong><span>物理字段改动</span></div><div><strong>4.1</strong><span>Isaac Sim 实测</span></div>
+        <p>一句话结果：旧版偏深、偏灰、像实体塑料；glass_v1 能透出背景与刻度，同时保留清楚的边缘反射。</p>
+      </div>
+    </section>
+
+    <section class="plain" id="overview">
+      <p class="section-no">01 / 先说人话</p>
+      <h2>这次到底改了什么？</h2>
+      <div class="plain-grid">
+        <p class="big-answer">把“玻璃外观”从一次 GUI 调参，变成了<strong>可复现、可打包、可审计</strong>的资产能力。</p>
+        <div class="scope-note"><b>没有升级任务包</b><br>Task 02 / 05 / 07 / 09 的 USD 本轮均未替换。先交付合格资产，任务升级另开版本，避免隐式污染已有结果。</div>
+      </div>
+    </section>
+
+    <section class="gallery" id="compare">
+      <p class="section-no">02 / 同机位实景 A/B</p>
+      <h2>四种器皿，四组直接证据</h2>
+      <p class="section-intro">全部使用同一间现代湿实验室、同一张 2000×800×755 mm 工作台、同一相机、灯光与物体 pose。拖动滑杆；下方双图用于没有交互能力时核对。</p>
+
+      <article class="comparison" data-comparison>
+        <header><span>01</span><h3>250 mL 量筒</h3><p>深蓝实体感 → 背景、刻度与杯壁层次可读</p></header>
+        <div class="split-stage"><img src="assets/graduated_cylinder_250ml_before.webp" alt="量筒材质升级前，杯体深暗且不易透出背景"><div class="after-layer"><img src="assets/graduated_cylinder_250ml_after.webp" alt="量筒应用 glass_v1 后，背景与黑色刻度可透过杯体看见"></div><span class="tag before">BEFORE</span><span class="tag after">GLASS V1</span><i class="divider"></i></div>
+        <input class="split-control" aria-label="拖动比较 250 mL 量筒材质前后效果" type="range" min="0" max="100" value="50">
+        <div class="fallback"><figure><img src="assets/graduated_cylinder_250ml_before.webp" alt="量筒升级前缩略图"><figcaption>旧材质</figcaption></figure><figure><img src="assets/graduated_cylinder_250ml_after.webp" alt="量筒 glass_v1 缩略图"><figcaption>glass_v1</figcaption></figure></div>
+      </article>
+
+      <article class="comparison" data-comparison>
+        <header><span>02</span><h3>325 mL 烧杯</h3><p>强镜面、发黑 → 透明杯壁与刻度同时保留</p></header>
+        <div class="split-stage"><img src="assets/beaker_325ml_before.webp" alt="325 mL 烧杯材质升级前，杯体反射重且底部发黑"><div class="after-layer"><img src="assets/beaker_325ml_after.webp" alt="325 mL 烧杯应用 glass_v1 后，透明度和刻度更清楚"></div><span class="tag before">BEFORE</span><span class="tag after">GLASS V1</span><i class="divider"></i></div>
+        <input class="split-control" aria-label="拖动比较 325 mL 烧杯材质前后效果" type="range" min="0" max="100" value="50">
+        <div class="fallback"><figure><img src="assets/beaker_325ml_before.webp" alt="325 mL 烧杯升级前缩略图"><figcaption>旧材质</figcaption></figure><figure><img src="assets/beaker_325ml_after.webp" alt="325 mL 烧杯 glass_v1 缩略图"><figcaption>glass_v1</figcaption></figure></div>
+      </article>
+
+      <article class="comparison" data-comparison>
+        <header><span>03</span><h3>250 mL 平底烧瓶</h3><p>只改瓶身与卷边；29/42 磨口仍保留磨砂语义</p></header>
+        <div class="split-stage"><img src="assets/flat_bottom_flask_250ml_29_42_before.webp" alt="平底烧瓶材质升级前实景图"><div class="after-layer"><img src="assets/flat_bottom_flask_250ml_29_42_after.webp" alt="平底烧瓶应用 glass_v1 后，瓶身透明但磨口仍为磨砂"></div><span class="tag before">BEFORE</span><span class="tag after">GLASS V1</span><i class="divider"></i></div>
+        <input class="split-control" aria-label="拖动比较 250 mL 平底烧瓶材质前后效果" type="range" min="0" max="100" value="50">
+        <div class="fallback"><figure><img src="assets/flat_bottom_flask_250ml_29_42_before.webp" alt="平底烧瓶升级前缩略图"><figcaption>旧材质</figcaption></figure><figure><img src="assets/flat_bottom_flask_250ml_29_42_after.webp" alt="平底烧瓶 glass_v1 缩略图"><figcaption>glass_v1</figcaption></figure></div>
+      </article>
+
+      <article class="comparison" data-comparison>
+        <header><span>04</span><h3>动态烧杯</h3><p>同一配方也覆盖液体任务使用的动态杯体</p></header>
+        <div class="split-stage"><img src="assets/beaker_dynamic_before.webp" alt="动态烧杯材质升级前实景图"><div class="after-layer"><img src="assets/beaker_dynamic_after.webp" alt="动态烧杯应用 glass_v1 后实景图"></div><span class="tag before">BEFORE</span><span class="tag after">GLASS V1</span><i class="divider"></i></div>
+        <input class="split-control" aria-label="拖动比较动态烧杯材质前后效果" type="range" min="0" max="100" value="50">
+        <div class="fallback"><figure><img src="assets/beaker_dynamic_before.webp" alt="动态烧杯升级前缩略图"><figcaption>旧材质</figcaption></figure><figure><img src="assets/beaker_dynamic_after.webp" alt="动态烧杯 glass_v1 缩略图"><figcaption>glass_v1</figcaption></figure></div>
+      </article>
+    </section>
+
+    <section class="recipe" id="recipe">
+      <p class="section-no">03 / 可复现配方</p><h2>五个显式写入的参数</h2>
+      <div class="parameter-list">
+        <div><code>reflection_color</code><b>0.86629593<br>0.97533488<br>0.98841697</b><small>略偏冷的玻璃反射色</small></div>
+        <div><code>frosting_roughness</code><b>0.0</b><small>不额外磨砂</small></div>
+        <div><code>roughness_texture_influence</code><b>1.0</b><small>保持模块纹理影响</small></div>
+        <div><code>enable_opacity</code><b>false</b><small>不走 cutout 透明</small></div>
+        <div><code>cutout_opacity</code><b>0.0</b><small>记录但不启用</small></div>
+      </div>
+      <div class="truth-grid"><div><h3>显式写入</h3><p>上面五项来自样例 USD 的已 authored 输入，也是我们能够诚实复现的修改经验。</p></div><div><h3>模块默认值</h3><p>IOR、thin-walled、depth 等沿用锁定 OmniGlass 模块默认值。它们不是样例显式修改，不能混写成“本次配方”。</p></div></div>
+    </section>
+
+    <section class="pipeline" id="handoff">
+      <p class="section-no">04 / 工程边界</p><h2>谁负责什么，一刀切清楚</h2>
+      <div class="flow"><div><b>① ConvertAsset</b><p>source-bound profile、Typed MDL inputs、OmniGlass 与 helper 闭包、Isaac 4.1 准入。</p></div><span>→</span><div><b>② Scenario Forge</b><p>严格消费四个不可变 package，打统一交付 ZIP，组织 A/B 证据与文档；不重写转换逻辑。</p></div><span>→</span><div><b>③ 任务升级（后续）</b><p>需要时显式发布新的 Task 版本。不会把材质变更悄悄塞回旧任务包。</p></div></div>
+      <div class="audit"><strong>物理未变证据</strong><p>每个 package 的 physics 与 interaction profile 和升级前输入逐字节一致；visual overlay 不含 geometry、xform、collision、mass 或 inertia authoring。</p></div>
+    </section>
+
+    <section class="boundary">
+      <p class="section-no">05 / 本轮刻意不做</p>
+      <ul><li><b>玻璃棒：</b>本轮不改。</li><li><b>瓶塞：</b>不属于透明玻璃主体范围。</li><li><b>平底烧瓶磨口：</b>保留磨砂，不整件覆盖。</li><li><b>任务结果：</b>不继承机器人策略、液体转移或 benchmark 成功结论。</li></ul>
+    </section>
+  </main>
+  <footer><span>SCENARIO FORGE · 2026-08-18</span><a href="../task-directory/">返回任务目录</a><a href="../">文档首页</a></footer>
+  <script src="guide.js"></script>
+</body>
+</html>

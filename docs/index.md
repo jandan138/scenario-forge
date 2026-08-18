@@ -1,5 +1,7 @@
 # Scenario Forge Documentation
 
+- [玻璃器皿材质升级教程](glass-material-guide/)
+
 Scenario Forge compiles portable embodied scenario packages for downstream evaluators.
 
 ## Strategy
