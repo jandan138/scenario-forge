@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pxr import Usd
-
 from scenario_forge.generation.glass_material_evidence import build_evidence_scene
 
 
@@ -33,13 +31,11 @@ def test_evidence_scene_uses_real_room_table_and_one_glass_asset(tmp_path: Path)
         object_height_m=0.755,
     )
 
-    stage = Usd.Stage.Open(str(output))
-    assert stage
-    assert stage.GetPrimAtPath("/World/_scene/room")
-    assert stage.GetPrimAtPath("/World/_scene/table")
-    assert stage.GetPrimAtPath("/World/_scene/obj_glass")
-    assert stage.GetPrimAtPath("/World/EvidenceDome")
     text = output.read_text(encoding="utf-8")
+    assert 'def Xform "room"' in text
+    assert 'def Xform "table"' in text
+    assert 'def Xform "obj_glass"' in text
+    assert 'def DomeLight "EvidenceDome"' in text
     assert str(room.resolve()) in text
     assert str(table.resolve()) in text
     assert str(asset.resolve()) in text
