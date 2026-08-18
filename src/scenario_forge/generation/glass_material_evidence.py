@@ -3,6 +3,17 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, Mapping
+
+
+REAGENT_BOTTLE_CLEAR_OMNIGLASS_INPUTS: dict[str, dict[str, Any]] = {
+    "glass_color": {"type": "color3f", "value": [0.99, 0.998, 1.0]},
+    "reflection_color": {"type": "color3f", "value": [1.0, 1.0, 1.0]},
+    "frosting_roughness": {"type": "float", "value": 0.035},
+    "glass_ior": {"type": "float", "value": 1.47},
+    "thin_walled": {"type": "bool", "value": False},
+    "depth": {"type": "float", "value": 0.002},
+}
 
 
 def build_evidence_scene(
@@ -13,6 +24,8 @@ def build_evidence_scene(
     asset_usd: Path,
     asset_prim_path: str,
     object_height_m: float,
+    mdl_inputs: Mapping[str, Mapping[str, Any]] | None = None,
+    mdl_material_name: str = "OmniGlassRenderChangeV1",
 ) -> Path:
     """Write one fixed-layout evidence scene; rendering stays in an adapter process."""
 
@@ -22,6 +35,11 @@ def build_evidence_scene(
     if not asset_prim_path.startswith("/World/"):
         raise ValueError("asset_prim_path must be under /World")
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    overlay = ""
+    if mdl_inputs:
+        overlay = "\n" + _omniglass_input_overlay(
+            mdl_inputs, material_name=mdl_material_name
+        )
     scene = f'''#usda 1.0
 (
     defaultPrim = "World"
@@ -56,7 +74,7 @@ def Xform "World"
         )
         {{
             double3 xformOp:translate = (0, -0.17, {float(object_height_m):.9g})
-            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate"]
+            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate"]{overlay}
         }}
     }}
 
@@ -78,3 +96,40 @@ def Xform "World"
 '''
     output_path.write_text(scene, encoding="utf-8")
     return output_path
+
+
+def _omniglass_input_overlay(
+    mdl_inputs: Mapping[str, Mapping[str, Any]],
+    *,
+    material_name: str,
+) -> str:
+    lines = [
+        '            over "__aan_visual_materials"',
+        "            {",
+        f'                over "{material_name}"',
+        "                {",
+        '                    over "Shader"',
+        "                    {",
+    ]
+    for name, spec in mdl_inputs.items():
+        lines.append(f"                        {_format_mdl_input(name, spec)}")
+    lines.extend(
+        [
+            "                    }",
+            "                }",
+            "            }",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _format_mdl_input(name: str, spec: Mapping[str, Any]) -> str:
+    input_type = spec["type"]
+    value = spec["value"]
+    if input_type == "bool":
+        rendered = "true" if value else "false"
+    elif input_type == "color3f":
+        rendered = "(" + ", ".join(repr(component) for component in value) + ")"
+    else:
+        rendered = repr(value)
+    return f"{input_type} inputs:{name} = {rendered}"

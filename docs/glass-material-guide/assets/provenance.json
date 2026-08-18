@@ -1,12 +1,80 @@
 {
-  "schema_version": "scenario-forge-glass-material-guide/v0.1",
+  "schema_version": "scenario-forge-glass-material-guide/v0.2",
   "runtime": "Isaac Sim 4.1",
   "review_setup": "modern wet chemistry room; 2000x800x755 mm table; fixed camera, lighting, and pose",
+  "after_recipe": "reagent_bottle_clear_omniglass",
   "comparisons": [
-    {"asset_id":"graduated_cylinder_250ml","before":{"path":"assets/graduated_cylinder_250ml_before.webp","sha256":"2c792002161186915b1d6b9752c66a0e2a5361225e632dedeba587bf3664cb0e"},"after":{"path":"assets/graduated_cylinder_250ml_after.webp","sha256":"a133691443628a6a2cb919830424d2c463509e8e62e38a7477c1520caae54974"}},
-    {"asset_id":"beaker_325ml","before":{"path":"assets/beaker_325ml_before.webp","sha256":"bfc88ac39f957595d5a95c58542eda5c47634874ff2678f7be28bd825cc0f297"},"after":{"path":"assets/beaker_325ml_after.webp","sha256":"ee6cd723cd48ae3201cae2c87f74f69ad062b34bef5e69d4ba69adc8da90d151"}},
-    {"asset_id":"flat_bottom_flask_250ml_29_42","before":{"path":"assets/flat_bottom_flask_250ml_29_42_before.webp","sha256":"c4fdd1625220712e340b774e846b53a6e9168e6f3639de33dce16b0612b5325f"},"after":{"path":"assets/flat_bottom_flask_250ml_29_42_after.webp","sha256":"f28d77529011a4b6914d2cf34032cd15d0d11f4541ed12288d5ee53b0783c254"}},
-    {"asset_id":"beaker_dynamic","before":{"path":"assets/beaker_dynamic_before.webp","sha256":"3b470ed9eaf2c760a93135657394905adc7a8d080aca4c18ae3f3f18878540d7"},"after":{"path":"assets/beaker_dynamic_after.webp","sha256":"5f9a0b0389086540becc3bb12c0586949b898a45ee7162f4b747fa0b162650b0"}}
+    {
+      "asset_id": "graduated_cylinder_250ml",
+      "before": {
+        "path": "assets/graduated_cylinder_250ml_before.webp",
+        "sha256": "bcb0e79d2a6816ad1151e313d16d22f3c6b32fba54001be815017deb65f77361"
+      },
+      "after": {
+        "path": "assets/graduated_cylinder_250ml_after.webp",
+        "sha256": "befe27da6fa0585d4859335cb240abc6a3527274a12fe7c1ca328c7e87884856"
+      },
+      "pathtracing": {
+        "path": "assets/graduated_cylinder_250ml_pathtracing.webp",
+        "sha256": "532a17cbffad77f3de47fddf2cbc8f2619933ef2755b5fcd98d5f2a6214dfa71"
+      }
+    },
+    {
+      "asset_id": "beaker_325ml",
+      "before": {
+        "path": "assets/beaker_325ml_before.webp",
+        "sha256": "59c9e65ed011539f34be760e2e4028ad48337ea4851c45e3d9398c27d2a6f57f"
+      },
+      "after": {
+        "path": "assets/beaker_325ml_after.webp",
+        "sha256": "f6ca9a58708502e4ceacb4d72614e77145d643b0afa382256da33798b4166073"
+      },
+      "pathtracing": {
+        "path": "assets/beaker_325ml_pathtracing.webp",
+        "sha256": "e76626ac279f44bb8c39bf4a157167db43b7f0aafc40b87ca64436589f7733b0"
+      }
+    },
+    {
+      "asset_id": "flat_bottom_flask_250ml_29_42",
+      "before": {
+        "path": "assets/flat_bottom_flask_250ml_29_42_before.webp",
+        "sha256": "53b1795472b2dae93249c7d8ff1080192b51ea5973ccaf83bf16402263512471"
+      },
+      "after": {
+        "path": "assets/flat_bottom_flask_250ml_29_42_after.webp",
+        "sha256": "1eb1db79032148079069c4bba503b513a06510f11cd43db6d0ceb6460a856dfd"
+      },
+      "pathtracing": {
+        "path": "assets/flat_bottom_flask_250ml_29_42_pathtracing.webp",
+        "sha256": "8977a80ae7197d86ea16d8a82961b59bc16676aee9dbb2fa75f417e30d10c215"
+      }
+    },
+    {
+      "asset_id": "beaker_dynamic",
+      "before": {
+        "path": "assets/beaker_dynamic_before.webp",
+        "sha256": "de9231f910ad344f4ac68408d41905f24c689f9203e8ae8622ca9b989b966918"
+      },
+      "after": {
+        "path": "assets/beaker_dynamic_after.webp",
+        "sha256": "fd051f42a7071ee4aea221ec3b6c4505625451f641c5f0fd66db3ebd4ba42a72"
+      },
+      "pathtracing": {
+        "path": "assets/beaker_dynamic_pathtracing.webp",
+        "sha256": "f6079dd8078109baf39c09c7a92a5acd0f73e98efa70e5f126bbd88e27bd70e4"
+      }
+    }
   ],
-  "claim_boundary": "visual material comparison only; no task package, robot policy, liquid transfer, or benchmark claim"
+  "donor": {
+    "asset_id": "reagent_bottle_90x55",
+    "rtl": {
+      "path": "assets/reagent_bottle_90x55.webp",
+      "sha256": "658dd6726cc8795c641c445e298cd71566543b6e334f3821a7ad494d4c8d5209"
+    },
+    "pathtracing": {
+      "path": "assets/reagent_bottle_90x55_pathtracing.webp",
+      "sha256": "d426767efa9d9131e0608542b99a60ecdf07ca64b4cb44c2c87b0e3272c1678f"
+    }
+  },
+  "claim_boundary": "visual comparison of pre-glass_v1 packages against glass_v1 meshes with reagent-bottle OmniGlass inputs overlaid, plus same-camera PathTracing stills; ConvertAsset packages were not rebuilt; no task package, robot policy, liquid transfer, or benchmark claim"
 }

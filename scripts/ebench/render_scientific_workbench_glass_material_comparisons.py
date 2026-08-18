@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render fixed-room A/B evidence for the four glass_v1 packages in Isaac Sim 4.1."""
+"""Render fixed-room A/B evidence for bottle OmniGlass on glass_v1 meshes."""
 
 from __future__ import annotations
 
@@ -18,14 +18,20 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from scenario_forge.generation.glass_material_evidence import build_evidence_scene  # noqa: E402
+from scenario_forge.generation.glass_material_evidence import (  # noqa: E402
+    REAGENT_BOTTLE_CLEAR_OMNIGLASS_INPUTS,
+    build_evidence_scene,
+)
 
 
 CONVERT_ROOT = Path("/cpfs/user/zhuzihou/dev/ConvertAsset")
 ROOM = CONVERT_ROOT / "outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package/asset.usd"
 TABLE = CONVERT_ROOT / "outputs/scientific_workbench_standard_table_20260811/package/asset.usd"
 NEW_ROOT = CONVERT_ROOT / "outputs/scientific_workbench_glass_material_v1_20260818/packages"
-OUTPUT = REPO_ROOT / "outputs/scientific_workbench_glass_material_v1_20260818/evidence/comparisons"
+OUTPUT = (
+    REPO_ROOT
+    / "outputs/scientific_workbench_glass_material_bottle_recipe_20260818/evidence/comparisons"
+)
 
 
 ASSETS = (
@@ -78,6 +84,9 @@ def main() -> int:
                 asset_usd=asset[variant],
                 asset_prim_path=str(asset["prim"]),
                 object_height_m=0.755,
+                mdl_inputs=(
+                    REAGENT_BOTTLE_CLEAR_OMNIGLASS_INPUTS if variant == "after" else None
+                ),
             )
 
     from isaacsim import SimulationApp
@@ -107,7 +116,8 @@ def main() -> int:
     finally:
         pass
     manifest = {
-        "schema_version": "scenario-forge-glass-material-comparison/v0.1",
+        "schema_version": "scenario-forge-glass-material-comparison/v0.2",
+        "after_recipe": "reagent_bottle_clear_omniglass",
         "status": "pass",
         "runtime": {
             "engine": "Isaac Sim",
@@ -125,8 +135,10 @@ def main() -> int:
         },
         "comparisons": records,
         "claim_boundary": (
-            "Fixed-pose visual material comparison only; no physics step, robot policy, "
-            "liquid transfer, or benchmark claim."
+            "Fixed-pose visual comparison of the pre-glass_v1 packages against the "
+            "admitted glass_v1 meshes with reagent-bottle OmniGlass inputs overlaid. "
+            "ConvertAsset packages were not rebuilt. No physics, robot-policy, "
+            "liquid-transfer, or benchmark claim."
         ),
     }
     (staging / "comparison_manifest.json").write_text(
