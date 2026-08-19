@@ -36,6 +36,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Scientific Workbench Task Directory](task-directory/)
 - [量筒 GPU-PBD 液体修复教程](liquid-cylinder-tutorial/)
 - [给任意合格容器加入初始液体](liquid-autofill/)
+- [Task02 烧杯四档液体验证](records/2026-08-20-task02-beaker-liquid-fill-sweep.md)
 - [Liquid Autofill Runbook](operations/liquid-autofill.md)
 - [Scientific Workbench Background Gallery](background-gallery/)
 - [Build the Scientific Workbench Task Directory](operations/build-scientific-workbench-task-directory.md)
