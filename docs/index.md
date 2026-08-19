@@ -28,12 +28,15 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Scientific Workbench Task Coverage Factory](design/task-coverage-factory.md)
 - [Progress Rubric (scenario-spec/v0.4)](design/progress-rubric.md)
 - [Liquid Measurement Adapter Contract](design/liquid-measurement-adapter-contract.md)
+- [Liquid Autofill Contract](design/liquid-autofill-contract.md)
 
 ## Operations
 
 - [Artifact Policy](operations/artifact-policy.md)
 - [Scientific Workbench Task Directory](task-directory/)
 - [量筒 GPU-PBD 液体修复教程](liquid-cylinder-tutorial/)
+- [给任意合格容器加入初始液体](liquid-autofill/)
+- [Liquid Autofill Runbook](operations/liquid-autofill.md)
 - [Scientific Workbench Background Gallery](background-gallery/)
 - [Build the Scientific Workbench Task Directory](operations/build-scientific-workbench-task-directory.md)
 - [Generate Scientific Workbench Layout Prototypes](operations/generate-scientific-workbench-layout-prototypes.md)
@@ -54,6 +57,8 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Scientific Workbench Task Design (self-contained HTML)](reference/scientific-workbench-task-design.html) — refresh via `python scripts/sync_scientific_workbench_task_catalog.py --write`
 
 ## Records
+
+- [2026-08-20 Liquid Autofill Tool](records/2026-08-20-liquid-autofill-tool.md)
 
 - [2026-08-19 Workbench Table Gray-top Package](records/2026-08-19-workbench-table-gray-top-package.md)
 - [2026-08-18 HCI 15 mL Closed Insert and Lid Demo Admission](records/2026-08-18-hci-15ml-closed-insert-lid-admission.md)

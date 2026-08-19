@@ -76,6 +76,11 @@ from scenario_forge.generation.workflows.workflow_composer import (
     WorkflowComposeError,
     compose_workflow_artifacts,
 )
+from scenario_forge.generation.liquid_autofill import (
+    LiquidAutofillGenerationError,
+    add_liquid,
+    inspect_liquid_candidates,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -518,12 +523,69 @@ def build_parser() -> argparse.ArgumentParser:
     )
     single_object_fixture_parser.add_argument("--out", required=True, help="Output package directory")
 
+    liquid_parser = subparsers.add_parser(
+        "liquid", help="Inspect containers and add qualified GPU-PBD liquid starts"
+    )
+    liquid_subparsers = liquid_parser.add_subparsers(dest="liquid_command", required=True)
+    liquid_inspect_parser = liquid_subparsers.add_parser(
+        "inspect", help="List trustworthy container candidates without modifying the source"
+    )
+    liquid_inspect_parser.add_argument("--scene", required=True, help="Source USD scene")
+    liquid_inspect_parser.add_argument("--out", help="Inspection JSON (defaults beside the source)")
+    liquid_inspect_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    liquid_inspect_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python executable")
+    liquid_add_parser = liquid_subparsers.add_parser(
+        "add", help="Produce one qualified, relocatable liquid-start USD and ZIP"
+    )
+    liquid_add_parser.add_argument("--scene", required=True, help="Source USD scene")
+    liquid_add_parser.add_argument("--container", required=True, help="Exact container prim path")
+    liquid_add_parser.add_argument("--fill", required=True, type=float, help="Settled fill ratio 0.10-0.80")
+    liquid_add_parser.add_argument("--out", help="Delivery directory (defaults beside the source)")
+    liquid_add_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    liquid_add_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python executable")
+
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "liquid" and args.liquid_command == "inspect":
+        try:
+            result = inspect_liquid_candidates(
+                scene=Path(args.scene),
+                output=Path(args.out) if args.out else None,
+                convertasset_root=(
+                    Path(args.convertasset_root) if args.convertasset_root else None
+                ),
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except LiquidAutofillGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Liquid inspection report: {result.report}")
+        return 0
+
+    if args.command == "liquid" and args.liquid_command == "add":
+        try:
+            result = add_liquid(
+                scene=Path(args.scene),
+                container=args.container,
+                fill=args.fill,
+                output=Path(args.out) if args.out else None,
+                convertasset_root=(
+                    Path(args.convertasset_root) if args.convertasset_root else None
+                ),
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except LiquidAutofillGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Liquid USD: {result.package.alias_usd}")
+        print(f"Liquid ZIP: {result.package.zip_path}")
+        print(f"Diagnostics: {result.diagnostics}")
+        return 0
 
     if args.command == "package" and args.package_command == "scaffold":
         out_dir = scaffold_starter_package(Path(args.out))
