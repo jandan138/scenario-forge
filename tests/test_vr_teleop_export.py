@@ -238,6 +238,43 @@ def test_vr_export_supports_generic_non_pour_task_objects(tmp_path: Path) -> Non
     assert "obj_obj_" not in scene
 
 
+def test_vr_export_can_omit_robot_physics_overrides(tmp_path: Path) -> None:
+    package_root = _build_generic_task_package(tmp_path)
+
+    result = export_vr_teleop_package(
+        package_root,
+        tmp_path / "vr-no-robot-physics-overrides",
+        task_id="scientific_workbench_generic_task",
+        include_robot_physics_overrides=False,
+    )
+
+    task_config = result.task_config.read_text(encoding="utf-8")
+    ast.parse(task_config)
+    assert '"set_robot_physics_material"' not in task_config
+    assert '"set_robot_contact_offset"' not in task_config
+    assert '"set_robot_rest_offset"' not in task_config
+    assert '"physx_scene_cfg"' in task_config
+
+
+def test_vr_export_can_hide_static_support_presentation(tmp_path: Path) -> None:
+    package_root = _build_generic_task_package(tmp_path)
+    recipe = package_root / "scenario.yaml"
+    raw = __import__("yaml").safe_load(recipe.read_text(encoding="utf-8"))
+    table = next(item for item in raw["objects"] if item["role"] == "table")
+    table.setdefault("metadata", {})["vr_presentation_visibility"] = "invisible"
+    recipe.write_text(__import__("yaml").safe_dump(raw, sort_keys=False), encoding="utf-8")
+
+    result = export_vr_teleop_package(
+        package_root,
+        tmp_path / "vr-hidden-support",
+        task_id="scientific_workbench_generic_task",
+    )
+
+    scene = result.scene_usd.read_text(encoding="utf-8")
+    table_block = scene.split('def Xform "table"', 1)[1].split('def Xform "obj_', 1)[0]
+    assert 'token visibility = "invisible"' in table_block
+
+
 def test_vr_randomization_groups_objects_from_metadata(tmp_path: Path) -> None:
     package_root = _build_generic_task_package(tmp_path)
     recipe = package_root / "scenario.yaml"

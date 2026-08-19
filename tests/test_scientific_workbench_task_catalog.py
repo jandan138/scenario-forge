@@ -27,6 +27,10 @@ LIVE_TASK_ASSET_REQUEST_PATH = (
     REPO_ROOT
     / "docs/operations/scientific-workbench-live-task-7-10-11-asset-admission-request.yaml"
 )
+HCI_15ML_CLOSED_INSERT_LID_REQUEST_PATH = (
+    REPO_ROOT
+    / "docs/operations/scientific-workbench-hci-15ml-closed-insert-lid-admission-request.yaml"
+)
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -203,6 +207,24 @@ def test_convertasset_request_uses_live_task_7_10_11_identities() -> None:
         ),
     }
     assert request["ownership_boundary"]["consumer_specific_scale_or_physics_patch_forbidden"]
+
+
+def test_hci_15ml_closed_insert_lid_admission_pins_scale_gates_and_isaac_video() -> None:
+    request = _load_yaml(HCI_15ML_CLOSED_INSERT_LID_REQUEST_PATH)
+    catalog_identity = request["catalog_identity"]
+    tube = request["deliveries"]["closed_tube"]
+    scale = tube["non_uniform_scale"]
+    gates = request["runtime_qualification"]["required_pass_records"]
+    video = request["runtime_qualification"]["isaac_demo"]
+
+    assert catalog_identity["canonical_feishu_task"] is False
+    assert scale["k_d"] == [0.50, 0.55]
+    assert scale["k_h"] == [0.33, 0.37]
+    assert tube["assembly"] == "closed_rigid"
+    assert gates == ["socket_insertion_clearance", "lid_contact_cycle"]
+    assert video["format"] == "mp4"
+    assert video["sequence"] == ["lid_open", "tube_insert", "lid_close"]
+    assert video["engine"] == "isaac_sim_4.1"
 
 
 def test_legacy_pdf_catalog_is_archived_but_not_active() -> None:

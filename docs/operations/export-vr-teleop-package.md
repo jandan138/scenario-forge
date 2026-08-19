@@ -45,6 +45,19 @@ and it does not author `/World/_scene`. Direct children use these names:
 - one `obj_*` prim for every tabletop task object and context prop;
 - `vr_direct_open_light`, a texture-free white DomeLight with intensity `750`.
 
+Callers may set `include_robot_physics_overrides=False` when the collection
+runtime, rather than the task handoff, owns Lift2 material/contact/rest-offset
+configuration.  This omits `set_robot_physics_material`,
+`set_robot_contact_offset`, and `set_robot_rest_offset` while retaining the
+shared PhysX scene configuration.  The default remains enabled for existing
+exports.
+
+A support object whose qualified collision must remain active but whose visual
+presentation is already supplied by the environment may declare
+`metadata.vr_presentation_visibility: invisible`.  The VR wrapper authors USD
+visibility on that reference; it does not disable or replace the upstream
+collider.
+
 `/World/_scene` is a runtime mount created by the VR loader. Therefore paths in
 `task_config.py` are runtime paths such as `/World/_scene/obj_beaker`, even though
 the source USD contains `/World/obj_beaker`. Do not pre-author the mount wrapper

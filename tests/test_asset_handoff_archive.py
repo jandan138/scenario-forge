@@ -50,7 +50,7 @@ def test_asset_handoff_archive_preserves_independent_packages(tmp_path: Path) ->
     )
 
     manifest = json.loads((result.root / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["schema_version"] == "scenario-forge-asset-handoff/v0.1"
+    assert manifest["schema_version"] == "scenario-forge-asset-handoff/v0.2"
     assert manifest["asset_count"] == 2
     assert manifest["task_packages_modified"] is False
     assert (result.root / "packages/beaker_glass_v1/asset.usd").is_file()
@@ -73,3 +73,46 @@ def test_asset_handoff_archive_rejects_non_admitted_visual_package(tmp_path: Pat
         assert "visual material-only audit" in str(error)
     else:
         raise AssertionError("blocked package must not be bundled")
+
+
+def test_asset_handoff_archive_accepts_admitted_original_material_package(
+    tmp_path: Path,
+) -> None:
+    package = tmp_path / "reagent_bottle_original_simready"
+    (package / "evidence").mkdir(parents=True)
+    (package / "asset.usd").write_text(
+        '#usda 1.0\n(def Xform "ObjectRoot")\n', encoding="utf-8"
+    )
+    (package / "evidence/manifest.json").write_text(
+        json.dumps(
+            {
+                "package_id": package.name,
+                "asset_id": package.name,
+                "overall_status": "pass",
+                "blocked_reasons": [],
+                "entrypoints": {
+                    "root_usd": "asset.usd",
+                    "asset_entry_prim": "/ObjectRoot",
+                },
+                "runtime_evidence": {"status": "pass"},
+                "visual_material_profile": {"status": "not_requested"},
+                "visual_preservation_fingerprint": {"status": "pass"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = build_asset_handoff_archive(
+        archive_id="original_material",
+        packages=[package],
+        output_dir=tmp_path / "handoff",
+    )
+
+    manifest = json.loads((result.root / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["assets"][0]["visual_admission_mode"] == (
+        "original_material_visual_preservation"
+    )
+    assert manifest["assets"][0]["visual_evidence"] == (
+        "packages/reagent_bottle_original_simready/evidence/manifest.json"
+        "#visual_preservation_fingerprint"
+    )

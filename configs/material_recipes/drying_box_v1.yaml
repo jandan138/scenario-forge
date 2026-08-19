@@ -1,0 +1,118 @@
+# Material recipe for the procedural drying-oven family
+# (external_artifacts/incoming/drying_box, 10 assets, 83 semantic part names).
+#
+# Rules are evaluated top-down against the mesh parent Xform name
+# (case-insensitive regex, search semantics). First match wins; otherwise the
+# part receives `default_material`. Texture-based materials reference files in
+# the shared material library and are copied next to the target USD on assign.
+#
+# Texture set provenance: ambientCG, CC0 1.0 (see
+# external_artifacts/incoming/drying_box/_material_library/manifest.yaml).
+name: drying_box_v1
+version: 1
+default_material: powder_coat_light
+
+materials:
+  stainless_brushed:
+    kind: texture_set
+    textures:
+      color: Metal009/Metal009_1K-JPG_Color.jpg
+      normal: Metal009/Metal009_1K-JPG_NormalGL.jpg
+      roughness: Metal009/Metal009_1K-JPG_Roughness.jpg
+      metallic: Metal009/Metal009_1K-JPG_Metalness.jpg
+    source:
+      provider: ambientCG
+      asset_id: Metal009
+      license: CC0-1.0
+      url: https://ambientcg.com/view?id=Metal009
+
+  powder_coat_light:
+    kind: texture_set
+    textures:
+      color: PowderCoatLight_SF/PowderCoatLight_SF_1K_Color.jpg
+      normal: PowderCoatLight_SF/PowderCoatLight_SF_1K_NormalGL.jpg
+      roughness: PowderCoatLight_SF/PowderCoatLight_SF_1K_Roughness.jpg
+    source:
+      provider: ambientCG
+      asset_id: PowderCoatLight_SF (derived from Metal027 color/normal/roughness)
+      license: CC0-1.0
+      url: https://ambientcg.com/view?id=Metal027
+
+  chrome:
+    kind: parametric
+    diffuse_color: [0.9, 0.91, 0.92]
+    roughness: 0.12
+    metallic: 1.0
+
+  zinc_steel:
+    kind: parametric
+    diffuse_color: [0.62, 0.64, 0.66]
+    roughness: 0.32
+    metallic: 1.0
+
+  dial_aluminum:
+    kind: parametric
+    diffuse_color: [0.75, 0.76, 0.78]
+    roughness: 0.3
+    metallic: 0.95
+
+  plastic_black:
+    kind: parametric
+    diffuse_color: [0.025, 0.025, 0.028]
+    roughness: 0.38
+    metallic: 0.0
+
+  rubber_black:
+    kind: parametric
+    diffuse_color: [0.02, 0.02, 0.02]
+    roughness: 0.92
+    metallic: 0.0
+
+  button_red:
+    kind: parametric
+    diffuse_color: [0.5, 0.02, 0.02]
+    roughness: 0.22
+    metallic: 0.0
+    clearcoat: 0.4
+
+  button_green:
+    kind: parametric
+    diffuse_color: [0.02, 0.35, 0.07]
+    roughness: 0.22
+    metallic: 0.0
+    clearcoat: 0.4
+
+  needle_red:
+    kind: parametric
+    diffuse_color: [0.55, 0.03, 0.03]
+    roughness: 0.45
+    metallic: 0.1
+
+rules:
+  # Indicator / control buttons first: their names may also contain "button".
+  - {pattern: "red_button|stop_button|emergency_stop|power_button", material: button_red}
+  - {pattern: "green_button|start_button", material: button_green}
+  - {pattern: "pushbutton", material: plastic_black}
+  # Gauge needles.
+  - {pattern: "needle", material: needle_red}
+  # Caster wheels and leveling feet are rubber; swivels/brakes are zinc-plated.
+  - {pattern: "caster.*_wheel$|^foot_", material: rubber_black}
+  - {pattern: "caster.*(swivel|brake)", material: zinc_steel}
+  - {pattern: "^rail_stage", material: zinc_steel}
+  # Interior contact surfaces and air-handling hardware: brushed stainless.
+  - {pattern: "shelf|^tray$", material: stainless_brushed}
+  - {pattern: "fan_rotor|blower_rotor|pump_rotor", material: stainless_brushed}
+  - {pattern: "damper", material: stainless_brushed}
+  # Bright hardware.
+  - {pattern: "latch|clamp|toggle_handle|disconnect_handle|handwheel", material: chrome}
+  # Operator controls.
+  - {pattern: "knob|power_rocker", material: plastic_black}
+  - {pattern: "^upper_dial$|^lower_dial$", material: dial_aluminum}
+  # Heavy process doors are stainless; all other doors match the enclosure.
+  - {pattern: "^pressure_door$|^refractory_door$", material: stainless_brushed}
+  - {pattern: "door", material: powder_coat_light}
+  # Frames and hidden mechanics.
+  - {pattern: "^trolley$", material: stainless_brushed}
+  - {pattern: "^carriage$", material: zinc_steel}
+  - {pattern: "^service_drawer$", material: powder_coat_light}
+  - {pattern: "^base$", material: powder_coat_light}

@@ -1,0 +1,48 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_environment_code_room_analytical_instrumentation_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/facade/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/generated_scientific_labs_v2_20260804/analytical_instrumentation/package/evidence/manifest.json
+    producer_revision: generated-scientific-labs-v2-20260804
+    expected_scope_prims: [/World]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room analytical instrumentation; ConvertAsset]
+    redistributable: true
+  scientific_workbench_r12_analytical_room_floor_static_support:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task09_r12_assets_20260818/analytical_room_floor_static_support/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task09_r12_assets_20260818/packages/analytical_room_floor_static_support_r12c
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task09_r12_assets_20260818/packages/analytical_room_floor_static_support_r12c/evidence/manifest.json
+    producer_revision: scientific-workbench-task09-r12-floor-20260818
+    expected_scope_prims: [/World/table]
+    expected_consumer_profile: scenario-forge
+    expected_runtime_profile: isaac41
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [Code-as-Room analytical instrumentation floor; ConvertAsset r12]
+    redistributable: true
+  scientific_workbench_r12_analog_oven:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task09_r12_assets_20260818/analog_gravity_convection_oven_r12/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task09_r12_assets_20260818/packages/analog_gravity_convection_oven_r12_task_controls
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task09_r12_assets_20260818/packages/analog_gravity_convection_oven_r12_task_controls/evidence/manifest.json
+    producer_revision: scientific-workbench-task09-r12-task-controls-20260818
+    expected_scope_prims: [/World/AnalogGravityConvectionOven]
+    expected_consumer_profile: scenario-forge
+    expected_runtime_profile: isaac41
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [drying_box analog gravity convection source; ConvertAsset r12 task-control convex decomposition]
+    redistributable: true
+  scientific_workbench_r12_beaker_dynamic_glass_v1:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_material_v1_20260818/packages/beaker_dynamic_glass_v1/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/Beaker
+    source_uri: convertasset://scientific_workbench_beaker_dynamic_glass_v1
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench beaker; ConvertAsset glass material v1; task interaction gates pending]
+    redistributable: true

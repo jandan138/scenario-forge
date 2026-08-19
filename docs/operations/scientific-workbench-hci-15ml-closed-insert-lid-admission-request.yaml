@@ -1,0 +1,150 @@
+schema_version: scenario-forge-convertasset-hci-15ml-closed-insert-lid-admission-request/v0.1
+request_id: scientific_workbench_hci_15ml_closed_insert_lid_20260818
+status: awaiting_producer
+catalog_identity:
+  canonical_feishu_task: false
+  note: >-
+    This request qualifies a kinematic insert-and-lid-close demonstration on
+    the existing HCI955350 mini centrifuge. It does not define Feishu Task 10
+    or Task 11 and does not authorize a live task package.
+consumer:
+  project: scenario-forge
+  runtime_profile: isaac41
+  license: LicenseRef-Internal-Restricted
+  redistributable: false
+
+producer: ConvertAsset
+producer_boundary:
+  raw_source_files_must_remain_unchanged: true
+  canonical_facade_required_before_dynamic_admission: true
+  package_dependencies_must_be_local: true
+  scenario_forge_physics_repairs_forbidden: true
+  scenario_forge_does_not_own_usd_mdl_mesh_conversion: true
+  consumer_specific_scale_or_physics_patch_forbidden: true
+  required_manifest_schema: asset_application_normalizer.v1
+  required_consumer_profile: scenario-forge
+  required_scoped_physx_warning_count: 0
+  uniform_geometry_scale_only_exception: >-
+    The closed 15 mL tube in this request may use baked non-uniform scale
+    (radial k_d, height k_h). Root prim scale must remain identity. Do not
+    apply this exception to other assets. Do not reuse the scaled tube for
+    cap-tightening.
+
+centrifuge_counterpart:
+  asset_id: scientific_workbench_hci955350_centrifuge_dynamic
+  usage: articulated_object
+  accepted_package: centrifuge_identity_root_r9_mount_contract_v2
+  package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/centrifuge_identity_root_r9_mount_contract_v2
+  mesh_revision_forbidden: true
+  observed_geometry:
+    rotor_hole_inner_diameter_mm: [12.5, 13.3]
+    lid_inner_clearance_above_rotor_mm_approx: 4.0
+    inserted_bottom_z_m_approx: 0.105
+    named_frames: [tube_socket_0_aperture, tube_socket_0_inserted_bottom_parked_root]
+  do_not_reuse_qualification_hashes:
+    - scientific_workbench_test_tube_dynamic_uniform_scale_k0365
+    - tube_package_asset_usd_sha256:7877f65af3d71bfdc51e6ec2a40fce7f7a199be8f70d3c19755ec3aa4650e794
+
+deliveries:
+  closed_tube:
+    asset_id: scientific_workbench_centrifuge_tube_15ml_red_cap_closed_hci_fit
+    usage: rigid_object
+    assembly: closed_rigid
+    source:
+      archive_uri: external_artifacts/incoming/实验室资产库.zip
+      archive_sha256: ab0e286972551f728f73d62054c5b46c00e9056c99e1d402eccb6819cad5f955
+      relative_path: 实验室资产库/02_塑料耗材/15毫升离心管_红盖
+      usd_name: centrifuge_tube_15ml_red_cap.usda
+      closed_pose: frame_1
+      cap_geometry: independent_shell_no_helical_thread
+    producer_facade:
+      required: true
+      source_identity_for_package: facade_sha256
+      raw_sha256_is_provenance_only: true
+      bake_non_uniform_scale_into_mesh: true
+      root_scale_must_be_identity: true
+      support_origin: bottom_center
+      up_axis: Z
+      meters_per_unit: 1.0
+    non_uniform_scale:
+      convention: tube_z_up
+      k_d: [0.50, 0.55]
+      k_h: [0.33, 0.37]
+      k_d_basis: cap_outer_diameter_mm_20.84
+      k_h_basis: assembled_height_mm_119.7
+      target_cap_od_mm: [10.4, 11.5]
+      target_assembled_height_mm: [39.5, 44.3]
+      radial_clearance_in_hci_hole_mm: [0.5, 1.5]
+    package:
+      asset_role: dynamic
+      default_prim: World
+      asset_entry_prim: /World/CentrifugeTube15mlClosed
+      asset_scope_prims: [/World/CentrifugeTube15mlClosed]
+      canonical_frame:
+        up_axis: Z
+        long_axis: +Z
+        origin: bottom_center
+      weld_cap_to_body: true
+      forbidden_reuse:
+        - scientific_workbench_tighten_centrifuge_tube_cap
+    interaction:
+      contract_schema: aan.interaction_contract.v1
+      exactly_one_active_rigid_body: true
+      named_frame_requirements:
+        support:
+          measurement: bottom support center after baked scale
+          authoritative: true
+        grasp:
+          measurement: collision-safe grasp section on the closed assembly
+          authoritative: true
+    runtime_qualification:
+      - Stable on the eBench table after warmup.
+      - The closed assembly is one rigid runtime identity.
+      - Collider diameter and height match the baked k_d and k_h bands.
+      - The package-scoped PhysX warning count is zero.
+
+runtime_qualification:
+  counterpart_centrifuge: centrifuge_identity_root_r9_mount_contract_v2
+  required_pass_records:
+    - socket_insertion_clearance
+    - lid_contact_cycle
+  socket_insertion_clearance:
+    method: session-only kinematic sweep of the delivered closed-tube collider
+    target_frame: tube_socket_0_inserted_bottom_parked_root
+    aperture_frame: tube_socket_0_aperture
+    rotor_pair_contact_count: 0
+    do_not_reuse_k0365_tube_report: true
+  lid_contact_cycle:
+    tube_at_inserted_target_during_lid_probe: true
+    required_status: pass
+    tube_lid_pair_contact_count: 0
+  isaac_demo:
+    engine: isaac_sim_4.1
+    method: scripted_kinematic
+    robot_policy_forbidden: true
+    format: mp4
+    sequence:
+      - lid_open
+      - tube_insert
+      - lid_close
+    storage: convertasset_outputs_or_external_artifacts
+    git_commit_forbidden: true
+    hash_must_be_returned: true
+
+handoff:
+  each_delivery_must_include:
+    - package/asset.usd
+    - package/evidence/manifest.json
+    - package-local runtime qualification evidence referenced by hash
+  demonstration_must_include:
+    - isaac_sim_4.1 mp4 of lid_open then tube_insert then lid_close
+    - socket_insertion_clearance pass bound to the new closed-tube asset hash
+    - lid_contact_cycle pass with the closed tube at the inserted target
+  claims_not_requested:
+    - robot_policy_success
+    - live_feishu_task_10_success
+    - live_feishu_task_11_success
+    - ebench_or_vr_task_package
+    - real_15ml_physical_parity
+    - cap_tightening_on_this_scaled_tube
+    - benchmark_score

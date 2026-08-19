@@ -94,6 +94,7 @@ def export_vr_teleop_package(
     out_dir: str | Path,
     *,
     task_id: str = VR_TASK_ID,
+    include_robot_physics_overrides: bool = True,
 ) -> VRTeleopExportResult:
     """Emit a relocatable VR directory with one scene USD and one config snippet."""
     package_root = Path(package_dir)
@@ -215,6 +216,7 @@ def export_vr_teleop_package(
                 task_id=task_id,
                 robot=robot,
                 objects=scene_objects,
+                include_robot_physics_overrides=include_robot_physics_overrides,
                 object_prim_paths=(
                     None
                     if producer_entrypoint is None
@@ -362,6 +364,14 @@ def _scene_usda(
     ]:
         source_prim = _string(item.get("source_prim_path"), f"{wrapper}.source_prim_path")
         pose = _mapping(item.get("pose"), f"{wrapper}.pose")
+        metadata = item.get("metadata", {})
+        if not isinstance(metadata, Mapping):
+            raise VRTeleopExportError(f"{wrapper}.metadata must be a mapping")
+        presentation_visibility = metadata.get("vr_presentation_visibility")
+        if presentation_visibility not in {None, "inherited", "invisible"}:
+            raise VRTeleopExportError(
+                f"{wrapper}.metadata.vr_presentation_visibility must be inherited or invisible"
+            )
         vr_wrapper = wrapper if wrapper == "table" else _vr_prim_name(wrapper)
         lines.extend(
             [
@@ -369,6 +379,11 @@ def _scene_usda(
                 f"        prepend references = @deps/{role}/asset.usd@<{source_prim}>",
                 "    )",
                 "    {",
+                *(
+                    [f'        token visibility = "{presentation_visibility}"']
+                    if presentation_visibility is not None
+                    else []
+                ),
                 *_pose_lines(pose, indent=8),
                 "    }",
                 "",
@@ -407,6 +422,7 @@ def _task_config_python(
     task_id: str,
     robot: Mapping[str, Any],
     objects: list[Mapping[str, Any]],
+    include_robot_physics_overrides: bool = True,
     object_prim_paths: list[str] | None = None,
 ) -> str:
     spawn = _mapping(robot.get("spawn"), "scenario.robot.spawn")
@@ -448,7 +464,7 @@ def _task_config_python(
             "orientation": _number_list(spawn.get("wxyz"), 4, "robot.spawn.wxyz"),
         },
         "physx_scene_cfg": physx_scene_config(),
-        **vr_robot_contact_config(),
+        **(vr_robot_contact_config() if include_robot_physics_overrides else {}),
     }
     body = _python_literal(config, indent=0).replace(
         '"__SCENE_PATH__"',
