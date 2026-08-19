@@ -32,8 +32,12 @@ def build_evidence_scene(
     for path in (room_usd, table_usd, asset_usd):
         if not Path(path).is_file():
             raise FileNotFoundError(path)
-    if not asset_prim_path.startswith("/World/"):
-        raise ValueError("asset_prim_path must be under /World")
+    if (
+        not asset_prim_path.startswith("/")
+        or asset_prim_path == "/"
+        or "//" in asset_prim_path
+    ):
+        raise ValueError("asset_prim_path must be an absolute USD prim path")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     overlay = ""
     if mdl_inputs:

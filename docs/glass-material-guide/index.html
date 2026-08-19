@@ -3,100 +3,113 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Scenario Forge 实验玻璃器皿 OmniGlass 材质升级教程：四种器皿从旧材质、试剂瓶 RTL 到 PathTracing 的同机位对照。">
-  <title>玻璃器皿材质升级 · Scenario Forge</title>
+  <meta name="description" content="Scenario Forge 实验玻璃器皿正式视觉准入标准：网页配方、原始 SimReady 材质、固定机位证据与工程交付。">
+  <title>玻璃器皿材质准入标准 · Scenario Forge</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="../">SCENARIO FORGE <span>/ OPTICS NOTE 01</span></a>
+    <a class="brand" href="../">SCENARIO FORGE <span>/ OPTICS STANDARD 01</span></a>
     <nav aria-label="页面导航"><a href="#compare">看对比</a><a href="#recipe">看参数</a><a href="#handoff">工程交付</a></nav>
   </header>
 
   <main>
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">VISUAL MATERIAL / 试剂瓶 OmniGlass 预览 · 让实验玻璃真正像玻璃</p>
+        <p class="eyebrow">VISUAL MATERIAL / 正式准入标准 · 让实验玻璃真正像玻璃</p>
         <h1>让实验玻璃<br><em>真正像玻璃</em></h1>
-        <p class="lead">现有量筒、烧杯、平底烧瓶和动态烧杯的 mesh 与绑定不变。每组图走同一条链：旧材质 RTL → 试剂瓶 OmniGlass RTL → 同机位 PathTracing。</p>
+        <p class="lead">量筒、烧杯、平底烧瓶和动态烧杯按本页完整 OmniGlass 状态正式打包；量筒 v2 已将筒身与六角底之间的圆形连接座也纳入玻璃绑定。试剂瓶与锥形瓶保留生产者原始 SimReady 材质。六件资产都已通过 Isaac Sim 4.1 准入与固定机位视觉审查。</p>
         <a class="primary" href="#compare">从原始一路看到 PathTracing ↓</a>
       </div>
       <div class="hero-board" aria-label="本次交付摘要">
-        <div><strong>04</strong><span>玻璃资产</span></div><div><strong>03</strong><span>同机位步骤</span></div>
-        <div><strong>00</strong><span>物理字段改动</span></div><div><strong>4.1</strong><span>Isaac Sim 实测</span></div>
-        <p>一句话问题：试剂瓶看起来更像硼硅玻璃。这组图问的是：同一套参数套到现有空心器皿上，RTL 和 PathTracing 各自长什么样？ConvertAsset 包尚未重建。</p>
+        <div><strong>06</strong><span>正式资产包</span></div><div><strong>02</strong><span>准入路线</span></div>
+        <div><strong>00</strong><span>旧任务静默改动</span></div><div><strong>4.1</strong><span>Isaac Sim 实测</span></div>
+        <p>本页现在不是“效果预览”，而是正式视觉基线：四件现有器皿复现网页配方，两件生产者器皿原材质直通；结构门禁与肉眼门禁缺一不可。</p>
       </div>
     </section>
 
     <section class="plain" id="overview">
       <p class="section-no">01 / 先说人话</p>
-      <h2>这次到底改了什么？</h2>
+      <h2>什么叫“以网页为准”？</h2>
       <div class="plain-grid">
-        <p class="big-answer">这是一次<strong>同机位预览</strong>：旧材质 vs 现有 glass_v1 mesh + 试剂瓶 OmniGlass 输入，再用 PathTracing 看同一套参数。</p>
-        <div class="scope-note"><b>没有重建 ConvertAsset 包</b><br>参数叠在证据场景里，不改已准入的 <code>_glass_v1</code> package，也不升级任何任务 USD。</div>
+        <p class="big-answer">网页的房间、桌子、相机、灯光和可见材质效果共同组成<strong>视觉准入基线</strong>。manifest 全绿但图片发黑、发白或不透明，仍然不算通过。</p>
+        <div class="scope-note"><b>已经正式重建并准入</b><br>最新聚合交付为 <code>glass_web_standard_v2</code>：量筒使用补齐圆形连接座的 v2，其余五件复用已通过的 v1。旧任务 USD 没有被悄悄覆盖，后续任务升级必须显式换包。</div>
       </div>
     </section>
 
     <section class="gallery" id="compare">
       <p class="section-no">02 / 同机位实景对照</p>
-      <h2>四种器皿，从旧材质走到 PathTracing</h2>
-      <p class="section-intro">全部使用同一间现代湿实验室、同一张 2000×800×755 mm 工作台、同一相机、灯光与物体 pose。滑杆只比较前两步材质差；每组下方三张图是完整链路。试剂瓶是参数来源，没有旧材质 before。</p>
+      <h2>同一个机位，直接看准入结果</h2>
+      <p class="section-intro">全部使用同一间现代湿实验室、同一张 2000×800×755 mm 工作台、同一相机、灯光与物体 pose。四组滑杆的右侧已更新为最终准入包；试剂瓶与锥形瓶则对照生产者原始 SimReady 资产与打包后结果。</p>
 
       <article class="donor">
-        <header><span>00</span><h3>试剂瓶 90×55</h3><p>参数来源；同机位 RTL 与 PathTracing</p></header>
+        <header><span>00</span><h3>试剂瓶 90×55</h3><p>原始 SimReady 材质直通；瓶口不再发白</p></header>
         <ol class="chain">
           <li><figure><img src="assets/reagent_bottle_90x55.webp" alt="试剂瓶 90×55 在证据机位下的 RayTracedLighting 实景"><figcaption>1 · 试剂瓶本体 · RTL</figcaption></figure></li>
           <li><figure><img src="assets/reagent_bottle_90x55_pathtracing.webp" alt="试剂瓶 90×55 在同一机位下的 PathTracing 实景"><figcaption>2 · 试剂瓶本体 · PathTracing</figcaption></figure></li>
         </ol>
       </article>
 
+      <article class="donor">
+        <header><span>00B</span><h3>锥形瓶 250 mL · 90/35</h3><p>生产者原资产与最终准入包，同机位核对</p></header>
+        <ol class="chain">
+          <li><figure><img src="assets/erlenmeyer_flask_250ml_90x35_reference.webp" alt="锥形瓶生产者原始 SimReady 材质同机位渲染"><figcaption>1 · PRODUCER SOURCE · RTL</figcaption></figure></li>
+          <li><figure><img src="assets/erlenmeyer_flask_250ml_90x35_candidate.webp" alt="锥形瓶最终准入包同机位渲染"><figcaption>2 · ADMITTED PACKAGE · RTL</figcaption></figure></li>
+        </ol>
+      </article>
+
       <article class="comparison" data-comparison>
-        <header><span>01</span><h3>250 mL 量筒</h3><p>旧材质 → 试剂瓶 OmniGlass → PathTracing</p></header>
-        <div class="split-stage"><img src="assets/graduated_cylinder_250ml_before.webp" alt="量筒材质升级前，杯体深暗且不易透出背景"><div class="after-layer"><img src="assets/graduated_cylinder_250ml_after.webp" alt="量筒套用试剂瓶 OmniGlass 参数后的 RTL 实景图"></div><span class="tag before">BEFORE</span><span class="tag after">BOTTLE RECIPE</span><i class="divider"></i></div>
+        <header><span>01</span><h3>250 mL 量筒</h3><p>网页玻璃标准 v2 · 圆形连接座不再保留青色 PP</p></header>
+        <div class="split-stage"><img src="assets/graduated_cylinder_250ml_before.webp" alt="量筒材质升级前，杯体深暗且不易透出背景"><div class="after-layer"><img src="assets/graduated_cylinder_250ml_after.webp" alt="量筒最终网页标准准入包的 RTL 实景图"></div><span class="tag before">BEFORE</span><span class="tag after">ADMITTED</span><i class="divider"></i></div>
         <input class="split-control" aria-label="拖动比较 250 mL 量筒材质前后效果" type="range" min="0" max="100" value="50">
         <ol class="chain">
           <li><figure><img src="assets/graduated_cylinder_250ml_before.webp" alt="量筒旧材质 RTL 缩略图"><figcaption>1 · 旧材质 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/graduated_cylinder_250ml_after.webp" alt="量筒试剂瓶参数 RTL 缩略图"><figcaption>2 · 试剂瓶参数 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/graduated_cylinder_250ml_pathtracing.webp" alt="量筒试剂瓶参数 PathTracing 缩略图"><figcaption>3 · 试剂瓶参数 · PathTracing</figcaption></figure></li>
+          <li><figure><img src="assets/graduated_cylinder_250ml_after.webp" alt="量筒网页标准 v2 准入包 RTL 缩略图"><figcaption>2 · v2 正式准入包 · RTL</figcaption></figure></li>
+          <li><figure><img src="assets/graduated_cylinder_250ml_pathtracing.webp" alt="量筒网页标准参数 PathTracing 缩略图"><figcaption>3 · 同参数 · PathTracing</figcaption></figure></li>
+        </ol>
+        <p class="section-intro"><b>连接座专项复核：</b>v1 只替换了筒身、内底、杯口、倾倒嘴和六角外底，因此中间圆圈仍是青色半透明 PP；v2 将独立的 <code>Base_Connector/Cylinder_005</code> 也绑定到同一套 ClearBorosilicate。深色来自厚玻璃贴近深蓝桌面的反射，不是黑色材质回退。</p>
+        <ol class="chain">
+          <li><figure><img src="assets/graduated_cylinder_250ml_connector_v1.webp" alt="量筒 v1 圆形连接座仍呈青色塑料感"><figcaption>v1 · 青色 PP 连接座</figcaption></figure></li>
+          <li><figure><img src="assets/graduated_cylinder_250ml_connector_v2.webp" alt="量筒 v2 圆形连接座使用统一玻璃材质"><figcaption>v2 · 统一网页玻璃材质</figcaption></figure></li>
         </ol>
       </article>
 
       <article class="comparison" data-comparison>
         <header><span>02</span><h3>325 mL 烧杯</h3><p>旧材质 → 同一组硼硅 OmniGlass → PathTracing</p></header>
-        <div class="split-stage"><img src="assets/beaker_325ml_before.webp" alt="325 mL 烧杯材质升级前，杯体反射重且底部发黑"><div class="after-layer"><img src="assets/beaker_325ml_after.webp" alt="325 mL 烧杯套用试剂瓶 OmniGlass 参数后的 RTL 实景图"></div><span class="tag before">BEFORE</span><span class="tag after">BOTTLE RECIPE</span><i class="divider"></i></div>
+        <div class="split-stage"><img src="assets/beaker_325ml_before.webp" alt="325 mL 烧杯材质升级前，杯体反射重且底部发黑"><div class="after-layer"><img src="assets/beaker_325ml_after.webp" alt="325 mL 烧杯最终网页标准准入包的 RTL 实景图"></div><span class="tag before">BEFORE</span><span class="tag after">ADMITTED</span><i class="divider"></i></div>
         <input class="split-control" aria-label="拖动比较 325 mL 烧杯材质前后效果" type="range" min="0" max="100" value="50">
         <ol class="chain">
           <li><figure><img src="assets/beaker_325ml_before.webp" alt="325 mL 烧杯旧材质 RTL 缩略图"><figcaption>1 · 旧材质 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/beaker_325ml_after.webp" alt="325 mL 烧杯试剂瓶参数 RTL 缩略图"><figcaption>2 · 试剂瓶参数 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/beaker_325ml_pathtracing.webp" alt="325 mL 烧杯试剂瓶参数 PathTracing 缩略图"><figcaption>3 · 试剂瓶参数 · PathTracing</figcaption></figure></li>
+          <li><figure><img src="assets/beaker_325ml_after.webp" alt="325 mL 烧杯网页标准准入包 RTL 缩略图"><figcaption>2 · 正式准入包 · RTL</figcaption></figure></li>
+          <li><figure><img src="assets/beaker_325ml_pathtracing.webp" alt="325 mL 烧杯网页标准参数 PathTracing 缩略图"><figcaption>3 · 同参数 · PathTracing</figcaption></figure></li>
         </ol>
       </article>
 
       <article class="comparison" data-comparison>
         <header><span>03</span><h3>250 mL 平底烧瓶</h3><p>只叠瓶身与卷边；29/42 磨口仍保留磨砂</p></header>
-        <div class="split-stage"><img src="assets/flat_bottom_flask_250ml_29_42_before.webp" alt="平底烧瓶材质升级前实景图"><div class="after-layer"><img src="assets/flat_bottom_flask_250ml_29_42_after.webp" alt="平底烧瓶套用试剂瓶 OmniGlass 参数后，瓶身透明但磨口仍为磨砂"></div><span class="tag before">BEFORE</span><span class="tag after">BOTTLE RECIPE</span><i class="divider"></i></div>
+        <div class="split-stage"><img src="assets/flat_bottom_flask_250ml_29_42_before.webp" alt="平底烧瓶材质升级前实景图"><div class="after-layer"><img src="assets/flat_bottom_flask_250ml_29_42_after.webp" alt="平底烧瓶最终网页标准准入包，瓶身透明但磨口仍为磨砂"></div><span class="tag before">BEFORE</span><span class="tag after">ADMITTED</span><i class="divider"></i></div>
         <input class="split-control" aria-label="拖动比较 250 mL 平底烧瓶材质前后效果" type="range" min="0" max="100" value="50">
         <ol class="chain">
           <li><figure><img src="assets/flat_bottom_flask_250ml_29_42_before.webp" alt="平底烧瓶旧材质 RTL 缩略图"><figcaption>1 · 旧材质 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/flat_bottom_flask_250ml_29_42_after.webp" alt="平底烧瓶试剂瓶参数 RTL 缩略图"><figcaption>2 · 试剂瓶参数 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/flat_bottom_flask_250ml_29_42_pathtracing.webp" alt="平底烧瓶试剂瓶参数 PathTracing 缩略图"><figcaption>3 · 试剂瓶参数 · PathTracing</figcaption></figure></li>
+          <li><figure><img src="assets/flat_bottom_flask_250ml_29_42_after.webp" alt="平底烧瓶网页标准准入包 RTL 缩略图"><figcaption>2 · 正式准入包 · RTL</figcaption></figure></li>
+          <li><figure><img src="assets/flat_bottom_flask_250ml_29_42_pathtracing.webp" alt="平底烧瓶网页标准参数 PathTracing 缩略图"><figcaption>3 · 同参数 · PathTracing</figcaption></figure></li>
         </ol>
       </article>
 
       <article class="comparison" data-comparison>
         <header><span>04</span><h3>动态烧杯</h3><p>液体任务用的动态杯体也叠同一组参数</p></header>
-        <div class="split-stage"><img src="assets/beaker_dynamic_before.webp" alt="动态烧杯材质升级前实景图"><div class="after-layer"><img src="assets/beaker_dynamic_after.webp" alt="动态烧杯套用试剂瓶 OmniGlass 参数后 RTL 实景图"></div><span class="tag before">BEFORE</span><span class="tag after">BOTTLE RECIPE</span><i class="divider"></i></div>
+        <div class="split-stage"><img src="assets/beaker_dynamic_before.webp" alt="动态烧杯材质升级前实景图"><div class="after-layer"><img src="assets/beaker_dynamic_after.webp" alt="动态烧杯最终网页标准准入包 RTL 实景图"></div><span class="tag before">BEFORE</span><span class="tag after">ADMITTED</span><i class="divider"></i></div>
         <input class="split-control" aria-label="拖动比较动态烧杯材质前后效果" type="range" min="0" max="100" value="50">
         <ol class="chain">
           <li><figure><img src="assets/beaker_dynamic_before.webp" alt="动态烧杯旧材质 RTL 缩略图"><figcaption>1 · 旧材质 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/beaker_dynamic_after.webp" alt="动态烧杯试剂瓶参数 RTL 缩略图"><figcaption>2 · 试剂瓶参数 · RTL</figcaption></figure></li>
-          <li><figure><img src="assets/beaker_dynamic_pathtracing.webp" alt="动态烧杯试剂瓶参数 PathTracing 缩略图"><figcaption>3 · 试剂瓶参数 · PathTracing</figcaption></figure></li>
+          <li><figure><img src="assets/beaker_dynamic_after.webp" alt="动态烧杯网页标准准入包 RTL 缩略图"><figcaption>2 · 正式准入包 · RTL</figcaption></figure></li>
+          <li><figure><img src="assets/beaker_dynamic_pathtracing.webp" alt="动态烧杯网页标准参数 PathTracing 缩略图"><figcaption>3 · 同参数 · PathTracing</figcaption></figure></li>
         </ol>
       </article>
     </section>
 
     <section class="recipe" id="recipe">
-      <p class="section-no">03 / 可复现配方</p><h2>试剂瓶那套显式 OmniGlass 输入</h2>
+      <p class="section-no">03 / 可复现配方</p><h2>网页标准的完整 OmniGlass 状态</h2>
       <div class="parameter-list">
         <div><code>glass_color</code><b>0.99<br>0.998<br>1.0</b><small>几乎无色的硼硅本体</small></div>
         <div><code>reflection_color</code><b>1.0<br>1.0<br>1.0</b><small>白反射，不再偏冷</small></div>
@@ -104,14 +117,17 @@
         <div><code>glass_ior</code><b>1.47</b><small>硼硅玻璃，不是默认 1.491</small></div>
         <div><code>thin_walled</code><b>false</b><small>按厚壁折射，不走单面</small></div>
         <div><code>depth</code><b>0.002</b><small>2 mm 体积吸收</small></div>
+        <div><code>enable_opacity</code><b>false</b><small>沿用网页证据层的非透明度通道模式</small></div>
+        <div><code>cutout_opacity</code><b>0.0</b><small>明确写入，不再依赖旧包继承</small></div>
+        <div><code>roughness_texture_influence</code><b>1.0</b><small>保留网页参考中的粗糙度纹理影响</small></div>
       </div>
-      <div class="truth-grid"><div><h3>显式写入</h3><p>这六项来自 <code>manual_glassware_v1</code> 试剂瓶 ClearBorosilicate shader。磨口仍不覆盖，继续用原来的磨砂绑定。</p></div><div><h3>还没准入</h3><p>这是证据层叠加，不是新的 ConvertAsset <code>glass_v2</code> 包。看完图再决定要不要走正式 profile。</p></div></div>
+      <div class="truth-grid"><div><h3>九项完整写入</h3><p>前六项来自 <code>manual_glassware_v1</code> 的 ClearBorosilicate shader；后三项原先由网页参考所用的 glass_v1 材质继承。正式 profile 现在把九项全部写明，不再靠隐式继承。</p></div><div><h3>两条准入路线</h3><p>现有四件器皿使用完整网页 profile；试剂瓶与锥形瓶直接保留原始 SimReady ClearBorosilicate、GroundGlass、标记与 GeomSubset 绑定。</p></div></div>
     </section>
 
     <section class="pipeline" id="handoff">
       <p class="section-no">04 / 工程边界</p><h2>谁负责什么，一刀切清楚</h2>
-      <div class="flow"><div><b>① ConvertAsset</b><p>source-bound profile、Typed MDL inputs、OmniGlass 与 helper 闭包、Isaac 4.1 准入。</p></div><span>→</span><div><b>② Scenario Forge</b><p>严格消费四个不可变 package，打统一交付 ZIP，组织 A/B 证据与文档；不重写转换逻辑。</p></div><span>→</span><div><b>③ 任务升级（后续）</b><p>需要时显式发布新的 Task 版本。不会把材质变更悄悄塞回旧任务包。</p></div></div>
-      <div class="audit"><strong>物理未变证据</strong><p>没有升级任务包。现有 <code>_glass_v1</code> package 的 physics 与 interaction profile 未改；本次只在证据场景叠 OmniGlass 输入。</p></div>
+      <div class="flow"><div><b>① ConvertAsset</b><p>source-bound profile 或原材质保真路线、Typed MDL inputs、OmniGlass 闭包、Isaac 4.1 准入。</p></div><span>→</span><div><b>② Scenario Forge</b><p>严格消费六个不可变 package，打统一交付 ZIP，组织 A/B 证据与文档；不重写转换逻辑。</p></div><span>→</span><div><b>③ 任务升级（后续）</b><p>需要时显式发布新的 Task 版本。不会把材质变更悄悄塞回旧任务包。</p></div></div>
+      <div class="audit"><strong>结构与视觉双门禁</strong><p>量筒 v2 与另外三个覆盖包均有 visual-material-only audit；两个原材质包均有 visual-preservation fingerprint。六件全部通过 Isaac 4.1 runtime 与固定机位肉眼审查，但本轮没有升级任务 USD。</p></div>
     </section>
 
     <section class="boundary">
@@ -119,7 +135,7 @@
       <ul><li><b>玻璃棒：</b>本轮不改。</li><li><b>瓶塞：</b>不属于透明玻璃主体范围。</li><li><b>平底烧瓶磨口：</b>保留磨砂，不整件覆盖。</li><li><b>任务结果：</b>不继承机器人策略、液体转移或 benchmark 成功结论。</li></ul>
     </section>
   </main>
-  <footer><span>SCENARIO FORGE · 2026-08-18</span><a href="../task-directory/">返回任务目录</a><a href="../">文档首页</a></footer>
+  <footer><span>SCENARIO FORGE · 2026-08-19</span><a href="../task-directory/">返回任务目录</a><a href="../">文档首页</a></footer>
   <script src="guide.js"></script>
 </body>
 </html>

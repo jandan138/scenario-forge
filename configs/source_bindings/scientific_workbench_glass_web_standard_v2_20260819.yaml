@@ -1,0 +1,62 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_graduated_cylinder_250ml_glass_web_standard_v2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages/graduated_cylinder_250ml_glass_web_standard_v2/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/GraduatedCylinder250ml
+    source_uri: convertasset://scientific_workbench_graduated_cylinder_250ml_glass_web_standard_v2
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench 250 mL graduated cylinder; webpage-standard ClearBorosilicate including round base connector]
+    redistributable: true
+  scientific_workbench_beaker_325ml_glass_web_standard_v1:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages/beaker_325ml_glass_web_standard_v1/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/Beaker325ml
+    source_uri: convertasset://scientific_workbench_beaker_325ml_glass_web_standard_v1
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench 325 mL beaker; webpage-standard ClearBorosilicate]
+    redistributable: true
+  scientific_workbench_flat_bottom_flask_250ml_29_42_glass_web_standard_v1:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages/flat_bottom_flask_250ml_29_42_glass_web_standard_v1/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/FlatBottomFlask2942
+    source_uri: convertasset://scientific_workbench_flat_bottom_flask_250ml_29_42_glass_web_standard_v1
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench flat-bottom flask 250 mL 29/42; webpage-standard ClearBorosilicate]
+    redistributable: true
+  scientific_workbench_beaker_dynamic_glass_web_standard_v1:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages/beaker_dynamic_glass_web_standard_v1/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/Beaker
+    source_uri: convertasset://scientific_workbench_beaker_dynamic_glass_web_standard_v1
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench dynamic beaker; webpage-standard ClearBorosilicate]
+    redistributable: true
+  scientific_workbench_reagent_bottle_90x55_original_simready:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages/reagent_bottle_90x55_original_simready/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /ObjectRoot
+    source_uri: convertasset://scientific_workbench_reagent_bottle_90x55_original_simready
+    expected_sha256: sha256:159e6014bbacc622af35ac8202f4cda5703d4cf1db5a0704db1d57560d00362e
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [manual_glassware_v1 reagent bottle 90x55; producer original SimReady material]
+    redistributable: true
+  scientific_workbench_erlenmeyer_flask_250ml_90x35_original_simready:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages/erlenmeyer_flask_250ml_90x35_original_simready/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /ObjectRoot
+    source_uri: convertasset://scientific_workbench_erlenmeyer_flask_250ml_90x35_original_simready
+    expected_sha256: sha256:159e6014bbacc622af35ac8202f4cda5703d4cf1db5a0704db1d57560d00362e
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [manual_glassware_v1 Erlenmeyer flask 250 mL 90x35; producer original SimReady material]
+    redistributable: true

@@ -43,6 +43,10 @@ def test_evidence_scene_uses_real_room_table_and_one_glass_asset(tmp_path: Path)
     assert str(table.resolve()) in text
     assert str(asset.resolve()) in text
     assert "inputs:glass_ior" not in text
+    assert 'over "Body"' not in text
+    assert "__aan_static_support_proxy" not in text
+    assert "EvidenceTableTop" not in text
+    assert "UsdPreviewSurface" not in text
 
 
 def test_evidence_scene_overlays_reagent_bottle_omniglass_on_existing_shader(
@@ -77,3 +81,30 @@ def test_evidence_scene_overlays_reagent_bottle_omniglass_on_existing_shader(
     assert "float inputs:depth = 0.002" in text
     assert REAGENT_BOTTLE_CLEAR_OMNIGLASS_INPUTS["glass_ior"]["value"] == 1.47
     assert REAGENT_BOTTLE_CLEAR_OMNIGLASS_INPUTS["frosting_roughness"]["value"] == 0.035
+
+
+def test_evidence_scene_accepts_an_absolute_non_world_source_entry_prim(
+    tmp_path: Path,
+) -> None:
+    room = tmp_path / "room.usda"
+    table = tmp_path / "table.usda"
+    asset = tmp_path / "asset.usda"
+    _asset(room, "Room")
+    _asset(table, "table")
+    asset.write_text(
+        '#usda 1.0\n(defaultPrim = "ObjectRoot" metersPerUnit = 1 upAxis = "Z")\n'
+        'def Xform "ObjectRoot" {}\n',
+        encoding="utf-8",
+    )
+    output = tmp_path / "scene.usda"
+
+    build_evidence_scene(
+        output_path=output,
+        room_usd=room,
+        table_usd=table,
+        asset_usd=asset,
+        asset_prim_path="/ObjectRoot",
+        object_height_m=0.755,
+    )
+
+    assert f"@{asset.resolve()}@</ObjectRoot>" in output.read_text(encoding="utf-8")

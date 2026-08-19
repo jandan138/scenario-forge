@@ -1,0 +1,62 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_graduated_cylinder_250ml_glass_v2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_material_v2_20260818/packages/graduated_cylinder_250ml_glass_v2/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/GraduatedCylinder250ml
+    source_uri: convertasset://scientific_workbench_graduated_cylinder_250ml_glass_v2
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench 250 mL graduated cylinder; ConvertAsset ClearBorosilicate v2]
+    redistributable: true
+  scientific_workbench_beaker_325ml_glass_v2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_material_v2_20260818/packages/beaker_325ml_glass_v2/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/Beaker325ml
+    source_uri: convertasset://scientific_workbench_beaker_325ml_glass_v2
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench 325 mL beaker; ConvertAsset ClearBorosilicate v2]
+    redistributable: true
+  scientific_workbench_flat_bottom_flask_250ml_29_42_glass_v2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_material_v2_20260818/packages/flat_bottom_flask_250ml_29_42_glass_v2/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/FlatBottomFlask2942
+    source_uri: convertasset://scientific_workbench_flat_bottom_flask_250ml_29_42_glass_v2
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench flat-bottom flask 250 mL 29/42; ConvertAsset ClearBorosilicate v2]
+    redistributable: true
+  scientific_workbench_beaker_dynamic_glass_v2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_material_v2_20260818/packages/beaker_dynamic_glass_v2/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/Beaker
+    source_uri: convertasset://scientific_workbench_beaker_dynamic_glass_v2
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench dynamic beaker; ConvertAsset ClearBorosilicate v2]
+    redistributable: true
+  scientific_workbench_reagent_bottle_90x55_glass_v2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_material_v2_20260818/packages/reagent_bottle_90x55_glass_v2/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/ReagentBottle90x55
+    source_uri: convertasset://scientific_workbench_reagent_bottle_90x55_glass_v2
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [manual glassware reagent bottle 90x55; ConvertAsset ClearBorosilicate v2]
+    redistributable: true
+  scientific_workbench_erlenmeyer_flask_250ml_90x35_glass_v2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_material_v2_20260818/packages/erlenmeyer_flask_250ml_90x35_glass_v2/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /World/ErlenmeyerFlask250ml90x35
+    source_uri: convertasset://scientific_workbench_erlenmeyer_flask_250ml_90x35_glass_v2
+    expected_sha256: sha256:0dc32192eef92da87ec37f0d959eb9beab638587148c081d7febefc6cb404952
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [manual glassware Erlenmeyer flask 250 mL 90x35; ConvertAsset ClearBorosilicate v2]
+    redistributable: true

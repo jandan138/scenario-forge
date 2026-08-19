@@ -1,8 +1,8 @@
 {
-  "schema_version": "scenario-forge-glass-material-guide/v0.2",
+  "schema_version": "scenario-forge-glass-material-guide/v0.4",
   "runtime": "Isaac Sim 4.1",
   "review_setup": "modern wet chemistry room; 2000x800x755 mm table; fixed camera, lighting, and pose",
-  "after_recipe": "reagent_bottle_clear_omniglass",
+  "after_recipe": "glass_web_standard_v2_connector_complete",
   "comparisons": [
     {
       "asset_id": "graduated_cylinder_250ml",
@@ -12,11 +12,11 @@
       },
       "after": {
         "path": "assets/graduated_cylinder_250ml_after.webp",
-        "sha256": "befe27da6fa0585d4859335cb240abc6a3527274a12fe7c1ca328c7e87884856"
+        "sha256": "235b8d8d6797460b6e76a95f84c2a40ad7521847c46dbc29d4c16c6ff264aa8f"
       },
       "pathtracing": {
         "path": "assets/graduated_cylinder_250ml_pathtracing.webp",
-        "sha256": "532a17cbffad77f3de47fddf2cbc8f2619933ef2755b5fcd98d5f2a6214dfa71"
+        "sha256": "fa1b566bdee8120d9f5601209e90e4a690ca0e645b4ef947a9336a2311f7b00f"
       }
     },
     {
@@ -27,11 +27,11 @@
       },
       "after": {
         "path": "assets/beaker_325ml_after.webp",
-        "sha256": "f6ca9a58708502e4ceacb4d72614e77145d643b0afa382256da33798b4166073"
+        "sha256": "2935679bcb3f8e192211c1bdde9171d0bfbdcf6eb2d105f76b07e3cc182bcb91"
       },
       "pathtracing": {
         "path": "assets/beaker_325ml_pathtracing.webp",
-        "sha256": "e76626ac279f44bb8c39bf4a157167db43b7f0aafc40b87ca64436589f7733b0"
+        "sha256": "08a2060d2cb2079361e7d80781e3e47cb6542b87464b585bab749df3db7cd1d1"
       }
     },
     {
@@ -42,11 +42,11 @@
       },
       "after": {
         "path": "assets/flat_bottom_flask_250ml_29_42_after.webp",
-        "sha256": "1eb1db79032148079069c4bba503b513a06510f11cd43db6d0ceb6460a856dfd"
+        "sha256": "bed3082e97579e3b85d5aa77d2f98393ea9a8ccf51df41a9cb0ffd3ee5fd2b2a"
       },
       "pathtracing": {
         "path": "assets/flat_bottom_flask_250ml_29_42_pathtracing.webp",
-        "sha256": "8977a80ae7197d86ea16d8a82961b59bc16676aee9dbb2fa75f417e30d10c215"
+        "sha256": "d115c71e90dc4ab427e882765b01fb57c6ccefbf3319090c1fe8b80d66f363fc"
       }
     },
     {
@@ -57,11 +57,11 @@
       },
       "after": {
         "path": "assets/beaker_dynamic_after.webp",
-        "sha256": "fd051f42a7071ee4aea221ec3b6c4505625451f641c5f0fd66db3ebd4ba42a72"
+        "sha256": "56185fd36bc473f023ebc31fbd75fd85adb1609e3ba9debad82f9c6ae42ab535"
       },
       "pathtracing": {
         "path": "assets/beaker_dynamic_pathtracing.webp",
-        "sha256": "f6079dd8078109baf39c09c7a92a5acd0f73e98efa70e5f126bbd88e27bd70e4"
+        "sha256": "dcf3be2e08e505b1ab91995a3a9a7ccc865b7431945082848b24ae777bfda9fd"
       }
     }
   ],
@@ -69,12 +69,49 @@
     "asset_id": "reagent_bottle_90x55",
     "rtl": {
       "path": "assets/reagent_bottle_90x55.webp",
-      "sha256": "658dd6726cc8795c641c445e298cd71566543b6e334f3821a7ad494d4c8d5209"
+      "sha256": "0b0fb69cad9bf31d239b0264bc403bc7871ea1b59b2f8e32e780fba96b1eeabd"
     },
     "pathtracing": {
       "path": "assets/reagent_bottle_90x55_pathtracing.webp",
-      "sha256": "d426767efa9d9131e0608542b99a60ecdf07ca64b4cb44c2c87b0e3272c1678f"
+      "sha256": "b63699393599faa2c9a0a20a18269f3c5201f05bfeed100dd1dba819b1206c3b"
     }
   },
-  "claim_boundary": "visual comparison of pre-glass_v1 packages against glass_v1 meshes with reagent-bottle OmniGlass inputs overlaid, plus same-camera PathTracing stills; ConvertAsset packages were not rebuilt; no task package, robot policy, liquid transfer, or benchmark claim"
+  "original_material_assets": [
+    {
+      "asset_id": "reagent_bottle_90x55",
+      "policy": "preserve_original_simready",
+      "candidate_path": "assets/reagent_bottle_90x55.webp",
+      "candidate_sha256": "0b0fb69cad9bf31d239b0264bc403bc7871ea1b59b2f8e32e780fba96b1eeabd"
+    },
+    {
+      "asset_id": "erlenmeyer_flask_250ml_90x35",
+      "policy": "preserve_original_simready",
+      "reference_path": "assets/erlenmeyer_flask_250ml_90x35_reference.webp",
+      "reference_sha256": "827e2361f7a89ede395305f8aef8299189d7aae2c5b4dccbaf76c48a3af1c7a8",
+      "candidate_path": "assets/erlenmeyer_flask_250ml_90x35_candidate.webp",
+      "candidate_sha256": "3b3088fb8f6f91647d58b3ff5ccc52c832522aa7467931edf2bf70861df0b199"
+    }
+  ],
+  "connector_revision": {
+    "asset_id": "graduated_cylinder_250ml",
+    "revision": "glass_web_standard_v2",
+    "v1": {
+      "path": "assets/graduated_cylinder_250ml_connector_v1.webp",
+      "sha256": "78831becdb6e1fa61b8ed5d730d4f738dcab892fd608287d50c6e155cacc47d0"
+    },
+    "v2": {
+      "path": "assets/graduated_cylinder_250ml_connector_v2.webp",
+      "sha256": "235b8d8d6797460b6e76a95f84c2a40ad7521847c46dbc29d4c16c6ff264aa8f"
+    },
+    "visual_result": "The cyan translucent-PP round connector is removed. The v2 connector uses the same WebStandardClearBorosilicate as the body and bases and appears dark where thick clear glass reflects the navy worktop."
+  },
+  "admission": {
+    "status": "pass",
+    "package_root": "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages",
+    "source_bindings": "configs/source_bindings/scientific_workbench_glass_web_standard_v2_20260819.yaml",
+    "handoff_zip": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_glass_web_standard_v2_20260819/handoff/scientific_workbench_glass_web_standard_v2.zip",
+    "handoff_zip_sha256": "e4a359ac865763ceddda35694db45d256daa48c40245134b6ff997541e77325c",
+    "visual_review": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_glass_web_standard_v2_20260819/evidence/connector_comparison/visual_review.json"
+  },
+  "claim_boundary": "visual comparison of pre-glass_v1 packages against glass_v1 meshes with reagent-bottle OmniGlass inputs overlaid, plus same-camera PathTracing stills; evidence scene hides the table Body and proxy cube and binds an opaque dark-blue UsdPreviewSurface on the Surface mesh; ConvertAsset packages were not rebuilt; no task package, robot policy, liquid transfer, or benchmark claim"
 }

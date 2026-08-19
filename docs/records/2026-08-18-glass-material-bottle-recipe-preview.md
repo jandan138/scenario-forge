@@ -20,4 +20,6 @@ this overlay, not a new admitted package.
 
 The published page now shows a three-step chain per vessel: pre-glass_v1 RTL,
 bottle-recipe RTL, and same-camera PathTracing. The reagent bottle is the
-donor reference (RTL + PathTracing, no before).
+donor reference (RTL + PathTracing, no before). PathTracing stills hide the
+table Body and collision proxy and bind an opaque dark-blue UsdPreviewSurface
+on the Surface mesh so the tabletop matches the solid navy RTL look.

@@ -16,7 +16,7 @@ ASSET_IDS = (
 )
 
 
-def test_glass_material_guide_covers_four_real_ab_comparisons() -> None:
+def test_glass_material_guide_covers_the_formal_six_asset_admission() -> None:
     html = (PAGE_ROOT / "index.html").read_text(encoding="utf-8")
     assert "让实验玻璃真正像玻璃" in html
     assert html.count('class="comparison"') == 4
@@ -34,7 +34,12 @@ def test_glass_material_guide_covers_four_real_ab_comparisons() -> None:
         assert f"assets/{asset_id}_pathtracing.webp" in html
     assert "assets/reagent_bottle_90x55.webp" in html
     assert "assets/reagent_bottle_90x55_pathtracing.webp" in html
-    assert html.count('class="chain"') == 5
+    assert "assets/erlenmeyer_flask_250ml_90x35_reference.webp" in html
+    assert "assets/erlenmeyer_flask_250ml_90x35_candidate.webp" in html
+    assert "assets/graduated_cylinder_250ml_connector_v1.webp" in html
+    assert "assets/graduated_cylinder_250ml_connector_v2.webp" in html
+    assert "圆形连接座" in html
+    assert html.count('class="chain"') == 7
     assert "旧材质" in html
     assert "PathTracing" in html
     for value in (
@@ -49,13 +54,17 @@ def test_glass_material_guide_covers_four_real_ab_comparisons() -> None:
         "thin_walled",
         "depth",
         "0.002",
+        "enable_opacity",
+        "cutout_opacity",
+        "roughness_texture_influence",
     ):
         assert value in html
     assert "试剂瓶" in html
-    assert "显式写入" in html
+    assert "九项完整写入" in html
+    assert "已经正式重建并准入" in html
     assert "玻璃棒" in html and "本轮不改" in html
     assert "磨口" in html and "保留磨砂" in html
-    assert "没有升级任务包" in html
+    assert "没有升级任务 USD" in html
     assert "ConvertAsset" in html and "Scenario Forge" in html
     assert "benchmark" in html
     assert "/cpfs/" not in html
@@ -79,7 +88,7 @@ def test_glass_material_guide_is_local_responsive_and_accessible() -> None:
 
 def test_glass_material_media_matches_provenance() -> None:
     provenance = json.loads((PAGE_ROOT / "assets/provenance.json").read_text(encoding="utf-8"))
-    assert provenance["schema_version"] == "scenario-forge-glass-material-guide/v0.2"
+    assert provenance["schema_version"] == "scenario-forge-glass-material-guide/v0.4"
     assert provenance["runtime"] == "Isaac Sim 4.1"
     assert len(provenance["comparisons"]) == 4
     for comparison in provenance["comparisons"]:
@@ -96,10 +105,30 @@ def test_glass_material_media_matches_provenance() -> None:
         path = PAGE_ROOT / item["path"]
         assert path.is_file()
         assert sha256(path.read_bytes()).hexdigest() == item["sha256"]
+    assert provenance["admission"]["status"] == "pass"
+    assert provenance["admission"]["handoff_zip_sha256"] == (
+        "e4a359ac865763ceddda35694db45d256daa48c40245134b6ff997541e77325c"
+    )
+    connector_revision = provenance["connector_revision"]
+    assert connector_revision["revision"] == "glass_web_standard_v2"
+    for side in ("v1", "v2"):
+        item = connector_revision[side]
+        path = PAGE_ROOT / item["path"]
+        assert path.is_file()
+        assert sha256(path.read_bytes()).hexdigest() == item["sha256"]
+    assert {item["asset_id"] for item in provenance["original_material_assets"]} == {
+        "reagent_bottle_90x55",
+        "erlenmeyer_flask_250ml_90x35",
+    }
+    for item in provenance["original_material_assets"]:
+        for field in ("candidate_path", "candidate_sha256"):
+            assert item[field]
+        candidate = PAGE_ROOT / item["candidate_path"]
+        assert sha256(candidate.read_bytes()).hexdigest() == item["candidate_sha256"]
 
 
 def test_docs_navigation_links_to_glass_material_guide() -> None:
     docs_index = (REPO_ROOT / "docs/index.md").read_text(encoding="utf-8")
     directory = (REPO_ROOT / "docs/task-directory/index.html").read_text(encoding="utf-8")
-    assert "[玻璃器皿材质升级教程](glass-material-guide/)" in docs_index
+    assert "[玻璃器皿材质准入标准](glass-material-guide/)" in docs_index
     assert 'href="../glass-material-guide/"' in directory

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Render fixed-room A/B evidence for bottle OmniGlass on glass_v1 meshes."""
+"""Render fixed-pose Isaac Sim 4.1 A/B evidence for six glass-v2 packages."""
 
 from __future__ import annotations
 
+import argparse
 from hashlib import sha256
 import importlib.metadata
 import json
@@ -19,63 +20,121 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from scenario_forge.generation.glass_material_evidence import (  # noqa: E402
-    REAGENT_BOTTLE_CLEAR_OMNIGLASS_INPUTS,
     build_evidence_scene,
 )
 
 
 CONVERT_ROOT = Path("/cpfs/user/zhuzihou/dev/ConvertAsset")
-ROOM = CONVERT_ROOT / "outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package/asset.usd"
-TABLE = CONVERT_ROOT / "outputs/scientific_workbench_standard_table_20260819/package/asset.usd"
-NEW_ROOT = CONVERT_ROOT / "outputs/scientific_workbench_glass_material_v1_20260818/packages"
+ROOM = (
+    CONVERT_ROOT
+    / "outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package/asset.usd"
+)
+TABLE = (
+    CONVERT_ROOT
+    / "outputs/scientific_workbench_standard_table_20260819/package/asset.usd"
+)
+NEW_ROOT = (
+    CONVERT_ROOT
+    / "outputs/scientific_workbench_glass_material_v2_20260818/packages"
+)
+INPUT_ROOT = (
+    CONVERT_ROOT
+    / "outputs/scientific_workbench_glass_material_v2_20260818/input"
+)
 OUTPUT = (
     REPO_ROOT
-    / "outputs/scientific_workbench_glass_material_bottle_recipe_20260818/evidence/comparisons"
+    / "outputs/scientific_workbench_glass_material_v2_20260818/evidence/comparisons"
 )
 
 
 ASSETS = (
     {
         "id": "graduated_cylinder_250ml",
-        "label": "250 mL 量筒",
+        "package_name": "graduated_cylinder_250ml_glass_v2",
+        "label": "250 mL 量筒（含外六边形底座）",
         "prim": "/World/GraduatedCylinder250ml",
-        "before": CONVERT_ROOT / "outputs/scientific_workbench_r7_task_assets_20260813/packages/graduated_cylinder_250ml/asset.usd",
-        "after": NEW_ROOT / "graduated_cylinder_250ml_glass_v1/asset.usd",
+        "before": CONVERT_ROOT
+        / "outputs/scientific_workbench_r7_task_assets_20260813/packages/graduated_cylinder_250ml/asset.usd",
+        "after": NEW_ROOT / "graduated_cylinder_250ml_glass_v2/asset.usd",
     },
     {
         "id": "beaker_325ml",
+        "package_name": "beaker_325ml_glass_v2",
         "label": "325 mL 烧杯",
         "prim": "/World/Beaker325ml",
-        "before": CONVERT_ROOT / "outputs/scientific_workbench_r7_task_assets_20260813/packages/beaker_325ml/asset.usd",
-        "after": NEW_ROOT / "beaker_325ml_glass_v1/asset.usd",
+        "before": CONVERT_ROOT
+        / "outputs/scientific_workbench_r7_task_assets_20260813/packages/beaker_325ml/asset.usd",
+        "after": NEW_ROOT / "beaker_325ml_glass_v2/asset.usd",
     },
     {
         "id": "flat_bottom_flask_250ml_29_42",
+        "package_name": "flat_bottom_flask_250ml_29_42_glass_v2",
         "label": "250 mL 平底烧瓶（29/42）",
         "prim": "/World/FlatBottomFlask2942",
-        "before": CONVERT_ROOT / "outputs/scientific_workbench_task05_task09_assets_r11_20260817/packages/flat_bottom_flask_250ml_29_42/asset.usd",
-        "after": NEW_ROOT / "flat_bottom_flask_250ml_29_42_glass_v1/asset.usd",
+        "before": CONVERT_ROOT
+        / "outputs/scientific_workbench_task05_task09_assets_r11_20260817/packages/flat_bottom_flask_250ml_29_42/asset.usd",
+        "after": NEW_ROOT / "flat_bottom_flask_250ml_29_42_glass_v2/asset.usd",
     },
     {
         "id": "beaker_dynamic",
+        "package_name": "beaker_dynamic_glass_v2",
         "label": "动态烧杯",
         "prim": "/World/Beaker",
-        "before": CONVERT_ROOT / "outputs/scientific_workbench_asset_library_20260810/packages/beaker_transparent_r3/asset.usd",
-        "after": NEW_ROOT / "beaker_dynamic_glass_v1/asset.usd",
+        "before": CONVERT_ROOT
+        / "outputs/scientific_workbench_asset_library_20260810/packages/beaker_transparent_r3/asset.usd",
+        "after": NEW_ROOT / "beaker_dynamic_glass_v2/asset.usd",
+    },
+    {
+        "id": "reagent_bottle_90x55",
+        "package_name": "reagent_bottle_90x55_glass_v2",
+        "label": "90×55 试剂瓶",
+        "prim": "/World/ReagentBottle90x55",
+        "before": INPUT_ROOT / "reagent_bottle_90x55/facade.usda",
+        "after": NEW_ROOT / "reagent_bottle_90x55_glass_v2/asset.usd",
+    },
+    {
+        "id": "erlenmeyer_flask_250ml_90x35",
+        "package_name": "erlenmeyer_flask_250ml_90x35_glass_v2",
+        "label": "250 mL 锥形瓶（90/35）",
+        "prim": "/World/ErlenmeyerFlask250ml90x35",
+        "before": INPUT_ROOT / "erlenmeyer_flask_250ml_90x35/facade.usda",
+        "after": NEW_ROOT / "erlenmeyer_flask_250ml_90x35_glass_v2/asset.usd",
     },
 )
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--asset",
+        choices=[str(asset["id"]) for asset in ASSETS],
+        help="Render one asset instead of the full six-asset comparison.",
+    )
+    parser.add_argument(
+        "--after-usd",
+        type=Path,
+        help="Diagnostic replacement for the selected asset's after USD.",
+    )
+    parser.add_argument("--output", type=Path, default=OUTPUT)
+    args = parser.parse_args(argv)
+    if args.after_usd is not None and args.asset is None:
+        parser.error("--after-usd requires --asset")
+    selected_assets = tuple(
+        dict(asset) for asset in ASSETS if args.asset is None or asset["id"] == args.asset
+    )
+    if args.after_usd is not None:
+        selected_assets[0]["after"] = args.after_usd.resolve()
+
     isaac_version = importlib.metadata.version("isaacsim")
     if not (isaac_version == "4.1" or isaac_version.startswith("4.1.")):
         raise RuntimeError(f"requires Isaac Sim 4.1.x, found {isaac_version}")
-    staging = OUTPUT.parent / ".comparisons.staging"
+    output_path = args.output.resolve()
+    staging = output_path.parent / f".{output_path.name}.staging"
     if staging.exists():
         shutil.rmtree(staging)
     staging.mkdir(parents=True)
     scenes = staging / "scenes"
-    for asset in ASSETS:
+    for asset in selected_assets:
         for variant in ("before", "after"):
             build_evidence_scene(
                 output_path=scenes / f"{asset['id']}_{variant}.usda",
@@ -84,9 +143,6 @@ def main() -> int:
                 asset_usd=asset[variant],
                 asset_prim_path=str(asset["prim"]),
                 object_height_m=0.755,
-                mdl_inputs=(
-                    REAGENT_BOTTLE_CLEAR_OMNIGLASS_INPUTS if variant == "after" else None
-                ),
             )
 
     from isaacsim import SimulationApp
@@ -103,21 +159,20 @@ def main() -> int:
         }
     )
     try:
-        records = _render_all(app, staging, scenes)
+        records = _render_all(app, staging, scenes, selected_assets)
     except BaseException as error:
         (staging / "failure.json").write_text(
             json.dumps({"error_type": type(error).__name__, "error": str(error)}, indent=2)
             + "\n",
             encoding="utf-8",
         )
-        print(f"GLASS_RENDER_FAILED {type(error).__name__}: {error}", flush=True)
+        print(f"GLASS_V2_RENDER_FAILED {type(error).__name__}: {error}", flush=True)
         app.close()
         return 1
-    finally:
-        pass
+
     manifest = {
-        "schema_version": "scenario-forge-glass-material-comparison/v0.2",
-        "after_recipe": "reagent_bottle_clear_omniglass",
+        "schema_version": "scenario-forge-glass-material-comparison/v0.3",
+        "after_recipe": "ClearBorosilicateV2",
         "status": "pass",
         "runtime": {
             "engine": "Isaac Sim",
@@ -135,25 +190,30 @@ def main() -> int:
         },
         "comparisons": records,
         "claim_boundary": (
-            "Fixed-pose visual comparison of the pre-glass_v1 packages against the "
-            "admitted glass_v1 meshes with reagent-bottle OmniGlass inputs overlaid. "
-            "ConvertAsset packages were not rebuilt. No physics, robot-policy, "
-            "liquid-transfer, or benchmark claim."
+            "Fixed-pose visual evidence for six admitted ClearBorosilicate v2 "
+            "packages in Isaac Sim 4.1. The graduated-cylinder after image includes "
+            "the requested glass binding on its outer hexagonal support base. No "
+            "physics, robot-policy, liquid-transfer, task-readiness, or benchmark claim."
         ),
     }
     (staging / "comparison_manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    if OUTPUT.exists():
-        shutil.rmtree(OUTPUT)
-    staging.rename(OUTPUT)
-    print(OUTPUT, flush=True)
+    if output_path.exists():
+        shutil.rmtree(output_path)
+    staging.rename(output_path)
+    print(output_path, flush=True)
     app.close()
     return 0
 
 
-def _render_all(app: Any, output: Path, scenes: Path) -> list[dict[str, Any]]:
+def _render_all(
+    app: Any,
+    output: Path,
+    scenes: Path,
+    assets: tuple[dict[str, Any], ...],
+) -> list[dict[str, Any]]:
     import carb.settings
     import numpy as np
     import omni.replicator.core as rep
@@ -169,8 +229,12 @@ def _render_all(app: Any, output: Path, scenes: Path) -> list[dict[str, Any]]:
     settings.set("/rtx/post/histogram/enabled", False)
     omni.timeline.get_timeline_interface().stop()
     records: list[dict[str, Any]] = []
-    for asset in ASSETS:
-        record: dict[str, Any] = {"asset_id": asset["id"], "label": asset["label"]}
+    for asset in assets:
+        record: dict[str, Any] = {
+            "asset_id": asset["id"],
+            "package_name": asset["package_name"],
+            "label": asset["label"],
+        }
         for variant in ("before", "after"):
             print(f"phase=open asset={asset['id']} variant={variant}", flush=True)
             scene = scenes / f"{asset['id']}_{variant}.usda"
@@ -178,7 +242,6 @@ def _render_all(app: Any, output: Path, scenes: Path) -> list[dict[str, Any]]:
             context.open_stage(str(scene))
             for _ in range(20):
                 app.update()
-            print(f"phase=camera asset={asset['id']} variant={variant}", flush=True)
             camera = Camera(
                 prim_path="/World/GlassEvidenceCamera",
                 name="glass_evidence",

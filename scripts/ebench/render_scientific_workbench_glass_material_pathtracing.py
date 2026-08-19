@@ -27,7 +27,7 @@ from scenario_forge.generation.glass_material_evidence import (  # noqa: E402
 
 CONVERT_ROOT = Path("/cpfs/user/zhuzihou/dev/ConvertAsset")
 ROOM = CONVERT_ROOT / "outputs/generated_scientific_labs_v2_20260804/modern_wet_chemistry/package/asset.usd"
-TABLE = CONVERT_ROOT / "outputs/scientific_workbench_standard_table_20260811/package/asset.usd"
+TABLE = CONVERT_ROOT / "outputs/scientific_workbench_standard_table_20260819/package/asset.usd"
 NEW_ROOT = CONVERT_ROOT / "outputs/scientific_workbench_glass_material_v1_20260818/packages"
 TARBALL = REPO_ROOT / "external_artifacts/incoming/manual_glassware_v1.tar.gz"
 OUTPUT = (
