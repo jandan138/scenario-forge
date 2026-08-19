@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 import scripts.generate_scientific_workbench_task02_r10_3_colleague_collision as exp
 
 
@@ -37,6 +39,7 @@ def test_left_edge_position_preserves_randomization_margin() -> None:
 
 
 def test_collision_profile_is_composed_as_a_separate_layer(tmp_path: Path) -> None:
+    pytest.importorskip("pxr")
     from pxr import Sdf, Usd
 
     scene = tmp_path / "scene.usda"
