@@ -58,10 +58,10 @@ bindings:
   scientific_workbench_ebench_table_static_support:
     resolver: convert_asset_package
     usage: static_support_object
-    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/facade/facade.usda
-    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package
-    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package/evidence/manifest.json
-    producer_revision: scientific-workbench-standard-table-2000x800x755-20260811
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260819/source.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260819/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260819/package/evidence/manifest.json
+    producer_revision: scientific-workbench-standard-table-2000x800x755-20260819
     expected_scope_prims: [/World/table]
     license: LicenseRef-Team-Owned-Public-Redistribution
     attribution: [LabUtopia lab_001 table visual; ConvertAsset exact 2000x800x755 mm facade and static support]

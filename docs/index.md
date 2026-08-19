@@ -1,6 +1,6 @@
 # Scenario Forge Documentation
 
-- [玻璃器皿材质升级教程](glass-material-guide/)
+- [玻璃器皿材质准入标准](glass-material-guide/)
 
 Scenario Forge compiles portable embodied scenario packages for downstream evaluators.
 
@@ -46,6 +46,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Generate Scientific Workbench Tube Prototypes](operations/generate-scientific-workbench-tube-prototypes.md)
 - [Live Tasks 7, 10, and 11 ConvertAsset Request](operations/scientific-workbench-live-task-7-10-11-asset-admission-request.yaml)
 - [Historical Tube-prototype ConvertAsset Request](operations/scientific-workbench-tube-prototype-asset-admission-request.yaml)
+- [HCI 15 mL Closed Insert and Lid Demo ConvertAsset Request](operations/scientific-workbench-hci-15ml-closed-insert-lid-admission-request.yaml)
 
 ## Reference
 
@@ -54,6 +55,8 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-08-19 Workbench Table Gray-top Package](records/2026-08-19-workbench-table-gray-top-package.md)
+- [2026-08-18 HCI 15 mL Closed Insert and Lid Demo Admission](records/2026-08-18-hci-15ml-closed-insert-lid-admission.md)
 - [2026-08-18 Task 05 / Task 09 r11.1 Prequalification](records/2026-08-18-scientific-workbench-r11-1-prequalification.md)
 - [2026-08-17 r10.1 VR Root, Randomization, and Task 07 Rack](records/2026-08-17-r10-1-vr-root-randomization-and-task07-rack.md)
 - [2026-08-16 Scientific Workbench r9 Rich Tabletop](records/2026-08-16-scientific-workbench-r9-rich-tabletop.md)

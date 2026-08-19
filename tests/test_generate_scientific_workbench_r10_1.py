@@ -92,6 +92,21 @@ def test_task02_direct_vr_contract_has_seven_objects_and_no_scene_wrapper() -> N
     ]
 
 
+def test_task02_vr_contract_can_omit_robot_contact_overrides() -> None:
+    config = r10_1.task02_vr_config(
+        scenario_id="task02_fill40",
+        particle_count=580,
+        include_robot_physics_overrides=False,
+    )
+
+    namespace = {"_ASSETS_DIR": Path("/tmp/assets")}
+    exec(config, namespace)
+    task = namespace["TASKS"]["task02_fill40"]
+    assert "set_robot_physics_material" not in task
+    assert "set_robot_contact_offset" not in task
+    assert "set_robot_rest_offset" not in task
+
+
 def test_finalize_runtime_release_requires_and_records_all_ten_gates(
     tmp_path: Path, monkeypatch
 ) -> None:

@@ -26,7 +26,7 @@ environment:
   translate_xyz_m: [0.002882434, -0.0069055, 0.0]
 
 table:
-  package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260811/package
+  package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_standard_table_20260819/package
   # Compose the package root so its /World/Looks bindings stay inside the reference.
   entry_prim: /World
   destination: deps/table

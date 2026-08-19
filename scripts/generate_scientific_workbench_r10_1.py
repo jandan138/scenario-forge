@@ -303,7 +303,12 @@ def _local_group(names: Sequence[str]) -> dict[str, Any]:
     }
 
 
-def task02_vr_config(*, scenario_id: str, particle_count: int) -> str:
+def task02_vr_config(
+    *,
+    scenario_id: str,
+    particle_count: int,
+    include_robot_physics_overrides: bool = True,
+) -> str:
     config = {
         "scene_usd_file_path": {
             "scene1": "__SCENE_PATH__",
@@ -326,7 +331,7 @@ def task02_vr_config(*, scenario_id: str, particle_count: int) -> str:
             "GpuMaxParticleContacts": 1048576,
             "TimeStepsPerSecond": 120,
         },
-        **vr_robot_contact_config(),
+        **(vr_robot_contact_config() if include_robot_physics_overrides else {}),
         "prototype_fluid": {
             "status": "qualified_dynamic_loaded_start",
             "particle_count": particle_count,

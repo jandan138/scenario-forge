@@ -323,7 +323,11 @@ def finalize_runtime_gates(package: Path) -> dict[str, Any]:
         )
     )
     vr_pass = bool(
-        vr.get("schema_version") == "scenario-forge-vr-usd-open-smoke/v0.1"
+        vr.get("schema_version")
+        in {
+            "scenario-forge-vr-usd-open-smoke/v0.1",
+            "scenario-forge-vr-usd-open-smoke/v0.2",
+        }
         and vr.get("status") == "pass"
         and vr.get("physics_steps") == 0
         and vr.get("default_prim") == "/World"

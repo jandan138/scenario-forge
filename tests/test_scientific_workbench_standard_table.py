@@ -41,9 +41,9 @@ def test_standard_table_binding_points_to_exact_convertasset_package() -> None:
     table = bindings["scientific_workbench_ebench_table_static_support"]
 
     assert table["source_usd"].endswith(
-        "/outputs/scientific_workbench_standard_table_20260811/facade/facade.usda"
+        "/outputs/scientific_workbench_standard_table_20260819/source.usda"
     )
     assert table["package_dir"].endswith(
-        "/outputs/scientific_workbench_standard_table_20260811/package"
+        "/outputs/scientific_workbench_standard_table_20260819/package"
     )
     assert table["expected_scope_prims"] == ["/World/table"]
