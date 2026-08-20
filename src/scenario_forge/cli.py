@@ -89,6 +89,12 @@ from scenario_forge.generation.fluid_asset import (
     qualify_fluid_asset,
     qualify_fluid_asset_batch,
 )
+from scenario_forge.generation.simple_sdf_liquid import (
+    SimpleSdfLiquidGenerationError,
+    add_sampled_liquid,
+    build_simple_sdf,
+    propose_simple_sdf,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -555,6 +561,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--fluid-profile",
         help="Qualified reservoir interaction/fluid_profile.json to bind",
     )
+    liquid_sample_parser = liquid_subparsers.add_parser(
+        "sample-add",
+        help="Bake one independent ParticleSet per exact sampler Mesh on one shared system",
+    )
+    liquid_sample_parser.add_argument("--spec", required=True, help="Multi-liquid YAML/JSON")
+    liquid_sample_parser.add_argument("--out", required=True, help="Delivery package directory")
+    liquid_sample_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    liquid_sample_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python executable")
 
     fluid_asset_parser = subparsers.add_parser(
         "fluid-asset", help="Prepare and qualify source-bound fluid-interaction assets"
@@ -598,6 +612,27 @@ def build_parser() -> argparse.ArgumentParser:
     fluid_batch_qualify_parser.add_argument("--out", required=True, help="Package root")
     fluid_batch_qualify_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
     fluid_batch_qualify_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python")
+    simple_sdf_propose = fluid_asset_subparsers.add_parser(
+        "simple-sdf-propose",
+        help="Propose the explicit visual-Mesh SDF route; review is mandatory",
+    )
+    simple_sdf_propose.add_argument("--source", required=True)
+    simple_sdf_propose.add_argument("--container", required=True)
+    simple_sdf_propose.add_argument("--visual-mesh", required=True)
+    simple_sdf_propose.add_argument(
+        "--particle-scale",
+        choices=["task02_compatible", "small_required"],
+        default="task02_compatible",
+    )
+    simple_sdf_propose.add_argument("--out", required=True)
+    simple_sdf_propose.add_argument("--convertasset-root")
+    simple_sdf_build = fluid_asset_subparsers.add_parser(
+        "simple-sdf-build",
+        help="Build a source-bound collision package from an approved simple-SDF spec",
+    )
+    simple_sdf_build.add_argument("--spec", required=True)
+    simple_sdf_build.add_argument("--out", required=True)
+    simple_sdf_build.add_argument("--convertasset-root")
 
     return parser
 
@@ -605,6 +640,52 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "fluid-asset" and args.fluid_asset_command == "simple-sdf-propose":
+        try:
+            result = propose_simple_sdf(
+                source=Path(args.source),
+                container=args.container,
+                visual_mesh=args.visual_mesh,
+                particle_scale=args.particle_scale,
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+            )
+        except SimpleSdfLiquidGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Simple-SDF proposal: {result.proposal}")
+        print("Status: review_required")
+        return 0
+
+    if args.command == "fluid-asset" and args.fluid_asset_command == "simple-sdf-build":
+        try:
+            result = build_simple_sdf(
+                spec=Path(args.spec),
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+            )
+        except SimpleSdfLiquidGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Simple-SDF USD: {result.root / 'asset.usda'}")
+        print(f"Simple-SDF ZIP: {result.zip_path}")
+        return 0
+
+    if args.command == "liquid" and args.liquid_command == "sample-add":
+        try:
+            result = add_sampled_liquid(
+                spec=Path(args.spec),
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except SimpleSdfLiquidGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Multi-liquid USD: {result.handoff.root_usd}")
+        print(f"Multi-liquid ZIP: {result.zip_path}")
+        return 0
 
     if args.command == "fluid-asset" and args.fluid_asset_command == "prepare":
         try:
