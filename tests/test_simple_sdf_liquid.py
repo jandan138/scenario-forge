@@ -49,6 +49,62 @@ def test_cli_exposes_two_separate_stages() -> None:
     assert liquid.liquid_command == "sample-add"
 
 
+def test_handoff_accepts_v2_auto_sampler_evidence(tmp_path: Path) -> None:
+    root = _handoff(tmp_path / "producer")
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["schema_version"] = "aan.multi_liquid_sample_result.v2"
+    evidence = root / "evidence"
+    evidence.mkdir(exist_ok=True)
+    (evidence / "auto_samplers.usda").write_text(
+        '#usda 1.0\ndef Scope "__ScenarioForgeAutoSamplers" {}\n'
+    )
+    manifest["entrypoints"]["auto_samplers_usd"] = "evidence/auto_samplers.usda"
+    manifest["sets"][0].update(
+        {
+            "sampler_mode": "mouth_drop",
+            "target_fill_ratio": 0.4,
+            "sampler_mesh_prim": "/__ScenarioForgeAutoSamplers/bottle",
+        }
+    )
+    manifest["sets"][1].update(
+        {
+            "sampler_mode": "inside_fill",
+            "target_fill_ratio": 0.2,
+            "sampler_mesh_prim": "/__ScenarioForgeAutoSamplers/tube",
+        }
+    )
+    manifest_path.write_text(json.dumps(manifest))
+
+    result = load_multi_liquid_handoff(root)
+
+    assert result.manifest["schema_version"] == "aan.multi_liquid_sample_result.v2"
+    assert result.sets[0]["sampler_mode"] == "mouth_drop"
+
+
+def test_handoff_rejects_v2_auto_sampler_outside_canonical_scope(tmp_path: Path) -> None:
+    root = _handoff(tmp_path / "producer")
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["schema_version"] = "aan.multi_liquid_sample_result.v2"
+    evidence = root / "evidence"
+    evidence.mkdir(exist_ok=True)
+    (evidence / "auto_samplers.usda").write_text('#usda 1.0\n')
+    manifest["entrypoints"]["auto_samplers_usd"] = "evidence/auto_samplers.usda"
+    for item in manifest["sets"]:
+        item.update(
+            {
+                "sampler_mode": "inside_fill",
+                "target_fill_ratio": 0.4,
+                "sampler_mesh_prim": "/World/UnscopedSampler",
+            }
+        )
+    manifest_path.write_text(json.dumps(manifest))
+
+    with pytest.raises(SimpleSdfLiquidHandoffError, match="canonical scope"):
+        load_multi_liquid_handoff(root)
+
+
 def _handoff(root: Path, *, duplicate_group: bool = False) -> Path:
     root.mkdir()
     (root / "scene.usda").write_text(

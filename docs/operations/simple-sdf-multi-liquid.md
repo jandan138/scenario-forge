@@ -66,3 +66,31 @@ same-name ZIP. Inspect `manifest.json` and
 
 Use `validation: qualified` for the three-cold-start, eight-second gate. Do not
 promote a quick package as qualified evidence.
+
+For automatic container inference, use request v2 instead of supplying a
+sampler USD:
+
+```yaml
+schema_version: aan.multi_liquid_sample_request.v2
+scene: /abs/path/collision_package/asset.usda
+validation: quick
+sets:
+  - id: reagent_bottle_liquid
+    container_prim: /World/obj_reagent_bottle
+    sampler:
+      mode: mouth_drop
+      fill_ratio: 0.40
+      visual_mesh_prim: /World/obj_reagent_bottle/Visual/HollowMesh
+    particle_scale: task02_compatible
+  - id: tube15_liquid
+    container_prim: /World/obj_tube15
+    sampler:
+      mode: inside_fill
+      fill_ratio: 0.40
+    particle_scale: small_required
+```
+
+The output contains `evidence/auto_samplers.usda` for audit, but the runtime
+`scene.usda` contains only the baked liquid points. Use `inside_fill` for a
+narrow 15 mL tube; do not reduce its particle physics merely to make
+`mouth_drop` fit.

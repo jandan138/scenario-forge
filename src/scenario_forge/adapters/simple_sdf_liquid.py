@@ -9,7 +9,10 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
-RESULT_SCHEMA = "aan.multi_liquid_sample_result.v1"
+RESULT_SCHEMAS = {
+    "aan.multi_liquid_sample_result.v1",
+    "aan.multi_liquid_sample_result.v2",
+}
 FLUID_ROOT = "/__ScenarioForgeFluid"
 
 
@@ -81,7 +84,7 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         raise SimpleSdfLiquidHandoffError(f"cannot read producer manifest: {manifest_path}") from error
-    if not isinstance(manifest, Mapping) or manifest.get("schema_version") != RESULT_SCHEMA:
+    if not isinstance(manifest, Mapping) or manifest.get("schema_version") not in RESULT_SCHEMAS:
         raise SimpleSdfLiquidHandoffError("unsupported multi-liquid producer schema")
     if manifest.get("overall_status") != "pass" or manifest.get("blocked_reasons"):
         raise SimpleSdfLiquidHandoffError("multi-liquid producer has not passed validation")
@@ -90,6 +93,10 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
         raise SimpleSdfLiquidHandoffError("producer entrypoints are missing")
     root_usd = _relative_file(package, entrypoints.get("root_usd"), "root USD")
     overlay = _relative_file(package, entrypoints.get("overlay_usd"), "liquid overlay")
+    if manifest.get("schema_version") == "aan.multi_liquid_sample_result.v2":
+        auto_samplers = entrypoints.get("auto_samplers_usd")
+        if auto_samplers is not None:
+            _relative_file(package, auto_samplers, "automatic sampler evidence")
     system = str(entrypoints.get("particle_system_prim", ""))
     if system != FLUID_ROOT + "/ParticleSystem":
         raise SimpleSdfLiquidHandoffError("producer must expose the one canonical ParticleSystem")
@@ -101,6 +108,7 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
     ids: set[str] = set()
     groups: set[int] = set()
     sets: list[Mapping[str, Any]] = []
+    is_v2 = manifest.get("schema_version") == "aan.multi_liquid_sample_result.v2"
     for value in values:
         if not isinstance(value, Mapping):
             raise SimpleSdfLiquidHandoffError("set record must be a mapping")
@@ -114,9 +122,27 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
             raise SimpleSdfLiquidHandoffError("ParticleSet prim does not match its id")
         if int(value.get("particle_count", 0)) <= 0:
             raise SimpleSdfLiquidHandoffError("ParticleSet must contain baked particles")
+        if is_v2:
+            sampler_mode = value.get("sampler_mode")
+            if sampler_mode not in {"explicit_mesh", "inside_fill", "mouth_drop"}:
+                raise SimpleSdfLiquidHandoffError("v2 set has an unsupported sampler mode")
+            if sampler_mode != "explicit_mesh":
+                ratio = float(value.get("target_fill_ratio", 0.0))
+                if not 0.10 <= ratio <= 0.80:
+                    raise SimpleSdfLiquidHandoffError(
+                        "automatic sampler target fill ratio is outside 0.10 through 0.80"
+                    )
+                sampler_prim = str(value.get("sampler_mesh_prim", ""))
+                if not sampler_prim.startswith("/__ScenarioForgeAutoSamplers/"):
+                    raise SimpleSdfLiquidHandoffError(
+                        "automatic sampler evidence prim is outside its canonical scope"
+                    )
         ids.add(set_id)
         groups.add(group)
         sets.append(value)
+    if is_v2 and any(item.get("sampler_mode") != "explicit_mesh" for item in sets):
+        if entrypoints.get("auto_samplers_usd") is None:
+            raise SimpleSdfLiquidHandoffError("automatic sampler evidence entrypoint is missing")
     validation = manifest.get("validation")
     if not isinstance(validation, Mapping) or validation.get("status") != "pass":
         raise SimpleSdfLiquidHandoffError("runtime validation is not pass")
