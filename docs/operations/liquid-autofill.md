@@ -23,6 +23,12 @@ scenario-forge liquid add \
   --out /path/to/delivery
 ```
 
+When the container comes from a promoted fluid-interaction asset package, bind
+its evidence explicitly with
+`--fluid-profile /path/to/package/interaction/fluid_profile.json`. Only a
+qualified `reservoir` profile is accepted; funnel (`conduit`) and glass-rod
+(`surface_guide`) profiles do not represent a loaded liquid start.
+
 The output basename is
 `<scene>__liquid__<container>__fillNN`. Keep the alias USD and matching `_deps/` directory
 together, or hand off the same-name ZIP. Open the alias USD in Isaac Sim 4.1.

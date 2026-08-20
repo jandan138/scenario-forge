@@ -143,6 +143,7 @@ def add_liquid(
     output: Path | None = None,
     convertasset_root: Path | None = None,
     isaac_python: Path | None = None,
+    fluid_profile: Path | None = None,
 ) -> LiquidAutofillResult:
     source = Path(scene).expanduser().resolve()
     destination = (
@@ -166,7 +167,12 @@ def add_liquid(
         _convertasset_root(convertasset_root), _isaac_python(isaac_python)
     )
     try:
-        request = build_request(scene=source, container=container, fill=fill)
+        request = build_request(
+            scene=source,
+            container=container,
+            fill=fill,
+            fluid_profile=fluid_profile,
+        )
         request_path = working / "request.json"
         request_path.write_text(
             json.dumps(request, indent=2, sort_keys=True) + "\n", encoding="utf-8"

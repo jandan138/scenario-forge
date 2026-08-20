@@ -81,6 +81,14 @@ from scenario_forge.generation.liquid_autofill import (
     add_liquid,
     inspect_liquid_candidates,
 )
+from scenario_forge.generation.fluid_asset import (
+    FluidAssetGenerationError,
+    derive_fluid_asset_partitions,
+    prepare_fluid_asset,
+    prepare_fluid_asset_batch,
+    qualify_fluid_asset,
+    qualify_fluid_asset_batch,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -543,6 +551,53 @@ def build_parser() -> argparse.ArgumentParser:
     liquid_add_parser.add_argument("--out", help="Delivery directory (defaults beside the source)")
     liquid_add_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
     liquid_add_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python executable")
+    liquid_add_parser.add_argument(
+        "--fluid-profile",
+        help="Qualified reservoir interaction/fluid_profile.json to bind",
+    )
+
+    fluid_asset_parser = subparsers.add_parser(
+        "fluid-asset", help="Prepare and qualify source-bound fluid-interaction assets"
+    )
+    fluid_asset_subparsers = fluid_asset_parser.add_subparsers(
+        dest="fluid_asset_command", required=True
+    )
+    fluid_prepare_parser = fluid_asset_subparsers.add_parser(
+        "prepare", help="Generate a review-required geometry and behavior proposal"
+    )
+    fluid_prepare_parser.add_argument("--source", required=True, help="Raw or admitted USD")
+    fluid_prepare_parser.add_argument("--prim", required=True, help="Exact source scope prim")
+    fluid_prepare_parser.add_argument("--out", required=True, help="Review directory")
+    fluid_prepare_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    fluid_prepare_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python")
+    fluid_qualify_parser = fluid_asset_subparsers.add_parser(
+        "qualify", help="Qualify and package one human-approved proposal"
+    )
+    fluid_qualify_parser.add_argument("--proposal", required=True, help="Approved proposal YAML")
+    fluid_qualify_parser.add_argument("--out", required=True, help="Delivery directory")
+    fluid_qualify_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    fluid_qualify_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python")
+    fluid_derive_parser = fluid_asset_subparsers.add_parser(
+        "derive-partitions", help="Create a second-review fallback after a blocked fast path"
+    )
+    fluid_derive_parser.add_argument("--proposal", required=True, help="Approved fast-path proposal")
+    fluid_derive_parser.add_argument("--out", required=True, help="Second review directory")
+    fluid_derive_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    fluid_derive_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python")
+    fluid_batch_parser = fluid_asset_subparsers.add_parser(
+        "batch-prepare", help="Prepare review proposals from a versioned batch YAML"
+    )
+    fluid_batch_parser.add_argument("--request", required=True, help="Batch request YAML")
+    fluid_batch_parser.add_argument("--out", required=True, help="Review root")
+    fluid_batch_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    fluid_batch_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python")
+    fluid_batch_qualify_parser = fluid_asset_subparsers.add_parser(
+        "batch-qualify", help="Qualify a reviewed batch and promote pass packages only"
+    )
+    fluid_batch_qualify_parser.add_argument("--request", required=True, help="Approved batch YAML")
+    fluid_batch_qualify_parser.add_argument("--out", required=True, help="Package root")
+    fluid_batch_qualify_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
+    fluid_batch_qualify_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python")
 
     return parser
 
@@ -550,6 +605,82 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "fluid-asset" and args.fluid_asset_command == "prepare":
+        try:
+            result = prepare_fluid_asset(
+                source=Path(args.source),
+                prim=args.prim,
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except FluidAssetGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Fluid asset proposal: {result.proposal}")
+        print("Status: review_required")
+        return 0
+
+    if args.command == "fluid-asset" and args.fluid_asset_command == "qualify":
+        try:
+            result = qualify_fluid_asset(
+                proposal=Path(args.proposal),
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except FluidAssetGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Fluid asset USD: {result.handoff.entry_usd}")
+        print(f"Fluid asset ZIP: {result.zip_path}")
+        return 0
+
+    if args.command == "fluid-asset" and args.fluid_asset_command == "derive-partitions":
+        try:
+            result = derive_fluid_asset_partitions(
+                proposal=Path(args.proposal),
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except FluidAssetGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Derived partition proposal: {result.proposal}")
+        print("Status: second_review_required")
+        return 0
+
+    if args.command == "fluid-asset" and args.fluid_asset_command == "batch-prepare":
+        try:
+            results = prepare_fluid_asset_batch(
+                request=Path(args.request),
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except FluidAssetGenerationError as exc:
+            print(exc)
+            return 1
+        for result in results:
+            print(result.proposal)
+        return 0
+
+    if args.command == "fluid-asset" and args.fluid_asset_command == "batch-qualify":
+        try:
+            results = qualify_fluid_asset_batch(
+                request=Path(args.request),
+                output=Path(args.out),
+                convertasset_root=Path(args.convertasset_root) if args.convertasset_root else None,
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except FluidAssetGenerationError as exc:
+            print(exc)
+            return 1
+        for result in results:
+            print(result.zip_path)
+        return 0
 
     if args.command == "liquid" and args.liquid_command == "inspect":
         try:
@@ -578,6 +709,7 @@ def main(argv: list[str] | None = None) -> int:
                     Path(args.convertasset_root) if args.convertasset_root else None
                 ),
                 isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+                fluid_profile=Path(args.fluid_profile) if args.fluid_profile else None,
             )
         except LiquidAutofillGenerationError as exc:
             print(exc)

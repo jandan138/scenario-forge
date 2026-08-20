@@ -18,6 +18,11 @@ mesh conversion, SDF cooking, or PBD tuning.
 one exact prim and one fill ratio from 0.10 through 0.80. Fill means the settled live-particle q95
 height in the target's local up axis, normalized from recovered cavity floor to rim.
 
+`liquid add --fluid-profile` may additionally bind a promoted
+`aan.fluid_interaction_asset_profile.v1`. The binding is hash-locked and must
+claim a qualified `reservoir`; it records why the composed container is trusted
+without moving geometry authoring into Scenario Forge.
+
 ## Promotion invariant
 
 No formal alias USD, dependency directory, or ZIP survives a failed producer or final integration

@@ -29,6 +29,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Progress Rubric (scenario-spec/v0.4)](design/progress-rubric.md)
 - [Liquid Measurement Adapter Contract](design/liquid-measurement-adapter-contract.md)
 - [Liquid Autofill Contract](design/liquid-autofill-contract.md)
+- [Fluid-interaction Asset Contract](design/fluid-interaction-asset-contract.md)
 
 ## Operations
 
@@ -38,6 +39,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [给任意合格容器加入初始液体](liquid-autofill/)
 - [Task02 烧杯四档液体验证](records/2026-08-20-task02-beaker-liquid-fill-sweep.md)
 - [Liquid Autofill Runbook](operations/liquid-autofill.md)
+- [Fluid-interaction Asset Runbook](operations/fluid-interaction-assets.md)
 - [Scientific Workbench Background Gallery](background-gallery/)
 - [Build the Scientific Workbench Task Directory](operations/build-scientific-workbench-task-directory.md)
 - [Generate Scientific Workbench Layout Prototypes](operations/generate-scientific-workbench-layout-prototypes.md)
@@ -59,6 +61,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-08-20 Fluid-interaction Asset Tool v1](records/2026-08-20-fluid-interaction-asset-tool-v1.md)
 - [2026-08-20 Liquid Autofill Tool](records/2026-08-20-liquid-autofill-tool.md)
 
 - [2026-08-19 Workbench Table Gray-top Package](records/2026-08-19-workbench-table-gray-top-package.md)

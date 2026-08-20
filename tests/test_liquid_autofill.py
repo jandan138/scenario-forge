@@ -156,6 +156,31 @@ def test_request_pins_task02_recipe_and_height_fill(tmp_path: Path) -> None:
 
     assert request["schema_version"] == "aan.gpu_pbd_autofill_request.v1"
     assert request["target_settled_fill_ratio"] == 0.6
+
+
+def test_request_can_bind_qualified_reservoir_profile(tmp_path: Path) -> None:
+    scene = tmp_path / "scene.usd"
+    scene.write_text("#usda 1.0\n")
+    profile = tmp_path / "fluid_profile.json"
+    profile.write_text(
+        json.dumps(
+            {
+                "schema_version": "aan.fluid_interaction_asset_profile.v1",
+                "behavior": "reservoir",
+                "claim": "qualified_fluid_interaction_asset",
+            }
+        )
+    )
+
+    request = build_request(
+        scene=scene,
+        container="/World/Beaker",
+        fill=0.4,
+        fluid_profile=profile,
+    )
+
+    assert request["fluid_interaction_profile"]["behavior"] == "reservoir"
+    assert len(request["fluid_interaction_profile"]["sha256"]) == 64
     assert request["fill_semantics"] == "live_points_target_local_up_q95_height_ratio"
     assert request["recipe_id"] == "task02_r10_3_blue_gpu_pbd_v1"
 

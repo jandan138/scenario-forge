@@ -119,7 +119,9 @@ class LiquidAutofillProducerHandoff:
         return str(self.analysis["scene_root_prim"])
 
 
-def build_request(*, scene: Path, container: str, fill: float) -> dict[str, Any]:
+def build_request(
+    *, scene: Path, container: str, fill: float, fluid_profile: Path | None = None
+) -> dict[str, Any]:
     source = Path(scene).resolve()
     if not source.is_file():
         raise LiquidAutofillHandoffError(f"source scene does not exist: {source}")
@@ -128,7 +130,7 @@ def build_request(*, scene: Path, container: str, fill: float) -> dict[str, Any]
     fill = float(fill)
     if not 0.10 <= fill <= 0.80:
         raise LiquidAutofillHandoffError("fill must be 0.10 through 0.80")
-    return {
+    request: dict[str, Any] = {
         "schema_version": REQUEST_SCHEMA,
         "scene": str(source),
         "container_prim": container,
@@ -143,6 +145,23 @@ def build_request(*, scene: Path, container: str, fill: float) -> dict[str, Any]
             "maximum_particle_count": 10_000,
         },
     }
+    if fluid_profile is not None:
+        profile_path = Path(fluid_profile).expanduser().resolve()
+        profile = _load_mapping(profile_path, "fluid-interaction profile")
+        if profile.get("schema_version") != "aan.fluid_interaction_asset_profile.v1":
+            raise LiquidAutofillHandoffError("unsupported fluid-interaction profile")
+        if profile.get("behavior") != "reservoir":
+            raise LiquidAutofillHandoffError(
+                "liquid starts require a qualified reservoir profile"
+            )
+        if profile.get("claim") != "qualified_fluid_interaction_asset":
+            raise LiquidAutofillHandoffError("fluid-interaction profile is not qualified")
+        request["fluid_interaction_profile"] = {
+            "path": str(profile_path),
+            "sha256": _sha(profile_path),
+            "behavior": "reservoir",
+        }
+    return request
 
 
 def _load_mapping(path: Path, label: str) -> Mapping[str, Any]:
