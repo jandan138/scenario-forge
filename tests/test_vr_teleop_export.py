@@ -4,7 +4,13 @@ import ast
 import json
 from pathlib import Path
 
-from scenario_forge.adapters.vr_teleop import export_vr_teleop_package
+import pytest
+
+from scenario_forge.adapters.vr_teleop import (
+    VRTeleopExportError,
+    _validate_vr_transform_ownership,
+    export_vr_teleop_package,
+)
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
@@ -116,6 +122,191 @@ def test_vr_context_prop_is_a_randomizable_object(tmp_path: Path) -> None:
     assert parity["equivalence"]["context_props"] == (
         "same_assets_poses_and_physics_in_randomizable_object_list"
     )
+    ownership = json.loads(result.transform_ownership.read_text(encoding="utf-8"))
+    assert ownership["schema_version"] == "scenario-forge-vr-transform-ownership/v0.1"
+    assert ownership["status"] == "pass"
+    assert {item["object_id"] for item in ownership["objects"]} == {
+        "obj_conical_bottle03",
+        "obj_graduated_cylinder_03",
+        "context_beaker",
+    }
+    assert all(item["scene_prim_path"].split("/")[-1].startswith("obj_") for item in ownership["objects"])
+    assert all(item["root_owns_task_pose"] is True for item in ownership["objects"])
+    assert parity["artifacts"]["transform_ownership"]["path"] == (
+        "transform_ownership.json"
+    )
+
+
+def test_vr_transform_gate_rejects_pose_authored_only_on_child(tmp_path: Path) -> None:
+    scene = tmp_path / "scene.usda"
+    scene.write_text(
+        '''#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+def Xform "World"
+{
+    def Xform "obj_flask"
+    {
+        double3 xformOp:translate = (0, 0, 0)
+        quatd xformOp:orient = (1, 0, 0, 0)
+        double3 xformOp:scale = (1, 1, 1)
+        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "Visual"
+        {
+            double3 xformOp:translate = (0.2, 0.1, 0.8)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+}
+''',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(VRTeleopExportError, match="obj_flask.*root transform"):
+        _validate_vr_transform_ownership(
+            scene_path=scene,
+            objects=[
+                {
+                    "id": "obj_flask",
+                    "pose": {
+                        "xyz": [0.2, 0.1, 0.8],
+                        "wxyz": [1.0, 0.0, 0.0, 0.0],
+                        "scale_xyz": [1.0, 1.0, 1.0],
+                    },
+                }
+            ],
+            scene_prim_paths=["/World/obj_flask"],
+            runtime_prim_paths=["/World/_scene/obj_flask"],
+            evidence_path=tmp_path / "transform_ownership.json",
+        )
+
+
+def test_vr_transform_gate_rejects_incomplete_root_trs(tmp_path: Path) -> None:
+    scene = tmp_path / "scene.usda"
+    scene.write_text(
+        '''#usda 1.0
+(defaultPrim = "World")
+def Xform "World"
+{
+    def Xform "obj_flask"
+    {
+        double3 xformOp:translate = (0.2, 0.1, 0.8)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}
+''',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(VRTeleopExportError, match="reset translate/orient/scale"):
+        _validate_vr_transform_ownership(
+            scene_path=scene,
+            objects=[
+                {
+                    "id": "obj_flask",
+                    "pose": {
+                        "xyz": [0.2, 0.1, 0.8],
+                        "wxyz": [1.0, 0.0, 0.0, 0.0],
+                    },
+                }
+            ],
+            scene_prim_paths=["/World/obj_flask"],
+            runtime_prim_paths=["/World/_scene/obj_flask"],
+            evidence_path=tmp_path / "transform_ownership.json",
+        )
+
+
+def test_vr_transform_gate_rejects_non_obj_runtime_path(tmp_path: Path) -> None:
+    scene = tmp_path / "scene.usda"
+    scene.write_text(
+        '''#usda 1.0
+(defaultPrim = "World")
+def Xform "World"
+{
+    def Xform "obj_flask"
+    {
+        double3 xformOp:translate = (0, 0, 0)
+        quatd xformOp:orient = (1, 0, 0, 0)
+        double3 xformOp:scale = (1, 1, 1)
+        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+}
+''',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(VRTeleopExportError, match="matching obj_ prim"):
+        _validate_vr_transform_ownership(
+            scene_path=scene,
+            objects=[
+                {
+                    "id": "obj_flask",
+                    "pose": {
+                        "xyz": [0.0, 0.0, 0.0],
+                        "wxyz": [1.0, 0.0, 0.0, 0.0],
+                    },
+                }
+            ],
+            scene_prim_paths=["/World/obj_flask"],
+            runtime_prim_paths=["/World/_scene/flask"],
+            evidence_path=tmp_path / "transform_ownership.json",
+        )
+
+
+def test_vr_transform_gate_allows_asset_internal_child_transform(tmp_path: Path) -> None:
+    scene = tmp_path / "scene.usda"
+    scene.write_text(
+        '''#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+def Xform "World"
+{
+    def Xform "obj_flask"
+    {
+        double3 xformOp:translate = (0.2, 0.1, 0.8)
+        quatd xformOp:orient = (1, 0, 0, 0)
+        double3 xformOp:scale = (1, 1, 1)
+        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "Visual"
+        {
+            double3 xformOp:translate = (0, 0, 0.01)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+}
+''',
+        encoding="utf-8",
+    )
+    evidence = tmp_path / "transform_ownership.json"
+
+    result = _validate_vr_transform_ownership(
+        scene_path=scene,
+        objects=[
+            {
+                "id": "obj_flask",
+                "pose": {
+                    "xyz": [0.2, 0.1, 0.8],
+                    "wxyz": [1.0, 0.0, 0.0, 0.0],
+                    "scale_xyz": [1.0, 1.0, 1.0],
+                },
+            }
+        ],
+        scene_prim_paths=["/World/obj_flask"],
+        runtime_prim_paths=["/World/_scene/obj_flask"],
+        evidence_path=evidence,
+    )
+
+    assert result["status"] == "pass"
+    assert result["objects"][0]["root_owns_task_pose"] is True
+    assert evidence.is_file()
 
 
 def _build_generic_task_package(tmp_path: Path) -> Path:

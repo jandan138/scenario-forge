@@ -21,6 +21,7 @@ scientific_workbench_bimanual_pour_vr_r2_20260806/
   scene.usd
   task_config.py
   parity_manifest.json
+  transform_ownership.json
   deps/
     environment/
     table/
@@ -70,6 +71,20 @@ must preserve their internal arrangement share one group—for example a rack an
 its tubes. Task 02 similarly groups the PBD runtime with its graduated cylinder,
 although `fluid_runtime` itself is not an `obj_*` entry.
 
+Every path in `obj_prim_list` also has one canonical source object root. That
+`obj_*` root—not an internal visual, collider, or joint prim—must author the
+complete initial task pose with reset-stack `translate`, `orient`, and `scale`
+operations. The root's local pose must match the corresponding `scenario.yaml`
+object pose within `1e-6`. Asset-internal child transforms remain valid, but they
+cannot substitute for the root task pose. The exporter verifies this on the final
+composed USD before publishing the staging directory; a mismatch blocks export
+rather than moving transforms automatically.
+
+`transform_ownership.json` records the source and runtime root path, expected and
+observed root pose, operation order, and pass state for every `obj_prim_list`
+entry. `parity_manifest.json` hash-binds this evidence. The room, table, robot,
+lights, and fluid helpers are outside this object-root contract.
+
 Give the entire directory to the VR engineer. `scene.usd` is the file to open;
 its USD, MDL, mesh, and texture references are package-relative under `deps/`.
 `task_config.py` is a valid standalone Python module containing one `TASKS`
@@ -96,7 +111,8 @@ does not authorize any other asset, physics, or semantic drift.
 ## Acceptance boundary
 
 Scenario Forge validates package closure, relative paths, shared-profile parity,
-the table's passing six-probe static-support certificate, and—when Isaac 4.1
+the table's passing six-probe static-support certificate, object-root transform
+ownership, and—when Isaac 4.1
 evidence is attached—the source root, direct-open light, object list, and local
 randomization mapping. The VR plugin runtime is not present in this repository,
 so actual headset/controller loading and a VR episode launch remain the VR owner's

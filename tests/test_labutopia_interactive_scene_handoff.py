@@ -16,6 +16,32 @@ def _digest(path: Path) -> str:
     return "sha256:" + sha256(path.read_bytes()).hexdigest()
 
 
+def _write_entrypoint_stage(
+    path: Path, scenario_prim: str, embedded_object_states: dict[str, dict[str, object]]
+) -> None:
+    from pxr import Gf, Usd, UsdGeom
+
+    stage = Usd.Stage.CreateNew(str(path))
+    world = UsdGeom.Xform.Define(stage, "/World").GetPrim()
+    stage.SetDefaultPrim(world)
+    UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
+    UsdGeom.Xform.Define(stage, scenario_prim)
+    for state in embedded_object_states.values():
+        prim_path = str(state["prim_path"])
+        xyz = [float(value) for value in state["position_xyz_m"]]  # type: ignore[union-attr]
+        wxyz = [float(value) for value in state["orientation_wxyz"]]  # type: ignore[union-attr]
+        scale = [float(value) for value in state["local_scale_xyz"]]  # type: ignore[union-attr]
+        xformable = UsdGeom.Xformable(UsdGeom.Xform.Define(stage, prim_path))
+        xformable.SetResetXformStack(True)
+        xformable.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*xyz))
+        xformable.AddOrientOp(UsdGeom.XformOp.PrecisionDouble).Set(
+            Gf.Quatd(wxyz[0], Gf.Vec3d(*wxyz[1:]))
+        )
+        xformable.AddScaleOp(UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*scale))
+    stage.GetRootLayer().Save()
+
+
 def write_interactive_handoff(
     root: Path,
     *,
@@ -57,15 +83,6 @@ def write_interactive_handoff(
                 }
             ),
             encoding="utf-8",
-        )
-    files = []
-    for path in sorted(item for item in package.rglob("*") if item.is_file()):
-        files.append(
-            {
-                "path": path.relative_to(package).as_posix(),
-                "sha256": _digest(path),
-                "size_bytes": path.stat().st_size,
-            }
         )
     entrypoints = {}
     for name, rate in (("native", 600), ("genmanip", 600), ("vr", 60)):
@@ -114,6 +131,11 @@ def write_interactive_handoff(
                 ),
             },
         }
+        _write_entrypoint_stage(
+            package / f"{name}.usd{'a' if name == 'native' else 'c'}",
+            scenario_prim,
+            embedded_object_states,
+        )
         entrypoints[name] = {
             "path": f"{name}.usd{'a' if name == 'native' else 'c'}",
             "sha256": _digest(package / f"{name}.usd{'a' if name == 'native' else 'c'}"),
@@ -127,6 +149,15 @@ def write_interactive_handoff(
             "particle_prims": {"particles": "/World/task/Particles"},
             "scenario_prim": scenario_prim,
         }
+    files = []
+    for path in sorted(item for item in package.rglob("*") if item.is_file()):
+        files.append(
+            {
+                "path": path.relative_to(package).as_posix(),
+                "sha256": _digest(path),
+                "size_bytes": path.stat().st_size,
+            }
+        )
     package_id = (
         f"lab001_pbd_beaker_to_beaker_{variant_id}_v3"
         if variant_id
