@@ -52,6 +52,10 @@ def _write_producer(root: Path, *, status: str = "pass") -> Path:
     (evidence / "report.json").write_text(
         json.dumps({"overall_status": status}), encoding="utf-8"
     )
+    (evidence / "fixed_container_fixture_1.usda").write_text(
+        '#usda 1.0\n(subLayers = [@/temporary/source.usd@])\n',
+        encoding="utf-8",
+    )
     report_sha = sha256((evidence / "report.json").read_bytes()).hexdigest()
     manifest = {
         "schema_version": "aan.gpu_pbd_autofill_result.v1",
@@ -85,6 +89,14 @@ def _write_producer(root: Path, *, status: str = "pass") -> Path:
             "report_sha256": report_sha,
         },
         "claim": "qualified_gpu_pbd_loaded_start" if status == "pass" else None,
+        "validation_fixture": {
+            "container_motion": "kinematic",
+            "scope": "evidence_only",
+        },
+        "collision_profile": {
+            "id": "task02_visual_mesh_convex_decomposition_v1",
+            "source_sdf_preserved": True,
+        },
     }
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     return root
@@ -158,6 +170,30 @@ def test_request_pins_task02_recipe_and_height_fill(tmp_path: Path) -> None:
     assert request["target_settled_fill_ratio"] == 0.6
 
 
+def test_request_can_fix_standalone_container_only_in_validation_fixture(
+    tmp_path: Path,
+) -> None:
+    scene = tmp_path / "scene.usd"
+    scene.write_text("#usda 1.0\n", encoding="utf-8")
+
+    request = build_request(
+        scene=scene,
+        container="/World/Flask",
+        fill=0.4,
+        fixed_container_validation=True,
+        initial_particle_count=747,
+    )
+
+    assert request["validation_fixture"] == {
+        "container_motion": "kinematic",
+        "scope": "evidence_only",
+    }
+    assert request["collision_profile"] == (
+        "task02_visual_mesh_convex_decomposition_v1"
+    )
+    assert request["initial_particle_count"] == 747
+
+
 def test_request_can_bind_qualified_reservoir_profile(tmp_path: Path) -> None:
     scene = tmp_path / "scene.usd"
     scene.write_text("#usda 1.0\n")
@@ -218,9 +254,12 @@ def test_alias_package_is_relative_self_contained_and_deterministic(tmp_path: Pa
         names = set(archive.namelist())
     assert "room__liquid__beaker__fill40.usd" in names
     assert "room__liquid__beaker__fill40_deps/manifest.json" in names
+    assert not any("fixed_container_fixture" in name for name in names)
     manifest = json.loads((result.dependencies / "manifest.json").read_text())
     assert manifest["claim"] == "qualified_gpu_pbd_loaded_start"
     assert manifest["robot_policy_success"] is False
+    assert manifest["validation_fixture"]["scope"] == "evidence_only"
+    assert manifest["collision_profile"]["source_sdf_preserved"] is True
 
 
 def test_cli_exposes_inspect_and_add_commands() -> None:
@@ -237,8 +276,13 @@ def test_cli_exposes_inspect_and_add_commands() -> None:
             "/World/Beaker",
             "--fill",
             "0.4",
+            "--fixed-container-validation",
+            "--initial-particle-count",
+            "747",
         ]
     )
 
     assert inspect.liquid_command == "inspect"
     assert add.liquid_command == "add"
+    assert add.fixed_container_validation is True
+    assert add.initial_particle_count == 747

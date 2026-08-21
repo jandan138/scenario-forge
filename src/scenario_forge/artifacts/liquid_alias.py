@@ -59,7 +59,11 @@ def _copy_producer(producer: LiquidAutofillProducerHandoff, destination: Path) -
     shutil.copy2(producer.recipe_path, destination / "recipe.json")
     shutil.copy2(producer.manifest_path, destination / "producer_manifest.json")
     if (producer.root / "evidence").is_dir():
-        shutil.copytree(producer.root / "evidence", destination / "evidence")
+        shutil.copytree(
+            producer.root / "evidence",
+            destination / "evidence",
+            ignore=shutil.ignore_patterns("fixed_container_fixture_*.usda"),
+        )
 
 
 def _reject_absolute_usd_dependencies(root: Path) -> None:
@@ -172,6 +176,8 @@ def build_liquid_alias_package(
         "fill_profile": producer.manifest["fill_profile"],
         "recipe": producer.manifest["recipe"],
         "producer_qualification": producer.manifest["qualification"],
+        "validation_fixture": producer.manifest.get("validation_fixture"),
+        "collision_profile": producer.manifest.get("collision_profile"),
         "full_scene_integration_8s": integration_status,
         "claim": "qualified_gpu_pbd_loaded_start",
         "license_policy": "internal_only",
@@ -180,7 +186,9 @@ def build_liquid_alias_package(
         "metric_enabled": False,
         "benchmark_success": False,
         "claim_boundary": (
-            "Qualified loaded-start liquid only; no robot, pour, metric, or benchmark claim."
+            "Qualified loaded-start liquid only; a kinematic container is evidence-only "
+            "when declared, while the delivered source rigid body remains dynamic. No robot, "
+            "pour, metric, or benchmark claim."
         ),
     }
     manifest_path = dependencies / "manifest.json"
@@ -194,6 +202,7 @@ def build_liquid_alias_package(
         f"- 容器：`{manifest_payload['container_prim']}`\n"
         f"- 目标液位：{float(fill):.0%}（稳定后 live `points` q95 高度）\n"
         "- 配方：Task 02 r10.3 blue GPU-PBD\n"
+        "- 独立动态容器的 kinematic 设置仅存在于验证 fixture；交付刚体保持 dynamic。\n"
         "- 边界：不包含机器人、倾倒成功、metric 或 benchmark 结论。\n",
         encoding="utf-8",
     )

@@ -120,7 +120,9 @@ class LiquidAutofillProducerHandoff:
 
 
 def build_request(
-    *, scene: Path, container: str, fill: float, fluid_profile: Path | None = None
+    *, scene: Path, container: str, fill: float, fluid_profile: Path | None = None,
+    fixed_container_validation: bool = False,
+    initial_particle_count: int | None = None,
 ) -> dict[str, Any]:
     source = Path(scene).resolve()
     if not source.is_file():
@@ -161,6 +163,18 @@ def build_request(
             "sha256": _sha(profile_path),
             "behavior": "reservoir",
         }
+    if fixed_container_validation:
+        request["validation_fixture"] = {
+            "container_motion": "kinematic",
+            "scope": "evidence_only",
+        }
+        request["collision_profile"] = "task02_visual_mesh_convex_decomposition_v1"
+    if initial_particle_count is not None:
+        if not 1 <= int(initial_particle_count) <= 10_000:
+            raise LiquidAutofillHandoffError(
+                "initial_particle_count must be 1 through 10,000"
+            )
+        request["initial_particle_count"] = int(initial_particle_count)
     return request
 
 

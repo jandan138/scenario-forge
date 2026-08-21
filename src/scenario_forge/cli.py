@@ -561,6 +561,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--fluid-profile",
         help="Qualified reservoir interaction/fluid_profile.json to bind",
     )
+    liquid_add_parser.add_argument(
+        "--fixed-container-validation",
+        action="store_true",
+        help=(
+            "Freeze the named dynamic container only in validation fixtures; "
+            "the delivered USD remains dynamic"
+        ),
+    )
+    liquid_add_parser.add_argument(
+        "--initial-particle-count",
+        type=int,
+        help="Explicit evidence-calibrated initial count for a profiled standalone vessel",
+    )
     liquid_sample_parser = liquid_subparsers.add_parser(
         "sample-add",
         help="Bake one independent ParticleSet per exact sampler Mesh on one shared system",
@@ -791,6 +804,8 @@ def main(argv: list[str] | None = None) -> int:
                 ),
                 isaac_python=Path(args.isaac_python) if args.isaac_python else None,
                 fluid_profile=Path(args.fluid_profile) if args.fluid_profile else None,
+                fixed_container_validation=args.fixed_container_validation,
+                initial_particle_count=args.initial_particle_count,
             )
         except LiquidAutofillGenerationError as exc:
             print(exc)

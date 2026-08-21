@@ -23,6 +23,29 @@ scenario-forge liquid add \
   --out /path/to/delivery
 ```
 
+For a standalone interaction-qualified dynamic container with no table in the
+input USD, keep the delivered rigid body dynamic but isolate liquid containment
+in an evidence-only fixed-container fixture:
+
+```bash
+scenario-forge liquid add \
+  --scene /path/to/dynamic_container_package/asset.usd \
+  --container /World/Flask \
+  --fill 0.40 \
+  --fixed-container-validation \
+  --initial-particle-count 731 \
+  --out /path/to/delivery
+```
+
+This route copies the selected visual hollow mesh into an invisible
+Task-02-derived `convexDecomposition` PBD proxy while preserving the source SDF.
+For a non-cylindrical axisymmetric vessel, particle generation follows the
+measured inner-radius curve instead of treating the vessel as a straight tube.
+An explicit particle count is accepted only on this profiled standalone route
+and must be backed by retained failed/pass evidence; it does not alter particle
+size, velocity, rest/contact offsets, or source physics. Temporary fixed-container
+USD fixtures are excluded from the final self-contained ZIP.
+
 When the container comes from a promoted fluid-interaction asset package, bind
 its evidence explicitly with
 `--fluid-profile /path/to/package/interaction/fluid_profile.json`. Only a

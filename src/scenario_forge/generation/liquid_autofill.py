@@ -144,6 +144,8 @@ def add_liquid(
     convertasset_root: Path | None = None,
     isaac_python: Path | None = None,
     fluid_profile: Path | None = None,
+    fixed_container_validation: bool = False,
+    initial_particle_count: int | None = None,
 ) -> LiquidAutofillResult:
     source = Path(scene).expanduser().resolve()
     destination = (
@@ -172,6 +174,8 @@ def add_liquid(
             container=container,
             fill=fill,
             fluid_profile=fluid_profile,
+            fixed_container_validation=fixed_container_validation,
+            initial_particle_count=initial_particle_count,
         )
         request_path = working / "request.json"
         request_path.write_text(
