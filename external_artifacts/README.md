@@ -40,3 +40,9 @@ Current indexed external artifacts:
   final manifest SHA-256:
   `7948fff535514227b7e6cce636dc9be63145837bc783802b1f4ce63658233598`;
   receipt: `evidence/articulation_runtime_qualification/promotion.json`.
+
+- `magnetic_stirrer_archive`: two USD extracts from
+  `valid_with_json_by_final_category_usd.zip` whose archive labels are
+  magnetic stirrer / magnetic stirrer with hot plate. Layout matches
+  `drying_box/<asset>/usd/` (canonical USD + four-view PNGs + contact sheet).
+  Provenance: `incoming/magnetic_stirrer_archive/provenance.json`.
