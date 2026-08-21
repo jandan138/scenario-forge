@@ -46,6 +46,11 @@ def test_tutorial_is_a_self_contained_evidence_bound_page() -> None:
         "至少 546 / 548",
         "87–88 FPS",
         "拓扑不同，不是少调了一个 PhysX 参数",
+        "2026-08-21 同粒子 A/B 复核",
+        "580 / 580 粒离开",
+        "578 粒低于 floor",
+        "38.99%–39.06%",
+        "0.10 m 抬升—保持—放回",
     ):
         assert fact in html
 

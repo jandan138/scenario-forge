@@ -327,6 +327,7 @@
             </article>
           </div>
           <div class="compare-verdict"><strong>一句话：</strong>拓扑不同，不是少调了一个 PhysX 参数。正确迁移方式是复用 0812 的<strong>容器拓扑经验</strong>，再按源量筒尺寸做可追溯变形，而不是照抄一个固定碰撞体。</div>
+          <div class="evidence-line"><strong>2026-08-21 同粒子 A/B 复核：</strong>在完全相同的 580 粒 fill40 fixture 中，视觉组件直接 SDF 第一轮即有 580 / 580 粒离开、580 粒低于 floor；视觉 Hollow Body 直接 convexDecomposition 同样 580 / 580 离开、578 粒低于 floor。闭合统一代理控制组三次均为外漏 0、floor 以下 0，液位 38.99%–39.06%；随后三次 0.10 m 抬升—保持—放回仍全程外漏 0。简单方案因此停在静置 gate，没有进入动态阶段。</div>
         </div>
       </div>
     </section>
