@@ -77,6 +77,17 @@ bindings:
     license: LicenseRef-Team-Owned-Public-Redistribution
     attribution: [LabUtopia conical_bottle03; ConvertAsset identity facade]
     redistributable: true
+  scientific_workbench_conical_flask_90x35_glass_warp_dynamic:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_conical_flask_90x35_glass_warp_20260821/input/facades/conical_flask_90x35_glass_warp/facade.usda
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_conical_flask_90x35_glass_warp_20260821/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_conical_flask_90x35_glass_warp_20260821/package/evidence/manifest.json
+    producer_revision: scientific-workbench-conical-flask-90x35-glass-warp-20260821
+    expected_scope_prims: [/World/ConicalFlask90x35Warp]
+    license: LicenseRef-Internal-Restricted
+    attribution: [LabUtopia conical_bottle03 glass warp; ConvertAsset baked 90x35x150 mm identity-scale facade]
+    redistributable: false
   scientific_workbench_graduated_cylinder_03_dynamic: &cylinder_dynamic_binding
     resolver: convert_asset_package
     usage: rigid_object

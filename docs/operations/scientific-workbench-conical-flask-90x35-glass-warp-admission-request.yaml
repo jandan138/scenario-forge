@@ -1,0 +1,144 @@
+schema_version: scenario-forge-convertasset-conical-flask-90x35-glass-warp-admission-request/v0.1
+request_id: scientific_workbench_conical_flask_90x35_glass_warp_20260821
+status: producer_delivered
+catalog_identity:
+  canonical_feishu_task: false
+  note: >-
+    This request qualifies a new dynamic flask that keeps the LabUtopia
+    conical_bottle03 glass look after a producer-side axisymmetric proportion
+    warp. It does not retarget Feishu Task 1 or Task 13 and does not replace
+    scientific_workbench_conical_bottle03_dynamic.
+consumer:
+  project: scenario-forge
+  runtime_profile: isaac41
+  license: LicenseRef-Internal-Restricted
+  redistributable: false
+
+producer: ConvertAsset
+producer_boundary:
+  raw_source_files_must_remain_unchanged: true
+  canonical_facade_required_before_dynamic_admission: true
+  package_dependencies_must_be_local: true
+  scenario_forge_physics_repairs_forbidden: true
+  scenario_forge_does_not_own_usd_mdl_mesh_conversion: true
+  consumer_specific_scale_or_physics_patch_forbidden: true
+  required_manifest_schema: asset_application_normalizer.v1
+  required_consumer_profile: scenario-forge
+  required_scoped_physx_warning_count: 0
+  uniform_geometry_scale_only_exception: >-
+    The conical flask in this request may bake a height-varying radial scale
+    k_r(z) together with a uniform height scale k_h (bake_axisymmetric_krz_and_kh).
+    Root prim scale must remain identity. Do not apply this exception to other
+    assets. Do not warp this flask at consume time. The exception is limited
+    to this flask.
+
+deliveries:
+  conical_flask_90x35_glass_warp:
+    asset_id: scientific_workbench_conical_flask_90x35_glass_warp
+    usage: rigid_object
+    do_not_replace_binding: scientific_workbench_conical_bottle03_dynamic
+    source:
+      identity_package_dir: >-
+        /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity
+      identity_facade: >-
+        /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task_assets_20260731/conical_bottle_identity/facade/facade.usda
+      identity_facade_sha256: 82115bd942c40214fdb2bacc6f4327111b452e67280bb3405b2451ddee6a83b9
+      identity_entry_prim: /World/conical_bottle03
+      raw_sha256_is_provenance_only: true
+    producer_facade:
+      required: true
+      source_identity_for_package: facade_sha256
+      raw_sha256_is_provenance_only: true
+      bake_axisymmetric_krz_and_kh: true
+      root_scale_must_be_identity: true
+      support_origin: bottom_center
+      up_axis: Z
+      meters_per_unit: 1.0
+      keep_omni_surface_glass: true
+    axisymmetric_warp:
+      convention: flask_z_up_metres
+      k_h: 0.7630969649115994
+      k_h_basis_height_mm: 196.5674179
+      z_belly_m: 0.012295
+      z_mouth_m: 0.195240
+      k_r_belly: 0.7943139666617408
+      k_r_mouth: 0.7115137648370429
+      k_r_belly_basis_od_mm: 113.3053223
+      k_r_mouth_basis_inner_mm: 49.19089655
+      target_belly_od_mm: 90.0
+      target_inner_mouth_mm: 35.0
+      target_height_mm: 150.0
+      measurement_tolerance_mm: 1.0
+      extrapolate_kr_below_belly: true
+      sit_ring_need_not_be_90mm: true
+    package:
+      asset_role: dynamic
+      default_prim: World
+      asset_entry_prim: /World/ConicalFlask90x35Warp
+      asset_scope_prims: [/World/ConicalFlask90x35Warp]
+      canonical_frame:
+        up_axis: Z
+        long_axis: +Z
+        origin: bottom_center
+      forbidden_reuse:
+        - scientific_workbench_conical_bottle03_dynamic
+        - runtime_nonuniform_xformOp_scale_on_identity_package
+    interaction:
+      contract_schema: aan.interaction_contract.v1
+      exactly_one_active_rigid_body: true
+      colliders:
+        - relative_path: Visual/Source/mesh
+          mode: preserve
+          purpose: [gripper, support, containment]
+          approximation: sdf
+      open_top:
+        required: true
+        axis_body_local: [0.0, 0.0, 1.0]
+        aperture_frame: opening
+      named_frame_requirements:
+        support:
+          measurement: bottom support center after baked warp
+          authoritative: true
+        opening:
+          measurement: (0, 0, z * k_h) of the identity opening frame
+          authoritative: true
+        grasp:
+          measurement: (0, 0, z * k_h) of the identity grasp frame
+          authoritative: true
+    runtime_qualification:
+      engine: isaac_sim_4.1
+      isaac_python: >-
+        /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python
+      convertasset_isaac_python_sh_forbidden: true
+      required_pass_records:
+        - overall_aan
+        - cooked_aperture
+        - stable_support
+        - gripper_collision
+
+runtime_qualification:
+  engine: isaac_sim_4.1
+  required_pass_records:
+    - overall_aan
+    - cooked_aperture
+    - stable_support
+    - gripper_collision
+  four_view_proof:
+    required: true
+    lighting: DomeLight
+    note: Glass is invisible on charcoal-only lighting.
+
+handoff:
+  each_delivery_must_include:
+    - package/asset.usd
+    - package/evidence/manifest.json
+    - four-view proof next to the package
+  claims_not_requested:
+    - volume_250ml
+    - gpu_pbd
+    - pour_success
+    - live_feishu_task_1_retarget
+    - live_feishu_task_13_retarget
+    - replacement_of_scientific_workbench_conical_bottle03_dynamic
+    - consumer_side_nonuniform_scale
+    - benchmark_score

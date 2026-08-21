@@ -31,6 +31,16 @@ HCI_15ML_CLOSED_INSERT_LID_REQUEST_PATH = (
     REPO_ROOT
     / "docs/operations/scientific-workbench-hci-15ml-closed-insert-lid-admission-request.yaml"
 )
+CONICAL_FLASK_90X35_GLASS_WARP_REQUEST_PATH = (
+    REPO_ROOT
+    / "docs/operations/scientific-workbench-conical-flask-90x35-glass-warp-admission-request.yaml"
+)
+ASSET_EXPANSION_BINDINGS_PATH = (
+    REPO_ROOT / "configs/source_bindings/scientific_workbench_asset_expansion_20260810.yaml"
+)
+IDENTITY_CONICAL_FACADE_SHA256 = (
+    "82115bd942c40214fdb2bacc6f4327111b452e67280bb3405b2451ddee6a83b9"
+)
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -225,6 +235,60 @@ def test_hci_15ml_closed_insert_lid_admission_pins_scale_gates_and_isaac_video()
     assert video["format"] == "mp4"
     assert video["sequence"] == ["lid_open", "tube_insert", "lid_close"]
     assert video["engine"] == "isaac_sim_4.1"
+
+
+def test_conical_flask_90x35_glass_warp_admission_pins_bake_not_consumer_scale() -> None:
+    request = _load_yaml(CONICAL_FLASK_90X35_GLASS_WARP_REQUEST_PATH)
+    flask = request["deliveries"]["conical_flask_90x35_glass_warp"]
+    warp = flask["axisymmetric_warp"]
+    facade = flask["producer_facade"]
+    package = flask["package"]
+    exception = request["producer_boundary"]["uniform_geometry_scale_only_exception"]
+
+    assert request["catalog_identity"]["canonical_feishu_task"] is False
+    assert request["producer_boundary"]["consumer_specific_scale_or_physics_patch_forbidden"]
+    assert "bake_axisymmetric_krz_and_kh" in exception
+    assert "this flask" in exception.lower() or "this conical flask" in exception.lower()
+    assert flask["asset_id"] == "scientific_workbench_conical_flask_90x35_glass_warp"
+    assert flask["do_not_replace_binding"] == "scientific_workbench_conical_bottle03_dynamic"
+    assert flask["source"]["identity_facade_sha256"] == IDENTITY_CONICAL_FACADE_SHA256
+    assert facade["bake_axisymmetric_krz_and_kh"] is True
+    assert facade["root_scale_must_be_identity"] is True
+    assert warp["target_belly_od_mm"] == 90.0
+    assert warp["target_inner_mouth_mm"] == 35.0
+    assert warp["target_height_mm"] == 150.0
+    assert warp["measurement_tolerance_mm"] == 1.0
+    assert package["asset_role"] == "dynamic"
+    assert package["asset_entry_prim"] == "/World/ConicalFlask90x35Warp"
+    assert flask["interaction"]["open_top"]["required"] is True
+    assert flask["interaction"]["colliders"][0]["mode"] == "preserve"
+    assert flask["interaction"]["colliders"][0]["approximation"] == "sdf"
+    assert "250 mL" in " ".join(request["handoff"]["claims_not_requested"]) or (
+        "volume_250ml" in request["handoff"]["claims_not_requested"]
+    )
+    assert "gpu_pbd" in request["handoff"]["claims_not_requested"]
+    assert "pour_success" in request["handoff"]["claims_not_requested"]
+
+
+def test_conical_flask_90x35_glass_warp_binding_does_not_replace_bottle03() -> None:
+    bindings = _load_yaml(ASSET_EXPANSION_BINDINGS_PATH)["bindings"]
+    bottle03 = bindings["scientific_workbench_conical_bottle03_dynamic"]
+    warp = bindings["scientific_workbench_conical_flask_90x35_glass_warp_dynamic"]
+
+    assert bottle03["package_dir"].endswith("conical_bottle_identity/package")
+    assert bottle03["expected_scope_prims"] == ["/World/conical_bottle03"]
+    assert warp["resolver"] == "convert_asset_package"
+    assert warp["usage"] == "rigid_object"
+    assert warp["license"] == "LicenseRef-Internal-Restricted"
+    assert warp["redistributable"] is False
+    assert warp["expected_scope_prims"] == ["/World/ConicalFlask90x35Warp"]
+    assert warp["package_dir"].endswith(
+        "scientific_workbench_conical_flask_90x35_glass_warp_20260821/package"
+    )
+    assert "lab" not in warp["package_dir"].split("/")[-2]
+    assert warp["producer_revision"] == (
+        "scientific-workbench-conical-flask-90x35-glass-warp-20260821"
+    )
 
 
 def test_legacy_pdf_catalog_is_archived_but_not_active() -> None:
