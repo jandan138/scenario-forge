@@ -21,7 +21,7 @@ scientific_workbench_bimanual_pour_vr_r2_20260806/
   scene.usd
   task_config.py
   parity_manifest.json
-  transform_ownership.json
+  object_materialization.json
   deps/
     environment/
     table/
@@ -71,22 +71,23 @@ must preserve their internal arrangement share one group—for example a rack an
 its tubes. Task 02 similarly groups the PBD runtime with its graduated cylinder,
 although `fluid_runtime` itself is not an `obj_*` entry.
 
-Every path in `obj_prim_list` also has one canonical source object root. That
-`obj_*` root—not an internal visual, collider, or joint prim—must author the
-complete initial task pose with reset-stack `translate`, `orient`, and `scale`
-operations. The root's local pose must match the corresponding `scenario.yaml`
-object pose within `1e-6`. Asset-internal child transforms remain valid, but they
-cannot substitute for the root task pose. The exporter verifies this on the final
-composed USD before publishing the staging directory; a mismatch blocks export
-rather than moving transforms automatically.
+Every path in `obj_prim_list` has one matching, movable `obj_*` Xform in the
+source scene. The exporter composes each complete tabletop object, then writes
+its mesh, material binding, collision and physics subtree directly into the
+ASCII `scene.usd`. Payloads, references and other composition arcs are forbidden
+inside those published object subtrees. Room, table, robot, lights and PBD helper
+prims remain outside this materialization contract.
 
-`transform_ownership.json` records the source and runtime root path, expected and
-observed root pose, operation order, and pass state for every `obj_prim_list`
-entry. `parity_manifest.json` hash-binds this evidence. The room, table, robot,
-lights, and fluid helpers are outside this object-root contract.
+Materialization preserves each object's composed transform exactly. It does not
+require a reset stack, complete translate/orient/scale operations, or equality
+with a separate recipe pose. Asset-internal visual, collider and joint transforms
+remain valid. `object_materialization.json` records the source/runtime paths,
+prim count, structure and non-transform fingerprints, removed composition arcs,
+and transform-equivalence result. `parity_manifest.json` hash-binds this evidence.
 
-Give the entire directory to the VR engineer. `scene.usd` is the file to open;
-its USD, MDL, mesh, and texture references are package-relative under `deps/`.
+Give the entire directory to the VR engineer. `scene.usd` is the file to open.
+Tabletop object geometry is inline; any remaining room/table USD and material or
+texture dependencies are package-relative under `deps/`.
 `task_config.py` is a valid standalone Python module containing one `TASKS`
 mapping. Merge that one entry into the VR plugin's existing mapping. Its task ID is
 `scientific_workbench_pour_flask_to_cylinder`, so the deployed directory must be
@@ -111,8 +112,8 @@ does not authorize any other asset, physics, or semantic drift.
 ## Acceptance boundary
 
 Scenario Forge validates package closure, relative paths, shared-profile parity,
-the table's passing six-probe static-support certificate, object-root transform
-ownership, and—when Isaac 4.1
+the table's passing six-probe static-support certificate, tabletop-object
+materialization and transform preservation, and—when Isaac 4.1
 evidence is attached—the source root, direct-open light, object list, and local
 randomization mapping. The VR plugin runtime is not present in this repository,
 so actual headset/controller loading and a VR episode launch remain the VR owner's

@@ -38,7 +38,13 @@ def build_usd_handoff_archive(
     records: list[dict[str, object]] = []
     for task_number, adapter in sorted(task_adapters.items()):
         source = Path(adapter).resolve()
-        required = ("scene.usd", "task_config.py", "deps", "parity_manifest.json")
+        required = (
+            "scene.usd",
+            "task_config.py",
+            "deps",
+            "parity_manifest.json",
+            "object_materialization.json",
+        )
         missing = [name for name in required if not (source / name).exists()]
         if missing:
             raise ValueError(f"task {task_number} VR adapter is incomplete: {', '.join(missing)}")
@@ -47,6 +53,10 @@ def build_usd_handoff_archive(
         shutil.copy2(source / "scene.usd", destination / "scene.usd")
         shutil.copy2(source / "task_config.py", destination / "task_config.py")
         shutil.copy2(source / "parity_manifest.json", destination / "parity_manifest.json")
+        shutil.copy2(
+            source / "object_materialization.json",
+            destination / "object_materialization.json",
+        )
         shutil.copytree(source / "deps", destination / "deps")
         scene_text = (destination / "scene.usd").read_text(encoding="utf-8")
         if "@/" in scene_text or "@file:" in scene_text:
@@ -57,6 +67,9 @@ def build_usd_handoff_archive(
                 "directory": f"tasks/task_{task_number:02d}",
                 "open_usd": f"tasks/task_{task_number:02d}/scene.usd",
                 "config": f"tasks/task_{task_number:02d}/task_config.py",
+                "object_materialization": (
+                    f"tasks/task_{task_number:02d}/object_materialization.json"
+                ),
                 "scene_sha256": _sha256(destination / "scene.usd"),
                 "robot_included": False,
             }
@@ -108,13 +121,24 @@ def build_usd_handoff_bundle(
             raise ValueError(f"duplicate handoff package label: {directory}")
         seen.add(directory)
         source = Path(adapter).resolve()
-        required = ("scene.usd", "task_config.py", "deps", "parity_manifest.json")
+        required = (
+            "scene.usd",
+            "task_config.py",
+            "deps",
+            "parity_manifest.json",
+            "object_materialization.json",
+        )
         missing = [name for name in required if not (source / name).exists()]
         if missing:
             raise ValueError(f"{directory} VR adapter is incomplete: {', '.join(missing)}")
         destination = package_root / directory
         destination.mkdir()
-        for name in ("scene.usd", "task_config.py", "parity_manifest.json"):
+        for name in (
+            "scene.usd",
+            "task_config.py",
+            "parity_manifest.json",
+            "object_materialization.json",
+        ):
             shutil.copy2(source / name, destination / name)
         shutil.copytree(source / "deps", destination / "deps")
         scene_text = (destination / "scene.usd").read_text(encoding="utf-8")
@@ -127,6 +151,9 @@ def build_usd_handoff_bundle(
                 "directory": f"packages/{directory}",
                 "open_usd": f"packages/{directory}/scene.usd",
                 "config": f"packages/{directory}/task_config.py",
+                "object_materialization": (
+                    f"packages/{directory}/object_materialization.json"
+                ),
                 "scene_sha256": _sha256(destination / "scene.usd"),
                 "robot_included": False,
             }

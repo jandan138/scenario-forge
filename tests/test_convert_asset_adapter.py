@@ -707,7 +707,10 @@ def _write_static_support_handoff(
     )
     overlay = package_dir / "overlays" / "static_support.usda"
     overlay.parent.mkdir(parents=True)
-    overlay.write_text('#usda 1.0\nover "World" { over "table" {} }\n', encoding="utf-8")
+    overlay.write_text(
+        '#usda 1.0\nover "World"\n{\n    over "table"\n    {\n    }\n}\n',
+        encoding="utf-8",
+    )
     root_usd = package_dir / "asset.usd"
     root_usd.write_text(
         '#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n'

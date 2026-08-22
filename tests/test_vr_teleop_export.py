@@ -4,13 +4,7 @@ import ast
 import json
 from pathlib import Path
 
-import pytest
-
-from scenario_forge.adapters.vr_teleop import (
-    VRTeleopExportError,
-    _validate_vr_transform_ownership,
-    export_vr_teleop_package,
-)
+from scenario_forge.adapters.vr_teleop import export_vr_teleop_package
 from scenario_forge.adapters.convert_asset import load_convert_asset_package_handoff
 from scenario_forge.assets.source import LocalUSDAssetSource
 from scenario_forge.core.scenario import ScenarioSpec
@@ -112,7 +106,8 @@ def test_vr_context_prop_is_a_randomizable_object(tmp_path: Path) -> None:
     scene = result.scene_usd.read_text(encoding="utf-8")
     config = result.task_config.read_text(encoding="utf-8")
     parity = json.loads(result.parity_manifest.read_text(encoding="utf-8"))
-    assert "@deps/context/context_beaker/asset.usd@" in scene
+    assert 'def Xform "obj_context_beaker"' in scene
+    assert "@deps/context/context_beaker/asset.usd@" not in scene
     assert 'def Xform "obj_context_beaker"' in scene
     assert '"/World/_scene/obj_context_beaker"' in config
     namespace: dict[str, object] = {"_ASSETS_DIR": Path("/tmp/assets")}
@@ -122,191 +117,25 @@ def test_vr_context_prop_is_a_randomizable_object(tmp_path: Path) -> None:
     assert parity["equivalence"]["context_props"] == (
         "same_assets_poses_and_physics_in_randomizable_object_list"
     )
-    ownership = json.loads(result.transform_ownership.read_text(encoding="utf-8"))
-    assert ownership["schema_version"] == "scenario-forge-vr-transform-ownership/v0.1"
-    assert ownership["status"] == "pass"
-    assert {item["object_id"] for item in ownership["objects"]} == {
+    materialization = json.loads(
+        result.object_materialization.read_text(encoding="utf-8")
+    )
+    assert materialization["schema_version"] == (
+        "scenario-forge-vr-object-materialization/v0.1"
+    )
+    assert materialization["status"] == "pass"
+    assert {item["object_name"] for item in materialization["objects"]} == {
         "obj_conical_bottle03",
         "obj_graduated_cylinder_03",
-        "context_beaker",
+        "obj_context_beaker",
     }
-    assert all(item["scene_prim_path"].split("/")[-1].startswith("obj_") for item in ownership["objects"])
-    assert all(item["root_owns_task_pose"] is True for item in ownership["objects"])
-    assert parity["artifacts"]["transform_ownership"]["path"] == (
-        "transform_ownership.json"
+    assert all(
+        item["composition_arcs_after"] == 0
+        for item in materialization["objects"]
     )
-
-
-def test_vr_transform_gate_rejects_pose_authored_only_on_child(tmp_path: Path) -> None:
-    scene = tmp_path / "scene.usda"
-    scene.write_text(
-        '''#usda 1.0
-(
-    defaultPrim = "World"
-    metersPerUnit = 1
-    upAxis = "Z"
-)
-def Xform "World"
-{
-    def Xform "obj_flask"
-    {
-        double3 xformOp:translate = (0, 0, 0)
-        quatd xformOp:orient = (1, 0, 0, 0)
-        double3 xformOp:scale = (1, 1, 1)
-        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
-
-        def Xform "Visual"
-        {
-            double3 xformOp:translate = (0.2, 0.1, 0.8)
-            uniform token[] xformOpOrder = ["xformOp:translate"]
-        }
-    }
-}
-''',
-        encoding="utf-8",
+    assert parity["artifacts"]["object_materialization"]["path"] == (
+        "object_materialization.json"
     )
-
-    with pytest.raises(VRTeleopExportError, match="obj_flask.*root transform"):
-        _validate_vr_transform_ownership(
-            scene_path=scene,
-            objects=[
-                {
-                    "id": "obj_flask",
-                    "pose": {
-                        "xyz": [0.2, 0.1, 0.8],
-                        "wxyz": [1.0, 0.0, 0.0, 0.0],
-                        "scale_xyz": [1.0, 1.0, 1.0],
-                    },
-                }
-            ],
-            scene_prim_paths=["/World/obj_flask"],
-            runtime_prim_paths=["/World/_scene/obj_flask"],
-            evidence_path=tmp_path / "transform_ownership.json",
-        )
-
-
-def test_vr_transform_gate_rejects_incomplete_root_trs(tmp_path: Path) -> None:
-    scene = tmp_path / "scene.usda"
-    scene.write_text(
-        '''#usda 1.0
-(defaultPrim = "World")
-def Xform "World"
-{
-    def Xform "obj_flask"
-    {
-        double3 xformOp:translate = (0.2, 0.1, 0.8)
-        uniform token[] xformOpOrder = ["xformOp:translate"]
-    }
-}
-''',
-        encoding="utf-8",
-    )
-
-    with pytest.raises(VRTeleopExportError, match="reset translate/orient/scale"):
-        _validate_vr_transform_ownership(
-            scene_path=scene,
-            objects=[
-                {
-                    "id": "obj_flask",
-                    "pose": {
-                        "xyz": [0.2, 0.1, 0.8],
-                        "wxyz": [1.0, 0.0, 0.0, 0.0],
-                    },
-                }
-            ],
-            scene_prim_paths=["/World/obj_flask"],
-            runtime_prim_paths=["/World/_scene/obj_flask"],
-            evidence_path=tmp_path / "transform_ownership.json",
-        )
-
-
-def test_vr_transform_gate_rejects_non_obj_runtime_path(tmp_path: Path) -> None:
-    scene = tmp_path / "scene.usda"
-    scene.write_text(
-        '''#usda 1.0
-(defaultPrim = "World")
-def Xform "World"
-{
-    def Xform "obj_flask"
-    {
-        double3 xformOp:translate = (0, 0, 0)
-        quatd xformOp:orient = (1, 0, 0, 0)
-        double3 xformOp:scale = (1, 1, 1)
-        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
-    }
-}
-''',
-        encoding="utf-8",
-    )
-
-    with pytest.raises(VRTeleopExportError, match="matching obj_ prim"):
-        _validate_vr_transform_ownership(
-            scene_path=scene,
-            objects=[
-                {
-                    "id": "obj_flask",
-                    "pose": {
-                        "xyz": [0.0, 0.0, 0.0],
-                        "wxyz": [1.0, 0.0, 0.0, 0.0],
-                    },
-                }
-            ],
-            scene_prim_paths=["/World/obj_flask"],
-            runtime_prim_paths=["/World/_scene/flask"],
-            evidence_path=tmp_path / "transform_ownership.json",
-        )
-
-
-def test_vr_transform_gate_allows_asset_internal_child_transform(tmp_path: Path) -> None:
-    scene = tmp_path / "scene.usda"
-    scene.write_text(
-        '''#usda 1.0
-(
-    defaultPrim = "World"
-    metersPerUnit = 1
-    upAxis = "Z"
-)
-def Xform "World"
-{
-    def Xform "obj_flask"
-    {
-        double3 xformOp:translate = (0.2, 0.1, 0.8)
-        quatd xformOp:orient = (1, 0, 0, 0)
-        double3 xformOp:scale = (1, 1, 1)
-        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
-
-        def Xform "Visual"
-        {
-            double3 xformOp:translate = (0, 0, 0.01)
-            uniform token[] xformOpOrder = ["xformOp:translate"]
-        }
-    }
-}
-''',
-        encoding="utf-8",
-    )
-    evidence = tmp_path / "transform_ownership.json"
-
-    result = _validate_vr_transform_ownership(
-        scene_path=scene,
-        objects=[
-            {
-                "id": "obj_flask",
-                "pose": {
-                    "xyz": [0.2, 0.1, 0.8],
-                    "wxyz": [1.0, 0.0, 0.0, 0.0],
-                    "scale_xyz": [1.0, 1.0, 1.0],
-                },
-            }
-        ],
-        scene_prim_paths=["/World/obj_flask"],
-        runtime_prim_paths=["/World/_scene/obj_flask"],
-        evidence_path=evidence,
-    )
-
-    assert result["status"] == "pass"
-    assert result["objects"][0]["root_owns_task_pose"] is True
-    assert evidence.is_file()
 
 
 def _build_generic_task_package(tmp_path: Path) -> Path:
@@ -362,11 +191,14 @@ def test_vr_export_uses_same_recipe_and_never_authors_a_local_table_slab(
 
     scene = (result.output_dir / "scene.usd").read_text(encoding="utf-8")
     assert "__support_surface_collision" not in scene
-    assert "PhysicsCollisionAPI" not in scene
     assert "@deps/table/asset.usd@</World/table>" in scene
     assert "@deps/environment/asset.usd@</World>" in scene
-    assert "@deps/source_container/asset.usd@</World/conical_bottle03>" in scene
-    assert "@deps/target_container/asset.usd@</World/graduated_cylinder_03>" in scene
+    assert "@deps/source_container/asset.usd@</World/conical_bottle03>" not in scene
+    assert "@deps/target_container/asset.usd@</World/graduated_cylinder_03>" not in scene
+    table_block = scene.split('def Xform "table"', 1)[1].split(
+        'def Xform "obj_', 1
+    )[0]
+    assert "PhysicsCollisionAPI" not in table_block
     assert 'def Xform "_scene"' not in scene
     assert 'def Xform "background"' in scene
     assert 'def Xform "table"' in scene
@@ -420,8 +252,10 @@ def test_vr_export_supports_generic_non_pour_task_objects(tmp_path: Path) -> Non
     )
 
     scene = result.scene_usd.read_text(encoding="utf-8")
-    assert "@deps/objects/obj_conical_bottle03/asset.usd@" in scene
-    assert "@deps/objects/obj_graduated_cylinder_03/asset.usd@" in scene
+    assert "@deps/objects/obj_conical_bottle03/asset.usd@" not in scene
+    assert "@deps/objects/obj_graduated_cylinder_03/asset.usd@" not in scene
+    assert 'def Xform "obj_conical_bottle03"' in scene
+    assert 'def Xform "obj_graduated_cylinder_03"' in scene
     task_config = result.task_config.read_text(encoding="utf-8")
     ast.parse(task_config)
     assert '"/World/_scene/obj_conical_bottle03"' in task_config

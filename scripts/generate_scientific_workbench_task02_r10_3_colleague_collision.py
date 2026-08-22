@@ -246,6 +246,11 @@ def _mark_unvalidated(destination: Path) -> None:
         "path": "scene.usd",
         "sha256": "sha256:" + _sha(destination / "vr/scene.usd"),
     }
+    parity["artifacts"]["object_materialization"] = {
+        "path": "object_materialization.json",
+        "sha256": "sha256:"
+        + _sha(destination / "vr/object_materialization.json"),
+    }
     parity_path.write_text(
         json.dumps(parity, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -262,6 +267,7 @@ def upgrade_variant(source: Path, destination: Path) -> Path:
     finally:
         r10_3.RACK_XYZ, r10_3.ROD_XYZ = old_rack, old_rod
     _apply_profile(destination)
+    r10_3._materialize_vr_scene(destination)
     _mark_unvalidated(destination)
     return destination
 
@@ -269,12 +275,17 @@ def upgrade_variant(source: Path, destination: Path) -> Path:
 def build_packages(source_root: Path, output_dir: Path) -> dict[str, Path]:
     if not COLLEAGUE_USD.is_file() or _sha(COLLEAGUE_USD) != COLLEAGUE_USD_SHA256:
         raise ValueError("test_0819_liquid.usd is missing or no longer matches the reviewed file")
-    return {
+    packages = {
         fill_id: upgrade_variant(
             source_root / fill_id, output_dir / "packages" / fill_id
         )
         for fill_id in FILL_IDS
     }
+    r10_3._validate_variant_parity(
+        packages,
+        evidence_path=output_dir / "evidence/vr_variant_object_parity.json",
+    )
+    return packages
 
 
 def _write_readme(root: Path) -> None:
@@ -310,6 +321,10 @@ def build_handoff(packages: Mapping[str, Path], output_dir: Path) -> Path:
         shutil.copytree(package / "vr", target / "vr")
         shutil.copy2(package / "manifest.json", target / "manifest.json")
     root.mkdir(parents=True, exist_ok=True)
+    parity_evidence = r10_3._validate_variant_parity(
+        packages,
+        evidence_path=root / "evidence/vr_variant_object_parity.json",
+    )
     root.joinpath("manifest.yaml").write_text(
         yaml.safe_dump(
             {
@@ -321,6 +336,10 @@ def build_handoff(packages: Mapping[str, Path], output_dir: Path) -> Path:
                 "variants": list(FILL_IDS),
                 "source_usd_sha256": COLLEAGUE_USD_SHA256,
                 "runtime_validation": "not_run_by_request",
+                "vr_variant_object_parity": {
+                    "status": "pass",
+                    "path": parity_evidence.relative_to(root).as_posix(),
+                },
             },
             allow_unicode=True,
             sort_keys=False,

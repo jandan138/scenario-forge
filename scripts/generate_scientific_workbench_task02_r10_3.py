@@ -29,6 +29,10 @@ from scenario_forge.adapters.ebench.preview import (  # noqa: E402
 from scenario_forge.artifacts.usd_handoff import (  # noqa: E402
     refresh_usd_handoff_archive,
 )
+from scenario_forge.adapters.vr_object_materialization import (  # noqa: E402
+    materialize_vr_object_subtrees,
+    validate_vr_variant_object_parity,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -172,6 +176,24 @@ def _inject_vr_scene(path: Path) -> None:
         text.replace(marker, _fixture_usd_blocks(vr=True) + marker),
         encoding="utf-8",
     )
+
+
+def _materialize_vr_scene(destination: Path) -> Path:
+    object_names = (*r10_1.TASK02_OBJECTS, "obj_glass_rod", "obj_acrylic_rod_rack")
+    objects_root = destination / "vr/deps/objects"
+    evidence = destination / "vr/object_materialization.json"
+    materialize_vr_object_subtrees(
+        scene_path=destination / "vr/scene.usd",
+        scene_prim_paths=[f"/World/{name}" for name in object_names],
+        runtime_prim_paths=[f"/World/_scene/{name}" for name in object_names],
+        evidence_path=evidence,
+        prunable_dependency_roots=(
+            tuple(path for path in objects_root.iterdir() if path.is_dir())
+            if objects_root.is_dir()
+            else ()
+        ),
+    )
+    return evidence
 
 
 def _inject_ebench_scene(destination: Path) -> None:
@@ -365,6 +387,7 @@ def upgrade_variant(
     _copy_fixture_closures(destination, fixture_package)
     _inject_ebench_scene(destination)
     _inject_vr_scene(destination / "vr/scene.usd")
+    object_materialization = _materialize_vr_scene(destination)
     _update_semantics(destination)
     _update_ebench_configs(destination)
     _update_ebench_manifest(destination, fixture_package)
@@ -426,6 +449,10 @@ def upgrade_variant(
         "path": "task_config.py",
         "sha256": "sha256:" + _sha(destination / "vr/task_config.py"),
     }
+    parity["artifacts"]["object_materialization"] = {
+        "path": "object_materialization.json",
+        "sha256": "sha256:" + _sha(object_materialization),
+    }
     parity_path.write_text(
         json.dumps(parity, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -443,7 +470,7 @@ def build_packages(
     output_dir: Path = DEFAULT_OUT,
     fixture_package: Path = DEFAULT_FIXTURE,
 ) -> dict[str, Path]:
-    return {
+    packages = {
         fill_id: upgrade_variant(
             source_root / fill_id,
             output_dir / "packages" / fill_id,
@@ -451,6 +478,24 @@ def build_packages(
         )
         for fill_id in FILL_IDS
     }
+    _validate_variant_parity(
+        packages,
+        evidence_path=output_dir / "evidence/vr_variant_object_parity.json",
+    )
+    return packages
+
+
+def _validate_variant_parity(
+    packages: Mapping[str, Path], *, evidence_path: Path
+) -> Path:
+    validate_vr_variant_object_parity(
+        {
+            fill_id: package / "vr/object_materialization.json"
+            for fill_id, package in packages.items()
+        },
+        evidence_path=evidence_path,
+    )
+    return evidence_path
 
 
 def _write_readme(root: Path, *, status: str) -> None:
@@ -500,6 +545,10 @@ def build_prevalidation_handoff(
         shutil.copytree(package / "vr", target / "vr")
         shutil.copy2(package / "manifest.json", target / "manifest.json")
     root.mkdir(parents=True, exist_ok=True)
+    parity_evidence = _validate_variant_parity(
+        packages,
+        evidence_path=root / "evidence/vr_variant_object_parity.json",
+    )
     root.joinpath("manifest.yaml").write_text(
         yaml.safe_dump(
             {
@@ -509,6 +558,10 @@ def build_prevalidation_handoff(
                 "status": "package_ready_runtime_validation_pending",
                 "default_variant": "fill40",
                 "variants": list(FILL_IDS),
+                "vr_variant_object_parity": {
+                    "status": "pass",
+                    "path": parity_evidence.relative_to(root).as_posix(),
+                },
                 "claim_boundary": (
                     "Portable composition is complete; new Isaac 4.1 runtime and visual "
                     "validation are pending."
@@ -560,6 +613,14 @@ def finalize_validated_handoff(
             },
         }
     )
+    parity_evidence = _validate_variant_parity(
+        packages,
+        evidence_path=archive.root / "evidence/vr_variant_object_parity.json",
+    )
+    manifest["vr_variant_object_parity"] = {
+        "status": "pass",
+        "path": parity_evidence.relative_to(archive.root).as_posix(),
+    }
     manifest_path.write_text(
         yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False),
         encoding="utf-8",

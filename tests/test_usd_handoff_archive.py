@@ -24,6 +24,9 @@ def test_usd_handoff_archive_contains_scene_config_deps_and_no_robot(tmp_path: P
     )
     (adapter / "task_config.py").write_text("TASKS = {}\n", encoding="utf-8")
     (adapter / "parity_manifest.json").write_text("{}\n", encoding="utf-8")
+    (adapter / "object_materialization.json").write_text(
+        '{"status":"pass"}\n', encoding="utf-8"
+    )
     (adapter / "deps/environment/asset.usd").write_text("#usda 1.0\n", encoding="utf-8")
 
     result = build_usd_handoff_archive(
@@ -49,6 +52,9 @@ def test_usd_handoff_bundle_keeps_multiple_variants_of_one_task(tmp_path: Path) 
         (adapter / "scene.usd").write_text("#usda 1.0\n", encoding="utf-8")
         (adapter / "task_config.py").write_text("TASKS = {}\n", encoding="utf-8")
         (adapter / "parity_manifest.json").write_text("{}\n", encoding="utf-8")
+        (adapter / "object_materialization.json").write_text(
+            '{"status":"pass"}\n', encoding="utf-8"
+        )
         packages.append((7, label, adapter))
 
     result = build_usd_handoff_bundle(

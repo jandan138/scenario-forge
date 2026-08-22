@@ -18,6 +18,9 @@ from scenario_forge.adapters.isaac41_vr600_profile import (
     physx_scene_config,
     vr_robot_contact_config,
 )
+from scenario_forge.adapters.vr_object_materialization import (
+    materialize_vr_object_subtrees,
+)
 from scenario_forge.assets.manifest import AssetManifestEntry, load_asset_manifest
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.package import validate_package
@@ -36,7 +39,7 @@ class VRTeleopExportResult:
     scene_usd: Path
     task_config: Path
     parity_manifest: Path
-    transform_ownership: Path
+    object_materialization: Path
 
 
 def _legacy_pour_objects(
@@ -178,12 +181,16 @@ def export_vr_teleop_package(
             )
         )
         for role, asset in asset_roles.items():
-            source_root = (package_root / asset.canonical_usd).parent
+            canonical_source = package_root / asset.canonical_usd
+            source_root = canonical_source.parent
             if not source_root.is_dir():
                 raise VRTeleopExportError(
                     f"compiled asset closure is missing for {asset.asset_id!r}"
                 )
-            shutil.copytree(source_root, staging / "deps" / role)
+            destination_root = staging / "deps" / role
+            shutil.copytree(source_root, destination_root)
+            if canonical_source.name != "asset.usd":
+                shutil.copy2(canonical_source, destination_root / "asset.usd")
 
         scene_path = staging / "scene.usd"
         scene_path.write_text(
@@ -235,6 +242,22 @@ def export_vr_teleop_package(
             if producer_entrypoint is not None
             else [f"/World/{name}" for name in object_names]
         )
+        object_materialization_path = staging / "object_materialization.json"
+        materialize_vr_object_subtrees(
+            scene_path=scene_path,
+            scene_prim_paths=scene_object_paths,
+            runtime_prim_paths=runtime_object_paths,
+            evidence_path=object_materialization_path,
+            prunable_dependency_roots=(
+                ()
+                if producer_entrypoint is not None
+                else tuple(
+                    staging / "deps" / role
+                    for role in asset_roles
+                    if role not in {"environment", "table"}
+                )
+            ),
+        )
         config_path = staging / "task_config.py"
         config_path.write_text(
             _task_config_python(
@@ -245,14 +268,6 @@ def export_vr_teleop_package(
                 object_prim_paths=runtime_object_paths,
             ),
             encoding="utf-8",
-        )
-        transform_ownership_path = staging / "transform_ownership.json"
-        _validate_vr_transform_ownership(
-            scene_path=scene_path,
-            objects=scene_objects,
-            scene_prim_paths=scene_object_paths,
-            runtime_prim_paths=runtime_object_paths,
-            evidence_path=transform_ownership_path,
         )
         parity_path = staging / "parity_manifest.json"
         scenario_bytes = (package_root / "scenario.yaml").read_bytes()
@@ -317,9 +332,9 @@ def export_vr_teleop_package(
             "artifacts": {
                 "scene_usd": {"path": "scene.usd", "sha256": _digest(scene_path)},
                 "task_config": {"path": "task_config.py", "sha256": _digest(config_path)},
-                "transform_ownership": {
-                    "path": "transform_ownership.json",
-                    "sha256": _digest(transform_ownership_path),
+                "object_materialization": {
+                    "path": "object_materialization.json",
+                    "sha256": _digest(object_materialization_path),
                 },
             },
         }
@@ -336,145 +351,8 @@ def export_vr_teleop_package(
         scene_usd=output / "scene.usd",
         task_config=output / "task_config.py",
         parity_manifest=output / "parity_manifest.json",
-        transform_ownership=output / "transform_ownership.json",
+        object_materialization=output / "object_materialization.json",
     )
-
-
-def _validate_vr_transform_ownership(
-    *,
-    scene_path: Path,
-    objects: list[Mapping[str, Any]],
-    scene_prim_paths: list[str],
-    runtime_prim_paths: list[str],
-    evidence_path: Path,
-) -> dict[str, Any]:
-    """Require every randomizable VR object root to own its complete task pose."""
-
-    if not (len(objects) == len(scene_prim_paths) == len(runtime_prim_paths)):
-        raise VRTeleopExportError(
-            "VR transform ownership inputs must map objects, scene prims, and runtime prims 1:1"
-        )
-    try:
-        from pxr import Usd, UsdGeom  # type: ignore
-    except ImportError as exc:
-        raise VRTeleopExportError(
-            "VR transform ownership validation requires the USD Python runtime"
-        ) from exc
-
-    stage = Usd.Stage.Open(str(scene_path))
-    if stage is None:
-        raise VRTeleopExportError(f"cannot open VR scene for transform validation: {scene_path}")
-    records: list[dict[str, Any]] = []
-    expected_order = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
-    for item, scene_prim_path, runtime_prim_path in zip(
-        objects, scene_prim_paths, runtime_prim_paths, strict=True
-    ):
-        object_id = _string(item.get("id"), "VR transform object.id")
-        expected_name = _vr_prim_name(object_id)
-        scene_name = scene_prim_path.rsplit("/", 1)[-1]
-        runtime_name = runtime_prim_path.rsplit("/", 1)[-1]
-        if (
-            not scene_prim_path.startswith("/")
-            or not runtime_prim_path.startswith("/")
-            or not scene_name.startswith("obj_")
-            or scene_name != expected_name
-            or runtime_name != expected_name
-        ):
-            raise VRTeleopExportError(
-                f"{object_id} VR object root must be the matching obj_ prim in both scene and obj_prim_list"
-            )
-        prim = stage.GetPrimAtPath(scene_prim_path)
-        if not prim.IsValid() or not prim.IsActive() or not prim.IsA(UsdGeom.Xform):
-            raise VRTeleopExportError(
-                f"{object_id} VR object root is missing or not an Xform: {scene_prim_path}"
-            )
-        xformable = UsdGeom.Xformable(prim)
-        ordered_ops = xformable.GetOrderedXformOps()
-        observed_order = [op.GetOpName() for op in ordered_ops]
-        if observed_order != expected_order or not xformable.GetResetXformStack():
-            raise VRTeleopExportError(
-                f"{object_id} root transform must author reset translate/orient/scale on {scene_prim_path}"
-            )
-        values = {op.GetOpName(): op.Get() for op in ordered_ops}
-        pose = _mapping(item.get("pose"), f"{object_id}.pose")
-        expected_xyz = _number_list(pose.get("xyz"), 3, f"{object_id}.pose.xyz")
-        expected_wxyz = _number_list(pose.get("wxyz"), 4, f"{object_id}.pose.wxyz")
-        expected_scale = _number_list(
-            pose.get("scale_xyz", [1.0, 1.0, 1.0]),
-            3,
-            f"{object_id}.pose.scale_xyz",
-        )
-        observed_xyz = [float(value) for value in values["xformOp:translate"]]
-        orient = values["xformOp:orient"]
-        imaginary = orient.GetImaginary()
-        observed_wxyz = [
-            float(orient.GetReal()),
-            float(imaginary[0]),
-            float(imaginary[1]),
-            float(imaginary[2]),
-        ]
-        observed_scale = [float(value) for value in values["xformOp:scale"]]
-        if not (
-            _vectors_close(observed_xyz, expected_xyz)
-            and _quaternions_equivalent(observed_wxyz, expected_wxyz)
-            and _vectors_close(observed_scale, expected_scale)
-        ):
-            raise VRTeleopExportError(
-                f"{object_id} root transform does not match scenario pose on {scene_prim_path}; "
-                "task placement may not live only on a child prim"
-            )
-        records.append(
-            {
-                "object_id": object_id,
-                "scene_prim_path": scene_prim_path,
-                "runtime_prim_path": runtime_prim_path,
-                "expected_pose": {
-                    "xyz": expected_xyz,
-                    "wxyz": expected_wxyz,
-                    "scale_xyz": expected_scale,
-                },
-                "observed_root_pose": {
-                    "xyz": observed_xyz,
-                    "wxyz": observed_wxyz,
-                    "scale_xyz": observed_scale,
-                },
-                "xform_op_order": ["!resetXformStack!", *observed_order],
-                "root_owns_task_pose": True,
-            }
-        )
-    result = {
-        "schema_version": "scenario-forge-vr-transform-ownership/v0.1",
-        "status": "pass",
-        "object_scope": "task_config.obj_prim_list",
-        "tolerance": 1e-6,
-        "objects": records,
-        "excluded": ["room", "table", "robot", "lights", "fluid_helpers"],
-    }
-    evidence_path.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    return result
-
-
-def _vectors_close(left: list[float], right: list[float], tolerance: float = 1e-6) -> bool:
-    return len(left) == len(right) and all(
-        abs(first - second) <= tolerance for first, second in zip(left, right, strict=True)
-    )
-
-
-def _quaternions_equivalent(
-    left: list[float], right: list[float], tolerance: float = 1e-6
-) -> bool:
-    left_norm = sum(value * value for value in left) ** 0.5
-    right_norm = sum(value * value for value in right) ** 0.5
-    if min(left_norm, right_norm) <= tolerance:
-        return False
-    dot = sum(
-        first * second
-        for first, second in zip(left, right, strict=True)
-    ) / (left_norm * right_norm)
-    return abs(abs(dot) - 1.0) <= tolerance
 
 
 def _scene_usda(

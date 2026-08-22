@@ -35,7 +35,13 @@ def _fake_source_package(path: Path) -> None:
 (defaultPrim = "World")
 def Xform "World"
 {
+    def Xform "obj_graduated_cylinder" {}
     def Xform "obj_beaker" {}
+    def Xform "obj_r9_amber_bottle" {}
+    def Xform "obj_r9_tip_box" {}
+    def Xform "obj_r9_wash_bottle" {}
+    def Xform "obj_r9_clear_bottle" {}
+    def Xform "obj_r9_pipette_carousel" {}
     def DomeLight "vr_direct_open_light" {}
 }
 '''
@@ -91,8 +97,16 @@ def PhysicsScene "physicsScene" {}
 
 def _fake_fixture_package(path: Path) -> None:
     vr = path / "adapters/vr_teleop/deps/objects"
-    _write(vr / "obj_glass_rod/asset.usd", "rod")
-    _write(vr / "obj_acrylic_rod_rack/asset.usd", "rack")
+    _write(
+        vr / "obj_glass_rod/asset.usd",
+        '#usda 1.0\n(defaultPrim = "World")\ndef Xform "World"\n{\n'
+        '    def Xform "GlassStirringRod" {}\n}\n',
+    )
+    _write(
+        vr / "obj_acrylic_rod_rack/asset.usd",
+        '#usda 1.0\n(defaultPrim = "World")\ndef Xform "World"\n{\n'
+        '    def Xform "AcrylicSpoonRack" {}\n}\n',
+    )
     scene_root = (
         path
         / "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/task07"
@@ -147,7 +161,17 @@ def test_upgrade_adds_grouped_rod_rack_without_changing_pbd(tmp_path: Path) -> N
     scene = (destination / "vr/scene.usd").read_text()
     assert 'def Xform "obj_glass_rod"' in scene
     assert 'def Xform "obj_acrylic_rod_rack"' in scene
+    assert "prepend references" not in scene
     assert "(-0.42, -0.17, 0.755)" in scene
+    materialization = json.loads(
+        (destination / "vr/object_materialization.json").read_text()
+    )
+    assert materialization["status"] == "pass"
+    assert len(materialization["objects"]) == 9
+    assert all(
+        item["composition_arcs_after"] == 0
+        for item in materialization["objects"]
+    )
     config = (destination / "vr/task_config.py").read_text()
     assert '"/World/_scene/obj_glass_rod"' in config
     assert '"/World/_scene/obj_acrylic_rod_rack"' in config

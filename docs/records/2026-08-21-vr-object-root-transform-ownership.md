@@ -1,5 +1,11 @@
 # 2026-08-21 VR object-root transform ownership
 
+> Superseded on 2026-08-23 by
+> `2026-08-23-vr-object-materialization-and-transform-correction.md`. The
+> explicit complete-TRS and scenario-pose equality rule below was based on an
+> incorrect interpretation of the downstream requirement and is no longer an
+> export gate.
+
 Future VR exports now enforce a single task-pose owner for every object listed in
 `task_config.py:obj_prim_list`. Each corresponding source root must be a matching
 `obj_*` Xform with an explicit reset stack and canonical translate, orient, and
