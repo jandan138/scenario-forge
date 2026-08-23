@@ -11,7 +11,11 @@ def test_task11_static_generator_is_vr_only_and_claim_bounded():
     assert "PRIMARY_SOCKET = 18" in source and "BALANCE_SOCKET = 6" in source
     assert source.count("2640") >= 2
     assert "object_materialization.json" in source
-    assert "labspin_x8_task11_r3_20260824" in source
+    assert "labspin_x8_task11_r4_20260824" in source
+    assert "scientific_workbench_task11_vr_r4_20260824" in source
     assert "button_causes_lid_open" in source
+    assert "contact_press_qualified" in source
+    assert "rotor_open_interlock" in source
+    assert "shutdown_causes_power_off" in source
     assert "robot_policy_success" in source
     assert "set_robot_contact_offset" not in source

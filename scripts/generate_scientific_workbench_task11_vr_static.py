@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the VR-only Task 11 static PBD candidate."""
+"""Generate the VR-only Task 11 r4 device-qualified PBD candidate."""
 
 from __future__ import annotations
 
@@ -27,8 +27,8 @@ TASK_ID = "scientific_workbench_centrifuge_unload_shutdown"
 DEFAULT_ASSETS = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task11_vr_static_assets_20260823"
 )
-DEFAULT_CENTRIFUGE_R3 = Path(
-    "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labspin_x8_task11_r3_20260824/package"
+DEFAULT_CENTRIFUGE_R4 = Path(
+    "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labspin_x8_task11_r4_20260824/package"
 )
 DEFAULT_RACK_ARCHIVE = (
     REPO_ROOT
@@ -42,12 +42,19 @@ DEFAULT_LIQUID = (
     REPO_ROOT
     / "outputs/simple_sdf_multi_liquid_golden_20260820/liquid_package_qualified/liquid_overlay.usda"
 )
-DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_task11_vr_static_candidate_20260823"
+DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_task11_vr_r4_20260824"
 DEVICE_XYZ = (0.22, 0.09, 0.82)
 RACK_XYZ = (-0.50, -0.17, 0.755)
 ROTOR_ORIGIN = (-0.03, 0.005, 0.27)
 PRIMARY_SOCKET = 18
 BALANCE_SOCKET = 6
+REQUIRED_DEVICE_CLAIMS = (
+    "contact_press_qualified",
+    "button_causes_lid_open",
+    "lid_remains_open_after_release",
+    "rotor_open_interlock",
+    "shutdown_causes_power_off",
+)
 
 
 def _sha(path: Path) -> str:
@@ -158,16 +165,31 @@ def _copy_liquid(stage, liquid_source: Path, tube_poses: list[tuple[str, tuple, 
     )
 
 
-def build(output: Path, assets: Path, rack_archive: Path, base: Path, liquid: Path) -> Path:
+def build(
+    output: Path,
+    assets: Path,
+    centrifuge: Path,
+    rack_archive: Path,
+    base: Path,
+    liquid: Path,
+) -> Path:
     from pxr import Gf, Usd, UsdGeom, UsdPhysics
 
+    producer_manifest = json.loads(
+        (centrifuge / "evidence/manifest.json").read_text(encoding="utf-8")
+    )
+    if producer_manifest.get("overall_status") != "pass" or not all(
+        producer_manifest["claims"].get(name) is True
+        for name in REQUIRED_DEVICE_CLAIMS
+    ):
+        raise RuntimeError("centrifuge r4 device qualification is incomplete")
     if output.exists():
         shutil.rmtree(output)
     vr = output / "vr"
     deps = vr / "deps"
     deps.mkdir(parents=True)
     _copytree(base, deps / "environment")
-    _copytree(DEFAULT_CENTRIFUGE_R3, deps / "centrifuge")
+    _copytree(centrifuge, deps / "centrifuge")
     _copytree(assets / "mixed_rack/package", deps / "rack")
     _copytree(assets / "closed_15ml_pbd_ready/package", deps / "tube")
     _extract_background_packages(rack_archive, deps / "background")
@@ -336,9 +358,9 @@ def build(output: Path, assets: Path, rack_archive: Path, base: Path, liquid: Pa
     )
     (vr / "task_config.py").write_text(config, encoding="utf-8")
     manifest = {
-        "schema_version": "scenario-forge-task11-vr-static-candidate/v0.1",
+        "schema_version": "scenario-forge-task11-vr-candidate/v0.2",
         "scenario_id": TASK_ID,
-        "status": "static_candidate_pending_runtime",
+        "status": "device_qualified_static_pbd_pending_runtime",
         "primary_socket": PRIMARY_SOCKET,
         "balance_socket": BALANCE_SOCKET,
         "target_rack_slot": "slot_15ml_r00_c02",
@@ -348,12 +370,18 @@ def build(output: Path, assets: Path, rack_archive: Path, base: Path, liquid: Pa
         ],
         "claims": {
             "static_stability": False,
-            "button_press": False,
-            "button_causes_lid_open": False,
-            "shutdown_causes_power_off": False,
+            "contact_press_qualified": True,
+            "button_causes_lid_open": True,
+            "lid_remains_open_after_release": True,
+            "rotor_open_interlock": True,
+            "shutdown_causes_power_off": True,
+            "manual_close_and_latch": False,
             "robot_policy_success": False,
             "benchmark_success": False,
         },
+        "producer_qualification": (
+            "vr/deps/centrifuge/evidence/lid_behavior/report.json"
+        ),
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     validation = {
@@ -382,9 +410,19 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--out", type=Path, default=DEFAULT_OUT)
     p.add_argument("--assets", type=Path, default=DEFAULT_ASSETS)
+    p.add_argument("--centrifuge", type=Path, default=DEFAULT_CENTRIFUGE_R4)
     p.add_argument("--rack-archive", type=Path, default=DEFAULT_RACK_ARCHIVE)
     args = p.parse_args()
-    print(build(args.out, args.assets, args.rack_archive, DEFAULT_BASE, DEFAULT_LIQUID))
+    print(
+        build(
+            args.out,
+            args.assets,
+            args.centrifuge,
+            args.rack_archive,
+            DEFAULT_BASE,
+            DEFAULT_LIQUID,
+        )
+    )
     return 0
 
 
