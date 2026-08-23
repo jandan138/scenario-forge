@@ -27,6 +27,9 @@ TASK_ID = "scientific_workbench_centrifuge_unload_shutdown"
 DEFAULT_ASSETS = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task11_vr_static_assets_20260823"
 )
+DEFAULT_CENTRIFUGE_R3 = Path(
+    "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labspin_x8_task11_r3_20260824/package"
+)
 DEFAULT_RACK_ARCHIVE = (
     REPO_ROOT
     / "external_artifacts/incoming/from_xinyu/scientific_workbench_tube15_50_mixed_rack_18plus4_20260821.zip"
@@ -164,7 +167,7 @@ def build(output: Path, assets: Path, rack_archive: Path, base: Path, liquid: Pa
     deps = vr / "deps"
     deps.mkdir(parents=True)
     _copytree(base, deps / "environment")
-    _copytree(assets / "centrifuge/package", deps / "centrifuge")
+    _copytree(DEFAULT_CENTRIFUGE_R3, deps / "centrifuge")
     _copytree(assets / "mixed_rack/package", deps / "rack")
     _copytree(assets / "closed_15ml_pbd_ready/package", deps / "tube")
     _extract_background_packages(rack_archive, deps / "background")
