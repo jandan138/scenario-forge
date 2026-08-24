@@ -93,6 +93,7 @@ from scenario_forge.generation.simple_sdf_liquid import (
     SimpleSdfLiquidGenerationError,
     add_sampled_liquid,
     build_simple_sdf,
+    publish_edited_liquid,
     propose_simple_sdf,
 )
 
@@ -582,6 +583,14 @@ def build_parser() -> argparse.ArgumentParser:
     liquid_sample_parser.add_argument("--out", required=True, help="Delivery package directory")
     liquid_sample_parser.add_argument("--convertasset-root", help="ConvertAsset checkout")
     liquid_sample_parser.add_argument("--isaac-python", help="Isaac Sim 4.1 Python executable")
+    liquid_publish_parser = liquid_subparsers.add_parser(
+        "publish-edit",
+        help="Freeze and validate saved ParticleSets from a dual-entry liquid package",
+    )
+    liquid_publish_parser.add_argument("--package", required=True)
+    liquid_publish_parser.add_argument("--out", required=True)
+    liquid_publish_parser.add_argument("--convertasset-root")
+    liquid_publish_parser.add_argument("--isaac-python")
 
     fluid_asset_parser = subparsers.add_parser(
         "fluid-asset", help="Prepare and qualify source-bound fluid-interaction assets"
@@ -698,6 +707,23 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"Multi-liquid USD: {result.handoff.root_usd}")
         print(f"Multi-liquid ZIP: {result.zip_path}")
+        return 0
+
+    if args.command == "liquid" and args.liquid_command == "publish-edit":
+        try:
+            result = publish_edited_liquid(
+                package=Path(args.package),
+                output=Path(args.out),
+                convertasset_root=(
+                    Path(args.convertasset_root) if args.convertasset_root else None
+                ),
+                isaac_python=Path(args.isaac_python) if args.isaac_python else None,
+            )
+        except SimpleSdfLiquidGenerationError as exc:
+            print(exc)
+            return 1
+        print(f"Frozen liquid USD: {result.handoff.root_usd}")
+        print(f"Frozen liquid ZIP: {result.zip_path}")
         return 0
 
     if args.command == "fluid-asset" and args.fluid_asset_command == "prepare":

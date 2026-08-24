@@ -163,3 +163,35 @@ def add_sampled_liquid(
             f"multi-liquid package was not promoted: {error}; diagnostics: {diagnostics}"
         ) from error
     return MultiLiquidPackageResult(handoff, _zip(destination))
+
+
+def publish_edited_liquid(
+    *, package: Path, output: Path, convertasset_root: Path | None = None,
+    isaac_python: Path | None = None,
+) -> MultiLiquidPackageResult:
+    """Delegate editable-sampler freezing and validation to ConvertAsset."""
+    source = Path(package).expanduser().resolve()
+    destination = Path(output).expanduser().resolve()
+    working = destination.parent / f".{destination.name}.working"
+    diagnostics = destination.parent / f"{destination.name}_diagnostics"
+    for path in (working, diagnostics):
+        if path.exists():
+            shutil.rmtree(path)
+    plan = SimpleSdfLiquidCommandPlan(_root(convertasset_root), _isaac(isaac_python))
+    try:
+        _run(
+            plan.freeze_command(source, working),
+            working.parent / f".{working.name}.log",
+        )
+        handoff = load_multi_liquid_handoff(working)
+        if destination.exists():
+            raise SimpleSdfLiquidGenerationError(f"refusing to overwrite: {destination}")
+        working.replace(destination)
+        handoff = load_multi_liquid_handoff(destination)
+    except (OSError, SimpleSdfLiquidGenerationError, SimpleSdfLiquidHandoffError) as error:
+        if working.exists():
+            working.replace(diagnostics)
+        raise SimpleSdfLiquidGenerationError(
+            f"edited liquid package was not promoted: {error}; diagnostics: {diagnostics}"
+        ) from error
+    return MultiLiquidPackageResult(handoff, _zip(destination))

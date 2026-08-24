@@ -1,0 +1,12 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_beaker_325ml_sdf_web_standard_v1:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_beaker_325ml_sdf_web_standard_20260824/package/asset.usd
+    role: dynamic_container
+    root_prim_path: /World/Beaker325mlSdf
+    source_uri: convertasset://scientific_workbench_beaker_325ml_sdf_web_standard_v1
+    expected_sha256: sha256:d450b02ca2211f4a017f502e2d1a40446eb99002bbbca0354dae949bc43fdd5e
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [scientific workbench 325 mL SDF beaker; webpage-standard ClearBorosilicate]
+    redistributable: true

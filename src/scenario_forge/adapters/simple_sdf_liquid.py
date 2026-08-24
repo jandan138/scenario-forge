@@ -12,6 +12,7 @@ from typing import Any, Mapping
 RESULT_SCHEMAS = {
     "aan.multi_liquid_sample_result.v1",
     "aan.multi_liquid_sample_result.v2",
+    "aan.multi_liquid_sample_result.v3",
 }
 FLUID_ROOT = "/__ScenarioForgeFluid"
 
@@ -54,6 +55,19 @@ class SimpleSdfLiquidCommandPlan:
             command += ("--isaac-python", str(self.isaac_python))
         return command
 
+    def freeze_command(self, package: Path, output: Path) -> tuple[str, ...]:
+        command = (
+            *self._entry(),
+            "multi-liquid-freeze",
+            "--package",
+            str(package),
+            "--out",
+            str(output),
+        )
+        if self.isaac_python is not None:
+            command += ("--isaac-python", str(self.isaac_python))
+        return command
+
 
 @dataclass(frozen=True)
 class MultiLiquidHandoff:
@@ -65,6 +79,7 @@ class MultiLiquidHandoff:
     sets: tuple[Mapping[str, Any], ...]
     claim: str
     manifest: Mapping[str, Any]
+    editable_root_usd: Path | None = None
 
 
 def _relative_file(root: Path, value: object, label: str) -> Path:
@@ -93,7 +108,28 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
         raise SimpleSdfLiquidHandoffError("producer entrypoints are missing")
     root_usd = _relative_file(package, entrypoints.get("root_usd"), "root USD")
     overlay = _relative_file(package, entrypoints.get("overlay_usd"), "liquid overlay")
-    if manifest.get("schema_version") == "aan.multi_liquid_sample_result.v2":
+    editable_root = None
+    is_v3 = manifest.get("schema_version") == "aan.multi_liquid_sample_result.v3"
+    if is_v3:
+        editable_root = _relative_file(
+            package, entrypoints.get("editable_root_usd"), "editable root USD"
+        )
+        _relative_file(
+            package,
+            entrypoints.get("editable_samplers_usd"),
+            "editable samplers USD",
+        )
+        sampling = manifest.get("sampling")
+        if not isinstance(sampling, Mapping) or sampling.get(
+            "runtime_resampling"
+        ) != "editable_only":
+            raise SimpleSdfLiquidHandoffError(
+                "v3 package must confine runtime resampling to the editable entry"
+            )
+    if manifest.get("schema_version") in {
+        "aan.multi_liquid_sample_result.v2",
+        "aan.multi_liquid_sample_result.v3",
+    }:
         auto_samplers = entrypoints.get("auto_samplers_usd")
         if auto_samplers is not None:
             _relative_file(package, auto_samplers, "automatic sampler evidence")
@@ -108,7 +144,10 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
     ids: set[str] = set()
     groups: set[int] = set()
     sets: list[Mapping[str, Any]] = []
-    is_v2 = manifest.get("schema_version") == "aan.multi_liquid_sample_result.v2"
+    is_auto_schema = manifest.get("schema_version") in {
+        "aan.multi_liquid_sample_result.v2",
+        "aan.multi_liquid_sample_result.v3",
+    }
     for value in values:
         if not isinstance(value, Mapping):
             raise SimpleSdfLiquidHandoffError("set record must be a mapping")
@@ -122,7 +161,7 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
             raise SimpleSdfLiquidHandoffError("ParticleSet prim does not match its id")
         if int(value.get("particle_count", 0)) <= 0:
             raise SimpleSdfLiquidHandoffError("ParticleSet must contain baked particles")
-        if is_v2:
+        if is_auto_schema:
             sampler_mode = value.get("sampler_mode")
             if sampler_mode not in {"explicit_mesh", "inside_fill", "mouth_drop"}:
                 raise SimpleSdfLiquidHandoffError("v2 set has an unsupported sampler mode")
@@ -137,10 +176,22 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
                     raise SimpleSdfLiquidHandoffError(
                         "automatic sampler evidence prim is outside its canonical scope"
                     )
+        if is_v3:
+            if value.get("editable_axis") != "height_z":
+                raise SimpleSdfLiquidHandoffError(
+                    "v3 ParticleSet editable_axis must be height_z"
+                )
+            editable_sampler = str(value.get("editable_sampler_prim", ""))
+            if editable_sampler != f"{FLUID_ROOT}/Samplers/{set_id}/Volume":
+                raise SimpleSdfLiquidHandoffError(
+                    "v3 editable sampler does not match its ParticleSet id"
+                )
         ids.add(set_id)
         groups.add(group)
         sets.append(value)
-    if is_v2 and any(item.get("sampler_mode") != "explicit_mesh" for item in sets):
+    if is_auto_schema and any(
+        item.get("sampler_mode") != "explicit_mesh" for item in sets
+    ):
         if entrypoints.get("auto_samplers_usd") is None:
             raise SimpleSdfLiquidHandoffError("automatic sampler evidence entrypoint is missing")
     validation = manifest.get("validation")
@@ -162,5 +213,13 @@ def load_multi_liquid_handoff(root: Path) -> MultiLiquidHandoff:
     if manifest.get("robot_policy_success") is not False or manifest.get("benchmark_success") is not False:
         raise SimpleSdfLiquidHandoffError("producer must not claim robot or benchmark success")
     return MultiLiquidHandoff(
-        package, root_usd, overlay, manifest_path, system, tuple(sets), expected, manifest
+        package,
+        root_usd,
+        overlay,
+        manifest_path,
+        system,
+        tuple(sets),
+        expected,
+        manifest,
+        editable_root,
     )

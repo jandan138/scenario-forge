@@ -51,6 +51,13 @@ Forge only accepts passed v2 handoffs whose evidence sampler lives under
 whose generated USD is package-relative. The evidence cylinder is not composed
 into the runtime scene.
 
+Request/result v3 adds a dual-entry delivery without changing v1/v2. The
+frozen entry remains the formal data-collection input. The editable entry
+composes one invisible height-Z cylinder per liquid, with a strict 1:1 mapping
+to its independent ParticleSet. All sets share one ParticleSystem and one
+transparent-blue material; the material must also be bound to the system so
+the PhysX isosurface does not render with a black fallback.
+
 If any set is marked `small_required`, the whole shared system uses the small
 recipe: 1 mm spacing, 1.188 mm width, 1 mm contact offset, 5 mm effective rest
 offset, 0.2 m/s maximum velocity, at most 50,000 particles per set, and 100,000

@@ -105,6 +105,67 @@ def test_handoff_rejects_v2_auto_sampler_outside_canonical_scope(tmp_path: Path)
         load_multi_liquid_handoff(root)
 
 
+def test_handoff_accepts_v3_dual_editable_frozen_package(tmp_path: Path) -> None:
+    root = _handoff(tmp_path / "producer")
+    (root / "scene_liquid_edit.usda").write_text(
+        '#usda 1.0\ndef Scope "__ScenarioForgeFluid" {}\n'
+    )
+    (root / "editable_samplers.usda").write_text(
+        '#usda 1.0\ndef Scope "__ScenarioForgeFluid" {}\n'
+    )
+    (root / "auto_samplers.usda").write_text(
+        '#usda 1.0\ndef Scope "__ScenarioForgeAutoSamplers" {}\n'
+    )
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["schema_version"] = "aan.multi_liquid_sample_result.v3"
+    manifest["entrypoints"].update(
+        {
+            "editable_root_usd": "scene_liquid_edit.usda",
+            "editable_samplers_usd": "editable_samplers.usda",
+            "auto_samplers_usd": "auto_samplers.usda",
+        }
+    )
+    manifest["sampling"] = {
+        "runtime_resampling": "editable_only",
+        "editable_axis": "height_z",
+    }
+    for item in manifest["sets"]:
+        item.update(
+            {
+                "sampler_mode": "inside_fill",
+                "target_fill_ratio": 0.4,
+                "editable_axis": "height_z",
+                "sampler_mesh_prim": f"/__ScenarioForgeAutoSamplers/{item['id']}",
+                "editable_sampler_prim": (
+                    f"/__ScenarioForgeFluid/Samplers/{item['id']}/Volume"
+                ),
+            }
+        )
+    manifest_path.write_text(json.dumps(manifest))
+
+    result = load_multi_liquid_handoff(root)
+
+    assert result.editable_root_usd == root / "scene_liquid_edit.usda"
+    assert result.manifest["sampling"]["runtime_resampling"] == "editable_only"
+
+
+def test_cli_exposes_publish_edit_without_implementing_usd_authoring() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "liquid",
+            "publish-edit",
+            "--package",
+            "candidate",
+            "--out",
+            "published",
+        ]
+    )
+
+    assert args.liquid_command == "publish-edit"
+
+
 def _handoff(root: Path, *, duplicate_group: bool = False) -> Path:
     root.mkdir()
     (root / "scene.usda").write_text(
