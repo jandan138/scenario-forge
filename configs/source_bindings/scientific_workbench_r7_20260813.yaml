@@ -64,6 +64,17 @@ bindings:
     manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/packages/beaker_325ml/evidence/manifest.json
     expected_scope_prims: [/World/Beaker325ml]
     attribution: [实验室资产库 325 mL beaker; ConvertAsset r7]
+  scientific_workbench_beaker_325ml_sdf_web_standard_v1:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_beaker_325ml_sdf_web_standard_20260824/package/asset.usd
+    package_dir: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_beaker_325ml_sdf_web_standard_20260824/package
+    manifest_path: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_beaker_325ml_sdf_web_standard_20260824/package/evidence/manifest.json
+    producer_revision: scientific-workbench-beaker-sdf-web-standard-20260824
+    expected_scope_prims: [/World/Beaker325mlSdf]
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution: [实验室资产库 325 mL beaker; Wangshuai SDF; webpage-standard ClearBorosilicate]
+    redistributable: true
   scientific_workbench_r7_glass_stirring_rod_300mm:
     <<: *cylinder
     source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_r7_task_assets_20260813/input/facades/glass_stirring_rod_300mm/facade.usda

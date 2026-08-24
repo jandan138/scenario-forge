@@ -165,7 +165,7 @@ def _task2() -> dict[str, Any]:
     s["seed"] = "002"
     s["objects"] += [
         {"id": "obj_graduated_cylinder", "asset_id": "scientific_workbench_r7_graduated_cylinder_250ml", "source_prim_path": "/World/GraduatedCylinder250ml", "role": "source_container", "pose": {"xyz": [0.16, -0.15, 0.755], "wxyz": [1, 0, 0, 0]}, "named_frames": _frame_request("support", "grasp", "opening", "interior_center")},
-        {"id": "obj_beaker", "asset_id": "scientific_workbench_r7_beaker_325ml", "source_prim_path": "/World/Beaker325ml", "role": "target_container", "pose": {"xyz": [-0.16, -0.17, 0.755], "wxyz": [1, 0, 0, 0]}, "named_frames": _frame_request("support", "grasp", "opening", "interior_center")},
+        {"id": "obj_beaker", "asset_id": "scientific_workbench_beaker_325ml_sdf_web_standard_v1", "source_prim_path": "/World/Beaker325mlSdf", "role": "target_container", "pose": {"xyz": [-0.16, -0.17, 0.755], "wxyz": [1, 0, 0, 0]}, "named_frames": _frame_request("support", "grasp", "opening", "interior_center")},
     ]
     s["steps"] = [
         {"id": "hold_beaker", "skill": "grasp_and_hold", "actors": ["auxiliary_arm"], "parameters": {"object": "obj_beaker"}},
@@ -190,7 +190,7 @@ def _task7(background: str) -> dict[str, Any]:
     s = _base(f"scientific_workbench_r7_task07_glass_rod_stir{suffix}", "辅助臂固定 325 mL 烧杯；操作臂拿起 300 mm 玻璃棒，插入杯内并累计搅拌至少一周，最后放回。", background)
     s["task_family"] = "bimanual_stir"
     s["objects"] += [
-        {"id": "obj_beaker", "asset_id": "scientific_workbench_r7_beaker_325ml", "source_prim_path": "/World/Beaker325ml", "role": "target_container", "pose": {"xyz": [-0.15, -0.17, 0.755], "wxyz": [1, 0, 0, 0]}, "named_frames": _frame_request("support", "grasp", "opening", "interior_center")},
+        {"id": "obj_beaker", "asset_id": "scientific_workbench_beaker_325ml_sdf_web_standard_v1", "source_prim_path": "/World/Beaker325mlSdf", "role": "target_container", "pose": {"xyz": [-0.15, -0.17, 0.755], "wxyz": [1, 0, 0, 0]}, "named_frames": _frame_request("support", "grasp", "opening", "interior_center")},
         {"id": "obj_glass_rod", "asset_id": "scientific_workbench_r7_glass_stirring_rod_300mm", "source_prim_path": "/World/GlassStirringRod", "role": "stirring_tool", "pose": {"xyz": [-0.10, 0.02, 0.758615], "wxyz": [0.7071067812, 0.7071067812, 0, 0]}, "named_frames": _frame_request("support", "grasp", "working_tip")},
     ]
     if background in RACKED_TASK7_BACKGROUNDS:

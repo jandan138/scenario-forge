@@ -24,8 +24,8 @@ def test_r7_plan_is_seven_immutable_packages_for_tasks_2_7_8() -> None:
 def test_r7_main_assets_are_only_the_locked_zip_assets() -> None:
     plans = generator.load_r7_plans()
     expected = {
-        2: {"scientific_workbench_r7_graduated_cylinder_250ml", "scientific_workbench_r7_beaker_325ml"},
-        7: {"scientific_workbench_r7_beaker_325ml", "scientific_workbench_r7_glass_stirring_rod_300mm"},
+        2: {"scientific_workbench_r7_graduated_cylinder_250ml", "scientific_workbench_beaker_325ml_sdf_web_standard_v1"},
+        7: {"scientific_workbench_beaker_325ml_sdf_web_standard_v1", "scientific_workbench_r7_glass_stirring_rod_300mm"},
         8: {"scientific_workbench_r7_tube_rack", "scientific_workbench_r7_centrifuge_tube_15ml_body", "scientific_workbench_r7_centrifuge_tube_15ml_cap"},
     }
     for plan in plans:
