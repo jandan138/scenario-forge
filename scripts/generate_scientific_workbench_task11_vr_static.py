@@ -71,10 +71,10 @@ def _orientation_z_to(axis: tuple[float, float, float]):
     return Gf.Quatf(scale * 0.5, Gf.Vec3f(cross[0] / scale, cross[1] / scale, 0.0))
 
 
-def _socket_pose(profile: dict, index: int):
+def _socket_pose(profile: dict, index: int, device_xyz=DEVICE_XYZ):
     socket = profile["tube_sockets"][index]
     bottom = tuple(
-        DEVICE_XYZ[i] + ROTOR_ORIGIN[i] + socket["inserted_bottom_rotor_local_m"][i]
+        device_xyz[i] + ROTOR_ORIGIN[i] + socket["inserted_bottom_rotor_local_m"][i]
         for i in range(3)
     )
     axis = tuple(float(v) for v in socket["axis_out_rotor_local"])
@@ -146,6 +146,7 @@ def build(
     centrifuge: Path,
     base: Path,
     liquid: Path,
+    device_xyz=DEVICE_XYZ,
 ) -> Path:
     from pxr import Usd, UsdGeom, UsdPhysics
 
@@ -199,7 +200,7 @@ def build(
         (0, 0, 0),
     )
     _define_ref(
-        stage, "/World/obj_centrifuge", "deps/centrifuge/asset.usd", "/World/Centrifuge", DEVICE_XYZ
+        stage, "/World/obj_centrifuge", "deps/centrifuge/asset.usd", "/World/Centrifuge", device_xyz
     )
     _define_ref(
         stage,
@@ -209,8 +210,8 @@ def build(
         RACK_XYZ,
     )
     profile = json.loads((deps / "centrifuge/articulation/device_profile.json").read_text())
-    primary_pose = _socket_pose(profile, PRIMARY_SOCKET)
-    balance_pose = _socket_pose(profile, BALANCE_SOCKET)
+    primary_pose = _socket_pose(profile, PRIMARY_SOCKET, device_xyz)
+    balance_pose = _socket_pose(profile, BALANCE_SOCKET, device_xyz)
     primary = _define_ref(
         stage,
         "/World/obj_primary_tube",
@@ -336,6 +337,7 @@ def build(
         "primary_socket": PRIMARY_SOCKET,
         "balance_socket": BALANCE_SOCKET,
         "target_rack_slot": "slot_15ml_r00_c02",
+        "device_xyz_m": list(device_xyz),
         "particle_sets": [
             {"id": "primary_liquid", "count": 2640, "scoring": True},
             {"id": "balance_liquid", "count": 2640, "scoring": False},
