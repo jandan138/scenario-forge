@@ -81,13 +81,13 @@ def _socket_pose(profile: dict, index: int, device_xyz=DEVICE_XYZ):
     return bottom, _orientation_z_to(axis)
 
 
-def _rack_frame(stage, name: str):
+def _rack_frame(stage, name: str, rack_xyz=RACK_XYZ):
     from pxr import UsdGeom
 
     prim = stage.GetPrimAtPath(f"/TubeRack15ml50ml_OriginalMesh/__frames/{name}_inserted_bottom")
     matrix = UsdGeom.XformCache().GetLocalToWorldTransform(prim)
     point = matrix.ExtractTranslation()
-    return (RACK_XYZ[0] + point[0], RACK_XYZ[1] + point[1], RACK_XYZ[2] + point[2])
+    return (rack_xyz[0] + point[0], rack_xyz[1] + point[1], rack_xyz[2] + point[2])
 
 
 def _define_ref(stage, path: str, asset: str, prim: str, xyz, orient=None):
@@ -147,6 +147,9 @@ def build(
     base: Path,
     liquid: Path,
     device_xyz=DEVICE_XYZ,
+    *,
+    target_tube: Path | None = None,
+    rack_xyz=RACK_XYZ,
 ) -> Path:
     from pxr import Usd, UsdGeom, UsdPhysics
 
@@ -162,7 +165,11 @@ def build(
         "rack": context_assets / "mixed_rack_r2/package",
         "context15": context_assets / "context_15ml_closed/package",
         "context50": context_assets / "context_50ml_closed/package",
-        "target_tube": context_assets / "target_tube_r2/package",
+        "target_tube": (
+            target_tube.resolve()
+            if target_tube is not None
+            else context_assets / "target_tube_r2/package"
+        ),
     }
     for label, package in producer_packages.items():
         manifest = json.loads((package / "evidence/manifest.json").read_text())
@@ -207,7 +214,7 @@ def build(
         "/World/obj_mixed_rack",
         "deps/rack/asset.usd",
         "/TubeRack15ml50ml_OriginalMesh",
-        RACK_XYZ,
+        rack_xyz,
     )
     profile = json.loads((deps / "centrifuge/articulation/device_profile.json").read_text())
     primary_pose = _socket_pose(profile, PRIMARY_SOCKET, device_xyz)
@@ -237,7 +244,7 @@ def build(
     ]
     for index, slot in enumerate([f"slot_15ml_r01_c{i:02d}" for i in range(6)]):
         path = f"/World/obj_bg_15ml_{index:02d}"
-        pos = _rack_frame(rack_stage, slot)
+        pos = _rack_frame(rack_stage, slot, rack_xyz)
         _define_ref(
             stage,
             path,
@@ -248,7 +255,7 @@ def build(
         object_paths.append(path)
     for index, slot in enumerate(("slot_50ml_r00_c00", "slot_50ml_r00_c03")):
         path = f"/World/obj_bg_50ml_{index:02d}"
-        pos = _rack_frame(rack_stage, slot)
+        pos = _rack_frame(rack_stage, slot, rack_xyz)
         _define_ref(
             stage,
             path,
