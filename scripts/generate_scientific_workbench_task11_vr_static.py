@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the VR-only Task 11 r4 device-qualified PBD candidate."""
+"""Generate the VR-only Task 11 r5 stable-context PBD candidate."""
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ import math
 from pathlib import Path
 import shutil
 import sys
-import zipfile
 
 _ROOT = Path(__file__).resolve().parents[1]
 for _path in (_ROOT, _ROOT / "src"):
@@ -24,15 +23,11 @@ from scenario_forge.adapters.vr_object_materialization import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TASK_ID = "scientific_workbench_centrifuge_unload_shutdown"
-DEFAULT_ASSETS = Path(
-    "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task11_vr_static_assets_20260823"
+DEFAULT_CONTEXT_ASSETS = Path(
+    "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/task11_r5_context_assets_20260824"
 )
 DEFAULT_CENTRIFUGE_R4 = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labspin_x8_task11_r4_20260824/package"
-)
-DEFAULT_RACK_ARCHIVE = (
-    REPO_ROOT
-    / "external_artifacts/incoming/from_xinyu/scientific_workbench_tube15_50_mixed_rack_18plus4_20260821.zip"
 )
 DEFAULT_BASE = (
     REPO_ROOT
@@ -42,7 +37,7 @@ DEFAULT_LIQUID = (
     REPO_ROOT
     / "outputs/simple_sdf_multi_liquid_golden_20260820/liquid_package_qualified/liquid_overlay.usda"
 )
-DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_task11_vr_r4_20260824"
+DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_task11_vr_r5_20260824"
 DEVICE_XYZ = (0.22, 0.09, 0.82)
 RACK_XYZ = (-0.50, -0.17, 0.755)
 ROTOR_ORIGIN = (-0.03, 0.005, 0.27)
@@ -74,26 +69,6 @@ def _orientation_z_to(axis: tuple[float, float, float]):
     cross = (-axis[1], axis[0], 0.0)
     scale = math.sqrt((1.0 + dot) * 2.0)
     return Gf.Quatf(scale * 0.5, Gf.Vec3f(cross[0] / scale, cross[1] / scale, 0.0))
-
-
-def _extract_background_packages(archive: Path, deps: Path) -> dict[str, Path]:
-    members = {
-        "body15": "packages/centrifuge_tube_15ml_body/",
-        "cap15": "packages/centrifuge_tube_15ml_cap/",
-        "body50": "packages/centrifuge_tube_50ml_body/",
-        "cap50": "packages/centrifuge_tube_50ml_cap/",
-    }
-    result = {}
-    with zipfile.ZipFile(archive) as source:
-        for label, prefix in members.items():
-            root = deps / label
-            for name in source.namelist():
-                if name.startswith(prefix) and not name.endswith("/"):
-                    destination = root / name[len(prefix) :]
-                    destination.parent.mkdir(parents=True, exist_ok=True)
-                    destination.write_bytes(source.read(name))
-            result[label] = root
-    return result
 
 
 def _socket_pose(profile: dict, index: int):
@@ -167,22 +142,35 @@ def _copy_liquid(stage, liquid_source: Path, tube_poses: list[tuple[str, tuple, 
 
 def build(
     output: Path,
-    assets: Path,
+    context_assets: Path,
     centrifuge: Path,
-    rack_archive: Path,
     base: Path,
     liquid: Path,
 ) -> Path:
-    from pxr import Gf, Usd, UsdGeom, UsdPhysics
+    from pxr import Usd, UsdGeom, UsdPhysics
 
-    producer_manifest = json.loads(
+    device_manifest = json.loads(
         (centrifuge / "evidence/manifest.json").read_text(encoding="utf-8")
     )
-    if producer_manifest.get("overall_status") != "pass" or not all(
-        producer_manifest["claims"].get(name) is True
+    if device_manifest.get("overall_status") != "pass" or not all(
+        device_manifest["claims"].get(name) is True
         for name in REQUIRED_DEVICE_CLAIMS
     ):
         raise RuntimeError("centrifuge r4 device qualification is incomplete")
+    producer_packages = {
+        "rack": context_assets / "mixed_rack_r2/package",
+        "context15": context_assets / "context_15ml_closed/package",
+        "context50": context_assets / "context_50ml_closed/package",
+        "target_tube": context_assets / "target_tube_r2/package",
+    }
+    for label, package in producer_packages.items():
+        manifest = json.loads((package / "evidence/manifest.json").read_text())
+        status = manifest.get("overall_status")
+        if status != "pass":
+            raise RuntimeError(
+                f"{label} producer status must be pass, got {status}; "
+                "candidate_pending_runtime is forbidden"
+            )
     if output.exists():
         shutil.rmtree(output)
     vr = output / "vr"
@@ -190,9 +178,10 @@ def build(
     deps.mkdir(parents=True)
     _copytree(base, deps / "environment")
     _copytree(centrifuge, deps / "centrifuge")
-    _copytree(assets / "mixed_rack/package", deps / "rack")
-    _copytree(assets / "closed_15ml_pbd_ready/package", deps / "tube")
-    _extract_background_packages(rack_archive, deps / "background")
+    _copytree(producer_packages["rack"], deps / "rack")
+    _copytree(producer_packages["target_tube"], deps / "tube")
+    _copytree(producer_packages["context15"], deps / "context15")
+    _copytree(producer_packages["context50"], deps / "context50")
     scene_path = vr / "scene.usd"
     stage = Usd.Stage.CreateNew(str(scene_path))
     UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
@@ -248,41 +237,23 @@ def build(
     for index, slot in enumerate([f"slot_15ml_r01_c{i:02d}" for i in range(6)]):
         path = f"/World/obj_bg_15ml_{index:02d}"
         pos = _rack_frame(rack_stage, slot)
-        root = UsdGeom.Xform.Define(stage, path)
-        root.AddTranslateOp().Set(Gf.Vec3d(*pos))
         _define_ref(
             stage,
-            f"{path}/Body",
-            "deps/background/body15/asset.usd",
-            "/World/CentrifugeTube15mlBody",
-            (0, 0, 0),
-        )
-        _define_ref(
-            stage,
-            f"{path}/Cap",
-            "deps/background/cap15/asset.usd",
-            "/World/CentrifugeTube15mlCap",
-            (0, 0, 0),
+            path,
+            "deps/context15/asset.usd",
+            "/World/ContextTube15mlClosed",
+            pos,
         )
         object_paths.append(path)
     for index, slot in enumerate(("slot_50ml_r00_c00", "slot_50ml_r00_c03")):
         path = f"/World/obj_bg_50ml_{index:02d}"
         pos = _rack_frame(rack_stage, slot)
-        root = UsdGeom.Xform.Define(stage, path)
-        root.AddTranslateOp().Set(Gf.Vec3d(*pos))
         _define_ref(
             stage,
-            f"{path}/Body",
-            "deps/background/body50/asset.usd",
-            "/World/CentrifugeTube50mlBody",
-            (0, 0, 0),
-        )
-        _define_ref(
-            stage,
-            f"{path}/Cap",
-            "deps/background/cap50/asset.usd",
-            "/World/CentrifugeTube50mlCap",
-            (0, 0, 0.1005),
+            path,
+            "deps/context50/asset.usd",
+            "/World/ContextTube50mlClosed",
+            pos,
         )
         object_paths.append(path)
     _copy_liquid(
@@ -307,7 +278,8 @@ def build(
             deps / "centrifuge",
             deps / "rack",
             deps / "tube",
-            deps / "background",
+            deps / "context15",
+            deps / "context50",
         ],
     )
     names = [p.rsplit("/", 1)[-1] for p in object_paths]
@@ -358,7 +330,7 @@ def build(
     )
     (vr / "task_config.py").write_text(config, encoding="utf-8")
     manifest = {
-        "schema_version": "scenario-forge-task11-vr-candidate/v0.2",
+        "schema_version": "scenario-forge-task11-vr-candidate/v0.3",
         "scenario_id": TASK_ID,
         "status": "device_qualified_static_pbd_pending_runtime",
         "primary_socket": PRIMARY_SOCKET,
@@ -370,6 +342,8 @@ def build(
         ],
         "claims": {
             "static_stability": False,
+            "background_context_static": True,
+            "rack_target_slot_insertion_qualified": True,
             "contact_press_qualified": True,
             "button_causes_lid_open": True,
             "lid_remains_open_after_release": True,
@@ -379,9 +353,12 @@ def build(
             "robot_policy_success": False,
             "benchmark_success": False,
         },
-        "producer_qualification": (
-            "vr/deps/centrifuge/evidence/lid_behavior/report.json"
-        ),
+        "producer_qualifications": {
+            "device": "vr/deps/centrifuge/evidence/lid_behavior/report.json",
+            "rack": "vr/deps/rack/evidence/manifest.json",
+            "context15": "vr/deps/context15/evidence/manifest.json",
+            "context50": "vr/deps/context50/evidence/manifest.json",
+        },
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     validation = {
@@ -409,16 +386,14 @@ def build(
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    p.add_argument("--assets", type=Path, default=DEFAULT_ASSETS)
+    p.add_argument("--context-assets", type=Path, default=DEFAULT_CONTEXT_ASSETS)
     p.add_argument("--centrifuge", type=Path, default=DEFAULT_CENTRIFUGE_R4)
-    p.add_argument("--rack-archive", type=Path, default=DEFAULT_RACK_ARCHIVE)
     args = p.parse_args()
     print(
         build(
             args.out,
-            args.assets,
+            args.context_assets,
             args.centrifuge,
-            args.rack_archive,
             DEFAULT_BASE,
             DEFAULT_LIQUID,
         )
