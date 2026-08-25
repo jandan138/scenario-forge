@@ -1,0 +1,26 @@
+schema_version: scenario_forge.funnel_15ml_small_particle_contract.v1
+name: funnel_15ml_small_particle
+generator: ai3dgen.glass_funnel_generator
+geometry:
+  top_diameter_mm: 76.0
+  neck_diameter_mm: 10.0
+  frustum_height_mm: 60.0
+  stem_length_mm: 60.0
+  wall_thickness_mm: 1.5
+  bevel_mm: 0.4
+  radial_segments: 96
+receiver:
+  id: centrifuge_tube_15ml_body
+  mouth_inner_diameter_mm: 13.11
+liquid:
+  recipe_id: scientific_workbench_small_gpu_pbd_v2
+  particle_spacing_mm: 1.0
+  particle_contact_offset_mm: 0.7
+  rest_offset_mm: 0.55
+  task02_particle_diameter_mm: 18.0
+collision:
+  sdf_margin_mm: 0.25
+  contact_offset_mm: 0.25
+constraints:
+  min_radial_insertion_clearance_after_collision_mm: 1.0
+  min_particle_widths_in_throat: 4.0

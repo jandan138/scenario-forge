@@ -1,0 +1,30 @@
+{
+  "name": "funnel_15ml_small_particle",
+  "geometry": {
+    "top_diameter_mm": 76.0,
+    "neck_diameter_mm": 10.0,
+    "frustum_height_mm": 60.0,
+    "stem_length_mm": 60.0,
+    "wall_thickness_mm": 1.5,
+    "bevel_mm": 0.4,
+    "radial_segments": 96
+  },
+  "glass": {
+    "tint_rgb": [
+      0.82,
+      0.96,
+      1.0
+    ],
+    "transmission": 0.98,
+    "roughness": 0.055,
+    "ior": 1.47,
+    "alpha": 1.0,
+    "coat_weight": 0.08,
+    "absorption_color_rgb": [
+      0.72,
+      0.92,
+      1.0
+    ],
+    "absorption_density": 1.5
+  }
+}
