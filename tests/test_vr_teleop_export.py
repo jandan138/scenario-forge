@@ -230,6 +230,11 @@ def test_vr_export_uses_same_recipe_and_never_authors_a_local_table_slab(
     assert parity["status"] == "pass_with_declared_exception"
     assert parity["canonical_scenario_id"] == "scientific_workbench_bimanual_pour"
     assert parity["equivalence"]["table_static_support"] == "same_asset_and_pose"
+    assert parity["vr_presentation_policy"] == {
+        "policy": "standard_workbench_surface_hidden",
+        "status": "not_applicable",
+        "table_asset_id": "qualified_table",
+    }
     assert parity["allowed_exceptions"] == [
         {
             "id": "robot_joint_initialization",

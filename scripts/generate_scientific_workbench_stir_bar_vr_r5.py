@@ -9,6 +9,10 @@ import json
 from pathlib import Path
 
 from scripts import generate_scientific_workbench_stir_bar_vr_r4 as r4
+from scenario_forge.adapters.vr_presentation import (
+    STANDARD_WORKBENCH_ASSET_ID,
+    apply_standard_workbench_vr_presentation,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +25,16 @@ DEFAULT_LIQUID = Path(
 
 def _sha(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
+
+
+def _apply_vr_presentation(output: Path, scene_names: tuple[str, ...]) -> dict:
+    return {
+        scene_name: apply_standard_workbench_vr_presentation(
+            output / "vr" / scene_name,
+            table_asset_id=STANDARD_WORKBENCH_ASSET_ID,
+        )
+        for scene_name in scene_names
+    }
 
 
 def _assert_hydra_compatible(output: Path) -> None:
@@ -56,6 +70,9 @@ def main() -> int:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["package_id"] = "scientific_workbench_insert_stir_bar_into_beaker_vr_r5"
     manifest["status"] = "r5_base_ready_liquid_pending"
+    manifest["vr_presentation_policies"] = _apply_vr_presentation(
+        output, ("scene.usd",)
+    )
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     if args.base_only:
         print(output)
@@ -70,11 +87,15 @@ def main() -> int:
     ):
         raise RuntimeError("Hydra-compatible producer qualification is incomplete")
     r4.add_dual_liquid(output, args.liquid.resolve())
+    presentation_policies = _apply_vr_presentation(
+        output, ("scene.usd", "scene_liquid_edit.usd")
+    )
     _assert_hydra_compatible(output)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["package_id"] = "scientific_workbench_insert_stir_bar_into_beaker_vr_r5"
     manifest["status"] = "hydra_compatible_dual_entry_runtime_pending"
     manifest["assets"]["beaker_liquid"] = "v3_shared_material_no_display_primvars"
+    manifest["vr_presentation_policies"] = presentation_policies
     manifest["source_hashes"]["liquid_overlay_hydra_compatible"] = _sha(
         args.liquid / "liquid_overlay.usda"
     )

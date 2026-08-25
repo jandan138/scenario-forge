@@ -15,6 +15,8 @@ def test_r5_consumes_hydra_compatible_producer_without_local_usd_patch():
     assert "scientific_workbench_stir_bar_beaker_dual_liquid_hydra_compat_20260825" in source
     assert "scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825" in source
     assert "particle_display_primvars_authored" in source
+    assert "apply_standard_workbench_vr_presentation" in source
+    assert '("scene.usd", "scene_liquid_edit.usd")' in source
     assert "ClearReferences" not in source
     assert "displayColor.Block" not in source
 

@@ -21,6 +21,9 @@ from scenario_forge.adapters.isaac41_vr600_profile import (
 from scenario_forge.adapters.vr_object_materialization import (
     materialize_vr_object_subtrees,
 )
+from scenario_forge.adapters.vr_presentation import (
+    apply_standard_workbench_vr_presentation,
+)
 from scenario_forge.assets.manifest import AssetManifestEntry, load_asset_manifest
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.package import validate_package
@@ -258,6 +261,10 @@ def export_vr_teleop_package(
                 )
             ),
         )
+        presentation_policy = apply_standard_workbench_vr_presentation(
+            scene_path,
+            table_asset_id=table_asset.asset_id,
+        )
         config_path = staging / "task_config.py"
         config_path.write_text(
             _task_config_python(
@@ -282,6 +289,7 @@ def export_vr_teleop_package(
             "vr_task_id": task_id,
             "shared_runtime_profile": PROFILE_ID,
             "source_contract": SOURCE_CONTRACT,
+            "vr_presentation_policy": presentation_policy,
             "equivalence": {
                 "environment": "same_asset_and_pose",
                 "table_static_support": (

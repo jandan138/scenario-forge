@@ -59,6 +59,16 @@ presentation is already supplied by the environment may declare
 visibility on that reference; it does not disable or replace the upstream
 collider.
 
+The standard scientific workbench has a narrower mandatory VR-only rule. The
+composed tabletop mesh at `Surface/Source/mesh` is authored
+`visibility = invisible`, while its active state, transforms, material and
+collision remain unchanged. The common VR exporter resolves both the canonical
+`/World/table/Surface/Source/mesh` path and the legacy
+`/World/table/table/Surface/Source/mesh` wrapper. A standard-table VR export
+fails if neither path is present. Custom VR generators must call
+`apply_standard_workbench_vr_presentation` for every emitted scene USD before
+hashing or packaging; eBench exports do not apply this presentation rule.
+
 `/World/_scene` is a runtime mount created by the VR loader. Therefore paths in
 `task_config.py` are runtime paths such as `/World/_scene/obj_beaker`, even though
 the source USD contains `/World/obj_beaker`. Do not pre-author the mount wrapper
@@ -84,6 +94,8 @@ with a separate recipe pose. Asset-internal visual, collider and joint transform
 remain valid. `object_materialization.json` records the source/runtime paths,
 prim count, structure and non-transform fingerprints, removed composition arcs,
 and transform-equivalence result. `parity_manifest.json` hash-binds this evidence.
+It also records `vr_presentation_policy`, including the resolved tabletop prim
+and confirmation that collision was preserved.
 
 Give the entire directory to the VR engineer. `scene.usd` is the file to open.
 Tabletop object geometry is inline; any remaining room/table USD and material or
