@@ -36,6 +36,8 @@ VIEWS = (
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--evidence-subdir", default="initial_scene")
+    parser.add_argument("--runtime-label", default="isaac41")
     args = parser.parse_args()
     root = args.root.resolve()
 
@@ -74,7 +76,7 @@ def main() -> int:
         for _ in range(50):
             app.update()
 
-        evidence = root / "vr/evidence/initial_scene"
+        evidence = root / "vr/evidence" / args.evidence_subdir
         evidence.mkdir(parents=True, exist_ok=True)
         records = {}
         cameras = []
@@ -133,7 +135,7 @@ def main() -> int:
                 {
                     "schema_version": "scenario-forge.fixed-scene-render.v1",
                     "status": "pass",
-                    "runtime": "isaac41",
+                    "runtime": args.runtime_label,
                     "renderer": "RayTracedLighting",
                     "resolution": [1280, 720],
                     "views": records,

@@ -1,0 +1,13 @@
+schema_version: aan.multi_liquid_sample_request.v3
+scene: /cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/scene.usd
+validation: quick
+delivery_mode: dual_editable_frozen
+sets:
+  - id: beaker_liquid
+    container_prim: /World/obj_beaker
+    sampler:
+      mode: mouth_drop
+      fill_ratio: 0.40
+      editable_axis: height_z
+      visual_mesh_prim: /World/obj_beaker/Visual/Source/Beaker_Hollow_Body/Beaker_Hollow_Body_Mesh
+    particle_scale: task02_compatible
