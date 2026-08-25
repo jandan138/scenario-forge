@@ -11,8 +11,10 @@ hard errors, but 0 of 9750 particles crossed the 7 mm throat because its 5 mm
 rest offset jammed above the stem. v2 changed only particle contact/rest offsets
 to 0.7/0.55 mm for the successful funnel qualification.
 
-The 15 mL receiver is not promoted. Multiple source-bound Hollow-SDF + bottom-
-Cube candidates improved static retention to about 92.7%, but did not meet the
-99% reservoir threshold; gravity-feed integration therefore retained 0% in the
-tube even though the funnel again delivered 100% legally. This receiver blocker
-does not invalidate the qualified funnel conduit claim.
+The final 15 mL receiver removes the Cube and uses one connected watertight
+visual-topology collision copy with a thickened bottom and a source-bound inner-
+wall retention profile. Three Isaac 4.1 runs passed at 0.99237 static retention,
+0.96004 motion retention, 0.98801 pour outflow and zero structural leaks. The
+funnel-to-tube gravity fixture then measured 1.0 legal funnel outlet ratio and
+0.98632 tube capture with zero structural leaks. Robot and benchmark success
+remain unclaimed.
