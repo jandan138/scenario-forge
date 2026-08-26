@@ -35,3 +35,10 @@ The r7 manifest remains a candidate with `task11_success=false`,
 `robot_policy_success=false`, and `benchmark_success=false`. The success-only
 packager intentionally refuses to promote it until one continuous canonical
 Lift2 episode passes all predicates.
+
+## Follow-up
+
+The scene-qualified, particle-free successor is recorded in
+[`2026-08-26-task11-r8-particle-free-rich-tabletop.md`](2026-08-26-task11-r8-particle-free-rich-tabletop.md).
+It does not supersede the r7 split-grasp tube's isolated grasp evidence; it uses
+the older insertion-stable tube because no robot-policy claim is in scope.
