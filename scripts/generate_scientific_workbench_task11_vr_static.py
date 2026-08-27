@@ -150,6 +150,12 @@ def build(
     *,
     target_tube: Path | None = None,
     rack_xyz=RACK_XYZ,
+    target_tube_entry_prim: str = "/World/CentrifugeTube15mlClosed",
+    target_tube_asset_filename: str = "asset.usd",
+    context_15ml_package: Path | None = None,
+    context_15ml_entry_prim: str = "/World/ContextTube15mlClosed",
+    context_15ml_asset_filename: str = "asset.usd",
+    author_target_kinematic_override: bool = True,
 ) -> Path:
     from pxr import Usd, UsdGeom, UsdPhysics
 
@@ -163,7 +169,11 @@ def build(
         raise RuntimeError("centrifuge r4 device qualification is incomplete")
     producer_packages = {
         "rack": context_assets / "mixed_rack_r2/package",
-        "context15": context_assets / "context_15ml_closed/package",
+        "context15": (
+            context_15ml_package.resolve()
+            if context_15ml_package is not None
+            else context_assets / "context_15ml_closed/package"
+        ),
         "context50": context_assets / "context_50ml_closed/package",
         "target_tube": (
             target_tube.resolve()
@@ -222,19 +232,20 @@ def build(
     primary = _define_ref(
         stage,
         "/World/obj_primary_tube",
-        "deps/tube/asset.usd",
-        "/World/CentrifugeTube15mlClosed",
+        f"deps/tube/{target_tube_asset_filename}",
+        target_tube_entry_prim,
         *primary_pose,
     )
     balance = _define_ref(
         stage,
         "/World/obj_balance_tube",
-        "deps/tube/asset.usd",
-        "/World/CentrifugeTube15mlClosed",
+        f"deps/tube/{target_tube_asset_filename}",
+        target_tube_entry_prim,
         *balance_pose,
     )
-    for prim in (primary, balance):
-        UsdPhysics.RigidBodyAPI(prim).CreateKinematicEnabledAttr(False)
+    if author_target_kinematic_override:
+        for prim in (primary, balance):
+            UsdPhysics.RigidBodyAPI(prim).CreateKinematicEnabledAttr(False)
     rack_stage = Usd.Stage.Open(str(deps / "rack/asset.usd"))
     object_paths = [
         "/World/obj_centrifuge",
@@ -248,8 +259,8 @@ def build(
         _define_ref(
             stage,
             path,
-            "deps/context15/asset.usd",
-            "/World/ContextTube15mlClosed",
+            f"deps/context15/{context_15ml_asset_filename}",
+            context_15ml_entry_prim,
             pos,
         )
         object_paths.append(path)

@@ -143,7 +143,17 @@ def _author_visual_liquid(stage, object_path: str, liquid_id: str) -> dict[str, 
     }
 
 
-def build(output: Path, centrifuge: Path, tube: Path) -> Path:
+def build(
+    output: Path,
+    centrifuge: Path,
+    tube: Path,
+    *,
+    required_tube_claim: str = "target_slot_insertion",
+    tube_entry_prim: str = "/World/CentrifugeTube15mlClosed",
+    tube_asset_filename: str = "asset.usd",
+    replace_all_15ml: bool = False,
+    release_id: str = "r8",
+) -> Path:
     from pxr import Sdf, Usd
 
     device_manifest = json.loads(
@@ -158,7 +168,7 @@ def build(output: Path, centrifuge: Path, tube: Path) -> Path:
     tube_manifest = json.loads((tube / "evidence/manifest.json").read_text())
     if (
         tube_manifest.get("overall_status") != "pass"
-        or tube_manifest.get("claims", {}).get("target_slot_insertion") is not True
+        or tube_manifest.get("claims", {}).get(required_tube_claim) is not True
     ):
         raise RuntimeError("producer stable target-tube insertion qualification is incomplete")
 
@@ -171,6 +181,16 @@ def build(output: Path, centrifuge: Path, tube: Path) -> Path:
         device_xyz=DEVICE_XYZ,
         target_tube=tube.resolve(),
         rack_xyz=RACK_XYZ,
+        target_tube_entry_prim=tube_entry_prim,
+        target_tube_asset_filename=tube_asset_filename,
+        context_15ml_package=tube.resolve() if replace_all_15ml else None,
+        context_15ml_entry_prim=(
+            tube_entry_prim if replace_all_15ml else "/World/ContextTube15mlClosed"
+        ),
+        context_15ml_asset_filename=(
+            tube_asset_filename if replace_all_15ml else "asset.usd"
+        ),
+        author_target_kinematic_override=not replace_all_15ml,
     )
     vr = output / "vr"
     scene_path = vr / "scene.usd"
@@ -278,8 +298,13 @@ def build(output: Path, centrifuge: Path, tube: Path) -> Path:
     manifest_path = output / "manifest.json"
     manifest = json.loads(manifest_path.read_text())
     manifest.pop("particle_sets", None)
-    manifest["schema_version"] = "scenario-forge-task11-vr-candidate/v0.6"
-    manifest["status"] = "r8_scene_pending_runtime"
+    manifest["schema_version"] = (
+        "scenario-forge-task11-vr-candidate/v0.7"
+        if release_id == "r9"
+        else "scenario-forge-task11-vr-candidate/v0.6"
+    )
+    manifest["release_id"] = release_id
+    manifest["status"] = f"{release_id}_scene_pending_runtime"
     manifest["device_xyz_m"] = list(DEVICE_XYZ)
     manifest["rack_xyz_m"] = list(RACK_XYZ)
     manifest["background_objects"] = list(CONTEXT_LAYOUT)
@@ -293,7 +318,7 @@ def build(output: Path, centrifuge: Path, tube: Path) -> Path:
     )
     manifest["source_hashes"] = {
         "centrifuge_asset": _sha(centrifuge / "asset.usd"),
-        "target_tube_asset": _sha(tube / "asset.usd"),
+        "target_tube_asset": _sha(tube / tube_asset_filename),
     }
     manifest["claims"].update(
         {
@@ -306,6 +331,8 @@ def build(output: Path, centrifuge: Path, tube: Path) -> Path:
             "robot_policy_success": False,
             "benchmark_success": False,
             "task11_success": False,
+            "single_rigid_body_closed_15ml": replace_all_15ml,
+            "all_15ml_tubes_replaced": replace_all_15ml,
         }
     )
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")

@@ -46,6 +46,7 @@ def main() -> int:
     parser.add_argument("--run-index", type=int, required=True)
     parser.add_argument("--seconds", type=float, default=8.0)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--all-15ml-dynamic", action="store_true")
     args = parser.parse_args()
     original = sys.argv
     sys.argv = [sys.argv[0]]
@@ -172,17 +173,28 @@ def main() -> int:
         tail_motion = {
             name: math.dist(tail[0][name], final[name]) for name in OBJECTS
         }
+        static_context = tuple(
+            name
+            for name in STATIC_CONTEXT
+            if not (args.all_15ml_dynamic and name.startswith("obj_bg_15ml_"))
+        )
         background_context_static = all(
             displacement[name] <= 0.001 and tail_motion[name] <= 0.0005
-            for name in STATIC_CONTEXT
+            for name in static_context
         )
         structural_static = all(
             displacement[name] <= 0.001
             for name in ("obj_centrifuge", "obj_mixed_rack")
         )
+        dynamic_tube_names = (
+            ("obj_primary_tube", "obj_balance_tube")
+            + tuple(f"obj_bg_15ml_{index:02d}" for index in range(6))
+            if args.all_15ml_dynamic
+            else ("obj_primary_tube", "obj_balance_tube")
+        )
         dynamic_tubes_stable = all(
             displacement[name] <= 0.012 and tail_motion[name] <= 0.002
-            for name in ("obj_primary_tube", "obj_balance_tube")
+            for name in dynamic_tube_names
         )
         log = (
             log_path.read_text(encoding="utf-8", errors="replace")[log_offset:]
@@ -243,6 +255,9 @@ def main() -> int:
                 "background_context_static": background_context_static,
                 "structural_static": structural_static,
                 "dynamic_tubes_stable": dynamic_tubes_stable,
+                "all_15ml_tubes_stable": (
+                    dynamic_tubes_stable if args.all_15ml_dynamic else False
+                ),
                 "particle_free_scene": particle_free,
                 "visual_static_liquid_only": visual_liquid_contract,
                 "scene_static_stability": passed,
