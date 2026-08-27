@@ -156,6 +156,8 @@ def build(
     context_15ml_entry_prim: str = "/World/ContextTube15mlClosed",
     context_15ml_asset_filename: str = "asset.usd",
     author_target_kinematic_override: bool = True,
+    primary_socket: int = PRIMARY_SOCKET,
+    balance_socket: int = BALANCE_SOCKET,
 ) -> Path:
     from pxr import Usd, UsdGeom, UsdPhysics
 
@@ -227,8 +229,8 @@ def build(
         rack_xyz,
     )
     profile = json.loads((deps / "centrifuge/articulation/device_profile.json").read_text())
-    primary_pose = _socket_pose(profile, PRIMARY_SOCKET, device_xyz)
-    balance_pose = _socket_pose(profile, BALANCE_SOCKET, device_xyz)
+    primary_pose = _socket_pose(profile, primary_socket, device_xyz)
+    balance_pose = _socket_pose(profile, balance_socket, device_xyz)
     primary = _define_ref(
         stage,
         "/World/obj_primary_tube",
@@ -352,8 +354,8 @@ def build(
         "schema_version": "scenario-forge-task11-vr-candidate/v0.3",
         "scenario_id": TASK_ID,
         "status": "device_qualified_static_pbd_pending_runtime",
-        "primary_socket": PRIMARY_SOCKET,
-        "balance_socket": BALANCE_SOCKET,
+        "primary_socket": primary_socket,
+        "balance_socket": balance_socket,
         "target_rack_slot": "slot_15ml_r00_c02",
         "device_xyz_m": list(device_xyz),
         "particle_sets": [

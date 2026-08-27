@@ -153,6 +153,8 @@ def build(
     tube_asset_filename: str = "asset.usd",
     replace_all_15ml: bool = False,
     release_id: str = "r8",
+    primary_socket: int = base.PRIMARY_SOCKET,
+    balance_socket: int = base.BALANCE_SOCKET,
 ) -> Path:
     from pxr import Sdf, Usd
 
@@ -191,6 +193,8 @@ def build(
             tube_asset_filename if replace_all_15ml else "asset.usd"
         ),
         author_target_kinematic_override=not replace_all_15ml,
+        primary_socket=primary_socket,
+        balance_socket=balance_socket,
     )
     vr = output / "vr"
     scene_path = vr / "scene.usd"
@@ -266,6 +270,10 @@ def build(
             "instances": [item["liquid_prim"] for item in visual_liquids],
         },
         "validation_scope": "scene_static_and_robot_free_device_mechanics",
+        "rotor_layout": {
+            "primary_socket": primary_socket,
+            "balance_socket": balance_socket,
+        },
     }
     config = (
         "from pathlib import Path\n_ASSETS_DIR = Path(__file__).resolve().parent\nTASKS = "
@@ -298,15 +306,16 @@ def build(
     manifest_path = output / "manifest.json"
     manifest = json.loads(manifest_path.read_text())
     manifest.pop("particle_sets", None)
-    manifest["schema_version"] = (
-        "scenario-forge-task11-vr-candidate/v0.7"
-        if release_id == "r9"
-        else "scenario-forge-task11-vr-candidate/v0.6"
-    )
+    manifest["schema_version"] = {
+        "r9_1": "scenario-forge-task11-vr-candidate/v0.8",
+        "r9": "scenario-forge-task11-vr-candidate/v0.7",
+    }.get(release_id, "scenario-forge-task11-vr-candidate/v0.6")
     manifest["release_id"] = release_id
     manifest["status"] = f"{release_id}_scene_pending_runtime"
     manifest["device_xyz_m"] = list(DEVICE_XYZ)
     manifest["rack_xyz_m"] = list(RACK_XYZ)
+    manifest["primary_socket"] = primary_socket
+    manifest["balance_socket"] = balance_socket
     manifest["background_objects"] = list(CONTEXT_LAYOUT)
     manifest["visual_liquids"] = visual_liquids
     manifest["physics_contract"] = visual_manifest["physics_contract"]
