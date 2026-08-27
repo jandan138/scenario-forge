@@ -52,3 +52,8 @@ independently promotable.
 Do not edit collision, SDF, mass or PhysX parameters in Scenario Forge after
 handoff. If qualification exposes leakage or an unusable throat, return the
 proposal and evidence to ConvertAsset. Do not solve it with a scene-local patch.
+
+The threaded 15 mL tube/funnel overlay from
+`lixinguan_funnel_liquid.usd` is not the small-v2 recipe. Use the ConvertAsset
+exact-source PBD card and the 1948-particle overlay USD; do not re-sample with
+`scientific_workbench_small_gpu_pbd_v2`.

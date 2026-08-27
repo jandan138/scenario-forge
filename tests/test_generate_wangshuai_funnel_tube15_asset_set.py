@@ -13,6 +13,11 @@ PRODUCER = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
     "wangshuai_funnel_tube15_exact_asset_set_20260826"
 )
+FLUID_RUNBOOK = Path(__file__).parents[1] / "docs/operations/fluid-interaction-assets.md"
+ASSET_RECORD = (
+    Path(__file__).parents[1]
+    / "docs/records/2026-08-26-wangshuai-funnel-tube15-liquid-asset-set.md"
+)
 
 
 @pytest.mark.skipif(not PRODUCER.is_dir(), reason="producer asset set unavailable")
@@ -71,3 +76,16 @@ def test_delivery_is_directory_only_without_zip_or_demo(tmp_path: Path) -> None:
     readme = (output / "README_CN.md").read_text()
     assert "不含液体" in readme
     assert "1948" in readme
+
+
+def test_consumer_docs_do_not_substitute_small_v2_for_threaded_overlay() -> None:
+    runbook = FLUID_RUNBOOK.read_text(encoding="utf-8")
+    record = ASSET_RECORD.read_text(encoding="utf-8")
+    for text in (runbook, record):
+        assert "lixinguan_funnel_liquid.usd" in text
+        assert "scientific_workbench_small_gpu_pbd_v2" in text
+    assert "1948" in record
+    assert "maxVelocity=0.1" in record
+    assert "particleContactOffset=0.002" in record
+    assert "restOffset=0.002" in record
+    assert "one GPU PhysicsScene" in record
