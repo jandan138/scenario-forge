@@ -307,6 +307,7 @@ def build(
     manifest = json.loads(manifest_path.read_text())
     manifest.pop("particle_sets", None)
     manifest["schema_version"] = {
+        "r9_2": "scenario-forge-task11-vr-candidate/v0.9",
         "r9_1": "scenario-forge-task11-vr-candidate/v0.8",
         "r9": "scenario-forge-task11-vr-candidate/v0.7",
     }.get(release_id, "scenario-forge-task11-vr-candidate/v0.6")

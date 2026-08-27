@@ -11,7 +11,13 @@ from pathlib import Path
 import yaml
 
 
-def validate(bundle: Path) -> Path:
+def validate(
+    bundle: Path,
+    *,
+    release_id: str = "r9_1",
+    primary_socket: int = 3,
+    balance_socket: int = 15,
+) -> Path:
     from pxr import Usd
 
     bundle = bundle.resolve()
@@ -28,9 +34,9 @@ def validate(bundle: Path) -> Path:
         "stage_composes": bool(stage),
         "source_hash_bound": sha256(source.read_bytes()).hexdigest()
         == manifest["adapter_local_scene_sha256"],
-        "config_routes_r9_1": "task11_r9_1/scene" in evaluation["usd_name"],
-        "socket_pair_3_15": manifest["primary_socket"] == 3
-        and manifest["balance_socket"] == 15,
+        "config_routes_release": f"task11_{release_id}/scene" in evaluation["usd_name"],
+        "socket_pair_matches": manifest["primary_socket"] == primary_socket
+        and manifest["balance_socket"] == balance_socket,
         "wrapper_package_relative": "/cpfs/" not in scene.read_text(),
     }
     passed = all(checks.values())
@@ -60,8 +66,18 @@ def validate(bundle: Path) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", type=Path, required=True)
+    parser.add_argument("--release-id", default="r9_1")
+    parser.add_argument("--primary-socket", type=int, default=3)
+    parser.add_argument("--balance-socket", type=int, default=15)
     args = parser.parse_args()
-    print(validate(args.bundle))
+    print(
+        validate(
+            args.bundle,
+            release_id=args.release_id,
+            primary_socket=args.primary_socket,
+            balance_socket=args.balance_socket,
+        )
+    )
     return 0
 
 
