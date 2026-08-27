@@ -65,6 +65,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 - [2026-08-24 Stir-bar/Beaker VR r2 Steel-tray Layout](records/2026-08-24-scientific-workbench-stir-bar-beaker-vr-r2.md)
 - [2026-08-26 Wangshuai Funnel/Tube Liquid Asset Directory](records/2026-08-26-wangshuai-funnel-tube15-liquid-asset-set.md)
+- [2026-08-27 Wangshuai Funnel/Tube Dynamic Asset Set v2](records/2026-08-27-wangshuai-funnel-tube15-dynamic-asset-set.md)
 - [2026-08-26 Task 11 r8 Particle-free Rich Tabletop](records/2026-08-26-task11-r8-particle-free-rich-tabletop.md)
 - [2026-08-21 Conical Flask 90/35 Glass Warp Admission](records/2026-08-21-conical-flask-90x35-glass-warp.md)
 - [2026-08-20 Fluid-interaction Asset Tool v1](records/2026-08-20-fluid-interaction-asset-tool-v1.md)
