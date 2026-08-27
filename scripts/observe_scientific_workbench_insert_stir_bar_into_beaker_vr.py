@@ -13,6 +13,7 @@ import traceback
 
 OBJECTS = (
     "obj_beaker",
+    "obj_steel_plate",
     "obj_stir_bar",
     "obj_r9_amber_bottle",
     "obj_r9_tip_box",

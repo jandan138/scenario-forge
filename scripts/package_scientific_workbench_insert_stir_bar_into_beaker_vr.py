@@ -73,11 +73,13 @@ def package(root: Path) -> Path:
 打开 `vr/scene.usd`，VR 配置为 `vr/task_config.py`。请保留整个文件夹，不能只
 复制 scene.usd。USD 不内嵌机器人，VR 运行时按配置插入 Lift2 双臂机器人。
 
-操作流程：辅助臂固定空烧杯；操作臂拿起 29.77 mm 磁力搅拌子，对准杯口后
-放入烧杯。烧杯为空，不包含液体或 PBD 粒子。
+操作流程：辅助臂固定空烧杯；操作臂从桌面不锈钢托盘（`obj_steel_plate`）上
+拿起 29.77 mm 磁力搅拌子，对准杯口后放入烧杯。烧杯为空，不包含液体或 PBD
+粒子。
 
-桌面后排的棕色试剂瓶、吸头盒、洗瓶、透明试剂瓶和移液器转盘均为不操作的
-背景 obj，只参与局部 ±0.01 m 随机化，不参与任务判定。
+桌面上的 30 cm 钢制托盘，以及后排棕色试剂瓶、吸头盒、洗瓶、透明试剂瓶和
+移液器转盘，均为不操作的背景 obj。托盘与磁子作为一组做局部 ±0.01 m
+随机化，其余背景 obj 各自独立随机化，均不参与任务判定。
 
 Isaac Sim 4.1 已完成三次 8 秒静置和三次非机器人杯口投放验证。未验证机器人
 抓取策略；本任务也不包含原 Task 04 的盖子步骤，因此不声明完整 Task 04 成功。
@@ -86,7 +88,7 @@ Isaac Sim 4.1 已完成三次 8 秒静置和三次非机器人杯口投放验证
 
     handoff = root / "handoff"
     handoff.mkdir(exist_ok=True)
-    archive = handoff / "scientific_workbench_insert_stir_bar_into_beaker_vr_r1.zip"
+    archive = handoff / "scientific_workbench_insert_stir_bar_into_beaker_vr_r2.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as target:
         for path in sorted(root.rglob("*")):
             if not path.is_file() or handoff in path.parents:
