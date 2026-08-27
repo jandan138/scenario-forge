@@ -17,6 +17,7 @@ VIEWS = (
     ("device_closeup", (0.85, -1.15, 1.22), (0.0, -0.10, 0.96), 48.0),
     ("rotor_liquid_closeup", (0.55, -0.82, 1.38), (0.0, -0.10, 1.02), 52.0),
     ("tube_liquid_closeup", (0.70, -0.95, 1.10), (0.35, -0.35, 0.82), 55.0),
+    ("rack_target_closeup", (-0.75, -0.85, 1.08), (-0.40, -0.30, 0.82), 55.0),
 )
 
 
@@ -25,7 +26,7 @@ def main() -> int:
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument(
         "--state",
-        choices=("before", "after", "open_review", "liquid_review"),
+        choices=("before", "after", "open_review", "liquid_review", "inserted_review"),
         required=True,
     )
     args = parser.parse_args()
@@ -54,7 +55,7 @@ def main() -> int:
         from omni.isaac.core import World
         from omni.isaac.sensor import Camera
         from PIL import Image
-        from pxr import Gf
+        from pxr import Gf, UsdGeom
         from scipy.spatial.transform import Rotation
 
         settings = carb.settings.get_settings()
@@ -68,7 +69,7 @@ def main() -> int:
             app.update()
         for _ in range(40):
             app.update()
-        if args.state == "open_review":
+        if args.state in ("open_review", "inserted_review"):
             stage = context.get_stage()
             stage.SetEditTarget(stage.GetSessionLayer())
             angle = -1.361356817
@@ -80,6 +81,37 @@ def main() -> int:
                     Gf.Vec3f(math.sin(angle * 0.5), 0.0, 0.0),
                 )
             )
+            for _ in range(20):
+                app.update()
+        if args.state == "inserted_review":
+            stage = context.get_stage()
+            stage.SetEditTarget(stage.GetSessionLayer())
+            profile = json.loads(
+                (root / "vr/deps/centrifuge/articulation/device_profile.json").read_text()
+            )
+            socket = profile["tube_sockets"][18]
+            local = Gf.Vec3d(
+                -0.03 + float(socket["inserted_bottom_rotor_local_m"][0]),
+                0.005 + float(socket["inserted_bottom_rotor_local_m"][1]),
+                0.27 + float(socket["inserted_bottom_rotor_local_m"][2]),
+            )
+            device_matrix = UsdGeom.XformCache().GetLocalToWorldTransform(
+                stage.GetPrimAtPath("/World/obj_centrifuge")
+            )
+            position = device_matrix.Transform(local)
+            axis = device_matrix.TransformDir(
+                Gf.Vec3d(*map(float, socket["axis_out_rotor_local"]))
+            ).GetNormalized()
+            dot = max(-1.0, min(1.0, float(axis[2])))
+            cross = Gf.Vec3d(-axis[1], axis[0], 0.0)
+            scale = max(math.sqrt((1.0 + dot) * 2.0), 1e-9)
+            orientation = Gf.Quatf(
+                scale * 0.5,
+                Gf.Vec3f(cross[0] / scale, cross[1] / scale, 0.0),
+            )
+            tube = stage.GetPrimAtPath("/World/obj_primary_tube")
+            tube.GetAttribute("xformOp:translate").Set(Gf.Vec3d(*position))
+            tube.GetAttribute("xformOp:orient").Set(orientation)
             for _ in range(20):
                 app.update()
         if args.state == "liquid_review":
@@ -140,6 +172,7 @@ def main() -> int:
             "after": "after_run_",
             "open_review": "open_review_",
             "liquid_review": "liquid_review_",
+            "inserted_review": "inserted_review_",
         }[args.state]
         for _ in range(4):
             rep.orchestrator.step(rt_subframes=4, pause_timeline=True, delta_time=0.0)

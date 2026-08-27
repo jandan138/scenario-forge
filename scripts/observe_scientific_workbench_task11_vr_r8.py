@@ -47,6 +47,8 @@ def main() -> int:
     parser.add_argument("--seconds", type=float, default=8.0)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--all-15ml-dynamic", action="store_true")
+    parser.add_argument("--no-50ml", action="store_true")
+    parser.add_argument("--single-visual-liquid", action="store_true")
     args = parser.parse_args()
     original = sys.argv
     sys.argv = [sys.argv[0]]
@@ -93,7 +95,12 @@ def main() -> int:
             ).ComputeAlignedRange()
             return ([float(v) for v in box.GetMin()], [float(v) for v in box.GetMax()])
 
-        authored = {name: world_xyz(f"/World/{name}") for name in OBJECTS}
+        objects = tuple(
+            name
+            for name in OBJECTS
+            if not (args.no_50ml and name.startswith("obj_bg_50ml_"))
+        )
+        authored = {name: world_xyz(f"/World/{name}") for name in objects}
         table_bounds = bounds("/World/table")
         base_bounds = bounds("/World/obj_centrifuge/base_link")
         support_gap_m = base_bounds[0][2] - table_bounds[1][2]
@@ -101,10 +108,9 @@ def main() -> int:
         preview = {
             name: world_xyz(f"/World/obj_centrifuge/{name}") for name in REST_LINKS
         }
-        visual_liquids = (
-            "/World/obj_primary_tube/VisualLiquid",
-            "/World/obj_balance_tube/VisualLiquid",
-        )
+        visual_liquids = ("/World/obj_primary_tube/VisualLiquid",)
+        if not args.single_visual_liquid:
+            visual_liquids += ("/World/obj_balance_tube/VisualLiquid",)
         liquid_forbidden = []
         for path in visual_liquids:
             root = stage.GetPrimAtPath(path)
@@ -164,19 +170,20 @@ def main() -> int:
             )
             if step >= max(0, steps - 120):
                 tail.append(
-                    {name: world_xyz(f"/World/{name}") for name in OBJECTS}
+                    {name: world_xyz(f"/World/{name}") for name in objects}
                 )
         final = tail[-1]
         displacement = {
-            name: math.dist(authored[name], final[name]) for name in OBJECTS
+            name: math.dist(authored[name], final[name]) for name in objects
         }
         tail_motion = {
-            name: math.dist(tail[0][name], final[name]) for name in OBJECTS
+            name: math.dist(tail[0][name], final[name]) for name in objects
         }
         static_context = tuple(
             name
             for name in STATIC_CONTEXT
-            if not (args.all_15ml_dynamic and name.startswith("obj_bg_15ml_"))
+            if name in objects
+            and not (args.all_15ml_dynamic and name.startswith("obj_bg_15ml_"))
         )
         background_context_static = all(
             displacement[name] <= 0.001 and tail_motion[name] <= 0.0005
@@ -215,6 +222,10 @@ def main() -> int:
         ]
         particle_free = not particle_like
         visual_liquid_contract = not liquid_forbidden
+        no_50ml_tubes = not any(
+            stage.GetPrimAtPath(f"/World/obj_bg_50ml_{index:02d}")
+            for index in range(2)
+        )
         passed = all(
             (
                 base_on_table,
@@ -224,6 +235,7 @@ def main() -> int:
                 dynamic_tubes_stable,
                 particle_free,
                 visual_liquid_contract,
+                no_50ml_tubes if args.no_50ml else True,
                 not hard_errors,
             )
         )
@@ -258,6 +270,7 @@ def main() -> int:
                 "all_15ml_tubes_stable": (
                     dynamic_tubes_stable if args.all_15ml_dynamic else False
                 ),
+                "no_50ml_tubes": args.no_50ml and no_50ml_tubes,
                 "particle_free_scene": particle_free,
                 "visual_static_liquid_only": visual_liquid_contract,
                 "scene_static_stability": passed,
