@@ -63,6 +63,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-09-01 Scientific Workbench Task 09 r14 VR](records/2026-09-01-scientific-workbench-task09-r14-vr.md)
 - [2026-08-31 Scientific Workbench Task 09 r13 VR](records/2026-08-31-scientific-workbench-task09-r13-vr.md)
 - [2026-08-31 IKA OVEN 125 Identity-root VR Handoff](records/2026-08-31-ika-oven-identity-root-vr-handoff.md)
 - [2026-08-31 IKA OVEN 125 Relocatability Diagnosis and Task09/12 Direct-stage Handoff](records/2026-08-31-ika-oven-v3-relocatability-diagnosis.md)
