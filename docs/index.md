@@ -63,6 +63,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-08-31 IKA OVEN 125 Relocatability Diagnosis and Task09/12 Direct-stage Handoff](records/2026-08-31-ika-oven-v3-relocatability-diagnosis.md)
 - [2026-08-24 Stir-bar/Beaker VR r2 Steel-tray Layout](records/2026-08-24-scientific-workbench-stir-bar-beaker-vr-r2.md)
 - [2026-08-26 Wangshuai Funnel/Tube Liquid Asset Directory](records/2026-08-26-wangshuai-funnel-tube15-liquid-asset-set.md)
 - [2026-08-27 Wangshuai Funnel/Tube Dynamic Asset Set v2](records/2026-08-27-wangshuai-funnel-tube15-dynamic-asset-set.md)
