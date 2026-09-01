@@ -1,0 +1,12 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_ika_oven_125_task09_r15_instance:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/ika_oven_125_task09_r15_instance_layout_20260901/package/asset.usd
+    role: articulated_object
+    root_prim_path: /World/obj_oven
+    source_uri: convertasset://ika_oven_125_task09_r15_instance_layout_20260901
+    expected_sha256: sha256:8de8c252cefe19a4fb604fe5698221c0ce3c52cedcce8d9f557f9079daa3e92e
+    license: LicenseRef-Internal-Restricted
+    attribution: [IKA OVEN 125 interactive v3; ConvertAsset Task09 r15 Instance Scope]
+    redistributable: false

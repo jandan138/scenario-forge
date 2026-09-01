@@ -11,6 +11,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Design
 
+- [Articulated Instance Layout](design/articulated-instance-layout.md)
 - [Architecture](design/architecture.md)
 - [Scenario Package Contract](design/scenario-package-contract.md)
 - [Adapter Boundaries](design/adapter-boundaries.md)
@@ -63,6 +64,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-09-01 Scientific Workbench Task 09 r15 Instance Layout](records/2026-09-01-scientific-workbench-task09-r15-instance-layout.md)
 - [2026-09-01 Scientific Workbench Task 08 r12 VR](records/2026-09-01-scientific-workbench-task08-r12-vr.md)
 - [2026-09-01 Long-neck Threaded 15 mL Tube Asset Readiness](records/2026-09-01-long-neck-threaded-tube15-asset-readiness.md)
 - [2026-09-01 Scientific Workbench Task 09 r14 VR](records/2026-09-01-scientific-workbench-task09-r14-vr.md)

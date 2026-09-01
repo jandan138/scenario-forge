@@ -1,0 +1,18 @@
+schema_version: scenario-forge.asset-readiness/v1
+asset_set_id: scientific_workbench_task09_r15_instance_oven_20260901
+producer_manifest: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/ika_oven_125_task09_r15_instance_layout_20260901/package/evidence/task09_r15_manifest.json
+producer_manifest_sha256: sha256:ca79e23e659ab8e5dbc645489d5f7b9758dc20b8d3148247240cd07bb16c7389
+source_bindings: configs/source_bindings/scientific_workbench_task09_r15_instance_oven_20260901.yaml
+readiness:
+  articulated_instance_layout: ready
+  all_links_under_instance: ready
+  canonical_namespace: ready
+  arbitrary_prefix_namespace: ready
+  vr_scene_namespace: ready
+  task09_controls: ready
+  robot_policy: not_requested
+  benchmark: not_requested
+consumer_policy:
+  require_instance_scope: true
+  allow_legacy_link_paths: false
+  allow_scenario_side_namespace_rewrite: false

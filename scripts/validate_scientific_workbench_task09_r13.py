@@ -50,6 +50,10 @@ def evaluate_report(report: dict[str, Any]) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument(
+        "--control-path",
+        default="/World/obj_oven/ControlPanel",
+    )
     args = parser.parse_args()
     root = args.root.resolve()
     original = sys.argv
@@ -108,7 +112,7 @@ def main() -> int:
             app.update()
         final = {name: xyz(name) for name in names}
         timeline.stop()
-        control = stage.GetPrimAtPath("/World/obj_oven/ControlPanel")
+        control = stage.GetPrimAtPath(args.control_path)
         report = {
             "schema_version": "scenario-forge-task09-r13-static-play/v0.1",
             "runtime": "isaac41",
