@@ -1,0 +1,22 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_tube15_long_neck_threaded_body_v1_1:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/tube15_long_neck_threaded_geometry_v1_1_20260901/packages/tube15_long_neck_threaded_body_v1_1/asset.usd
+    role: rigid_object
+    root_prim_path: /World/Tube15LongNeckThreadedBody
+    source_uri: convertasset://tube15_long_neck_threaded_geometry_v1_1_20260901/body
+    expected_sha256: sha256:d087dd7f800a9276149d145dcc41d5a0b2cfd7abe57e89e76daca500542105ea
+    license: LicenseRef-Internal-Restricted
+    attribution: [Wangshuai tube.usd; ConvertAsset source-bound long-neck threaded body v1.1]
+    redistributable: false
+  scientific_workbench_tube15_long_neck_threaded_closed_cap_v1_1:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/tube15_long_neck_threaded_geometry_v1_1_20260901/packages/tube15_long_neck_threaded_closed_cap_v1_1/asset.usd
+    role: rigid_object
+    root_prim_path: /World/Tube15LongNeckThreadedClosedCap
+    source_uri: convertasset://tube15_long_neck_threaded_geometry_v1_1_20260901/closed-cap
+    expected_sha256: sha256:b914135235016b585cba9a9fa370cece20308cf24ca69d416861e3f2880d571a
+    license: LicenseRef-Internal-Restricted
+    attribution: [Wangshuai tube.usd; ConvertAsset source-bound sealed threaded cap v1.1]
+    redistributable: false

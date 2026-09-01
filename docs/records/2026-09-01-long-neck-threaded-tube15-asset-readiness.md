@@ -4,20 +4,22 @@
 
 Scenario Forge now registers the independently admitted long-neck tube body and
 sealed cap from ConvertAsset. The bindings are in
-`configs/source_bindings/scientific_workbench_tube15_long_neck_threaded_v1_20260901.yaml`.
+`configs/source_bindings/scientific_workbench_tube15_long_neck_threaded_v1_1_20260901.yaml`.
 The explicit readiness card is
-`configs/asset_readiness/scientific_workbench_tube15_long_neck_threaded_v1_20260901.yaml`.
+`configs/asset_readiness/scientific_workbench_tube15_long_neck_threaded_v1_1_20260901.yaml`.
 
 The two consumer assets are:
 
-- `scientific_workbench_tube15_long_neck_threaded_body_v1`, rooted at
+- `scientific_workbench_tube15_long_neck_threaded_body_v1_1`, rooted at
   `/World/Tube15LongNeckThreadedBody`;
-- `scientific_workbench_tube15_long_neck_threaded_closed_cap_v1`, rooted at
+- `scientific_workbench_tube15_long_neck_threaded_closed_cap_v1_1`, rooted at
   `/World/Tube15LongNeckThreadedClosedCap`.
 
 Both bindings point directly to immutable ConvertAsset package entries. Scenario
 Forge does not copy or modify their mesh, SDF collision, physics material, mass,
-or inertia.
+or inertia. v1.1 replaces the initial runtime-only `OmniPBR.mdl` reference with
+a package-local UsdPreviewSurface network; both USD dependency closures now
+report zero unresolved paths.
 
 ## Readiness boundary
 

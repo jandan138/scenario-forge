@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from hashlib import sha256
 import json
 from pathlib import Path
 
-from pxr import Usd, UsdGeom, UsdPhysics
+from pxr import Usd, UsdGeom, UsdPhysics, UsdUtils
 import yaml
 
 from scenario_forge.generation.source_resolver import (
@@ -15,24 +16,24 @@ ROOT = Path(__file__).resolve().parents[1]
 BINDINGS = (
     ROOT
     / "configs/source_bindings/"
-    "scientific_workbench_tube15_long_neck_threaded_v1_20260901.yaml"
+    "scientific_workbench_tube15_long_neck_threaded_v1_1_20260901.yaml"
 )
 READINESS = (
     ROOT
     / "configs/asset_readiness/"
-    "scientific_workbench_tube15_long_neck_threaded_v1_20260901.yaml"
+    "scientific_workbench_tube15_long_neck_threaded_v1_1_20260901.yaml"
 )
 PRODUCER = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
-    "tube15_long_neck_threaded_geometry_v1_20260901"
+    "tube15_long_neck_threaded_geometry_v1_1_20260901"
 )
 
 
 def test_long_neck_threaded_assets_resolve_as_separate_rigid_packages() -> None:
     sources = resolve_scenario_source_bindings(BINDINGS)
     assert set(sources) == {
-        "scientific_workbench_tube15_long_neck_threaded_body_v1",
-        "scientific_workbench_tube15_long_neck_threaded_closed_cap_v1",
+        "scientific_workbench_tube15_long_neck_threaded_body_v1_1",
+        "scientific_workbench_tube15_long_neck_threaded_closed_cap_v1_1",
     }
     for source in sources.values():
         assert source.role == "rigid_object"
@@ -43,6 +44,9 @@ def test_long_neck_threaded_packages_keep_identity_dynamic_sdf_entries() -> None
     payload = yaml.safe_load(BINDINGS.read_text(encoding="utf-8"))
     for binding in payload["bindings"].values():
         package = Path(binding["source_usd"]).parent
+        assert binding["expected_sha256"] == (
+            "sha256:" + sha256((package / "asset.usd").read_bytes()).hexdigest()
+        )
         manifest = json.loads(
             (package / "evidence/manifest.json").read_text(encoding="utf-8")
         )
@@ -62,16 +66,23 @@ def test_long_neck_threaded_packages_keep_identity_dynamic_sdf_entries() -> None
         ]
         assert len(colliders) == 1
         assert colliders[0].GetAttribute("physics:approximation").Get() == "sdf"
+        _, _, unresolved = UsdUtils.ComputeAllDependencies(str(package / "asset.usd"))
+        assert list(unresolved) == []
 
 
 def test_readiness_promotes_geometry_but_blocks_thread_task_and_liquid() -> None:
     readiness = yaml.safe_load(READINESS.read_text(encoding="utf-8"))
-    assert readiness["asset_set_id"] == "tube15_long_neck_threaded_v1"
+    assert readiness["asset_set_id"] == "tube15_long_neck_threaded_v1_1"
     assert readiness["producer_manifest"].endswith("/asset_set_manifest.json")
+    producer_manifest = Path(readiness["producer_manifest"])
+    assert readiness["producer_manifest_sha256"] == (
+        "sha256:" + sha256(producer_manifest.read_bytes()).hexdigest()
+    )
     assert readiness["readiness"] == {
         "geometry": "ready",
         "dynamic_runtime": "ready",
         "sdf_collision": "ready",
+        "usd_dependency_closure": "ready",
         "thread_interaction": "blocked",
         "task08": "blocked",
         "liquid_container": "not_requested",
