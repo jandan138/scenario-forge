@@ -1,0 +1,23 @@
+schema_version: scenario-forge.asset-readiness/v1
+asset_set_id: scientific_workbench_task08_r12_assets_20260901
+producer_manifest: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task08_r12_assets_20260901/asset_set_manifest.json
+producer_manifest_sha256: sha256:314297ebd633bd3b32f69d0a5136057487b42f2b15910eeb6e2b66103ec43ce8
+source_bindings: configs/source_bindings/scientific_workbench_task08_r12_assets_20260901.yaml
+readiness:
+  rack_scaled_sdf: ready
+  selected_slot_static_stability: ready
+  tube_glass_visual: ready
+  cap_red_visual: ready
+  dynamic_runtime: ready
+  vr_action_collection_layout: ready
+  thread_interaction: blocked
+  task08: blocked
+consumer_policy:
+  allow_vr_action_collection: true
+  allow_all_six_objects_interactive: true
+  allow_thread_task_claim: false
+  allow_asset_physics_override: false
+claim_boundary: >-
+  The r12 scene is ready for VR alignment, mating and twist trajectory
+  collection. It does not establish physical screw advance, released-cap
+  retention, Task 08 success, robot-policy success or benchmark success.

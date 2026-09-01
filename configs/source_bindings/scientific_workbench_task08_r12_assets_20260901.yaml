@@ -1,0 +1,32 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_task08_r12_mixed_rack_scaled_sdf_r3:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task08_r12_assets_20260901/packages/mixed_rack_18plus4_scaled_sdf_r3/asset.usd
+    role: static_support_object
+    root_prim_path: /TubeRack15ml50ml_OriginalMesh
+    source_uri: convertasset://scientific_workbench_task08_r12_assets_20260901/rack
+    expected_sha256: sha256:652b37e5fda4519301071c317af279bcd574716c40c79703c3e2581b3605813d
+    license: LicenseRef-Internal-Restricted
+    attribution: [Xinyu 18+4 mixed rack; ConvertAsset r3 baked-scale SDF]
+    redistributable: false
+  scientific_workbench_task08_r12_tube15_body_glass_v1_2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task08_r12_assets_20260901/packages/tube15_long_neck_threaded_body_glass_v1_2/asset.usd
+    role: rigid_object
+    root_prim_path: /World/Tube15LongNeckThreadedBody
+    source_uri: convertasset://scientific_workbench_task08_r12_assets_20260901/body
+    expected_sha256: sha256:bd4494147a20531ed3dfd86a41123f94d8ed5ecd8a6626b3e96bbe0dee76a7a2
+    license: LicenseRef-Internal-Restricted
+    attribution: [Wangshuai long-neck threaded tube; webpage-standard glass visual v1.2]
+    redistributable: false
+  scientific_workbench_task08_r12_tube15_closed_cap_red_v1_2:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_task08_r12_assets_20260901/packages/tube15_long_neck_threaded_closed_cap_red_v1_2/asset.usd
+    role: rigid_object
+    root_prim_path: /World/Tube15LongNeckThreadedClosedCap
+    source_uri: convertasset://scientific_workbench_task08_r12_assets_20260901/cap
+    expected_sha256: sha256:d331844c295bea6a03184394aa39581305e2845d63f8d70626f6b06cce8fdfe1
+    license: LicenseRef-Internal-Restricted
+    attribution: [Wangshuai closed threaded cap; Task 11 red PP visual v1.2]
+    redistributable: false
