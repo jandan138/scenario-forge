@@ -10,10 +10,7 @@ import omni.usd
 from omni.isaac.dynamic_control import _dynamic_control
 
 
-TUBE_PATH = "/World/obj_tube_01"
-CAP_PATH = "/World/obj_cap_01"
-CONTRACT_PATH = "/World/TaskRuntime/AssistedThreadContract"
-LOCK_PATH = "/World/TaskRuntime/ClosedLock"
+CONTROLLER_SUFFIX = "/TaskRuntime/AssistedThreadGraph/Controller"
 CLOSED_Z_M = 0.1074
 TRAVEL_M = 0.0076
 CLOSE_ANGLE_DEG = 350.0
@@ -79,8 +76,16 @@ def _stage():
     return omni.usd.get_context().get_stage()
 
 
-def _set(stage, name, value):
-    attr = stage.GetPrimAtPath(CONTRACT_PATH).GetAttribute(name)
+def _instance_root_from_node_path(node_path):
+    node_path = str(node_path)
+    if not node_path.endswith(CONTROLLER_SUFFIX):
+        raise ValueError("unexpected assisted-thread controller path: " + node_path)
+    root = node_path[: -len(CONTROLLER_SUFFIX)]
+    return root or "/"
+
+
+def _set(stage, contract_path, name, value):
+    attr = stage.GetPrimAtPath(contract_path).GetAttribute(name)
     if attr and attr.Get() != value:
         attr.Set(value)
 
@@ -125,27 +130,57 @@ def _set_cap_pose(dc, handle, position, rotation):
     )
 
 
-def _enable_closed_lock(stage, relative_yaw):
-    lock = stage.GetPrimAtPath(LOCK_PATH)
+def _enable_closed_lock(stage, lock_path, relative_yaw):
+    lock = stage.GetPrimAtPath(lock_path)
     lock.GetAttribute("assistedThread:active").Set(True)
     lock.GetAttribute("assistedThread:relativeYawDegrees").Set(float(relative_yaw))
 
 
+def _set_grasp_proxy(stage, state, enabled):
+    grasp = stage.GetPrimAtPath(
+        state.cap_path + "/__aan_collision_proxy/grasp_box"
+    )
+    if not grasp:
+        return
+    attr = grasp.GetAttribute("physics:collisionEnabled")
+    if attr and attr.Get() != bool(enabled):
+        attr.Set(bool(enabled))
+    proxy = stage.GetPrimAtPath(state.cap_path + "/__aan_collision_proxy")
+    for child in proxy.GetChildren():
+        name = child.GetName()
+        if not (name.startswith("shell_") or name == "top"):
+            continue
+        collision = child.GetAttribute("physics:collisionEnabled")
+        if collision and collision.Get() != (not bool(enabled)):
+            collision.Set(not bool(enabled))
+
+
 def _reset_state(stage, state):
-    lock = stage.GetPrimAtPath(LOCK_PATH).GetAttribute("assistedThread:active")
+    lock = stage.GetPrimAtPath(state.lock_path).GetAttribute("assistedThread:active")
     if lock:
         lock.Set(False)
+    _set_grasp_proxy(stage, state, True)
     state.mode = "free"
     state.accumulated = 0.0
     state.last_yaw = None
     state.closed_yaw = None
-    _set(stage, "assistedThread:state", "free")
-    _set(stage, "assistedThread:progress", 0.0)
-    _set(stage, "assistedThread:accumulatedClockwiseDegrees", 0.0)
+    _set(stage, state.contract_path, "assistedThread:state", "free")
+    _set(stage, state.contract_path, "assistedThread:progress", 0.0)
+    _set(
+        stage,
+        state.contract_path,
+        "assistedThread:accumulatedClockwiseDegrees",
+        0.0,
+    )
 
 
 def setup(db):
     state = db.per_instance_state
+    state.instance_root = _instance_root_from_node_path(db.node.get_prim_path())
+    state.tube_path = state.instance_root + "/obj_tube_01"
+    state.cap_path = state.instance_root + "/obj_cap_01"
+    state.contract_path = state.instance_root + "/TaskRuntime/AssistedThreadContract"
+    state.lock_path = state.instance_root + "/TaskRuntime/ClosedLock"
     state.dc = _dynamic_control.acquire_dynamic_control_interface()
     state.initialized = False
 
@@ -158,15 +193,27 @@ def compute(db):
     if not state.initialized:
         _reset_state(stage, state)
         state.initialized = True
-    tube = _pose(state.dc, TUBE_PATH)
-    cap = _pose(state.dc, CAP_PATH)
+    tube = _pose(state.dc, state.tube_path)
+    cap = _pose(state.dc, state.cap_path)
     if tube is None or cap is None:
         return True
     local_position, local_rotation, radial, tilt = _relative_pose(tube, cap)
     yaw = _yaw_degrees(local_rotation)
-    _set(stage, "assistedThread:rawRadialErrorM", float(radial))
-    _set(stage, "assistedThread:rawTiltErrorDegrees", float(tilt))
-    _set(stage, "assistedThread:rawRelativeZM", float(local_position[2]))
+    _set(
+        stage, state.contract_path, "assistedThread:rawRadialErrorM", float(radial)
+    )
+    _set(
+        stage,
+        state.contract_path,
+        "assistedThread:rawTiltErrorDegrees",
+        float(tilt),
+    )
+    _set(
+        stage,
+        state.contract_path,
+        "assistedThread:rawRelativeZM",
+        float(local_position[2]),
+    )
 
     if state.mode == "free":
         eligible = (
@@ -175,16 +222,17 @@ def compute(db):
             and CAPTURE_Z_MIN_M <= local_position[2] <= CAPTURE_Z_MAX_M
         )
         if eligible:
+            _set_grasp_proxy(stage, state, False)
             state.mode = "capture"
             state.last_yaw = yaw
             state.accumulated = 0.0
-            _set(stage, "assistedThread:state", "capture")
+            _set(stage, state.contract_path, "assistedThread:state", "capture")
         return True
 
     if state.mode == "capture":
         state.mode = "engaged"
         state.last_yaw = yaw
-        _set(stage, "assistedThread:state", "engaged")
+        _set(stage, state.contract_path, "assistedThread:state", "engaged")
 
     if state.mode == "engaged":
         if radial > ABORT_RADIAL_M or tilt > ABORT_TILT_DEG:
@@ -203,14 +251,25 @@ def compute(db):
             sum((target_position[index] - cap[1][index]) ** 2 for index in range(3))
         )
         _set_cap_pose(state.dc, cap[0], target_position, target_rotation)
-        _set(stage, "assistedThread:progress", float(progress))
+        _set(stage, state.contract_path, "assistedThread:progress", float(progress))
         _set(
             stage,
+            state.contract_path,
             "assistedThread:accumulatedClockwiseDegrees",
             float(state.accumulated),
         )
-        _set(stage, "assistedThread:targetRelativeZM", float(target_z))
-        _set(stage, "assistedThread:lastCorrectionM", float(correction))
+        _set(
+            stage,
+            state.contract_path,
+            "assistedThread:targetRelativeZM",
+            float(target_z),
+        )
+        _set(
+            stage,
+            state.contract_path,
+            "assistedThread:lastCorrectionM",
+            float(correction),
+        )
         if state.accumulated >= CLOSE_ANGLE_DEG:
             state.mode = "closed"
             state.closed_yaw = yaw
@@ -218,11 +277,16 @@ def compute(db):
                 tube, CLOSED_Z_M, state.closed_yaw
             )
             _set_cap_pose(state.dc, cap[0], target_position, target_rotation)
-            _enable_closed_lock(stage, state.closed_yaw)
-            _set(stage, "assistedThread:state", "closed")
-            _set(stage, "assistedThread:progress", 1.0)
-            _set(stage, "assistedThread:targetRelativeZM", CLOSED_Z_M)
-            _set(stage, "assistedThread:closed", True)
+            _enable_closed_lock(stage, state.lock_path, state.closed_yaw)
+            _set(stage, state.contract_path, "assistedThread:state", "closed")
+            _set(stage, state.contract_path, "assistedThread:progress", 1.0)
+            _set(
+                stage,
+                state.contract_path,
+                "assistedThread:targetRelativeZM",
+                CLOSED_Z_M,
+            )
+            _set(stage, state.contract_path, "assistedThread:closed", True)
         return True
 
     if state.mode == "closed":
@@ -230,7 +294,7 @@ def compute(db):
             tube, CLOSED_Z_M, state.closed_yaw
         )
         _set_cap_pose(state.dc, cap[0], target_position, target_rotation)
-        _set(stage, "assistedThread:closed", True)
+        _set(stage, state.contract_path, "assistedThread:closed", True)
         return True
     return True
 

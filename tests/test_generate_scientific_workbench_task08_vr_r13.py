@@ -3,6 +3,9 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+import runpy
+import sys
+import types
 
 import pytest
 from pxr import Usd, UsdPhysics
@@ -12,6 +15,37 @@ from scripts.generate_scientific_workbench_task08_vr_r13 import (
     ASSISTED_TUBE_ENTRY,
     build,
 )
+
+
+def test_task08_controller_resolves_direct_and_nested_instance_roots(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    omni = types.ModuleType("omni")
+    omni.__path__ = []
+    omni_usd = types.ModuleType("omni.usd")
+    omni_isaac = types.ModuleType("omni.isaac")
+    omni_isaac.__path__ = []
+    dynamic_control = types.ModuleType("omni.isaac.dynamic_control")
+    dynamic_control._dynamic_control = types.SimpleNamespace(INVALID_HANDLE=-1)
+    monkeypatch.setitem(sys.modules, "omni", omni)
+    monkeypatch.setitem(sys.modules, "omni.usd", omni_usd)
+    monkeypatch.setitem(sys.modules, "omni.isaac", omni_isaac)
+    monkeypatch.setitem(sys.modules, "omni.isaac.dynamic_control", dynamic_control)
+    namespace = runpy.run_path(
+        str(Path("scripts/task08_assisted_thread_controller.py").resolve())
+    )
+    resolver = namespace["_instance_root_from_node_path"]
+    assert (
+        resolver("/World/TaskRuntime/AssistedThreadGraph/Controller") == "/World"
+    )
+    assert (
+        resolver(
+            "/World/_scene/TaskRuntime/AssistedThreadGraph/Controller"
+        )
+        == "/World/_scene"
+    )
+    with pytest.raises(ValueError):
+        resolver("/World/Unexpected/Controller")
 
 
 def test_task08_r13_embeds_one_turn_assisted_thread_contract(tmp_path: Path) -> None:
@@ -26,6 +60,7 @@ def test_task08_r13_embeds_one_turn_assisted_thread_contract(tmp_path: Path) -> 
     assert controller.GetAttribute("node:type").Get() == "omni.graph.scriptnode.ScriptNode"
     script = controller.GetAttribute("inputs:script").Get()
     assert "free" in script and "engaged" in script and "closed" in script
+    assert "__aan_collision_proxy/grasp_box" in script
     assert contract.GetAttribute("assistedThread:effectiveLeadMPerTurn").Get() == pytest.approx(
         0.0076
     )
