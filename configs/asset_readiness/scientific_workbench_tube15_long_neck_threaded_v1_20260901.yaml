@@ -1,0 +1,24 @@
+schema_version: scenario-forge.asset-readiness/v1
+asset_set_id: tube15_long_neck_threaded_v1
+producer_manifest: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/tube15_long_neck_threaded_geometry_v1_20260901/asset_set_manifest.json
+producer_manifest_sha256: sha256:d52f1d26e965d440fd29f574efe63d8bf8c39eb550e8459c494423f07eb82b07
+source_bindings: configs/source_bindings/scientific_workbench_tube15_long_neck_threaded_v1_20260901.yaml
+assets:
+  body: scientific_workbench_tube15_long_neck_threaded_body_v1
+  cap: scientific_workbench_tube15_long_neck_threaded_closed_cap_v1
+readiness:
+  geometry: ready
+  dynamic_runtime: ready
+  sdf_collision: ready
+  thread_interaction: blocked
+  task08: blocked
+  liquid_container: not_requested
+consumer_policy:
+  allow_separate_asset_placement: true
+  allow_thread_task_claim: false
+  allow_physics_override: false
+claim_boundary: >-
+  The two assets may be placed independently as provisional dynamic geometry.
+  This record does not authorize a tightened/locked assembly, reversible thread
+  interaction, liquid containment, Task 08 success, robot success, or benchmark
+  success.
