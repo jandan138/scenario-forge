@@ -3,16 +3,33 @@
 Install:
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,usd]"
 ```
 
-Run:
+Run the portable gate used by GitHub Actions:
+
+```bash
+make ci-check
+```
+
+This gate runs pure-Python checks and self-contained OpenUSD tests. It excludes
+tests marked `local_artifacts`, which require repository-external `/cpfs`
+inputs or generated task outputs.
+
+In the managed internal environment with all declared local artifacts, run the
+complete gate:
 
 ```bash
 make check
 ```
 
-The default check runs:
+Run only the local artifact integrations with:
+
+```bash
+python -m pytest -q -m local_artifacts
+```
+
+The complete local check runs:
 
 - unit and contract tests;
 - Ruff linting;

@@ -171,8 +171,12 @@ records are retained as historical evidence only.
 Developer checks:
 
 ```bash
-make check
+python -m pip install -e ".[dev,usd]"
+make ci-check
 ```
+
+The internal full gate is `make check`; it additionally runs tests marked
+`local_artifacts` and therefore requires the declared `/cpfs` inputs.
 
 ## Design Rules
 

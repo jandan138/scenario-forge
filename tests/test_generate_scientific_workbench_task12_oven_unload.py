@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+import pytest
 import yaml
 from pxr import Usd, UsdGeom
 
@@ -9,6 +10,7 @@ from scripts.generate_scientific_workbench_task12_oven_unload import build_hando
 from scripts.validate_scientific_workbench_task12_oven_unload import evaluate_report
 
 
+@pytest.mark.local_artifacts
 def test_task12_places_dual_glassware_on_lower_shelf_and_shortens_cart(
     tmp_path,
 ) -> None:
@@ -47,6 +49,7 @@ def test_task12_places_dual_glassware_on_lower_shelf_and_shortens_cart(
         assert 0.0 <= vessel.GetMin()[2] - shelf.GetMax()[2] <= 0.002
 
 
+@pytest.mark.local_artifacts
 def test_task12_authors_completed_panel_and_dual_unload_contract(tmp_path) -> None:
     result = build_handoff(tmp_path / "handoff")
     stage = Usd.Stage.Open(str(result.root / "scene.usd"))

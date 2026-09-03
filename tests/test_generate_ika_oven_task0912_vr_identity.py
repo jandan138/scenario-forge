@@ -13,6 +13,7 @@ from scripts.generate_ika_oven_task0912_vr_identity import (
 )
 
 
+@pytest.mark.local_artifacts
 def test_vr_scene_consumes_identity_oven_without_moving_the_table(
     tmp_path: Path,
 ) -> None:
@@ -61,6 +62,7 @@ def test_vr_scene_consumes_identity_oven_without_moving_the_table(
     assert "set_robot_physics_material" not in task_config
 
 
+@pytest.mark.local_artifacts
 def test_vr_identity_handoff_zip_is_self_contained(tmp_path: Path) -> None:
     result = build_handoff(tmp_path / "handoff")
 

@@ -3,9 +3,12 @@
 ## Development Loop
 
 ```bash
-python -m pip install -e ".[dev]"
-make check
+python -m pip install -e ".[dev,usd]"
+make ci-check
 ```
+
+`make ci-check` matches GitHub's portable gate. Use `make check` in the managed
+internal environment to include tests that require local generated artifacts.
 
 Write tests before production behavior. Keep package validation and schema helpers runnable
 without simulator SDKs.

@@ -11,6 +11,9 @@ from scripts.generate_scientific_workbench_water_bath_tube_heat_vr import (
 )
 
 
+pytestmark = pytest.mark.local_artifacts
+
+
 @pytest.fixture(scope="module")
 def water_bath(tmp_path_factory):
     return build_handoff(tmp_path_factory.mktemp("water_bath") / "package")

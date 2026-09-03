@@ -4,9 +4,13 @@ import json
 from pathlib import Path
 from zipfile import ZipFile
 
+import pytest
 from pxr import Usd, UsdGeom
 
 from scripts.generate_ika_oven_task0912_direct_scene import build_handoff
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 def test_direct_scene_preserves_oven_root_and_places_empty_sdf_vessels(

@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import json
 
+import pytest
 from pxr import Usd
 
 from scripts.generate_scientific_workbench_task09_r14 import build_handoff
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 def test_r14_scene_exposes_two_roots_with_full_gui_trs(tmp_path) -> None:

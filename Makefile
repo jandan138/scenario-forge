@@ -1,4 +1,4 @@
-.PHONY: test lint type package-smoke phase10x-smoke diff-check check
+.PHONY: test test-ci lint type package-smoke phase10x-smoke diff-check check ci-check
 
 PYTHON ?= python
 CHECK_PYTHON ?= $(PYTHON)
@@ -9,6 +9,9 @@ PHASE10X_SUITE_OUT ?= /tmp/scenario-forge-phase10x-suite
 
 test:
 	$(CHECK_PYTHON) -m pytest -q
+
+test-ci:
+	$(CHECK_PYTHON) -m pytest -q -m "not local_artifacts"
 
 lint:
 	$(CHECK_PYTHON) -m ruff check src tests scripts
@@ -38,3 +41,5 @@ diff-check:
 	git diff --check
 
 check: test lint package-smoke phase10x-smoke diff-check
+
+ci-check: test-ci lint package-smoke phase10x-smoke diff-check

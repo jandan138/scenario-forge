@@ -10,6 +10,9 @@ from pxr import Usd, UsdPhysics
 from scripts.generate_scientific_workbench_task08_vr_r12 import build
 
 
+pytestmark = pytest.mark.local_artifacts
+
+
 def test_task08_r12_builds_three_interactive_tubes_caps_and_visual_liquids(
     tmp_path: Path,
 ) -> None:

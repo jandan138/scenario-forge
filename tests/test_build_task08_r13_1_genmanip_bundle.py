@@ -3,10 +3,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from pxr import Usd, UsdUtils
 import yaml
 
 from scripts.build_task08_r13_1_genmanip_bundle import build
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 def test_builds_nested_lift2_bundle_with_instance_aware_graph(tmp_path: Path) -> None:

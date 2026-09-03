@@ -4,10 +4,14 @@ import json
 from pathlib import Path
 from zipfile import ZipFile
 
+import pytest
 import yaml
 from pxr import Usd, UsdGeom, UsdPhysics
 
 from scripts.generate_scientific_workbench_task09_r13 import build_handoff
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 def test_r13_uses_materialized_oven_compact_cart_and_two_graspable_vessels(

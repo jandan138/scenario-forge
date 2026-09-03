@@ -26,6 +26,9 @@ dev = [
   "ruff>=0.5",
   "mypy>=1.8",
 ]
+usd = [
+  "usd-core==26.5",
+]
 
 [project.scripts]
 scenario-forge = "scenario_forge.cli:main"
@@ -51,3 +54,6 @@ files = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src", "."]
 testpaths = ["tests"]
+markers = [
+  "local_artifacts: requires repository-external /cpfs assets or generated outputs",
+]

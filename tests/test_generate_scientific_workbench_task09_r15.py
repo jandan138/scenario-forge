@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import json
 
+import pytest
 from pxr import Usd, UsdGeom, UsdPhysics
 
 from scripts.generate_scientific_workbench_task09_r15 import build_handoff
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 def test_r15_scene_preserves_obj_root_and_places_all_links_under_instance(tmp_path) -> None:

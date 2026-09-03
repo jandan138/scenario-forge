@@ -48,6 +48,7 @@ def test_task08_controller_resolves_direct_and_nested_instance_roots(
         resolver("/World/Unexpected/Controller")
 
 
+@pytest.mark.local_artifacts
 def test_task08_r13_embeds_one_turn_assisted_thread_contract(tmp_path: Path) -> None:
     output = build(tmp_path / "task08_r13")
     stage = Usd.Stage.Open(str(output / "vr/scene.usd"))
@@ -78,6 +79,7 @@ def test_task08_r13_embeds_one_turn_assisted_thread_contract(tmp_path: Path) -> 
     ] == ["/World/obj_cap_01"]
 
 
+@pytest.mark.local_artifacts
 def test_task08_r13_consumes_smooth_proxy_assets_and_keeps_visual_threads(
     tmp_path: Path,
 ) -> None:
@@ -99,6 +101,7 @@ def test_task08_r13_consumes_smooth_proxy_assets_and_keeps_visual_threads(
     ).GetAttribute("physics:collisionEnabled").Get() is False
 
 
+@pytest.mark.local_artifacts
 def test_task08_r13_config_and_manifest_keep_claim_boundaries(tmp_path: Path) -> None:
     output = build(tmp_path / "task08_r13")
     config = (output / "vr/task_config.py").read_text()

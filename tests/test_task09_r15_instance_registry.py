@@ -4,9 +4,13 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 from scenario_forge.generation.source_resolver import resolve_scenario_source_bindings
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 ROOT = Path(__file__).resolve().parents[1]
