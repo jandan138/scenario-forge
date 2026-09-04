@@ -22,6 +22,12 @@ VIEWS = (
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument(
+        "--oven-z-offset",
+        type=float,
+        default=0.0,
+        help="Apply a Z offset to oven_station and control_panel evidence cameras.",
+    )
     args = parser.parse_args()
     root = args.root.resolve()
     original = sys.argv
@@ -65,6 +71,9 @@ def main() -> int:
         evidence.mkdir(parents=True, exist_ok=True)
         records = {}
         for index, (name, position, target, focal) in enumerate(VIEWS):
+            if name in {"oven_station", "control_panel"}:
+                position = (position[0], position[1], position[2] + args.oven_z_offset)
+                target = (target[0], target[1], target[2] + args.oven_z_offset)
             camera = Camera(
                 prim_path=f"/World/__task09_r13_camera_{index}",
                 name=name,

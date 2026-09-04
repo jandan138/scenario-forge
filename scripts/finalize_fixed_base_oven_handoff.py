@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Finalize a rendered and runtime-checked fixed-base oven VR handoff."""
+
+from __future__ import annotations
+
+import argparse
+from hashlib import sha256
+import json
+from pathlib import Path
+import shutil
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+for path in (ROOT, ROOT / "src"):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+
+from scenario_forge.validation.articulated_instance_layout import (  # noqa: E402
+    validate_fixed_base_articulation_layout,
+)
+
+
+def _sha(path: Path) -> str:
+    return sha256(path.read_bytes()).hexdigest()
+
+
+def finalize(root: Path, *, smoke_relative: str) -> Path:
+    from pxr import UsdUtils
+
+    root = root.resolve()
+    smoke = root / smoke_relative
+    render = root / "evidence/initial_scene/render_manifest.json"
+    review = root / "evidence/initial_scene/visual_review.json"
+    for path in (smoke, render, review):
+        payload = json.loads(path.read_text())
+        if payload.get("status") != "pass":
+            raise ValueError(f"fixed-base oven evidence did not pass: {path}")
+
+    layout = validate_fixed_base_articulation_layout(root / "scene.usd", ["/World/obj_oven"])
+    layout_path = root / "evidence/articulated_instance_layout_v2.json"
+    layout_path.write_text(json.dumps(layout, indent=2, sort_keys=True) + "\n")
+
+    layers, dependencies, unresolved = UsdUtils.ComputeAllDependencies(str(root / "scene.usd"))
+    external = [
+        str(path)
+        for path in dependencies
+        if str(path).startswith("/") and not str(path).startswith(str(root) + "/")
+    ]
+    closure = {
+        "schema_version": "scenario-forge-package-closure/v0.1",
+        "status": "pass" if not unresolved and not external else "blocked",
+        "layer_count": len(layers),
+        "asset_count": len(dependencies),
+        "unresolved": [str(path) for path in unresolved],
+        "external_absolute_assets": external,
+    }
+    closure_path = root / "evidence/package_closure.json"
+    closure_path.write_text(json.dumps(closure, indent=2, sort_keys=True) + "\n")
+    if closure["status"] != "pass":
+        raise ValueError("fixed-base oven dependency closure blocked")
+
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["status"] = "isaac41_runtime_complete"
+    manifest["runtime_evidence"] = {
+        "scene_smoke": smoke_relative,
+        "scene_smoke_sha256": _sha(smoke),
+        "render_manifest": "evidence/initial_scene/render_manifest.json",
+        "render_manifest_sha256": _sha(render),
+        "visual_review": "evidence/initial_scene/visual_review.json",
+        "visual_review_sha256": _sha(review),
+        "articulated_instance_layout": "evidence/articulated_instance_layout_v2.json",
+        "articulated_instance_layout_sha256": _sha(layout_path),
+        "package_closure": "evidence/package_closure.json",
+        "package_closure_sha256": _sha(closure_path),
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    output = root.parent
+    archive = output / (root.name + ".zip")
+    shutil.make_archive(str(archive.with_suffix("")), "zip", root_dir=output, base_dir=root.name)
+    archive.with_suffix(archive.suffix + ".sha256").write_text(
+        _sha(archive) + "  " + archive.name + "\n"
+    )
+    return archive
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--smoke-relative", required=True)
+    args = parser.parse_args()
+    print(finalize(args.root, smoke_relative=args.smoke_relative))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
