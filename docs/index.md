@@ -12,6 +12,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 ## Design
 
 - [Articulated Instance Layout](design/articulated-instance-layout.md)
+- [VR articulated link registration record](records/2026-09-04-vr-articulated-link-registration.md)
 - [Architecture](design/architecture.md)
 - [Scenario Package Contract](design/scenario-package-contract.md)
 - [Adapter Boundaries](design/adapter-boundaries.md)

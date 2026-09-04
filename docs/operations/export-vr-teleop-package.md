@@ -81,8 +81,28 @@ must preserve their internal arrangement share one group—for example a rack an
 its tubes. Task 02 similarly groups the PBD runtime with its graduated cylinder,
 although `fluid_runtime` itself is not an `obj_*` entry.
 
+### Articulated-object registration
+
+An articulated object is the exception to the one-path-per-object form of
+`obj_prim_list`: the list contains its `/World/_scene/obj_*` root followed by
+every `RigidBodyAPI` link below `/World/_scene/obj_*/Instance`, in deterministic
+USD traversal order. Joints, visual meshes, material prims, and collider children
+are not registered as links.
+
+Only the `obj_*` root is listed in `layout_randomization.objects`. Registered
+links are never randomized independently; doing so would apply child-local
+offsets and break or double-transform the articulation. A device and its support
+cart may be placed in the same root-level randomization group.
+
+New articulated exports must pass the fixed-base v2 contract: enabled
+Articulation Root on `obj_*`, identity `Xform` at `obj_*/Instance`, non-kinematic
+links, and `Instance/Joints/BaseFixed` from the object root to `Instance/Body`.
+The exporter rejects legacy Scope assemblies and incomplete link registration.
+See [Articulated Instance Layout](../design/articulated-instance-layout.md).
+
 Every path in `obj_prim_list` has one matching, movable `obj_*` Xform in the
-source scene. The exporter composes each complete tabletop object, then writes
+source scene, except registered articulation links, which remain descendants of
+their matching movable root. The exporter composes each complete tabletop object, then writes
 its mesh, material binding, collision and physics subtree directly into the
 ASCII `scene.usd`. Payloads, references and other composition arcs are forbidden
 inside those published object subtrees. Room, table, robot, lights and PBD helper

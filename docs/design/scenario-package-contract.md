@@ -72,3 +72,8 @@ Required manifest fields:
 `scenario-forge package scaffold` writes the v0.2 layout by default. `package
 check` validates referenced v0.2 files and runs the asset-lock check because a
 formal v0.2 package must carry `locks/asset_lock.yaml`.
+
+Packages containing `articulated_object` assets must additionally follow the
+[Articulated Instance Layout](articulated-instance-layout.md). New VR exports
+register the object root and every rigid link while retaining root-only
+randomization.

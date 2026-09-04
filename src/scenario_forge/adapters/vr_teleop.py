@@ -27,6 +27,10 @@ from scenario_forge.adapters.vr_presentation import (
 from scenario_forge.assets.manifest import AssetManifestEntry, load_asset_manifest
 from scenario_forge.core.scenario import ScenarioSpec
 from scenario_forge.package import validate_package
+from scenario_forge.validation.articulated_instance_layout import (
+    ArticulatedInstanceLayoutError,
+    validate_fixed_base_articulation_layout,
+)
 
 
 VR_TASK_ID = "scientific_workbench_pour_flask_to_cylinder"
@@ -34,6 +38,35 @@ VR_TASK_ID = "scientific_workbench_pour_flask_to_cylinder"
 
 class VRTeleopExportError(ValueError):
     pass
+
+
+def articulated_vr_registration_paths(
+    scene_path: str | Path,
+    *,
+    scene_root: str,
+    runtime_root: str,
+) -> list[str]:
+    """Return the runtime object root followed by every rigid articulation link."""
+
+    try:
+        report = validate_fixed_base_articulation_layout(scene_path, [scene_root])
+    except ArticulatedInstanceLayoutError as exc:
+        raise VRTeleopExportError(
+            f"VR articulated object {scene_root} violates the fixed-base Instance contract: {exc}"
+        ) from exc
+    links = report["objects"][0]["link_prim_paths"]
+    registered = [runtime_root]
+    for link in links:
+        if not link.startswith(scene_root + "/Instance/"):
+            raise VRTeleopExportError(
+                f"VR articulated link must remain below {scene_root}/Instance: {link}"
+            )
+        registered.append(runtime_root + link[len(scene_root) :])
+    if len(registered) != len(set(registered)):
+        raise VRTeleopExportError(
+            f"VR articulated object {scene_root} has duplicate registration paths"
+        )
+    return registered
 
 
 @dataclass(frozen=True)
@@ -261,6 +294,29 @@ def export_vr_teleop_package(
                 )
             ),
         )
+        registered_runtime_paths: list[str] = []
+        articulated_link_registration: dict[str, list[str]] = {}
+        for item, scene_root, runtime_root in zip(
+            scene_objects,
+            scene_object_paths,
+            runtime_object_paths,
+            strict=True,
+        ):
+            object_id = _string(item.get("id"), "task object.id")
+            if task_assets[object_id].role == "articulated_object":
+                paths = articulated_vr_registration_paths(
+                    scene_path,
+                    scene_root=scene_root,
+                    runtime_root=runtime_root,
+                )
+                registered_runtime_paths.extend(paths)
+                articulated_link_registration[runtime_root] = paths[1:]
+            else:
+                registered_runtime_paths.append(runtime_root)
+        if len(registered_runtime_paths) != len(set(registered_runtime_paths)):
+            raise VRTeleopExportError(
+                "VR obj_prim_list would contain duplicate object or articulation link paths"
+            )
         presentation_policy = apply_standard_workbench_vr_presentation(
             scene_path,
             table_asset_id=table_asset.asset_id,
@@ -272,7 +328,7 @@ def export_vr_teleop_package(
                 robot=robot,
                 objects=scene_objects,
                 include_robot_physics_overrides=include_robot_physics_overrides,
-                object_prim_paths=runtime_object_paths,
+                object_prim_paths=registered_runtime_paths,
             ),
             encoding="utf-8",
         )
@@ -290,6 +346,13 @@ def export_vr_teleop_package(
             "shared_runtime_profile": PROFILE_ID,
             "source_contract": SOURCE_CONTRACT,
             "vr_presentation_policy": presentation_policy,
+            "articulated_link_registration": {
+                "status": (
+                    "pass" if articulated_link_registration else "not_applicable"
+                ),
+                "policy": "register_root_and_all_rigid_links_randomize_root_only",
+                "objects": articulated_link_registration,
+            },
             "equivalence": {
                 "environment": "same_asset_and_pose",
                 "table_static_support": (
