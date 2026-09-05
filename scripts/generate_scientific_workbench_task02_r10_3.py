@@ -37,15 +37,10 @@ from scenario_forge.adapters.vr_object_materialization import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FILL_IDS = ("fill20", "fill40", "fill60", "fill80")
-DEFAULT_SOURCE = (
-    REPO_ROOT
-    / "outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages"
-)
-DEFAULT_FIXTURE = (
-    REPO_ROOT
-    / "outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/"
-    "task07/teaching_research"
-)
+DEFAULT_SOURCE = None
+from scripts.retained_build_inputs import input_path  # noqa: E402
+
+DEFAULT_FIXTURE = input_path('rod_rack')
 DEFAULT_OUT = (
     REPO_ROOT / "outputs/scientific_workbench_task02_r10_3_fill_sweep_20260819"
 )
@@ -381,9 +376,10 @@ def upgrade_variant(
 ) -> Path:
     source = source.resolve()
     destination = destination.resolve()
-    if destination.exists():
-        shutil.rmtree(destination)
-    shutil.copytree(source, destination)
+    if source != destination:
+        if destination.exists():
+            shutil.rmtree(destination)
+        shutil.copytree(source, destination)
     _copy_fixture_closures(destination, fixture_package)
     _inject_ebench_scene(destination)
     _inject_vr_scene(destination / "vr/scene.usd")
@@ -466,10 +462,15 @@ def upgrade_variant(
 
 def build_packages(
     *,
-    source_root: Path = DEFAULT_SOURCE,
+    source_root: Path | None = DEFAULT_SOURCE,
     output_dir: Path = DEFAULT_OUT,
     fixture_package: Path = DEFAULT_FIXTURE,
 ) -> dict[str, Path]:
+    if source_root is None:
+        from scripts.build_task02_current import build_variant
+
+        return {fill: build_variant(fill, output_dir / 'packages' / fill, target='r10.3',
+                                   fixture_input=fixture_package) for fill in FILL_IDS}
     packages = {
         fill_id: upgrade_variant(
             source_root / fill_id,

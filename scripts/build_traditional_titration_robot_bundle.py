@@ -13,6 +13,7 @@ from typing import Any, Sequence
 import zipfile
 
 import yaml
+from scripts.retained_build_inputs import input_path
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,11 +23,7 @@ DEFAULT_R1 = (
     / "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_20260904/"
     "handoff/scientific_workbench_traditional_acid_base_titration_vr_r1"
 )
-DEFAULT_BASE = (
-    ROOT
-    / "outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/"
-    "packages/fill40/ebench"
-)
+DEFAULT_BASE = input_path('robot_adapter_metadata')
 DEFAULT_OUTPUT = (
     ROOT
     / "outputs/scientific_workbench_traditional_acid_base_titration_"
@@ -266,6 +263,9 @@ def _task_version(task_id: str) -> str:
 
 def _build_genmanip(root: Path, base: Path, task_id: str) -> Path:
     from pxr import Sdf, Usd, UsdGeom, UsdPhysics
+    from scripts.retained_build_inputs import verify_registered_input
+
+    verify_registered_input(base)
 
     out = root / "adapters/ebench/genmanip"
     adapter_slug = f"titration_{_task_version(task_id)}"

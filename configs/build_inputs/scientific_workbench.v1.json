@@ -1,0 +1,82 @@
+{
+  "inputs": {
+    "environment": {
+      "bytes": 106761510,
+      "includes": [
+        "scene.usda",
+        "source_bundle"
+      ],
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages/fill40/vr/deps/r7_scene",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/environment-0c45bdf06b0d2b2c",
+      "tree_sha256": "0c45bdf06b0d2b2cc9cb47ffaf583bc3bd1fb389a972bcd9989fb261745d5f6e"
+    },
+    "oven_layout": {
+      "bytes": 67307722,
+      "includes": [
+        "scene.usd",
+        "deps",
+        "task_config.py",
+        "manifest.json",
+        "README_CN.md",
+        "task_r15.json"
+      ],
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task09_r15_20260901/handoff/scientific_workbench_task09_r15_vr",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/oven-layout-cbdb6b222f155156",
+      "tree_sha256": "cbdb6b222f155156d0820b0fc7eca80a8986747ea1d83b93e53ad80f14ed6fce"
+    },
+    "robot_adapter_metadata": {
+      "bytes": 27014,
+      "includes": [
+        "config.yaml",
+        "cameras",
+        "tasks/scenario_forge/scientific_workbench_r10_task02_fill40_pour_cylinder_to_beaker__background_modern_wet_chemistry/002/episode_metadata.json"
+      ],
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages/fill40/ebench",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/robot-adapter-metadata-ba1e65704997633c",
+      "tree_sha256": "ba1e65704997633c89a61ff60c8dc630266d406e3c0248ebe86abb588bd4521a"
+    },
+    "rod_rack": {
+      "bytes": 8285584,
+      "includes": [
+        "adapters/vr_teleop/deps/objects/obj_glass_rod",
+        "adapters/vr_teleop/deps/objects/obj_acrylic_rod_rack",
+        "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r10_1_task07_glass_rod_stir__background_teaching_research/source_bundle/scientific_workbench_r7_glass_stirring_rod_300mm",
+        "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r10_1_task07_glass_rod_stir__background_teaching_research/source_bundle/scientific_workbench_r10_1_acrylic_spoon_rack",
+        "adapters/ebench/genmanip/package_manifest.json"
+      ],
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/rod-rack-9fa42f230481b8a4",
+      "tree_sha256": "9fa42f230481b8a47d7d50b009de0a57ece950a02060abf29bbc25173b2e0677"
+    },
+    "stirrer_layout": {
+      "bytes": 200326749,
+      "includes": [
+        "manifest.json",
+        "scenario.json",
+        "vr/scene.usd",
+        "vr/legacy_scene.usd",
+        "vr/deps"
+      ],
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/stirrer-layout-95b76f2557eba26e",
+      "tree_sha256": "95b76f2557eba26e1a876a79fa85a73acb50d2fca082eec28a8c644a7e8b0cd4"
+    },
+    "task02_base": {
+      "bytes": 106906367,
+      "includes": [
+        "scenario.yaml",
+        "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry",
+        "adapters/ebench/genmanip/tasks/config.yaml",
+        "adapters/ebench/genmanip/tasks/scenario_forge/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry/002/episode_metadata.json",
+        "adapters/ebench/genmanip/cameras",
+        "adapters/ebench/genmanip/package_manifest.json",
+        "adapters/ebench/genmanip/evidence/render_request.yaml"
+      ],
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_tasks_02_07_08_r9_20260816/rich_bases/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/task02-base-c440f153f0c3ce47",
+      "tree_sha256": "c440f153f0c3ce476f250e75e555d38b9937e59d641a4dbca1cc50350f253f41"
+    }
+  },
+  "policy": "explicit runtime closures and authoring metadata; no handoff ZIP or preview collections",
+  "schema_version": "scenario-forge-build-inputs/v1"
+}

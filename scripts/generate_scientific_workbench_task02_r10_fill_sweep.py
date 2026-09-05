@@ -18,6 +18,7 @@ from scenario_forge.artifacts.usd_handoff import (
     build_dual_consumer_variant_bundle,
     refresh_usd_handoff_archive,
 )
+from scripts.retained_build_inputs import input_path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -25,11 +26,7 @@ R8_SCRIPT = REPO_ROOT / "scripts/generate_scientific_workbench_task02_r8.py"
 RENDERER_SCRIPT = REPO_ROOT / "scripts/ebench/render_genmanip_initial_preview.py"
 PHYSICS_SMOKE_SCRIPT = REPO_ROOT / "scripts/ebench/run_genmanip_zero_action_physics_smoke.py"
 VR_OPEN_SMOKE_SCRIPT = REPO_ROOT / "scripts/ebench/open_vr_scene_smoke.py"
-DEFAULT_R9 = (
-    REPO_ROOT
-    / "outputs/scientific_workbench_tasks_02_07_08_r9_20260816/rich_bases/"
-    / "scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry"
-)
+DEFAULT_R9 = input_path('task02_base')
 DEFAULT_TRANSFER_ROOT = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
     "task02_gpu_pbd_fill_sweep_20260817_r60/final_packages"

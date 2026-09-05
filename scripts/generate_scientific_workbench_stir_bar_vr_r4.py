@@ -23,7 +23,9 @@ from scenario_forge.adapters.vr_object_materialization import (  # noqa: E402
 
 
 TASK_ID = "scientific_workbench_insert_stir_bar_into_beaker"
-DEFAULT_BASE = ROOT / "outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824"
+from scripts.retained_build_inputs import input_path  # noqa: E402
+
+DEFAULT_BASE = input_path('stirrer_layout')
 DEFAULT_BEAKER = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
     "scientific_workbench_beaker_325ml_sdf_web_standard_20260824/package"
@@ -117,6 +119,9 @@ def _write_task_config(path: Path, *, scene_name: str, particle_count: int) -> N
 
 def build_base(base: Path, beaker: Path, output: Path) -> Path:
     from pxr import Gf, Usd, UsdGeom
+    from scripts.retained_build_inputs import verify_registered_input
+
+    verify_registered_input(base)
 
     if output.exists():
         shutil.rmtree(output)
@@ -221,6 +226,7 @@ def add_dual_liquid(output: Path, liquid: Path) -> Path:
         particle_count=count,
     )
     provenance = output / "provenance"
+    provenance.mkdir(parents=True, exist_ok=True)
     shutil.copy2(liquid / "manifest.json", provenance / "liquid_v3_manifest.json")
     shutil.copy2(liquid / "recipe.json", provenance / "liquid_v3_recipe.json")
     scenario_path = output / "scenario.json"

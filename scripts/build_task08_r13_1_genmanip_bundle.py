@@ -11,15 +11,12 @@ import shutil
 from typing import Any
 
 import yaml
+from scripts.retained_build_inputs import input_path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_R13 = ROOT / "outputs/scientific_workbench_task08_vr_r13_20260901"
-DEFAULT_BASE = (
-    ROOT
-    / "outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/"
-    "packages/fill40/ebench"
-)
+DEFAULT_BASE = input_path('robot_adapter_metadata')
 DEFAULT_OUT = (
     ROOT
     / "outputs/scientific_workbench_task08_vr_r13_1_robot_20260902/"
@@ -81,6 +78,9 @@ def build(
     out: Path = DEFAULT_OUT,
 ) -> Path:
     from pxr import Sdf, Usd, UsdGeom, UsdPhysics
+    from scripts.retained_build_inputs import verify_registered_input
+
+    verify_registered_input(base)
 
     r13 = r13.resolve()
     base = base.resolve()

@@ -36,7 +36,7 @@ from scenario_forge.package import validate_package
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = REPO_ROOT / "outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817"
-DEFAULT_R10 = REPO_ROOT / "outputs/scientific_workbench_task02_r10_fill_sweep_20260817"
+DEFAULT_R10 = None
 DEFAULT_RACK_BINDINGS = (
     REPO_ROOT
     / "configs/source_bindings/scientific_workbench_r10_1_acrylic_rack_20260817.yaml"
@@ -355,9 +355,10 @@ def _sha(path: Path) -> str:
 
 
 def upgrade_task02_package(source: Path, destination: Path) -> Path:
-    if destination.exists():
-        shutil.rmtree(destination)
-    shutil.copytree(source, destination)
+    if source.resolve() != destination.resolve():
+        if destination.exists():
+            shutil.rmtree(destination)
+        shutil.copytree(source, destination)
     vr = destination / "vr"
     original = vr / "scene.usd"
     legacy = vr / "legacy_scene.usd"
@@ -490,7 +491,7 @@ def _compile_task07_08(
 def build_static_release(
     *,
     output_dir: Path = DEFAULT_OUT,
-    r10_root: Path = DEFAULT_R10,
+    r10_root: Path | None = DEFAULT_R10,
     base_bindings: Path = r9.DEFAULT_BASE_BINDINGS,
     context_bindings: Path = r9.DEFAULT_CONTEXT_BINDINGS,
     rack_bindings: Path = DEFAULT_RACK_BINDINGS,
@@ -498,9 +499,14 @@ def build_static_release(
     output_dir = output_dir.resolve()
     records: list[dict[str, Any]] = []
     for fill_id in ("fill20", "fill40", "fill60", "fill80"):
-        source = r10_root / "packages" / fill_id
         destination = output_dir / "packages/task02" / fill_id
-        package = upgrade_task02_package(source, destination)
+        if r10_root is None:
+            from scripts.build_task02_current import build_variant
+
+            package = build_variant(fill_id, destination, target='r10.1')
+        else:
+            source = r10_root / "packages" / fill_id
+            package = upgrade_task02_package(source, destination)
         records.append(
             {
                 "task_number": 2,
@@ -509,7 +515,7 @@ def build_static_release(
                 "package_root": str(package.resolve()),
                 "ebench_root": str((package / "ebench").resolve()),
                 "vr_root": str((package / "vr").resolve()),
-                "runtime_preview": "inherited_r10",
+                "runtime_preview": "inherited_r10" if r10_root else "not_run",
                 "vr_open_smoke": "pending_r10_1_contract",
             }
         )

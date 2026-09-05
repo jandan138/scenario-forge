@@ -29,10 +29,9 @@ DEFAULT_CONTEXT_ASSETS = Path(
 DEFAULT_CENTRIFUGE_R4 = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/labspin_x8_task11_r4_20260824/package"
 )
-DEFAULT_BASE = (
-    REPO_ROOT
-    / "outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages/fill40/vr/deps/r7_scene"
-)
+from scripts.retained_build_inputs import input_path  # noqa: E402
+
+DEFAULT_BASE = input_path('environment')
 DEFAULT_LIQUID = (
     REPO_ROOT
     / "outputs/simple_sdf_multi_liquid_golden_20260820/liquid_package_qualified/liquid_overlay.usda"
@@ -160,6 +159,9 @@ def build(
     balance_socket: int = BALANCE_SOCKET,
 ) -> Path:
     from pxr import Usd, UsdGeom, UsdPhysics
+    from scripts.retained_build_inputs import verify_registered_input
+
+    verify_registered_input(base)
 
     device_manifest = json.loads(
         (centrifuge / "evidence/manifest.json").read_text(encoding="utf-8")

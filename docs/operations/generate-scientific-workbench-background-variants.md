@@ -1,5 +1,10 @@
 # Generate fixed-workspace background variants
 
+The July 23 screening/admission batch and July 26 workspace variants are now
+cold-archived. Restore their exact directories before running the historical
+commands below; current task heads do not require those batches.
+See [round 2 archival](../records/2026-09-05-round2-build-input-decoupling.md).
+
 Full-room packages emit the v0.3 seven-view preview contract described in
 [`genmanip-full-room-preview-v0.3.md`](../design/genmanip-full-room-preview-v0.3.md).
 Run it through the existing managed EOS/Isaac environment; do not create a

@@ -37,6 +37,8 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 ## Operations
 
 - [Artifact Policy](operations/artifact-policy.md)
+- [Workbench build inputs and reconstruction](operations/workbench-build-inputs.md)
+- [Round 2 background archival and dependency decoupling](records/2026-09-05-round2-build-input-decoupling.md)
 - [Current generated-artifact retention review](records/2026-09-05-generated-artifact-retention-review.md)
 - [Scientific Workbench Task Directory](task-directory/)
 - [量筒 GPU-PBD 液体修复教程](liquid-cylinder-tutorial/)

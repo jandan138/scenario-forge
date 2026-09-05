@@ -23,10 +23,9 @@ from scenario_forge.validation.articulated_instance_layout import (  # noqa: E40
 )
 
 
-R15_ROOT = (
-    ROOT / "outputs/scientific_workbench_task09_r15_20260901/handoff/"
-    "scientific_workbench_task09_r15_vr"
-)
+from scripts.retained_build_inputs import input_path  # noqa: E402
+
+R15_ROOT = input_path('oven_layout')
 OVEN_R16 = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
     "ika_oven_125_task09_r16_fixed_articulation_20260904"
@@ -48,6 +47,9 @@ def _sha(path: Path) -> str:
 
 def build_handoff(output: Path = DEFAULT_OUTPUT) -> Task09R16Result:
     from pxr import Gf, Sdf, Usd
+    from scripts.retained_build_inputs import verify_registered_input
+
+    verify_registered_input(R15_ROOT)
 
     output = output.resolve()
     root = output / HANDOFF_ID
@@ -58,7 +60,7 @@ def build_handoff(output: Path = DEFAULT_OUTPUT) -> Task09R16Result:
         raise ValueError("ConvertAsset r16 fixed-base oven is not promoted")
 
     shutil.copytree(R15_ROOT, root)
-    shutil.rmtree(root / "evidence")
+    shutil.rmtree(root / "evidence", ignore_errors=True)
     shutil.rmtree(root / "deps/oven")
     shutil.copytree(OVEN_R16, root / "deps/oven")
 

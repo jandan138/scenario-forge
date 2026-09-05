@@ -32,10 +32,7 @@ from scenario_forge.artifacts.usd_handoff import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FILL_IDS = ("fill20", "fill40", "fill60", "fill80")
-DEFAULT_SOURCE = (
-    REPO_ROOT
-    / "outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task02"
-)
+DEFAULT_SOURCE = None
 DEFAULT_VISUAL_ROOT = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
     "scientific_workbench_glass_web_standard_20260819/packages"
@@ -240,9 +237,10 @@ def upgrade_variant(
     beaker_visual_package = beaker_visual_package.resolve()
     cylinder_manifest = _visual_manifest(cylinder_visual_package)
     beaker_manifest = _visual_manifest(beaker_visual_package)
-    if destination.exists():
-        shutil.rmtree(destination)
-    shutil.copytree(source, destination)
+    if source != destination:
+        if destination.exists():
+            shutil.rmtree(destination)
+        shutil.copytree(source, destination)
 
     compositions = []
     for root in _transfer_roots(destination):
@@ -342,11 +340,17 @@ def upgrade_variant(
 
 def build_packages(
     *,
-    source_root: Path = DEFAULT_SOURCE,
+    source_root: Path | None = DEFAULT_SOURCE,
     output_dir: Path = DEFAULT_OUT,
     cylinder_visual_package: Path = DEFAULT_CYLINDER_VISUAL,
     beaker_visual_package: Path = DEFAULT_BEAKER_VISUAL,
 ) -> dict[str, Path]:
+    if source_root is None:
+        from scripts.build_task02_current import build_variant
+
+        return {fill: build_variant(fill, output_dir / 'packages' / fill, target='r10.2',
+                                   cylinder_visual=cylinder_visual_package, beaker_visual=beaker_visual_package)
+                for fill in FILL_IDS}
     packages: dict[str, Path] = {}
     for fill_id in FILL_IDS:
         packages[fill_id] = upgrade_variant(

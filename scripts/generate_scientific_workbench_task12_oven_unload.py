@@ -12,14 +12,11 @@ import shutil
 from typing import Any, Sequence
 
 import yaml
+from scripts.retained_build_inputs import input_path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-R15_ROOT = (
-    ROOT
-    / "outputs/scientific_workbench_task09_r15_20260901/handoff/"
-    "scientific_workbench_task09_r15_vr"
-)
+R15_ROOT = input_path('oven_layout')
 DEFAULT_OUTPUT = (
     ROOT
     / "outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r1_20260902/"
@@ -232,7 +229,7 @@ def build_handoff(output: Path = DEFAULT_OUTPUT) -> Task12OvenUnloadResult:
     if not (R15_ROOT / "scene.usd").is_file():
         raise FileNotFoundError(R15_ROOT / "scene.usd")
     shutil.copytree(R15_ROOT, root)
-    shutil.rmtree(root / "evidence")
+    shutil.rmtree(root / "evidence", ignore_errors=True)
     for stale in ("task_r15.json", "task_r14.json"):
         path = root / stale
         if path.exists():

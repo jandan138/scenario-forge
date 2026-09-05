@@ -32,10 +32,9 @@ DEFAULT_BASE = (
 DEFAULT_STATION = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/traditional_titration_assets_r1_20260904"
 )
-DEFAULT_STIRRER = (
-    ROOT / "outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824/"
-    "vr/deps/objects/obj_magnetic_stirrer"
-)
+from scripts.retained_build_inputs import input_path  # noqa: E402
+
+DEFAULT_STIRRER = input_path('stirrer_layout') / 'vr/deps/objects/obj_magnetic_stirrer'
 DEFAULT_FLASK = Path(
     "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
     "scientific_workbench_conical_flask_90x35_glass_warp_20260821/package"
@@ -248,6 +247,9 @@ def build(
     task_id: str = TASK_ID,
 ) -> TitrationVRResult:
     from pxr import Gf, Usd, UsdGeom, UsdPhysics
+    from scripts.retained_build_inputs import verify_registered_input
+
+    verify_registered_input(stirrer)
 
     output = output.resolve()
     root = output / task_id

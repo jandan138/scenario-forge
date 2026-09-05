@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import pytest
 
 import scripts.generate_scientific_workbench_task02_r10_2 as r10_2
 
@@ -109,9 +110,10 @@ prepend references = @deps/target/asset.usd@</World/Beaker325ml>
     )
 
 
-def test_upgrade_variant_preserves_liquid_and_pbd_bytes(tmp_path: Path) -> None:
+@pytest.mark.parametrize('in_place', [False, True])
+def test_upgrade_variant_preserves_liquid_and_pbd_bytes(tmp_path: Path, in_place: bool) -> None:
     source = tmp_path / "source"
-    destination = tmp_path / "destination"
+    destination = source if in_place else tmp_path / "destination"
     cylinder = tmp_path / "cylinder_visual"
     beaker = tmp_path / "beaker_visual"
     _fake_r10_1_package(source)

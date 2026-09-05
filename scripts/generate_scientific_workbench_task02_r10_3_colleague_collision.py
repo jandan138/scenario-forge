@@ -25,10 +25,7 @@ import scripts.generate_scientific_workbench_task02_r8 as r8  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FILL_IDS = ("fill20", "fill40", "fill60", "fill80")
-DEFAULT_SOURCE = (
-    REPO_ROOT
-    / "outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages"
-)
+DEFAULT_SOURCE = None
 DEFAULT_OUT = (
     REPO_ROOT
     / "outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819"
@@ -268,13 +265,42 @@ def upgrade_variant(source: Path, destination: Path) -> Path:
         r10_3.RACK_XYZ, r10_3.ROD_XYZ = old_rack, old_rod
     _apply_profile(destination)
     r10_3._materialize_vr_scene(destination)
+    finalize_collision_opinions(destination / 'vr/scene.usd')
     _mark_unvalidated(destination)
     return destination
 
 
-def build_packages(source_root: Path, output_dir: Path) -> dict[str, Path]:
+def finalize_collision_opinions(scene_path: Path) -> None:
+    """Keep the delivered disabled proxy opinions stronger than flattened visuals."""
+    from pxr import Usd, UsdPhysics
+
+    stage = Usd.Stage.Open(str(scene_path))
+    for name in ('beaker', 'graduated_cylinder'):
+        prim = stage.GetPrimAtPath(
+            f'/World/obj_{name}/__aan_pbd_collision_proxy/PBD_Unified_Vessel_Mesh'
+        )
+        if not prim:
+            raise ValueError(f'missing legacy proxy: {name}')
+        prim.GetAttribute('physics:collisionEnabled').Set(False)
+        for approximation, parts in (('sdf', SDF_MESHES[name]), ('convexHull', HULL_MESHES[name])):
+            for component, mesh in parts:
+                collider = stage.GetPrimAtPath(f'/World/obj_{name}/Visual/Source/{component}/{mesh}')
+                if not collider:
+                    raise ValueError(f'missing collision component: {component}/{mesh}')
+                UsdPhysics.CollisionAPI.Apply(collider)
+                UsdPhysics.MeshCollisionAPI.Apply(collider)
+                collider.AddAppliedSchema('PhysxCollisionAPI')
+                collider.AddAppliedSchema('PhysxSDFMeshCollisionAPI' if approximation == 'sdf' else 'PhysxConvexHullCollisionAPI')
+    stage.GetRootLayer().Save()
+
+
+def build_packages(source_root: Path | None, output_dir: Path) -> dict[str, Path]:
     if not COLLEAGUE_USD.is_file() or _sha(COLLEAGUE_USD) != COLLEAGUE_USD_SHA256:
         raise ValueError("test_0819_liquid.usd is missing or no longer matches the reviewed file")
+    if source_root is None:
+        from scripts.build_task02_current import build_variant
+
+        return {fill: build_variant(fill, output_dir / 'packages' / fill) for fill in FILL_IDS}
     packages = {
         fill_id: upgrade_variant(
             source_root / fill_id, output_dir / "packages" / fill_id
