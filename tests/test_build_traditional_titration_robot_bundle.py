@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import yaml
 from pxr import Usd
@@ -100,3 +101,56 @@ def test_finalize_blocked_attaches_evidence_without_promoting_claims(tmp_path) -
         "not_run_prerequisite_failed"
     )
     assert archive.is_file()
+
+
+def test_builds_r1_2_adapter_identity_from_r1_2_source(tmp_path) -> None:
+    source = Path(
+        "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/"
+        "scientific_workbench_traditional_acid_base_titration_vr_r1_2_20260905/"
+        "handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_2"
+    )
+    task_id = "scientific_workbench_traditional_acid_base_titration_vr_r1_2_robot"
+    result = build(tmp_path / "robot_bundle", r1=source, task_id=task_id)
+    manifest = json.loads(result.manifest.read_text())
+    assert manifest["package_id"] == task_id
+    config = yaml.safe_load((result.genmanip / "config.yaml").read_text())
+    assert config["evaluation_configs"][0]["task_name"] == (
+        "scenario_forge/titration_r1_2"
+    )
+    episode = next(
+        (result.genmanip / "tasks/scenario_forge/titration_r1_2").glob(
+            "*/episode_metadata.json"
+        )
+    )
+    assert json.loads(episode.read_text())["task_data"][
+        "scenario_forge_runtime_contract"
+    ]["task_id"] == task_id
+
+
+def test_finalize_blocked_uses_eos_validation_summary_when_present(tmp_path) -> None:
+    result = build(tmp_path / "robot_bundle")
+    evidence = tmp_path / "eos_evidence"
+    evidence.mkdir()
+    (evidence / "report.json").write_text('{"status":"diagnostic_blocked"}')
+    (evidence / "isaac41_main.mp4").write_bytes(b"main")
+    (evidence / "isaac41_closeup.mp4").write_bytes(b"close")
+    summary = {
+        "status": "robot_validation_blocked",
+        "robot_validation": {
+            "isaac41": {"status": "blocked_reproducibility_and_contact_evidence"},
+            "isaac45": {"status": "not_run_prerequisite_failed"},
+        },
+        "claims": {
+            "scripted_robot_oracle_success": False,
+            "robot_policy_success": False,
+            "benchmark_success": False,
+        },
+    }
+    (evidence / "validation_summary.json").write_text(json.dumps(summary))
+    finalize_blocked(result.root, evidence)
+    manifest = json.loads(result.manifest.read_text())
+    assert manifest["robot_validation"]["isaac41"]["status"] == (
+        "blocked_reproducibility_and_contact_evidence"
+    )
+    assert "evidence" in manifest["robot_validation"]["isaac41"]
+    assert manifest["status"] == "robot_validation_blocked"

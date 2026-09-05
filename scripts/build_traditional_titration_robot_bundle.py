@@ -68,8 +68,14 @@ def finalize_blocked(root: Path, evidence: Path) -> Path:
     destination.mkdir(parents=True, exist_ok=True)
     copied: dict[str, dict[str, Any]] = {}
     attachments = list(required)
-    if (evidence / "full_attempt_report.json").is_file():
-        attachments.append("full_attempt_report.json")
+    for optional in (
+        "full_attempt_report.json",
+        "motion_pass_report.json",
+        "lower_grasp_failure_report.json",
+        "validation_summary.json",
+    ):
+        if (evidence / optional).is_file():
+            attachments.append(optional)
     for name in attachments:
         target = destination / name
         shutil.copy2(evidence / name, target)
@@ -81,56 +87,82 @@ def finalize_blocked(root: Path, evidence: Path) -> Path:
 
     manifest_path = root / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    manifest["status"] = "robot_validation_blocked"
-    manifest["claims"].update(
-        {
-            "isaac41_scripted_robot_oracle_success": False,
-            "isaac45_trace_replay_success": False,
-            "scripted_robot_oracle_success": False,
-            "robot_policy_success": False,
-            "benchmark_success": False,
+    summary_path = evidence / "validation_summary.json"
+    summary = (
+        json.loads(summary_path.read_text(encoding="utf-8"))
+        if summary_path.is_file()
+        else None
+    )
+    if summary is not None:
+        if summary.get("status") != "robot_validation_blocked":
+            raise ValueError("validation summary must fail closed")
+        if any(bool(value) for value in summary.get("claims", {}).values()):
+            raise ValueError("blocked validation summary cannot promote claims")
+        manifest["status"] = summary["status"]
+        manifest["claims"].update(summary["claims"])
+        manifest["robot_validation"] = summary["robot_validation"]
+        manifest["robot_validation"].setdefault("isaac41", {})["evidence"] = copied
+        _write_json(manifest_path, manifest)
+        note = root / "ROBOT_VALIDATION_BLOCKED_CN.md"
+        note.write_text(
+            "# 机器人验证结论\n\n"
+            "详细判定见 `evidence/robot_validation/isaac41/validation_summary.json`。"
+            "本包保持 fail-closed：脚本机器人、策略、benchmark 与跨运行时成功均未声明。\n",
+            encoding="utf-8",
+        )
+    else:
+        manifest["status"] = "robot_validation_blocked"
+        manifest["claims"].update(
+            {
+                "isaac41_scripted_robot_oracle_success": False,
+                "isaac45_trace_replay_success": False,
+                "scripted_robot_oracle_success": False,
+                "robot_policy_success": False,
+                "benchmark_success": False,
+            }
+        )
+        manifest["robot_validation"] = {
+            "canonical_layout": True,
+            "isaac41": {
+                "status": "blocked",
+                "attempts_completed": 1,
+                "required_passes": 3,
+                "blocker": "original_40mm_handle_collider_produced_unilateral_contact",
+                "handle_visual_span_m": 0.0509125,
+                "handle_collision_wing_span_m": 0.04,
+                "observed_failed_grasp_inner_gap_m": 0.0638994,
+                "observed_gap_is_intrinsic_gripper_minimum": False,
+                "observed_one_jaw_peak_angle_deg": 49.9719,
+                "reverse_close_reached": False,
+                "evidence": copied,
+            },
+            "isaac45": {
+                "status": "not_run_prerequisite_failed",
+                "reason": "no successful Isaac 4.1 command trace exists to replay",
+                "required_passes": 3,
+            },
+            "claim_boundary": (
+                "The videos prove a real Lift2 contact attempt and one-jaw stopcock "
+                "motion only; they do not prove task, policy, benchmark, or runtime "
+                "parity success."
+            ),
         }
-    )
-    manifest["robot_validation"] = {
-        "canonical_layout": True,
-        "isaac41": {
-            "status": "blocked",
-            "attempts_completed": 1,
-            "required_passes": 3,
-            "blocker": "original_stopcock_handle_is_narrower_than_lift2_closed_collision_gap",
-            "measured_handle_span_m": 0.0509125,
-            "measured_lift2_inner_gap_m": 0.0638994,
-            "shortfall_m": 0.0129869,
-            "observed_one_jaw_peak_angle_deg": 49.9719,
-            "reverse_close_reached": False,
-            "evidence": copied,
-        },
-        "isaac45": {
-            "status": "not_run_prerequisite_failed",
-            "reason": "no successful Isaac 4.1 command trace exists to replay",
-            "required_passes": 3,
-        },
-        "claim_boundary": (
-            "The videos prove a real Lift2 contact attempt and one-jaw stopcock "
-            "motion only; they do not prove task, policy, benchmark, or runtime "
-            "parity success."
-        ),
-    }
-    _write_json(manifest_path, manifest)
+        _write_json(manifest_path, manifest)
 
-    note = root / "ROBOT_VALIDATION_BLOCKED_CN.md"
-    note.write_text(
-        "# r1.1 机器人验证结论\n\n"
-        "Isaac Sim 4.1 中，Lift2 左臂已真实接触并推动原始旋塞；"
-        "没有在初始化后直接写旋塞关节或任务物体位姿。\n\n"
-        "完整任务未通过：旋塞把手有效跨度约 50.9 mm，而当前姿态下 "
-        "Lift2 两指碰撞内间隙约 63.9 mm，无法形成双指夹持。"
-        "单侧接触可把旋塞推到约 50°，但不能可靠反向关闭，因此不能完成 "
-        "OPEN → FINE → DRIP → CLOSED 与 15.0 ± 0.3 mL。\n\n"
-        "Isaac 4.5 未执行，因为不存在通过的 4.1 命令轨迹可供冻结回放。"
-        "视频是失败诊断证据，不是成功演示。\n",
-        encoding="utf-8",
-    )
+        note = root / "ROBOT_VALIDATION_BLOCKED_CN.md"
+        note.write_text(
+            "# r1.1 机器人验证结论\n\n"
+            "Isaac Sim 4.1 中，Lift2 左臂已真实接触并推动原始旋塞；"
+            "没有在初始化后直接写旋塞关节或任务物体位姿。\n\n"
+            "完整任务未通过：旋塞视觉跨度约 50.9 mm，但原物理碰撞翼片只有 40 mm；"
+            "失败姿态下观测到的两指间隙约 63.9 mm，形成了单侧接触。"
+            "单侧接触可把旋塞推到约 50°，但不能可靠反向关闭，因此不能完成 "
+            "OPEN → FINE → DRIP → CLOSED 与 15.0 ± 0.3 mL。\n\n"
+            "63.9 mm 是这次失败抓取的观测值，不是 Lift2 的固有最小开口。\n\n"
+            "Isaac 4.5 未执行，因为不存在通过的 4.1 命令轨迹可供冻结回放。"
+            "视频是失败诊断证据，不是成功演示。\n",
+            encoding="utf-8",
+        )
 
     handoff = root / "handoff"
     handoff.mkdir(exist_ok=True)
@@ -173,11 +205,17 @@ def _source_pose(stage: Any, path: str) -> tuple[list[float], list[float]]:
     )
 
 
-def _build_genmanip(root: Path, base: Path) -> Path:
+def _task_version(task_id: str) -> str:
+    return task_id.rsplit("_vr_", 1)[-1].removesuffix("_robot")
+
+
+def _build_genmanip(root: Path, base: Path, task_id: str) -> Path:
     from pxr import Sdf, Usd, UsdGeom, UsdPhysics
 
     out = root / "adapters/ebench/genmanip"
-    copied_vr = out / SCENE_REL.parent / "source_bundle/vr"
+    adapter_slug = f"titration_{_task_version(task_id)}"
+    scene_rel = Path(f"assets/scene_usds/scenario_forge/{adapter_slug}/scene.usda")
+    copied_vr = out / scene_rel.parent / "source_bundle/vr"
     shutil.copytree(root, copied_vr, ignore=shutil.ignore_patterns("adapters"))
     copied_scene = Usd.Stage.Open(str(copied_vr / "scene.usd"))
     tick = copied_scene.GetPrimAtPath(
@@ -187,7 +225,7 @@ def _build_genmanip(root: Path, base: Path) -> Path:
     tick.GetAttribute("node:type").Set("omni.isaac.core_nodes.OnPhysicsStep")
     copied_scene.GetRootLayer().Save()
 
-    wrapper_path = out / SCENE_REL
+    wrapper_path = out / scene_rel
     wrapper = Usd.Stage.CreateNew(str(wrapper_path))
     UsdGeom.SetStageMetersPerUnit(wrapper, 1.0)
     UsdGeom.SetStageUpAxis(wrapper, UsdGeom.Tokens.z)
@@ -216,8 +254,8 @@ def _build_genmanip(root: Path, base: Path) -> Path:
     evaluation = config["evaluation_configs"][0]
     evaluation.update(
         {
-            "task_name": "scenario_forge/titration_r1_1",
-            "usd_name": SCENE_REL.with_suffix("").as_posix(),
+            "task_name": f"scenario_forge/{adapter_slug}",
+            "usd_name": scene_rel.with_suffix("").as_posix(),
             "instruction": (
                 "左臂抓住滴定管旋塞，依次经过粗滴、细调、逐滴和关闭；"
                 "在淡粉终点关闭保持三秒后释放。"
@@ -304,7 +342,7 @@ def _build_genmanip(root: Path, base: Path) -> Path:
         }
     base_episode["task_data"]["initial_layout"] = layout
     base_episode["task_data"]["scenario_forge_runtime_contract"] = {
-        "task_id": TASK_ID,
+        "task_id": task_id,
         "operating_arm": "left",
         "auxiliary_arm": "idle",
         "station_uid": "titration_station",
@@ -318,15 +356,18 @@ def _build_genmanip(root: Path, base: Path) -> Path:
         "post_initialization_device_joint_writes_allowed": False,
         "post_initialization_object_pose_writes_allowed": False,
     }
-    episode_path = out / "tasks/scenario_forge/titration_r1_1/001/episode_metadata.json"
+    episode_path = out / f"tasks/scenario_forge/{adapter_slug}/001/episode_metadata.json"
     _write_json(episode_path, base_episode)
     _write_json(
         out / "package_manifest.json",
         {
-            "schema_version": "scenario-forge-titration-r1.1-genmanip/v1",
-            "task_id": TASK_ID,
+            "schema_version": (
+                f"scenario-forge-titration-{_task_version(task_id).replace('_', '.')}"
+                "-genmanip/v1"
+            ),
+            "task_id": task_id,
             "runtime": "isaac_sim_4.1_genmanip_lift2",
-            "scene_usd": SCENE_REL.as_posix(),
+            "scene_usd": scene_rel.as_posix(),
             "source_scene_sha256": _sha(root / "scene.usd"),
             "claims": {
                 "scripted_robot_oracle_success": False,
@@ -338,14 +379,17 @@ def _build_genmanip(root: Path, base: Path) -> Path:
     return out
 
 
-def _build_isaac45(root: Path) -> Path:
+def _build_isaac45(root: Path, task_id: str) -> Path:
     out = root / "adapters/isaac45/replay"
     out.mkdir(parents=True)
     _write_json(
         out / "replay_contract.json",
         {
-            "schema_version": "scenario-forge-titration-r1.1-isaac45-replay/v1",
-            "task_id": TASK_ID,
+            "schema_version": (
+                f"scenario-forge-titration-{_task_version(task_id).replace('_', '.')}"
+                "-isaac45-replay/v1"
+            ),
+            "task_id": task_id,
             "scene": "../../../scene.usd",
             "robot": {
                 "usd_path": str(ROBOT_USD),
@@ -397,6 +441,7 @@ def build(
     *,
     r1: Path = DEFAULT_R1,
     base: Path = DEFAULT_BASE,
+    task_id: str = TASK_ID,
 ) -> RobotBundleResult:
     output = output.resolve()
     r1 = r1.resolve()
@@ -407,14 +452,17 @@ def build(
     for stale in (output / "evidence/runtime", output / "handoff"):
         if stale.exists():
             shutil.rmtree(stale)
-    genmanip = _build_genmanip(output, base)
-    isaac45 = _build_isaac45(output)
+    genmanip = _build_genmanip(output, base, task_id)
+    isaac45 = _build_isaac45(output, task_id)
     manifest_path = output / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest.update(
         {
-            "schema_version": "scenario-forge-traditional-titration-vr-r1.1/v1",
-            "package_id": TASK_ID,
+            "schema_version": (
+                "scenario-forge-traditional-titration-vr-"
+                f"{_task_version(task_id).replace('_', '.')}/v1"
+            ),
+            "package_id": task_id,
             "status": "robot_validation_pending",
             "robot_validation": {
                 "canonical_layout": True,
@@ -447,8 +495,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--r1", type=Path, default=DEFAULT_R1)
     parser.add_argument("--base", type=Path, default=DEFAULT_BASE)
+    parser.add_argument("--task-id", default=TASK_ID)
     args = parser.parse_args(argv)
-    print(build(args.output, r1=args.r1, base=args.base).root)
+    print(
+        build(args.output, r1=args.r1, base=args.base, task_id=args.task_id).root
+    )
     return 0
 
 

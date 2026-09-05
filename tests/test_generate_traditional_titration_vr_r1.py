@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from pxr import Usd, UsdGeom, UsdPhysics
 
@@ -68,3 +69,28 @@ def test_task_contract_encodes_endpoint_and_claim_boundary(tmp_path) -> None:
     assert manifest["claims"]["scene_static_validation"] is False
     assert manifest["claims"]["robot_policy_success"] is False
     assert result.archive.is_file()
+
+
+def test_r1_2_consumes_promoted_long_handle_station_without_local_patch(
+    tmp_path,
+) -> None:
+    station = Path(
+        "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/"
+        "traditional_titration_assets_r2_long_handle_20260905"
+    )
+    task_id = "scientific_workbench_traditional_acid_base_titration_vr_r1_2"
+    result = build(
+        tmp_path / "handoff",
+        station=station,
+        task_id=task_id,
+    )
+    namespace: dict[str, object] = {"__file__": str(result.config)}
+    exec(result.config.read_text(), namespace)
+    assert task_id in namespace["TASKS"]
+    manifest = json.loads(result.manifest.read_text())
+    assert manifest["package_id"] == task_id
+    assert manifest["assets"]["titration_station_package_id"] == (
+        "traditional_titration_station_r2"
+    )
+    assert manifest["assets"]["stopcock_visible_span_m"] == 0.09
+    assert "stopcock" not in manifest.get("scenario_local_physics_patches", [])

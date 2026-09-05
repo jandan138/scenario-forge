@@ -132,11 +132,13 @@ def _author_visual_receiver(stage: object) -> list[str]:
     return visual_paths
 
 
-def _write_task_files(root: Path, station_links: list[str]) -> tuple[Path, Path, Path]:
+def _write_task_files(
+    root: Path, station_links: list[str], task_id: str
+) -> tuple[Path, Path, Path]:
     task = root / "task.yaml"
     task.write_text(
         """schema_version: scenario-forge-task/v0.1
-task_id: scientific_workbench_traditional_acid_base_titration_vr_r1
+task_id: __TASK_ID__
 title: 传统酸碱滴定：无色至淡粉终点
 mode: single_arm
 operating_arm: left
@@ -164,13 +166,13 @@ failure_contract:
   one_frame_light_stand_or_clamp_touch: tolerated
   persistent_stand_contact_or_displacement: failure
   glass_interpenetration: failure
-""",
+""".replace("__TASK_ID__", task_id),
         encoding="utf-8",
     )
     metrics = root / "metrics.yaml"
     metrics.write_text(
         """schema_version: scenario-forge-metrics/v0.1
-task_id: scientific_workbench_traditional_acid_base_titration_vr_r1
+task_id: __TASK_ID__
 score_ceiling: 1.0
 metrics:
   - {id: stopcock_grasp, weight: 0.15}
@@ -182,7 +184,7 @@ metrics:
 hard_requirements:
   ordered_valve_sequence: [OPEN, FINE, DRIP, CLOSED]
   overshoot_failure_threshold_ml: 15.3
-""",
+""".replace("__TASK_ID__", task_id),
         encoding="utf-8",
     )
     obj_paths = [
@@ -230,7 +232,7 @@ hard_requirements:
     config.write_text(
         "from pathlib import Path\n"
         "_ASSETS_DIR = Path(__file__).resolve().parent\n"
-        f"TASKS = {{{TASK_ID!r}: {body}}}\n",
+        f"TASKS = {{{task_id!r}: {body}}}\n",
         encoding="utf-8",
     )
     return task, metrics, config
@@ -243,11 +245,12 @@ def build(
     station: Path = DEFAULT_STATION,
     stirrer: Path = DEFAULT_STIRRER,
     flask: Path = DEFAULT_FLASK,
+    task_id: str = TASK_ID,
 ) -> TitrationVRResult:
     from pxr import Gf, Usd, UsdGeom, UsdPhysics
 
     output = output.resolve()
-    root = output / HANDOFF_ID
+    root = output / task_id
     if output.exists():
         raise FileExistsError(f"refusing to replace output: {output}")
     receipt = json.loads((station / "promotion_receipt.json").read_text())
@@ -334,11 +337,15 @@ def build(
             continue
         if prim.HasAPI(UsdPhysics.RigidBodyAPI):
             station_links.append(str(prim.GetPath())[len(str(station_root.GetPath())) + 1 :])
-    task, metrics, config = _write_task_files(root, station_links)
+    task, metrics, config = _write_task_files(root, station_links, task_id)
+
+    station_manifest = json.loads(
+        (station / "packages/station/evidence/manifest.json").read_text()
+    )
 
     manifest = {
         "schema_version": "scenario-forge-traditional-titration-vr/v0.1",
-        "package_id": HANDOFF_ID,
+        "package_id": task_id,
         "status": "layout_ready_static_validation_pending",
         "runtime": "Isaac Sim 4.5",
         "entrypoints": {
@@ -349,6 +356,12 @@ def build(
         },
         "assets": {
             "titration_station_receipt_sha256": _sha(station / "promotion_receipt.json"),
+            "titration_station_package_id": receipt.get(
+                "package_id", station_manifest["package_id"]
+            ),
+            "stopcock_visible_span_m": station_manifest.get("package_transform", {}).get(
+                "handle_visible_span_m"
+            ),
             "background": "scientific_environment_code_room_wet_chemistry_v2",
             "table": "scientific_workbench_standard_2000x800x755_gray",
             "receiver": "conical_flask_90x35_dynamic_sdf",
@@ -386,16 +399,18 @@ def build(
         "关闭保持 3 秒。超过 15.3 mL 后仍可继续操作，但最终不可成功。\n",
         encoding="utf-8",
     )
-    archive = output / f"{HANDOFF_ID}.zip"
-    shutil.make_archive(str(archive.with_suffix("")), "zip", root_dir=output, base_dir=HANDOFF_ID)
+    archive = output / f"{task_id}.zip"
+    shutil.make_archive(str(archive.with_suffix("")), "zip", root_dir=output, base_dir=task_id)
     return TitrationVRResult(root, scene, task, metrics, config, manifest_path, archive)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--task-id", default=TASK_ID)
+    parser.add_argument("--station", type=Path, default=DEFAULT_STATION)
     args = parser.parse_args(argv)
-    print(build(args.output).archive)
+    print(build(args.output, station=args.station, task_id=args.task_id).archive)
     return 0
 
 
