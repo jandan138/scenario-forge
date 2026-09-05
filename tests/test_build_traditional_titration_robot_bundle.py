@@ -6,7 +6,11 @@ from pathlib import Path
 import yaml
 from pxr import Usd
 
-from scripts.build_traditional_titration_robot_bundle import build, finalize_blocked
+from scripts.build_traditional_titration_robot_bundle import (
+    attach_single_episode_demo,
+    build,
+    finalize_blocked,
+)
 
 
 def test_builds_isolated_41_and_45_robot_adapters(tmp_path) -> None:
@@ -154,3 +158,30 @@ def test_finalize_blocked_uses_eos_validation_summary_when_present(tmp_path) -> 
     )
     assert "evidence" in manifest["robot_validation"]["isaac41"]
     assert manifest["status"] == "robot_validation_blocked"
+
+
+def test_attach_single_demo_keeps_formal_robot_claims_false(tmp_path) -> None:
+    result = build(tmp_path / "robot_bundle")
+    demo = tmp_path / "demo"
+    demo.mkdir()
+    (demo / "titration.mp4").write_bytes(b"video")
+    (demo / "manifest.json").write_text(
+        json.dumps(
+            {
+                "status": "pass",
+                "claims": {
+                    "single_episode_visual_demonstration": True,
+                    "scripted_robot_oracle_success": False,
+                    "robot_policy_success": False,
+                    "benchmark_success": False,
+                },
+                "video": {"path": "titration.mp4", "sha256": "placeholder"},
+            }
+        )
+    )
+    attach_single_episode_demo(result.root, demo)
+    manifest = json.loads(result.manifest.read_text())
+    assert manifest["claims"]["single_episode_visual_demonstration"] is True
+    assert manifest["claims"]["scripted_robot_oracle_success"] is False
+    assert manifest["claims"]["robot_policy_success"] is False
+    assert manifest["claims"]["benchmark_success"] is False

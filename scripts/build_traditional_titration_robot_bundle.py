@@ -55,6 +55,61 @@ class RobotBundleResult:
     manifest: Path
 
 
+def attach_single_episode_demo(root: Path, demo: Path) -> Path:
+    """Attach one visual success without promoting formal robot claims."""
+
+    root = root.resolve()
+    demo = demo.resolve()
+    demo_manifest_path = demo / "manifest.json"
+    demo_manifest = json.loads(demo_manifest_path.read_text(encoding="utf-8"))
+    claims = demo_manifest.get("claims", {})
+    if demo_manifest.get("status") != "pass":
+        raise ValueError("single-episode demonstration must pass its own gates")
+    if claims.get("single_episode_visual_demonstration") is not True:
+        raise ValueError("single-episode demonstration claim is missing")
+    for name in (
+        "scripted_robot_oracle_success",
+        "robot_policy_success",
+        "benchmark_success",
+    ):
+        if claims.get(name) is not False:
+            raise ValueError(f"single demonstration cannot promote {name}")
+
+    destination = root / "evidence/robot_validation/isaac41/single_episode_demo"
+    if destination.exists():
+        shutil.rmtree(destination)
+    shutil.copytree(demo, destination)
+    retained_manifest = destination / "manifest.json"
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["claims"]["single_episode_visual_demonstration"] = True
+    manifest["claims"]["scripted_robot_oracle_success"] = False
+    manifest["claims"]["robot_policy_success"] = False
+    manifest["claims"]["benchmark_success"] = False
+    manifest["single_episode_demo"] = {
+        "status": "pass",
+        "manifest": retained_manifest.relative_to(root).as_posix(),
+        "manifest_sha256": _sha(retained_manifest),
+        "claim_boundary": (
+            "One continuous visual demonstration; formal three-of-three robot "
+            "validation remains blocked."
+        ),
+    }
+    _write_json(manifest_path, manifest)
+
+    handoff = root / "handoff"
+    if handoff.exists():
+        archive = handoff / f"{root.name}_robot_validation_blocked.zip"
+        with zipfile.ZipFile(
+            archive, "w", compression=zipfile.ZIP_DEFLATED
+        ) as bundle:
+            for path in sorted(root.rglob("*")):
+                if not path.is_file() or handoff in path.parents:
+                    continue
+                bundle.write(path, Path(root.name) / path.relative_to(root))
+    return destination
+
+
 def finalize_blocked(root: Path, evidence: Path) -> Path:
     """Attach a failed contact-oracle attempt without promoting robot claims."""
 

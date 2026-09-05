@@ -26,3 +26,13 @@ Outputs:
 The scene package claims asset and state-machine qualification only.  The robot
 bundle is `robot_validation_blocked`; scripted-oracle, robot-policy, benchmark,
 and cross-runtime replay success remain false.
+
+## Single-episode visual demonstration
+
+A later recording retained one continuous successful Isaac Sim 4.1 episode as
+two synchronized views and a 1920x720 side-by-side MP4.  It reaches 15.063 mL,
+shows the pale-pink endpoint, and holds closed for 6.97 s without device-joint,
+volume, color, or task-object pose writes.  A gripper-open, lift-offset control
+keeps the receiver colorless at 0.0 mL.  This adds
+`single_episode_visual_demonstration=true` but deliberately leaves the package
+status and all formal robot/benchmark claims unchanged.
