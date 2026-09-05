@@ -77,6 +77,6 @@
       "tree_sha256": "c440f153f0c3ce476f250e75e555d38b9937e59d641a4dbca1cc50350f253f41"
     }
   },
-  "policy": "explicit runtime closures and authoring metadata; no handoff ZIP or preview collections",
+  "policy": "explicit runtime closures and authoring metadata; no task-level handoff ZIP or preview collections; producer packages remain intact",
   "schema_version": "scenario-forge-build-inputs/v1"
 }

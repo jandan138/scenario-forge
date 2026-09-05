@@ -7,9 +7,10 @@ are local build inputs, not portable package identities.
 The retained inputs total 489,614,946 bytes. They contain the required base USD
 closure and authoring configuration, the rod/rack fixture, robot adapter metadata,
 the shared environment closure, oven layout, and stirrer layout. The migration
-uses a positive file list, excludes handoff directories and preview collections,
+uses a positive file list, excludes task-level handoff directories and preview collections,
 and records source paths, included subtrees, byte counts and SHA-256 tree hashes.
-Source asset dependencies inside the selected closures remain intact.
+Source asset packages inside the selected closures remain intact, including
+their producer-owned evidence or embedded provenance archives.
 
 Task02 now composes the producer's four dynamic-loaded initial states, the
 web-standard glass assets and the rod/rack fixture through transformations in

@@ -44,7 +44,7 @@ def migrate(repo: Path, index: Path) -> None:
         'manifest.json', 'scenario.json', 'vr/scene.usd', 'vr/legacy_scene.usd', 'vr/deps',
     ])
     data = {'schema_version': 'scenario-forge-build-inputs/v1', 'inputs': entries,
-            'policy': 'explicit runtime closures and authoring metadata; no handoff ZIP or preview collections'}
+            'policy': 'explicit runtime closures and authoring metadata; no task-level handoff ZIP or preview collections; producer packages remain intact'}
     index.parent.mkdir(parents=True, exist_ok=True)
     if index.exists():
         raise FileExistsError(index)
