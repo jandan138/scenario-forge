@@ -49,6 +49,11 @@ Current indexed external artifacts:
 
 ## Historical output archive
 
+The [round-two archive and build-input index](archive-index-round2-20260905.json)
+records the large background cleanup and removal of old task build dependencies.
+It adds 46.89 GB net reclaimed while preserving current delivered packages.
+Reconstruction uses the [locked build inputs](../docs/operations/workbench-build-inputs.md).
+
 The [2026-09-05 archive index](archive-index-20260905.json) maps original
 directories to verified OSS copies, file manifests and retained exceptions.
 See the [execution and restore record](../docs/records/2026-09-05-generated-artifact-retention-review.md)

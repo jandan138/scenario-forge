@@ -15,6 +15,7 @@ reports/
 external_artifacts/*
 !external_artifacts/README.md
 !external_artifacts/archive-index-20260905.json
+!external_artifacts/archive-index-round2-20260905.json
 
 # Local source handoffs are indexed by immutable hashes in committed catalogs.
 docs/tmp/

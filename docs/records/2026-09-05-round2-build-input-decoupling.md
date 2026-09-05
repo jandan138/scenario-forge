@@ -28,4 +28,41 @@ No existing delivered package was changed.
 Detailed comparisons and runtime reports are under
 `/cpfs/user/zhuzihou/ops/storage-cleanup/reports/round2/`.
 The original Step 1 archive index is immutable; this round has separate
-inventory/batch records and will publish its own result index.
+inventory/batch records and its own
+[result index](../../external_artifacts/archive-index-round2-20260905.json).
+
+## Completed execution
+
+| Item | Bytes |
+| --- | ---: |
+| Two historical background directories archived and removed | 35,917,409,949 |
+| Eight historical task directories archived and removed | 11,461,976,124 |
+| Independent build inputs retained and backed up | 489,614,946 |
+| Round-two net reclaimed | 46,889,771,127 |
+
+Including round one, net reclaimed space is 66,014,628,006 bytes (66.01 GB).
+Current delivered USD and ZIP files remain at their existing paths.
+The archived task groups are r9, Task02 r10/r10.2/the earlier r10.3 fixture
+layout, Task09 r15, and stirrer r2/r3/r4. Their active consumers use the new
+inputs; historical release-only entrypoints require restoration when needed.
+
+With those eight old directories quarantined, `make check` completed:
+916 passed / 1 skipped, Ruff passed, package smoke passed, Phase 10.x passed.
+This included a real fill20 reconstruction using the new input contract. The
+skip is the existing historical Labspin bundle test whose r9 package input is
+now archived; current Task11 construction remains covered by its current tests.
+
+Both archive batches passed count/byte/hash checks and restore sampling before
+local removal. Input closures were independently uploaded and checked under
+`archives/scenario-forge/build-inputs-v1/<input-name>/<tree-sha256>/files/`.
+The result index includes their exact URIs. Verification scratch outputs and
+the unused first stirrer-input draft were removed and are not counted as
+original space reclaimed.
+
+Human-readable result:
+`/cpfs/user/zhuzihou/ops/storage-cleanup/reports/round2/result.md`.
+Recovery metadata and reconstruction evidence are also backed up at:
+
+```text
+aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/_manifests/retention-round2-final-20260905
+```

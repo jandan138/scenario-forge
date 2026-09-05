@@ -1,0 +1,470 @@
+{
+  "archived": [
+    {
+      "batch_id": "sf-artifact-history-round2-backgrounds-20260905",
+      "bytes": 13181786660,
+      "device": 1048587,
+      "file_count": 1229,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-backgrounds-20260905/files-scientific_environment_background_screening_20260723.sha256.tsv",
+      "largest_bytes": 2017088113,
+      "largest_file": "packages/scientific_environment_084/deps/usd/source_root.usd",
+      "newest_mtime_ns": 1784876354068845749,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_environment_background_screening_20260723",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-environment-backgrounds/screening-and-admission/20260723/retention-round2-backgrounds-20260905/scientific_environment_background_screening_20260723",
+      "tree_sha256": "214e13fae01d96846f8350ae56e7fd6c6f396301a9d93dd21c3f6b48e6d3424d"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-backgrounds-20260905",
+      "bytes": 22735623289,
+      "device": 1048587,
+      "file_count": 2832,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-backgrounds-20260905/files-scientific_workbench_workspace_profiled_variants_20260726.sha256.tsv",
+      "largest_bytes": 2017088113,
+      "largest_file": "scientific_environment_084/adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_bimanual_pour_env_084/source_bundle/scientific_environment_084/deps/usd/source_root.usd",
+      "newest_mtime_ns": 1785121894498562545,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_workspace_profiled_variants_20260726",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-environment-backgrounds/workcell-variants/20260726/retention-round2-backgrounds-20260905/scientific_workbench_workspace_profiled_variants_20260726",
+      "tree_sha256": "f5cf0534d72dab22c1d2e42b203cd4747002494eda7df07febab811b0c1eaa52"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 240934335,
+      "device": 1048587,
+      "file_count": 349,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_insert_stir_bar_into_beaker_vr_r2_20260824.sha256.tsv",
+      "largest_bytes": 61221409,
+      "largest_file": "vr/scene.usd",
+      "newest_mtime_ns": 1787555714476944164,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r2_20260824",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/stirrer/r2/retention-round2-task-history-20260905/scientific_workbench_insert_stir_bar_into_beaker_vr_r2_20260824",
+      "tree_sha256": "e75f7ad65c1c6af3e8c3a50c9d9545dc4a8c42856daa663500a9c791c0e6d267"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 259841994,
+      "device": 1048587,
+      "file_count": 357,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824.sha256.tsv",
+      "largest_bytes": 72030946,
+      "largest_file": "vr/scene.usd",
+      "newest_mtime_ns": 1787559181211626416,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/stirrer/r3/retention-round2-task-history-20260905/scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824",
+      "tree_sha256": "be80154258be279fb2beb868ea72fa9fc23bed38d2605685b9321a6b444b29e7"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 532178060,
+      "device": 1048587,
+      "file_count": 449,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_insert_stir_bar_into_beaker_vr_r4_20260824.sha256.tsv",
+      "largest_bytes": 111771636,
+      "largest_file": "handoff/scientific_workbench_insert_stir_bar_into_beaker_vr_r4.zip",
+      "newest_mtime_ns": 1787570522223065678,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r4_20260824",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/stirrer/r4/retention-round2-task-history-20260905/scientific_workbench_insert_stir_bar_into_beaker_vr_r4_20260824",
+      "tree_sha256": "41f2c5da7918d398bf17ee05419715a8bdd3a45b912f350725d7807eeb628031"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 2324835152,
+      "device": 1048587,
+      "file_count": 4875,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_task02_r10_2_fill_sweep_20260819.sha256.tsv",
+      "largest_bytes": 351078943,
+      "largest_file": "handoff/task02_r10_2_fill_sweep.zip",
+      "newest_mtime_ns": 1787114113725572000,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/task02/r10.2/retention-round2-task-history-20260905/scientific_workbench_task02_r10_2_fill_sweep_20260819",
+      "tree_sha256": "49dd6f46ced4e6ec3f254042b2b04eb29a2877371c22b26a807d09ed0b41460d"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 2309679579,
+      "device": 1048587,
+      "file_count": 5284,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_task02_r10_3_fill_sweep_20260819.sha256.tsv",
+      "largest_bytes": 325533780,
+      "largest_file": "handoff/task02_r10_3_fill_sweep_prevalidation.zip",
+      "newest_mtime_ns": 1787116302252123015,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_fill_sweep_20260819",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/task02-previous-rack-layout/r10.3/retention-round2-task-history-20260905/scientific_workbench_task02_r10_3_fill_sweep_20260819",
+      "tree_sha256": "b4189dfe0c9340ad14eb3a707c00c1a767674211bf77a993cb6ade4877c61c21"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 2246261360,
+      "device": 1048587,
+      "file_count": 4179,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_task02_r10_fill_sweep_20260817.sha256.tsv",
+      "largest_bytes": 351277563,
+      "largest_file": "handoff/task02_r10_fill_sweep.zip",
+      "newest_mtime_ns": 1786950164861755000,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_fill_sweep_20260817",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/task02/r10/retention-round2-task-history-20260905/scientific_workbench_task02_r10_fill_sweep_20260817",
+      "tree_sha256": "82b6aae2e800cb6d27a7c11b2b32c5b91ce4f8805baf7e02ef430bde4a1df2f6"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 99659597,
+      "device": 1048587,
+      "file_count": 178,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_task09_r15_20260901.sha256.tsv",
+      "largest_bytes": 29702927,
+      "largest_file": "handoff/scientific_workbench_task09_r15_vr.zip",
+      "newest_mtime_ns": 1788255792322252714,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task09_r15_20260901",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/oven/r15/retention-round2-task-history-20260905/scientific_workbench_task09_r15_20260901",
+      "tree_sha256": "337b8d923ae49ccd1817c0d52fb23c5d8b5e09168fdbb905f54de47239a5a54b"
+    },
+    {
+      "batch_id": "sf-artifact-history-round2-tasks-20260905",
+      "bytes": 3448586047,
+      "device": 1048587,
+      "file_count": 6469,
+      "files_manifest": "/cpfs/user/zhuzihou/ops/storage-cleanup/runs/sf-artifact-history-round2-tasks-20260905/files-scientific_workbench_tasks_02_07_08_r9_20260816.sha256.tsv",
+      "largest_bytes": 247406583,
+      "largest_file": "handoff/scientific_workbench_tasks_02_07_08_r9_rich_tabletop_20260816.zip",
+      "newest_mtime_ns": 1786874414230247127,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_tasks_02_07_08_r9_20260816",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/artifact-history-v1/scientific-workbench/multi-task/r9/retention-round2-task-history-20260905/scientific_workbench_tasks_02_07_08_r9_20260816",
+      "tree_sha256": "01666cf1539fa0334846201b7dfb310a211553ffd5ca6cfe5aaa5a58a8280185"
+    }
+  ],
+  "batches": [
+    "sf-artifact-history-round2-backgrounds-20260905",
+    "sf-artifact-history-round2-tasks-20260905"
+  ],
+  "build_input_backups": [
+    {
+      "bytes": 106761510,
+      "includes": [
+        "scene.usda",
+        "source_bundle"
+      ],
+      "name": "environment",
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages/fill40/vr/deps/r7_scene",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/environment-0c45bdf06b0d2b2c",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/build-inputs-v1/environment/0c45bdf06b0d2b2cc9cb47ffaf583bc3bd1fb389a972bcd9989fb261745d5f6e/files",
+      "status": "verified",
+      "tree_sha256": "0c45bdf06b0d2b2cc9cb47ffaf583bc3bd1fb389a972bcd9989fb261745d5f6e"
+    },
+    {
+      "bytes": 67307722,
+      "includes": [
+        "scene.usd",
+        "deps",
+        "task_config.py",
+        "manifest.json",
+        "README_CN.md",
+        "task_r15.json"
+      ],
+      "name": "oven_layout",
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task09_r15_20260901/handoff/scientific_workbench_task09_r15_vr",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/oven-layout-cbdb6b222f155156",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/build-inputs-v1/oven_layout/cbdb6b222f155156d0820b0fc7eca80a8986747ea1d83b93e53ad80f14ed6fce/files",
+      "status": "verified",
+      "tree_sha256": "cbdb6b222f155156d0820b0fc7eca80a8986747ea1d83b93e53ad80f14ed6fce"
+    },
+    {
+      "bytes": 27014,
+      "includes": [
+        "config.yaml",
+        "cameras",
+        "tasks/scenario_forge/scientific_workbench_r10_task02_fill40_pour_cylinder_to_beaker__background_modern_wet_chemistry/002/episode_metadata.json"
+      ],
+      "name": "robot_adapter_metadata",
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages/fill40/ebench",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/robot-adapter-metadata-ba1e65704997633c",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/build-inputs-v1/robot_adapter_metadata/ba1e65704997633c89a61ff60c8dc630266d406e3c0248ebe86abb588bd4521a/files",
+      "status": "verified",
+      "tree_sha256": "ba1e65704997633c89a61ff60c8dc630266d406e3c0248ebe86abb588bd4521a"
+    },
+    {
+      "bytes": 8285584,
+      "includes": [
+        "adapters/vr_teleop/deps/objects/obj_glass_rod",
+        "adapters/vr_teleop/deps/objects/obj_acrylic_rod_rack",
+        "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r10_1_task07_glass_rod_stir__background_teaching_research/source_bundle/scientific_workbench_r7_glass_stirring_rod_300mm",
+        "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r10_1_task07_glass_rod_stir__background_teaching_research/source_bundle/scientific_workbench_r10_1_acrylic_spoon_rack",
+        "adapters/ebench/genmanip/package_manifest.json"
+      ],
+      "name": "rod_rack",
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/rod-rack-9fa42f230481b8a4",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/build-inputs-v1/rod_rack/9fa42f230481b8a47d7d50b009de0a57ece950a02060abf29bbc25173b2e0677/files",
+      "status": "verified",
+      "tree_sha256": "9fa42f230481b8a47d7d50b009de0a57ece950a02060abf29bbc25173b2e0677"
+    },
+    {
+      "bytes": 200326749,
+      "includes": [
+        "manifest.json",
+        "scenario.json",
+        "vr/scene.usd",
+        "vr/legacy_scene.usd",
+        "vr/deps"
+      ],
+      "name": "stirrer_layout",
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/stirrer-layout-95b76f2557eba26e",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/build-inputs-v1/stirrer_layout/95b76f2557eba26e1a876a79fa85a73acb50d2fca082eec28a8c644a7e8b0cd4/files",
+      "status": "verified",
+      "tree_sha256": "95b76f2557eba26e1a876a79fa85a73acb50d2fca082eec28a8c644a7e8b0cd4"
+    },
+    {
+      "bytes": 106906367,
+      "includes": [
+        "scenario.yaml",
+        "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry",
+        "adapters/ebench/genmanip/tasks/config.yaml",
+        "adapters/ebench/genmanip/tasks/scenario_forge/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry/002/episode_metadata.json",
+        "adapters/ebench/genmanip/cameras",
+        "adapters/ebench/genmanip/package_manifest.json",
+        "adapters/ebench/genmanip/evidence/render_request.yaml"
+      ],
+      "name": "task02_base",
+      "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_tasks_02_07_08_r9_20260816/rich_bases/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry",
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/task02-base-c440f153f0c3ce47",
+      "remote_uri": "aliyun-beijing-internal:pjlab-bjpai-zhuzihou-assets/archives/scenario-forge/build-inputs-v1/task02_base/c440f153f0c3ce476f250e75e555d38b9937e59d641a4dbca1cc50350f253f41/files",
+      "status": "verified",
+      "tree_sha256": "c440f153f0c3ce476f250e75e555d38b9937e59d641a4dbca1cc50350f253f41"
+    }
+  ],
+  "build_inputs": {
+    "inputs": {
+      "environment": {
+        "bytes": 106761510,
+        "includes": [
+          "scene.usda",
+          "source_bundle"
+        ],
+        "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages/fill40/vr/deps/r7_scene",
+        "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/environment-0c45bdf06b0d2b2c",
+        "tree_sha256": "0c45bdf06b0d2b2cc9cb47ffaf583bc3bd1fb389a972bcd9989fb261745d5f6e"
+      },
+      "oven_layout": {
+        "bytes": 67307722,
+        "includes": [
+          "scene.usd",
+          "deps",
+          "task_config.py",
+          "manifest.json",
+          "README_CN.md",
+          "task_r15.json"
+        ],
+        "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task09_r15_20260901/handoff/scientific_workbench_task09_r15_vr",
+        "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/oven-layout-cbdb6b222f155156",
+        "tree_sha256": "cbdb6b222f155156d0820b0fc7eca80a8986747ea1d83b93e53ad80f14ed6fce"
+      },
+      "robot_adapter_metadata": {
+        "bytes": 27014,
+        "includes": [
+          "config.yaml",
+          "cameras",
+          "tasks/scenario_forge/scientific_workbench_r10_task02_fill40_pour_cylinder_to_beaker__background_modern_wet_chemistry/002/episode_metadata.json"
+        ],
+        "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_2_fill_sweep_20260819/packages/fill40/ebench",
+        "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/robot-adapter-metadata-ba1e65704997633c",
+        "tree_sha256": "ba1e65704997633c89a61ff60c8dc630266d406e3c0248ebe86abb588bd4521a"
+      },
+      "rod_rack": {
+        "bytes": 8285584,
+        "includes": [
+          "adapters/vr_teleop/deps/objects/obj_glass_rod",
+          "adapters/vr_teleop/deps/objects/obj_acrylic_rod_rack",
+          "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r10_1_task07_glass_rod_stir__background_teaching_research/source_bundle/scientific_workbench_r7_glass_stirring_rod_300mm",
+          "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r10_1_task07_glass_rod_stir__background_teaching_research/source_bundle/scientific_workbench_r10_1_acrylic_spoon_rack",
+          "adapters/ebench/genmanip/package_manifest.json"
+        ],
+        "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/teaching_research",
+        "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/rod-rack-9fa42f230481b8a4",
+        "tree_sha256": "9fa42f230481b8a47d7d50b009de0a57ece950a02060abf29bbc25173b2e0677"
+      },
+      "stirrer_layout": {
+        "bytes": 200326749,
+        "includes": [
+          "manifest.json",
+          "scenario.json",
+          "vr/scene.usd",
+          "vr/legacy_scene.usd",
+          "vr/deps"
+        ],
+        "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r3_20260824",
+        "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/stirrer-layout-95b76f2557eba26e",
+        "tree_sha256": "95b76f2557eba26e1a876a79fa85a73acb50d2fca082eec28a8c644a7e8b0cd4"
+      },
+      "task02_base": {
+        "bytes": 106906367,
+        "includes": [
+          "scenario.yaml",
+          "adapters/ebench/genmanip/assets/scene_usds/scenario_forge/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry",
+          "adapters/ebench/genmanip/tasks/config.yaml",
+          "adapters/ebench/genmanip/tasks/scenario_forge/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry/002/episode_metadata.json",
+          "adapters/ebench/genmanip/cameras",
+          "adapters/ebench/genmanip/package_manifest.json",
+          "adapters/ebench/genmanip/evidence/render_request.yaml"
+        ],
+        "origin": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_tasks_02_07_08_r9_20260816/rich_bases/scientific_workbench_r9_task02_pour_cylinder_to_beaker__background_modern_wet_chemistry",
+        "path": "/cpfs/user/zhuzihou/dev/scenario-forge/external_artifacts/build_inputs/v1/task02-base-c440f153f0c3ce47",
+        "tree_sha256": "c440f153f0c3ce476f250e75e555d38b9937e59d641a4dbca1cc50350f253f41"
+      }
+    },
+    "policy": "explicit runtime closures and authoring metadata; no task-level handoff ZIP or preview collections; producer packages remain intact",
+    "schema_version": "scenario-forge-build-inputs/v1"
+  },
+  "gross_removed_bytes": 47379386073,
+  "net_reclaimed_bytes": 46889771127,
+  "retained_build_input_bytes": 489614946,
+  "schema_version": "scenario-forge-archive-round2/v1",
+  "verification": {
+    "isaac41": {
+      "claim": "open, advancing timeline, stop/reopen pose reset only; not liquid retention or robot success",
+      "results": [
+        {
+          "play_updates": 60,
+          "reset": "stop_close_reopen",
+          "root_pose_reset": true,
+          "scene": "/tmp/scenario-forge-decoupled-task02-final/packages/fill20/vr/scene.usd",
+          "status": "pass",
+          "timeline_seconds": 0.02424166413644957
+        },
+        {
+          "play_updates": 60,
+          "reset": "stop_close_reopen",
+          "root_pose_reset": true,
+          "scene": "/tmp/scenario-forge-decoupled-task02-final/packages/fill40/vr/scene.usd",
+          "status": "pass",
+          "timeline_seconds": 0.024224666568140256
+        },
+        {
+          "play_updates": 60,
+          "reset": "stop_close_reopen",
+          "root_pose_reset": true,
+          "scene": "/tmp/scenario-forge-decoupled-task02-final/packages/fill60/vr/scene.usd",
+          "status": "pass",
+          "timeline_seconds": 0.016045998781919563
+        },
+        {
+          "play_updates": 60,
+          "reset": "stop_close_reopen",
+          "root_pose_reset": true,
+          "scene": "/tmp/scenario-forge-decoupled-task02-final/packages/fill80/vr/scene.usd",
+          "status": "pass",
+          "timeline_seconds": 0.020516996271908353
+        },
+        {
+          "play_updates": 60,
+          "reset": "stop_close_reopen",
+          "root_pose_reset": true,
+          "scene": "/tmp/scenario-forge-decoupled-oven/scientific_workbench_task09_r16_vr/scene.usd",
+          "status": "pass",
+          "timeline_seconds": 1.1772690010257065
+        },
+        {
+          "play_updates": 60,
+          "reset": "stop_close_reopen",
+          "root_pose_reset": true,
+          "scene": "/tmp/scenario-forge-decoupled-stirrer-ready/vr/scene.usd",
+          "status": "pass",
+          "timeline_seconds": 0.012033331518372194
+        }
+      ],
+      "runtime": "Isaac Sim 4.1",
+      "status": "pass"
+    },
+    "oven": {
+      "difference_count": 0,
+      "differences": [],
+      "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task09_r16_20260904/handoff/scientific_workbench_task09_r16_vr/scene.usd",
+      "left_prims": 9048,
+      "right": "/tmp/scenario-forge-decoupled-oven/scientific_workbench_task09_r16_vr/scene.usd",
+      "right_prims": 9048,
+      "status": "pass"
+    },
+    "quarantined_check": "916 passed, 1 historical integration skipped; Ruff and smoke checks passed",
+    "stirrer": {
+      "difference_count": 0,
+      "differences": [],
+      "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/scene.usd",
+      "left_prims": 3037,
+      "right": "/tmp/scenario-forge-decoupled-stirrer-ready/vr/scene.usd",
+      "right_prims": 3037,
+      "status": "pass"
+    },
+    "task02_vr_and_ebench": [
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill20/vr/scene.usd",
+        "left_prims": 2937,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill20/vr/scene.usd",
+        "right_prims": 2937,
+        "status": "pass"
+      },
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill20/ebench/scene.usd",
+        "left_prims": 2938,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill20/ebench/scene.usd",
+        "right_prims": 2938,
+        "status": "pass"
+      },
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill40/vr/scene.usd",
+        "left_prims": 2937,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill40/vr/scene.usd",
+        "right_prims": 2937,
+        "status": "pass"
+      },
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill40/ebench/scene.usd",
+        "left_prims": 2938,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill40/ebench/scene.usd",
+        "right_prims": 2938,
+        "status": "pass"
+      },
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill60/vr/scene.usd",
+        "left_prims": 2937,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill60/vr/scene.usd",
+        "right_prims": 2937,
+        "status": "pass"
+      },
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill60/ebench/scene.usd",
+        "left_prims": 2938,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill60/ebench/scene.usd",
+        "right_prims": 2938,
+        "status": "pass"
+      },
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill80/vr/scene.usd",
+        "left_prims": 2937,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill80/vr/scene.usd",
+        "right_prims": 2937,
+        "status": "pass"
+      },
+      {
+        "difference_count": 0,
+        "differences": [],
+        "left": "/cpfs/user/zhuzihou/dev/scenario-forge/outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819/packages/fill80/ebench/scene.usd",
+        "left_prims": 2938,
+        "right": "/tmp/scenario-forge-decoupled-task02-final/packages/fill80/ebench/scene.usd",
+        "right_prims": 2938,
+        "status": "pass"
+      }
+    ]
+  }
+}
