@@ -1,0 +1,119 @@
+{
+  "default_local_policy": "complete_directory_and_handoff_zip",
+  "entries": [
+    {
+      "artifact_family": "task01_flask_to_cylinder",
+      "handoff_zip": "scientific_workbench_task01_layout_labutopia_flask_pbd_cylinder_20260819.zip",
+      "output_root": "outputs/scientific_workbench_usd_handoff_task01_layout_20260819",
+      "revision": "20260819",
+      "status": "current_delivery",
+      "variant_key": "vr_review_layout"
+    },
+    {
+      "artifact_family": "task02_cylinder_to_beaker",
+      "handoff_zip": "handoff/task02_r10_3_colleague_collision_unvalidated.zip",
+      "output_root": "outputs/scientific_workbench_task02_r10_3_colleague_collision_20260819",
+      "revision": "r10.3",
+      "status": "current_candidate",
+      "variant_key": "ebench_vr_fill20_40_60_80"
+    },
+    {
+      "artifact_family": "task05_remove_ground_glass_stopper",
+      "handoff_zip": "handoff/scientific_workbench_task05_task09_r11.zip",
+      "output_root": "outputs/scientific_workbench_task05_task09_r11_20260817",
+      "revision": "r11",
+      "status": "current_delivery",
+      "variant_key": "ebench_vr_dual_task_handoff"
+    },
+    {
+      "artifact_family": "task07_glass_rod_to_rack",
+      "handoff_zip": "handoff/scientific_workbench_tasks_02_07_08_r10_1.zip",
+      "output_root": "outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817",
+      "revision": "r10.1",
+      "status": "current_delivery",
+      "variant_key": "vr_rich_tabletop"
+    },
+    {
+      "artifact_family": "task08_tighten_tube_cap",
+      "handoff_zip": "handoff/scientific_workbench_task08_vr_r13_one_turn.zip",
+      "output_root": "outputs/scientific_workbench_task08_vr_r13_20260901",
+      "revision": "r13",
+      "status": "current_candidate",
+      "variant_key": "vr_one_turn_assisted"
+    },
+    {
+      "artifact_family": "task08_tighten_tube_cap",
+      "handoff_zip": "handoff/scientific_workbench_task08_r13_1_robot_validation_blocked.zip",
+      "output_root": "outputs/scientific_workbench_task08_vr_r13_1_robot_20260902",
+      "revision": "r13.1",
+      "status": "current_validation_evidence",
+      "variant_key": "lift2_robot_validation"
+    },
+    {
+      "artifact_family": "task09_oven_load_start",
+      "handoff_zip": "handoff/scientific_workbench_task09_r16_vr.zip",
+      "output_root": "outputs/scientific_workbench_task09_r16_20260904",
+      "revision": "r16",
+      "status": "current_delivery",
+      "variant_key": "vr_fixed_base_articulation"
+    },
+    {
+      "artifact_family": "task11_centrifuge_unload_shutdown",
+      "handoff_zip": "handoff/scientific_workbench_task11_vr_r9_2_left_right_candidate.zip",
+      "output_root": "outputs/scientific_workbench_task11_vr_r9_2_left_right_20260827",
+      "revision": "r9.2",
+      "status": "current_candidate",
+      "variant_key": "vr_world_x_left_right"
+    },
+    {
+      "artifact_family": "task12_centrifuge_rack_to_rotor",
+      "handoff_zip": "handoff/scientific_workbench_task12_alias_centrifuge_rack_to_rotor_candidate.zip",
+      "output_root": "outputs/scientific_workbench_task12_alias_centrifuge_rack_to_rotor_vr_r1_20260827",
+      "revision": "r1",
+      "status": "current_candidate",
+      "variant_key": "vr_alias"
+    },
+    {
+      "artifact_family": "task12_oven_unload_dual_glassware",
+      "handoff_zip": "handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2.zip",
+      "output_root": "outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904",
+      "revision": "r2",
+      "status": "current_delivery",
+      "variant_key": "vr_dual_glassware"
+    },
+    {
+      "artifact_family": "insert_stir_bar_into_beaker",
+      "handoff_zip": "handoff/scientific_workbench_insert_stir_bar_into_beaker_vr_r5.zip",
+      "output_root": "outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825",
+      "revision": "r5",
+      "status": "current_delivery",
+      "variant_key": "vr_hydra_compatible_liquid"
+    },
+    {
+      "artifact_family": "water_bath_heat_tube",
+      "handoff_zip": "handoff/scientific_workbench_water_bath_tube_heat_vr_r1.zip",
+      "output_root": "outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902",
+      "revision": "r1",
+      "status": "current_delivery",
+      "variant_key": "vr_visual_liquid"
+    },
+    {
+      "artifact_family": "traditional_acid_base_titration",
+      "handoff_zip": "handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_2.zip",
+      "output_root": "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_2_20260905",
+      "revision": "r1.2",
+      "status": "current_delivery",
+      "variant_key": "vr_long_handle"
+    },
+    {
+      "artifact_family": "traditional_acid_base_titration",
+      "handoff_zip": "handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_2_robot_20260905_robot_validation_blocked.zip",
+      "output_root": "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_2_robot_20260905",
+      "revision": "r1.2",
+      "status": "current_validation_evidence",
+      "variant_key": "lift2_robot_demonstration"
+    }
+  ],
+  "schema_version": "scenario-forge-current-task-heads/v1",
+  "unclassified_policy": "HOLD"
+}

@@ -37,6 +37,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 ## Operations
 
 - [Artifact Policy](operations/artifact-policy.md)
+- [Current generated-artifact retention review](records/2026-09-05-generated-artifact-retention-review.md)
 - [Scientific Workbench Task Directory](task-directory/)
 - [量筒 GPU-PBD 液体修复教程](liquid-cylinder-tutorial/)
 - [给任意合格容器加入初始液体](liquid-autofill/)
