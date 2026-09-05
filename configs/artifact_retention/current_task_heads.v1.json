@@ -35,6 +35,14 @@
     },
     {
       "artifact_family": "task08_tighten_tube_cap",
+      "handoff_zip": "handoff/scientific_workbench_task08_vr_r12_candidate.zip",
+      "output_root": "outputs/scientific_workbench_task08_vr_r12_20260901",
+      "revision": "r12",
+      "status": "current_candidate",
+      "variant_key": "vr_physical_thread_without_assistance"
+    },
+    {
+      "artifact_family": "task08_tighten_tube_cap",
       "handoff_zip": "handoff/scientific_workbench_task08_vr_r13_one_turn.zip",
       "output_root": "outputs/scientific_workbench_task08_vr_r13_20260901",
       "revision": "r13",
