@@ -46,3 +46,11 @@ Current indexed external artifacts:
   magnetic stirrer / magnetic stirrer with hot plate. Layout matches
   `drying_box/<asset>/usd/` (canonical USD + four-view PNGs + contact sheet).
   Provenance: `incoming/magnetic_stirrer_archive/provenance.json`.
+
+## Historical output archive
+
+The [2026-09-05 archive index](archive-index-20260905.json) maps original
+directories to verified OSS copies, file manifests and retained exceptions.
+See the [execution and restore record](../docs/records/2026-09-05-generated-artifact-retention-review.md)
+for totals and restore commands. Current task heads remain in
+`configs/artifact_retention/current_task_heads.v1.json`.

@@ -45,3 +45,18 @@ def test_current_task_heads_do_not_claim_success_by_default() -> None:
     for entry in payload["entries"]:
         assert "benchmark_success" not in entry
         assert "robot_policy_success" not in entry
+
+
+def test_archive_index_accounts_for_retained_exceptions_and_net_bytes() -> None:
+    index = json.loads((ROOT / 'external_artifacts/archive-index-20260905.json').read_text())
+    removed = index['archived_and_removed']
+    exceptions = index['retained_exceptions']
+    removed_paths = {row['local_path'] for row in removed}
+    assert len(removed_paths) == len(removed)
+    assert removed_paths.isdisjoint(row['local_path'] for row in exceptions)
+    assert index['bytes_released'] == sum(row['bytes'] for row in removed)
+    assert all(batch['status'] == 'complete' for batch in index['batches'])
+    for row in removed + index['archived_and_restored']:
+        assert len(row['tree_sha256']) == 64
+        assert '/artifact-history-v1/' in row['remote_uri']
+        assert '..' not in Path(row['remote_uri'].split(':', 1)[1]).parts
