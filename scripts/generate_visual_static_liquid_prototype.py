@@ -39,8 +39,10 @@ def height_for_volume_fraction(
 
     profile = _validated_profile(axial_profile_m)
     fraction = float(fill_fraction)
-    if not 0.0 < fraction < 1.0:
-        raise ValueError("fill_fraction must be between zero and one")
+    if not 0.0 < fraction <= 1.0:
+        raise ValueError("fill_fraction must be greater than zero and at most one")
+    if fraction == 1.0:
+        return profile[-1][0]
     segment_volumes = [
         _frustum_volume(profile[index], profile[index + 1])
         for index in range(len(profile) - 1)

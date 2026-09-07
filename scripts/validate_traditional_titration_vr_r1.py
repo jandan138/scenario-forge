@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from hashlib import sha256
 import json
 import math
 from pathlib import Path
@@ -17,6 +18,23 @@ OBJECT_DRIFT_LIMITS = {
     "obj_sample_beaker": 0.02,
     "obj_context_conical_flask": 0.02,
 }
+
+
+def evaluate_burette(states):
+    names = ('pre_run', 'running_initial', 'mid', 'end_scale', 'reset')
+    checks = {'all_liquid_states_recorded': all(n in states for n in names),
+              'precharge_always_visible': bool(states) and all(s['precharge_visible'] for s in states.values())}
+    for name in names:
+        state = states.get(name, {})
+        remaining = float(state.get('remaining_ml', -100))
+        checks['burette_'+name] = (
+            abs(float(state.get('surface_z', 100)) - (-0.09+0.32*remaining/25)) < 1e-5
+            and abs(float(state.get('column_bottom_z', 100))+0.09) < 1e-5
+            and state.get('column_visible') == (remaining > 0.01))
+    checks['burette_mid_reached'] = 10 < states.get('mid', {}).get('remaining_ml', -1) < 15
+    checks['burette_reset_full'] = abs(states.get('reset', {}).get('remaining_ml', -100)-25) < 1e-5
+    checks['burette_exhausted'] = abs(states.get('end_scale', {}).get('remaining_ml', -100)) < 1e-5
+    return checks
 
 
 def evaluate_report(report: dict[str, Any]) -> dict[str, Any]:
@@ -41,6 +59,18 @@ def evaluate_report(report: dict[str, Any]) -> dict[str, Any]:
         "reset_restored": state.get("reset_dispensed_ml") == 0.0,
         "one_dof_station": report.get("dof_count") == 1,
     }
+    if "liquid_material" in report:
+        material = report['liquid_material']
+        def matches(colors, expected):
+            return bool(colors) and all(
+                len(color) == 3 and all(abs(a-b) < 1e-5 for a, b in zip(color, expected))
+                for color in colors
+            )
+        checks['liquid_material_initial'] = matches(material.get('initial', []), (0.97, 0.99, 1.0))
+        checks['liquid_material_endpoint'] = matches(material.get('endpoint', []), (1.0, 0.80, 0.88))
+        checks['liquid_material_reset'] = matches(material.get('reset', []), (0.97, 0.99, 1.0))
+    if 'burette_states' in report:
+        checks.update(evaluate_burette(report['burette_states']))
     return {"status": "pass" if all(checks.values()) else "blocked", "checks": checks}
 
 
@@ -62,6 +92,7 @@ def main() -> int:
         "schema_version": "scenario-forge-titration-vr-runtime/v0.1",
         "status": "blocked",
         "scene": str(root / "scene.usd"),
+        "scene_sha256": sha256((root / "scene.usd").read_bytes()).hexdigest(),
     }
     try:
         import carb.settings
@@ -91,6 +122,23 @@ def main() -> int:
             app.update()
         stage = context.get_stage()
         stage.SetEditTarget(Usd.EditTarget(stage.GetSessionLayer()))
+
+        base = '/World/obj_titration_station/Instance/Burette/body_link/Visual/'
+        has_precharge = bool(stage.GetPrimAtPath(base+'liquid_precharge'))
+
+        def burette_state():
+            col = stage.GetPrimAtPath(base+'liquid_column')
+            men = stage.GetPrimAtPath(base+'liquid_meniscus')
+            st = stage.GetPrimAtPath('/World/obj_titration_station')
+            remaining = float(st.GetAttribute('titration:burette_liquid_volume_ml').Get())
+            return {'remaining_ml': remaining,
+                    'surface_z': float(men.GetAttribute('xformOp:translate').Get()[2]),
+                    'column_bottom_z': float(col.GetAttribute('xformOp:translate').Get()[2])-float(col.GetAttribute('height').Get())/2,
+                    'column_visible': UsdGeom.Imageable(col).ComputeVisibility() != 'invisible',
+                    'precharge_visible': UsdGeom.Imageable(stage.GetPrimAtPath(base+'liquid_precharge')).ComputeVisibility() != 'invisible'}
+
+        if has_precharge:
+            report['burette_states'] = {'pre_run': burette_state()}
 
         try:
             from isaacsim.core.api import World
@@ -127,6 +175,20 @@ def main() -> int:
         def value(name: str):
             return station.GetAttribute(name).Get()
 
+        def liquid_colors():
+            result = []
+            for path in station.GetRelationship('titration:receiverLiquidShader').GetTargets():
+                attr = stage.GetPrimAtPath(path).GetAttribute('inputs:glass_color')
+                if attr:
+                    result.append(list(attr.Get()))
+            return result
+
+        step(3)
+        if has_precharge:
+            report['burette_states']['running_initial'] = burette_state()
+        if liquid_colors():
+            report['liquid_material'] = {'initial': liquid_colors()}
+
         def set_angle(degrees: float) -> None:
             articulation.set_joint_positions(np.asarray([math.radians(degrees)]))
             step(3)
@@ -139,6 +201,9 @@ def main() -> int:
             raise RuntimeError(f"dispensed volume did not reach {threshold}")
 
         set_angle(90.0)
+        if has_precharge:
+            until(12.5, 600)
+            report['burette_states']['mid'] = burette_state()
         until(14.4, 600)
         set_angle(25.0)
         until(14.7, 180)
@@ -165,9 +230,20 @@ def main() -> int:
                 == "inherited"
             ),
         }
+        if 'liquid_material' in report:
+            report['liquid_material']['endpoint'] = liquid_colors()
+        if has_precharge:
+            set_angle(90.0)
+            until(25.0, 900)
+            set_angle(0.0)
+            report['burette_states']['end_scale'] = burette_state()
         station.GetAttribute("titration:reset_requested").Set(True)
         step(3)
         success_state["reset_dispensed_ml"] = float(value("titration:dispensed_volume_ml"))
+        if 'liquid_material' in report:
+            report['liquid_material']['reset'] = liquid_colors()
+        if has_precharge:
+            report['burette_states']['reset'] = burette_state()
         set_angle(0.0)
         step(300)
         final_positions = positions()
