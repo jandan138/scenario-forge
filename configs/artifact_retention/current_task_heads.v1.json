@@ -106,6 +106,14 @@
       "variant_key": "vr_visual_liquid"
     },
     {
+      "artifact_family": "fehlings_reducing_sugar_water_bath",
+      "handoff_zip": "handoff/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r1.zip",
+      "output_root": "outputs/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r1_20260907",
+      "revision": "r1",
+      "status": "current_delivery",
+      "variant_key": "vr_open_tube_positive_visual_reaction"
+    },
+    {
       "artifact_family": "traditional_acid_base_titration",
       "handoff_zip": "handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_4.zip",
       "output_root": "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_4_20260907",
