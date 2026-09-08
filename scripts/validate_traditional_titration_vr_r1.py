@@ -59,6 +59,16 @@ def evaluate_report(report: dict[str, Any]) -> dict[str, Any]:
         "reset_restored": state.get("reset_dispensed_ml") == 0.0,
         "one_dof_station": report.get("dof_count") == 1,
     }
+    if report.get('policy_version') == 'linear_deadzone_v1':
+        from scripts.titration_linear_policy import PINK_END
+        from scripts.validate_titration_linear_runtime import REQUIRED_CHECKS
+        if report.get('receiver_visual_mode') == 'single_material':
+            checks['single_material_persistent'] = report.get('linear_policy_checks', {}).get('single_material_persistent') is True
+        checks.pop('ordered_success_path')
+        checks['free_angle_success_path'] = state.get('success') is True
+        checks['endpoint_in_window'] = 15 <= float(state.get('endpoint_dispensed_ml', -1)) <= PINK_END
+        checks.update({name: report.get('linear_policy_checks', {}).get(name) is True
+                       for name in REQUIRED_CHECKS})
     if "liquid_material" in report:
         material = report['liquid_material']
         def matches(colors, expected):
@@ -183,69 +193,76 @@ def main() -> int:
                     result.append(list(attr.Get()))
             return result
 
-        step(3)
-        if has_precharge:
-            report['burette_states']['running_initial'] = burette_state()
-        if liquid_colors():
-            report['liquid_material'] = {'initial': liquid_colors()}
-
-        def set_angle(degrees: float) -> None:
-            articulation.set_joint_positions(np.asarray([math.radians(degrees)]))
+        policy_attr = station.GetAttribute('titration:policy_version')
+        if policy_attr and policy_attr.Get() == 'linear_deadzone_v1':
+            from scripts.validate_titration_linear_runtime import exercise
+            report['policy_version'] = policy_attr.Get()
+            report['receiver_visual_mode'] = json.loads((root/'manifest.json').read_text()).get('receiver_liquid', {}).get('visual_mode', 'phase_meshes')
+            success_state = exercise(world, articulation, station, report, burette_state, liquid_colors)
+        else:
             step(3)
+            if has_precharge:
+                report['burette_states']['running_initial'] = burette_state()
+            if liquid_colors():
+                report['liquid_material'] = {'initial': liquid_colors()}
 
-        def until(threshold: float, max_steps: int) -> None:
-            for _ in range(max_steps):
-                world.step(render=False)
-                if float(value("titration:dispensed_volume_ml")) >= threshold:
-                    return
-            raise RuntimeError(f"dispensed volume did not reach {threshold}")
+            def set_angle(degrees: float) -> None:
+                articulation.set_joint_positions(np.asarray([math.radians(degrees)]))
+                step(3)
 
-        set_angle(90.0)
-        if has_precharge:
-            until(12.5, 600)
-            report['burette_states']['mid'] = burette_state()
-        until(14.4, 600)
-        set_angle(25.0)
-        until(14.7, 180)
-        set_angle(10.0)
-        until(15.0, 600)
-        set_angle(0.0)
-        step(190)
-        success_state = {
-            "success": bool(value("titration:task_success")),
-            "endpoint_dispensed_ml": float(value("titration:dispensed_volume_ml")),
-            "hold_seconds": float(value("titration:endpoint_hold_seconds")),
-            "indicator_phase": str(value("titration:indicator_phase")),
-            "visited": {
-                "open": bool(value("titration:visited_open")),
-                "fine": bool(value("titration:visited_fine")),
-                "drip": bool(value("titration:visited_drip")),
-            },
-            "pale_visual_visible": (
-                stage.GetPrimAtPath(
-                    "/World/obj_receiver_flask/VisualLiquid/SolutionEndpointPalePink"
-                )
-                .GetAttribute("visibility")
-                .Get()
-                == "inherited"
-            ),
-        }
-        if 'liquid_material' in report:
-            report['liquid_material']['endpoint'] = liquid_colors()
-        if has_precharge:
+            def until(threshold: float, max_steps: int) -> None:
+                for _ in range(max_steps):
+                    world.step(render=False)
+                    if float(value("titration:dispensed_volume_ml")) >= threshold:
+                        return
+                raise RuntimeError(f"dispensed volume did not reach {threshold}")
+
             set_angle(90.0)
-            until(25.0, 900)
+            if has_precharge:
+                until(12.5, 600)
+                report['burette_states']['mid'] = burette_state()
+            until(14.4, 600)
+            set_angle(25.0)
+            until(14.7, 180)
+            set_angle(10.0)
+            until(15.0, 600)
             set_angle(0.0)
-            report['burette_states']['end_scale'] = burette_state()
-        station.GetAttribute("titration:reset_requested").Set(True)
-        step(3)
-        success_state["reset_dispensed_ml"] = float(value("titration:dispensed_volume_ml"))
-        if 'liquid_material' in report:
-            report['liquid_material']['reset'] = liquid_colors()
-        if has_precharge:
-            report['burette_states']['reset'] = burette_state()
-        set_angle(0.0)
-        step(300)
+            step(190)
+            success_state = {
+                "success": bool(value("titration:task_success")),
+                "endpoint_dispensed_ml": float(value("titration:dispensed_volume_ml")),
+                "hold_seconds": float(value("titration:endpoint_hold_seconds")),
+                "indicator_phase": str(value("titration:indicator_phase")),
+                "visited": {
+                    "open": bool(value("titration:visited_open")),
+                    "fine": bool(value("titration:visited_fine")),
+                    "drip": bool(value("titration:visited_drip")),
+                },
+                "pale_visual_visible": (
+                    stage.GetPrimAtPath(
+                        "/World/obj_receiver_flask/VisualLiquid/SolutionEndpointPalePink"
+                    )
+                    .GetAttribute("visibility")
+                    .Get()
+                    == "inherited"
+                ),
+            }
+            if 'liquid_material' in report:
+                report['liquid_material']['endpoint'] = liquid_colors()
+            if has_precharge:
+                set_angle(90.0)
+                until(25.0, 900)
+                set_angle(0.0)
+                report['burette_states']['end_scale'] = burette_state()
+            station.GetAttribute("titration:reset_requested").Set(True)
+            step(3)
+            success_state["reset_dispensed_ml"] = float(value("titration:dispensed_volume_ml"))
+            if 'liquid_material' in report:
+                report['liquid_material']['reset'] = liquid_colors()
+            if has_precharge:
+                report['burette_states']['reset'] = burette_state()
+            set_angle(0.0)
+            step(300)
         final_positions = positions()
 
         cache = UsdGeom.BBoxCache(

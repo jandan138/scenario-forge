@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--liquid-ior', type=float, help='Diagnostic session-only IOR comparison')
     parser.add_argument('--no-liquid-shadow', action='store_true')
     parser.add_argument('--burette-views', action='store_true')
+    parser.add_argument('--linear-states', action='store_true', help='Render r1.5 cumulative-volume color states')
     args = parser.parse_args()
     original = sys.argv
     sys.argv = [sys.argv[0]]
@@ -76,15 +77,18 @@ def main():
                 raise RuntimeError('cannot open scene')
             stage = context.get_stage()
             stage.SetEditTarget(Usd.EditTarget(stage.GetSessionLayer()))
+            station = stage.GetPrimAtPath('/World/obj_titration_station')
+            shader_targets = station.GetRelationship('titration:receiverLiquidShader').GetTargets()
+            visual_targets = station.GetRelationship('titration:receiverLiquidVisuals').GetTargets()
             if args.thin_liquid:
-                for name in ('Colorless', 'Transition', 'EndpointPalePink', 'Overshoot'):
-                    stage.GetPrimAtPath('/World/obj_receiver_flask/VisualLiquid/Looks/Water'+name+'/Shader').GetAttribute('inputs:thin_walled').Set(True)
+                for target in shader_targets:
+                    stage.GetPrimAtPath(target).GetAttribute('inputs:thin_walled').Set(True)
             if args.liquid_ior is not None:
-                for name in ('Colorless', 'Transition', 'EndpointPalePink', 'Overshoot'):
-                    stage.GetPrimAtPath('/World/obj_receiver_flask/VisualLiquid/Looks/Water'+name+'/Shader').GetAttribute('inputs:glass_ior').Set(args.liquid_ior)
+                for target in shader_targets:
+                    stage.GetPrimAtPath(target).GetAttribute('inputs:glass_ior').Set(args.liquid_ior)
             if args.no_liquid_shadow:
-                for name in ('Colorless', 'Transition', 'EndpointPalePink', 'Overshoot'):
-                    UsdGeom.PrimvarsAPI(stage.GetPrimAtPath('/World/obj_receiver_flask/VisualLiquid/Solution'+name)).CreatePrimvar('doNotCastShadows', Sdf.ValueTypeNames.Bool).Set(True)
+                for target in visual_targets:
+                    UsdGeom.PrimvarsAPI(stage.GetPrimAtPath(target)).CreatePrimvar('doNotCastShadows', Sdf.ValueTypeNames.Bool).Set(True)
             stage.GetPrimAtPath('/World/obj_titration_station/Instance/Runtime/TitrationFlowGraph').SetActive(False)
             while context.get_stage_loading_status()[2]:
                 app.update()
@@ -96,6 +100,8 @@ def main():
             camera.set_vertical_aperture(11.784)
             camera.set_clipping_range(0.005, 100)
             phases = ('initial', 'mid', 'end_scale') if args.burette_views else ('initial','endpoint')
+            if args.linear_states:
+                phases = ('initial', 'transition', 'endpoint', 'overshoot')
             for phase in (('initial',) if args.quick else phases):
                 suffix = 'Colorless' if phase=='initial' else 'EndpointPalePink'
                 if args.burette_views:
@@ -115,9 +121,36 @@ def main():
                     if phase != 'initial':
                         for prim in (column, meniscus):
                             UsdGeom.Imageable(prim).GetVisibilityAttr().Set('inherited' if remaining else 'invisible')
-                for name in ('Colorless','Transition','EndpointPalePink','Overshoot'):
-                    prim = stage.GetPrimAtPath('/World/obj_receiver_flask/VisualLiquid/Solution'+name)
-                    UsdGeom.Imageable(prim).GetVisibilityAttr().Set('inherited' if name==suffix else 'invisible')
+                station = stage.GetPrimAtPath('/World/obj_titration_station')
+                for target in station.GetRelationship('titration:receiverLiquidVisuals').GetTargets():
+                    prim = stage.GetPrimAtPath(target)
+                    phase_attr = prim.GetAttribute('titration:phase')
+                    enabled = not phase_attr or prim.GetName() == 'Solution'+suffix
+                    UsdGeom.Imageable(prim).GetVisibilityAttr().Set('inherited' if enabled else 'invisible')
+                if args.linear_states:
+                    from pxr import Gf
+                    from scripts.titration_linear_policy import TRANSITION_START, PINK_END, color
+                    from scripts.generate_traditional_titration_vr_r15 import STATION
+                    volume = {'initial': 0, 'transition': (TRANSITION_START+15)/2,
+                              'endpoint': 15.5, 'overshoot': PINK_END+1}[phase]
+                    state, rgb, opacity = color(volume)
+                    suffix = {'colorless': 'Colorless', 'transition': 'Transition',
+                              'endpoint_pale_pink': 'EndpointPalePink', 'overshoot': 'Overshoot'}[state]
+                    station = stage.GetPrimAtPath(STATION)
+                    for target in station.GetRelationship('titration:receiverLiquidShader').GetTargets():
+                        shader = stage.GetPrimAtPath(target)
+                        shader.GetAttribute('inputs:glass_color').Set(Gf.Vec3f(*rgb))
+                    for target in station.GetRelationship('titration:receiverLiquidVisuals').GetTargets():
+                        prim = stage.GetPrimAtPath(target)
+                        enabled = not prim.GetAttribute('titration:phase') or prim.GetName() == 'Solution'+suffix
+                        prim.GetAttribute('visibility').Set('inherited' if enabled else 'invisible')
+                    base = STATION+'/Instance/Burette/body_link/Visual/'
+                    height = .32*(25-volume)/25
+                    col = stage.GetPrimAtPath(base+'liquid_column')
+                    h = max(.0001, height-.0003)
+                    col.GetAttribute('height').Set(h)
+                    col.GetAttribute('xformOp:translate').Set(Gf.Vec3d(0, 0, -.09+h/2))
+                    stage.GetPrimAtPath(base+'liquid_meniscus').GetAttribute('xformOp:translate').Set(Gf.Vec3d(0, 0, -.09+height))
                 views = VIEWS
                 if args.burette_views:
                     views = (VIEWS[0], VIEWS[1],
@@ -145,6 +178,8 @@ def main():
                     print('CAPTURE '+str(path), flush=True)
         (out/f'render_manifest_{args.variant}.json').write_text(json.dumps({'status':'pass','renderer':'RayTracedLighting',
             'runtime_version': app.app.get_app_version(),
+            'scene_sha256': sha256((root/'scene.usd').read_bytes()).hexdigest(),
+            'linear_policy_color_states': args.linear_states,
             'refraction_bounces': settings.get('/rtx/translucency/maxRefractionBounces'),
             'resolution':[1920,1080],'views':records,'endpoint_is_visual_state_snapshot':True},indent=2)+'\n')
     finally:

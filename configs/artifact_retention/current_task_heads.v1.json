@@ -115,9 +115,9 @@
     },
     {
       "artifact_family": "traditional_acid_base_titration",
-      "handoff_zip": "handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_4.zip",
-      "output_root": "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_4_20260907",
-      "revision": "r1.4",
+      "handoff_zip": "handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_6.zip",
+      "output_root": "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_6_20260907",
+      "revision": "r1.6",
       "status": "current_delivery",
       "variant_key": "vr_long_handle"
     },
