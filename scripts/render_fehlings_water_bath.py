@@ -84,7 +84,7 @@ def main():
         particles = stage.GetPrimAtPath("/World/fluid_runtime/ParticleSets/beaker_liquid")
         for snapshot in data["snapshots"]:
             name = snapshot["name"]
-            if name not in ("initial", "outside_no_heating", "t10", "t30", "t120", "observed"):
+            if name not in ("initial", "outside_no_heating", "t10", "t30", "t37_5", "t45", "t52_5", "t60", "t120", "pause_begin", "observed"):
                 continue
             tube.GetAttribute("xformOp:translate").Set(Gf.Vec3d(*snapshot["tube_xyz"]))
             if 'beaker_xyz' in snapshot:
@@ -117,6 +117,12 @@ def main():
             stage.GetPrimAtPath(
                 "/World/obj_sample_tube/VisualLiquid/Looks/Sediment/Shader"
             ).GetAttribute("inputs:opacity").Set(snapshot["sediment_opacity"])
+            for relative,values in snapshot.get('geometry',{}).items():
+                mesh=stage.GetPrimAtPath('/World/obj_sample_tube/'+relative)
+                points=np.asarray(values['points'])
+                mesh.GetAttribute('points').Set([Gf.Vec3f(*p) for p in points])
+                mesh.GetAttribute('extent').Set([Gf.Vec3f(*points.min(axis=0)),Gf.Vec3f(*points.max(axis=0))])
+                mesh.GetAttribute('visibility').Set(values['visibility'])
             target = np.asarray(snapshot["tube_xyz"]) + np.asarray([0, 0, 0.035])
             views = [("closeup", target + np.asarray([0.25, -0.38, 0.15]), target, 45)]
             if name == "initial":
@@ -163,6 +169,8 @@ def main():
             json.dumps(
                 {
                     "status": "pass",
+                    "scene_sha256": data["scene_sha256"],
+                    "policy_version": data.get("policy_version", "visual_reaction_v1"),
                     "runtime": "Isaac Sim 4.5",
                     "method": "paused_physics_replay_of_retained_milestone_states",
                     "live_camera_physics_capture": False,

@@ -49,6 +49,8 @@ def main():
         stage.SetEditTarget(Usd.EditTarget(stage.GetSessionLayer()))
         TUBE = '/World/obj_sample_tube'
         tube = stage.GetPrimAtPath(TUBE)
+        r2 = tube.GetAttribute('fehlings:policy_version').Get() == 'visual_sedimentation_v2'
+        report['policy_version'] = 'visual_sedimentation_v2' if r2 else 'visual_reaction_v1'
         particles = stage.GetPrimAtPath('/World/fluid_runtime/ParticleSets/beaker_liquid')
         world = World(stage_units_in_meters=1,physics_prim_path='/World/physicsScene',set_defaults=False,physics_dt=1/120,rendering_dt=1/120)
         world.reset()
@@ -80,6 +82,16 @@ def main():
                 'sample_color':list(stage.GetPrimAtPath(TUBE+'/VisualLiquid/Looks/Sample/Shader').GetAttribute('inputs:diffuseColor').Get()),
                 'sample_opacity':stage.GetPrimAtPath(TUBE+'/VisualLiquid/Looks/Sample/Shader').GetAttribute('inputs:opacity').Get(),
                 'sediment_opacity':stage.GetPrimAtPath(TUBE+'/VisualLiquid/Looks/Sediment/Shader').GetAttribute('inputs:opacity').Get()}
+            if r2:
+                record.update(reaction_stage=value('reaction_stage'),sediment_progress=value('sediment_progress'),
+                              sediment_height_m=value('sediment_height_m'),observation_seconds=value('observation_seconds'))
+                record['geometry'] = {}
+                for label in ('Sample','Sediment'):
+                    for part in ('body','surface'):
+                        relative='VisualLiquid/'+label+'/'+part
+                        mesh=stage.GetPrimAtPath(TUBE+'/'+relative)
+                        record['geometry'][relative] = dict(points=[list(p) for p in mesh.GetAttribute('points').Get()],
+                                                            visibility=mesh.GetAttribute('visibility').Get())
             record['beaker_xyz'] = list(stage.GetPrimAtPath('/World/obj_beaker').GetAttribute('xformOp:translate').Get())
             snapshots.append(record)
             print(name,record['heated_s'],record['stage'],flush=True)
@@ -131,7 +143,8 @@ def main():
         tilted = capture('tilted_invalid')
         move((0.37,-0.028,1.0))
         travel(target,240)
-        for name,threshold in [('t10',10),('t30',30)]:
+        milestones = [('t29_9',29.9),('t30',30),('t37_5',37.5),('t45',45)] if r2 else [('t10',10),('t30',30)]
+        for name,threshold in milestones:
             for _ in range(int((threshold+3)*120)):
                 step(1)
                 if float(value('heated_seconds')) >= threshold:
@@ -141,14 +154,18 @@ def main():
             capture(name)
         travel((0.37,-0.028,1.0))
         before = float(value('heated_seconds'))
+        if r2:
+            capture('pause_begin')
         step(600)
         early = capture('early_withdrawal')
         travel(target)
-        for _ in range(120*100):
-            step(1)
-            if float(value('heated_seconds')) >= 120-1e-6:
-                break
-        heated = capture('t120')
+        milestones = [('t52_5',52.5),('t60',60)] if r2 else [('t120',120)]
+        for name,threshold in milestones:
+            for _ in range(120*100):
+                step(1)
+                if float(value('heated_seconds')) >= threshold-1e-6:
+                    break
+            heated = capture(name)
         travel((0.37,-0.028,1.0))
         step(360)
         observed = capture('observed')
@@ -169,6 +186,37 @@ def main():
             'reset':reset['heated_s']==0 and reset['color_progress']==0 and not reset['success'],
             'particles_retained':retained==969 and below==0,'no_runtime_errors':not errors,
             'water_reference_matches':abs(water_q95-float(value('water_surface_z')))<0.006}
+        if r2:
+            from scripts.fehlings_r2_state import appearance, geometry
+            milestones={s['name']:s for s in snapshots}
+            checks.pop('t30_color_complete')
+            checks.pop('heated_120')
+            checks['before_onset_unchanged']=milestones['t29_9']['color_progress']==0
+            checks['t30_is_onset']=0<=milestones['t30']['color_progress']<=1/120/30+1e-6
+            checks['heated_60']=heated['heated_s']>=60-1e-6
+            checks['developed_at_60']=heated['reaction_stage']=='developed' and heated['color_progress']==1
+            checks['paused_geometry']=milestones['pause_begin']['geometry']==early['geometry']
+            checks['paused_appearance']=(milestones['pause_begin']['sample_color']==early['sample_color']
+                                         and milestones['pause_begin']['sample_opacity']==early['sample_opacity'])
+            checks['observed_three_seconds']=observed['observation_seconds']>=3-1e-6
+            checks['reset_geometry']=reset['geometry']==milestones['initial']['geometry']
+            checks['reset_color']=max(abs(a-b) for a,b in zip(reset['sample_color'],(.4,.72,.95)))<1e-5
+            profile=[tuple(p) for p in tube.GetAttribute('fehlings:cavity_profile_m').Get()]
+            checks['actual_material_values']=True
+            checks['actual_geometry_values']=True
+            for snapshot in snapshots:
+                look=appearance(snapshot['heated_s'])
+                checks['actual_material_values'] &= (max(abs(a-b) for a,b in zip(snapshot['sample_color'],look['color']))<1e-5
+                    and abs(snapshot['sample_opacity']-look['opacity'])<1e-5
+                    and abs(snapshot['sediment_opacity']-look['sediment_opacity'])<1e-5)
+                expected=geometry(profile,float(value('sample_height_m')),look['sediment'])
+                for label in ('Sample','Sediment'):
+                    for part in ('body','surface'):
+                        actual=snapshot['geometry']['VisualLiquid/'+label+'/'+part]['points']
+                        checks['actual_geometry_values'] &= (len(actual)==len(expected[label][part]) and
+                            max(abs(x-y) for a,b in zip(actual,expected[label][part]) for x,y in zip(a,b))<1e-7)
+            heights=[milestones[n]['sediment_height_m'] for n in ('t30','t37_5','t45','t52_5','t60')]
+            checks['sediment_height_increases']=all(a<b for a,b in zip(heights,heights[1:]))
         report.update(status='pass' if all(checks.values()) else 'blocked',checks=checks,
             runtime='Isaac Sim 4.5',rack_drift_m=drift,water_q95=water_q95,particle_count=len(pts),retained=retained,
             below=below,errors=errors,snapshots=snapshots,kinematic_trajectory_fixture=True)

@@ -107,9 +107,9 @@
     },
     {
       "artifact_family": "fehlings_reducing_sugar_water_bath",
-      "handoff_zip": "handoff/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r1.zip",
-      "output_root": "outputs/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r1_20260907",
-      "revision": "r1",
+      "handoff_zip": "handoff/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r2.zip",
+      "output_root": "outputs/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r2_20260908",
+      "revision": "r2",
       "status": "current_delivery",
       "variant_key": "vr_open_tube_positive_visual_reaction"
     },

@@ -16,6 +16,7 @@ def main():
     args=parser.parse_args()
     root=args.root.resolve()
     scene_sha=sha256((root/'scene.usd').read_bytes()).hexdigest()
+    r2=json.loads((root/'manifest.json').read_text()).get('reaction_policy',{}).get('version')=='visual_sedimentation_v2'
     reports=[json.loads(p.read_text()) for p in args.report]
     if len(reports)!=3 or len({p.resolve() for p in args.report})!=3:
         raise ValueError('three independent report paths required')
@@ -35,7 +36,7 @@ def main():
     draw=ImageDraw.Draw(sheet)
     font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',22)
     for i,(name,label) in enumerate([('outside_no_heating_closeup.png','Before heating | 0 s'),
-                                    ('observed_closeup.png','After 120 s | observation')]):
+                                    ('observed_closeup.png',('After 60 s | observation' if r2 else 'After 120 s | observation'))]):
         draw.text((i*960+15,8),label,fill='white',font=font)
         with Image.open(evidence/'initial_scene'/name) as frame:
             sheet.paste(frame.resize((960,540)),(i*960,40))
@@ -44,7 +45,11 @@ def main():
     stage=Usd.Stage.Open(str(root/'scene.usd'))
     if stage.GetDefaultPrim().GetPath().pathString!='/World':
         raise ValueError('unexpected default prim')
-    write_task_documents(root)
+    if r2:
+        from scripts.generate_fehlings_water_bath_r2 import write_task_documents as write_r2_documents
+        write_r2_documents(root)
+    else:
+        write_task_documents(root)
     runtime=evidence/'runtime'
     runtime.mkdir(exist_ok=True)
     for i,p in enumerate(args.report,1):
