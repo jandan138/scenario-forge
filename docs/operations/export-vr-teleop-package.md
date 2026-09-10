@@ -36,86 +36,36 @@ VR collector randomize scene dressing without silently leaving background props
 fixed. The table, room, light, and PBD particle set are deliberately excluded.
 The legacy bimanual-pour shape above remains unchanged for compatibility.
 
-## r10.1 source-root and randomization contract
+## r10.1 export checklist and options
 
-The deliverable `scene.usd` is directly openable. Its `defaultPrim` is `/World`
-and it does not author `/World/_scene`. Direct children use these names:
+The current authoring requirements are maintained in
+[USD scene organization](../standards/usd-layout.md) and
+[Articulation standards](../standards/articulation.md).
+This runbook provides the procedure and exporter options, not a second normative
+copy of the hierarchy, registration or randomization rules.
 
-- `background` for the room;
-- `table` for the static workbench;
-- one `obj_*` prim for every tabletop task object and context prop;
-- `vr_direct_open_light`, a texture-free white DomeLight with intensity `750`.
+1. Select the source and target profiles, then check USD-003 for the direct-open
+   root, loader mount paths, object registration and local randomization scope.
+2. For fixed-base articulated devices, use ART-001 through ART-004 for structure,
+   complete link registration and root-level randomization. See the
+   [design rationale](../design/articulated-instance-layout.md) for its history.
+3. Run the common exporter/materialization route and inspect
+   `object_materialization.json` and `parity_manifest.json` against USD-004.
+   Their source/runtime paths, transform-equivalence result and content
+   fingerprints explain which composition arcs were removed and what was kept.
+4. Apply the standard-table VR presentation policy (USD-005) before hashing.
+   The evidence includes `vr_presentation_policy` and confirmation of preserved
+   collision. This policy is specific to its standard-table VR route.
 
 Callers may set `include_robot_physics_overrides=False` when the collection
-runtime, rather than the task handoff, owns Lift2 material/contact/rest-offset
-configuration.  This omits `set_robot_physics_material`,
-`set_robot_contact_offset`, and `set_robot_rest_offset` while retaining the
-shared PhysX scene configuration.  The default remains enabled for existing
-exports.
+runtime owns Lift2 material/contact/rest-offset configuration. It omits
+`set_robot_physics_material`, `set_robot_contact_offset` and
+`set_robot_rest_offset` while retaining shared PhysX scene configuration;
+the default remains enabled for existing exports.
 
-A support object whose qualified collision must remain active but whose visual
-presentation is already supplied by the environment may declare
-`metadata.vr_presentation_visibility: invisible`.  The VR wrapper authors USD
-visibility on that reference; it does not disable or replace the upstream
-collider.
-
-The standard scientific workbench has a narrower mandatory VR-only rule. The
-composed tabletop mesh at `Surface/Source/mesh` is authored
-`visibility = invisible`, while its active state, transforms, material and
-collision remain unchanged. The common VR exporter resolves both the canonical
-`/World/table/Surface/Source/mesh` path and the legacy
-`/World/table/table/Surface/Source/mesh` wrapper. A standard-table VR export
-fails if neither path is present. Custom VR generators must call
-`apply_standard_workbench_vr_presentation` for every emitted scene USD before
-hashing or packaging; eBench exports do not apply this presentation rule.
-
-`/World/_scene` is a runtime mount created by the VR loader. Therefore paths in
-`task_config.py` are runtime paths such as `/World/_scene/obj_beaker`, even though
-the source USD contains `/World/obj_beaker`. Do not pre-author the mount wrapper
-in the source file.
-
-Every `obj_*` entry appears exactly once in `obj_prim_list` and exactly once in
-`layout_randomization.objects`. Randomization is local-frame XY translation only:
-`x` and `y` are both `[-0.01, 0.01]` metres and yaw is fixed to zero. Items that
-must preserve their internal arrangement share one group—for example a rack and
-its tubes. Task 02 similarly groups the PBD runtime with its graduated cylinder,
-although `fluid_runtime` itself is not an `obj_*` entry.
-
-### Articulated-object registration
-
-An articulated object is the exception to the one-path-per-object form of
-`obj_prim_list`: the list contains its `/World/_scene/obj_*` root followed by
-every `RigidBodyAPI` link below `/World/_scene/obj_*/Instance`, in deterministic
-USD traversal order. Joints, visual meshes, material prims, and collider children
-are not registered as links.
-
-Only the `obj_*` root is listed in `layout_randomization.objects`. Registered
-links are never randomized independently; doing so would apply child-local
-offsets and break or double-transform the articulation. A device and its support
-cart may be placed in the same root-level randomization group.
-
-New articulated exports must pass the fixed-base v2 contract: enabled
-Articulation Root on `obj_*`, identity `Xform` at `obj_*/Instance`, non-kinematic
-links, and `Instance/Joints/BaseFixed` from the object root to `Instance/Body`.
-The exporter rejects legacy Scope assemblies and incomplete link registration.
-See [Articulated Instance Layout](../design/articulated-instance-layout.md).
-
-Every path in `obj_prim_list` has one matching, movable `obj_*` Xform in the
-source scene, except registered articulation links, which remain descendants of
-their matching movable root. The exporter composes each complete tabletop object, then writes
-its mesh, material binding, collision and physics subtree directly into the
-ASCII `scene.usd`. Payloads, references and other composition arcs are forbidden
-inside those published object subtrees. Room, table, robot, lights and PBD helper
-prims remain outside this materialization contract.
-
-Materialization preserves each object's composed transform exactly. It does not
-require a reset stack, complete translate/orient/scale operations, or equality
-with a separate recipe pose. Asset-internal visual, collider and joint transforms
-remain valid. `object_materialization.json` records the source/runtime paths,
-prim count, structure and non-transform fingerprints, removed composition arcs,
-and transform-equivalence result. `parity_manifest.json` hash-binds this evidence.
-It also records `vr_presentation_policy`, including the resolved tabletop prim
-and confirmation that collision was preserved.
+The supported `metadata.vr_presentation_visibility: invisible` option authors
+visibility for a support object's reference when the environment already supplies
+its visual presentation. It does not replace or disable the qualified collider.
 
 Give the entire directory to the VR engineer. `scene.usd` is the file to open.
 Tabletop object geometry is inline; any remaining room/table USD and material or
@@ -128,11 +78,9 @@ the plugin owner deliberately changes that root convention.
 
 ## Physics and collider ownership
 
-The table is the same ConvertAsset `static_support` package used by eBench. Neither
-the VR scene nor Scenario Forge authors a local slab. If a downstream stronger USD
-layer needs to replace support collision, it must explicitly disable the delivered
-collider before enabling the replacement. Layering a second active collider on top
-is invalid.
+The table consumes the same ConvertAsset `static_support` package as eBench.
+Follow [ASSET-005](../standards/asset-intake.md#asset-005) for collider ownership
+and the boundary between visibility overrides and collision replacement.
 
 Both adapters use `manip/lift2/R5a_isaac41_vr600_v1`, derived from the Feishu VR
 contract revision 600. It fixes Isaac Sim 4.1 PhysX scene values, robot material,

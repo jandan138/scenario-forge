@@ -1,5 +1,7 @@
 # USD Scene Compiler Design
 
+Scene-authoring guidance is indexed in [USD scene organization](../standards/usd-layout.md). This document remains authoritative for the compiler interface and its scope.
+
 Status: Phase 3 static compiler implemented. This document is normative for
 the v0.2 USD compiler contract and records the implemented pure-Python USDA
 reference-stage scope.

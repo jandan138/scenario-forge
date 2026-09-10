@@ -1,5 +1,7 @@
 # Liquid autofill contract
 
+This document remains authoritative for the liquid-autofill interface. General scene-authoring rules and their limits are in [materials and liquids](../standards/materials-and-liquids.md).
+
 Scenario Forge exposes a portable packaging workflow around a ConvertAsset-owned GPU-PBD liquid
 producer. The boundary is intentional:
 

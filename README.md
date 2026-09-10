@@ -52,6 +52,14 @@ scenario_package/
 Simulator-specific exports live under `adapters/<target>/` and must not mutate the
 portable manifest in place.
 
+## Scene Authoring Standards
+
+Start with the [scene-authoring standards](docs/standards/README.md) for current
+rules on assets, USD layout, articulation, materials/liquids, task state,
+validation and delivery. The [maintenance workflow](docs/standards/maintenance.md)
+requires the implementer to synchronize applicable rules after validation.
+Core package/schema/API contracts remain in the design documents below.
+
 ## Roadmap
 
 The v0.1 package format remains readable as a bootstrap format. The v0.2 package

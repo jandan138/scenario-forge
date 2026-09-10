@@ -1,62 +1,42 @@
-# Articulated Instance Layout
+# Articulated Instance Layout — Design Rationale
 
-## Canonical v2 layout
+Status: design rationale and migration entrypoint. The current scene-authoring
+requirements live in [Articulation standards](../standards/articulation.md).
+They explicitly scope the canonical v2 hierarchy to the qualified fixed-base
+route; this document does not define a second copy of those requirements.
 
-Every newly generated articulated-object scenario package uses this hierarchy:
+## Why the fixed-base v2 route exists
 
-```text
-<existing-prefix>/<obj_root>                         # placement Xform + Articulation Root
-└── Instance                                         # identity Xform
-    ├── Body                                         # non-kinematic rigid base link
-    ├── <other rigid links>                          # non-kinematic
-    └── Joints
-        └── BaseFixed                                # obj_root -> Instance/Body
-```
+Earlier oven handoffs could preserve links below a Scope-based Instance and use
+a kinematic chassis without a complete articulation. Downstream attempts to add
+an articulation exposed kinematic-link errors; making a chassis dynamic without
+its proper anchor allowed the assembly to move apart. VR post-processing also
+needed a transformable boundary rather than a Scope.
 
-The existing prefix and `obj_*` placement root remain unchanged. The object root
-owns placement, GUI transform, uniform asset scale, and scene randomization.
-`Instance` must be an identity `Xform`; no placement transform may be authored on
-it or on individual links.
+The producer-qualified v2 route separates scene placement from device assembly
+and makes the base anchoring and runtime registration explicit. Its current
+hierarchy and ownership are defined by ART-001/ART-002, and registration and
+randomization by ART-003. Source materialization must preserve asset-internal
+transforms rather than confusing them with scene placement.
 
-The `obj_*` root must have `PhysicsArticulationRootAPI` and an enabled PhysX
-articulation. Every `RigidBodyAPI` link must remain below `Instance` and be
-non-kinematic. `Instance/Joints/BaseFixed` connects body0 at the object root to
-body1 at `Instance/Body`. All other internal joint body targets stay below
-`Instance`.
+## Evidence and legacy interpretation
 
-## VR registration and randomization
+See the [fixed-base v2 implementation and oven handoff record](../records/2026-09-04-fixed-base-articulated-instance-v2-and-oven-handoffs.md)
+and [VR link registration record](../records/2026-09-04-vr-articulated-link-registration.md).
+The v1 validator remains available to interpret immutable historical outputs;
+ART-004 defines its boundary relative to new v2 exports.
 
-VR `task_config.py:obj_prim_list` registers both the runtime object root and every
-rigid link, in deterministic USD traversal order:
+Mobile-base or other articulation topologies are not qualified by those oven
+experiments. New designs need their own stated scope and corresponding evidence
+before extending the current standard.
 
-```text
-/World/_scene/obj_device
-/World/_scene/obj_device/Instance/Body
-/World/_scene/obj_device/Instance/<link>...
-```
+## Rule changes
 
-Joints, visual meshes, material prims, and collider children are not links and
-are not registered separately. Registration does not grant transform ownership:
-only `obj_device` appears in `layout_randomization`. Links follow the articulation
-root and must never be randomized independently. A support cart and its device
-may share one root-level randomization group; their child links still do not.
+Propose and explain changes here or in a linked design document. After the
+appropriate validation, update the canonical rules using the
+[standards maintenance workflow](../standards/maintenance.md), rather than
+reintroducing a separate normative hierarchy here.
 
-## Ownership and admission
-
-ConvertAsset owns the producer facade and fixed-base physics authoring. It
-materializes the complete subtree under `Instance`, preserves existing link,
-joint, control, and runtime-graph paths, and qualifies canonical, arbitrary-prefix,
-and VR `_scene` mounts. Scenario Forge consumes the promoted package, expands the
-VR registration list, and validates the final scene. It never adds an articulation
-root, toggles kinematic state, adds a fixed joint, or repairs asset physics.
-
-The v2 validator blocks a missing or disabled articulation root, a Scope or
-non-identity `Instance`, missing/kinematic links, an invalid `BaseFixed`, and
-internal joint targets outside `Instance`.
-
-## Legacy boundary
-
-The former v1 layout used a `Scope` and could retain a kinematic chassis. It is a
-legacy compatibility shape for immutable historical outputs only. New exports
-must not reuse it. A legacy asset must receive a new ConvertAsset revision before
-entering a newly generated VR or eBench task package.
+2026-09-08: moved the previously published authoring requirements to the standards
+library; preserved this path, rationale and evidence links. No asset or runtime
+implementation changed in this documentation migration.

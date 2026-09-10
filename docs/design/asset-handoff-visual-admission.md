@@ -1,5 +1,7 @@
 # Asset handoff visual-admission modes
 
+This document remains authoritative for the handoff interface. Scene-authoring responsibilities and qualification use are indexed in [asset intake standards](../standards/asset-intake.md).
+
 `scenario-forge-asset-handoff/v0.2` accepts either of two explicit visual
 admission modes from an already admitted ConvertAsset package.
 
