@@ -128,6 +128,14 @@
       "revision": "r1.2",
       "status": "current_validation_evidence",
       "variant_key": "lift2_robot_demonstration"
+    },
+    {
+      "artifact_family": "solid_sample_weighing",
+      "handoff_zip": "handoff/scientific_workbench_solid_sample_weighing_vr_r1.zip",
+      "output_root": "outputs/scientific_workbench_solid_sample_weighing_vr_r1_20260909",
+      "revision": "r1",
+      "status": "current_delivery",
+      "variant_key": "vr_force_balance_dual_runtime"
     }
   ],
   "schema_version": "scenario-forge-current-task-heads/v1",

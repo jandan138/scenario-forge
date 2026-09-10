@@ -55,6 +55,7 @@
 | [VR 物化修正](../records/2026-08-23-vr-object-materialization-and-transform-correction.md) | 物化中的变换和内容保真 | 任意第三方 loader 的行为 |
 | [滴定 r1.6](../records/2026-09-07-titration-r16-single-material.md) | 单材质连续变色、纯逻辑、重置、场景证据 | 真实化学、所有 articulation 布局 |
 | [斐林水浴 r2](../records/2026-09-08-fehlings-water-bath-r2-sedimentation.md) | 样液/沉淀分层、几何与状态更新、精确状态回放 | 温度求解、沉淀颗粒动力学、任意姿态下的防漏 |
+| [受力称量 r1](../records/2026-09-09-solid-weighing-force-r1.md) | 两个 runtime 的受力读数、去皮、测量条件与已验证的可搬动天平 | 任意自由基座资格、机器人舀取或完整策略成功 |
 | [液体接入契约](../design/liquid-autofill-contract.md) | 指定生产者和运行时的液体资格与闭包 | 视觉假液体自动获得真实液体能力 |
 
 [早期假液体原型](../records/2026-08-16-visual-static-liquid-prototype.md) 的“仅背景”描述是该原型当时的范围；
