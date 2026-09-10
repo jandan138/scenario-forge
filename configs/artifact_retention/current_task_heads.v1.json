@@ -136,6 +136,14 @@
       "revision": "r1",
       "status": "current_delivery",
       "variant_key": "vr_force_balance_dual_runtime"
+    },
+    {
+      "artifact_family": "solid_sample_weighing",
+      "handoff_zip": "handoff/powder_weighing_r1.zip",
+      "output_root": "outputs/powder_weighing_r1_20260909",
+      "revision": "r1",
+      "status": "current_delivery",
+      "variant_key": "isaac45_rigid_powder_force_demo"
     }
   ],
   "schema_version": "scenario-forge-current-task-heads/v1",

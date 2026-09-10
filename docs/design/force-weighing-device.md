@@ -39,3 +39,19 @@ Scenario Forge 消费生产者资产与来源绑定的载荷配置，组装原�
 报告同时绑定主场景、设备 USD 和包含 USD/MDL/纹理/入口配置的内容指纹，
 不能只验证引用它们的那一层 USD 文件。
 数值测量、真实画面、受控物理放置与机器人策略证据分别声明，遵循 VAL-001 至 VAL-004。
+
+## 粉末场景的接触力通道（Isaac 4.5，2026-09-09）
+
+4096 个毫米级刚体粉末的集成试验发现：一颗微小颗粒接触自由基座 `Body` 时，
+incoming joint force 可能保留秤盘自重，却漏掉秤盘外部载荷。独立 post-fetch 读取也复现，
+而秤盘接触力仍能测得舟的支撑载荷。该现象不追溯否定 force r1 已记录的规则载荷测试，
+也不能推广为所有 PhysX 版本的结论。
+
+粉末 r1 新变体固定采用 `PowderBalanceRuntime`：从独立秤盘的 world-space 接触冲量，
+按真实物理 dt 换算接触力，对 1 s 仿真时间窗积分，再送入原 `BalanceState`。
+仪器净重没有读取粒子数量、标称质量或 ROI。原反力通道保留为独立诊断，不自动切换或补偿。
+
+`BalanceRuntime.measure_gross(poses, dt)` 提供脚本内部的测量扩展点，默认实现保持原关节反力语义。
+新场景在生产者侧附加 contact-report API、控制器和更高迭代配置后重新验证，原设备包保持原字节。
+新变体的字段、延迟、代码外力边界及运行命令见[粉末操作指南](../operations/powder-weighing-r1-guide.md)，
+具体失败复现及资格证据见[日期记录](../records/2026-09-09-rigid-powder-force-weighing-r1.md)。

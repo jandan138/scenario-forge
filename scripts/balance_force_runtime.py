@@ -76,6 +76,12 @@ class BalanceRuntime:
                     return True
         return False
 
+    def measure_gross(self, poses, dt):
+        """Default instrument channel: projected incoming load-cell joint force."""
+        force = self.view.get_link_incoming_joint_force()[0,self.pan]
+        return vertical_mass_g(tuple(map(float,force[:3])),tuple(map(float,poses[self.pan,3:7])),
+                               self.get('gravity_m_s2'),self.get('pan_mass_g'))
+
     def update(self, dt):
         from pxr import UsdGeom
         if self.get('reset_requested'):
@@ -98,9 +104,7 @@ class BalanceRuntime:
         valid = (upright >= math.cos(math.radians(5)) and supported
                  and sum(float(v)**2 for v in vel[:3]) < .005**2
                  and sum(float(v)**2 for v in vel[3:]) < .03**2)
-        force = self.view.get_link_incoming_joint_force()[0,self.pan]
-        gross = vertical_mass_g(tuple(map(float,force[:3])),tuple(map(float,poses[self.pan,3:7])),
-                                 self.get('gravity_m_s2'),self.get('pan_mass_g'))
+        gross = self.measure_gross(poses, dt)
         valid = valid and math.isfinite(gross)
         q = float(self.view.get_dof_positions()[0,self.tare])
         self.pressed = q >= (.00045 if self.pressed else .0009)
