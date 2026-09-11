@@ -84,13 +84,25 @@ def main():
         particles = stage.GetPrimAtPath("/World/fluid_runtime/ParticleSets/beaker_liquid")
         for snapshot in data["snapshots"]:
             name = snapshot["name"]
-            if name not in ("initial", "outside_no_heating", "t10", "t30", "t37_5", "t45", "t52_5", "t60", "t120", "pause_begin", "observed"):
+            five_layers = data.get('policy_version') == 'visual_five_layers_v6'
+            selected = ("initial", "outside_no_heating", "t10", "t30", "t37_5", "t45", "t52_5", "t60", "t120", "pause_begin", "shallow_contact", "tilted_contact", "partial_contact", "dynamic_insert", "observed", "reset")
+            if five_layers:
+                selected = ("initial", "outside_no_heating", "pause_begin", "shallow_contact", "tilted_contact", "observed", "reset") + tuple(
+                    't'+str(t)+suffix for t in (3,9,15,21,27,30) for suffix in ('','_withdrawn'))
+            if name not in selected:
                 continue
             tube.GetAttribute("xformOp:translate").Set(Gf.Vec3d(*snapshot["tube_xyz"]))
             if 'beaker_xyz' in snapshot:
                 attr = stage.GetPrimAtPath('/World/obj_beaker').GetAttribute('xformOp:translate')
                 attr.Set(Gf.Vec3f(*snapshot['beaker_xyz']) if str(attr.GetTypeName()) == 'float3'
                          else Gf.Vec3d(*snapshot['beaker_xyz']))
+            if 'beaker_quat_xyzw' in snapshot:
+                beaker=stage.GetPrimAtPath('/World/obj_beaker')
+                orient=beaker.GetAttribute('xformOp:orient')
+                if not orient:
+                    orient=UsdGeom.Xformable(beaker).AddOrientOp(UsdGeom.XformOp.PrecisionDouble).GetAttr()
+                q=snapshot['beaker_quat_xyzw']
+                orient.Set(Gf.Quatf(q[3],Gf.Vec3f(*q[:3])) if str(orient.GetTypeName())=='quatf' else Gf.Quatd(q[3],Gf.Vec3d(*q[:3])))
             quat = snapshot["tube_quat_xyzw"]
             attr = tube.GetAttribute("xformOp:orient")
             if not attr:
@@ -100,23 +112,39 @@ def main():
                 if str(attr.GetTypeName()) == "quatf"
                 else Gf.Quatd(quat[3], Gf.Vec3d(*quat[:3]))
             )
-            pts = [Gf.Vec3f(*p) for p in snapshot["particle_points"]]
-            particles.GetAttribute("points").Set(pts)
-            particles.GetAttribute("physxParticle:simulationPoints").Set(pts)
-            arr = np.asarray(snapshot["particle_points"])
-            particles.GetAttribute("extent").Set(
-                [Gf.Vec3f(*arr.min(axis=0)), Gf.Vec3f(*arr.max(axis=0))]
-            )
-            shader = stage.GetPrimAtPath("/World/obj_sample_tube/VisualLiquid/Looks/Sample/Shader")
-            shader.GetAttribute("inputs:diffuseColor").Set(Gf.Vec3f(*snapshot["sample_color"]))
-            shader.GetAttribute("inputs:opacity").Set(snapshot["sample_opacity"])
-            sediment = stage.GetPrimAtPath("/World/obj_sample_tube/VisualLiquid/Sediment")
-            UsdGeom.Imageable(sediment).GetVisibilityAttr().Set(
-                "inherited" if snapshot["sediment_opacity"] > 0 else "invisible"
-            )
-            stage.GetPrimAtPath(
-                "/World/obj_sample_tube/VisualLiquid/Looks/Sediment/Shader"
-            ).GetAttribute("inputs:opacity").Set(snapshot["sediment_opacity"])
+            if 'particle_points' in snapshot:
+                pts = [Gf.Vec3f(*p) for p in snapshot["particle_points"]]
+                particles.GetAttribute("points").Set(pts)
+                particles.GetAttribute("physxParticle:simulationPoints").Set(pts)
+                arr = np.asarray(snapshot["particle_points"])
+                particles.GetAttribute("extent").Set(
+                    [Gf.Vec3f(*arr.min(axis=0)), Gf.Vec3f(*arr.max(axis=0))]
+                )
+            if five_layers:
+                paths = tube.GetRelationship('fehlings:layerShaders').GetTargets()
+                if len(paths)!=5 or len(snapshot['layers'])!=5:
+                    raise ValueError('five retained material states required')
+                for path,values in zip(paths,snapshot['layers']):
+                    shader=stage.GetPrimAtPath(path)
+                    shader.GetAttribute('inputs:diffuseColor').Set(Gf.Vec3f(*values['color']))
+                    shader.GetAttribute('inputs:opacity').Set(values['opacity'])
+                    shader.GetAttribute('inputs:roughness').Set(values['roughness'])
+            else:
+                shader = stage.GetPrimAtPath("/World/obj_sample_tube/VisualLiquid/Looks/Sample/Shader")
+                shader.GetAttribute("inputs:diffuseColor").Set(Gf.Vec3f(*snapshot["sample_color"]))
+                shader.GetAttribute("inputs:opacity").Set(snapshot["sample_opacity"])
+                sediment = stage.GetPrimAtPath("/World/obj_sample_tube/VisualLiquid/Sediment")
+                UsdGeom.Imageable(sediment).GetVisibilityAttr().Set(
+                    "inherited" if snapshot["sediment_opacity"] > 0 else "invisible"
+                )
+                stage.GetPrimAtPath(
+                    "/World/obj_sample_tube/VisualLiquid/Looks/Sediment/Shader"
+                ).GetAttribute("inputs:opacity").Set(snapshot["sediment_opacity"])
+            if data.get('policy_version') == 'visual_fixed_regions_v5':
+                shader.GetAttribute('inputs:roughness').Set(snapshot['sample_roughness'])
+                lower=stage.GetPrimAtPath('/World/obj_sample_tube/VisualLiquid/Looks/Sediment/Shader')
+                lower.GetAttribute('inputs:diffuseColor').Set(Gf.Vec3f(*snapshot['sediment_color']))
+                lower.GetAttribute('inputs:roughness').Set(snapshot['sediment_roughness'])
             for relative,values in snapshot.get('geometry',{}).items():
                 mesh=stage.GetPrimAtPath('/World/obj_sample_tube/'+relative)
                 points=np.asarray(values['points'])
@@ -174,6 +202,7 @@ def main():
                     "runtime": "Isaac Sim 4.5",
                     "method": "paused_physics_replay_of_retained_milestone_states",
                     "live_camera_physics_capture": False,
+                    "snapshot_step_kind": "fixture_world_step" if data.get("policy_version") in ("visual_water_contact_v3", "visual_fixed_regions_v5", "visual_five_layers_v6") else "legacy_fixture_step",
                     "report_sha256": sha256(args.report.read_bytes()).hexdigest(),
                     "images": records,
                 },
