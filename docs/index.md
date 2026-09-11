@@ -76,6 +76,8 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [全部工作树改动分批收尾](records/2026-09-12-worktree-batch-closeout.md)
+
 - [2026-09-05 Traditional titration r1.2 long-handle integration](records/2026-09-05-traditional-titration-r1-2-long-handle.md)
 - [2026-09-02 Scientific Workbench Task 08 r13.1 Lift2 Validation](records/2026-09-02-task08-r13-1-lift2-validation.md)
 - [2026-09-01 Scientific Workbench Task 08 r13 One-turn Assisted Thread](records/2026-09-01-scientific-workbench-task08-r13-one-turn-assisted-thread.md)
