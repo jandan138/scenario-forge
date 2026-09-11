@@ -10,6 +10,8 @@
 区分静态结构、目标运行时、视觉、场景集成、真实任务执行和机器人策略结果。
 生产者合格不替代最终场景集成；运动学指定轨迹通过不等于真实抓取；视觉体积变化不等于真实液体转移。
 未验证的能力不能以 `pass`、漂亮截图或案例相似性补齐。
+引擎报错后返回的有限旧位姿不证明仿真继续运行；验收需核对引擎健康和记录完整性。
+依据：[task09 粉末瓶 r2 的错误与停滞诊断](../records/2026-09-10-task09-powder-bottle-r2.md)。
 
 依据：[资产准则](asset-intake.md)、[固定基座记录](../records/2026-09-04-fixed-base-articulated-instance-v2-and-oven-handoffs.md)、
 [水浴证据边界](../records/2026-09-08-fehlings-water-bath-r2-sedimentation.md)。

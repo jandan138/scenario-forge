@@ -50,13 +50,13 @@ class PowderBalanceRuntime(BalanceRuntime):
         return self.window_impulse_g_s/self.window_duration_s
 
 
-def compute(db):
+def compute(db, runtime_class=PowderBalanceRuntime):
     import omni.usd
     stage = omni.usd.get_context().get_stage()
     root = str(db.node.get_prim_path()).split('/BalanceRuntime/')[0]
     try:
         if db.per_instance_state.runtime is None:
-            db.per_instance_state.runtime = PowderBalanceRuntime(stage,root)
+            db.per_instance_state.runtime = runtime_class(stage,root)
         db.per_instance_state.runtime.update(float(db.inputs.deltaSeconds))
     except Exception as exc:
         from pxr import UsdGeom

@@ -144,6 +144,14 @@
       "revision": "r1",
       "status": "current_delivery",
       "variant_key": "isaac45_rigid_powder_force_demo"
+    },
+    {
+      "artifact_family": "solid_sample_weighing",
+      "handoff_zip": "handoff/task09_powder_bottle_r3.zip",
+      "output_root": "outputs/task09_powder_bottle_r3_20260910",
+      "revision": "r3",
+      "status": "current_delivery",
+      "variant_key": "isaac45_original_scene_powder_bottle"
     }
   ],
   "schema_version": "scenario-forge-current-task-heads/v1",
