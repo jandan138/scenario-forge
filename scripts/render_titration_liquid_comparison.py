@@ -25,6 +25,8 @@ def main():
     parser.add_argument('--no-liquid-shadow', action='store_true')
     parser.add_argument('--burette-views', action='store_true')
     parser.add_argument('--linear-states', action='store_true', help='Render r1.5 cumulative-volume color states')
+    parser.add_argument('--tip-detail', action='store_true', help='Close views of the nozzle wall and outlet')
+    parser.add_argument('--follow-task-pose', action='store_true', help='Translate cameras with the receiver placement')
     args = parser.parse_args()
     original = sys.argv
     sys.argv = [sys.argv[0]]
@@ -100,7 +102,7 @@ def main():
             camera.set_vertical_aperture(11.784)
             camera.set_clipping_range(0.005, 100)
             phases = ('initial', 'mid', 'end_scale') if args.burette_views else ('initial','endpoint')
-            if args.linear_states:
+            if args.linear_states and not args.burette_views:
                 phases = ('initial', 'transition', 'endpoint', 'overshoot')
             for phase in (('initial',) if args.quick else phases):
                 suffix = 'Colorless' if phase=='initial' else 'EndpointPalePink'
@@ -127,12 +129,12 @@ def main():
                     phase_attr = prim.GetAttribute('titration:phase')
                     enabled = not phase_attr or prim.GetName() == 'Solution'+suffix
                     UsdGeom.Imageable(prim).GetVisibilityAttr().Set('inherited' if enabled else 'invisible')
-                if args.linear_states:
+                if args.linear_states or args.burette_views:
                     from pxr import Gf
                     from scripts.titration_linear_policy import TRANSITION_START, PINK_END, color
                     from scripts.generate_traditional_titration_vr_r15 import STATION
-                    volume = {'initial': 0, 'transition': (TRANSITION_START+15)/2,
-                              'endpoint': 15.5, 'overshoot': PINK_END+1}[phase]
+                    volume = (25-{'initial':25,'mid':12.5,'end_scale':0}[phase] if args.burette_views
+                              else {'initial':0,'transition':(TRANSITION_START+15)/2,'endpoint':15.5,'overshoot':PINK_END+1}[phase])
                     state, rgb, opacity = color(volume)
                     suffix = {'colorless': 'Colorless', 'transition': 'Transition',
                               'endpoint_pale_pink': 'EndpointPalePink', 'overshoot': 'Overshoot'}[state]
@@ -157,7 +159,17 @@ def main():
                              ('burette_full', (0.45,-0.90,1.33), (-0.03,0.03,1.28), 20),
                              ('burette_lower', (0.19,-0.32,1.12), (-0.03,0.03,1.10), 27),
                              ('burette_surface', (0.15,-0.27,1.49), (-0.03,0.03,1.48), 35))
+                if args.tip_detail:
+                    views = (*views,
+                        ('tip_side',(.07,-.15,1.027),(-.03,.03,1.015),35),
+                        ('tip_outlet',(.01,-.02,.97),(-.03,.03,.99),70))
+                shift = np.zeros(3)
+                if args.follow_task_pose:
+                    pose = UsdGeom.XformCache().GetLocalToWorldTransform(stage.GetPrimAtPath('/World/obj_receiver_flask')).ExtractTranslation()
+                    shift = np.asarray(pose)-np.asarray([-.03,.03,.8267])
                 for view, position, target, focal in (views[1:2] if args.quick else views):
+                    position = tuple(float(v) for v in np.asarray(position)+shift)
+                    target = tuple(float(v) for v in np.asarray(target)+shift)
                     camera.set_focal_length(focal)
                     offset = np.asarray(position)-np.asarray(target)
                     elevation = math.degrees(math.asin(offset[2]/np.linalg.norm(offset)))
@@ -180,6 +192,7 @@ def main():
             'runtime_version': app.app.get_app_version(),
             'scene_sha256': sha256((root/'scene.usd').read_bytes()).hexdigest(),
             'linear_policy_color_states': args.linear_states,
+            'burette_views': args.burette_views, 'tip_detail': args.tip_detail, 'follow_task_pose': args.follow_task_pose,
             'refraction_bounces': settings.get('/rtx/translucency/maxRefractionBounces'),
             'resolution':[1920,1080],'views':records,'endpoint_is_visual_state_snapshot':True},indent=2)+'\n')
     finally:

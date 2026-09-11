@@ -69,6 +69,8 @@ def evaluate_report(report: dict[str, Any]) -> dict[str, Any]:
         checks['endpoint_in_window'] = 15 <= float(state.get('endpoint_dispensed_ml', -1)) <= PINK_END
         checks.update({name: report.get('linear_policy_checks', {}).get(name) is True
                        for name in REQUIRED_CHECKS})
+    if 'r17_checks' in report:
+        checks.update(report['r17_checks'])
     if "liquid_material" in report:
         material = report['liquid_material']
         def matches(colors, expected):
@@ -133,6 +135,16 @@ def main() -> int:
         stage = context.get_stage()
         stage.SetEditTarget(Usd.EditTarget(stage.GetSessionLayer()))
 
+        package_manifest = json.loads((root/'manifest.json').read_text())
+        r17 = package_manifest.get('package_id','').endswith('vr_r1_7')
+        if r17:
+            reference = json.loads((root/'evidence/initial_pose_reference.json').read_text())
+            cache = UsdGeom.XformCache()
+            errors = {}
+            for path, expected in reference['poses'].items():
+                actual = cache.GetLocalToWorldTransform(stage.GetPrimAtPath(path))
+                errors[path] = max(abs(actual[i][j]-expected[i][j]) for i in range(4) for j in range(4))
+            report['reference_pose_errors'] = errors
         base = '/World/obj_titration_station/Instance/Burette/body_link/Visual/'
         has_precharge = bool(stage.GetPrimAtPath(base+'liquid_precharge'))
 
@@ -309,6 +321,18 @@ def main() -> int:
                 "layout": layout,
             }
         )
+        if r17:
+            station_xyz = [float(v) for v in articulation.get_world_pose()[0]]
+            expected = reference['poses']['/World/obj_titration_station'][3][:3]
+            tip = stage.GetPrimAtPath(base+'delivery_tip')
+            plate = cache.ComputeWorldBound(stage.GetPrimAtPath('/World/obj_magnetic_stirrer/Geom/CeramicTop/CeramicTop_Mesh')).ComputeAlignedBox()
+            report['r17_checks'] = {
+                'reference_poses_match': all(v < 1e-8 for v in report['reference_pose_errors'].values()),
+                'station_keeps_reference_pose': max(abs(a-b) for a,b in zip(station_xyz,expected)) < 1e-4,
+                'mesh_tip': tip.GetTypeName() == 'Mesh',
+                'flask_supported_xy': all(plate.GetMin()[i] <= flask_box.GetMin()[i] and flask_box.GetMax()[i] <= plate.GetMax()[i] for i in (0,1)),
+            }
+            report['station_final_xyz'] = station_xyz
         report.update(evaluate_report(report))
     except Exception as error:
         report["error"] = f"{type(error).__name__}: {error}"
