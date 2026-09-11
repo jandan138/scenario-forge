@@ -35,9 +35,10 @@ def main():
                   protocol_sha256=hashlib.sha256((Path(__file__).parent/'task09_powder_protocol.py').read_bytes()).hexdigest())
     compact = 'inner_profile' in cfg
     if compact:
-        from scripts.compact_powder_protocol import prescribed_spoon as compact_spoon, cavity_mask, bed_depth
+        from scripts.compact_powder_protocol import prescribed_spoon as compact_spoon, cavity_mask, bed_depth, fill_level, near_full_check
         report['protocol_sha256'] = hashlib.sha256((Path(__file__).parent/'compact_powder_protocol.py').read_bytes()).hexdigest()
         report['profile_revision'] = cfg.get('revision')
+        report['initial_state'] = cfg.get('initial_state','generated')
     sys.argv = [sys.argv[0]]
     from isaacsim import SimulationApp
     app = SimulationApp({'headless':True,'multi_gpu':False})
@@ -250,6 +251,8 @@ def main():
                 r = Gf.Matrix3d(Gf.Rotation(Gf.Quatd(float(pose[6]),Gf.Vec3d(*map(float,pose[3:6])))).GetInverse())
                 return (grain[:,:3]-pose[:3])@np.array(r)
             local = local_to(bp)
+            if cfg.get('revision')=='r4' and not rows:
+                report['initial_fill_level'] = fill_level(local,cfg)
             if compact:
                 within = cavity_mask(local,cfg)
                 in_bottle = within&(local[:,2]>=cfg['false_floor_m']-.001)&(local[:,2]<cfg['bottle_height_m']+.01)
@@ -285,11 +288,16 @@ def main():
         checks = dict(finite=True,root_bodies=True,powder_mass=True,no_engine_errors=not fatal_errors,
                       no_leak_below_insert=not any(r['below_insert_count'] for r in rows),
                       no_below_table=not any(r['below_table_count'] for r in rows))
+        if cfg.get('initial_state')=='presettled':
+            checks['near_full_initial_state'] = near_full_check(report['initial_fill_level'])
         if args.mode=='settle':
             checks['retained'] = rows[-1]['bottle_count']==cfg['count']
             if compact:
                 report['settled_bed'] = bed_depth(local,cfg)
                 checks['deep_powder_bed'] = .010<=report['settled_bed']['surface_depth_median_m']<=.012
+                if cfg.get('initial_state')=='presettled':
+                    report['settled_fill_level'] = fill_level(local,cfg)
+                    checks['near_full_settled_state'] = near_full_check(report['settled_fill_level'])
         elif args.mode=='hold':
             checks['spoon_retains_known_grains'] = rows[-1]['spoon_count']==64
         elif args.mode=='scoop':

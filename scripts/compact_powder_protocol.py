@@ -78,3 +78,21 @@ def bed_depth(local, cfg):
     q = np.percentile(depths,[10,50,90]) if len(depths) else [0.,0.,0.]
     return dict(surface_depth_median_m=float(q[1]),surface_depth_p10_m=float(q[0]),
                 surface_depth_p90_m=float(q[2]),columns=len(depths))
+
+
+def fill_level(local,cfg):
+    """Measure the actual bed and headspace, including grains above the rim."""
+    import numpy as np
+    level = bed_depth(local,cfg)
+    points = local[cavity_mask(local,cfg)&(local[:,2]>=cfg['false_floor_m'])]
+    highest = float(points[:,2].max()+cfg['grain_bound_m']) if len(points) else cfg['false_floor_m']
+    level.update(median_headspace_m=cfg['bottle_height_m']-cfg['false_floor_m']-level['surface_depth_median_m'],
+                 minimum_headspace_m=cfg['bottle_height_m']-highest)
+    assert np.isfinite(list(level.values())).all()
+    return level
+
+
+def near_full_check(level):
+    return (level.get('columns',0)>0 and .010<=level.get('surface_depth_median_m',0)<=.012
+            and .003<=level.get('median_headspace_m',0)<=.007
+            and level.get('minimum_headspace_m',0)>=.001)

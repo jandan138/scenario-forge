@@ -31,7 +31,9 @@ def main():
     shutil.copytree(a.candidate,out,dirs_exist_ok=True)
     cfg = json.loads((out/'scene_config.json').read_text())
     compact = 'inner_profile' in cfg
-    revision = 'r3' if compact else 'r2'
+    revision = cfg.get('revision','r3') if compact else 'r2'
+    if revision not in ('r2','r3','r4'):
+        raise ValueError('Unsupported task09 revision')
     source_root = Path(__file__).resolve().parents[1]
     scripts = out/'scripts'
     scripts.mkdir(exist_ok=True)
@@ -47,6 +49,9 @@ def main():
         shutil.copy2(a.producer_scripts/name,out/'source_scripts'/name)
     if compact:
         for name in ('build_compact_powder_scene.py','model_compact_powder_bottle.py'):
+            shutil.copy2(a.producer_scripts/name,out/'source_scripts'/name)
+    if revision=='r4':
+        for name in ('build_full_powder_scene.py','model_full_powder_bottle.py'):
             shutil.copy2(a.producer_scripts/name,out/'source_scripts'/name)
     guide = source_root/f'docs/operations/task09-powder-bottle-{revision}-guide.md'
     if guide.exists():

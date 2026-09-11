@@ -15,6 +15,16 @@ def validate_report(report, scene_hash, mode, config=None):
     hz = config.get('physics_hz',480)
     compact = 'inner_profile' in config
     required = REQUIRED[mode] | ({'deep_powder_bed'} if compact and mode=='settle' else set())
+    if config.get('revision')=='r4':
+        from scripts.compact_powder_protocol import near_full_check
+        required |= {'near_full_initial_state'}
+        if (config.get('preparation_only') or config.get('initial_state')!='presettled' or report.get('initial_state')!='presettled'
+                or not near_full_check(report.get('initial_fill_level',{}))):
+            raise ValueError('r4 requires a verified near-full initial state')
+        if mode=='settle':
+            required |= {'near_full_settled_state'}
+            if not near_full_check(report.get('settled_fill_level',{})):
+                raise ValueError('r4 must remain near-full after cold-start settlement')
     if compact:
         bed = report.get('settled_bed',{})
         if (report.get('profile_revision')!=config.get('revision')

@@ -155,9 +155,9 @@
     },
     {
       "artifact_family": "solid_sample_weighing",
-      "handoff_zip": "handoff/task09_powder_bottle_r3.zip",
-      "output_root": "outputs/task09_powder_bottle_r3_20260910",
-      "revision": "r3",
+      "handoff_zip": "handoff/task09_powder_bottle_r4.zip",
+      "output_root": "outputs/task09_powder_bottle_r4_20260911",
+      "revision": "r4",
       "status": "current_delivery",
       "variant_key": "isaac45_original_scene_powder_bottle"
     }
