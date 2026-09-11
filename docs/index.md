@@ -4,6 +4,13 @@
 
 Scenario Forge compiles portable embodied scenario packages for downstream evaluators.
 
+## Research Prototypes
+
+- [Native EBench Intervention Suite Contract](design/ebench-native-intervention-suite.md)
+- [EBench dish 几何 × 初始进度干预任务](records/2026-09-11-ebench-dish-intervention-suite.md)
+- [EBench 惯性匹配诊断任务](records/2026-09-11-ebench-inertia-matched-task.md)
+- [EBench 剩余目标指令干预](records/2026-09-11-ebench-remaining-instruction.md)
+
 ## Strategy
 
 - [Strategy Documents](strategy/README.md)
