@@ -79,7 +79,24 @@ r10.1 scientific-workbench VR 直接打开入口为 `/World`，`defaultPrim` 对
 先引用已验证的组装、物化和呈现工具；需要新策略时提交设计与对应验证，避免每个任务新增隐式坐标修补。
 迁移后同时核对直接打开与目标导入的对象定位；不要把 GUI 看起来对齐当作变换等价证明。
 
+<a id="usd-008"></a>
+### USD-008 — CPU PhysX 场景不要把 SDF 当作唯一接触体
+
+Isaac Sim 4.1 在 `EnableGPUDynamics=false` 时不会把带 `physics:approximation=sdf` 的刚体加入 PhysX
+（`PxScene::addRigidActor` 报错）。视觉网格仍在，碰撞不存在，表现为穿模。
+需要 CPU 接触时改用静态三角网格（`physics:approximation=none`）、convexHull、基本几何，
+或确认不会填孔的 convexDecomposition，并保留原对象世界坐标。
+只把 `collisionEnabled` 关掉但留下 `PhysxSDFMeshCollisionAPI` 不够：整刚体仍可能被拒收，须去掉 SDF 碰撞 API。
+未加载 PhysX schema 插件的 usd-core 中，`GetAppliedSchemas` / `HasAPI` 会忽略未知 schema；
+须同时检查 `apiSchemas` 元数据，不能把“有效列表中看不到”当作文件已移除该标记。
+带孔架子不要先做成实心凸包再把物体留在孔内。
+这不授权把 SDF 容器资格自动当成 CPU 接触资格；GPU+SDF 不稳定时另作运行记录，不在本条推广。
+
+依据：[斐林 r4 CPU 接触碰撞](../records/2026-09-11-fehlings-r4-cpu-contact-colliders.md)。
+
 ## 已知限制与变更记录
 
 不同导出配置的灯光、物理设置和随机化数值可能不同；上面的 r10.1 数值不推广到所有场景。
 2026-09-08 汇集既有制作约束，保留编译器/overlay/域 pack 的 API 定义位置。
+2026-09-11：按斐林 r4 补充 CPU 场景下 SDF 刚体不会进入 PhysX 的推荐做法。
+2026-09-11：收尾回归补充无 PhysX 插件时的 authored schema 检查，依据 r4 修正候选的静态证据。

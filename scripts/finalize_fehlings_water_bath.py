@@ -17,7 +17,11 @@ def write_versioned_task_documents(root):
         from scripts.generate_fehlings_water_bath_r2 import write_task_documents as write_documents
         write_documents(root)
     elif version=='visual_water_contact_v3':
-        from scripts.generate_fehlings_water_bath_r3 import write_task_documents as write_documents
+        package_id=json.loads((root/'manifest.json').read_text()).get('package_id','')
+        if str(package_id).endswith('_vr_r4'):
+            from scripts.generate_fehlings_water_bath_r4 import write_task_documents as write_documents
+        else:
+            from scripts.generate_fehlings_water_bath_r3 import write_task_documents as write_documents
         write_documents(root)
     elif version=='visual_fixed_regions_v5':
         from scripts.generate_fehlings_water_bath_r5 import write_task_documents as write_documents
