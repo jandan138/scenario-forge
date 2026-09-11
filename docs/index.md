@@ -10,6 +10,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [EBench dish 几何 × 初始进度干预任务](records/2026-09-11-ebench-dish-intervention-suite.md)
 - [EBench 惯性匹配诊断任务](records/2026-09-11-ebench-inertia-matched-task.md)
 - [EBench 剩余目标指令干预](records/2026-09-11-ebench-remaining-instruction.md)
+- [EBench 互补惯性诊断任务](records/2026-09-12-ebench-reverse-inertia.md)
 
 ## Strategy
 
