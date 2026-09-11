@@ -9,7 +9,11 @@ GenManip 的独立 `dish_reverse_inertia_r1_*` 名称空间；当前只使用 co
 进行互补诊断，不把编译数量当成评测数量。
 
 实际静态场景比较确认相对旧 control/preplaced 只改变勺子的 COM 与对角惯性，
-`task_data` 完全一致。EEOS 已完成新条件读回并进入回放；最终结果仍待解释。
+`task_data` 完全一致。EEOS 随后完成读回与回放，在 1000 步窗口内没有达到勺子目标；
+该结果仍限于固定动作诊断，不能替代在线策略评测或完整任务资格。
+结果依据为 EEOS `outputs/ebench_evolution/reverse_inertia_sequence_20260912_r1/sequence.json`
+及 `factor_cell_outcome.json`：完整执行1000步、1001次观测，勺子最高报告分数为0，
+终止原因是固定窗口结束，`model_score=null`，新增模型推理次数为0。
 源与产物哈希保存在 suite/build/installation 记录及 EEOS 的 reverse inertia preflight。
 
 本次仅使用既有编译功能与新配置，通用规范无需变化。遵循 ASSET-001/002/003 和
