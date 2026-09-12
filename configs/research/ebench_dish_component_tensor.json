@@ -1,0 +1,18 @@
+{
+  "schema": "ebench-native-intervention-build/v1",
+  "task_prefix": "dish_component_tensor_r1",
+  "source_layout": "/cpfs/user/zhuzihou/dev/embodied-eval-os/outputs/ebench_evolution/20260911-task-review/dish_source_layout.json",
+  "source_task_config": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/configs/tasks/ebench/mobile_manip/test_mini/dish.yml",
+  "base_scene": "/cpfs/shared/simulation/zhuzihou/dev/GenManip/saved/assets/scene_usds/ebench/long_horizon/scene_dish/scene.usd",
+  "base_scene_sha256": "5e02ff8366a3fba7387d8ae828ca87503a08a9da5cb5e673cbaa6d70ca500b24",
+  "overlays": {
+    "control": {
+      "path": "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/ebench_spoon_intervention_20260911_r2/native_control_overlay.usda",
+      "sha256": "12baf451ee7a8d4b1c0f719fc2be33845732522fad43758e80c2afca00e79df1"
+    },
+    "wide": {
+      "path": "/cpfs/user/zhuzihou/dev/ConvertAsset/outputs/ebench_spoon_inertia_components_20260912_r1/wide_geometry_control_tensor.usda",
+      "sha256": "12e4e761cf41f42b7aa0b8820ae5b7c466b0dbee293f49e698087e38b979897d"
+    }
+  }
+}

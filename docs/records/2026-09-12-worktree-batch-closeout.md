@@ -13,7 +13,9 @@
 | 粉末 r4 | `f11e3c6` | 近满瓶预沉降初态检查、证据约束、回放／包装、指南与任务头 |
 | EBench 研究原型 | `3245e33` | 四条件编译／本地安装、惯性匹配和指令干预配置、类型标注、异常路径回归及契约 |
 | EBench 互补惯性配置 | `3a21451` | 收尾期间新增的 control 几何／wide 惯性诊断配置、说明与索引 |
-| 总收尾 | 本记录所在提交 | 既有规范 ZIP 归置、完整验证和 Git 状态记录 |
+| 总收尾 | `045d3ea` | 既有规范 ZIP 归置、完整验证和 Git 状态记录 |
+| 互补惯性结果补录 | `a6cd756` | 1000步固定窗口回放结果及 EEOS 出处 |
+| COM／惯性分项截止快照 | 本补充提交 | 两份配置、对应记录与索引；用户指定的本轮截止范围 |
 
 生产者资产由 ConvertAsset 管理。本次提交的是 Scenario Forge 的消费者／适配器实现；
 已交付包保留对应来源资产、receipt 或 source_scripts 快照。没有将外部流水线搬入核心包层。
@@ -96,3 +98,24 @@ make check SMOKE_OUT=/tmp/opencode/all-batches-smoke SMOKE_SUITE_OUT=/tmp/openco
 证据目录：`outputs/worktree_closeout_20260911/`，含 `make_check.log`、各批索引审查、
 交付复核、研究配置编译核对与规范 ZIP 身份。本记录与文档索引作为最后一批提交。
 分批测试和全量测试均使用已有本地资产，不宣称无资产环境的所有集成测试通过。
+
+## 用户指定的截止快照
+
+其他会话在收尾期间持续新增研究任务。用户明确选择“以当前快照为截止”：
+处理当时已出现的 COM／惯性分项配置与记录，之后新增或更新的内容留给下一轮。
+本轮追加固定以下文件的索引快照：
+
+- `configs/research/ebench_dish_component_com.json`
+- `configs/research/ebench_dish_component_tensor.json`
+- `docs/records/2026-09-12-ebench-inertia-components.md`
+- 文档索引中指向上述记录的条目。
+
+快照导出为 `/tmp/opencode/batch-closeout-inertia-components-cutoff-stage/`。
+确认实际导入的编译器来自该快照，而不是后来改动的工作树；两份配置的8个入口均通过
+真实 USD 加载和临时运行目录注册，每个入口2886个 prim。配置 SHA256 分别为
+`0be72d8ab98803fe715114284db154b81af2b788a0bd280365fe58787a63f06c`、
+`b78a13a76f8135cf68d003eba753820a3e749a36cc8a43a9f0a330883d7af5d9`。
+日志为证据目录下 `inertia_components_cutoff_check.log`。
+
+后续成对布局变体、齿轮相关记录及 native adapter 的继续修改未纳入该截止快照，
+保留工作树供下一轮处理。因此本轮完成含义是“截止快照已提交”，不是宣称并行会话持续写入的工作树永久干净。
