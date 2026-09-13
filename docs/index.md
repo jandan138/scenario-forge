@@ -80,6 +80,8 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [Fehling r7 演示视频（关键帧合成）](records/2026-09-13-fehlings-r7-demo-video.md)
+
 - [全部工作树改动分批收尾](records/2026-09-12-worktree-batch-closeout.md)
 
 - [2026-09-05 Traditional titration r1.2 long-handle integration](records/2026-09-05-traditional-titration-r1-2-long-handle.md)
