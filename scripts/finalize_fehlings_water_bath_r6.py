@@ -18,20 +18,20 @@ REQUIRED_CHECKS = (
 )
 
 
-def compose_progression(root):
+def compose_progression(root, *, label='Fehling r6', crop=(865,500,1055,835)):
     """Same crop and scale from actual withdrawn snapshots; no color adjustment."""
     from PIL import Image, ImageDraw, ImageFont
     folder = root/'evidence/initial_scene'
     render_path = folder/'render_manifest.json'
     render = json.loads(render_path.read_text())
     inputs = {Path(v['path']).name:v for v in render['images']}
-    sheet = Image.new('RGB',(1920,640),'#18232c')
+    image_height=round(300*(crop[3]-crop[1])/(crop[2]-crop[0]))
+    sheet = Image.new('RGB',(1920,max(640,110+image_height)),'#18232c')
     draw = ImageDraw.Draw(sheet)
     font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',24)
     small = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',18)
-    draw.text((18,12),'Fehling r6 | cumulative water-contact time | retained states, withdrawn for inspection',font=small,fill='white')
+    draw.text((18,12),label+' | cumulative water-contact time | retained states, withdrawn for inspection',font=small,fill='white')
     sources = []
-    crop = (865,500,1055,835)
     for i,t in enumerate((0,9,15,21,27,30)):
         name = 'outside_no_heating_closeup.png' if t==0 else f't{t}_withdrawn_closeup.png'
         record = inputs[name]
@@ -42,7 +42,7 @@ def compose_progression(root):
         with Image.open(path) as image:
             if image.size!=(1920,1080):
                 raise ValueError('unexpected source framing')
-            sheet.paste(image.crop(crop).resize((300,529)),(i*320+10,90))
+            sheet.paste(image.crop(crop).resize((300,image_height)),(i*320+10,90))
         sources.append(record)
     output = folder/'color_progression.png'
     sheet.save(output)

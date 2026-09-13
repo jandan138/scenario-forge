@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 
-def main(*, fixed_materials=False, five_layers=False):
+def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--out',type=Path,required=True)
@@ -24,6 +24,14 @@ def main(*, fixed_materials=False, five_layers=False):
     report=dict(status='blocked',scene_sha256=sha256((args.root/'scene.usd').read_bytes()).hexdigest(),
                 policy_version=version,process_id=os.getpid(),protocol='dynamic_insertion_and_prescribed_contact_fixtures',robot_policy_success=False)
     try:
+        if glass_tube:
+            manifest=json.loads((args.root/'manifest.json').read_text())
+            producer_path=args.root/manifest['tube_producer_manifest']
+            producer=json.loads(producer_path.read_text())
+            asset_hash=sha256((producer_path.parent.parent/'asset.usd').read_bytes()).hexdigest()
+            if asset_hash!=producer['asset_sha256'] or asset_hash!=manifest['tube_asset_sha256']:
+                raise ValueError('r7 producer asset identity mismatch')
+            report.update(package_id=manifest['package_id'],glass_tube_r7=True,tube_asset_sha256=asset_hash)
         import carb.settings
         import omni.usd
         import omni.physx
@@ -67,6 +75,7 @@ def main(*, fixed_materials=False, five_layers=False):
         if not tube_handle or not bath_handle:
             raise RuntimeError('rigid body pose unavailable')
         snapshots=[]
+        report['snapshots']=snapshots
         tick=0
         def val(name):
             return tube.GetAttribute('fehlings:'+name).Get()
@@ -137,6 +146,38 @@ def main(*, fixed_materials=False, five_layers=False):
         checks=dict(no_pbd_components=not any('Particle' in p.GetTypeName() or any('Particle' in a for a in p.GetAppliedSchemas()) for p in stage.TraverseAll()),
                     water_has_no_physics=not any(any('Physics' in a or 'Physx' in a for a in p.GetAppliedSchemas()) for p in Usd.PrimRange(water)),
                     rack_stable=math.dist(initial_xyz,initial['tube_xyz'])<.005)
+        report['checks']=checks
+        if glass_tube:
+            fit=json.loads((args.root/'evidence/rack_fit.json').read_text())
+            checks['glass_body_mass']=abs(dc.get_rigid_body_properties(tube_handle).mass-producer['mass_kg'])<1e-6
+            start=pose(tube_handle)[0]
+            trajectory=[]
+            for _ in range(600):
+                # Command must exceed gravity loss during a native simulation step.
+                dc.set_rigid_body_linear_velocity(tube_handle,(0,0,.25))
+                dc.set_rigid_body_angular_velocity(tube_handle,(0,0,0))
+                step(1)
+                xyz=pose(tube_handle)[0]
+                trajectory.append(xyz)
+                if xyz[2]>=fit['rack_top_world_m']+.015:
+                    break
+            extracted=capture('rack_extracted')
+            checks['rack_extraction']=extracted['tube_xyz'][2]>=fit['rack_top_world_m']+.015
+            for _ in range(800):
+                dc.set_rigid_body_linear_velocity(tube_handle,(0,0,-.03))
+                dc.set_rigid_body_angular_velocity(tube_handle,(0,0,0))
+                step(1)
+                xyz=pose(tube_handle)[0]
+                trajectory.append(xyz)
+                if xyz[2]<=start[2]+.001:
+                    break
+            dc.set_rigid_body_linear_velocity(tube_handle,(0,0,0))
+            step(240)
+            reinserted=capture('rack_reinserted')
+            checks['rack_reinsertion']=math.dist(start,reinserted['tube_xyz'])<.004
+            checks['rack_guided_path_clear']=max(math.hypot(p[0]-start[0],p[1]-start[1]) for p in trajectory)<.005
+            report['rack_cycle']=dict(method='dynamic body, prescribed vertical velocities; no grasp claim',
+                                      sampled_positions=trajectory,start=start,final=reinserted['tube_xyz'])
         colliders=[p for p in Usd.PrimRange(stage.GetPrimAtPath(BEAKER)) if p.HasAPI(UsdPhysics.CollisionAPI) and p.GetAttribute('physics:collisionEnabled').Get()]
         checks['cup_colliders_retained']=len(colliders)==3
         # Actual dynamic body passes through the fake surface and lands on the cup bottom.
@@ -168,6 +209,12 @@ def main(*, fixed_materials=False, five_layers=False):
         step(2)
         tube_handle=dc.get_rigid_body(TUBE)
         def reset_at(local,degrees=0):
+            if glass_tube:
+                # Wall-contact negative cases can move a dynamic beaker. Isolate
+                # each semantic case instead of reusing its displaced/tilted pose.
+                move(tube_handle,local_position((.15,0,profile[-1][0]+.080)))
+                move(bath_handle,initial['beaker_xyz'])
+                step(120)
             move(tube_handle,local_position(local),degrees)
             tube.GetAttribute('fehlings:reset_requested').Set(True)
             step(1)
@@ -177,7 +224,7 @@ def main(*, fixed_materials=False, five_layers=False):
         cases=[('above_surface',(0,0,surface+.003),0,False),
                ('outside',(0.055,0,.05),0,False),
                ('wall_only',(.046,0,.05),0,False),
-               ('upper_only',(0,0,surface+.060),180,False),
+               ('upper_only',(0,0,surface+(.090 if glass_tube else .060)),180,False),
                ('shallow_contact',(0,0,surface-.006),0,True),
                ('tilted_contact',(-.020,0,surface-.006),55,True),
                ('partial_contact',(.026,0,surface-.010),0,True)]
@@ -213,6 +260,7 @@ def main(*, fixed_materials=False, five_layers=False):
                 if val('heated_seconds')>=threshold:
                     break
             if val('heated_seconds')<threshold:
+                capture('heating_stalled')
                 raise RuntimeError('relaxed contact did not heat')
             capture(name)
             if five_layers:
@@ -262,6 +310,10 @@ def main(*, fixed_materials=False, five_layers=False):
         tube.GetAttribute('fehlings:reset_requested').Set(True)
         step(1)
         reset=capture('reset')
+        if glass_tube:
+            checks['sample_eight_ml']=abs(val('sample_volume_ml')-8)<1e-9
+            checks['new_tube_dimensions']=abs(val('mouth_height_m')-.15)<1e-9 and abs(val('outer_radius_m')-.009)<1e-9
+            checks['finite_actual_poses']=all(all(math.isfinite(v) for v in snap['tube_xyz']+snap['tube_quat_xyzw']) for snap in snapshots)
         checks['reset_complete']=reset['heated_s']==0 and not reset['success'] and reset['geometry']==initial['geometry']
         checks['actual_materials']=True
         checks['actual_geometry']=True

@@ -12,6 +12,7 @@ def main():
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument('--diagnostic-no-shadows', action='store_true')
+    parser.add_argument('--states', help='Optional comma-separated retained state names')
     args = parser.parse_args()
     args.root = args.root.resolve()
     args.report = args.report.resolve()
@@ -62,7 +63,9 @@ def main():
         if args.diagnostic_no_shadows:
             for path in ('/World/fluid_runtime','/World/fluid_runtime/ParticleSystem',
                          '/World/fluid_runtime/ParticleSets/beaker_liquid','/World/obj_sample_tube/VisualLiquid'):
-                UsdGeom.PrimvarsAPI(stage.GetPrimAtPath(path)).CreatePrimvar('doNotCastShadows',Sdf.ValueTypeNames.Bool).Set(True)
+                prim=stage.GetPrimAtPath(path)
+                if prim:
+                    UsdGeom.PrimvarsAPI(prim).CreatePrimvar('doNotCastShadows',Sdf.ValueTypeNames.Bool).Set(True)
             for path in ('/World/obj_sample_tube/Visual','/World/obj_beaker/Visual', '/World/obj_sample_tube/VisualLiquid'):
                 for prim in Usd.PrimRange(stage.GetPrimAtPath(path)):
                     if prim.IsA(UsdGeom.Mesh):
@@ -89,7 +92,11 @@ def main():
             if five_layers:
                 selected = ("initial", "outside_no_heating", "pause_begin", "shallow_contact", "tilted_contact", "observed", "reset") + tuple(
                     't'+str(t)+suffix for t in (3,9,15,21,27,30) for suffix in ('','_withdrawn'))
+                if data.get('glass_tube_r7'):
+                    selected += ('rack_extracted','rack_reinserted')
             if name not in selected:
+                continue
+            if args.states and name not in args.states.split(','):
                 continue
             tube.GetAttribute("xformOp:translate").Set(Gf.Vec3d(*snapshot["tube_xyz"]))
             if 'beaker_xyz' in snapshot:
@@ -153,6 +160,12 @@ def main():
                 mesh.GetAttribute('visibility').Set(values['visibility'])
             target = np.asarray(snapshot["tube_xyz"]) + np.asarray([0, 0, 0.035])
             views = [("closeup", target + np.asarray([0.25, -0.38, 0.15]), target, 45)]
+            if data.get('glass_tube_r7') and name in ('initial','rack_extracted','rack_reinserted','outside_no_heating','observed'):
+                full=np.asarray(snapshot['tube_xyz'])+np.asarray([0,0,.075])
+                views.append(('tube_full',full+np.asarray([.25,-.38,.13]),full,28))
+                if name in ('outside_no_heating','observed'):
+                    mouth=np.asarray(snapshot['tube_xyz'])+np.asarray([0,0,.147])
+                    views.append(('mouth_detail',mouth+np.asarray([.07,-.10,.075]),mouth,35))
             if name == "initial":
                 views.append(
                     (
@@ -204,6 +217,7 @@ def main():
                     "live_camera_physics_capture": False,
                     "snapshot_step_kind": "fixture_world_step" if data.get("policy_version") in ("visual_water_contact_v3", "visual_fixed_regions_v5", "visual_five_layers_v6") else "legacy_fixture_step",
                     "report_sha256": sha256(args.report.read_bytes()).hexdigest(),
+                    "glass_tube_r7": data.get('glass_tube_r7',False),
                     "images": records,
                 },
                 indent=2,

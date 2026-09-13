@@ -27,7 +27,11 @@ def write_versioned_task_documents(root):
         from scripts.generate_fehlings_water_bath_r5 import write_task_documents as write_documents
         write_documents(root)
     elif version=='visual_five_layers_v6':
-        from scripts.generate_fehlings_water_bath_r6 import write_task_documents as write_documents
+        package_id=json.loads((root/'manifest.json').read_text()).get('package_id','')
+        if package_id.endswith('_vr_r7'):
+            from scripts.generate_fehlings_water_bath_r7 import write_task_documents as write_documents
+        else:
+            from scripts.generate_fehlings_water_bath_r6 import write_task_documents as write_documents
         write_documents(root)
     else:
         raise ValueError('unsupported reaction policy: '+str(version))
@@ -46,7 +50,7 @@ def main():
         raise ValueError('three independent report paths required')
     if any(d['status']!='pass' or d['scene_sha256']!=scene_sha for d in reports):
         raise ValueError('three passes must bind to the exact scene')
-    producer=root/'deps/objects/obj_sample_tube/evidence/manifest.json'
+    producer=root/json.loads((root/'manifest.json').read_text()).get('tube_producer_manifest','deps/objects/obj_sample_tube/evidence/manifest.json')
     if json.loads(producer.read_text())['overall_status']!='pass':
         raise ValueError('producer not qualified')
     evidence=root/'evidence'

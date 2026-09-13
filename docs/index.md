@@ -21,6 +21,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Design
 
+- [Fehling r7 Glass Test Tube and Rack Fit](design/fehlings-glass-test-tube.md)
 - [Articulated Instance Layout](design/articulated-instance-layout.md)
 - [VR articulated link registration record](records/2026-09-04-vr-articulated-link-registration.md)
 - [Architecture](design/architecture.md)
@@ -46,6 +47,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Operations
 
+- [斐林 r7 玻璃试管与8 mL显色指南](operations/fehlings-r7-glass-tube-guide.md)
 - [Artifact Policy](operations/artifact-policy.md)
 - [Workbench build inputs and reconstruction](operations/workbench-build-inputs.md)
 - [Round 2 background archival and dependency decoupling](records/2026-09-05-round2-build-input-decoupling.md)
