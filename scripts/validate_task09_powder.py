@@ -10,6 +10,7 @@ import traceback
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from scripts.task09_powder_protocol import prescribed_spoon
 from scripts.powder_weighing_protocol import measurement_check
+from scripts.task09_powder_evidence import authored_velocity_cap_matches, NEAR_FULL_REVISIONS, R51_DEPENETRATION_VELOCITY, R51_LINEAR_VELOCITY
 
 
 def main():
@@ -106,6 +107,15 @@ def main():
             raise RuntimeError('Physics initialization error: '+fatal_errors[0])
         report['world_manager_dt'] = world.get_physics_dt()
         report['authored_physics_hz'] = stage.GetPrimAtPath('/World/PhysicsScene').GetAttribute('physxScene:timeStepsPerSecond').Get()
+        if cfg.get('revision')=='r5.1':
+            for path in powder_paths:
+                grain = stage.GetPrimAtPath(path)
+                linear = grain.GetAttribute('physxRigidBody:maxLinearVelocity').Get()
+                depen = grain.GetAttribute('physxRigidBody:maxDepenetrationVelocity').Get()
+                if not authored_velocity_cap_matches(linear, depen):
+                    raise ValueError('r5.1 grain velocity caps missing or wrong on '+path)
+            report['authored_grain_max_linear_velocity'] = R51_LINEAR_VELOCITY
+            report['authored_grain_max_depenetration_velocity'] = R51_DEPENETRATION_VELOCITY
         settings.set_bool('/physics/updateToUsd',False)
         settings.set_bool('/physics/updateVelocitiesToUsd',False)
         sim = tensors.create_simulation_view('numpy')
@@ -251,7 +261,7 @@ def main():
                 r = Gf.Matrix3d(Gf.Rotation(Gf.Quatd(float(pose[6]),Gf.Vec3d(*map(float,pose[3:6])))).GetInverse())
                 return (grain[:,:3]-pose[:3])@np.array(r)
             local = local_to(bp)
-            if cfg.get('revision')=='r4' and not rows:
+            if cfg.get('revision') in NEAR_FULL_REVISIONS and not rows:
                 report['initial_fill_level'] = fill_level(local,cfg)
             if compact:
                 within = cavity_mask(local,cfg)

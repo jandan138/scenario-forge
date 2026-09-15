@@ -36,7 +36,11 @@ def prescribed_spoon(t, initial, bottle, receiver, cfg):
     keys = [(8,head_from_root(initial[:3],initial_pitch),initial_pitch,'settle_and_tare'),
             (11,head_from_root((initial[0],initial[1],initial[2]+.13),initial_pitch),initial_pitch,'extract_from_beaker'),
             (14,above,70,'approach_bottle'),(20,entry,70,'insert'),(21,entry,70,'contact_pause'),
-            (28,filled,30,'slow_scoop'),(32,carry,0,'lift_powder'),(36,over,0,'transfer'),
+            (28,filled,30,'slow_scoop')]
+    hold_m = cfg.get('lift_early_hold_m')
+    if hold_m:
+        keys.append((30,(filled[0],filled[1],filled[2]+float(hold_m)),20,'lift_powder'))
+    keys += [(32,carry,0,'lift_powder'),(36,over,0,'transfer'),
             (40,over,100,'slow_pour'),(44,away,0,'withdraw')]
     if t<=8:
         return tuple(initial),'settle_and_tare'

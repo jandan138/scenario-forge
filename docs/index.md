@@ -21,6 +21,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Design
 
+- [Task09 Powder Bottle](design/task09-powder-bottle.md)
 - [Fehling r7 Glass Test Tube and Rack Fit](design/fehlings-glass-test-tube.md)
 - [Articulated Instance Layout](design/articulated-instance-layout.md)
 - [VR articulated link registration record](records/2026-09-04-vr-articulated-link-registration.md)
@@ -47,6 +48,14 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Operations
 
+- [Task09 粉末瓶 r5.7 120 Hz 早期抬离停顿](operations/task09-powder-bottle-r5.7-guide.md)
+- [Task09 粉末瓶 r5.6 120 Hz 勺碗摩擦](operations/task09-powder-bottle-r5.6-guide.md)
+- [Task09 粉末瓶 r5.5 120 Hz 挖深舀取](operations/task09-powder-bottle-r5.5-guide.md)
+- [Task09 粉末瓶 r5.4 120 Hz 加厚内托](operations/task09-powder-bottle-r5.4-guide.md)
+- [Task09 粉末瓶 r5.3 120 Hz 加厚瓶壁](operations/task09-powder-bottle-r5.3-guide.md)
+- [Task09 粉末瓶 r5.2 120 Hz 近满瓶重固化](operations/task09-powder-bottle-r5.2-guide.md)
+- [Task09 粉末瓶 r5.1 120 Hz 限速对照](operations/task09-powder-bottle-r5.1-guide.md)
+- [Task09 粉末瓶 r5.0 120 Hz 对照](operations/task09-powder-bottle-r5.0-guide.md)
 - [斐林 r7 玻璃试管与8 mL显色指南](operations/fehlings-r7-glass-tube-guide.md)
 - [Artifact Policy](operations/artifact-policy.md)
 - [Workbench build inputs and reconstruction](operations/workbench-build-inputs.md)
@@ -80,6 +89,15 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [Task09 120 Hz 近满瓶 5.x 目标进度](records/2026-09-15-task09-powder-120hz-5x-goal-progress.md)
+- [Task09 粉末瓶 r5.7 120 Hz 早期抬离停顿](records/2026-09-15-task09-powder-bottle-r5.7-early-lift-hold.md)
+- [Task09 粉末瓶 r5.6 120 Hz 勺碗摩擦](records/2026-09-15-task09-powder-bottle-r5.6-bowl-friction.md)
+- [Task09 粉末瓶 r5.5 120 Hz 挖深](records/2026-09-15-task09-powder-bottle-r5.5-deeper-scoop.md)
+- [Task09 粉末瓶 r5.4 120 Hz 加厚内托](records/2026-09-15-task09-powder-bottle-r5.4-thicker-insert.md)
+- [Task09 粉末瓶 r5.3 120 Hz 加厚瓶壁](records/2026-09-15-task09-powder-bottle-r5.3-wall-offset.md)
+- [Task09 粉末瓶 r5.2 120 Hz 近满瓶重固化](records/2026-09-15-task09-powder-bottle-r5.2-120hz.md)
+- [Task09 粉末瓶 r5.1 120 Hz 限速对照](records/2026-09-14-task09-powder-bottle-r5.1-velocity-cap.md)
+- [Task09 粉末瓶 r5.0 120 Hz 对照](records/2026-09-14-task09-powder-bottle-r5.0-120hz.md)
 - [Fehling r7 演示视频（关键帧合成）](records/2026-09-13-fehlings-r7-demo-video.md)
 
 - [全部工作树改动分批收尾](records/2026-09-12-worktree-batch-closeout.md)

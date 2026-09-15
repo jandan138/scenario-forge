@@ -8,6 +8,7 @@ import sys
 import traceback
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from scripts.task09_powder_evidence import NEAR_FULL_REVISIONS
 
 
 def load_recording(path):
@@ -30,7 +31,7 @@ def main():
     a.out.mkdir(parents=True,exist_ok=True)
     cfg = json.loads((a.root/'scene_config.json').read_text())
     bottle_focus_z = cfg.get('powder_surface_target_m',.133)+(.010 if 'inner_profile' in cfg else 0.)
-    if cfg.get('revision')=='r4':
+    if cfg.get('revision') in NEAR_FULL_REVISIONS:
         # Match the r3 bottle framing to make the increased fill level visible.
         bottle_focus_z = cfg['bottle_height_m']-.020
     entry = (a.root/cfg['entrypoints'][a.runtime]).resolve()

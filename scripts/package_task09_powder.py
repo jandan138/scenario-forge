@@ -8,7 +8,9 @@ import sys
 import zipfile
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from scripts.task09_powder_evidence import validate_report
+from scripts.task09_powder_evidence import NEAR_FULL_REVISIONS, validate_report
+
+COMPACT_REVISIONS = ('r2','r3','r4','r5.0','r5.1','r5.2','r5.3','r5.4','r5.5','r5.6','r5.7')
 
 
 def sha(path):
@@ -32,7 +34,7 @@ def main():
     cfg = json.loads((out/'scene_config.json').read_text())
     compact = 'inner_profile' in cfg
     revision = cfg.get('revision','r3') if compact else 'r2'
-    if revision not in ('r2','r3','r4'):
+    if revision not in COMPACT_REVISIONS:
         raise ValueError('Unsupported task09 revision')
     source_root = Path(__file__).resolve().parents[1]
     scripts = out/'scripts'
@@ -50,7 +52,7 @@ def main():
     if compact:
         for name in ('build_compact_powder_scene.py','model_compact_powder_bottle.py'):
             shutil.copy2(a.producer_scripts/name,out/'source_scripts'/name)
-    if revision=='r4':
+    if revision in NEAR_FULL_REVISIONS:
         for name in ('build_full_powder_scene.py','model_full_powder_bottle.py'):
             shutil.copy2(a.producer_scripts/name,out/'source_scripts'/name)
     guide = source_root/f'docs/operations/task09-powder-bottle-{revision}-guide.md'

@@ -8,6 +8,16 @@ REQUIRED = {
     'calibration':COMMON|{'known_loads','boat_removed','instrument_reset'},
 }
 MIN_SECONDS = {'settle':5,'scoop':50,'calibration':43}
+NEAR_FULL_REVISIONS = ('r4','r5.0','r5.1','r5.2','r5.3','r5.4','r5.5','r5.6','r5.7')
+R51_LINEAR_VELOCITY = 0.15
+R51_DEPENETRATION_VELOCITY = 0.2
+
+
+def authored_velocity_cap_matches(linear, depen):
+    if linear is None or depen is None:
+        return False
+    return (math.isclose(float(linear), R51_LINEAR_VELOCITY, rel_tol=0, abs_tol=1e-5)
+            and math.isclose(float(depen), R51_DEPENETRATION_VELOCITY, rel_tol=0, abs_tol=1e-5))
 
 
 def validate_report(report, scene_hash, mode, config=None):
@@ -15,16 +25,20 @@ def validate_report(report, scene_hash, mode, config=None):
     hz = config.get('physics_hz',480)
     compact = 'inner_profile' in config
     required = REQUIRED[mode] | ({'deep_powder_bed'} if compact and mode=='settle' else set())
-    if config.get('revision')=='r4':
+    if config.get('revision')=='r5.1' and (
+            config.get('grain_max_linear_velocity_m_s')!=R51_LINEAR_VELOCITY
+            or config.get('grain_max_depenetration_velocity_m_s')!=R51_DEPENETRATION_VELOCITY):
+        raise ValueError('r5.1 requires grain maxLinearVelocity 0.15 and maxDepenetrationVelocity 0.2')
+    if config.get('revision') in NEAR_FULL_REVISIONS:
         from scripts.compact_powder_protocol import near_full_check
         required |= {'near_full_initial_state'}
         if (config.get('preparation_only') or config.get('initial_state')!='presettled' or report.get('initial_state')!='presettled'
                 or not near_full_check(report.get('initial_fill_level',{}))):
-            raise ValueError('r4 requires a verified near-full initial state')
+            raise ValueError('near-full revision requires a verified near-full initial state')
         if mode=='settle':
             required |= {'near_full_settled_state'}
             if not near_full_check(report.get('settled_fill_level',{})):
-                raise ValueError('r4 must remain near-full after cold-start settlement')
+                raise ValueError('near-full revision must remain near-full after cold-start settlement')
     if compact:
         bed = report.get('settled_bed',{})
         if (report.get('profile_revision')!=config.get('revision')

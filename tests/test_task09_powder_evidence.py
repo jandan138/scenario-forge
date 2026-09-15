@@ -1,5 +1,6 @@
 import pytest
 
+from scripts.package_task09_powder import COMPACT_REVISIONS, NEAR_FULL_REVISIONS
 from scripts.task09_powder_evidence import REQUIRED, validate_report
 
 
@@ -46,3 +47,123 @@ def test_compact_evidence_uses_candidate_timestep_and_requires_measured_bed():
     del data['checks']['deep_powder_bed']
     with pytest.raises(ValueError):
         validate_report(data,'scene','settle',cfg)
+
+
+def test_r5_0_compact_evidence_requires_120hz_not_r4_240hz():
+    cfg = {'revision':'r5.0','physics_hz':120,'inner_profile':[{}],'initial_state':'presettled'}
+    level = dict(surface_depth_median_m=.011,median_headspace_m=.005,minimum_headspace_m=.004,columns=120)
+    data = report('settle')
+    data.update(physics_dt=1/120,authored_physics_hz=120,profile_revision='r5.0',
+                initial_state='presettled',initial_fill_level=level,settled_bed=level,settled_fill_level=level)
+    data['checks']['deep_powder_bed'] = True
+    data['checks']['near_full_initial_state'] = True
+    data['checks']['near_full_settled_state'] = True
+    validate_report(data,'scene','settle',cfg)
+    with pytest.raises(ValueError):
+        validate_report(dict(data,physics_dt=1/240,authored_physics_hz=240),'scene','settle',cfg)
+
+
+def test_packager_treats_r5_0_as_compact_near_full_revision():
+    assert 'r5.0' in COMPACT_REVISIONS
+    assert 'r4' in NEAR_FULL_REVISIONS
+    assert 'r5.0' in NEAR_FULL_REVISIONS
+
+
+def test_r5_1_compact_evidence_requires_120hz_velocity_caps_not_r4_240hz():
+    cfg = {'revision':'r5.1','physics_hz':120,'inner_profile':[{}],'initial_state':'presettled',
+           'grain_max_linear_velocity_m_s':0.15,'grain_max_depenetration_velocity_m_s':0.2}
+    level = dict(surface_depth_median_m=.011,median_headspace_m=.005,minimum_headspace_m=.004,columns=120)
+    data = report('settle')
+    data.update(physics_dt=1/120,authored_physics_hz=120,profile_revision='r5.1',
+                initial_state='presettled',initial_fill_level=level,settled_bed=level,settled_fill_level=level)
+    data['checks']['deep_powder_bed'] = True
+    data['checks']['near_full_initial_state'] = True
+    data['checks']['near_full_settled_state'] = True
+    validate_report(data,'scene','settle',cfg)
+    with pytest.raises(ValueError):
+        validate_report(dict(data,physics_dt=1/240,authored_physics_hz=240),'scene','settle',cfg)
+    with pytest.raises(ValueError):
+        validate_report(data,'scene','settle',dict(cfg,grain_max_linear_velocity_m_s=1.0))
+    with pytest.raises(ValueError):
+        validate_report(data,'scene','settle',dict(cfg,grain_max_depenetration_velocity_m_s=0.05))
+
+
+def test_packager_treats_r5_1_as_compact_near_full_revision():
+    assert 'r5.1' in COMPACT_REVISIONS
+    assert 'r5.1' in NEAR_FULL_REVISIONS
+
+
+def test_r5_2_compact_evidence_requires_120hz_not_r4_240hz():
+    cfg = {'revision':'r5.2','physics_hz':120,'inner_profile':[{}],'initial_state':'presettled',
+           'grain_contact_offset_m':0.00015,'grain_rest_offset_m':0.00005}
+    level = dict(surface_depth_median_m=.011,median_headspace_m=.005,minimum_headspace_m=.004,columns=120)
+    data = report('settle')
+    data.update(physics_dt=1/120,authored_physics_hz=120,profile_revision='r5.2',
+                initial_state='presettled',initial_fill_level=level,settled_bed=level,settled_fill_level=level)
+    data['checks']['deep_powder_bed'] = True
+    data['checks']['near_full_initial_state'] = True
+    data['checks']['near_full_settled_state'] = True
+    validate_report(data,'scene','settle',cfg)
+    with pytest.raises(ValueError):
+        validate_report(dict(data,physics_dt=1/240,authored_physics_hz=240),'scene','settle',cfg)
+
+
+def test_packager_treats_r5_2_as_compact_near_full_revision():
+    assert 'r5.2' in COMPACT_REVISIONS
+    assert 'r5.2' in NEAR_FULL_REVISIONS
+
+
+def test_r5_3_compact_evidence_requires_120hz_not_r4_240hz():
+    cfg = {'revision':'r5.3','physics_hz':120,'inner_profile':[{}],'initial_state':'presettled',
+           'grain_contact_offset_m':0.00025,'grain_rest_offset_m':0.00015,
+           'wall_contact_offset_m':0.001,'wall_rest_offset_m':0.0002}
+    level = dict(surface_depth_median_m=.011,median_headspace_m=.005,minimum_headspace_m=.004,columns=120)
+    data = report('settle')
+    data.update(physics_dt=1/120,authored_physics_hz=120,profile_revision='r5.3',
+                initial_state='presettled',initial_fill_level=level,settled_bed=level,settled_fill_level=level)
+    data['checks']['deep_powder_bed'] = True
+    data['checks']['near_full_initial_state'] = True
+    data['checks']['near_full_settled_state'] = True
+    validate_report(data,'scene','settle',cfg)
+    with pytest.raises(ValueError):
+        validate_report(dict(data,physics_dt=1/240,authored_physics_hz=240),'scene','settle',cfg)
+
+
+def test_packager_treats_r5_3_as_compact_near_full_revision():
+    assert 'r5.3' in COMPACT_REVISIONS
+    assert 'r5.3' in NEAR_FULL_REVISIONS
+
+
+def test_r5_4_compact_evidence_requires_120hz_not_r4_240hz():
+    cfg = {'revision':'r5.4','physics_hz':120,'inner_profile':[{}],'initial_state':'presettled',
+           'insert_contact_offset_m':0.003,'insert_rest_offset_m':0.0006}
+    level = dict(surface_depth_median_m=.011,median_headspace_m=.005,minimum_headspace_m=.004,columns=120)
+    data = report('settle')
+    data.update(physics_dt=1/120,authored_physics_hz=120,profile_revision='r5.4',
+                initial_state='presettled',initial_fill_level=level,settled_bed=level,settled_fill_level=level)
+    data['checks']['deep_powder_bed'] = True
+    data['checks']['near_full_initial_state'] = True
+    data['checks']['near_full_settled_state'] = True
+    validate_report(data,'scene','settle',cfg)
+    with pytest.raises(ValueError):
+        validate_report(dict(data,physics_dt=1/240,authored_physics_hz=240),'scene','settle',cfg)
+
+
+def test_packager_treats_r5_4_as_compact_near_full_revision():
+    assert 'r5.4' in COMPACT_REVISIONS
+    assert 'r5.4' in NEAR_FULL_REVISIONS
+
+
+def test_packager_treats_r5_5_as_compact_near_full_revision():
+    assert 'r5.5' in COMPACT_REVISIONS
+    assert 'r5.5' in NEAR_FULL_REVISIONS
+
+
+def test_packager_treats_r5_6_as_compact_near_full_revision():
+    assert 'r5.6' in COMPACT_REVISIONS
+    assert 'r5.6' in NEAR_FULL_REVISIONS
+
+
+def test_packager_treats_r5_7_as_compact_near_full_revision():
+    assert 'r5.7' in COMPACT_REVISIONS
+    assert 'r5.7' in NEAR_FULL_REVISIONS

@@ -30,3 +30,18 @@ def test_pouring_keeps_head_in_place_and_new_bottle_is_reached():
     assert pose[2]-.087*np.sin(angle)==pytest.approx(receiver[2]+.05)
     pose,_ = prescribed_spoon(20,initial,bottle,receiver,CFG)
     assert pose[2]-.087*np.sin(2*np.arctan2(pose[5],pose[3])) < bottle[2]+.09
+
+
+def _head_z(pose):
+    return pose[2]-.087*np.sin(2*np.arctan2(pose[5],pose[3]))
+
+
+def test_optional_early_lift_hold_stays_lower_at_t30():
+    initial = (.083,.192,.861,.7809008,0,.62465507,0)
+    bottle,receiver = (-.08,-.065,.756),(.287,-.105,.93)
+    default,_ = prescribed_spoon(30,initial,bottle,receiver,CFG)
+    held,_ = prescribed_spoon(30,initial,bottle,receiver,dict(CFG,lift_early_hold_m=0.006))
+    assert _head_z(held) < _head_z(default) - 0.004
+    # Total timeline is unchanged: carry still happens at t=32.
+    _,phase = prescribed_spoon(32,initial,bottle,receiver,dict(CFG,lift_early_hold_m=0.006))
+    assert phase=='lift_powder'

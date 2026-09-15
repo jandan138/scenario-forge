@@ -102,3 +102,72 @@ r3 实际粉面距 100 mm 瓶口约 30 mm。用户希望粉末看起来盛满，
 
 见 [r4 日期记录](../records/2026-09-11-task09-powder-bottle-r4.md) 与
 [r4 操作说明](../operations/task09-powder-bottle-r4-guide.md)。
+
+## r5.0：锁定 120 Hz 的对照试验
+
+用户要求这条粉末任务后续物理步频定死 120 Hz。r5.0 只改 USD `timeStepsPerSecond` 与
+`scene_config.physics_hz`，几何、10240 粒预沉降初态、PGS、32 次位置迭代和规定勺轨迹保持 r4。
+不继承 r4 的 240 Hz 运行资格。
+
+Isaac 4.5 冷启动与舀取均失败：床深从约 10.3 mm 压到约 7.5 mm，内托下漏粒，舟内仅 31 粒、LCD 0.07 g。
+当前交付头仍是 r4。120 Hz 仍是后续目标，但不能把这次克隆试验标成合格场景。
+
+见 [r5.0 日期记录](../records/2026-09-14-task09-powder-bottle-r5.0-120hz.md) 与
+[r5.0 操作说明](../operations/task09-powder-bottle-r5.0-guide.md)。
+
+## r5.1：120 Hz 粉粒限速对照
+
+r5.0 在 120 Hz 下床深落到约 7.5 mm。r5.1 保持 120 Hz / PGS / r4 预沉降位姿，只给 10240 颗粉末加上
+`maxLinearVelocity = 0.15` m/s，并保持已有 `maxDepenetrationVelocity = 0.2` m/s。
+不继承 r4 的 240 Hz 运行资格，也不替换 r4 交付头。
+
+Isaac 4.5 2 s 烟测床深已约 7.51 mm，与 r5.0 同类，因此未跑 50 s 舀取。8 s 沉降仍约 7.53 mm；
+内托下仍有 2 粒，未穿到玻璃瓶底。限速不能把 120 Hz 接触平衡拉回 10–12 mm。
+
+见 [r5.1 日期记录](../records/2026-09-14-task09-powder-bottle-r5.1-velocity-cap.md) 与
+[r5.1 操作说明](../operations/task09-powder-bottle-r5.1-guide.md)。
+
+## r5.2：120 Hz 偏移重固化
+
+r5.1 证明限速不能把 120 Hz 平衡拉回 10–12 mm。r5.2 保持 120 Hz / PGS / 32 次位置迭代，
+把粉粒 `contactOffset`/`restOffset` 增到 0.25 / 0.15 mm，给内托凸片 2.0 / 0.4 mm 偏移，
+并从 r4 预沉降位姿在 120 Hz 下再沉降后固化。放弃 ConvertAsset 高塔 HCP：该路径在 120 Hz 下过慢。
+不继承 r4 的 240 Hz 运行资格，也不替换 r4 交付头。
+
+Isaac 4.5 冷启动近满瓶门禁通过（沉降床深约 11.54 mm，距口约 4.46 mm），规定舀取能转到舟内 170 粒、LCD 0.37 g；
+包装 `status` 仍因丢 3 粒和舀取内托下 1 粒失败。视频已出。当前交付头仍是 r4。
+
+见 [r5.2 日期记录](../records/2026-09-15-task09-powder-bottle-r5.2-120hz.md) 与
+[r5.2 操作说明](../operations/task09-powder-bottle-r5.2-guide.md)。
+
+## r5.3：120 Hz 加厚瓶壁
+
+r5.2 冷启动丢 3 粒、瓶外贴粒。r5.3 保持 120 Hz 与 r5.2 粉粒/内托偏移，只把 256 块 `Wall_*`
+加到 1.0 / 0.2 mm。冷启动 8 s 全部通过（10240 粒，床深约 11.50 mm）。规定舀取仍能转到约 167 粒 / 0.36 g，
+但内托下最多 2 粒，且第一粒在勺入瓶前就出现。不替换 r4 交付头。
+
+见 [r5.3 日期记录](../records/2026-09-15-task09-powder-bottle-r5.3-wall-offset.md) 与
+[r5.3 操作说明](../operations/task09-powder-bottle-r5.3-guide.md)。
+
+## r5.4：120 Hz 再加厚内托
+
+r5.3 冷启动不再丢粒，但舀取仍有最多 2 粒漏进内托。r5.4 保持 120 Hz 与瓶壁/粉粒偏移，
+把 `Insert_*` 加到 3.0 / 0.6 mm。冷启动与规定舀取包装门禁均通过（177 粒 / 0.38 g，内托下 0）。
+转移量仍低于 r4。不替换 r4 交付头。
+
+见 [r5.4 日期记录](../records/2026-09-15-task09-powder-bottle-r5.4-thicker-insert.md) 与
+[r5.4 操作说明](../operations/task09-powder-bottle-r5.4-guide.md)。
+
+## r5.5–r5.7：120 Hz 留勺量
+
+r5.4 过门后舟内只有 177 粒。之后仍锁 120 Hz，总时间轴 0–50 s，每一版只改一个变量：
+
+- r5.5 把舀取粉面目标从 95 mm 降到 91 mm。高峰升到约 1119，抬离后仍是 221 粒 / 0.48 g。
+- r5.6 只给勺碗新建 `BowlContact` 0.9/0.7，不改瓶壁摩擦。舟内仍是 221。
+- r5.7 在 t=30 插入 `lift_early_hold_m=0.006`（缺省关闭，旧轨迹不变）。舟内 **252 粒 / 0.54 g**，接近 r4 的 253 / 0.55 g。可见瓶身无贴粒。
+
+120 Hz 不能直接复用 r4 的 240 Hz 接触平衡和抬离加速度。近满靠加大偏移并重固化；等量靠减慢抬离前 2 s，不是再挖深或加摩擦。不替换 r4 交付头。
+
+见 [5.x 进度](../records/2026-09-15-task09-powder-120hz-5x-goal-progress.md)、
+[r5.7 日期记录](../records/2026-09-15-task09-powder-bottle-r5.7-early-lift-hold.md) 与
+[r5.7 操作说明](../operations/task09-powder-bottle-r5.7-guide.md)。
