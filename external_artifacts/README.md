@@ -76,6 +76,31 @@ Current indexed external artifacts:
   the image inventory of
   `docs/design/asset-specs/traditional-titration-burette-and-stand.md`.
 
+- `lab2sim_iclr2027_fig1_sources`: five ignored raster inputs staged for the
+  Lab2Sim paper hero. Their immutable source and selected-asset hashes are in
+  `paper/venues/iclr2027/figures/lab2sim/source/fig1-assets.json` and
+  `paper/venues/iclr2027/figures/lab2sim/provenance.json`. Rebuild the ignored
+  `source/*.png` files with
+  `python scripts/prepare_lab2sim_fig1_assets.py`; `--check` verifies an
+  existing staging tree. The sources are the IKA OVEN evidence catalog, the
+  Fehling r10 camera-only retake under
+  `outputs/lab2sim_fig1_retake_20260917/`, and the current-delivery powder r4,
+  titration r1.7, and OVEN r2 evidence trees. Missing external sources are a
+  hard error; the script never substitutes candidate or prototype renders.
+
+- `lab2sim_iclr2027_result_sources`: fourteen ignored raster inputs staged for
+  the Lab2Sim paper Figures 2–3 and appendix by
+  `python scripts/prepare_lab2sim_result_assets.py` (`--check` verifies).
+  Hashes, crops, and global brightness are in
+  `paper/venues/iclr2027/figures/lab2sim/source/fig23-assets.json` and
+  `paper/venues/iclr2027/figures/lab2sim/provenance.json`. Sources are the
+  current-delivery task05 r11, task07 r10.1, stir-bar r5, water-bath r1,
+  OVEN r2, and titration r1.7 evidence trees, the IKA OVEN and burette
+  evidence catalogs, the phase-11 Lift2 runtime frame, and the camera-only
+  OVEN r2 retake under `outputs/lab2sim_fig3_retake_20260917/oven_r2/`
+  (`scripts/render_lab2sim_oven_retake.py`; same scene, same door command,
+  new camera and exposure only).
+
 ## Historical output archive
 
 The [round-two archive and build-input index](archive-index-round2-20260905.json)
