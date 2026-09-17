@@ -53,7 +53,7 @@ def main():
                   protocol_sha256=hashlib.sha256((Path(__file__).parent/'task09_powder_protocol.py').read_bytes()).hexdigest())
     compact = 'inner_profile' in cfg
     if compact:
-        from scripts.compact_powder_protocol import prescribed_spoon as compact_spoon, cavity_mask, bed_depth, fill_level, near_full_check, exclusive_loose_count
+        from scripts.compact_powder_protocol import prescribed_spoon as compact_spoon, cavity_mask, bed_depth, fill_level, near_full_check, exclusive_loose_count, in_spoon_mask
         report['protocol_sha256'] = hashlib.sha256((Path(__file__).parent/'compact_powder_protocol.py').read_bytes()).hexdigest()
         report['profile_revision'] = cfg.get('revision')
         report['initial_state'] = cfg.get('initial_state','generated')
@@ -389,7 +389,7 @@ def main():
             boat_local = local_to(bowl)
             in_boat = (abs(boat_local[:,0])<.027)&(abs(boat_local[:,1])<.037)&(boat_local[:,2]>-.006)&(boat_local[:,2]<.030)
             tool_local = local_to(tool)
-            in_spoon = ((tool_local[:,0]>.067)&(tool_local[:,0]<.101)
+            in_spoon = in_spoon_mask(tool_local, cfg) if compact else ((tool_local[:,0]>.067)&(tool_local[:,0]<.101)
                         &(abs(tool_local[:,1])<.009)&(tool_local[:,2]>.001)&(tool_local[:,2]<.012))
             loose_count = exclusive_loose_count(in_bottle, in_spoon, in_boat) if compact else int((~in_bottle & ~in_spoon & ~in_boat).sum())
             row = dict(time_s=t+dt,phase=phase,bottle_count=int(in_bottle.sum()),below_insert_count=int(below_insert.sum()),

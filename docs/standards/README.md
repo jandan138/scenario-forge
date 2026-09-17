@@ -76,6 +76,7 @@
 | [粉末瓶 r5.10 120 Hz 静止冻结](../records/2026-09-15-task09-powder-bottle-r5.10-rest-hold.md) | 本任务 120 Hz 下 0.5–18 s 回写位姿可将插入前中位速度压到 0、15 s 漂移 0.90 mm，舀取约 245 粒 / 0.53 g | 全仓库粉粒 kinematic/sleep 默认、替换 r4 交付资格 |
 | [固体称量 1 g 过程分](../records/2026-09-16-solid-sample-weighing-1g-package.md) | 本任务以去皮后终帧 LCD `1.00 g` 为最大过程分（0.35），场景 USD 用 r5.7 | 把 LCD 1.00 g 写成全仓库仪器成功默认、替换 r4 交付头 |
 | [粉末瓶 r6.0 PBD 干粉起步](../records/2026-09-17-task09-powder-bottle-r6.0-pbd-start.md) | 本任务用 `fluid=False`、自碰 1.04 mm rest、墙碰 0.7 mm、`gravityScale` 1 替换刚体粒；scoop 先按区域粒数计质量 | 液体 PBD 配方、斐林水浴、刚体秤盘接触力资格、替换 r4/r5.7 交付 |
+| [固体称量 r6.0 a54 VR 候选](../records/2026-09-17-solid-sample-weighing-r6.0-a54-vr.md) | 本任务把 a54 3125 粒干 PBD 编成 v0.2 数采包，过程分仍是终帧 LCD `1.00 g`；包级是 `asset_locked` | 把 a54 写成近满合格或 `scene_fixture_verified`、替换 r4/r5.7 交付、放宽全仓库 LCD |
 | [液体接入契约](../design/liquid-autofill-contract.md) | 指定生产者和运行时的液体资格与闭包 | 视觉假液体自动获得真实液体能力 |
 
 [早期假液体原型](../records/2026-08-16-visual-static-liquid-prototype.md) 的“仅背景”描述是该原型当时的范围；

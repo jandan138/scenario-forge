@@ -229,8 +229,12 @@ def test_packager_treats_r6_0_as_compact_near_full_pbd_revision():
     }
     assert authored_pbd_dry_powder_matches(cfg)
     assert not authored_pbd_dry_powder_matches(dict(cfg, pbd_fluid=True))
-    assert not authored_pbd_dry_powder_matches(dict(cfg, pbd_solid_rest_offset_m=0.0007))
-    assert not authored_pbd_dry_powder_matches(dict(cfg, pbd_particle_contact_offset_m=0.0014))
+    assert not authored_pbd_dry_powder_matches(dict(cfg, pbd_solid_rest_offset_m=0.0012))
+    assert not authored_pbd_dry_powder_matches(dict(cfg, pbd_particle_contact_offset_m=0.0010))
+    assert authored_pbd_dry_powder_matches(dict(
+        cfg, pbd_solid_rest_offset_m=0.00149, pbd_particle_contact_offset_m=0.00163,
+        pbd_rigid_rest_offset_m=0.0010, pbd_rigid_contact_offset_m=0.00103,
+    ))
 
 
 def test_authored_pbd_viscous_particles_requires_fluid_and_particle_display():
@@ -251,6 +255,11 @@ def test_authored_pbd_viscous_particles_requires_fluid_and_particle_display():
     assert not authored_pbd_viscous_particles_matches(dict(cfg, powder_kind='pbd_solid'))
     assert not authored_pbd_viscous_particles_matches(dict(cfg, pbd_display='isosurface'))
     assert not authored_pbd_viscous_particles_matches(dict(cfg, pbd_fluid_rest_offset_m=0.00114))
+    assert authored_pbd_viscous_particles_matches(dict(
+        cfg, pbd_fluid_rest_offset_m=0.00093, pbd_particle_contact_offset_m=0.00163,
+        pbd_rigid_rest_offset_m=0.0010, pbd_rigid_contact_offset_m=0.00103,
+        pbd_solid_rest_offset_m=0.00149,
+    ))
 
 
 def test_r6_0_replaces_rigid_grains_with_dry_pbd_points(tmp_path):
@@ -317,6 +326,42 @@ def Xform "World"
     assert cfg['pbd_gravity_scale'] == pytest.approx(1.0)
 
 
+def test_set_pbd_particle_xyz_keeps_dry_offsets_and_updates_count(tmp_path):
+    from pxr import Usd, UsdGeom, UsdPhysics
+    from scripts.clone_task09_powder_r6_0 import replace_grains_with_pbd, set_pbd_particle_xyz
+
+    usda = tmp_path / 'scene.usda'
+    usda.write_text(
+        '''#usda 1.0
+def Xform "World"
+{
+    def PhysicsScene "PhysicsScene" {}
+    def Xform "obj_powder_grain_00000"
+    {
+        double3 xformOp:translate = (0.1, 0.2, 0.8)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+    def Xform "obj_powder_grain_00001"
+    {
+        double3 xformOp:translate = (0.11, 0.21, 0.81)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}
+'''
+    )
+    replace_grains_with_pbd(usda, mass_per_particle=2.15513256e-6)
+    n = set_pbd_particle_xyz(usda, [(0.1, 0.2, 0.8)], mass_per_particle=2.15513256e-6)
+    assert n == 1
+    stage = Usd.Stage.Open(str(usda))
+    system = stage.GetPrimAtPath('/World/powder_pbd/ParticleSystem')
+    prim = stage.GetPrimAtPath('/World/powder_pbd/ParticleSet')
+    assert prim.GetAttribute('physxParticle:fluid').Get() is False
+    assert system.GetAttribute('solidRestOffset').Get() == pytest.approx(0.00104)
+    pts = UsdGeom.Points(prim).GetPointsAttr().Get()
+    assert len(pts) == 1
+    assert UsdPhysics.MassAPI(prim).GetMassAttr().Get() == pytest.approx(2.15513256e-6)
+
+
 def test_apply_pbd_motion_caps_writes_damping_and_max_velocity(tmp_path):
     from pxr import Usd
     from scripts.clone_task09_powder_r6_0 import apply_pbd_motion_caps, replace_grains_with_pbd
@@ -381,6 +426,123 @@ def Xform "World"
     assert stage.GetPrimAtPath('/World/powder_pbd/PBDMaterial').GetAttribute('physxPBDMaterial:adhesionOffsetScale').Get() == pytest.approx(0.0)
     iso = stage.GetPrimAtPath('/World/powder_pbd/ParticleSystem').GetAttribute('physxParticleIsosurface:isosurfaceEnabled')
     assert (not iso) or iso.Get() is False
+
+
+def test_apply_pbd_viscous_particle_fluid_can_scale_contact_with_larger_rest(tmp_path):
+    from pxr import Usd
+    from scripts.clone_task09_powder_r6_0 import apply_pbd_viscous_particle_fluid, replace_grains_with_pbd
+
+    usda = tmp_path / 'scene.usda'
+    usda.write_text(
+        '''#usda 1.0
+def Xform "World"
+{
+    def PhysicsScene "PhysicsScene" {}
+    def Xform "obj_powder_grain_00000"
+    {
+        double3 xformOp:translate = (0.1, 0.2, 0.8)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}
+'''
+    )
+    replace_grains_with_pbd(usda, mass_per_particle=6.28e-6)
+    apply_pbd_viscous_particle_fluid(
+        usda, cohesion=0.2, viscosity=2.0, friction=0.85,
+        fluid_rest_offset_m=0.00093, particle_contact_offset_m=0.00163,
+        rigid_rest_offset_m=0.0010, rigid_contact_offset_m=0.00103,
+    )
+    stage = Usd.Stage.Open(str(usda))
+    system = stage.GetPrimAtPath('/World/powder_pbd/ParticleSystem')
+    assert system.GetAttribute('fluidRestOffset').Get() == pytest.approx(0.00093)
+    assert system.GetAttribute('particleContactOffset').Get() == pytest.approx(0.00163)
+    assert system.GetAttribute('restOffset').Get() == pytest.approx(0.0010)
+    assert system.GetAttribute('contactOffset').Get() == pytest.approx(0.00103)
+
+
+def test_apply_pbd_dry_solid_disables_fluid_and_can_scale_rest(tmp_path):
+    from pxr import Usd
+    from scripts.clone_task09_powder_r6_0 import (
+        apply_pbd_dry_solid, apply_pbd_viscous_particle_fluid, replace_grains_with_pbd,
+    )
+
+    usda = tmp_path / 'scene.usda'
+    usda.write_text(
+        '''#usda 1.0
+def Xform "World"
+{
+    def PhysicsScene "PhysicsScene" {}
+    def Xform "obj_powder_grain_00000"
+    {
+        double3 xformOp:translate = (0.1, 0.2, 0.8)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}
+'''
+    )
+    replace_grains_with_pbd(usda, mass_per_particle=6.28e-6)
+    apply_pbd_viscous_particle_fluid(
+        usda, cohesion=0.2, viscosity=2.0, friction=0.85,
+        fluid_rest_offset_m=0.00093, particle_contact_offset_m=0.00163,
+        rigid_rest_offset_m=0.0010, rigid_contact_offset_m=0.00103,
+    )
+    apply_pbd_dry_solid(
+        usda, solid_rest_offset_m=0.00149, particle_contact_offset_m=0.00163,
+        rigid_rest_offset_m=0.0010, rigid_contact_offset_m=0.00103,
+        friction=0.65, damping=0.4, max_velocity=0.06,
+    )
+    stage = Usd.Stage.Open(str(usda))
+    system = stage.GetPrimAtPath('/World/powder_pbd/ParticleSystem')
+    material = stage.GetPrimAtPath('/World/powder_pbd/PBDMaterial')
+    assert stage.GetPrimAtPath('/World/powder_pbd/ParticleSet').GetAttribute('physxParticle:fluid').Get() is False
+    assert system.GetAttribute('fluidRestOffset').Get() == pytest.approx(0.0)
+    assert system.GetAttribute('solidRestOffset').Get() == pytest.approx(0.00149)
+    assert system.GetAttribute('particleContactOffset').Get() == pytest.approx(0.00163)
+    assert system.GetAttribute('restOffset').Get() == pytest.approx(0.0010)
+    assert system.GetAttribute('contactOffset').Get() == pytest.approx(0.00103)
+    assert system.GetAttribute('maxVelocity').Get() == pytest.approx(0.06)
+    assert material.GetAttribute('physxPBDMaterial:cohesion').Get() == pytest.approx(0.0)
+    assert material.GetAttribute('physxPBDMaterial:viscosity').Get() == pytest.approx(0.0)
+    assert material.GetAttribute('physxPBDMaterial:friction').Get() == pytest.approx(0.65)
+    assert material.GetAttribute('physxPBDMaterial:damping').Get() == pytest.approx(0.4)
+
+
+def test_fill_pbd_cavity_lattice_writes_visual_width(tmp_path):
+    from pxr import Usd, UsdGeom
+    from scripts.clone_task09_powder_r6_0 import fill_pbd_cavity_lattice, replace_grains_with_pbd
+
+    usda = tmp_path / 'scene.usda'
+    usda.write_text(
+        '''#usda 1.0
+def Xform "World"
+{
+    def PhysicsScene "PhysicsScene" {}
+    def Xform "obj_powder_grain_00000"
+    {
+        double3 xformOp:translate = (1.0, 2.0, 3.0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}
+'''
+    )
+    replace_grains_with_pbd(usda, mass_per_particle=6.28e-6)
+    cfg = {
+        'bottle_xyz': [-0.08, -0.065, 0.756],
+        'false_floor_m': 0.084,
+        'bottle_height_m': 0.100,
+        'inner_profile': [
+            {'z': 0.002, 'radius': 0.0278, 'exponent': 5.0},
+            {'z': 0.100, 'radius': 0.0249, 'exponent': 2.0},
+        ],
+    }
+    fill_pbd_cavity_lattice(
+        usda, cfg, spacing_m=0.004, surface_depth_m=0.011, mass_per_particle=6.28e-6,
+        visual_width_m=0.002,
+    )
+    stage = Usd.Stage.Open(str(usda))
+    widths = UsdGeom.Points(stage.GetPrimAtPath('/World/powder_pbd/ParticleSet')).GetWidthsAttr().Get()
+    assert widths
+    assert widths[0] == pytest.approx(0.002)
 
 
 def test_spoon_weir_collision_enabled_is_half_open_window():

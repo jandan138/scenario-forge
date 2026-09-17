@@ -55,7 +55,8 @@ def prescribed_spoon_keys(initial, bottle, receiver, cfg):
             (28,filled,30,'slow_scoop')]
     hold_m = cfg.get('lift_early_hold_m')
     if hold_m:
-        keys.append((30,(filled[0],filled[1],filled[2]+float(hold_m)),20,'lift_powder'))
+        hold_pitch = float(cfg.get('lift_hold_pitch_deg', 20) or 20)
+        keys.append((30,(filled[0],filled[1],filled[2]+float(hold_m)),hold_pitch,'lift_powder'))
     carry_pitch = float(cfg.get('carry_pitch_deg', 0.0) or 0.0)
     transfer_pitch = carry_pitch if cfg.get('carry_pitch_through_transfer') else 0.0
     keys += [(32,carry,carry_pitch,'lift_powder'),(36,over,transfer_pitch,'transfer'),
@@ -203,6 +204,16 @@ def fill_level(local,cfg):
                  minimum_headspace_m=cfg['bottle_height_m']-highest)
     assert np.isfinite(list(level.values())).all()
     return level
+
+
+def in_spoon_mask(tool_local, cfg=None):
+    """Bowl occupancy in spoon-local XYZ. Taller grains may raise z_max."""
+    import numpy as np
+    cfg = {} if cfg is None else cfg
+    z_max = float(cfg.get('spoon_local_z_max_m') or 0.012)
+    pts = np.asarray(tool_local, dtype=float)
+    return ((pts[:, 0] > 0.067) & (pts[:, 0] < 0.101)
+            & (np.abs(pts[:, 1]) < 0.009) & (pts[:, 2] > 0.001) & (pts[:, 2] < z_max))
 
 
 def exclusive_loose_count(in_bottle, in_spoon, in_boat):

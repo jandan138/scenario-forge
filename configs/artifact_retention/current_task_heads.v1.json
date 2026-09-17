@@ -160,6 +160,14 @@
       "revision": "r4",
       "status": "current_delivery",
       "variant_key": "isaac45_original_scene_powder_bottle"
+    },
+    {
+      "artifact_family": "solid_sample_weighing",
+      "handoff_zip": "handoff/scientific_workbench_solid_sample_weighing_r6_0_a54.zip",
+      "output_root": "outputs/task09_powder_bottle_r6_0_20260917",
+      "revision": "r6.0",
+      "status": "current_candidate",
+      "variant_key": "isaac45_pbd_a54_vr"
     }
   ],
   "schema_version": "scenario-forge-current-task-heads/v1",

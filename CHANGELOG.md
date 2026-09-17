@@ -29,6 +29,36 @@
   onto the official 50 s key times so lift heap and LCD stay in frame.
   Optional `carry_pitch_deg` keeps the bowl pocketed through neck exit
   so a viscous rim ridge can slump back into the bowl; default stays 0°.
+  Optional `lift_hold_pitch_deg` keeps the early-lift key from flattening
+  to the official 20°; default stays 20.
+  Coarse viscous pack `prep_a48` (3125 grains, 2.0 mm visual) held 156
+  through official 50 s with 0 exclusive loose and LCD 0.61 g; the close
+  replay is a single-file rim C-ring, not a bowl heap. Shrinking that pack
+  to 1.6 mm at the same count would thin the spoon monolayer; `prep_a49`
+  keeps the a48 pack and only raises post-neck `carry_pitch_deg` to 35.
+  `prep_a50` keeps that pack on official 20°/0° keys and only drops
+  cohesion/viscosity to 0.02/0.2: t=32 stays a 156-grain C-ring (center
+  57 / rim 46.2%), then 0° transfer sheds 34 exclusive loose. Dry PBD
+  evidence now accepts any solid/rigid rest below contact so a coarse
+  3125 pack can run `fluid=False`; `apply_pbd_dry_solid` converts a
+  viscous set back to dry beads. `prep_a51` reused the a48 lattice as dry
+  beads: the bed swelled and leaked 311 grains by t=8, ending 75 in the
+  boat / 815 exclusive loose. Do not convert a viscous cavity pack to dry.
+  `prep_a52` repacks from dry a9: 3074 grains at 1.63 mm / 7 mm leaked
+  281 by t=8 (bed 14.3 mm). `prep_a53` keeps those offsets and drops the
+  authored pack to 5 mm (2556 grains). Official 50 s scoop ended 68 in
+  the boat / 417 exclusive loose / LCD 0.42 g; t=32 spoon 132 / center 64.
+  Do not keep shallowing dry ~3000 cavity lattices. `set_pbd_particle_xyz`
+  can rewrite an existing dry set; `prep_a54` keeps a9 rest/mass/visual and
+  subsamples 3125 of the a9 positions.   `prep_a54` settle retained 3125 / 0
+  exclusive loose; the bed compacted 8.90→7.05 mm. Official 50 s scoop
+  kept `transfer`/`sustained_carry`: t=32 spoon 155 / center 69 / rim
+  36.1%, boat 126 / 0.27 g / LCD 0.27 g / 30 exclusive loose (a9 ~187).
+  Dry a9-subsample spills less than a9; the 7.05 mm bed still fails the
+  10–12 mm near-full gate. Freeze `prep_a54` as `vr_a54` and compile
+  `scientific_workbench_solid_sample_weighing_r6_0` for VR collection
+  (`asset_locked`, not `scene_fixture_verified`). The 1 g rubric is
+  unchanged; r4 / r5.7 heads stay put.
 - Add progress-rubric condition `instrument_display_matches` (scenario-spec/v0.6
   and v0.7). The solid-sample weighing package scores a tared terminal LCD of
   `1.00 g` at weight 0.35 on the r5.7 powder-bottle producer scene.

@@ -2,12 +2,20 @@ import numpy as np
 import pytest
 
 from scripts.compact_powder_protocol import (
-    bed_depth, cavity_mask, exclusive_loose_count, prescribed_spoon,
+    bed_depth, cavity_mask, exclusive_loose_count, in_spoon_mask, prescribed_spoon,
 )
 
 CFG = dict(bottle_height_m=.1,false_floor_m=.059,powder_surface_target_m=.070,
            grain_bound_m=.000827,inner_profile=[dict(z=.002,radius=.0282,exponent=5),dict(z=.1,radius=.024,exponent=2)],
            spoon_floor_envelope=[[0,0],[30,-.0028],[50,-.0065],[70,-.01024],[80,-.01175]])
+
+
+def test_in_spoon_mask_can_raise_bowl_height_for_larger_grains():
+    pts = np.array([[0.084, 0.0, 0.014], [0.084, 0.0, 0.008]])
+    default = in_spoon_mask(pts, {})
+    taller = in_spoon_mask(pts, {'spoon_local_z_max_m': 0.018})
+    assert default.tolist() == [False, True]
+    assert taller.tolist() == [True, True]
 
 
 def test_exclusive_loose_count_ignores_overlapping_spoon_in_bottle():
@@ -152,3 +160,21 @@ def test_carry_pitch_keeps_bowl_pocket_until_after_the_neck():
     held, _ = prescribed_spoon(36, initial, bottle, receiver,
                                dict(CFG, carry_pitch_deg=25, carry_pitch_through_transfer=True))
     assert _pitch_deg(held) == pytest.approx(25.0, abs=0.5)
+
+
+def test_lift_hold_pitch_can_keep_bowl_pocketed_through_the_neck():
+    initial = (.083,.192,.861,.7809008,0,.62465507,0)
+    bottle, receiver = (-.08,-.065,.756),(.287,-.105,.93)
+    cfg = dict(CFG, lift_early_hold_m=0.006)
+    default_hold, phase = prescribed_spoon(30, initial, bottle, receiver, cfg)
+    assert phase == 'lift_powder'
+    assert _pitch_deg(default_hold) == pytest.approx(20.0, abs=0.5)
+    kept, _ = prescribed_spoon(30, initial, bottle, receiver, dict(cfg, lift_hold_pitch_deg=30))
+    assert _pitch_deg(kept) == pytest.approx(30.0, abs=0.5)
+    scoop, scoop_phase = prescribed_spoon(28, initial, bottle, receiver, dict(cfg, lift_hold_pitch_deg=30))
+    assert scoop_phase == 'slow_scoop'
+    assert _pitch_deg(scoop) == pytest.approx(30.0, abs=0.5)
+    over_boat, transfer = prescribed_spoon(
+        36, initial, bottle, receiver, dict(cfg, lift_hold_pitch_deg=30, carry_pitch_deg=35))
+    assert transfer == 'transfer'
+    assert _pitch_deg(over_boat) == pytest.approx(0.0, abs=0.5)

@@ -63,6 +63,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Generate an Articulated Asset (Agent-Driven)](operations/generate-articulated-asset.md)
 - [Task09 粉末瓶 r6.0 GPU-PBD 干粉](operations/task09-powder-bottle-r6.0-guide.md)
 - [固体样品称量 r5.7 / 1 g 任务包](operations/solid-sample-weighing-r5.7-1g-guide.md)
+- [固体样品称量 r6.0 a54 PBD VR 数采候选](operations/solid-sample-weighing-r6.0-a54-guide.md)
 - [Task09 粉末瓶 r5.10 120 Hz 静止段位姿冻结](operations/task09-powder-bottle-r5.10-guide.md)
 - [Task09 粉末瓶 r5.7 120 Hz 早期抬离停顿](operations/task09-powder-bottle-r5.7-guide.md)
 - [Task09 粉末瓶 r5.6 120 Hz 勺碗摩擦](operations/task09-powder-bottle-r5.6-guide.md)
@@ -109,6 +110,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 ## Records
 
 - [2026-09-17 资产生成管线方法论与 skill 接入](records/2026-09-17-asset-generation-pipeline-and-skill-intake.md)
+- [固体样品称量 r6.0 a54 PBD VR 数采候选](records/2026-09-17-solid-sample-weighing-r6.0-a54-vr.md)
 - [Task09 粉末瓶 r6.0 GPU-PBD 干粉起步](records/2026-09-17-task09-powder-bottle-r6.0-pbd-start.md)
 - [固体样品称量 1 g 过程分与 r5.7 任务包](records/2026-09-16-solid-sample-weighing-1g-package.md)
 - [Task09 120 Hz 近满瓶 5.x 目标进度](records/2026-09-15-task09-powder-120hz-5x-goal-progress.md)

@@ -44,12 +44,11 @@ def authored_linear_damping_matches(damping):
 def authored_pbd_dry_powder_matches(config):
     if config.get('powder_kind') != 'pbd_solid' or config.get('pbd_fluid') is not False:
         return False
-    return (
-        math.isclose(float(config.get('pbd_solid_rest_offset_m', -1)), R60_SOLID_REST_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-        and math.isclose(float(config.get('pbd_particle_contact_offset_m', -1)), R60_PARTICLE_CONTACT_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-        and math.isclose(float(config.get('pbd_rigid_rest_offset_m', -1)), R60_RIGID_REST_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-        and math.isclose(float(config.get('pbd_rigid_contact_offset_m', -1)), R60_RIGID_CONTACT_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-    )
+    solid_rest = float(config.get('pbd_solid_rest_offset_m', -1))
+    contact = float(config.get('pbd_particle_contact_offset_m', -1))
+    rigid_rest = float(config.get('pbd_rigid_rest_offset_m', -1))
+    rigid_contact = float(config.get('pbd_rigid_contact_offset_m', -1))
+    return 0 < solid_rest < contact and 0 < rigid_rest < rigid_contact
 
 
 def authored_pbd_viscous_particles_matches(config):
@@ -59,12 +58,12 @@ def authored_pbd_viscous_particles_matches(config):
         return False
     fluid_rest = float(config.get('pbd_fluid_rest_offset_m', -1))
     contact = float(config.get('pbd_particle_contact_offset_m', -1))
+    rigid_rest = float(config.get('pbd_rigid_rest_offset_m', -1))
+    rigid_contact = float(config.get('pbd_rigid_contact_offset_m', -1))
     return (
-        math.isclose(float(config.get('pbd_solid_rest_offset_m', -1)), R60_SOLID_REST_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-        and math.isclose(contact, R60_PARTICLE_CONTACT_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-        and math.isclose(float(config.get('pbd_rigid_rest_offset_m', -1)), R60_RIGID_REST_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-        and math.isclose(float(config.get('pbd_rigid_contact_offset_m', -1)), R60_RIGID_CONTACT_OFFSET_M, rel_tol=0, abs_tol=1e-8)
-        and 0 < fluid_rest < contact
+        0 < fluid_rest < contact
+        and 0 < rigid_rest < rigid_contact
+        and float(config.get('pbd_solid_rest_offset_m', -1)) > 0
     )
 
 

@@ -72,6 +72,32 @@ def read_pbd_particle_xyz(prim):
     return np.asarray(points, dtype=np.float64).reshape(-1, 3)
 
 
+def set_pbd_particle_xyz(scene, xyz, mass_per_particle, visual_width_m=None):
+    """Replace authored PBD points without changing material or rest offsets."""
+    import numpy as np
+    pts = np.asarray(xyz, dtype=np.float64).reshape(-1, 3)
+    if len(pts) == 0:
+        raise ValueError('PBD point set is empty')
+    stage = Usd.Stage.Open(str(scene))
+    if stage is None:
+        raise ValueError('Cannot open '+str(scene))
+    particle_set = stage.GetPrimAtPath(PARTICLE_SET)
+    if not particle_set:
+        raise ValueError('Missing '+PARTICLE_SET)
+    points = UsdGeom.Points(particle_set)
+    world = [Gf.Vec3f(float(p[0]), float(p[1]), float(p[2])) for p in pts]
+    points.GetPointsAttr().Set(Vt.Vec3fArray(world))
+    points.GetVelocitiesAttr().Set(Vt.Vec3fArray([Gf.Vec3f(0.0)] * len(world)))
+    width_attr = points.GetWidthsAttr()
+    current = width_attr.Get()
+    width = float(visual_width_m) if visual_width_m is not None else (
+        float(current[0]) if current else VISUAL_WIDTH_M)
+    width_attr.Set(Vt.FloatArray([width] * len(world)))
+    UsdPhysics.MassAPI.Apply(particle_set).CreateMassAttr(float(len(world)) * float(mass_per_particle))
+    stage.GetRootLayer().Save()
+    return len(world)
+
+
 def _schema_attr(prim, name, type_name, value):
     attr = prim.CreateAttribute(name, type_name, custom=False)
     attr.Set(value)
@@ -195,7 +221,8 @@ def apply_pbd_motion_caps(scene, damping=None, max_velocity=None, friction=None,
 
 def apply_pbd_viscous_particle_fluid(scene, cohesion=5.0, viscosity=2.0, friction=0.85,
                                     surface_tension=0.05, fluid_rest_offset_m=R60_FLUID_REST_OFFSET_M,
-                                    particle_friction_scale=1.5):
+                                    particle_friction_scale=1.5, particle_contact_offset_m=None,
+                                    rigid_rest_offset_m=None, rigid_contact_offset_m=None):
     """Turn the dry PBD set into a viscous fluid that still renders as particles."""
     stage = Usd.Stage.Open(str(scene))
     if stage is None:
@@ -206,8 +233,15 @@ def apply_pbd_viscous_particle_fluid(scene, cohesion=5.0, viscosity=2.0, frictio
     if not system or not material or not particle_set:
         raise ValueError('Missing PBD system, material, or set in '+str(scene))
     rest = float(fluid_rest_offset_m)
-    if rest <= 0 or rest >= R60_PARTICLE_CONTACT_OFFSET_M:
+    contact = float(particle_contact_offset_m) if particle_contact_offset_m is not None else R60_PARTICLE_CONTACT_OFFSET_M
+    if rest <= 0 or rest >= contact:
         raise ValueError('fluidRestOffset must be in (0, particleContactOffset)')
+    if particle_contact_offset_m is not None:
+        _schema_attr(system, 'particleContactOffset', Sdf.ValueTypeNames.Float, contact)
+    if rigid_rest_offset_m is not None:
+        _schema_attr(system, 'restOffset', Sdf.ValueTypeNames.Float, float(rigid_rest_offset_m))
+    if rigid_contact_offset_m is not None:
+        _schema_attr(system, 'contactOffset', Sdf.ValueTypeNames.Float, float(rigid_contact_offset_m))
     _schema_attr(system, 'fluidRestOffset', Sdf.ValueTypeNames.Float, rest)
     iso = system.GetAttribute('physxParticleIsosurface:isosurfaceEnabled')
     if iso:
@@ -227,6 +261,58 @@ def apply_pbd_viscous_particle_fluid(scene, cohesion=5.0, viscosity=2.0, frictio
         tension.Set(float(surface_tension))
     material.GetAttribute('physxPBDMaterial:friction').Set(float(friction))
     material.GetAttribute('physxPBDMaterial:particleFrictionScale').Set(float(particle_friction_scale))
+    material.GetAttribute('physxPBDMaterial:adhesion').Set(0.0)
+    material.GetAttribute('physxPBDMaterial:particleAdhesionScale').Set(0.0)
+    offset = material.GetAttribute('physxPBDMaterial:adhesionOffsetScale')
+    if offset:
+        offset.Set(0.0)
+    stage.GetRootLayer().Save()
+
+
+def apply_pbd_dry_solid(scene, solid_rest_offset_m=R60_SOLID_REST_OFFSET_M,
+                        particle_contact_offset_m=R60_PARTICLE_CONTACT_OFFSET_M,
+                        rigid_rest_offset_m=R60_RIGID_REST_OFFSET_M,
+                        rigid_contact_offset_m=R60_RIGID_CONTACT_OFFSET_M,
+                        friction=FRICTION, damping=DAMPING, max_velocity=MAX_VELOCITY):
+    """Turn a viscous particle set back into dry solid PBD (fluid=False, no cohesion)."""
+    stage = Usd.Stage.Open(str(scene))
+    if stage is None:
+        raise ValueError('Cannot open '+str(scene))
+    system = stage.GetPrimAtPath(PARTICLE_SYSTEM)
+    material = stage.GetPrimAtPath(PBD_MATERIAL)
+    particle_set = stage.GetPrimAtPath(PARTICLE_SET)
+    if not system or not material or not particle_set:
+        raise ValueError('Missing PBD system, material, or set in '+str(scene))
+    solid = float(solid_rest_offset_m)
+    contact = float(particle_contact_offset_m)
+    rigid_rest = float(rigid_rest_offset_m)
+    rigid_contact = float(rigid_contact_offset_m)
+    if not (0 < solid < contact and 0 < rigid_rest < rigid_contact):
+        raise ValueError('dry solid rest must be in (0, particleContactOffset) and rigid rest < contact')
+    _schema_attr(system, 'solidRestOffset', Sdf.ValueTypeNames.Float, solid)
+    _schema_attr(system, 'particleContactOffset', Sdf.ValueTypeNames.Float, contact)
+    _schema_attr(system, 'fluidRestOffset', Sdf.ValueTypeNames.Float, 0.0)
+    _schema_attr(system, 'restOffset', Sdf.ValueTypeNames.Float, rigid_rest)
+    _schema_attr(system, 'contactOffset', Sdf.ValueTypeNames.Float, rigid_contact)
+    _schema_attr(system, 'maxVelocity', Sdf.ValueTypeNames.Float, float(max_velocity))
+    iso = system.GetAttribute('physxParticleIsosurface:isosurfaceEnabled')
+    if iso:
+        iso.Set(False)
+    particle_set.GetAttribute('physxParticle:fluid').Set(False)
+    material.GetAttribute('physxPBDMaterial:cohesion').Set(0.0)
+    visc = material.GetAttribute('physxPBDMaterial:viscosity')
+    if not visc:
+        _schema_attr(material, 'physxPBDMaterial:viscosity', Sdf.ValueTypeNames.Float, 0.0)
+    else:
+        visc.Set(0.0)
+    tension = material.GetAttribute('physxPBDMaterial:surfaceTension')
+    if tension:
+        tension.Set(0.0)
+    material.GetAttribute('physxPBDMaterial:friction').Set(float(friction))
+    material.GetAttribute('physxPBDMaterial:damping').Set(float(damping))
+    scale = material.GetAttribute('physxPBDMaterial:particleFrictionScale')
+    if scale:
+        scale.Set(1.0)
     material.GetAttribute('physxPBDMaterial:adhesion').Set(0.0)
     material.GetAttribute('physxPBDMaterial:particleAdhesionScale').Set(0.0)
     offset = material.GetAttribute('physxPBDMaterial:adhesionOffsetScale')
@@ -275,7 +361,8 @@ def planned_cavity_lattice(cfg, spacing_m, surface_depth_m, wall_margin_m=0.002,
 
 
 def fill_pbd_cavity_lattice(scene, cfg, spacing_m, surface_depth_m, mass_per_particle,
-                            wall_margin_m=0.002, neck_z_m=None, neck_wall_margin_m=None):
+                            wall_margin_m=0.002, neck_z_m=None, neck_wall_margin_m=None,
+                            visual_width_m=None):
     """Replace the PBD set with a cavity lattice so a viscous rest can stay near-full."""
     local = planned_cavity_lattice(
         cfg, spacing_m, surface_depth_m, wall_margin_m,
@@ -297,7 +384,8 @@ def fill_pbd_cavity_lattice(scene, cfg, spacing_m, surface_depth_m, mass_per_par
     points = UsdGeom.Points(particle_set)
     points.GetPointsAttr().Set(Vt.Vec3fArray(world))
     points.GetVelocitiesAttr().Set(Vt.Vec3fArray([Gf.Vec3f(0.0)] * len(world)))
-    points.GetWidthsAttr().Set(Vt.FloatArray([VISUAL_WIDTH_M] * len(world)))
+    width = VISUAL_WIDTH_M if visual_width_m is None else float(visual_width_m)
+    points.GetWidthsAttr().Set(Vt.FloatArray([width] * len(world)))
     UsdPhysics.MassAPI.Apply(particle_set).CreateMassAttr(float(len(world)) * float(mass_per_particle))
     stage.GetRootLayer().Save()
     return len(world)
