@@ -50,6 +50,26 @@ def test_front_bath_with_waterline_looks_at_submerged_midpoint():
     assert focal >= 50
 
 
+def test_hero_tabletop_view_frames_bath_rack_and_stirrer():
+    from scripts.render_fehlings_water_bath import hero_tabletop_view
+
+    name, position, target, focal = hero_tabletop_view()
+    assert name == "hero_tabletop"
+    assert position == pytest.approx((1.18, -1.55, 1.42))
+    assert target == pytest.approx((0.18, -0.02, 0.86))
+    assert 34 <= focal <= 42
+
+
+def test_hero_tabletop_view_is_opt_in():
+    from scripts.render_fehlings_water_bath import optional_paper_views
+
+    assert optional_paper_views(None) == []
+    assert optional_paper_views("front_bath") == []
+    assert [view[0] for view in optional_paper_views("front_bath,hero_tabletop")] == [
+        "hero_tabletop"
+    ]
+
+
 def test_r10_finalizer_rejects_shallow_color_snapshots(tmp_path):
     from scripts.finalize_fehlings_water_bath_r10 import prepare
 

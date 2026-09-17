@@ -15,6 +15,18 @@ def front_bath_view(tube_xyz, water_surface_z=None):
     return ('front_bath', (look[0], look[1] - 0.30, look[2] + 0.03), look, 52)
 
 
+def hero_tabletop_view():
+    """Three-quarter paper view containing the bath, stirrer, and tube rack."""
+    return ("hero_tabletop", (1.18, -1.55, 1.42), (0.18, -0.02, 0.86), 38)
+
+
+def optional_paper_views(requested):
+    """Return paper-only views without changing the renderer's default evidence set."""
+    if requested and "hero_tabletop" in requested.split(","):
+        return [hero_tabletop_view()]
+    return []
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
@@ -185,6 +197,7 @@ def main():
                     views.append(front_bath_view(snapshot['tube_xyz'], water_surface_z=data.get('water_world_surface_z')))
                 else:
                     views.append(front_bath_view(snapshot['tube_xyz']))
+            views.extend(optional_paper_views(args.views))
             if args.views:
                 allowed = set(args.views.split(','))
                 views = [item for item in views if item[0] in allowed]
