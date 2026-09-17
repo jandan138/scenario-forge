@@ -61,6 +61,9 @@ ConvertAsset 负责资产转换、源几何/材质修复及其物理配置资格
 
 缺少适用的姿态、关节、容器或视觉资格时，把需求、源哈希与失败证据交给生产者，获得新版本后再集成。
 优先复用已合格闭包，场景自己拥有的视觉修改按 [MAT-004](materials-and-liquids.md#mat-004) 保留差异证据。
+需要全新关节/复杂资产时，能力缺口请求也可经由 Agent 驱动的资产生成管线履行：
+按 [GEN-001](asset-generation.md#gen-001) 生成属生产者角色，交付前按
+[GEN-005](asset-generation.md#gen-005) 过静态门禁，准入仍走本页资格路径。
 
 <a id="asset-007"></a>
 ### ASSET-007 — 为 CPU 接触改碰撞近似时锁定摆放
@@ -80,3 +83,4 @@ ConvertAsset 负责资产转换、源几何/材质修复及其物理配置资格
 变更记录：2026-09-08 从现有职责边界与接入契约提炼制作规则；核心/API 契约保留原文权威。
 2026-09-09：按[粉末称重 r1](../records/2026-09-09-rigid-powder-force-weighing-r1.md)补充颗粒尺度资格边界。
 2026-09-11：按[斐林 r4](../records/2026-09-11-fehlings-r4-cpu-contact-colliders.md)增加 CPU 接触碰撞的授权例外推荐项。
+2026-09-17：ASSET-006 交叉引用 [GEN-001](asset-generation.md#gen-001)/[GEN-005](asset-generation.md#gen-005)，能力缺口请求可经由资产生成管线履行；准入资格路径不变。

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Hunyuan Isaac Articulation Assets"
+  short_description: "Generate Hunyuan assets and validated Isaac articulations"
+  default_prompt: "Use $hunyuan-isaac-articulation-assets to generate and validate a Hunyuan3D asset in Isaac Sim."
+
+policy:
+  allow_implicit_invocation: true

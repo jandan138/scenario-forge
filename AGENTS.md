@@ -43,6 +43,9 @@ historical task packages are not silently rewritten to adopt new standards.
 - `src/scenario_forge/artifacts`: package layout and provenance.
 - `src/scenario_forge/evaluation`: portable metric and split references.
 - `src/scenario_forge/adapters`: external tools and simulators.
+- `skills`: external agent tooling for the asset producer role; not core
+  package layers, never imported by `src/`, outside boundary-test/lint/test
+  scope (see `skills/README.md`).
 - `docs/standards`: current scene-authoring rules, applicability and validation basis.
 - `docs/design`: design rationale/proposals; core package/schema/API contracts.
 - `docs/operations`: runbooks, checklists, handoff notes.

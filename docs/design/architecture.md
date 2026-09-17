@@ -36,6 +36,12 @@ ConvertAsset public CLI entry points, but it must not import or reimplement conv
 Isaac, Habitat, ManiSkill, OmniGibson, and future simulator integrations belong under
 `src/scenario_forge/adapters/<name>/`.
 
+Agent-driven asset generation (see
+[agent-driven-asset-generation-pipeline](agent-driven-asset-generation-pipeline.md))
+is producer-role work using external skill packages under `skills/`; those skills are agent
+tooling outside the package layers, and generated assets enter only through the existing
+ConvertAsset admission boundary above.
+
 ## Downstream Contract
 
 The durable output is a package directory with `manifest.yaml` plus referenced files. Downstream

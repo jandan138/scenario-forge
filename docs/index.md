@@ -27,6 +27,9 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Design
 
+- [Agent-Driven Asset Generation Pipeline](design/agent-driven-asset-generation-pipeline.md)
+- [Asset Spec: IKA OVEN 125](design/asset-specs/ika-oven-125.md)
+- [Asset Spec: Traditional Titration Burette and Stand](design/asset-specs/traditional-titration-burette-and-stand.md)
 - [Task09 Powder Bottle](design/task09-powder-bottle.md)
 - [Fehling r10 Deep Upright Immerse](design/fehlings-deep-immerse.md)
 - [Fehling r9 Front-on In-bath Color](design/fehlings-front-bath.md)
@@ -57,6 +60,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Operations
 
+- [Generate an Articulated Asset (Agent-Driven)](operations/generate-articulated-asset.md)
 - [Task09 粉末瓶 r6.0 GPU-PBD 干粉](operations/task09-powder-bottle-r6.0-guide.md)
 - [固体样品称量 r5.7 / 1 g 任务包](operations/solid-sample-weighing-r5.7-1g-guide.md)
 - [Task09 粉末瓶 r5.10 120 Hz 静止段位姿冻结](operations/task09-powder-bottle-r5.10-guide.md)
@@ -104,6 +108,7 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [2026-09-17 资产生成管线方法论与 skill 接入](records/2026-09-17-asset-generation-pipeline-and-skill-intake.md)
 - [Task09 粉末瓶 r6.0 GPU-PBD 干粉起步](records/2026-09-17-task09-powder-bottle-r6.0-pbd-start.md)
 - [固体样品称量 1 g 过程分与 r5.7 任务包](records/2026-09-16-solid-sample-weighing-1g-package.md)
 - [Task09 120 Hz 近满瓶 5.x 目标进度](records/2026-09-15-task09-powder-120hz-5x-goal-progress.md)

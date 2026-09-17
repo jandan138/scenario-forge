@@ -47,6 +47,35 @@ Current indexed external artifacts:
   `drying_box/<asset>/usd/` (canonical USD + four-view PNGs + contact sheet).
   Provenance: `incoming/magnetic_stirrer_archive/provenance.json`.
 
+- `hunyuan_isaac_articulation_assets_skill`: the Hunyuan3D→Isaac articulated
+  asset skill package, extracted into the committed tree
+  `skills/hunyuan-isaac-articulation-assets/` (agent tooling, producer role;
+  no asset qualification implied). Source archive
+  `incoming/from_xinyu/hunyuan-isaac-articulation-assets.7z` SHA-256:
+  `d112b48cb2d5a855d313af51f13a23376548f9521ae915ba624ce233a0ea59cb`;
+  provenance: `incoming/from_xinyu/provenance.json`; indexed 2026-09-17.
+
+- `asset_evidence_ika_oven_125`: evidence images extracted from
+  `incoming/from_xinyu/IKA_OVEN_125_reference.docx` (source SHA-256:
+  `c4338164e43123d09102865b295cd5ab04dd238aa186a373d92ae7362562ec21`),
+  stored under `asset_evidence/ika-oven-125/` with per-image hashes in
+  `asset_evidence/ika-oven-125/MANIFEST.sha256` (catalog digest:
+  `90d6b591634617264285de3e813ca01238effaf1521061cfcebe961a6f0a2886`) and in
+  the image inventory of `docs/design/asset-specs/ika-oven-125.md`.
+
+- `asset_evidence_traditional_titration_burette_and_stand`: evidence images
+  extracted from
+  `incoming/from_xinyu/Traditional_Titration_Burette_and_Stand_Asset_Reference.docx`
+  (source SHA-256:
+  `49b697f42cc9b61c26649cab50b2eb8f720e7e6d0931090bb4f825f7547bf126`),
+  stored under `asset_evidence/traditional-titration-burette-and-stand/`
+  with per-image hashes in
+  `asset_evidence/traditional-titration-burette-and-stand/MANIFEST.sha256`
+  (catalog digest:
+  `68af1981b7c07a446fc19d2e60faabf1ac5f2e42344b7385112a7c15438f7e65`) and in
+  the image inventory of
+  `docs/design/asset-specs/traditional-titration-burette-and-stand.md`.
+
 ## Historical output archive
 
 The [round-two archive and build-input index](archive-index-round2-20260905.json)
