@@ -171,3 +171,23 @@ r5.4 过门后舟内只有 177 粒。之后仍锁 120 Hz，总时间轴 0–50 s
 见 [5.x 进度](../records/2026-09-15-task09-powder-120hz-5x-goal-progress.md)、
 [r5.7 日期记录](../records/2026-09-15-task09-powder-bottle-r5.7-early-lift-hold.md) 与
 [r5.7 操作说明](../operations/task09-powder-bottle-r5.7-guide.md)。
+
+## r5.8–r5.10：120 Hz 静止蠕动
+
+r5.7 舀取量已接近 r4，但插入前粉粒仍以约 4.8 mm/s 蠕动，15 s 漂移约 6.6 mm。之后仍锁 120 Hz，每一版只改一个变量：
+
+- r5.8 只把粉粒 `linearDamping` 改到 1.0。静止仍是 4.83 mm/s / 6.53 mm。GPU PGS 每步纠穿透不走线阻尼。
+- r5.9 只把 `sleepThreshold` / `stabilizationThreshold` 改到 5e-5 / 1e-5。轨迹与 r5.8 逐粒重合。
+- r5.10 在 validator 里于 0.5–18 s 回写粉粒世界坐标（不是 PhysX kinematic：GPU 上 kinematic+CCD 会被拒绝）。scoop 静止 **0 mm/s / 0.90 mm**，过 r4 门；舟内 **245 粒 / 0.53 g**，冷启动 10240，不漏内托，可见瓶身无贴粒。
+
+位姿冻结是本任务夹具，不是全仓库粉粒 sleep 或 kinematic 默认。不替换 r4 交付头。
+
+见 [静止蠕动进度](../records/2026-09-15-task09-powder-120hz-rest-jitter-goal-progress.md)、
+[r5.10 日期记录](../records/2026-09-15-task09-powder-bottle-r5.10-rest-hold.md) 与
+[r5.10 操作说明](../operations/task09-powder-bottle-r5.10-guide.md)。
+
+## 智能体 / VR 任务包（1 g）
+
+对外过程分见 [固体样品称量 1 g 包](../records/2026-09-16-solid-sample-weighing-1g-package.md)。
+预定场景 USD 是 r5.7，不是 r5.10 的插入前按住。终帧去皮 LCD `1.00 g` 权重 0.35；勺数不限。
+合同在 `examples/scientific_workbench/solid_sample_weighing/scenario.yaml`。当前交付头仍是 r4。

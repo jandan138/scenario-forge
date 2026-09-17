@@ -16,7 +16,29 @@
 
 - 冷启动 8 s：**通过**。10240 粒；床深约 **11.68 mm**，距口约 **4.32 mm**（与 r5.6 相同：只改轨迹，未改颗粒）。
 - 规定舀取 50 s：**通过**。舟内 **252** 粒，LCD **0.54 g**；高峰 1114；内托下 0。接近 r4（253 / 0.55 g）。
+- 已知载荷校准 43 s：**通过**。known loads / 移舟 / 仪器复位均过门；场景 SHA 与 settle、scoop、视频一致。
 - 视频：`outputs/task09_powder_bottle_r5_7_20260915/video/overview.mp4`、`close.mp4`，以及四张瓶口帧。独立目视：可见瓶身无贴粒。
+
+## 总交付 ZIP
+
+与 r4 同形的 `scene_fixture_verified` 包（含 1 g 任务合同）在：
+
+`outputs/task09_powder_bottle_r5_7_20260915/handoff/task09_powder_bottle_r5_7.zip`
+
+旁路 `task09_powder_bottle_r5_7.zip.sha256`。包内 `task/scenario.yaml` 是终帧 LCD `1.00 g` 合同；`source_usd` 指向同包 `scene.usda`。未替换 [r4 当前交付头](task09-powder-bottle-r4-guide.md)。
+
+```bash
+python scripts/package_task09_powder.py \
+  --candidate outputs/task09_powder_bottle_r5_7_20260915/prep_h1 \
+  --out outputs/task09_powder_bottle_r5_7_20260915/handoff/task09_powder_bottle_r5_7 \
+  --settle outputs/task09_powder_bottle_r5_7_20260915/prep_h1_settle \
+  --scoop outputs/task09_powder_bottle_r5_7_20260915/prep_h1_scoop \
+  --calibration outputs/task09_powder_bottle_r5_7_20260915/prep_h1_calibration \
+  --video outputs/task09_powder_bottle_r5_7_20260915/video \
+  --task-spec examples/scientific_workbench/solid_sample_weighing/scenario.yaml \
+  --task-bindings examples/scientific_workbench/solid_sample_weighing/source_bindings.yaml \
+  --producer-scripts /cpfs/user/zhuzihou/dev/ConvertAsset/scripts
+```
 
 ## 复跑
 

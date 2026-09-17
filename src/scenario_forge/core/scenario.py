@@ -44,6 +44,7 @@ _V06_PROGRESS_RUBRIC_CONDITION_TYPES = frozenset(
         "object_at_initial_pose",
         "motion_trajectory_completed",
         "articulation_joint_state_reached",
+        "instrument_display_matches",
     }
 )
 
@@ -530,10 +531,23 @@ class ProgressRubricItemSpec:
                 f"progress rubric item {item_id}.condition.type must be one of "
                 + ", ".join(sorted(supported_condition_types))
             )
-        _mapping(
+        parameters = _mapping(
             condition.get("parameters"),
             f"progress rubric item {item_id}.condition.parameters",
         )
+        if condition_type == "instrument_display_matches":
+            _string(
+                parameters.get("instrument"),
+                f"progress rubric item {item_id}.condition.parameters.instrument",
+            )
+            _string(
+                parameters.get("channel"),
+                f"progress rubric item {item_id}.condition.parameters.channel",
+            )
+            _string(
+                parameters.get("expected_text"),
+                f"progress rubric item {item_id}.condition.parameters.expected_text",
+            )
         source_ref = dict(
             _json_mapping(data.get("source_ref", {}), f"progress rubric item {item_id}.source_ref")
         )
@@ -874,7 +888,15 @@ def _validate_parameter_references(
     owner: str,
 ) -> None:
     object_by_id = {item.object_id: item for item in objects}
-    for key in ("object", "source", "target", "container", "relative_to", "relative_axis_object"):
+    for key in (
+        "object",
+        "source",
+        "target",
+        "container",
+        "relative_to",
+        "relative_axis_object",
+        "instrument",
+    ):
         value = parameters.get(key)
         if isinstance(value, str) and value not in object_ids:
             raise ValueError(f"{owner} references unknown object {value}")

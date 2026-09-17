@@ -18,8 +18,11 @@ def spoon_target(t, receiver_x, offset_z):
 
 
 def measurement_check(rows, expected_g, tolerance_g):
-    values = [row['net_g'] for row in rows]
-    valid = bool(rows) and all(row['valid'] and row['stable'] and math.isfinite(row['net_g']) for row in rows)
+    values = [row['net_g'] for row in rows if row.get('net_g') is not None]
+    valid = bool(rows) and all(
+        row.get('valid') and row.get('stable')
+        and row.get('net_g') is not None and math.isfinite(row['net_g'])
+        for row in rows)
     error = max((abs(v-expected_g) for v in values), default=float('inf'))
     spread = max(values)-min(values) if values else float('inf')
     return dict(passed=valid and error <= tolerance_g, expected_g=expected_g,

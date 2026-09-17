@@ -1,10 +1,10 @@
-"""Task09 contact scale: explicitly never-sleeping grains need no per-step wake."""
+"""Task09 contact scale: powder grains must not be force-woken every balance tick."""
 from scripts.powder_balance_runtime import PowderBalanceRuntime, compute as base_compute
 
 
 def requires_wake(name, sleep_threshold, stabilization_threshold):
-    return not (name.startswith('obj_powder_grain_') and sleep_threshold == 0
-                and stabilization_threshold == 0)
+    del sleep_threshold, stabilization_threshold
+    return not name.startswith('obj_powder_grain_')
 
 
 class Task09PowderRuntime(PowderBalanceRuntime):

@@ -10,11 +10,32 @@ import zipfile
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from scripts.task09_powder_evidence import NEAR_FULL_REVISIONS, validate_report
 
-COMPACT_REVISIONS = ('r2','r3','r4','r5.0','r5.1','r5.2','r5.3','r5.4','r5.5','r5.6','r5.7')
+COMPACT_REVISIONS = ('r2','r3','r4','r5.0','r5.1','r5.2','r5.3','r5.4','r5.5','r5.6','r5.7','r5.8','r5.9','r5.10','r6.0')
 
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def include_task_contract(out, spec, bindings=None):
+    task = out/'task'
+    task.mkdir(exist_ok=True)
+    shutil.copy2(spec, task/'scenario.yaml')
+    if bindings is not None:
+        rewritten = []
+        for line in bindings.read_text().splitlines(keepends=True):
+            if line.lstrip().startswith('source_usd:'):
+                indent = line[:len(line)-len(line.lstrip())]
+                rewritten.append(f'{indent}source_usd: ../scene.usda\n')
+            else:
+                rewritten.append(line)
+        (task/'source_bindings.yaml').write_text(''.join(rewritten))
+
+
+def write_zip_sha256(archive):
+    sidecar = Path(str(archive)+'.sha256')
+    sidecar.write_text(f'{sha(archive)}  {archive.name}\n')
+    return sidecar
 
 
 def main():
@@ -24,6 +45,8 @@ def main():
     for mode in ('settle','scoop','calibration'):
         p.add_argument('--'+mode,type=Path)
     p.add_argument('--video',type=Path)
+    p.add_argument('--task-spec',type=Path)
+    p.add_argument('--task-bindings',type=Path)
     p.add_argument('--producer-scripts',type=Path,required=True)
     a = p.parse_args()
     out = a.out.resolve()
@@ -58,6 +81,11 @@ def main():
     guide = source_root/f'docs/operations/task09-powder-bottle-{revision}-guide.md'
     if guide.exists():
         shutil.copy2(guide,out/'README.md')
+    if a.task_spec:
+        include_task_contract(out,a.task_spec,a.task_bindings)
+        task_guide = source_root/'docs/operations/solid-sample-weighing-r5.7-1g-guide.md'
+        if task_guide.exists():
+            shutil.copy2(task_guide,out/'task'/'README.md')
     manifest = dict(package_id=f'task09_powder_bottle_{revision}',status='candidate',runtime='Isaac Sim 4.5.0',
                     scene_sha256=sha(out/'scene.usda'),powder_count=cfg['count'],
                     original_large_samples_preserved=True,robot_grasp_verified=False,
@@ -114,7 +142,8 @@ def main():
                     zipped.write(path,str(Path(out.name)/path.relative_to(out)))
         with zipfile.ZipFile(archive) as zipped:
             assert zipped.testzip() is None
-        print(json.dumps({'zip':str(archive),'sha256':sha(archive),'files':len(manifest['files'])}))
+        sidecar = write_zip_sha256(archive)
+        print(json.dumps({'zip':str(archive),'sha256':sha(archive),'sha256_file':str(sidecar),'files':len(manifest['files'])}))
     else:
         print('STAGED',out)
 

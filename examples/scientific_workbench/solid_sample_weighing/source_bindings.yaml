@@ -1,0 +1,11 @@
+schema_version: scenario-source-bindings/v0.2
+bindings:
+  task09_powder_bottle_r5_7:
+    resolver: local_usd
+    source_usd: ../../../outputs/task09_powder_bottle_r5_7_20260915/prep_h1/scene.usda
+    role: interactive_composed_scene
+    license: internal-task09-powder-r5.7
+    source_uri: outputs://task09_powder_bottle_r5_7
+    attribution:
+      - Task09 powder bottle r5.7 120 Hz candidate
+    redistributable: false

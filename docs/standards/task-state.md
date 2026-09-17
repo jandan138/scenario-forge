@@ -85,3 +85,5 @@
 2026-09-09：补充测量条件与显示精度的区分，来源为双版本受力称重验证。
 2026-09-09：补充多 link 接触下的测量覆盖，依据[粉末称重 r1](../records/2026-09-09-rigid-powder-force-weighing-r1.md)
 在 Isaac 4.5 的机身单粒接触反例及秤盘接触力回归；不扩大到其他 runtime。
+2026-09-16：固体称量 1 g 包用终帧 LCD 文本作为过程分，不新增通用成功锁定规则；见
+[1 g 任务包记录](../records/2026-09-16-solid-sample-weighing-1g-package.md)。

@@ -109,6 +109,11 @@ sheet:
 - `object_at_initial_pose` for a return-to-start condition;
 - `motion_trajectory_completed` for an explicitly configured motion sequence,
   such as vessel shaking.
+- `instrument_display_matches` for a terminal instrument readout. Parameters are
+  `instrument`, `channel`, `expected_text`, and optional `after_tare`. The
+  scientific-workbench solid-sample weighing package uses channel `lcd_readout`
+  and expected text `1.00 g`. Downstream runtimes evaluate this; Scenario Forge
+  only transports it.
 
 The compiler emits `task/v0.5` and `metrics/v0.4`; the GenManip adapter transports
 the result in `scenario-forge-genmanip-runtime-contract/v0.6`. These additions do

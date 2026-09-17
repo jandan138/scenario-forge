@@ -35,9 +35,9 @@ def test_pour_rotates_about_spoon_head_not_root():
     assert pose[2]-.087*math.sin(angle) == pytest.approx(RECEIVER[2]+.04)
 
 
-def test_wake_optimization_only_excludes_explicit_never_sleeping_grains():
+def test_wake_optimization_never_pokes_powder_grains():
     from scripts.task09_powder_runtime import requires_wake
     assert not requires_wake('obj_powder_grain_00000',0.,0.)
-    assert requires_wake('obj_powder_grain_00000',None,0.)
-    assert requires_wake('obj_powder_grain_00000',1e-6,0.)
+    assert not requires_wake('obj_powder_grain_00000',None,0.)
+    assert not requires_wake('obj_powder_grain_00000',5e-5,1e-5)
     assert requires_wake('obj_weighing_boat',0.,0.)

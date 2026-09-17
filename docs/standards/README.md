@@ -70,6 +70,11 @@
 | [粉末瓶 r5.5 120 Hz 挖深](../records/2026-09-15-task09-powder-bottle-r5.5-deeper-scoop.md) | 本任务 120 Hz 下粉面目标 95→91 mm 可提高勺内高峰，抬离后仍约 221 粒 / 0.48 g | 全仓库粉面目标、把挖深当成 r4 等量 |
 | [粉末瓶 r5.6 120 Hz 勺碗摩擦](../records/2026-09-15-task09-powder-bottle-r5.6-bowl-friction.md) | 本任务 120 Hz 下只给勺碗加 0.9/0.7 不能提高抬离留存，仍约 221 粒 / 0.48 g | 全仓库勺摩擦默认、把 BowlContact 当成 r4 等量 |
 | [粉末瓶 r5.7 120 Hz 早期抬离](../records/2026-09-15-task09-powder-bottle-r5.7-early-lift-hold.md) | 本任务 120 Hz 下 t=30 加 6 mm 停顿可将舀取留存拉回约 252 粒 / 0.54 g；同机位可见瓶身无贴粒 | 全仓库勺轨迹默认、把 6 mm 停顿当成任意粉末任务解、专用侧拍 |
+| [粉末瓶 r5.8 120 Hz 线阻尼](../records/2026-09-15-task09-powder-bottle-r5.8-grain-damping.md) | 本任务 120 Hz 下粉粒 linearDamping=1 不能压静止蠕动，仍约 4.83 mm/s / 6.53 mm | 全仓库粉粒阻尼默认、把线阻尼当成 GPU PGS 静止解 |
+| [粉末瓶 r5.9 120 Hz sleep](../records/2026-09-15-task09-powder-bottle-r5.9-grain-sleep.md) | 本任务 120 Hz 下粉粒 sleep 5e-5 对 GPU PGS+CCD 无效，与 r5.8 逐粒重合 | 全仓库粉粒 sleep 默认、宣称阈值能冻 GPU 粉粒 |
+| [粉末瓶 r5.10 120 Hz 静止冻结](../records/2026-09-15-task09-powder-bottle-r5.10-rest-hold.md) | 本任务 120 Hz 下 0.5–18 s 回写位姿可将插入前中位速度压到 0、15 s 漂移 0.90 mm，舀取约 245 粒 / 0.53 g | 全仓库粉粒 kinematic/sleep 默认、替换 r4 交付资格 |
+| [固体称量 1 g 过程分](../records/2026-09-16-solid-sample-weighing-1g-package.md) | 本任务以去皮后终帧 LCD `1.00 g` 为最大过程分（0.35），场景 USD 用 r5.7 | 把 LCD 1.00 g 写成全仓库仪器成功默认、替换 r4 交付头 |
+| [粉末瓶 r6.0 PBD 干粉起步](../records/2026-09-17-task09-powder-bottle-r6.0-pbd-start.md) | 本任务用 `fluid=False`、自碰 1.04 mm rest、墙碰 0.7 mm、`gravityScale` 1 替换刚体粒；scoop 先按区域粒数计质量 | 液体 PBD 配方、斐林水浴、刚体秤盘接触力资格、替换 r4/r5.7 交付 |
 | [液体接入契约](../design/liquid-autofill-contract.md) | 指定生产者和运行时的液体资格与闭包 | 视觉假液体自动获得真实液体能力 |
 
 [早期假液体原型](../records/2026-08-16-visual-static-liquid-prototype.md) 的“仅背景”描述是该原型当时的范围；
@@ -91,4 +96,5 @@
 2026-09-15：粉末瓶 r5.3 加厚瓶壁后冷启动保留 10240 粒，不把 1.0 mm 瓶壁偏移写成通用规则。
 2026-09-15：粉末瓶 r5.4 再加厚内托后 120 Hz 舀取不再漏板缝；不把 3 mm 内托偏移或 0.38 g 写成通用粉末规则。
 2026-09-15：粉末瓶 r5.5 挖深、r5.6 勺碗摩擦均不能提高抬离留存；r5.7 在锁定时间轴内加 6 mm 早期抬离停顿后约 252 粒 / 0.54 g。这些夹具参数不升为通用勺轨迹或摩擦默认，当前交付仍为 r4。
+2026-09-15：粉末瓶 r5.8 线阻尼、r5.9 sleep 均不能压 GPU PGS 静止蠕动；r5.10 用 validator 在 0.5–18 s 回写位姿后插入前速度 0、15 s 漂移 0.90 mm，舀取约 245 粒 / 0.53 g。位姿冻结不升为通用粉粒 kinematic/sleep 默认，当前交付仍为 r4。
 2026-09-16：补充斐林 r10 案例行；隔杯验收时样液须在水面下，不把杯底间隙提升为默认。

@@ -8,7 +8,18 @@ import sys
 import traceback
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from scripts.task09_powder_evidence import NEAR_FULL_REVISIONS
+from scripts.compact_powder_protocol import canonical_close_time, phase_progress
+from scripts.task09_powder_evidence import NEAR_FULL_REVISIONS, PBD_REVISIONS, R60_VISUAL_RADIUS_M
+
+PBD_DISPLAY_COLOR = (0.91, 0.82, 0.45)
+
+
+def recorded_powder_prototype(cfg):
+    """PBD recordings have no grain Mesh; replay a visual-radius sphere."""
+    if cfg.get('powder_kind') in ('pbd_solid', 'pbd_viscous') or cfg.get('revision') in PBD_REVISIONS:
+        radius = float(cfg.get('grain_radius_m') or cfg.get('grain_bound_m') or R60_VISUAL_RADIUS_M)
+        return {'kind': 'sphere', 'radius_m': radius, 'display_color': PBD_DISPLAY_COLOR}
+    return {'kind': 'copy_mesh'}
 
 
 def load_recording(path):
@@ -25,7 +36,7 @@ def main():
     p.add_argument('--runtime',choices=['45'],default='45')
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--view',choices=['overview','close','bottle'],default='close')
-    p.add_argument('--frames',default='0,180,330,600,750,840,960,1080,1140,1200,1470')
+    p.add_argument('--frames',default='0,180,330,600,750,840,960,1080,1140,1200,1470,1860,2100')
     p.add_argument('--video',action='store_true')
     a = p.parse_args()
     a.out.mkdir(parents=True,exist_ok=True)
@@ -59,15 +70,28 @@ def main():
         flattened = stage.Flatten()
         inst = UsdGeom.PointInstancer.Define(stage,'/World/RecordedPowder')
         prototype = '/World/RecordedPowder/Prototype'
-        Sdf.CopySpec(flattened,str(d['paths'][0])+'/Mesh',stage.GetSessionLayer(),prototype)
-        proto = stage.GetPrimAtPath(prototype)
-        for api in list(proto.GetAppliedSchemas()):
-            if api.startswith(('Physics','Physx')):
-                proto.RemoveAppliedSchema(api)
+        spec = recorded_powder_prototype(cfg)
+        if spec['kind']=='sphere':
+            sphere = UsdGeom.Sphere.Define(stage,prototype)
+            sphere.CreateRadiusAttr(float(spec['radius_m']))
+            sphere.CreateDisplayColorAttr([Gf.Vec3f(*spec['display_color'])])
+            proto = sphere.GetPrim()
+        else:
+            Sdf.CopySpec(flattened,str(d['paths'][0])+'/Mesh',stage.GetSessionLayer(),prototype)
+            proto = stage.GetPrimAtPath(prototype)
+            for api in list(proto.GetAppliedSchemas()):
+                if api.startswith(('Physics','Physx')):
+                    proto.RemoveAppliedSchema(api)
         inst.CreatePrototypesRel().SetTargets([prototype])
-        inst.CreateProtoIndicesAttr([0]*len(d['paths']))
-        for path in d['paths']:
-            UsdGeom.Imageable(stage.GetPrimAtPath(str(path))).CreateVisibilityAttr('invisible')
+        inst.CreateProtoIndicesAttr([0]*len(d['positions'][0]))
+        hide_paths = list(d['paths'])
+        pbd_root = stage.GetPrimAtPath('/World/powder_pbd')
+        if pbd_root:
+            hide_paths.append(str(pbd_root.GetPath()))
+        for path in hide_paths:
+            prim = stage.GetPrimAtPath(str(path))
+            if prim:
+                UsdGeom.Imageable(prim).CreateVisibilityAttr('invisible')
         for prim in stage.Traverse():
             if prim.IsA(UsdPhysics.Joint):
                 UsdPhysics.Joint(prim).CreateJointEnabledAttr(False)
@@ -78,6 +102,7 @@ def main():
         stage.GetPrimAtPath(cfg['paths']['balance']+'/BalanceRuntime').SetActive(False)
         body_paths = [str(x) for x in d['body_paths']]
         link_paths = [str(x) for x in d['link_paths']]
+        recorded_phases = [str(p) for p in d['phases']] if 'phases' in d else None
         scales = {path:Gf.Transform(UsdGeom.Xformable(stage.GetPrimAtPath(path)).ComputeLocalToWorldTransform(0)).GetScale()
                   for path in body_paths+link_paths}
         def set_pose(path,pose):
@@ -110,6 +135,12 @@ def main():
         rgb = rep.AnnotatorRegistry.get_annotator('rgb')
         rgb.attach([product])
         requested = set(map(int,a.frames.split(',')))
+        if recorded_phases:
+            ph = np.asarray(recorded_phases)
+            for name in ('lift_powder', 'transfer', 'slow_pour'):
+                idx = np.flatnonzero(ph == name)
+                if len(idx):
+                    requested.update((int(idx[0]), int(idx[len(idx)//2]), int(idx[-1])))
         selected = list(range(len(d['times']))) if a.video else sorted(i for i in requested if 0<=i<len(d['times']))
         if not selected:
             raise ValueError('No requested frames are available')
@@ -126,6 +157,10 @@ def main():
             for path,pose in zip(link_paths,d['link_poses'][frame]):
                 set_pose(path,pose)
             now = float(d['times'][frame])
+            if recorded_phases:
+                cam_t = canonical_close_time(*phase_progress(d['times'], recorded_phases, frame))
+            else:
+                cam_t = now
             bottle = d['body_poses'][frame,body_paths.index(cfg['paths']['bottle']),:3]
             boat = d['body_poses'][frame,body_paths.index(cfg['paths']['boat']),:3]
             if a.view=='overview':
@@ -139,49 +174,49 @@ def main():
                 beaker_target = np.array([.088,.19,.86])
                 bottle_target = bottle+np.array([0.,0.,bottle_focus_z])
                 boat_target = boat+np.array([0.,-.005,.008])
-                if now<11:
+                if cam_t<11:
                     target = beaker_target
                     eye = target+np.array([.15,-.33,.23])
                     camera.GetFocalLengthAttr().Set(30)
-                elif now<14:
-                    u = (now-11)/3
+                elif cam_t<14:
+                    u = (cam_t-11)/3
                     target = (1-u)*beaker_target+u*bottle_target
                     eye = target+np.array([.08,-.16,.15])
-                elif now<32:
+                elif cam_t<32:
                     target = bottle_target
                     eye = target+np.array([.065,-.13,.15])
                     camera.GetFocalLengthAttr().Set(34 if 'inner_profile' in cfg else 38)
                 else:
-                    u = min(1.,(now-32)/4)
+                    u = min(1.,(cam_t-32)/4)
                     target = (1-u)*bottle_target+u*boat_target
                     eye = target+np.array([.06,-.14,.14])
                     camera.GetFocalLengthAttr().Set(36)
-                if 'inner_profile' in cfg and 8<=now<42:
+                if 'inner_profile' in cfg and 8<=cam_t<42:
                     spoon_matrix = UsdGeom.Xformable(stage.GetPrimAtPath(cfg['paths']['spoon'])).ComputeLocalToWorldTransform(0)
                     head = np.array(spoon_matrix.Transform(Gf.Vec3d(.087,0,0)))
-                    if now<14:
-                        u = min(1.,(now-8)/3)
+                    if cam_t<14:
+                        u = min(1.,(cam_t-8)/3)
                         target = (1-u)*beaker_target+u*head
                         eye = target+(1-u)*np.array([.15,-.33,.23])+u*np.array([.065,-.13,.15])
-                    elif now<20:
-                        u = (now-14)/6
+                    elif cam_t<20:
+                        u = (cam_t-14)/6
                         target = (1-u)*head+u*bottle_target
                         eye = target+np.array([.065,-.13,.15])
-                    elif now>=28:
-                        if now<36:
-                            u = min(1.,(now-28)/2)
+                    elif cam_t>=28:
+                        if cam_t<36:
+                            u = min(1.,(cam_t-28)/2)
                             target = (1-u)*bottle_target+u*head
-                        elif now<40:
-                            u = min(1.,now-36)/2
+                        elif cam_t<40:
+                            u = min(1.,cam_t-36)/2
                             target = (1-u)*head+u*boat_target
                         else:
-                            target = boat_target+np.array([0.,0.,.021*(42-now)/2])
+                            target = boat_target+np.array([0.,0.,.021*(42-cam_t)/2])
                         eye = target+np.array([.08,-.20,.20])
                         camera.GetFocalLengthAttr().Set(35)
-                if now>=42:
+                if cam_t>=42:
                     body_index = link_paths.index(cfg['paths']['balance']+'/Instance/Body')
                     body = d['link_poses'][frame,body_index,:3]
-                    u = min(1.,(now-42)/4)
+                    u = min(1.,(cam_t-42)/4)
                     target = (1-u)*target+u*(body+np.array([.01,-.085,.125]))
                     eye = (1-u)*eye+u*(body+np.array([.11,-.47,.30]))
                     camera.GetFocalLengthAttr().Set(35)
@@ -209,7 +244,7 @@ def main():
             image = Image.fromarray(rgb.get_data()).convert('RGB')
             draw = ImageDraw.Draw(image)
             draw.rectangle((0,0,1280,72),fill=(16,24,30))
-            draw.text((20,10),f"Isaac {a.runtime[0]}.{a.runtime[1]} observed-state replay | {now:05.2f} s | {len(d['paths'])} obj_ grains",font=font,fill=(240,243,245))
+            draw.text((20,10),f"Isaac {a.runtime[0]}.{a.runtime[1]} observed-state replay | {now:05.2f} s | {len(d['positions'][0])} grains",font=font,fill=(240,243,245))
             draw.text((20,40),f"Pan-contact net: {float(d['balance_net_g'][frame]):.4f} g | {str(d['phases'][frame])}",font=font,fill=(235,202,99))
             if frame in requested:
                 dest = a.out/f'{a.view}_{frame:04d}.png'

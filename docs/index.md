@@ -57,6 +57,9 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Operations
 
+- [Task09 粉末瓶 r6.0 GPU-PBD 干粉](operations/task09-powder-bottle-r6.0-guide.md)
+- [固体样品称量 r5.7 / 1 g 任务包](operations/solid-sample-weighing-r5.7-1g-guide.md)
+- [Task09 粉末瓶 r5.10 120 Hz 静止段位姿冻结](operations/task09-powder-bottle-r5.10-guide.md)
 - [Task09 粉末瓶 r5.7 120 Hz 早期抬离停顿](operations/task09-powder-bottle-r5.7-guide.md)
 - [Task09 粉末瓶 r5.6 120 Hz 勺碗摩擦](operations/task09-powder-bottle-r5.6-guide.md)
 - [Task09 粉末瓶 r5.5 120 Hz 挖深舀取](operations/task09-powder-bottle-r5.5-guide.md)
@@ -101,7 +104,13 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 ## Records
 
+- [Task09 粉末瓶 r6.0 GPU-PBD 干粉起步](records/2026-09-17-task09-powder-bottle-r6.0-pbd-start.md)
+- [固体样品称量 1 g 过程分与 r5.7 任务包](records/2026-09-16-solid-sample-weighing-1g-package.md)
 - [Task09 120 Hz 近满瓶 5.x 目标进度](records/2026-09-15-task09-powder-120hz-5x-goal-progress.md)
+- [Task09 120 Hz 静止粉粒振动 5.x 目标进度](records/2026-09-15-task09-powder-120hz-rest-jitter-goal-progress.md)
+- [Task09 粉末瓶 r5.10 120 Hz 静止段位姿冻结](records/2026-09-15-task09-powder-bottle-r5.10-rest-hold.md)
+- [Task09 粉末瓶 r5.9 120 Hz 粉粒 sleep](records/2026-09-15-task09-powder-bottle-r5.9-grain-sleep.md)
+- [Task09 粉末瓶 r5.8 120 Hz 粉粒线阻尼](records/2026-09-15-task09-powder-bottle-r5.8-grain-damping.md)
 - [Task09 粉末瓶 r5.7 120 Hz 早期抬离停顿](records/2026-09-15-task09-powder-bottle-r5.7-early-lift-hold.md)
 - [Task09 粉末瓶 r5.6 120 Hz 勺碗摩擦](records/2026-09-15-task09-powder-bottle-r5.6-bowl-friction.md)
 - [Task09 粉末瓶 r5.5 120 Hz 挖深](records/2026-09-15-task09-powder-bottle-r5.5-deeper-scoop.md)

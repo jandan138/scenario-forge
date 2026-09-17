@@ -22,6 +22,9 @@ def test_force_acceptance_requires_valid_stable_known_load():
     assert not measurement_check([dict(net_g=.5,valid=False,stable=True)],.5,.1)['passed']
     assert not measurement_check([],0,.1)['passed']
     assert not measurement_check([dict(net_g=float('nan'),valid=True,stable=True)],.5,.1)['passed']
+    missing = measurement_check([dict(net_g=None,valid=None,stable=None)],.3,.01)
+    assert missing['passed'] is False
+    assert missing['samples'] == 1
 
 
 def test_contact_channel_preserves_load_when_incoming_joint_loses_it():
