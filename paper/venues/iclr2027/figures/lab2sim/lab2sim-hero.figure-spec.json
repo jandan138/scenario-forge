@@ -4,245 +4,238 @@
   "title": "Lab2Sim editorial story hero",
   "canvas": {
     "width": 2000,
-    "height": 560,
-    "background": "#FAFBFD"
+    "height": 470,
+    "background": "#FFFFFF"
   },
   "theme": {
-    "font_family": "Noto Sans",
-    "font_fallbacks": ["Liberation Sans", "DejaVu Sans", "Arial", "sans-serif"],
+    "font_family": "DejaVu Sans",
+    "font_fallbacks": [
+      "Liberation Sans",
+      "Noto Sans",
+      "sans-serif"
+    ],
     "palette": {
-      "canvas": "#FAFBFD",
+      "canvas": "#FFFFFF",
       "surface": "#FFFFFF",
       "ink": "#172033",
-      "text": "#172033",
-      "muted_ink": "#667085",
-      "muted_text": "#667085",
-      "temporal": "#2D6AA3",
-      "convergence": "#D97706",
-      "result": "#0F8B7A",
-      "hairline": "#CBD5E1",
-      "input_tint": "#EEF5FC",
-      "spec_tint": "#FFF6E8",
-      "result_tint": "#ECF8F5"
+      "muted_ink": "#3F4855",
+      "accent": "#0E7C6B",
+      "blue": "#2F6B99",
+      "orange": "#C96A0A",
+      "hairline": "#C5CFDA",
+      "spec_tint": "#FFF8EE"
     },
-    "panel_radius": 16,
-    "panel_stroke_width": 2,
-    "connector_width": 4
+    "panel_radius": 10,
+    "panel_stroke_width": 3,
+    "connector_width": 5
   },
   "panels": [
     {
-      "id": "rule-input",
+      "id": "rule-headers",
       "x": 25,
-      "y": 82,
-      "width": 235,
-      "height": 4,
+      "y": 84,
+      "width": 1950,
+      "height": 3,
       "title": "",
-      "semantic_role": "input section rule",
-      "fill": "#5A8FC4",
-      "stroke": "#5A8FC4",
-      "stroke_width": 0,
-      "radius": 0
-    },
-    {
-      "id": "rule-agent",
-      "x": 300,
-      "y": 82,
-      "width": 615,
-      "height": 4,
-      "title": "",
-      "semantic_role": "agent section rule",
-      "fill": "#D97706",
-      "stroke": "#D97706",
-      "stroke_width": 0,
-      "radius": 0
-    },
-    {
-      "id": "rule-results",
-      "x": 940,
-      "y": 82,
-      "width": 1035,
-      "height": 4,
-      "title": "",
-      "semantic_role": "results section rule",
-      "fill": "#0F8B7A",
-      "stroke": "#0F8B7A",
+      "semantic_role": "single header hairline across all zones",
+      "fill": "#C5CFDA",
+      "stroke": "#C5CFDA",
       "stroke_width": 0,
       "radius": 0
     },
     {
       "id": "input-evidence",
       "x": 25,
-      "y": 112,
+      "y": 170,
       "width": 235,
-      "height": 418,
+      "height": 260,
       "title": "",
       "semantic_role": "one multimodal request interface",
-      "fill": "#EEF5FC",
-      "stroke": "#7FA9D2",
-      "stroke_width": 2,
-      "radius": 20
+      "fill": "#FFFFFF",
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
+      "radius": 12
     },
     {
       "id": "stage-retrieve",
-      "x": 285,
-      "y": 186,
-      "width": 125,
-      "height": 214,
+      "x": 275,
+      "y": 170,
+      "width": 155,
+      "height": 260,
       "title": "",
       "semantic_role": "retrieve manufacturer evidence",
-      "fill": "#F4F8FC",
-      "stroke": "#B7CAE0",
-      "stroke_width": 1.5,
-      "radius": 12,
+      "fill": "#FFFFFF",
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
+      "radius": 10,
       "header_height": 0,
-      "header_fill": "#FAFBFD",
+      "header_fill": "#FFFFFF",
       "header_text_color": "#172033",
-      "title_font_size": 32
+      "title_font_size": 40
     },
     {
       "id": "stage-spec",
-      "x": 420,
-      "y": 146,
-      "width": 185,
-      "height": 284,
+      "x": 450,
+      "y": 170,
+      "width": 190,
+      "height": 260,
       "title": "",
       "semantic_role": "freeze evidence into asset contract",
-      "fill": "#FFF9F0",
-      "stroke": "#D9A45B",
-      "radius": 13,
-      "header_height": 52,
-      "header_fill": "#FCE8C8",
+      "fill": "#FFF8EE",
+      "stroke": "#C96A0A",
+      "stroke_width": 4,
+      "radius": 10,
+      "header_height": 0,
+      "header_fill": "#FFF8EE",
       "header_text_color": "#172033",
-      "title_font_size": 32
+      "title_font_size": 40
     },
     {
       "id": "stage-build",
-      "x": 615,
-      "y": 186,
-      "width": 120,
-      "height": 214,
+      "x": 660,
+      "y": 170,
+      "width": 115,
+      "height": 260,
       "title": "",
       "semantic_role": "generate articulated USD",
-      "fill": "#F4F8FC",
-      "stroke": "#B7CAE0",
-      "stroke_width": 1.5,
-      "radius": 12,
+      "fill": "#FFFFFF",
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
+      "radius": 10,
       "header_height": 0,
-      "header_fill": "#FAFBFD",
+      "header_fill": "#FFFFFF",
       "header_text_color": "#172033",
-      "title_font_size": 32
+      "title_font_size": 40
     },
     {
       "id": "stage-admit",
-      "x": 745,
-      "y": 166,
-      "width": 170,
-      "height": 244,
+      "x": 795,
+      "y": 170,
+      "width": 145,
+      "height": 260,
       "title": "",
       "semantic_role": "qualify generated USD",
-      "fill": "#ECF8F5",
-      "stroke": "#42A28F",
+      "fill": "#FFFFFF",
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
       "radius": 10,
-      "header_height": 52,
-      "header_fill": "#D5F0E9",
+      "header_height": 0,
+      "header_fill": "#FFFFFF",
       "header_text_color": "#172033",
-      "title_font_size": 32
+      "title_font_size": 40
+    },
+    {
+      "id": "admit-pass-badge",
+      "x": 812,
+      "y": 360,
+      "width": 110,
+      "height": 36,
+      "title": "",
+      "semantic_role": "terminal admission success state",
+      "fill": "#FFFFFF",
+      "stroke": "#0E7C6B",
+      "stroke_width": 3,
+      "radius": 18
     },
     {
       "id": "result-region",
-      "x": 940,
+      "x": 963,
       "y": 104,
-      "width": 1035,
-      "height": 438,
+      "width": 1014,
+      "height": 336,
       "title": "",
       "semantic_role": "four representative compiled scenes",
-      "fill": "#FAFBFD",
-      "stroke": "#FAFBFD",
+      "fill": "#FFFFFF",
+      "stroke": "#FFFFFF",
       "stroke_width": 0,
       "radius": 0
     },
     {
       "id": "result-fehling",
-      "x": 960,
-      "y": 180,
-      "width": 235,
-      "height": 250,
+      "x": 965,
+      "y": 170,
+      "width": 238,
+      "height": 260,
       "title": "",
       "semantic_role": "Fehling r10 result",
       "fill": "#FFFFFF",
-      "stroke": "#A7CFC5",
-      "radius": 14
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
+      "radius": 10
     },
     {
       "id": "result-powder",
-      "x": 1210,
-      "y": 180,
-      "width": 235,
-      "height": 250,
+      "x": 1223,
+      "y": 170,
+      "width": 238,
+      "height": 260,
       "title": "",
       "semantic_role": "powder r4 result",
       "fill": "#FFFFFF",
-      "stroke": "#A7CFC5",
-      "radius": 14
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
+      "radius": 10
     },
     {
       "id": "result-titration",
-      "x": 1460,
-      "y": 180,
-      "width": 235,
-      "height": 250,
+      "x": 1481,
+      "y": 170,
+      "width": 238,
+      "height": 260,
       "title": "",
       "semantic_role": "titration r1.7 result",
       "fill": "#FFFFFF",
-      "stroke": "#A7CFC5",
-      "radius": 14
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
+      "radius": 10
     },
     {
       "id": "result-oven",
-      "x": 1710,
-      "y": 180,
-      "width": 235,
-      "height": 250,
+      "x": 1739,
+      "y": 170,
+      "width": 238,
+      "height": 260,
       "title": "",
       "semantic_role": "OVEN r2 result",
       "fill": "#FFFFFF",
-      "stroke": "#A7CFC5",
-      "radius": 14
+      "stroke": "#C5CFDA",
+      "stroke_width": 3,
+      "radius": 10
     }
   ],
   "texts": [
     {
       "id": "heading-input",
-      "text": "INPUT",
+      "text": "Input",
       "x": 25,
       "y": 24,
       "width": 235,
       "height": 48,
-      "font_size": 36,
+      "font_size": 46,
       "font_weight": "bold",
       "color": "#172033",
       "align": "left"
     },
     {
       "id": "heading-agent",
-      "text": "LAB2SIM AGENT",
-      "x": 300,
+      "text": "Lab2Sim agent",
+      "x": 275,
       "y": 24,
       "width": 615,
       "height": 48,
-      "font_size": 36,
+      "font_size": 46,
       "font_weight": "bold",
       "color": "#172033",
       "align": "left"
     },
     {
       "id": "heading-results",
-      "text": "ROBOT-READY ISAAC SCENES",
-      "x": 940,
+      "text": "Robot-ready Isaac scenes",
+      "x": 965,
       "y": 24,
-      "width": 1035,
+      "width": 1010,
       "height": 48,
-      "font_size": 36,
+      "font_size": 46,
       "font_weight": "bold",
       "color": "#172033",
       "align": "left"
@@ -250,9 +243,9 @@
     {
       "id": "stage-title-search",
       "text": "Search",
-      "x": 285,
-      "y": 198,
-      "width": 125,
+      "x": 275,
+      "y": 182,
+      "width": 155,
       "height": 44,
       "font_size": 36,
       "font_weight": "bold",
@@ -263,11 +256,11 @@
     {
       "id": "stage-title-spec",
       "text": "Spec",
-      "x": 420,
-      "y": 154,
-      "width": 185,
+      "x": 450,
+      "y": 182,
+      "width": 190,
       "height": 44,
-      "font_size": 40,
+      "font_size": 36,
       "font_weight": "bold",
       "color": "#172033",
       "align": "center",
@@ -276,11 +269,11 @@
     {
       "id": "stage-title-build",
       "text": "Build",
-      "x": 615,
-      "y": 198,
-      "width": 120,
+      "x": 660,
+      "y": 182,
+      "width": 115,
       "height": 44,
-      "font_size": 40,
+      "font_size": 36,
       "font_weight": "bold",
       "color": "#172033",
       "align": "center",
@@ -289,11 +282,11 @@
     {
       "id": "stage-title-admit",
       "text": "Admit",
-      "x": 745,
-      "y": 174,
-      "width": 170,
+      "x": 795,
+      "y": 182,
+      "width": 145,
       "height": 44,
-      "font_size": 40,
+      "font_size": 36,
       "font_weight": "bold",
       "color": "#172033",
       "align": "center",
@@ -301,66 +294,70 @@
     },
     {
       "id": "input-modalities",
-      "text": "TEXT",
-      "x": 43,
-      "y": 132,
-      "width": 199,
-      "height": 48,
-      "font_size": 40,
-      "font_weight": "bold",
-      "color": "#2D6AA3",
-      "align": "left"
+      "text": "Text",
+      "x": 87,
+      "y": 178,
+      "width": 155,
+      "height": 36,
+      "font_size": 30,
+      "font_weight": "normal",
+      "color": "#172033",
+      "align": "left",
+      "valign": "middle",
+      "owner": "input-evidence"
     },
     {
       "id": "input-image-label",
-      "text": "IMAGE",
-      "x": 43,
-      "y": 190,
-      "width": 199,
-      "height": 48,
-      "font_size": 40,
-      "font_weight": "bold",
-      "color": "#2D6AA3",
+      "text": "Image",
+      "x": 87,
+      "y": 220,
+      "width": 155,
+      "height": 36,
+      "font_size": 30,
+      "font_weight": "normal",
+      "color": "#172033",
       "align": "left",
+      "valign": "middle",
       "owner": "input-evidence"
     },
     {
       "id": "input-video-label",
-      "text": "VIDEO",
-      "x": 105,
-      "y": 478,
+      "text": "Video",
+      "x": 87,
+      "y": 262,
       "width": 155,
-      "height": 48,
-      "font_size": 40,
-      "font_weight": "medium",
-      "color": "#667085",
+      "height": 36,
+      "font_size": 30,
+      "font_weight": "normal",
+      "color": "#172033",
       "align": "left",
+      "valign": "middle",
       "owner": "input-evidence"
     },
     {
       "id": "retrieve-body",
-      "text": "WEB\nDOCS",
-      "x": 295,
+      "text": "Web\ndocs",
+      "x": 280,
       "y": 306,
-      "width": 105,
-      "height": 74,
-      "font_size": 40,
-      "font_weight": "medium",
-      "color": "#667085",
+      "width": 145,
+      "height": 70,
+      "font_size": 34,
+      "font_weight": "normal",
+      "color": "#3F4855",
       "align": "center",
       "valign": "middle",
       "owner": "stage-retrieve"
     },
     {
       "id": "spec-body",
-      "text": "OVEN125\nDOOR180°\nSHELF×6",
-      "x": 436,
-      "y": 228,
-      "width": 153,
-      "height": 146,
-      "font_size": 34,
-      "font_weight": "medium",
-      "color": "#7A4C12",
+      "text": "OVEN 125\nDOOR 180°\nSHELF ×6",
+      "x": 455,
+      "y": 246,
+      "width": 180,
+      "height": 150,
+      "font_size": 30,
+      "font_weight": "normal",
+      "color": "#172033",
       "align": "left",
       "valign": "middle",
       "owner": "stage-spec"
@@ -368,26 +365,27 @@
     {
       "id": "build-body",
       "text": "USD",
-      "x": 625,
-      "y": 304,
-      "width": 100,
+      "x": 665,
+      "y": 306,
+      "width": 105,
       "height": 58,
-      "font_size": 40,
-      "font_weight": "medium",
-      "color": "#172033",
+      "font_size": 34,
+      "font_weight": "normal",
+      "color": "#3F4855",
       "align": "center",
+      "valign": "middle",
       "owner": "stage-build"
     },
     {
       "id": "admit-body",
       "text": "Convert\nAsset\nPhysX",
-      "x": 755,
-      "y": 228,
-      "width": 150,
-      "height": 120,
+      "x": 798,
+      "y": 240,
+      "width": 139,
+      "height": 110,
       "font_size": 34,
-      "font_weight": "medium",
-      "color": "#38665C",
+      "font_weight": "normal",
+      "color": "#3F4855",
       "align": "center",
       "valign": "middle",
       "owner": "stage-admit"
@@ -395,25 +393,26 @@
     {
       "id": "admit-status",
       "text": "PASS",
-      "x": 755,
-      "y": 370,
-      "width": 150,
+      "x": 812,
+      "y": 360,
+      "width": 110,
       "height": 36,
-      "font_size": 40,
+      "font_size": 30,
       "font_weight": "bold",
-      "color": "#0F8B7A",
+      "color": "#0E7C6B",
       "align": "center",
-      "owner": "stage-admit"
+      "valign": "middle",
+      "owner": "admit-pass-badge"
     },
     {
       "id": "label-fehling",
       "text": "Fehling",
-      "x": 974,
-      "y": 390,
-      "width": 207,
+      "x": 977,
+      "y": 370,
+      "width": 214,
       "height": 44,
-      "font_size": 40,
-      "font_weight": "bold",
+      "font_size": 36,
+      "font_weight": "normal",
       "color": "#172033",
       "align": "center",
       "owner": "result-fehling"
@@ -421,12 +420,12 @@
     {
       "id": "label-powder",
       "text": "Powder",
-      "x": 1224,
-      "y": 390,
-      "width": 207,
+      "x": 1235,
+      "y": 370,
+      "width": 214,
       "height": 44,
-      "font_size": 40,
-      "font_weight": "bold",
+      "font_size": 36,
+      "font_weight": "normal",
       "color": "#172033",
       "align": "center",
       "owner": "result-powder"
@@ -434,12 +433,12 @@
     {
       "id": "label-titration",
       "text": "Titration",
-      "x": 1474,
-      "y": 390,
-      "width": 207,
+      "x": 1493,
+      "y": 370,
+      "width": 214,
       "height": 44,
-      "font_size": 40,
-      "font_weight": "bold",
+      "font_size": 36,
+      "font_weight": "normal",
       "color": "#172033",
       "align": "center",
       "owner": "result-titration"
@@ -447,12 +446,12 @@
     {
       "id": "label-oven",
       "text": "OVEN 125",
-      "x": 1724,
-      "y": 390,
-      "width": 207,
+      "x": 1751,
+      "y": 370,
+      "width": 214,
       "height": 44,
-      "font_size": 40,
-      "font_weight": "bold",
+      "font_size": 36,
+      "font_weight": "normal",
       "color": "#172033",
       "align": "center",
       "owner": "result-oven"
@@ -460,14 +459,36 @@
   ],
   "assets": [
     {
+      "id": "input-text-icon",
+      "path": "icons/icon-text.safe.svg",
+      "x": 43,
+      "y": 180,
+      "width": 32,
+      "height": 32,
+      "fit": "contain",
+      "alt": "Wet-lab protocol text symbol",
+      "owner": "input-evidence"
+    },
+    {
+      "id": "input-image-icon",
+      "path": "icons/icon-image.safe.svg",
+      "x": 43,
+      "y": 222,
+      "width": 32,
+      "height": 32,
+      "fit": "contain",
+      "alt": "Catalog image request symbol",
+      "owner": "input-evidence"
+    },
+    {
       "id": "input-catalog-photo",
       "path": "source/ika_catalog_closed.png",
       "x": 43,
-      "y": 246,
+      "y": 308,
       "width": 199,
-      "height": 188,
+      "height": 116,
       "fit": "contain",
-      "clip_radius": 12,
+      "clip_radius": 8,
       "alt": "IKA OVEN 125 manufacturer catalog image used as an image request",
       "owner": "input-evidence"
     },
@@ -475,9 +496,9 @@
       "id": "input-video-icon",
       "path": "icons/icon-video.safe.svg",
       "x": 43,
-      "y": 472,
-      "width": 50,
-      "height": 50,
+      "y": 264,
+      "width": 32,
+      "height": 32,
       "fit": "contain",
       "alt": "Wet-lab demonstration video symbol",
       "owner": "input-evidence"
@@ -485,10 +506,10 @@
     {
       "id": "retrieve-icon",
       "path": "icons/icon-search.safe.svg",
-      "x": 323,
-      "y": 250,
-      "width": 54,
-      "height": 54,
+      "x": 328,
+      "y": 246,
+      "width": 48,
+      "height": 48,
       "fit": "contain",
       "alt": "Manufacturer evidence retrieval symbol",
       "owner": "stage-retrieve"
@@ -496,10 +517,10 @@
     {
       "id": "build-icon",
       "path": "icons/icon-generate.safe.svg",
-      "x": 656,
-      "y": 248,
-      "width": 54,
-      "height": 44,
+      "x": 693,
+      "y": 246,
+      "width": 48,
+      "height": 48,
       "fit": "contain",
       "alt": "Blender-to-USD generation symbol",
       "owner": "stage-build"
@@ -507,48 +528,48 @@
     {
       "id": "scene-fehling",
       "path": "source/fehling_r10_hero.png",
-      "x": 960,
-      "y": 180,
-      "width": 235,
-      "height": 190,
+      "x": 965,
+      "y": 170,
+      "width": 238,
+      "height": 192,
       "fit": "cover",
-      "clip_radius": 14,
+      "clip_radius": 10,
       "alt": "Fehling r10 current-delivery Isaac scene with bath and tube rack",
       "owner": "result-fehling"
     },
     {
       "id": "scene-powder",
       "path": "source/powder_r4_hero.png",
-      "x": 1210,
-      "y": 180,
-      "width": 235,
-      "height": 190,
+      "x": 1223,
+      "y": 170,
+      "width": 238,
+      "height": 192,
       "fit": "cover",
-      "clip_radius": 14,
+      "clip_radius": 10,
       "alt": "Powder r4 current-delivery Isaac scene with scoop over bottle",
       "owner": "result-powder"
     },
     {
       "id": "scene-titration",
       "path": "source/titration_r17_hero.png",
-      "x": 1460,
-      "y": 180,
-      "width": 235,
-      "height": 190,
+      "x": 1481,
+      "y": 170,
+      "width": 238,
+      "height": 192,
       "fit": "cover",
-      "clip_radius": 14,
+      "clip_radius": 10,
       "alt": "Titration r1.7 current-delivery Isaac scene at endpoint",
       "owner": "result-titration"
     },
     {
       "id": "scene-oven",
       "path": "source/oven_r2_hero.png",
-      "x": 1710,
-      "y": 180,
-      "width": 235,
-      "height": 190,
+      "x": 1739,
+      "y": 170,
+      "width": 238,
+      "height": 192,
       "fit": "cover",
-      "clip_radius": 14,
+      "clip_radius": 10,
       "alt": "OVEN r2 current-delivery Isaac scene with open door and glassware",
       "owner": "result-oven"
     }
@@ -565,7 +586,7 @@
     {
       "id": "retrieve.in",
       "owner": "stage-retrieve",
-      "x": 285,
+      "x": 275,
       "y": 320,
       "scope": "external",
       "description": "The request enters evidence retrieval"
@@ -573,7 +594,7 @@
     {
       "id": "retrieve.out",
       "owner": "stage-retrieve",
-      "x": 410,
+      "x": 430,
       "y": 320,
       "scope": "external",
       "description": "Retrieved manufacturer evidence leaves search"
@@ -581,7 +602,7 @@
     {
       "id": "spec.in",
       "owner": "stage-spec",
-      "x": 420,
+      "x": 450,
       "y": 320,
       "scope": "external",
       "description": "Manufacturer evidence enters spec freezing"
@@ -589,7 +610,7 @@
     {
       "id": "spec.out",
       "owner": "stage-spec",
-      "x": 605,
+      "x": 640,
       "y": 320,
       "scope": "external",
       "description": "The frozen asset spec leaves the contract stage"
@@ -597,7 +618,7 @@
     {
       "id": "build.in",
       "owner": "stage-build",
-      "x": 615,
+      "x": 660,
       "y": 320,
       "scope": "external",
       "description": "The frozen spec drives USD generation"
@@ -605,7 +626,7 @@
     {
       "id": "build.out",
       "owner": "stage-build",
-      "x": 735,
+      "x": 775,
       "y": 320,
       "scope": "external",
       "description": "Generated USD leaves the skill"
@@ -613,7 +634,7 @@
     {
       "id": "admit.in",
       "owner": "stage-admit",
-      "x": 745,
+      "x": 795,
       "y": 320,
       "scope": "external",
       "description": "Generated USD enters ConvertAsset"
@@ -621,7 +642,7 @@
     {
       "id": "admit.out",
       "owner": "stage-admit",
-      "x": 920,
+      "x": 940,
       "y": 320,
       "scope": "external",
       "description": "Qualified USD leaves ConvertAsset"
@@ -629,7 +650,7 @@
     {
       "id": "result.in",
       "owner": "result-region",
-      "x": 940,
+      "x": 960,
       "y": 320,
       "scope": "external",
       "description": "Qualified USD enters the representative-scene result group"
@@ -644,9 +665,9 @@
       "meaning": "A text, image, or video request enters the Lab2Sim agent",
       "arrowhead": "end",
       "route": "straight",
-      "color": "#D97706",
+      "color": "#3F4855",
       "width": 4,
-      "dash": "dashed"
+      "dash": "solid"
     },
     {
       "id": "retrieve-to-spec",
@@ -656,7 +677,7 @@
       "meaning": "Retrieved manufacturer evidence is frozen into the asset spec",
       "arrowhead": "end",
       "route": "straight",
-      "color": "#2D6AA3",
+      "color": "#3F4855",
       "width": 4,
       "dash": "solid"
     },
@@ -668,7 +689,7 @@
       "meaning": "The frozen spec drives articulated USD generation",
       "arrowhead": "end",
       "route": "straight",
-      "color": "#2D6AA3",
+      "color": "#3F4855",
       "width": 4,
       "dash": "solid"
     },
@@ -680,7 +701,7 @@
       "meaning": "Generated USD is handed to ConvertAsset",
       "arrowhead": "end",
       "route": "straight",
-      "color": "#2D6AA3",
+      "color": "#3F4855",
       "width": 4,
       "dash": "solid"
     },
@@ -692,20 +713,25 @@
       "meaning": "ConvertAsset-qualified USD becomes a robot-ready Isaac scene",
       "arrowhead": "end",
       "route": "straight",
-      "color": "#0F8B7A",
+      "color": "#3F4855",
       "width": 4,
       "dash": "solid"
     }
   ],
   "outputs": {
-    "formats": ["svg", "png", "pdf", "pptx"],
+    "formats": [
+      "svg",
+      "png",
+      "pdf",
+      "pptx"
+    ],
     "basename": "lab2sim-hero"
   },
   "review": {
     "semantic_graph_approved": true,
     "approved_by": "user-approved Lab2Sim Figure 1 redesign plan",
     "approved_at": "2026-09-17",
-    "notes": "One multimodal interface enters one linear agent path. The four current-delivery scenes are parallel examples, not a temporal sequence."
+    "notes": "One multimodal interface enters one linear agent path. The four current-delivery scenes are parallel examples, not a temporal sequence. Visual-language restyle 2026-09-17: slate plus single teal accent, DejaVu Sans, unified hairline cards and arrows; semantic graph unchanged."
   },
   "provenance": [
     {
@@ -713,7 +739,10 @@
       "source": "fig1-reference-audit.md",
       "section": "Reference-led decisions",
       "claim": "Inspired editorial hierarchy and output-gallery allocation",
-      "applies_to": ["rule-input", "rule-agent", "rule-results", "result-region"],
+      "applies_to": [
+        "rule-headers",
+        "result-region"
+      ],
       "status": "verified"
     },
     {
@@ -721,7 +750,12 @@
       "source": "../../../../../docs/design/agent-driven-asset-generation-pipeline.md",
       "section": "Five-stage pipeline",
       "claim": "Evidence retrieval, spec freeze, generation, and ConvertAsset admission",
-      "applies_to": ["stage-retrieve", "stage-spec", "stage-build", "stage-admit"],
+      "applies_to": [
+        "stage-retrieve",
+        "stage-spec",
+        "stage-build",
+        "stage-admit"
+      ],
       "status": "verified"
     },
     {
@@ -729,7 +763,9 @@
       "source": "../../../../../docs/design/asset-specs/ika-oven-125.md",
       "section": "Frozen manufacturer fields",
       "claim": "OVEN 125 identity, door articulation, and shelf count",
-      "applies_to": ["spec-body"],
+      "applies_to": [
+        "spec-body"
+      ],
       "status": "verified"
     },
     {
@@ -737,7 +773,9 @@
       "source": "../../../../../external_artifacts/asset_evidence/ika-oven-125/image1.png",
       "section": "Multimodal image request",
       "claim": "Manufacturer photograph of IKA OVEN 125",
-      "applies_to": ["input-catalog-photo"],
+      "applies_to": [
+        "input-catalog-photo"
+      ],
       "status": "user-provided"
     },
     {
@@ -745,7 +783,9 @@
       "source": "../../../../../outputs/lab2sim_fig1_retake_20260917/fehling_r10/t30_hero_tabletop.png",
       "section": "Figure 1 current-delivery scenes",
       "claim": "Camera-only render of the Fehling r10 retained t30 scene state",
-      "applies_to": ["scene-fehling"],
+      "applies_to": [
+        "scene-fehling"
+      ],
       "status": "verified"
     },
     {
@@ -753,7 +793,9 @@
       "source": "../../../../../outputs/task09_powder_bottle_r4_20260911/video/close_0960.png",
       "section": "Figure 1 current-delivery scenes",
       "claim": "Powder r4 observed-state replay with the HUD removed by a documented crop",
-      "applies_to": ["scene-powder"],
+      "applies_to": [
+        "scene-powder"
+      ],
       "status": "verified"
     },
     {
@@ -761,7 +803,9 @@
       "source": "../../../../../outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/evidence/initial_scene/after_end_scale_scene_overview.png",
       "section": "Figure 1 current-delivery scenes",
       "claim": "Titration r1.7 endpoint scene overview",
-      "applies_to": ["scene-titration"],
+      "applies_to": [
+        "scene-titration"
+      ],
       "status": "verified"
     },
     {
@@ -769,7 +813,9 @@
       "source": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/evidence/initial_scene/open_oven_station.png",
       "section": "Figure 1 current-delivery scenes",
       "claim": "OVEN r2 open-door station with dual glassware",
-      "applies_to": ["scene-oven"],
+      "applies_to": [
+        "scene-oven"
+      ],
       "status": "verified"
     }
   ]

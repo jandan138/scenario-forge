@@ -7,17 +7,17 @@
           "command": [
             "/usr/lib/libreoffice/program/soffice",
             "--headless",
-            "-env:UserInstallation=file:///tmp/figure-lo-l2897vsi/profile",
+            "-env:UserInstallation=file:///tmp/figure-lo-8hefetoq/profile",
             "--convert-to",
             "pdf:impress_pdf_Export",
             "--outdir",
-            "/tmp/figure-lo-l2897vsi",
+            "/tmp/figure-lo-8hefetoq",
             "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx"
           ],
           "error": null,
           "returncode": 0,
           "stderr": "Warning: failed to launch javaldx - java may not function correctly",
-          "stdout": "convert /cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx -> /tmp/figure-lo-l2897vsi/fig1-hero.pdf using filter : impress_pdf_Export",
+          "stdout": "convert /cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx -> /tmp/figure-lo-8hefetoq/fig1-hero.pdf using filter : impress_pdf_Export",
           "timed_out": false
         }
       ],
@@ -27,8 +27,8 @@
         {
           "exists": true,
           "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero.pdf",
-          "sha256": "b3ddad0d2756a5c53433320334bfa6c8ba4917e40ae4d7b4359c5e4d818550c9",
-          "size_bytes": 187784,
+          "sha256": "23839b0a921888ed7bc810dc8cecf66d4befa49a21bb90e04b788453ca828fc6",
+          "size_bytes": 188090,
           "validation": {
             "details": "PDF header, cross-reference marker, and EOF trailer are present",
             "passed": true,
@@ -54,7 +54,7 @@
             "-r",
             "180",
             "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero.pdf",
-            "/tmp/figure-png-17vmzvcx/raster-1-pdftocairo/page"
+            "/tmp/figure-png-d9q8i0p6/raster-1-pdftocairo/page"
           ],
           "error": null,
           "returncode": 0,
@@ -69,11 +69,11 @@
         {
           "exists": true,
           "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero-slides/slide-001.png",
-          "sha256": "802e57824c3a550735594b63934778586604e360a51847b94fc0330a1dcf5a8b",
-          "size_bytes": 611555,
+          "sha256": "192f574f7a9b54868fb6f0a695d4dd50ae262da796533362f6fbdcd4dc3fbc54",
+          "size_bytes": 620430,
           "validation": {
             "details": "PNG chunk structure and CRC checks are valid",
-            "height_px": 1051,
+            "height_px": 882,
             "passed": true,
             "width_px": 3751
           }
@@ -139,7 +139,7 @@
         "preferred_backend": "sharp"
       }
     },
-    "checked_at": "2026-09-17T08:41:51Z",
+    "checked_at": "2026-09-17T12:51:14Z",
     "commands": {
       "imagemagick": {
         "available": false,
@@ -190,11 +190,11 @@
         "candidate_failures": [],
         "command": "node",
         "located": true,
-        "path": "/usr/local/lib/nodejs/bin/node",
+        "path": "/etc/dsw/runtime/node/bin/node",
         "probe_warning": null,
         "purpose": "Optional Sharp/PDFKit and PptxGenJS backends",
         "verification": "passed",
-        "version": "v24.14.1"
+        "version": "v22.22.3"
       },
       "pdftocairo": {
         "available": true,
@@ -299,7 +299,7 @@
       }
     },
     "platform": {
-      "cwd": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures",
+      "cwd": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim",
       "machine": "x86_64",
       "python_executable": "/isaac-sim/kit/python/bin/python3",
       "python_version": "3.10.15",
@@ -338,7 +338,7 @@
     "read_only_probe": true,
     "schema_version": 1
   },
-  "generated_at": "2026-09-17T08:41:53Z",
+  "generated_at": "2026-09-17T12:51:16Z",
   "policy": {
     "automatic_installation": false,
     "missing_backend_is_degraded_skip": true,
@@ -372,8 +372,8 @@
       "details": "PPTX package structure and CRC checks are valid (1 slide(s))",
       "passed": true,
       "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx",
-      "sha256": "cc0cc15f022380bf8eb525174f6df39c54790aa121d1bdd0fdbce19d6b08070a",
-      "size_bytes": 3683672,
+      "sha256": "b868b503d06ee65c391304b4328c99359eb7a1e81bd92ff0656f9c89c067a80f",
+      "size_bytes": 3715974,
       "slide_count": 1,
       "type": "pptx"
     }

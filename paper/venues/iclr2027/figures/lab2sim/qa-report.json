@@ -5,11 +5,11 @@
         {
           "backend": "sharp",
           "command": [
-            "/usr/local/lib/nodejs/bin/node",
+            "/etc/dsw/runtime/node/bin/node",
             "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/render_svg.mjs",
             "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg",
             "--output",
-            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-18vm1afx.png",
+            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fcb3b302.png",
             "--format",
             "png",
             "--dpi",
@@ -18,7 +18,7 @@
           "error": null,
           "returncode": 0,
           "stderr": "",
-          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-18vm1afx.png\",\"format\":\"png\",\"dpi\":180}",
+          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fcb3b302.png\",\"format\":\"png\",\"dpi\":180}",
           "timed_out": false
         }
       ],
@@ -28,11 +28,11 @@
         {
           "exists": true,
           "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.png",
-          "sha256": "06a9578cbb61291cfba6568677d8f2fad6ae815b5757e7ca71a374ab8a8f1467",
-          "size_bytes": 1658785,
+          "sha256": "10a82f2c7fb7dcb887f83f733de15c5e8d5033238dde8a8897c81ea700c0cc0c",
+          "size_bytes": 1577681,
           "validation": {
             "details": "PNG chunk structure and CRC checks are valid",
-            "height_px": 1400,
+            "height_px": 1175,
             "passed": true,
             "width_px": 5000
           }
@@ -51,11 +51,11 @@
         {
           "backend": "sharp+pdfkit",
           "command": [
-            "/usr/local/lib/nodejs/bin/node",
+            "/etc/dsw/runtime/node/bin/node",
             "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/render_svg.mjs",
             "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg",
             "--output",
-            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-107dxs0e.pdf",
+            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fxrflnc1.pdf",
             "--format",
             "pdf",
             "--dpi",
@@ -64,7 +64,7 @@
           "error": null,
           "returncode": 0,
           "stderr": "",
-          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-107dxs0e.pdf\",\"format\":\"pdf\",\"dpi\":180}",
+          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fxrflnc1.pdf\",\"format\":\"pdf\",\"dpi\":180}",
           "timed_out": false
         }
       ],
@@ -74,8 +74,8 @@
         {
           "exists": true,
           "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pdf",
-          "sha256": "f2a901b80a73e660ea23b79b7b52b64fc865ef8646df8333572c25f0652f52cc",
-          "size_bytes": 1451457,
+          "sha256": "fe345eaf92649b52eadc5f8e38ca8fe2560b836378aeef4f9fc9045feda3b33a",
+          "size_bytes": 1455323,
           "validation": {
             "details": "PDF header, cross-reference marker, and EOF trailer are present",
             "passed": true,
@@ -143,7 +143,7 @@
         "preferred_backend": "sharp"
       }
     },
-    "checked_at": "2026-09-17T08:41:47Z",
+    "checked_at": "2026-09-17T12:51:11Z",
     "commands": {
       "imagemagick": {
         "available": false,
@@ -194,11 +194,11 @@
         "candidate_failures": [],
         "command": "node",
         "located": true,
-        "path": "/usr/local/lib/nodejs/bin/node",
+        "path": "/etc/dsw/runtime/node/bin/node",
         "probe_warning": null,
         "purpose": "Optional Sharp/PDFKit and PptxGenJS backends",
         "verification": "passed",
-        "version": "v24.14.1"
+        "version": "v22.22.3"
       },
       "pdftocairo": {
         "available": true,
@@ -303,7 +303,7 @@
       }
     },
     "platform": {
-      "cwd": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures",
+      "cwd": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim",
       "machine": "x86_64",
       "python_executable": "/isaac-sim/kit/python/bin/python3",
       "python_version": "3.10.15",
@@ -342,7 +342,7 @@
     "read_only_probe": true,
     "schema_version": 1
   },
-  "generated_at": "2026-09-17T08:41:49Z",
+  "generated_at": "2026-09-17T12:51:13Z",
   "policy": {
     "automatic_installation": false,
     "missing_backend_is_degraded_skip": true,
@@ -376,8 +376,8 @@
       "details": "SVG XML is well-formed",
       "passed": true,
       "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg",
-      "sha256": "8190c405ddbc2e9d86afbfe43e1d8aed828b0b18a158da6efe431cbf6db87116",
-      "size_bytes": 4810051,
+      "sha256": "e56f10a02a82e986dfd322952d2fbb7b6de2fe96c8e04a24ac8b874cc6cf4184",
+      "size_bytes": 4852308,
       "slide_count": null,
       "type": "svg"
     }

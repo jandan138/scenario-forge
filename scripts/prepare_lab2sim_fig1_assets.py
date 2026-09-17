@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass
 from hashlib import sha256
 import json
 from pathlib import Path
+import re
 
 from PIL import Image, ImageEnhance
 
@@ -61,8 +62,8 @@ ASSETS = (
             "vr_r2/evidence/initial_scene/open_oven_station.png"
         ),
         source_sha256="59d42ae225a02ab12c21390fbd2bc0283ae857557bd11b884cdce0632e39bb44",
-        transform="brightness_1_12",
-        asset_sha256="e7be78e732114136a6a82bb5f625500d3910a2735c09af28f1efd4a290ea4250",
+        transform="brightness_1_25",
+        asset_sha256="f232ad85747ec5758b9b12107569007990d236c7b4980b65f0ace8ed21717cf9",
     ),
 )
 
@@ -79,8 +80,10 @@ def transform_image(image: Image.Image, transform: str) -> Image.Image:
         if image.size != (1280, 800):
             raise ValueError(f"powder source must be 1280x800, got {image.size}")
         return image.crop((0, 69, 1280, 789))
-    if transform == "brightness_1_12":
-        return ImageEnhance.Brightness(image).enhance(1.12)
+    brightness = re.fullmatch(r"brightness_(\d+)_(\d+)", transform)
+    if brightness:
+        factor = float(f"{brightness.group(1)}.{brightness.group(2)}")
+        return ImageEnhance.Brightness(image).enhance(factor)
     raise ValueError(f"unknown transform: {transform}")
 
 
