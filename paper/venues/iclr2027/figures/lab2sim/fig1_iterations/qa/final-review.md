@@ -65,4 +65,3 @@ rebuilding from the hash-staged source assets.
 Machine checks at that time: strict validation clean; hash check clean;
 PPTX audit 62 shapes, 19 text shapes, 26 words, three font sizes; paper
 compiled to five pages with Figure 1 after its first reference.
-
