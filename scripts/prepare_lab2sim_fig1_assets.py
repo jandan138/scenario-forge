@@ -55,6 +55,13 @@ ASSETS = (
         asset_sha256="99cbde05e783d48413f4d4655f043b9fec283142f8158737b56b94c3bf890e85",
     ),
     FigureAsset(
+        name="ika_catalog_open.png",
+        source="external_artifacts/asset_evidence/ika-oven-125/image2.png",
+        source_sha256="a19453cc33ec01a0502e2faeb9cc67a31f81e00b84b9e6f4bfbe408b694d48fd",
+        transform="copy",
+        asset_sha256="071d25780e901793006eda3fe072aa82517cf60662d2dc1749c6c0d14626c55c",
+    ),
+    FigureAsset(
         name="oven_r2_hero.png",
         source=(
             "outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_"
@@ -62,8 +69,8 @@ ASSETS = (
             "vr_r2/evidence/initial_scene/open_oven_station.png"
         ),
         source_sha256="59d42ae225a02ab12c21390fbd2bc0283ae857557bd11b884cdce0632e39bb44",
-        transform="brightness_1_25",
-        asset_sha256="f232ad85747ec5758b9b12107569007990d236c7b4980b65f0ace8ed21717cf9",
+        transform="brightness_1_40",
+        asset_sha256="1c574eee81eee6ed5c0247f7d68fed110b799f642598b10cbe0e32e7375d2cb8",
     ),
 )
 
