@@ -8,6 +8,12 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 
 - [EBench COM／惯性分项任务](records/2026-09-12-ebench-inertia-components.md)
 
+- [成对布局变体与候选实例](records/2026-09-12-ebench-paired-layout-variants.md)
+
+- [齿轮内侧支撑前缀诊断](records/2026-09-12-ebench-gear-support-probe.md)
+
+- [EBench 齿轮入齿几何配对任务](records/2026-09-12-ebench-gear-leadin-suite.md)
+
 - [Native EBench Intervention Suite Contract](design/ebench-native-intervention-suite.md)
 - [EBench dish 几何 × 初始进度干预任务](records/2026-09-11-ebench-dish-intervention-suite.md)
 - [EBench 惯性匹配诊断任务](records/2026-09-11-ebench-inertia-matched-task.md)

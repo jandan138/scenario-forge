@@ -100,3 +100,23 @@ Isaac Sim 4.1 在 `EnableGPUDynamics=false` 时不会把带 `physics:approximati
 2026-09-08 汇集既有制作约束，保留编译器/overlay/域 pack 的 API 定义位置。
 2026-09-11：按斐林 r4 补充 CPU 场景下 SDF 刚体不会进入 PhysX 的推荐做法。
 2026-09-11：收尾回归补充无 PhysX 插件时的 authored schema 检查，依据 r4 修正候选的静态证据。
+
+2026-09-12 补充 USD-007 的 EBench 场景变体范围：metadata 位姿更新不能单独证明
+原生重置后的装配关系。`initial_scene_pose_objects` 可将指定既有普通对象的初始世界位姿
+同步写入源场景覆盖层；不适用于动态加载资产或 articulation parts，不修改子几何和物理参数。
+接口定义见 [原生干预套件](../design/ebench-native-intervention-suite.md)，仍按 VAL-002
+做组合与目标运行时检查。i01 的局部证据不推广成所有姿态/模拟器的稳定性保证。
+
+2026-09-12 补充 USD-007 的来源区分：原生 scene-variants 可用明确的
+`source_initial_metadata_only` 生成完整初始任务，绑定原始 metadata 而不要求未使用的
+轨迹数据库。此来源不得用于专家终点预放置，也不构成策略成功证据；接口和记录均
+保留来源类型，运行时重置仍须验证。
+
+2026-09-13 补充 USD-007：EBench 受控变体不能假定 sublayer 会把源舞台元数据
+继承到包装根层。新增构建可用 `preserve_source_stage_metadata: true` 显式保留
+源 authored 字段（含 customLayerData、单位、轴向），并对实际源做组合属性审计。
+同日修正：该选项下不再对源中缺失的单位/轴向字段注入旧包装默认值；
+保留 authored 字段也包括保留这两项的缺省状态。仍须审计完整组合场景，
+不能仅凭选项宣称舞台完全等价。已生成旧包不自动改写。
+该路径在 adapter 内惰性使用 OpenUSD，不改变纯包依赖或旧任务产物。
+依据：[舞台元数据记录](../records/2026-09-13-ebench-source-stage-metadata.md)。
