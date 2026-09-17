@@ -1,5 +1,48 @@
 # Figure 1 final visual review
 
+Date: 2026-09-17 (round 07 structure-A rebuild; supersedes the round 06
+restyle review below)
+
+## Evidence
+
+- Canonical standalone: `../../fig1-hero.png`
+- Canonical SVG/PDF: `../../fig1-hero.svg`, `../../fig1-hero.pdf`
+- Grayscale: `fig1-hero-grayscale.png`
+- Editable roundtrip: `../../rendered/pptx-final/fig1-hero-slides/slide-001.png`
+- Paper placement: `paper-page-2.png` (figure and caption inline)
+- Round notes: `../round07-rebuild/README.md`
+
+## Independent visible-only verdict (round 07)
+
+PASS, high confidence, from an independent clean-room reviewer, reached
+after one full review (PASS with five Minors) and one re-verification
+round after three repairs (PASS, no Critical/Major; the brightness and
+label-binding repairs were confirmed by pixel-level measurement).
+Residual informational Minor: the OVEN 125 tile remains the darkest of
+the four scenes but is within an acceptable exposure range.
+
+- One IKA OVEN 125 instance threads request, evidence, spec, USD render,
+  PASS, and the OVEN 125 gallery tile; the thread reads instantly.
+- The agent band's four numbered steps each carry a real artifact; the
+  in-band chevrons and both zone connectors are visible at paper scale.
+- The 2x2 gallery is the dominant image region; labels bind to their
+  own tiles; no clipping, overflow, or miscrop anywhere.
+- Grayscale preserves hierarchy (numbered dots, PASS pill, spec card
+  border, caption row).
+
+## Machine checks (round 07)
+
+- Strict figure-spec validation: zero errors and zero warnings.
+- `scripts/prepare_lab2sim_fig1_assets.py --check`: six external sources and
+  six selected assets match the committed hash manifest (the Search step's
+  open-door catalog photograph was added as a sixth staged asset).
+- PPTX audit: 76 shapes, 23 text shapes, 34 words, four font sizes, no
+  external relationships, paths, shadows, or theme effects.
+- Paper compile: five pages; Figure 1 sits inline on page 2 after its
+  first textual reference.
+
+## Round 06 restyle review (kept for history)
+
 Date: 2026-09-17 (round 06 restyle; supersedes the earlier same-day review below)
 
 ## Evidence

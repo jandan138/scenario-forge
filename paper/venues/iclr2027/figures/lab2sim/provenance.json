@@ -31,6 +31,37 @@
           "role": "manufacturer photograph inside the multimodal input card",
           "source_sha256": "6076b4ea89378556a0860e2cbd9c4146572fbe1ddfe32893427c56afcf13ec8d",
           "asset_sha256": "700b6b22facb9f5795fbdfe3bd179dda4b3edce60cb1c01bb56407e9d5ada1c3"
+        },
+        {
+          "asset": "source/ika_catalog_open.png",
+          "source": "../../../../../external_artifacts/asset_evidence/ika-oven-125/image2.png",
+          "role": "manufacturer open-door photograph shown as retrieved evidence in the Search step",
+          "source_sha256": "a19453cc33ec01a0502e2faeb9cc67a31f81e00b84b9e6f4bfbe408b694d48fd",
+          "asset_sha256": "071d25780e901793006eda3fe072aa82517cf60662d2dc1749c6c0d14626c55c",
+          "evidence_manifest": "../../../../../external_artifacts/asset_evidence/ika-oven-125/MANIFEST.sha256",
+          "evidence_manifest_sha256": "90d6b591634617264285de3e813ca01238effaf1521061cfcebe961a6f0a2886"
+        },
+        {
+          "label": "Task 12 OVEN r2 admitted-scene USD render reused in the Figure 1 Build step (staged by the fig23 pipeline)",
+          "asset": "source/fig3_oven_usd.png",
+          "source": "../../../../../outputs/lab2sim_fig3_retake_20260917/oven_r2/hero_open_threequarter.png",
+          "revision": "r2",
+          "status": "current_delivery",
+          "transform": "crop (280, 0, 1522, 1080)",
+          "source_sha256": "5a0b5d9aa410a314bb1d1e3d2e34bb4886f43c18fb9775799048e71b2e473162",
+          "asset_sha256": "01cb8809732a8537005d8973c467d0bda4f84984d6972981c09a6ff946cc4946",
+          "size": [
+            1242,
+            1080
+          ],
+          "render_manifest": "../../../../../outputs/lab2sim_fig3_retake_20260917/oven_r2/render_manifest.json",
+          "render_manifest_sha256": "7c7562b3d40bcb19fa08a95c94a39e0a6cd7641a5a02618081317a06c3b4fea0",
+          "scene": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/scene.usd",
+          "scene_sha256": "15a24e977dee1ffcff6d533fb7f309feed96e9c9dc682459c594667cedad173f",
+          "promotion_receipt": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/deps/oven/promotion_receipt.json",
+          "promotion_receipt_sha256": "53b99d2e9888c1be4a9c78c06d7214fd75e8c127ea5b3e61bbe4bf09efcf73d0",
+          "retake_command": "/isaac-sim/python.sh scripts/render_lab2sim_oven_retake.py --root <handoff> --out outputs/lab2sim_fig3_retake_20260917/oven_r2",
+          "retake_note": "same door hinge command as the evidence renderer; exposure multiplier 1.08; scene state, geometry, materials and physics unchanged"
         }
       ],
       "outputs": [
@@ -74,9 +105,9 @@
           "source": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/evidence/initial_scene/open_oven_station.png",
           "revision": "r2",
           "status": "current_delivery",
-          "transform": "global brightness 1.25; no local retouching or crop",
+          "transform": "global brightness 1.40; no local retouching or crop",
           "source_sha256": "59d42ae225a02ab12c21390fbd2bc0283ae857557bd11b884cdce0632e39bb44",
-          "asset_sha256": "f232ad85747ec5758b9b12107569007990d236c7b4980b65f0ace8ed21717cf9"
+          "asset_sha256": "1c574eee81eee6ed5c0247f7d68fed110b799f642598b10cbe0e32e7375d2cb8"
         }
       ],
       "claim_boundary": "The four images are current-delivery Isaac scene evidence across independent requests. They are not a temporal sequence and do not claim robot-policy success."

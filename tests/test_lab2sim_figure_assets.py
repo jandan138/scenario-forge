@@ -23,7 +23,7 @@ def test_oven_brightness_transform_changes_only_global_values():
     from scripts.prepare_lab2sim_fig1_assets import transform_image
 
     image = Image.new("RGB", (4, 4), (100, 100, 100))
-    result = transform_image(image, "brightness_1_25")
+    result = transform_image(image, "brightness_1_40")
 
     assert result.size == image.size
     assert result.getpixel((0, 0)) == result.getpixel((3, 3))

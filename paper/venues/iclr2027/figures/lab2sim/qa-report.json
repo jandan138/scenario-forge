@@ -9,7 +9,7 @@
             "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/render_svg.mjs",
             "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg",
             "--output",
-            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fcb3b302.png",
+            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-_4mp0tjm.png",
             "--format",
             "png",
             "--dpi",
@@ -18,7 +18,7 @@
           "error": null,
           "returncode": 0,
           "stderr": "",
-          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fcb3b302.png\",\"format\":\"png\",\"dpi\":180}",
+          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-_4mp0tjm.png\",\"format\":\"png\",\"dpi\":180}",
           "timed_out": false
         }
       ],
@@ -28,11 +28,11 @@
         {
           "exists": true,
           "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.png",
-          "sha256": "10a82f2c7fb7dcb887f83f733de15c5e8d5033238dde8a8897c81ea700c0cc0c",
-          "size_bytes": 1577681,
+          "sha256": "81c450125a2fafb70b2940be5611adccee3d316da73a32dde790bb9e1e47eff7",
+          "size_bytes": 2879658,
           "validation": {
             "details": "PNG chunk structure and CRC checks are valid",
-            "height_px": 1175,
+            "height_px": 1800,
             "passed": true,
             "width_px": 5000
           }
@@ -55,7 +55,7 @@
             "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/render_svg.mjs",
             "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg",
             "--output",
-            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fxrflnc1.pdf",
+            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-if_i8swl.pdf",
             "--format",
             "pdf",
             "--dpi",
@@ -64,7 +64,7 @@
           "error": null,
           "returncode": 0,
           "stderr": "",
-          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-fxrflnc1.pdf\",\"format\":\"pdf\",\"dpi\":180}",
+          "stdout": "{\"input\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg\",\"output\":\"/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/.render-if_i8swl.pdf\",\"format\":\"pdf\",\"dpi\":180}",
           "timed_out": false
         }
       ],
@@ -74,8 +74,8 @@
         {
           "exists": true,
           "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pdf",
-          "sha256": "fe345eaf92649b52eadc5f8e38ca8fe2560b836378aeef4f9fc9045feda3b33a",
-          "size_bytes": 1455323,
+          "sha256": "e049a757c3af97480fc36bd1f79c7bd8c2c83f1268f9d8d7f5d89df08867bc7a",
+          "size_bytes": 2619069,
           "validation": {
             "details": "PDF header, cross-reference marker, and EOF trailer are present",
             "passed": true,
@@ -143,7 +143,7 @@
         "preferred_backend": "sharp"
       }
     },
-    "checked_at": "2026-09-17T12:51:11Z",
+    "checked_at": "2026-09-17T13:58:54Z",
     "commands": {
       "imagemagick": {
         "available": false,
@@ -342,7 +342,7 @@
     "read_only_probe": true,
     "schema_version": 1
   },
-  "generated_at": "2026-09-17T12:51:13Z",
+  "generated_at": "2026-09-17T13:58:56Z",
   "policy": {
     "automatic_installation": false,
     "missing_backend_is_degraded_skip": true,
@@ -376,8 +376,8 @@
       "details": "SVG XML is well-formed",
       "passed": true,
       "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.svg",
-      "sha256": "e56f10a02a82e986dfd322952d2fbb7b6de2fe96c8e04a24ac8b874cc6cf4184",
-      "size_bytes": 4852308,
+      "sha256": "e769942f2b7c57acba693c20a2a4d03a990d307736a691a3e7e570a84ad2bd38",
+      "size_bytes": 6494781,
       "slide_count": null,
       "type": "svg"
     }

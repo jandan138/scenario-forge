@@ -51,9 +51,8 @@ global brightness lift. No scene state or geometry was changed.
 
 ## Visual targets
 
-- 2000 x 470 canvas (the shipped spec is canonical; early 680/560 targets
-  were retired when every card joined one 170-430 band), left-to-right
-  reading order.
+- 2000 x 720 canvas (the shipped spec is canonical; early 680/560/470
+  targets were retired as the layout evolved), left-to-right reading order.
 - One multimodal card, four concise process stages, four equal result frames.
 - Result imagery occupies the largest continuous region.
 - At most four font sizes and about 70 words inside the graphic.
