@@ -7,12 +7,22 @@ from pathlib import Path
 import sys
 
 
+def front_bath_view(tube_xyz, water_surface_z=None):
+    """Eye-level view through the near beaker wall at the immersed column."""
+    x, y, z = (float(v) for v in tube_xyz)
+    look_z = z + 0.018 if water_surface_z is None else 0.5 * (z + float(water_surface_z))
+    look = (x, y, look_z)
+    return ('front_bath', (look[0], look[1] - 0.30, look[2] + 0.03), look, 52)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument('--diagnostic-no-shadows', action='store_true')
     parser.add_argument('--states', help='Optional comma-separated retained state names')
+    parser.add_argument('--views', help='Optional comma-separated camera names')
+    parser.add_argument('--out', type=Path, help='Optional render output directory')
     args = parser.parse_args()
     args.root = args.root.resolve()
     args.report = args.report.resolve()
@@ -73,13 +83,16 @@ def main():
         settings = carb.settings.get_settings()
         settings.set("/rtx/post/aa/autoExposureMode", 0)
         settings.set("/rtx/post/aa/exposureMultiplier", 0.92)
+        clear_water = str(data.get('package_id', '')).endswith(('_vr_r8', '_vr_r9')) or data.get('in_bath_clear_water_r8')
+        if clear_water:
+            settings.set('/rtx/translucency/maxRefractionBounces', 12)
         camera = Camera(prim_path="/World/__fehlings_camera", resolution=(1920, 1080))
         camera.initialize()
         camera.set_horizontal_aperture(20.955)
         camera.set_vertical_aperture(11.784)
         camera.set_clipping_range(0.005, 100)
-        out = args.root / "evidence/initial_scene"
-        if args.diagnostic_no_shadows:
+        out = args.out.resolve() if args.out else args.root / "evidence/initial_scene"
+        if args.diagnostic_no_shadows and not args.out:
             out = args.root/'evidence/diagnostic_no_shadows'
         out.mkdir(parents=True, exist_ok=True)
         records = []
@@ -94,9 +107,10 @@ def main():
                     't'+str(t)+suffix for t in (3,9,15,21,27,30) for suffix in ('','_withdrawn'))
                 if data.get('glass_tube_r7'):
                     selected += ('rack_extracted','rack_reinserted')
-            if name not in selected:
-                continue
-            if args.states and name not in args.states.split(','):
+            if args.states:
+                if name not in args.states.split(','):
+                    continue
+            elif name not in selected:
                 continue
             tube.GetAttribute("xformOp:translate").Set(Gf.Vec3d(*snapshot["tube_xyz"]))
             if 'beaker_xyz' in snapshot:
@@ -160,6 +174,20 @@ def main():
                 mesh.GetAttribute('visibility').Set(values['visibility'])
             target = np.asarray(snapshot["tube_xyz"]) + np.asarray([0, 0, 0.035])
             views = [("closeup", target + np.asarray([0.25, -0.38, 0.15]), target, 45)]
+            immersed = snapshot.get('immersed') is True or name in (
+                't3', 't6', 't9', 't12', 't15', 't18', 't21', 't24', 't27', 't30',
+                'shallow_contact', 'tilted_contact', 'pause_begin',
+            )
+            if (str(data.get('package_id', '')).endswith(('_vr_r8', '_vr_r9', '_vr_r10')) or data.get('in_bath_clear_water_r8')) and immersed:
+                sample = np.asarray(snapshot['tube_xyz']) + np.asarray([0, 0, 0.02])
+                views.append(('through_wall', sample + np.asarray([0.22, 0.02, 0.01]), sample, 50))
+                if str(data.get('package_id', '')).endswith('_vr_r10'):
+                    views.append(front_bath_view(snapshot['tube_xyz'], water_surface_z=data.get('water_world_surface_z')))
+                else:
+                    views.append(front_bath_view(snapshot['tube_xyz']))
+            if args.views:
+                allowed = set(args.views.split(','))
+                views = [item for item in views if item[0] in allowed]
             if data.get('glass_tube_r7') and name in ('initial','rack_extracted','rack_reinserted','outside_no_heating','observed'):
                 full=np.asarray(snapshot['tube_xyz'])+np.asarray([0,0,.075])
                 views.append(('tube_full',full+np.asarray([.25,-.38,.13]),full,28))
@@ -176,6 +204,8 @@ def main():
                     )
                 )
             for view, position, target, focal in views:
+                position = np.asarray(position, dtype=float)
+                target = np.asarray(target, dtype=float)
                 offset = position - target
                 elevation = math.degrees(math.asin(offset[2] / np.linalg.norm(offset)))
                 azimuth = math.degrees(math.atan2(offset[1], offset[0]))
@@ -197,9 +227,13 @@ def main():
                     ("scene_overview" if view == "scene_overview" else name + "_" + view) + ".png"
                 )
                 Image.fromarray(frame[:, :, :3]).save(path)
+                try:
+                    stored = str(path.relative_to(args.root))
+                except ValueError:
+                    stored = str(path)
                 records.append(
                     {
-                        "path": str(path.relative_to(args.root)),
+                        "path": stored,
                         "sha256": sha256(path.read_bytes()).hexdigest(),
                         "physics_step": snapshot["step"],
                         "heated_s": snapshot["heated_s"],
@@ -218,6 +252,7 @@ def main():
                     "snapshot_step_kind": "fixture_world_step" if data.get("policy_version") in ("visual_water_contact_v3", "visual_fixed_regions_v5", "visual_five_layers_v6") else "legacy_fixture_step",
                     "report_sha256": sha256(args.report.read_bytes()).hexdigest(),
                     "glass_tube_r7": data.get('glass_tube_r7',False),
+                    "in_bath_clear_water_r8": bool(str(data.get('package_id', '')).endswith('_vr_r8') or data.get('in_bath_clear_water_r8')),
                     "images": records,
                 },
                 indent=2,

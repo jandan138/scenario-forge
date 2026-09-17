@@ -7,8 +7,32 @@ import os
 from pathlib import Path
 import sys
 
+DEEP_FLOOR_CLEARANCE_M = 0.0015
 
-def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
+
+def heating_local(profile, style='shallow', clearance=DEEP_FLOOR_CLEARANCE_M):
+    """Return (x, y, z) in beaker-local metres and tilt degrees for a heating pose."""
+    surface = float(profile[-1][0])
+    floor = float(profile[0][0])
+    if style == 'deep':
+        return (0.0, 0.0, floor + clearance), 0
+    if style == 'shallow':
+        return (-0.020, 0.0, surface - 0.006), 55
+    if style == 'shallow_upright':
+        return (0.0, 0.0, surface - 0.006), 0
+    raise ValueError('unsupported heating style: ' + str(style))
+
+
+def color_heating_pose(profile, heating_style='shallow', phase='first'):
+    """Color-replay pose. Default keeps r7–r9 shallow dip; r10 uses deep upright."""
+    if heating_style == 'deep':
+        return heating_local(profile, 'deep')
+    if phase == 'last':
+        return heating_local(profile, 'shallow_upright')
+    return heating_local(profile, 'shallow')
+
+
+def main(*, fixed_materials=False, five_layers=False, glass_tube=False, heating_style='shallow'):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--out',type=Path,required=True)
@@ -19,10 +43,13 @@ def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
     from isaacsim import SimulationApp
     app=SimulationApp({'headless':True,'multi_gpu':False})
     sys.argv=argv
+    if heating_style not in ('shallow', 'deep'):
+        raise ValueError('unsupported heating style: ' + str(heating_style))
     completion=30 if five_layers else 60
     version='visual_five_layers_v6' if five_layers else 'visual_fixed_regions_v5' if fixed_materials else 'visual_water_contact_v3'
     report=dict(status='blocked',scene_sha256=sha256((args.root/'scene.usd').read_bytes()).hexdigest(),
-                policy_version=version,process_id=os.getpid(),protocol='dynamic_insertion_and_prescribed_contact_fixtures',robot_policy_success=False)
+                policy_version=version,process_id=os.getpid(),protocol='dynamic_insertion_and_prescribed_contact_fixtures',robot_policy_success=False,
+                heating_style=heating_style)
     try:
         if glass_tube:
             manifest=json.loads((args.root/'manifest.json').read_text())
@@ -252,7 +279,9 @@ def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
         reset_at((0,0,surface+.030))
         step(3)
         capture('outside_no_heating')
-        move(tube_handle,local_position((-.020,0,surface-.006)),55)
+        heat_first,tilt_first=color_heating_pose(profile,heating_style,'first')
+        heat_last,tilt_last=color_heating_pose(profile,heating_style,'last')
+        move(tube_handle,local_position(heat_first),tilt_first)
         first_milestones=[('t3',3),('t6',6),('t9',9),('t12',12),('t15',15)] if five_layers else [('t30',30),('t37_5',37.5),('t45',45)]
         for name,threshold in first_milestones:
             for _ in range(8000):
@@ -267,7 +296,7 @@ def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
                 move(tube_handle,local_position((0,0,surface+.030)))
                 step(2)
                 capture(name+'_withdrawn')
-                move(tube_handle,local_position((-.020,0,surface-.006)),55)
+                move(tube_handle,local_position(heat_first),tilt_first)
                 step(2)
         move(tube_handle,local_position((0,0,surface+.030)))
         step(3)
@@ -278,7 +307,7 @@ def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
         if five_layers:
             checks['pause_and_geometry_freeze'] &= paused['geometry_sha256']==pause_end['geometry_sha256']
             checks['pause_all_materials']=paused['layers']==pause_end['layers'] and paused['layer_progress']==pause_end['layer_progress']
-        move(tube_handle,local_position((0,0,surface-.006)))
+        move(tube_handle,local_position(heat_last),tilt_last)
         last_milestones=[('t18',18),('t21',21),('t24',24),('t27',27),('t29_9',29.9),('t30',30)] if five_layers else [('t52_5',52.5),('t60',60)]
         for name,threshold in last_milestones:
             for _ in range(8000):
@@ -292,7 +321,7 @@ def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
                 move(tube_handle,local_position((0,0,surface+.030)))
                 step(2)
                 capture(name+'_withdrawn')
-                move(tube_handle,local_position((0,0,surface-.006)))
+                move(tube_handle,local_position(heat_last),tilt_last)
                 step(2)
         checks['complete_at_'+str(completion)]=val('heated_seconds')==completion and val('color_progress')==1 and not val('success')
         move(tube_handle,local_position((0,0,surface+.030)))
@@ -337,6 +366,13 @@ def main(*, fixed_materials=False, five_layers=False, glass_tube=False):
                     abs(p-v['progress'])<1e-6 for p,v in zip(snap['layer_progress'],look['layers']))
                 checks['global_progress_matches']=checks.get('global_progress_matches',True) and abs(snap['color_progress']-look['progress'])<1e-6
                 checks['reset_complete'] &= reset['geometry_sha256']==initial['geometry_sha256'] and reset['layers']==initial['layers']
+                if heating_style=='deep':
+                    sample_top=float(tube.GetAttribute('fehlings:sample_height_m').Get())
+                    water_z=val('water_surface_z')
+                    color_names={'t3','t6','t9','t12','t15','t18','t21','t24','t27','t29_9','t30'}
+                    checks['color_sample_below_waterline']=all(
+                        snap['name'] not in color_names or snap['tube_xyz'][2]+sample_top<water_z
+                        for snap in snapshots)
                 continue
             checks['actual_materials'] &= (max(abs(a-b) for a,b in zip(snap['sample_color'],look['color']))<1e-5
                                           and abs(snap['sample_opacity']-look['opacity'])<1e-5

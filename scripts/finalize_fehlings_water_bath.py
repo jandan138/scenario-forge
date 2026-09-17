@@ -28,7 +28,13 @@ def write_versioned_task_documents(root):
         write_documents(root)
     elif version=='visual_five_layers_v6':
         package_id=json.loads((root/'manifest.json').read_text()).get('package_id','')
-        if package_id.endswith('_vr_r7'):
+        if package_id.endswith('_vr_r10'):
+            from scripts.generate_fehlings_water_bath_r10 import write_task_documents as write_documents
+        elif package_id.endswith('_vr_r9'):
+            from scripts.generate_fehlings_water_bath_r9 import write_task_documents as write_documents
+        elif package_id.endswith('_vr_r8'):
+            from scripts.generate_fehlings_water_bath_r8 import write_task_documents as write_documents
+        elif package_id.endswith('_vr_r7'):
             from scripts.generate_fehlings_water_bath_r7 import write_task_documents as write_documents
         else:
             from scripts.generate_fehlings_water_bath_r6 import write_task_documents as write_documents
@@ -63,8 +69,16 @@ def main():
     sheet=Image.new('RGB',(1920,580),'#18232c')
     draw=ImageDraw.Draw(sheet)
     font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',22)
-    for i,(name,label) in enumerate([('outside_no_heating_closeup.png','Before heating | 0 s'),
-                                    ('observed_closeup.png',f'After {completion_seconds:g} s | observation')]):
+    before_after=(
+        ('outside_no_heating_closeup.png','Before heating | 0 s'),
+        ('observed_closeup.png',f'After {completion_seconds:g} s | observation'),
+    )
+    if not (evidence/'initial_scene'/before_after[0][0]).is_file():
+        before_after=(
+            ('t3_front_bath.png','In-bath | 3 s'),
+            ('t30_front_bath.png',f'In-bath | {completion_seconds:g} s'),
+        )
+    for i,(name,label) in enumerate(before_after):
         draw.text((i*960+15,8),label,fill='white',font=font)
         with Image.open(evidence/'initial_scene'/name) as frame:
             sheet.paste(frame.resize((960,540)),(i*960,40))

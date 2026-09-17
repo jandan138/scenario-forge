@@ -28,6 +28,9 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 ## Design
 
 - [Task09 Powder Bottle](design/task09-powder-bottle.md)
+- [Fehling r10 Deep Upright Immerse](design/fehlings-deep-immerse.md)
+- [Fehling r9 Front-on In-bath Color](design/fehlings-front-bath.md)
+- [Fehling r8 Clear Bath Water](design/fehlings-clear-bath-water.md)
 - [Fehling r7 Glass Test Tube and Rack Fit](design/fehlings-glass-test-tube.md)
 - [Articulated Instance Layout](design/articulated-instance-layout.md)
 - [VR articulated link registration record](records/2026-09-04-vr-articulated-link-registration.md)
@@ -62,6 +65,9 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Task09 粉末瓶 r5.2 120 Hz 近满瓶重固化](operations/task09-powder-bottle-r5.2-guide.md)
 - [Task09 粉末瓶 r5.1 120 Hz 限速对照](operations/task09-powder-bottle-r5.1-guide.md)
 - [Task09 粉末瓶 r5.0 120 Hz 对照](operations/task09-powder-bottle-r5.0-guide.md)
+- [斐林 r10 试管插到接近杯底再隔水看变色](operations/fehlings-r10-deep-immerse-guide.md)
+- [斐林 r9 正对隔杯看清浸入变色](operations/fehlings-r9-front-bath-guide.md)
+- [斐林 r8 透过烧杯清水看清试管内变色](operations/fehlings-r8-clear-bath-guide.md)
 - [斐林 r7 玻璃试管与8 mL显色指南](operations/fehlings-r7-glass-tube-guide.md)
 - [Artifact Policy](operations/artifact-policy.md)
 - [Workbench build inputs and reconstruction](operations/workbench-build-inputs.md)
@@ -104,8 +110,9 @@ Scenario Forge compiles portable embodied scenario packages for downstream evalu
 - [Task09 粉末瓶 r5.2 120 Hz 近满瓶重固化](records/2026-09-15-task09-powder-bottle-r5.2-120hz.md)
 - [Task09 粉末瓶 r5.1 120 Hz 限速对照](records/2026-09-14-task09-powder-bottle-r5.1-velocity-cap.md)
 - [Task09 粉末瓶 r5.0 120 Hz 对照](records/2026-09-14-task09-powder-bottle-r5.0-120hz.md)
-- [Fehling r7 演示视频（关键帧合成）](records/2026-09-13-fehlings-r7-demo-video.md)
-
+- [斐林 r10 试管插到接近杯底再隔水看变色](records/2026-09-16-fehlings-r10-deep-immerse.md)
+- [斐林 r9 正对隔杯看清浸入变色](records/2026-09-14-fehlings-r9-front-bath.md)
+- [斐林 r8 透过烧杯清水看清试管内变色](records/2026-09-14-fehlings-r8-clear-bath-water.md)
 - [全部工作树改动分批收尾](records/2026-09-12-worktree-batch-closeout.md)
 
 - [2026-09-05 Traditional titration r1.2 long-handle integration](records/2026-09-05-traditional-titration-r1-2-long-handle.md)
