@@ -1,0 +1,46 @@
+\section{Introduction}
+\label{sec:introduction}
+
+``Open the IKA OVEN~125 and unload the glassware'' is a legal line in a lab
+notebook. It is not a scene. Before a robot can rehearse it, the oven needs a
+door on a hinge, a handle a gripper can close on, shelves that count as
+placement surfaces, and a laboratory floor for a Lift2 to stand on. The
+protocol names the instrument; the simulator needs its USD.
+
+Two lines of work approach that gap from opposite sides. Real-to-sim systems
+reconstruct a workspace that already exists, from a scan or a photograph
+\citep{torne2024rialto,dai2024cousins,li2024simpler,chen2024urdformer}.
+Generative scene agents furnish rooms and write task programs from a prompt
+\citep{yang2024holodeck,wang2024gensim,wang2024robogen}. A wet-lab station
+starts from neither. Its instruments are specific products---a burette with a
+working stopcock, an oven whose door travels 180$^{\circ}$---named by a
+protocol rather than seen in a scan. Laboratory robotics has policies and
+simulators, but no compiler between the notebook and the scene.
+
+Lab2Sim is that compiler, run as an agent (Figure~\ref{fig:hero}). Text,
+image, and video enter as one request. The agent searches for the real device
+and keeps its manufacturer evidence; writes an asset specification that fixes
+envelope, joints, grasp regions, and placement surfaces; iterates a USD
+candidate with a Blender skill until it matches; and hands it to
+ConvertAsset, whose admission places it in an Isaac laboratory
+\citep{nvidia2024isaac}. The specification is the agent's central artifact:
+everything upstream is evidence for it, everything downstream is checked
+against it.
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{fig1-hero.pdf}
+  \caption{Text, image, and video form one request interface. Lab2Sim
+  searches manufacturer evidence, writes an asset specification, builds
+  articulated USD with a Blender skill \citep{blender2024}, and admits it
+  through ConvertAsset. Hunyuan3D is an optional geometry frontend
+  \citep{zhao2025hunyuan3d}. Right: Fehling, powder, titration, and OVEN~125
+  Isaac scenes the agent delivered from independent requests.}
+  \label{fig:hero}
+\end{figure*}
+
+We make three claims. The compiler runs end to end on real instruments. Its
+laboratories span different rooms and manipulation verbs
+(Figure~\ref{fig:gallery}). And the task-critical features of an instrument
+survive from evidence to specification to admitted USD, which we show on the
+OVEN~125 and a traditional burette (Figure~\ref{fig:real-spec}).

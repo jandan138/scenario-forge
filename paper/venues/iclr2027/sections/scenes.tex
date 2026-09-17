@@ -1,0 +1,55 @@
+\section{Compiled Laboratories}
+\label{sec:scenes}
+
+Two questions decide whether the compiler is useful. Which laboratories can
+the agent produce? And do the features that make an instrument usable by a
+robot survive from the real device to the admitted USD?
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig2-gallery.pdf}
+  \caption{Four Lab2Sim laboratories beyond those in Figure~\ref{fig:hero}.
+  Each panel shows the delivered Isaac station and, inset, the objects the
+  task acts on. Top: two eBench rooms, shown as cutaways with a Lift2 at the
+  bench, for removing a ground-glass stopper (teaching room, r11) and racking
+  a glass rod (analytical-instrumentation room, r10.1). Bottom: two
+  bench-level liquid stations, for dropping a stir bar into a beaker (r5) and
+  heating a tube in a water bath (r1).}
+  \label{fig:gallery}
+\end{figure*}
+
+Figure~\ref{fig:gallery} answers the first question with four stations that
+share nothing with Figure~\ref{fig:hero} except the compiler. Two are
+room-scale eBench packages in different laboratories, a teaching room and an
+analytical-instrumentation room, with a Lift2 already at the bench: a
+stoppered flask to open, and a glass rod to seat in a rack. Two are
+bench-level liquid stations: a stir bar to drop into a filled
+beaker, and a test tube to heat in a beaker water bath on a hotplate. With
+the Fehling bath, powder weighing, titration, and drying oven of
+Figure~\ref{fig:hero}, the agent's deliveries cover opening, unloading,
+weighing, racking, inserting, immersing, and turning a valve.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig3-real-spec-usd.pdf}
+  \caption{Two end-to-end agent traces read left to right. Manufacturer
+  evidence is what the agent searched out; the contract is four fields from
+  the specification it wrote; the admitted USD is the scene Isaac renders
+  after ConvertAsset promotion (the oven asset under Isaac Sim~4.1, the
+  titration station under 4.5). (a) IKA OVEN~125: the door hinge and shelves
+  carry from the catalog view to the loaded, open oven. (b) Burette stopcock:
+  the manufacturer's PTFE stopcock becomes a revolute joint with a grasp
+  handle on the graduated tube, mounted on the stand through a fixed joint.}
+  \label{fig:real-spec}
+\end{figure*}
+
+Figure~\ref{fig:real-spec} answers the second question on two instruments
+the agent compiled end to end. For the OVEN~125, the catalog photograph shows
+a right-hinged door swung open onto wire shelves; the specification writes
+that down as a revolute \texttt{door\_hinge}, a handle collider, and shelves
+declared as placement surfaces; the admitted USD, rendered from the matching
+three-quarter view, opens the same way with a beaker on the shelf the
+specification named. For the burette, the manufacturer's exploded stopcock
+becomes a revolute \texttt{stopcock} joint with a grasp region on its handle,
+and in the admitted scene that joint is the part a Lift2 turns. In both rows
+the middle column is what made the right column checkable.

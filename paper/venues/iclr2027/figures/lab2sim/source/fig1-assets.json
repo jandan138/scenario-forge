@@ -1,0 +1,59 @@
+{
+  "assets": [
+    {
+      "name": "ika_catalog_closed.png",
+      "source": "external_artifacts/asset_evidence/ika-oven-125/image1.png",
+      "source_sha256": "6076b4ea89378556a0860e2cbd9c4146572fbe1ddfe32893427c56afcf13ec8d",
+      "transform": "copy",
+      "asset_sha256": "700b6b22facb9f5795fbdfe3bd179dda4b3edce60cb1c01bb56407e9d5ada1c3",
+      "size": [
+        1000,
+        960
+      ]
+    },
+    {
+      "name": "fehling_r10_hero.png",
+      "source": "outputs/lab2sim_fig1_retake_20260917/fehling_r10/t30_hero_tabletop.png",
+      "source_sha256": "e7f585a431b72a2fbd2da6bf8fdc32d456bbce1a7f26df1d843afc734c7a7f77",
+      "transform": "copy",
+      "asset_sha256": "2be4434170a215adf7cfa557a0c20f0bbc4caf1f9d6c70147856b31f7a1bb91e",
+      "size": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "powder_r4_hero.png",
+      "source": "outputs/task09_powder_bottle_r4_20260911/video/close_0960.png",
+      "source_sha256": "6563f9f52e361d849e65343260f792ff6c68d9d8f019ecf5e58c0c93a67c8278",
+      "transform": "crop_y69_789",
+      "asset_sha256": "8eaabe7941d3ce79f79d7f6a318e9603531a4c7223a8125028b620ce24b72e2d",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "name": "titration_r17_hero.png",
+      "source": "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/evidence/initial_scene/after_end_scale_scene_overview.png",
+      "source_sha256": "6dbb2964df988a37b48af60beaac7e5ab9a648d0c6725fc07474c2ac666af1d9",
+      "transform": "copy",
+      "asset_sha256": "99cbde05e783d48413f4d4655f043b9fec283142f8158737b56b94c3bf890e85",
+      "size": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "oven_r2_hero.png",
+      "source": "outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/evidence/initial_scene/open_oven_station.png",
+      "source_sha256": "59d42ae225a02ab12c21390fbd2bc0283ae857557bd11b884cdce0632e39bb44",
+      "transform": "brightness_1_12",
+      "asset_sha256": "e7be78e732114136a6a82bb5f625500d3910a2735c09af28f1efd4a290ea4250",
+      "size": [
+        1280,
+        720
+      ]
+    }
+  ]
+}

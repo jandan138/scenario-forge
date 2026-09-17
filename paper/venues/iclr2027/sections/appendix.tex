@@ -1,0 +1,118 @@
+\section{Pipeline details}
+\label{app:pipeline}
+
+Lab2Sim is implemented in Scenario Forge as a producer-side agent in front of
+the existing package compiler. Request understanding, search, specification,
+and generation are the new front-end. ConvertAsset, source bindings, asset
+locks, and scenario compile are unchanged.
+
+\paragraph{Request.}
+The agent reads the experiment requirement and emits an asset request list:
+one row per object, with a slug, why the experiment needs it, whether it
+articulates, which dimensions are task-critical, and the intended robot
+contact (grasp, pour, open, place). Text, stills, and video are parsed into
+that same table.
+
+\paragraph{Evidence.}
+For each row the agent retrieves manufacturer identity. Catalog pages,
+datasheets, and official photographs are hashed into an evidence register.
+Items are graded as exact-model evidence, family evidence, derived crops, or
+unknown. Unknown fields stay unknown; they are not filled in from pixels.
+
+\paragraph{Specification.}
+The specification template has a manufacturer table, a decomposition
+decision, a prim tree, joint contracts, state variables, interaction
+semantics, a QA matrix, delivery conventions, and an open-measurement punch
+list. Table~\ref{tab:oven-spec} is the manufacturer table of the OVEN~125
+specification behind Figure~\ref{fig:real-spec}a. The burette specification
+fixes a revolute stopcock on \texttt{burette.usd}, a static
+\texttt{burette\_stand.usd}, and a scene-level fixed joint between their mount
+frames.
+
+\paragraph{Generation.}
+The skill iterates geometry and articulation against the specification.
+Blender is the always-on modeller. Hunyuan3D is called only when the service
+is up; a miss falls back to Blender without changing the specification. A
+static articulation checker runs under Isaac Kit Python. Failures block
+admission.
+
+\paragraph{Admission.}
+ConvertAsset snapshots the generated tree, converts meshes and materials,
+and qualifies PhysX. A promoted asset carries a promotion receipt with its
+hash and the qualifying runtime; the scene that uses it carries a render
+manifest with camera poses and frame hashes. Figure~\ref{fig:real-spec} is
+built from those two records for each row: the OVEN~125 asset was promoted
+under Isaac Sim~4.1 with a 4.5 compatibility check, and the burette station
+under Isaac Sim~4.5. Lab2Sim does not own a second physics stack.
+
+\section{OVEN~125 specification excerpt}
+\label{app:spec}
+
+\begin{table}[h]
+  \centering
+  \small
+  \caption{Manufacturer fields for the IKA OVEN~125 control-dry (solid door)
+  as fixed in the agent-written asset specification.}
+  \label{tab:oven-spec}
+  \begin{tabular}{@{}llp{3.4cm}@{}}
+    \toprule
+    Field & Value & Role \\
+    \midrule
+    Envelope $W{\times}H{\times}D$ & $700{\times}825{\times}650$~mm & Body collider \\
+    Chamber $W{\times}D{\times}H$ & $550{\times}525{\times}450$~mm & Interior volume \\
+    Volume & 125~L & Identity \\
+    Mass & 82~kg & Fixed base \\
+    Door travel & ${\sim}180^{\circ}$ revolute & Open / close \\
+    Hinge & Configurable side & Joint axis \\
+    Shelves & Up to 6; 30~kg each & Placement surfaces \\
+    Controls & Dual TFT, rotary/push knob & Setpoint \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Decomposition follows the specification rather than the mesh.
+\texttt{oven\_body} is a fixed base. \texttt{door} is a revolute link.
+\texttt{handle} is a grasp collider on the door.
+\texttt{shelf\_0}--\texttt{shelf\_5} carry placement surfaces.
+\texttt{control\_knob} is a rotary/push compound. Generation may rebuild
+geometry. It may not rename those contracts.
+
+\section{Additional renders}
+\label{app:extra}
+
+Figure~\ref{fig:app-extra} adds three close views. The oven interior shows
+the lower shelf of the admitted OVEN~125 (r2), with a beaker and flask seated
+on the wire deck. The powder close-up is the weighing scoop of the r4 station
+in Figure~\ref{fig:hero}. The Lift2 frame is the same Isaac runtime that
+consumes the compiled laboratories: a bimanual robot already spawned in front
+of a table.
+
+\begin{figure*}[h]
+  \centering
+  \begin{tabular}{@{}ccc@{}}
+    \includegraphics[width=0.31\textwidth]{source/app_oven_interior.png} &
+    \includegraphics[width=0.31\textwidth]{source/powder_r4_hero.png} &
+    \includegraphics[width=0.31\textwidth]{source/app_lift2_runtime.png} \\
+    {\small Oven interior} &
+    {\small Powder scoop} &
+    {\small Lift2 in Isaac} \\
+  \end{tabular}
+  \caption{Extra Isaac frames. Left: OVEN~125 lower shelf with glassware.
+  Center: powder-weighing scoop. Right: Lift2 in the Isaac runtime that
+  loads Lab2Sim scenes.}
+  \label{fig:app-extra}
+\end{figure*}
+
+\section{Figure sources}
+\label{app:figures}
+
+Figures~\ref{fig:hero}--\ref{fig:real-spec} use frames from the
+current-delivery scenes and from the indexed manufacturer evidence. Figure~2
+shows eBench task05 (r11), task07 (r10.1), the stir-bar station (r5), and
+the water-bath station (r1). Figure~3 uses the OVEN~125 Task~12 scene (r2)
+and the titration station (r1.7); the open-oven frame is a camera-only
+retake of the admitted scene chosen to match the catalog viewpoint. Frames
+are cropped and, where noted in the figure provenance, globally
+brightness-adjusted; scene state, geometry, materials, and physics are never
+edited for a figure. Every scene in the paper can be generated with the
+Blender skill alone.

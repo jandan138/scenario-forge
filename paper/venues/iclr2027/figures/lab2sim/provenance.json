@@ -1,0 +1,398 @@
+{
+  "paper": "Lab2Sim: From Wet-Lab Evidence to Robot-Ready USD Scenes",
+  "figures": [
+    {
+      "id": "fig1-hero",
+      "role": "story hero",
+      "mode": "inspired",
+      "source": "lab2sim-hero.figure-spec.json",
+      "reference_audit": "fig1-reference-audit.md",
+      "references": [
+        {
+          "name": "Genesis-LLM ACL 2027 K1",
+          "source": "../../../../../../genesis-llm/paper/shared/figures/acl2027/fig1_iterations/round09/K1/fig1-K1.png",
+          "use": "editorial hierarchy and four-frame evidence rhythm only"
+        },
+        {
+          "name": "VIMA, ICML 2023",
+          "source": "https://proceedings.mlr.press/v202/jiang23b.html",
+          "use": "single multimodal request-region principle only"
+        },
+        {
+          "name": "GenSim, ICLR 2024",
+          "source": "https://proceedings.iclr.cc/paper_files/paper/2024/file/143ea4a156ef64f32d4d905206cf32e1-Paper-Conference.pdf",
+          "use": "diverse generated-result gallery principle only"
+        }
+      ],
+      "inputs": [
+        {
+          "asset": "source/ika_catalog_closed.png",
+          "source": "../../../../../external_artifacts/asset_evidence/ika-oven-125/image1.png",
+          "role": "manufacturer photograph inside the multimodal input card",
+          "source_sha256": "6076b4ea89378556a0860e2cbd9c4146572fbe1ddfe32893427c56afcf13ec8d",
+          "asset_sha256": "700b6b22facb9f5795fbdfe3bd179dda4b3edce60cb1c01bb56407e9d5ada1c3"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Fehling r10",
+          "asset": "source/fehling_r10_hero.png",
+          "source": "../../../../../outputs/lab2sim_fig1_retake_20260917/fehling_r10/t30_hero_tabletop.png",
+          "revision": "r10",
+          "status": "current_delivery",
+          "transform": "camera-only 1920x1080 retained-state render; copied without crop",
+          "source_sha256": "e7f585a431b72a2fbd2da6bf8fdc32d456bbce1a7f26df1d843afc734c7a7f77",
+          "asset_sha256": "2be4434170a215adf7cfa557a0c20f0bbc4caf1f9d6c70147856b31f7a1bb91e",
+          "render_manifest": "../../../../../outputs/lab2sim_fig1_retake_20260917/fehling_r10/render_manifest.json",
+          "render_manifest_sha256": "6e3a0f48145cb9240e480815074e43a2f1b3b680a73386094076d749e2912724",
+          "scene": "../../../../../outputs/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r10_20260914/handoff/scientific_workbench_fehlings_reducing_sugar_water_bath_vr_r10/scene.usd",
+          "scene_sha256": "5243d9752fa753e4c1d98e8647ab2b43328dec9d1100fbe1f6c9b959cb5c89d5"
+        },
+        {
+          "label": "Powder r4",
+          "asset": "source/powder_r4_hero.png",
+          "source": "../../../../../outputs/task09_powder_bottle_r4_20260911/video/close_0960.png",
+          "revision": "r4",
+          "status": "current_delivery",
+          "transform": "crop y=69:789 removes replay HUD and yields 1280x720",
+          "source_sha256": "6563f9f52e361d849e65343260f792ff6c68d9d8f019ecf5e58c0c93a67c8278",
+          "asset_sha256": "8eaabe7941d3ce79f79d7f6a318e9603531a4c7223a8125028b620ce24b72e2d"
+        },
+        {
+          "label": "Titration r1.7",
+          "asset": "source/titration_r17_hero.png",
+          "source": "../../../../../outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/evidence/initial_scene/after_end_scale_scene_overview.png",
+          "revision": "r1.7",
+          "status": "current_delivery",
+          "transform": "copied without crop",
+          "source_sha256": "6dbb2964df988a37b48af60beaac7e5ab9a648d0c6725fc07474c2ac666af1d9",
+          "asset_sha256": "99cbde05e783d48413f4d4655f043b9fec283142f8158737b56b94c3bf890e85"
+        },
+        {
+          "label": "OVEN 125 r2",
+          "asset": "source/oven_r2_hero.png",
+          "source": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/evidence/initial_scene/open_oven_station.png",
+          "revision": "r2",
+          "status": "current_delivery",
+          "transform": "global brightness 1.12; no local retouching or crop",
+          "source_sha256": "59d42ae225a02ab12c21390fbd2bc0283ae857557bd11b884cdce0632e39bb44",
+          "asset_sha256": "e7be78e732114136a6a82bb5f625500d3910a2735c09af28f1efd4a290ea4250"
+        }
+      ],
+      "claim_boundary": "The four images are current-delivery Isaac scene evidence across independent requests. They are not a temporal sequence and do not claim robot-policy success."
+    },
+    {
+      "id": "fig2-gallery",
+      "role": "scene plate: four current-delivery laboratories absent from Figure 1",
+      "mode": "python-composed",
+      "source": "compose_galleries.py",
+      "staging": "source/fig23-assets.json",
+      "layout": "2x2; top row: eBench room cutaways (16:9) with Lift2 at the bench; bottom row: bench-level liquid stations; each cell adds a 4:3 task-object inset and a verb phrase; composed at 5.5 in text width with 7-8.5 pt type",
+      "inputs": [
+        {
+          "label": "task05 stopper removal, teaching-research room cutaway with Lift2 at the bench",
+          "asset": "source/fig2_stopper_station.png",
+          "source": "../../../../../outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/room_corner_b.png",
+          "revision": "r11",
+          "status": "current_delivery",
+          "transform": "crop (300, 175, 1620, 918)",
+          "source_sha256": "7c0b50cc61b6125c0653b4dced3023cb3fafd9c2ffb5485defb068333bcd9e43",
+          "asset_sha256": "5297d461d69f2f36beadf3e84b372544d5e302dbaffb80716a874595eba10aab",
+          "size": [
+            1320,
+            743
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "1d57d7e30d55b2318eb7b01a0dc1cbe6f755201b377a078e509ff77a14509360",
+          "scene": "../../../../../outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/scene/main.usda",
+          "scene_sha256": "8cb719f4ef61b7640fc48a2a329116e047ac61491ef95488f404afcb774d7ca1",
+          "runtime": "Isaac Sim 4.1 via GenManip, Lift2 injected"
+        },
+        {
+          "label": "task05 stopper removal, task-object detail",
+          "asset": "source/fig2_stopper_detail.png",
+          "source": "../../../../../outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png",
+          "revision": "r11",
+          "status": "current_delivery",
+          "transform": "crop (680, 400, 1160, 760)",
+          "source_sha256": "23517465224ee5fb17b9739a9911ee28d92a85064e5afc080868598f6d4650d9",
+          "asset_sha256": "5e2851f968c5d221c776b22160068ab45658d2de7547334dcb71fbaa3862de67",
+          "size": [
+            480,
+            360
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "1d57d7e30d55b2318eb7b01a0dc1cbe6f755201b377a078e509ff77a14509360",
+          "scene": "../../../../../outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/scene/main.usda",
+          "scene_sha256": "8cb719f4ef61b7640fc48a2a329116e047ac61491ef95488f404afcb774d7ca1"
+        },
+        {
+          "label": "task07 glass-rod rack, analytical-instrumentation room cutaway with Lift2 at the bench",
+          "asset": "source/fig2_glassrod_station.png",
+          "source": "../../../../../outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/room_corner_b.png",
+          "revision": "r10.1",
+          "status": "current_delivery",
+          "transform": "crop (300, 175, 1620, 918)",
+          "source_sha256": "8fde4e7fe7868668c5e67e17fc80161e3fa43105f0021690f4fd8171baded32e",
+          "asset_sha256": "62a2042bded462de2f03695ab4e4e9d023bab9b05d19573c418801a838f53920",
+          "size": [
+            1320,
+            743
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "f3a3d905bddad83a7010dca2c3f7a33a9ad8a9eb037f60b4592fa2f4971ebf57",
+          "scene": "../../../../../outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/scene/main.usda",
+          "scene_sha256": "e209fd2394e297c71a860973ee6ea5e5a0af365ace7350c40fad47196591cad7",
+          "runtime": "Isaac Sim 4.1 via GenManip, Lift2 injected"
+        },
+        {
+          "label": "task07 glass-rod rack, task-object detail",
+          "asset": "source/fig2_glassrod_detail.png",
+          "source": "../../../../../outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png",
+          "revision": "r10.1",
+          "status": "current_delivery",
+          "transform": "crop (700, 440, 1260, 860)",
+          "source_sha256": "574fcb96b45c5b1160bab06a1a7821ffefd1327a296441d48e29ea6452945109",
+          "asset_sha256": "63c552a3d639a9ee1ad8f31451cdc0f8ad4eb338dc499c88e15e595e2516623d",
+          "size": [
+            560,
+            420
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "f3a3d905bddad83a7010dca2c3f7a33a9ad8a9eb037f60b4592fa2f4971ebf57",
+          "scene": "../../../../../outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/scene/main.usda",
+          "scene_sha256": "e209fd2394e297c71a860973ee6ea5e5a0af365ace7350c40fad47196591cad7"
+        },
+        {
+          "label": "stir-bar insertion, bench-level workspace view",
+          "asset": "source/fig2_stirbar_station.png",
+          "source": "../../../../../outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/evidence/initial_scene/workspace_closeup.png",
+          "revision": "r5",
+          "status": "current_delivery",
+          "transform": "copied without crop",
+          "source_sha256": "3d38e489d9a8785a48ce92b8ead41d75ba94e114d4f636d49deddbfbddaa1f63",
+          "asset_sha256": "56f80ed7d031a19f124bdfad20d856ff1f0376593ce92b6e7f8614d3196bb4be",
+          "size": [
+            1280,
+            720
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "cfbdb641945489287aa7f7ba9bcd2eaa1bdac6ec8742e04005556872e323ad20",
+          "scene": "../../../../../outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/scene.usd",
+          "scene_sha256": "f1cab8a32b7000d6241a2f57bfab8476ad9781efa5b34807bcc558ef9e32b804",
+          "runtime": "isaac41"
+        },
+        {
+          "label": "stir-bar insertion, stir bar waiting in the dish (task-object detail)",
+          "asset": "source/fig2_stirbar_detail.png",
+          "source": "../../../../../outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/evidence/initial_scene/task_object_closeup.png",
+          "revision": "r5",
+          "status": "current_delivery",
+          "transform": "crop (560, 230, 1200, 710)",
+          "source_sha256": "dcc8bdcf676b5752a3ea5dff7fc9d1ef1b3933098f45df3b6af16b31afec3c47",
+          "asset_sha256": "11cb3e9667249596812a328582872ee6c96fda97bc7cdad8bbf62882a66a9319",
+          "size": [
+            640,
+            480
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "cfbdb641945489287aa7f7ba9bcd2eaa1bdac6ec8742e04005556872e323ad20",
+          "scene": "../../../../../outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/scene.usd",
+          "scene_sha256": "f1cab8a32b7000d6241a2f57bfab8476ad9781efa5b34807bcc558ef9e32b804"
+        },
+        {
+          "label": "tube water bath, station",
+          "asset": "source/fig2_waterbath_station.png",
+          "source": "../../../../../outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/evidence/initial_scene/scene_overview.png",
+          "revision": "r1",
+          "status": "current_delivery",
+          "transform": "copied without crop",
+          "source_sha256": "7064ecb45bde83b107601eb5ba71100119982dcf5aaa9f340a6c47a7a4dd72f6",
+          "asset_sha256": "7bc523525b0007c4db50ae30e666283c622a0828ba39d813bfcc1e596ea59d28",
+          "size": [
+            960,
+            540
+          ],
+          "visual_review": "../../../../../outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/evidence/initial_scene/visual_review.json",
+          "visual_review_sha256": "82f14dee0b3a7b2bcee798b9728c28ff7b75c3e213876f760f626e39cb2580a1",
+          "scene": "../../../../../outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/scene.usd",
+          "scene_sha256": "a55a93f46127d91d7834647a893b6942063f55ecb807a542feec5efcc5c4069c"
+        },
+        {
+          "label": "tube water bath, tube immersed detail",
+          "asset": "source/fig2_waterbath_detail.png",
+          "source": "../../../../../outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/evidence/initial_scene/tube_immersed_in_pbd_water.png",
+          "revision": "r1",
+          "status": "current_delivery",
+          "transform": "crop (200, 0, 920, 540)",
+          "source_sha256": "27a98d9dbb53573ea8120fb9e07b4b0d8f64b7bdcabd013baf8d3b3500ff7d1d",
+          "asset_sha256": "eb6cd9a8e2406c781ad3a3935556d9f414c1bf75bc9cd021d7b2aa72a3b7c5c3",
+          "size": [
+            720,
+            540
+          ],
+          "visual_review": "../../../../../outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/evidence/initial_scene/visual_review.json",
+          "visual_review_sha256": "82f14dee0b3a7b2bcee798b9728c28ff7b75c3e213876f760f626e39cb2580a1",
+          "scene": "../../../../../outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/scene.usd",
+          "scene_sha256": "a55a93f46127d91d7834647a893b6942063f55ecb807a542feec5efcc5c4069c"
+        }
+      ],
+      "claim_boundary": "Initial-scene evidence frames of admitted, current-delivery Isaac scenes. They show delivered stations and task object state; they do not claim robot-policy or task success."
+    },
+    {
+      "id": "fig3-real-spec-usd",
+      "role": "two end-to-end agent traces: manufacturer evidence -> agent-written contract -> admitted USD",
+      "mode": "python-composed",
+      "source": "compose_galleries.py",
+      "staging": "source/fig23-assets.json",
+      "layout": "two rows x three columns; image panels share a 1.15:1 aspect; row b is titled Burette stopcock because both evidence and USD panels centre on the stopcock joint; contract card shows the spec slug and four fields; composed at 5.5 in text width with 7.5-8.5 pt type",
+      "contracts": [
+        {
+          "row": "a",
+          "spec": "docs/design/asset-specs/ika-oven-125.md",
+          "spec_sha256": "0eae6d1235498dacff53db7cf7c46e54bf24be48726ec810615983876725c104",
+          "fields": [
+            "envelope 700 x 825 x 650 mm (E, datasheet)",
+            "door_hinge revolute 0-180 deg (E, operating manual)",
+            "handle: door-child collider (D)",
+            "shelf_0..5 placement surfaces (D)"
+          ]
+        },
+        {
+          "row": "b",
+          "spec": "docs/design/asset-specs/traditional-titration-burette-and-stand.md",
+          "spec_sha256": "05f32155f07afab1979ac5114c99bc6bb0f5ed40ebd8a48abd8762f5e5a2ab0f",
+          "fields": [
+            "tube 560 mm, dia 12 mm (E, Corning 2103-25 product page)",
+            "stopcock_joint revolute 0-90 deg design target (D)",
+            "handle grasp_region annotation (D)",
+            "mount_frame aligned to stand, scene-level FixedJoint (D)"
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "label": "IKA OVEN 125 manufacturer open-door view",
+          "asset": "source/fig3_oven_real.png",
+          "source": "../../../../../external_artifacts/asset_evidence/ika-oven-125/image2.png",
+          "revision": "evidence E02",
+          "status": "indexed manufacturer evidence",
+          "transform": "crop (0, 60, 1000, 930)",
+          "source_sha256": "a19453cc33ec01a0502e2faeb9cc67a31f81e00b84b9e6f4bfbe408b694d48fd",
+          "asset_sha256": "32b366d229832b1d4a32d5ff4a14b5b6ec07807df0037f34becee0d5a6f95373",
+          "size": [
+            1000,
+            870
+          ],
+          "evidence_manifest": "../../../../../external_artifacts/asset_evidence/ika-oven-125/MANIFEST.sha256",
+          "evidence_manifest_sha256": "90d6b591634617264285de3e813ca01238effaf1521061cfcebe961a6f0a2886"
+        },
+        {
+          "label": "Task 12 OVEN r2 admitted scene, camera-only retake matching the catalog viewpoint",
+          "asset": "source/fig3_oven_usd.png",
+          "source": "../../../../../outputs/lab2sim_fig3_retake_20260917/oven_r2/hero_open_threequarter.png",
+          "revision": "r2",
+          "status": "current_delivery",
+          "transform": "crop (280, 0, 1522, 1080)",
+          "source_sha256": "5a0b5d9aa410a314bb1d1e3d2e34bb4886f43c18fb9775799048e71b2e473162",
+          "asset_sha256": "01cb8809732a8537005d8973c467d0bda4f84984d6972981c09a6ff946cc4946",
+          "size": [
+            1242,
+            1080
+          ],
+          "render_manifest": "../../../../../outputs/lab2sim_fig3_retake_20260917/oven_r2/render_manifest.json",
+          "render_manifest_sha256": "7c7562b3d40bcb19fa08a95c94a39e0a6cd7641a5a02618081317a06c3b4fea0",
+          "scene": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/scene.usd",
+          "scene_sha256": "15a24e977dee1ffcff6d533fb7f309feed96e9c9dc682459c594667cedad173f",
+          "promotion_receipt": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/deps/oven/promotion_receipt.json",
+          "promotion_receipt_sha256": "53b99d2e9888c1be4a9c78c06d7214fd75e8c127ea5b3e61bbe4bf09efcf73d0",
+          "retake_command": "/isaac-sim/python.sh scripts/render_lab2sim_oven_retake.py --root <handoff> --out outputs/lab2sim_fig3_retake_20260917/oven_r2",
+          "retake_note": "same door hinge command as the evidence renderer; exposure multiplier 1.08; scene state, geometry, materials and physics unchanged"
+        },
+        {
+          "label": "traditional burette manufacturer exploded stopcock (B-E03 panel of image3)",
+          "asset": "source/fig3_burette_real.png",
+          "source": "../../../../../external_artifacts/asset_evidence/traditional-titration-burette-and-stand/image3.png",
+          "revision": "evidence B-E03",
+          "status": "indexed manufacturer evidence",
+          "transform": "crop (1040, 160, 1546, 600)",
+          "source_sha256": "806e512b71edd4cbeb5be9c353f4dde503197b4f8a227a201a3aa25cce35bec4",
+          "asset_sha256": "cc170fc91fe99321ab9ddcf590e4830232fcce615a8e6c5b757a469d379581c1",
+          "size": [
+            506,
+            440
+          ],
+          "evidence_manifest": "../../../../../external_artifacts/asset_evidence/traditional-titration-burette-and-stand/MANIFEST.sha256",
+          "evidence_manifest_sha256": "68af1981b7c07a446fc19d2e60faabf1ac5f2e42344b7385112a7c15438f7e65"
+        },
+        {
+          "label": "titration r1.7 admitted scene, graduated tube and stopcock close view",
+          "asset": "source/fig3_burette_usd.png",
+          "source": "../../../../../outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/evidence/initial_scene/after_end_scale_burette_lower.png",
+          "revision": "r1.7",
+          "status": "current_delivery",
+          "transform": "crop (420, 0, 1410, 860); global brightness x1.04",
+          "source_sha256": "581c5a869dac37bb7679b7e05b6134032b8cb39eb8c7f169583932aefd2babef",
+          "asset_sha256": "f2fbe02b8a99b4103c2740183dbdc24a8dc01a84f489923d82f03af96e98d9e8",
+          "size": [
+            990,
+            860
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "0ae9eb1dac18cbe20a0270a130fa383a71b4fbf39f7b1c84933bd4428ec324fd",
+          "scene": "../../../../../outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/scene.usd",
+          "scene_sha256": "d190860a6641629f4f61e661a8af93c79e6fb55b9e5f070e54a83738f302e132",
+          "promotion_receipt": "../../../../../outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/deps/titration_assets/promotion_receipt.json",
+          "promotion_receipt_sha256": "e664fe0f0684e63af7a527c71319f9419fff9af8379499afb7f282c04e8aa40a"
+        }
+      ],
+      "claim_boundary": "Both rows are author-confirmed end-to-end Lab2Sim agent traces. The middle column is the agent-written asset specification as committed in docs/design/asset-specs; no separate signed freeze artifact is claimed. Admission evidence is the ConvertAsset promotion receipt linked per row."
+    },
+    {
+      "id": "app-extra",
+      "role": "appendix additional renders",
+      "mode": "latex tabular of staged frames",
+      "staging": "source/fig23-assets.json",
+      "inputs": [
+        {
+          "label": "OVEN r2 lower shelf with beaker and flask",
+          "asset": "source/app_oven_interior.png",
+          "source": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/evidence/initial_scene/lower_shelf_dual_glassware.png",
+          "revision": "r2",
+          "status": "current_delivery",
+          "transform": "copied without crop",
+          "source_sha256": "c75cd2e133e223205bab797b23bdc32778f7051293a4f70c0a7b412377c94843",
+          "asset_sha256": "d1934d99a8fcec071fe334ecaa7b9dd141b4ce641327dfacca146ddd1a18ebd1",
+          "size": [
+            1280,
+            720
+          ],
+          "render_manifest": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/evidence/initial_scene/render_manifest.json",
+          "render_manifest_sha256": "48aca54d4cfc69dffc1e243abdb101acf1641a53c3f7652b37f27f8d55c33563",
+          "scene": "../../../../../outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/scene.usd",
+          "scene_sha256": "15a24e977dee1ffcff6d533fb7f309feed96e9c9dc682459c594667cedad173f"
+        },
+        {
+          "label": "powder r4 weighing scoop",
+          "asset": "source/powder_r4_hero.png",
+          "note": "shared with fig1-hero; see fig1 outputs for hashes"
+        },
+        {
+          "label": "Lift2 in the Isaac runtime (phase-11 canary initial overlook)",
+          "asset": "source/app_lift2_runtime.png",
+          "source": "../../../../../docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_executed_episode_initial_overlook.png",
+          "revision": "2026-07-05 record evidence",
+          "status": "current_delivery",
+          "transform": "copied without crop",
+          "source_sha256": "35d90e1d89dc71ef50aaf5a3ea89caf2eb1c13224140f88982bd97cfa8577122",
+          "asset_sha256": "3677c8e4442be6c220470e90b503f79cc5a1044e08b9f8599e9d9ae8bea42364",
+          "size": [
+            1280,
+            720
+          ]
+        }
+      ],
+      "claim_boundary": "Close views of admitted scenes and the Isaac runtime; no robot-policy success is claimed."
+    }
+  ]
+}

@@ -1,0 +1,388 @@
+{
+  "artifacts": [
+    {
+      "attempts": [
+        {
+          "backend": "libreoffice",
+          "command": [
+            "/usr/lib/libreoffice/program/soffice",
+            "--headless",
+            "-env:UserInstallation=file:///tmp/figure-lo-l2897vsi/profile",
+            "--convert-to",
+            "pdf:impress_pdf_Export",
+            "--outdir",
+            "/tmp/figure-lo-l2897vsi",
+            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx"
+          ],
+          "error": null,
+          "returncode": 0,
+          "stderr": "Warning: failed to launch javaldx - java may not function correctly",
+          "stdout": "convert /cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx -> /tmp/figure-lo-l2897vsi/fig1-hero.pdf using filter : impress_pdf_Export",
+          "timed_out": false
+        }
+      ],
+      "backend": "libreoffice",
+      "message": "rendered and passed structural output validation",
+      "outputs": [
+        {
+          "exists": true,
+          "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero.pdf",
+          "sha256": "b3ddad0d2756a5c53433320334bfa6c8ba4917e40ae4d7b4359c5e4d818550c9",
+          "size_bytes": 187784,
+          "validation": {
+            "details": "PDF header, cross-reference marker, and EOF trailer are present",
+            "passed": true,
+            "pdf_version": "1.6"
+          }
+        }
+      ],
+      "reason_code": null,
+      "route": null,
+      "source": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx",
+      "source_type": "pptx",
+      "status": "rendered",
+      "target": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero.pdf",
+      "target_format": "pdf"
+    },
+    {
+      "attempts": [
+        {
+          "backend": "pdftocairo",
+          "command": [
+            "/usr/bin/pdftocairo",
+            "-png",
+            "-r",
+            "180",
+            "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero.pdf",
+            "/tmp/figure-png-17vmzvcx/raster-1-pdftocairo/page"
+          ],
+          "error": null,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "",
+          "timed_out": false
+        }
+      ],
+      "backend": "libreoffice+pdftocairo",
+      "message": "rendered one validated PNG per slide through a PDF intermediate",
+      "outputs": [
+        {
+          "exists": true,
+          "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero-slides/slide-001.png",
+          "sha256": "802e57824c3a550735594b63934778586604e360a51847b94fc0330a1dcf5a8b",
+          "size_bytes": 611555,
+          "validation": {
+            "details": "PNG chunk structure and CRC checks are valid",
+            "height_px": 1051,
+            "passed": true,
+            "width_px": 3751
+          }
+        }
+      ],
+      "reason_code": null,
+      "route": "pptx->pdf->png",
+      "source": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx",
+      "source_type": "pptx",
+      "status": "rendered",
+      "target": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/fig1-hero-slides",
+      "target_format": "png"
+    }
+  ],
+  "environment": {
+    "automatic_installation": false,
+    "capabilities": {
+      "pdf_to_png": {
+        "available": true,
+        "backends": [
+          "pdftocairo",
+          "pdftoppm"
+        ],
+        "degradation": null,
+        "mode": "direct",
+        "preferred_backend": "pdftocairo"
+      },
+      "pptx_to_pdf": {
+        "available": true,
+        "backends": [
+          "libreoffice"
+        ],
+        "degradation": null,
+        "mode": "direct",
+        "preferred_backend": "libreoffice"
+      },
+      "pptx_to_png": {
+        "available": true,
+        "backends": [
+          "libreoffice+pdftocairo",
+          "libreoffice+pdftoppm"
+        ],
+        "degradation": null,
+        "mode": "chained",
+        "preferred_backend": "libreoffice+pdftocairo"
+      },
+      "svg_to_pdf": {
+        "available": true,
+        "backends": [
+          "sharp+pdfkit"
+        ],
+        "degradation": null,
+        "mode": "direct",
+        "preferred_backend": "sharp+pdfkit"
+      },
+      "svg_to_png": {
+        "available": true,
+        "backends": [
+          "sharp"
+        ],
+        "degradation": null,
+        "mode": "direct",
+        "preferred_backend": "sharp"
+      }
+    },
+    "checked_at": "2026-09-17T08:41:51Z",
+    "commands": {
+      "imagemagick": {
+        "available": false,
+        "candidate_failures": [],
+        "command": null,
+        "located": false,
+        "path": null,
+        "probe_warning": null,
+        "purpose": "Fallback SVG/PDF rasterization",
+        "verification": "not-found",
+        "version": null
+      },
+      "inkscape": {
+        "available": false,
+        "candidate_failures": [],
+        "command": null,
+        "located": false,
+        "path": null,
+        "probe_warning": null,
+        "purpose": "SVG to PNG/PDF",
+        "verification": "not-found",
+        "version": null
+      },
+      "libreoffice": {
+        "available": true,
+        "candidate_failures": [],
+        "command": "soffice",
+        "located": true,
+        "path": "/usr/lib/libreoffice/program/soffice",
+        "probe_warning": null,
+        "purpose": "PPTX to PDF",
+        "verification": "passed",
+        "version": "LibreOffice 7.3.7.2 30(Build:2)"
+      },
+      "mutool": {
+        "available": false,
+        "candidate_failures": [],
+        "command": null,
+        "located": false,
+        "path": null,
+        "probe_warning": null,
+        "purpose": "PDF to PNG",
+        "verification": "not-found",
+        "version": null
+      },
+      "node": {
+        "available": true,
+        "candidate_failures": [],
+        "command": "node",
+        "located": true,
+        "path": "/usr/local/lib/nodejs/bin/node",
+        "probe_warning": null,
+        "purpose": "Optional Sharp/PDFKit and PptxGenJS backends",
+        "verification": "passed",
+        "version": "v24.14.1"
+      },
+      "pdftocairo": {
+        "available": true,
+        "candidate_failures": [],
+        "command": "pdftocairo",
+        "located": true,
+        "path": "/usr/bin/pdftocairo",
+        "probe_warning": null,
+        "purpose": "PDF to PNG",
+        "verification": "passed",
+        "version": "pdftocairo version 22.02.0"
+      },
+      "pdftoppm": {
+        "available": true,
+        "candidate_failures": [],
+        "command": "pdftoppm",
+        "located": true,
+        "path": "/usr/bin/pdftoppm",
+        "probe_warning": null,
+        "purpose": "PDF to PNG",
+        "verification": "passed",
+        "version": "pdftoppm version 22.02.0"
+      },
+      "powershell": {
+        "available": false,
+        "candidate_failures": [],
+        "command": null,
+        "located": false,
+        "path": null,
+        "probe_warning": null,
+        "purpose": "Microsoft PowerPoint automation on Windows",
+        "verification": "not-found",
+        "version": null
+      },
+      "rsvg_convert": {
+        "available": false,
+        "candidate_failures": [],
+        "command": null,
+        "located": false,
+        "path": null,
+        "probe_warning": null,
+        "purpose": "SVG to PNG/PDF",
+        "verification": "not-found",
+        "version": null
+      }
+    },
+    "degradation": {
+      "available_capabilities": 5,
+      "grade": "full",
+      "level": 0,
+      "total_capabilities": 5
+    },
+    "node_modules": {
+      "pdfkit": {
+        "available": true,
+        "module": "pdfkit",
+        "probe_warning": null,
+        "purpose": "Raster-backed SVG to PDF",
+        "resolved": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/node_modules/pdfkit/js/pdfkit.js",
+        "verification": "require-passed",
+        "version": null
+      },
+      "pptxgenjs": {
+        "available": true,
+        "module": "pptxgenjs",
+        "probe_warning": null,
+        "purpose": "Optional editable PPTX projection",
+        "resolved": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/node_modules/pptxgenjs/dist/pptxgen.cjs.js",
+        "verification": "require-passed",
+        "version": null
+      },
+      "sharp": {
+        "available": true,
+        "module": "sharp",
+        "probe_warning": null,
+        "purpose": "SVG to PNG",
+        "resolved": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/node_modules/sharp/dist/index.cjs",
+        "verification": "require-passed",
+        "version": null
+      }
+    },
+    "node_renderers": {
+      "sharp_pdfkit_pdf": {
+        "available": true,
+        "backend": "sharp+pdfkit",
+        "format": "pdf",
+        "helper": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/render_svg.mjs",
+        "output_bytes": 1524,
+        "probe_warning": null,
+        "purpose": "Raster-backed SVG to PDF",
+        "verification": "render-passed"
+      },
+      "sharp_png": {
+        "available": true,
+        "backend": "sharp",
+        "format": "png",
+        "helper": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures/scripts/render_svg.mjs",
+        "output_bytes": 95,
+        "probe_warning": null,
+        "purpose": "SVG to PNG",
+        "verification": "render-passed"
+      }
+    },
+    "platform": {
+      "cwd": "/cpfs/user/zhuzihou/dev/agent-skills/skills/build-scientific-figures",
+      "machine": "x86_64",
+      "python_executable": "/isaac-sim/kit/python/bin/python3",
+      "python_version": "3.10.15",
+      "release": "5.10.134-17.3.al8.x86_64",
+      "system": "Linux"
+    },
+    "powerpoint": {
+      "automation": "PowerPoint.Application COM",
+      "available": false,
+      "probe_warning": "Microsoft PowerPoint COM automation is Windows-only",
+      "purpose": "PPTX to PDF/PNG",
+      "verification": "not-applicable"
+    },
+    "python_modules": {
+      "cairosvg": {
+        "available": false,
+        "distribution": "CairoSVG",
+        "import_name": "cairosvg",
+        "located": false,
+        "probe_warning": null,
+        "purpose": "SVG to PNG/PDF",
+        "verification": "not-found",
+        "version": null
+      },
+      "pymupdf": {
+        "available": false,
+        "distribution": "PyMuPDF",
+        "import_name": "fitz",
+        "located": false,
+        "probe_warning": null,
+        "purpose": "PDF to PNG",
+        "verification": "not-found",
+        "version": null
+      }
+    },
+    "read_only_probe": true,
+    "schema_version": 1
+  },
+  "generated_at": "2026-09-17T08:41:53Z",
+  "policy": {
+    "automatic_installation": false,
+    "missing_backend_is_degraded_skip": true,
+    "source_files_modified": false
+  },
+  "request": {
+    "dpi": 180,
+    "formats": [
+      "png",
+      "pdf"
+    ],
+    "inputs": [
+      "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx"
+    ],
+    "output_dir": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final",
+    "output_names": [
+      {
+        "source": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx",
+        "stem": "fig1-hero"
+      }
+    ],
+    "overwrite": true,
+    "report_path_effective": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/qa-report.json",
+    "report_path_requested": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/rendered/pptx-final/qa-report.json",
+    "strict": false,
+    "timeout_seconds": 180.0
+  },
+  "schema_version": 1,
+  "source_checks": [
+    {
+      "details": "PPTX package structure and CRC checks are valid (1 slide(s))",
+      "passed": true,
+      "path": "/cpfs/user/zhuzihou/dev/scenario-forge/paper/venues/iclr2027/figures/lab2sim/fig1-hero.pptx",
+      "sha256": "cc0cc15f022380bf8eb525174f6df39c54790aa121d1bdd0fdbce19d6b08070a",
+      "size_bytes": 3683672,
+      "slide_count": 1,
+      "type": "pptx"
+    }
+  ],
+  "status": "passed",
+  "summary": {
+    "failed": 0,
+    "rendered": 2,
+    "requested": 2,
+    "skipped": 0
+  }
+}

@@ -1,0 +1,55 @@
+\section{Lab2Sim}
+\label{sec:method}
+
+Lab2Sim treats a protocol as a compilation request and moves it through five
+artifacts: a \emph{request}, the \emph{evidence} for each instrument, an
+\emph{asset specification}, a \emph{USD candidate}, and an \emph{admitted
+scene}. Each stage consumes the previous artifact; once the specification
+exists, every later stage is checked against it.
+
+\paragraph{Understanding the request.}
+A request arrives as text, a photograph, or a demonstration video. The agent
+reads out which instruments the experiment needs, which must articulate, and
+what the robot will do to each. ``Unload the oven'' yields a hinged door, a
+graspable handle, and shelf placement; a catalog photo of the OVEN~125 yields
+the same demands with the model already identified; a demo video adds the
+order in which devices are touched. The three modalities converge on one
+table of asset requests.
+
+\paragraph{Searching for the real instrument.}
+For every request row the agent finds the actual product. Manufacturer pages,
+datasheets, and official photographs are hashed into an evidence register and
+graded as exact-model, family, derived, or unknown. Identity is a model
+number, not ``a lab oven''. This is what stops the specification from
+inventing a hinge the instrument does not have, and what lets
+Figure~\ref{fig:real-spec} put a catalog photograph beside the USD.
+
+\paragraph{Writing the asset specification.}
+From the evidence the agent fixes the envelope, the decomposition into links,
+the prim tree, joint types and limits, grasp regions, placement surfaces,
+state variables, and a QA matrix. The OVEN~125 specification fixes a
+$700{\times}825{\times}650$~mm body, a revolute door hinge with
+0--180$^{\circ}$ travel, a handle collider on the door, and six shelves as
+placement surfaces. The burette specification fixes a 560~mm,
+$\varnothing$12~mm tube, a revolute stopcock with a 0--90$^{\circ}$ target, a
+grasp region on the handle, and a mount frame the stand receives through a
+scene-level fixed joint. Fields the evidence does not support stay open.
+Generation may rebuild geometry; it may not change these numbers or rename
+these contracts.
+
+\paragraph{Generating the USD candidate.}
+A skill package turns the specification into articulated USD. Procedural
+modelling in Blender is the always-on route \citep{blender2024}; Hunyuan3D is
+an optional geometry frontend the same skill calls when it is reachable
+\citep{zhao2025hunyuan3d}. The agent iterates until a static articulation
+check under Isaac Kit Python matches the specification: joint names, axes,
+limits, and colliders. A failing candidate returns to generation with the
+mismatch named.
+
+\paragraph{Admitting the scene.}
+ConvertAsset is the existing conversion and physics-qualification compiler
+for meshes, materials, and PhysX fitness; Lab2Sim hands it the candidate and
+does not reimplement it. A candidate that fails conversion is an explicit
+gap. One that passes receives a promotion receipt, is bound into a scenario,
+compiled, and spawned in Isaac Sim with a Lift2. Admission is the moment the
+protocol becomes a place the robot can stand.

@@ -1,0 +1,5 @@
+$pdf_mode = 1;
+$bibtex_use = 2;
+$out_dir = 'build';
+@default_files = ('main.tex');
+$pdflatex = 'pdflatex -interaction=nonstopmode -file-line-error %O %S';

@@ -1,0 +1,222 @@
+{
+  "assets": [
+    {
+      "name": "fig2_stopper_station.png",
+      "source": "outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/room_corner_b.png",
+      "source_sha256": "7c0b50cc61b6125c0653b4dced3023cb3fafd9c2ffb5485defb068333bcd9e43",
+      "crop": [
+        300,
+        175,
+        1620,
+        918
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "5297d461d69f2f36beadf3e84b372544d5e302dbaffb80716a874595eba10aab",
+      "size": [
+        1320,
+        743
+      ]
+    },
+    {
+      "name": "fig2_stopper_detail.png",
+      "source": "outputs/scientific_workbench_task05_task09_r11_20260817/packages/task05/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png",
+      "source_sha256": "23517465224ee5fb17b9739a9911ee28d92a85064e5afc080868598f6d4650d9",
+      "crop": [
+        680,
+        400,
+        1160,
+        760
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "5e2851f968c5d221c776b22160068ab45658d2de7547334dcb71fbaa3862de67",
+      "size": [
+        480,
+        360
+      ]
+    },
+    {
+      "name": "fig2_glassrod_station.png",
+      "source": "outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/room_corner_b.png",
+      "source_sha256": "8fde4e7fe7868668c5e67e17fc80161e3fa43105f0021690f4fd8171baded32e",
+      "crop": [
+        300,
+        175,
+        1620,
+        918
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "62a2042bded462de2f03695ab4e4e9d023bab9b05d19573c418801a838f53920",
+      "size": [
+        1320,
+        743
+      ]
+    },
+    {
+      "name": "fig2_glassrod_detail.png",
+      "source": "outputs/scientific_workbench_tasks_02_07_08_r10_1_20260817/packages/task07/analytical_instrumentation/adapters/ebench/genmanip/evidence/initial_scene/task_object_closeup.png",
+      "source_sha256": "574fcb96b45c5b1160bab06a1a7821ffefd1327a296441d48e29ea6452945109",
+      "crop": [
+        700,
+        440,
+        1260,
+        860
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "63c552a3d639a9ee1ad8f31451cdc0f8ad4eb338dc499c88e15e595e2516623d",
+      "size": [
+        560,
+        420
+      ]
+    },
+    {
+      "name": "fig2_stirbar_station.png",
+      "source": "outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/evidence/initial_scene/workspace_closeup.png",
+      "source_sha256": "3d38e489d9a8785a48ce92b8ead41d75ba94e114d4f636d49deddbfbddaa1f63",
+      "crop": null,
+      "brightness": 1.0,
+      "asset_sha256": "56f80ed7d031a19f124bdfad20d856ff1f0376593ce92b6e7f8614d3196bb4be",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "name": "fig2_stirbar_detail.png",
+      "source": "outputs/scientific_workbench_insert_stir_bar_into_beaker_vr_r5_20260825/vr/evidence/initial_scene/task_object_closeup.png",
+      "source_sha256": "dcc8bdcf676b5752a3ea5dff7fc9d1ef1b3933098f45df3b6af16b31afec3c47",
+      "crop": [
+        560,
+        230,
+        1200,
+        710
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "11cb3e9667249596812a328582872ee6c96fda97bc7cdad8bbf62882a66a9319",
+      "size": [
+        640,
+        480
+      ]
+    },
+    {
+      "name": "fig2_waterbath_station.png",
+      "source": "outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/evidence/initial_scene/scene_overview.png",
+      "source_sha256": "7064ecb45bde83b107601eb5ba71100119982dcf5aaa9f340a6c47a7a4dd72f6",
+      "crop": null,
+      "brightness": 1.0,
+      "asset_sha256": "7bc523525b0007c4db50ae30e666283c622a0828ba39d813bfcc1e596ea59d28",
+      "size": [
+        960,
+        540
+      ]
+    },
+    {
+      "name": "fig2_waterbath_detail.png",
+      "source": "outputs/scientific_workbench_water_bath_tube_heat_vr_r1_20260902/vr/evidence/initial_scene/tube_immersed_in_pbd_water.png",
+      "source_sha256": "27a98d9dbb53573ea8120fb9e07b4b0d8f64b7bdcabd013baf8d3b3500ff7d1d",
+      "crop": [
+        200,
+        0,
+        920,
+        540
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "eb6cd9a8e2406c781ad3a3935556d9f414c1bf75bc9cd021d7b2aa72a3b7c5c3",
+      "size": [
+        720,
+        540
+      ]
+    },
+    {
+      "name": "fig3_oven_real.png",
+      "source": "external_artifacts/asset_evidence/ika-oven-125/image2.png",
+      "source_sha256": "a19453cc33ec01a0502e2faeb9cc67a31f81e00b84b9e6f4bfbe408b694d48fd",
+      "crop": [
+        0,
+        60,
+        1000,
+        930
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "32b366d229832b1d4a32d5ff4a14b5b6ec07807df0037f34becee0d5a6f95373",
+      "size": [
+        1000,
+        870
+      ]
+    },
+    {
+      "name": "fig3_oven_usd.png",
+      "source": "outputs/lab2sim_fig3_retake_20260917/oven_r2/hero_open_threequarter.png",
+      "source_sha256": "5a0b5d9aa410a314bb1d1e3d2e34bb4886f43c18fb9775799048e71b2e473162",
+      "crop": [
+        280,
+        0,
+        1522,
+        1080
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "01cb8809732a8537005d8973c467d0bda4f84984d6972981c09a6ff946cc4946",
+      "size": [
+        1242,
+        1080
+      ]
+    },
+    {
+      "name": "fig3_burette_real.png",
+      "source": "external_artifacts/asset_evidence/traditional-titration-burette-and-stand/image3.png",
+      "source_sha256": "806e512b71edd4cbeb5be9c353f4dde503197b4f8a227a201a3aa25cce35bec4",
+      "crop": [
+        1040,
+        160,
+        1546,
+        600
+      ],
+      "brightness": 1.0,
+      "asset_sha256": "cc170fc91fe99321ab9ddcf590e4830232fcce615a8e6c5b757a469d379581c1",
+      "size": [
+        506,
+        440
+      ]
+    },
+    {
+      "name": "fig3_burette_usd.png",
+      "source": "outputs/scientific_workbench_traditional_acid_base_titration_vr_r1_7_20260908/handoff/scientific_workbench_traditional_acid_base_titration_vr_r1_7/evidence/initial_scene/after_end_scale_burette_lower.png",
+      "source_sha256": "581c5a869dac37bb7679b7e05b6134032b8cb39eb8c7f169583932aefd2babef",
+      "crop": [
+        420,
+        0,
+        1410,
+        860
+      ],
+      "brightness": 1.04,
+      "asset_sha256": "f2fbe02b8a99b4103c2740183dbdc24a8dc01a84f489923d82f03af96e98d9e8",
+      "size": [
+        990,
+        860
+      ]
+    },
+    {
+      "name": "app_oven_interior.png",
+      "source": "outputs/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2_20260904/handoff/scientific_workbench_task12_oven_unload_dual_glassware_vr_r2/evidence/initial_scene/lower_shelf_dual_glassware.png",
+      "source_sha256": "c75cd2e133e223205bab797b23bdc32778f7051293a4f70c0a7b412377c94843",
+      "crop": null,
+      "brightness": 1.0,
+      "asset_sha256": "d1934d99a8fcec071fe334ecaa7b9dd141b4ce641327dfacca146ddd1a18ebd1",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "name": "app_lift2_runtime.png",
+      "source": "docs/records/evidence/2026-07-05-phase11-small-multi-task-canary/remote_to_holder_phase11_executed_episode_initial_overlook.png",
+      "source_sha256": "35d90e1d89dc71ef50aaf5a3ea89caf2eb1c13224140f88982bd97cfa8577122",
+      "crop": null,
+      "brightness": 1.0,
+      "asset_sha256": "3677c8e4442be6c220470e90b503f79cc5a1044e08b9f8599e9d9ae8bea42364",
+      "size": [
+        1280,
+        720
+      ]
+    }
+  ]
+}

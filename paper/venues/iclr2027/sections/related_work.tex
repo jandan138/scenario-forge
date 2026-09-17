@@ -1,0 +1,25 @@
+\section{Related Work}
+\label{sec:related-work}
+
+\paragraph{Real-to-sim reconstruction.}
+RialTo scans a scene into a digital twin for policy robustification
+\citep{torne2024rialto}. Digital cousins build interactive lookalikes from a
+single RGB image \citep{dai2024cousins}. SIMPLER matches real robot setups so
+that simulated evaluation tracks real evaluation \citep{li2024simpler}.
+URDFormer predicts articulated URDF scenes directly from real photographs
+\citep{chen2024urdformer}. Lab2Sim shares the goal of an interactive twin but
+takes a different input: a protocol and the manufacturer's own evidence for
+the named instrument, rather than a scan or photograph of a workspace that
+already exists.
+
+\paragraph{Generative scene agents.}
+GenSim writes simulation task code from language \citep{wang2024gensim}.
+RoboGen proposes tasks, scenes, and supervision in a propose--generate--learn
+loop \citep{wang2024robogen}. Holodeck lays out 3D rooms from a prompt using
+Objaverse meshes \citep{yang2024holodeck}. Image-conditioned 3D generators such
+as Hunyuan3D propose textured geometry from a single view
+\citep{zhao2025hunyuan3d}. Lab2Sim calls generators of this kind as tools
+inside its Blender skill. What it adds is the layer these agents leave
+implicit: a written specification of the instrument's joints and contact
+surfaces, and an admission step that decides whether the generated USD may
+enter the robot's laboratory.
