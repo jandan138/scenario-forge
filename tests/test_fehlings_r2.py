@@ -63,6 +63,7 @@ def test_geometry_grows_from_fixed_floor_without_overlap_or_top_drift():
     assert len(set(sizes))==1
 
 
+@pytest.mark.local_artifacts
 def test_package_relations_and_physical_invariance(tmp_path):
     import json
     from pxr import Usd, UsdGeom
@@ -87,6 +88,7 @@ def test_package_relations_and_physical_invariance(tmp_path):
     assert (root/'COLOR_GUIDE_CN.md').is_file()
 
 
+@pytest.mark.local_artifacts
 def test_reset_applies_without_pose_and_does_not_heat_same_step(tmp_path):
     import ast
     from types import SimpleNamespace as NS

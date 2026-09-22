@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+
+import pytest
 from pathlib import Path
 
 import yaml
@@ -11,6 +13,9 @@ from scripts.build_traditional_titration_robot_bundle import (
     build,
     finalize_blocked,
 )
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 def test_builds_isolated_41_and_45_robot_adapters(tmp_path) -> None:

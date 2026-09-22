@@ -38,3 +38,11 @@ asset_cache/
 !docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_initial_overlook.png
 !docs/records/evidence/2026-07-04-phase10-real-ebench-apple-to-bowl-usd/phase11_executed_episode_final_overlook.png
 !docs/task-directory/assets/*.png
+
+# Paper closeout: keep every editable PPTX in Git. Historical SVG/PDF projections
+# and local render caches stay on disk, indexed by paper/artifact-retention-20260922.json.
+paper/**/round*/**/*.svg
+paper/**/round*/**/*.pdf
+paper/**/pptx-render*/**/*.pdf
+paper/**/_icon_cache/
+paper/**/*.log

@@ -83,6 +83,7 @@ def test_time_integration_and_receiver_accounting():
     assert spilled['burette_liquid_volume_ml'] == 0
 
 
+@pytest.mark.local_artifacts
 def test_r15_package_embeds_policy_and_preserves_physics(tmp_path):
     import json
     import yaml

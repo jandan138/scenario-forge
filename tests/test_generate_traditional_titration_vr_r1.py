@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
+
+import pytest
 from pathlib import Path
 
 from pxr import Usd, UsdGeom, UsdPhysics
 
 from scripts.generate_traditional_titration_vr_r1 import build
+
+
+pytestmark = pytest.mark.local_artifacts
 
 
 def test_builds_materialized_vr_titration_scene(tmp_path) -> None:

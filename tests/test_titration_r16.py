@@ -14,6 +14,7 @@ def package(tmp_path_factory):
     return build(output=tmp_path_factory.mktemp('r16'))
 
 
+@pytest.mark.local_artifacts
 def test_single_mesh_material_binding_and_unchanged_physics(package):
     stage = Usd.Stage.Open(str(package/'scene.usd'))
     old = Usd.Stage.Open(str(SOURCE/'scene.usd'))
@@ -34,6 +35,7 @@ def test_single_mesh_material_binding_and_unchanged_physics(package):
     assert [str(t) for t in station.GetRelationship('titration:receiverLiquidShader').GetTargets()] == [LIQUID+'/Looks/Water/Shader']
 
 
+@pytest.mark.local_artifacts
 def test_embedded_update_uses_same_visible_mesh_for_all_colors(package):
     stage = Usd.Stage.Open(str(package/'scene.usd'))
     stage.SetEditTarget(stage.GetSessionLayer())
@@ -60,6 +62,7 @@ def test_embedded_update_uses_same_visible_mesh_for_all_colors(package):
         assert [str(p.GetPath()) for p in stage.Traverse()] == paths
 
 
+@pytest.mark.local_artifacts
 def test_new_package_identity_docs_and_fresh_evidence(package):
     manifest = json.loads((package/'manifest.json').read_text())
     assert manifest['package_id'].endswith('r1_6')
@@ -71,6 +74,7 @@ def test_new_package_identity_docs_and_fresh_evidence(package):
     assert '(COLOR_GUIDE_CN.md)' in (package/'README_CN.md').read_text()
 
 
+@pytest.mark.local_artifacts
 def test_runtime_observer_rejects_missing_binding_or_hidden_liquid(package):
     from scripts.validate_titration_linear_runtime import receiver_visual_state
     stage = Usd.Stage.Open(str(package/'scene.usd'))

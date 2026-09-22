@@ -17,6 +17,14 @@ Use [external artifact indexes](../../external_artifacts/README.md) for external
 stored material and the associated dated records for hashes and restoration
 checks. A filename's largest revision number is not a substitute for the index.
 
+Paper presentation history is indexed separately in
+[paper/artifact-retention-20260922.json](../../paper/artifact-retention-20260922.json).
+All listed PPTX files are retained in Git at their original paths. Historical
+SVG/PDF projections and render caches listed as local remain on disk; the index
+is a location/hash record, not a claim that those files have been uploaded elsewhere.
+See [VAL-005](../standards/validation-and-delivery.md#val-005) for the author-directed
+paper retention scope and [the closeout record](../records/2026-09-22-repository-closeout.md).
+
 ## Maintenance procedure
 
 Before retention work, resolve the task family, variant and source dependencies;
