@@ -1,0 +1,30 @@
+schema_version: scenario-spec/v0.6
+scenario_id: scientific_workbench_funnel_pour_flask_to_stirrer
+domain: scientific_workbench
+task_family: funnel_pour_then_place
+instruction: 从漏斗架拿起漏斗并插入桌面上的锥形瓶口，用量筒经漏斗倒液，将漏斗放回原架槽，最后把锥形瓶放到磁力搅拌器上。本包不做塞子，也不放扁圆柱底座。
+claim_scope: layout_and_authored_pbd_at_rest
+canonical_task13_success: false
+note: Documentation-only object list for VR r1.2. The generator clones scene_usds USD; this file is not the compiler entry.
+objects:
+  - {id: obj_funnel, role: funnel, vr_randomization_group: funnel_rack}
+  - {id: obj_funnel_rack, role: funnel_stand, vr_randomization_group: funnel_rack}
+  - {id: obj_graduated_cylinder, role: source_container, vr_randomization_group: cylinder_fixed}
+  - {id: obj_conical_flask, role: target_container, vr_randomization_group: flask}
+  - {id: obj_magnetic_stirrer, role: terminal_place_target, vr_randomization_group: stirrer}
+poses:
+  obj_conical_flask: {xyz: [-0.11, -0.16, 0.755]}
+  obj_magnetic_stirrer: {xyz: [0.53, -0.205, 0.755]}
+liquid:
+  source: task_04_pour_liquid_with_funnel
+  particle_count: 986
+  particle_contact_offset_m: 0.003
+  rest_offset_m: 0.003
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [0.0, -1.02, 0.31], wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]}
+success:
+  claim_scope: layout_and_authored_pbd_at_rest
+  liquid_transfer_verified: false
+  funnel_conduit_qualified: false
+  robot_policy_success: false

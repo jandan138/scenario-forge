@@ -1,0 +1,35 @@
+schema_version: scenario-spec/v0.6
+scenario_id: scientific_workbench_boat_pour_stir
+domain: scientific_workbench
+task_family: boat_pour_stir
+instruction: 称量舟已在天平上并已去皮，内有 30 粒刚体粉末。拿起称量舟把颗粒倒入空烧杯，把称量舟放回桌面，再拿起量筒把液体倒入烧杯，最后拿起玻璃棒搅拌。
+claim_scope: layout_authored_pbd_and_rigid_grains_at_rest
+qualified_runtime: Isaac Sim 4.5.0
+note: Documentation-only object list for VR r1. The generator clones scene_usds USD; this file is not the compiler entry.
+objects:
+  - {id: obj_analytical_balance, role: balance, vr_randomization_group: balance_boat_fixed}
+  - {id: obj_weighing_boat, role: solid_source, vr_randomization_group: balance_boat_fixed}
+  - {id: obj_beaker, role: target_vessel, vr_randomization_group: beaker}
+  - {id: obj_graduated_cylinder, role: solvent_source, vr_randomization_group: cylinder_fixed}
+  - {id: obj_glass_rod, role: stirrer, vr_randomization_group: rod_rack}
+  - {id: obj_acrylic_rod_rack, role: rod_stand, vr_randomization_group: rod_rack}
+  - {id: obj_plate, role: rod_rest_tray, vr_randomization_group: plate}
+poses:
+  obj_plate: {xyz: [-0.34, -0.20, 0.755]}
+grains:
+  source: task09_powder_bottle_r5_7
+  count: 30
+  mass_per_grain_kg: 2.155132560362598e-6
+liquid:
+  source: task_04_pour_liquid_with_funnel
+  particle_count: 986
+  particle_contact_offset_m: 0.003
+  rest_offset_m: 0.003
+robot:
+  profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+  spawn: {xyz: [0.0, -1.02, 0.31], wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]}
+success:
+  claim_scope: layout_authored_pbd_and_rigid_grains_at_rest
+  liquid_transfer_verified: false
+  dissolve_verified: false
+  robot_policy_success: false

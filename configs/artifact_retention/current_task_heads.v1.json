@@ -168,6 +168,22 @@
       "revision": "r6.0",
       "status": "current_candidate",
       "variant_key": "isaac45_pbd_a54_vr"
+    },
+    {
+      "artifact_family": "funnel_pour_flask_to_stirrer",
+      "handoff_zip": "handoff/scientific_workbench_funnel_pour_flask_to_stirrer_vr_r1_2.zip",
+      "output_root": "outputs/scientific_workbench_funnel_pour_flask_to_stirrer_vr_r1_2_20260920",
+      "revision": "r1.2",
+      "status": "current_candidate",
+      "variant_key": "vr_layout_authored_pbd"
+    },
+    {
+      "artifact_family": "boat_pour_stir",
+      "handoff_zip": "handoff/scientific_workbench_boat_pour_stir_vr_r1.zip",
+      "output_root": "outputs/scientific_workbench_boat_pour_stir_vr_r1_20260920",
+      "revision": "r1",
+      "status": "current_candidate",
+      "variant_key": "isaac45_vr"
     }
   ],
   "schema_version": "scenario-forge-current-task-heads/v1",
