@@ -1,0 +1,26 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  scientific_workbench_reagent_bottle_90x55_original_simready:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_glass_web_standard_20260819/packages/reagent_bottle_90x55_original_simready/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /ObjectRoot
+    source_uri: convertasset://scientific_workbench_reagent_bottle_90x55_original_simready
+    expected_sha256: sha256:159e6014bbacc622af35ac8202f4cda5703d4cf1db5a0704db1d57560d00362e
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution:
+      - manual_glassware_v1 reagent bottle 90x55; producer original SimReady material
+      - matched plug scientific_workbench_reagent_bottle_plug_45_40_original_simready
+    redistributable: true
+  scientific_workbench_reagent_bottle_plug_45_40_original_simready:
+    resolver: local_usd
+    source_usd: /cpfs/user/zhuzihou/dev/ConvertAsset/outputs/scientific_workbench_reagent_bottle_pair_20260919/packages/reagent_bottle_plug_45_40_original_simready/asset.usd
+    role: rigid_object_unqualified_task_instance
+    root_prim_path: /ObjectRoot
+    source_uri: convertasset://scientific_workbench_reagent_bottle_plug_45_40_original_simready
+    expected_sha256: sha256:159e6014bbacc622af35ac8202f4cda5703d4cf1db5a0704db1d57560d00362e
+    license: LicenseRef-Team-Owned-Public-Redistribution
+    attribution:
+      - manual_glassware_v1 reagent-bottle plug 45/40; producer original SimReady material
+      - matched vessel scientific_workbench_reagent_bottle_90x55_original_simready
+    redistributable: true
