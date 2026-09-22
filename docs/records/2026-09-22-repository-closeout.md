@@ -78,4 +78,14 @@ Both complete make targets passed lint, package smoke, phase10x smoke and diff-c
 All 91 PPTX and all 129 indexed local artifacts were rehashed unchanged before commit.
 The clean snapshot omits ignored images, simulator trees and generated outputs.
 A separate import probe confirmed the legacy PPTX builder's pure geometry/image helpers
-work without python-pptx; no rendering or core runtime dependency was added.
+work without python-pptx; no core runtime dependency was added.
+
+## Hosted CI dependency follow-up
+
+The first push (`7063a2f`) passed Pages deployment, but GitHub's minimal development
+environment exposed five portable Figure 2/3 failures: `matplotlib` was available
+on the managed host but absent from the declared `dev` extra. Those tests render
+synthetic temporary fixtures and belong in portable CI. Add `matplotlib>=3.7` to
+the development extra and retain all five tests; core runtime dependencies and
+historical figure bytes remain unchanged. The final hosted CI result is attached
+to the follow-up commit in GitHub Actions.
