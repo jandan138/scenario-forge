@@ -4,8 +4,13 @@
 最新决定及证据限制见[任务记录](../records/2026-10-11-scientific-five-item-acceptance.md)。
 
 工作根为 `/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010`。
-其中 `baseline_runtime` 是以原版 GenManip 为底座的验收 checkout；上一级主 checkout
-仍保留实验分支，不能将整个主 checkout 当成交付包。
+其中 `baseline_runtime` 是以原版 GenManip 为底座的验收 checkout。自己的主 checkout
+已切至 `delivery/scientific-five-items-20261011`，同样为原版core加允许的metric提交，
+并同步四任务当前候选；3172个候选文件哈希与验收目录一致。588个非允许范围的原版
+Git blob（587个普通文件和1个原始软链接）保持原内容。旧core实验保留在
+`experiment/scientific-repair-runtime-hooks-20261010` 历史分支，旧资产/data另存工作根
+`experimental_main_payload_snapshot/20261010T185138Z`。候选仍有未通过项，不能
+把整个主 checkout（含本方工具和实验记录）作为交付包。
 
 ## 允许交付的内容
 

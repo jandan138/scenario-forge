@@ -113,3 +113,9 @@ articulation solver错误，随后CUDA700。没有完整结果，不记零分；
 metric-only提交为 `9d85d222e213d34bda43e8834266e4fff401ce56`，仅允许目录内5个文件，
 17项纯判定边界测试通过，Black格式化前后AST一致且提交钩子通过。操作入口见
 [受限交付说明](../operations/scientific-five-item-handoff.md)。
+
+自己的主 checkout 已切回 `delivery/scientific-five-items-20261011`，HEAD为上述metric-only
+提交。四任务候选同步后3172个文件与验收目录哈希一致，588个非允许范围原版Git blob
+无差异（其中1个为原始软链接）；实验core保留历史分支，旧资产/data单独归档。
+本次只同步候选，不宣布银镜或全部坏例通过；验收目录运行不受主checkout切换影响。
+证据见 `evidence/owned_main_restored_20261010T185138Z.json`。
