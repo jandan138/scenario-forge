@@ -299,3 +299,55 @@ fehling `366a7c9e520065c302dc0aa2ef03bdd46570e177edb832e427b76959e9f4c372`。
 后续审查发现初始已休眠且仅收到部分pair的LOST事件时，不能据此宣称所有接触
 状态已知。生产者正加强这个late-init边界并另出delta，当前远端输入继续冻结；
 当前版本完整回放只能证明它自身及已执行路径，不能替代后续新字节的最终验收。
+
+body CCD独立对照 `recovery_D_active_bodyCCD_prefix700` 于391动作FAIL_ENGINE，
+首错为cuEventRecord/cuStreamWaitEvent 700，随后其他求解器报错；虽然早期146帧
+指尖穿入有所减小，该变体仍拒绝推广，不能把对照差异宣称为已证明的底层根因。
+保留v2物理、不开body CCD；单帧穿入限制继续记录。
+
+更严counter v2已冻结，21项边界测试及SDK生命周期复核通过，后者2346原生tick、
+0引擎错、1902个休眠贴壁帧保持门控；实际多shape刚体初次awake PERSIST报告完整性
+也经过三个reset轮次核对。新delta SHA：silver
+`993cc9b30ab015872e4d2e3345966cf222c0c7ba90a05ed360d2b99f2264662a`，fehling
+`7cb770056c479ab55de2bd372e714e26eb5bb05d515468477e5e7871d2fb0e0c`。
+集成至 `final_waterbath_validation_runtime` 的40入口静态通过，目录名不代表最终资格；
+见 `evidence/active_contact_v2_diagnostic_integration.json`。
+
+最终counter v2本地原动作前缀随后于369动作再次FAIL_ENGINE（672个原生tick），
+没有body CCD，也没有contact tensor view。生命周期规则通过不等于物理稳定；
+旧active的一条完整原core回放也不能覆盖此失败。最终counter v2的远端bad17
+继续只作独立诊断，剩余队列未放行，交付资格仍未建立。生产者开始审查能否减少
+数千液体细壳碰撞单元，以独立新候选验证统一开放凸碰撞的保液与接触；尚不认定
+形状数量就是根因。见 `evidence/active_contact_v2_runtime_state.json`。
+
+旧active原core诊断 `diagnostic_proxy_active_silver_bad17_20261010T214245_506808Z`
+最终完成7000步，score0.15/success_rate0，四路视频全解码、native120与日志错误扫描
+通过，退出后GPU0MiB/8087空闲。实现者查看四路0/3500/6999/7000帧：烧杯离开
+加热盘并倾斜、液体洒在桌面，试管留在杯旁/杯内而未回架；液体强暗反射和腕视角
+裁切保留WARN。仅检查所列帧，不宣称全帧无穿入；旧active结果不覆盖新counter v2
+的本地引擎失败。对应原生audit.json内已写目视范围。
+
+本地/远端实际VERSION与GPU驱动只读核对均为Isaac4.1.0-rc.7+4.1.14801.71533b68.gl、
+570.153.02、RTX4090/46068MiB，不能把本地失败无证据解释成版本不兼容。
+生产者下一shared264候选仅停用试管3745细壳、让264开放管壁代理同时参与PBD；
+仍待独立保液/运动和原动作运行，不预先认定形状数量为根因。
+
+随后为缩小实际接收环境中的失败范围，放行当前冻结counter v2的原core文档坏例
+诊断队列，等待bad17完整结果后依次跑其余水浴/银镜例；这不是交付资格放行。
+`evidence/active_contact_v2_badcase_gate.json` 明确delivery_qualified=false，并冻结
+1299个相关配置/资产/task-data/metric文件哈希；本地369动作引擎失败仍保留。
+队列遇到原core失败即停止，也可用 `evidence/activev2_queue_stop` 在下一例前停下，
+以便更换有新资格的生产者资产。新资产需重新绑定受影响证据。
+
+`five_item_bad_17_activev2_20261010T221121_718390Z` 原core诊断完整完成7000步，
+score0.15/success_rate0，四路全解码/native120/错误扫描通过。实现者看四路
+0/3500/6999/7000帧：杯仍在加热盘附近、未见旧active-v1诊断那样的大范围洒液，
+试管最终斜靠架孔，未认证正确落座；末次遥测PBD_valid=true、heated_seconds=0、
+阻断bath_off_center。腕裁切/遮挡仍为WARN，局部SDK369失败仍未被此结果覆盖。
+原core队列继续bad06，尚非最终交付资格。
+
+shared264独立10秒静置1202tick通过，但17秒提拉2042tick失败，试管粒子数不变
+仍出现275峰值出界。首越界在tick548圆底135度扇区接缝，不靠放宽1mm容差修正。
+生产者新底部混合候选保留264粗代理并添加353个PBD底部单元，旧3745细壳inactive；
+原生property query确认618个管collider记录，其中617新代理加1个原shape，质量/
+质心/惯量与dynamic_control一致。该query只证明解析结果，不证明保液或机器人资格。
