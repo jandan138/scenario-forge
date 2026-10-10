@@ -227,10 +227,36 @@ FK报错。没有完整结果，不记分。原版未加载生产者的额外con
 随后生产者的新烧杯96单元代理（`c9bb470e5a3ae4f999480d3f0db6aa19127987037d0026be61ca252a72fb450f`）
 与264试管代理组合，在完整接触读取的700动作前缀中于275动作再次FAIL_ENGINE。
 首错仍为mArtiSolveBlockPartitionFunction，随后CUDA700；两容器启用碰撞均已无SDF，
-因而不能把替换烧杯SDF称为已解决问题。碰壁读数最高236，未达到8192容量，
+因而不能把替换烧杯SDF称为已解决问题。后续逐步记录见132/191/224/236/276/238/259/264接触点，未达到8192容量，
 粒子有效标记仍为true也不能证明引擎健康。证据为生产者输出
 `silver_bad17_diagnostic/recovery_bath_proxy_v1_prefix700/report.json`。
 
 新的 `bath_proxy_validation_runtime` 仅准备原版core与旧v2载荷副本，尚未集成该失败层、
 未启动远端回放。B/main与原D保持冻结。继续以保留真实碰撞及碰壁加热门控为前提，
 诊断SDK详细接触读取与事件读取的差异；不交付禁用采样或伪造零接触的探针。
+
+生产者将详细tensor接触读取替换为SDK即时接触报告，保留tensor view注册及杯v1
+作单变量对照，仍于271动作FAIL_ENGINE（574个原生120Hz tick）。因此不能把详细
+读取调用本身宣布为根因，失败候选不推广。原失败的575个成功warmup/action帧中，
+独立SDK事件与tensor接触点数逐帧一致，前后偏移一帧则出现不匹配；这只是原运行
+采样对应关系，不是新读取实现的休眠/重置或完整回放资格。下一诊断回到D v2，
+以SDK接触报告保留实际碰壁判定，并移除不再需要的tensor view注册。
+
+D v2加即时报告且不创建contact tensor view的短前缀随后完成700动作，状态为
+`PASS_BOUNDED_ENGINE`。1000个成功warmup/action帧的graph count与独立SDK事件
+逐帧相等，187个正接触帧，最大139；此结果不能外推静止休眠贴壁/重置或完整策略。
+对应生产者目录 `silver_bad17_diagnostic/recovery_D_immediate_no_view_prefix700`。
+
+新隔离目录 `bath_proxy_validation_runtime` 现只包含D v2加两任务readout脚本delta，
+没有失败的杯v1。40入口验证原/new script哈希、threshold0、264代理/PBD关系、
+质量/COM/惯量及依赖闭包；见 `evidence/immediate_no_view_diagnostic_integration.json`。
+银镜delta SHA为 `139f2c2e1733f3296b36298ec09739269f58cbe870b4bc1eae550f60a49c7f3d`，
+斐林为 `31199ce3f292c177f249b7eb838697f028f3c6da72d5d2d1a32e09d855d234e3`。
+原版远端 `diagnostic_proxy_contact_silver_bad17_20261010T213332_344589Z` 已启动完整
+坏例诊断，588个非允许范围原版Git blob核验一致；尚无完整结果，不标最终通过。
+
+独立静止贴壁/休眠夹具随后发现即时报告与旧tensor均在休眠贴壁帧返回0，
+当步SDK事件也为空。1366个贴壁休眠帧受影响，1564原生tick无引擎错误，语义验收
+仍为FAIL。旧实现同样漏判不是豁免理由：需持有FOUND/PERSIST直到LOST的活动
+接触状态或等效fail-closed机制，并验证离开、重新接触、epoch/reset和清理。
+当前远端即时无view回放继续作为引擎诊断，不晋升为最终加热门控资格。
