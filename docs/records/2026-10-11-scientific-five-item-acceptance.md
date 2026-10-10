@@ -260,3 +260,42 @@ D v2加即时报告且不创建contact tensor view的短前缀随后完成700动
 仍为FAIL。旧实现同样漏判不是豁免理由：需持有FOUND/PERSIST直到LOST的活动
 接触状态或等效fail-closed机制，并验证离开、重新接触、epoch/reset和清理。
 当前远端即时无view回放继续作为引擎诊断，不晋升为最终加热门控资格。
+
+持续接触状态版本在SDK微夹具通过1564tick计数测试和2346tick实际内嵌wrapper
+生命周期测试，2049个休眠贴壁帧保持活动接触，移离/晚初始化fail-closed/epoch变更/
+同epoch物理索引回退/cleanup通过。其700动作前缀1002原生tick无引擎错，1000帧
+接触布尔与SDK同帧一致；活动记录点数不是每帧重新测量，FOUND随后LOST的同帧
+例子有63对64差异，正确释放已离开的pair，不宣称逐帧点数全等。
+
+该前缀也记录一帧raw指尖穿入1.512mm（action146），SDK峰值1.539mm在下一帧147；
+各自超过1mm只持续8.33ms，随后恢复约0.1mm。保留此瞬态穿入，不能借用此前
+stateless轨迹的0.108mm最大值。证据在生产者 `recovery_D_active_no_view_prefix700`
+的grip与 `finger146_transient_audit.json`，仍待完整场景接触/任务验收。
+
+stateless远端诊断在保存2157条客户端动作记录后因上述已知休眠漏判主动停止，
+状态 `STOPPED_SUPERSEDED_DIAGNOSTIC`，无完整score；清理后GPU0MiB、8087关闭。
+这不是新的引擎失败，也不是完整回放通过。随后启动active状态版原core完整坏例：
+`diagnostic_proxy_active_silver_bad17_20261010T214245_506808Z`。
+输入位于新的 `active_contact_validation_runtime`，588个受保护原版文件一致；
+40入口静态集成与40份内嵌脚本AST/依赖检查通过，分别见
+`evidence/active_contact_diagnostic_integration.json`、
+`evidence/embedded_script_dependency_audit_20261010T213936Z.json`。
+两task active delta SHA：silver `baeea3fe82c2ce78d11d252b9772bc506f3357d7795179318303f3e7a588d39e`，
+fehling `366a7c9e520065c302dc0aa2ef03bdd46570e177edb832e427b76959e9f4c372`。
+
+实际银镜场景门控的第一轮1562tick无引擎错，粒子计数96649/13905不变；贴壁、
+倾斜、恢复和epoch条件通过，但偏心阶段未产生目标相对位移，命中的是
+`tube_touches_beaker`而不是`bath_off_center`，因此该轮总体FAIL，不算偏心资格。
+后续修正测试夹具的约束和位姿记录，生产资产保持冻结。
+
+修正银镜夹具 `recovery_active_silver_gate41_03/report.json` 随后通过全部16项，
+1562原生tick、0引擎错误，96649/13905粒子数不变；负条件尾30帧确认浴液有效、
+试管浸水且加热时间停止，恢复与epoch通过。贴壁段烧杯仍动态，最大活动接触244；
+偏心及后续位姿隔离显式约束烧杯，仅证明规则门控，不推广为自由刚体稳定或成功示范。
+斐林须以自身场景另外验证。
+
+斐林独立门控 `recovery_active_fehling_gate41/report.json` 同样通过16项，1562个
+原生tick、0引擎错误，粒子计数96649/13905不变；范围仍为声明约束下的门控夹具。
+后续审查发现初始已休眠且仅收到部分pair的LOST事件时，不能据此宣称所有接触
+状态已知。生产者正加强这个late-init边界并另出delta，当前远端输入继续冻结；
+当前版本完整回放只能证明它自身及已执行路径，不能替代后续新字节的最终验收。
