@@ -92,6 +92,11 @@ success_rate0；四路完整解码、周期120Hz和物理错误扫描通过，�
 变为-0.884rad），未通过平滑动作掩盖；详细数值及限制见
 `evidence/task10_bad_robot_state_comparison.json`。腕视角裁切仍记WARN，未声称逐帧物体碰撞认证。
 
+水浴第二条坏例 `five_item_bad_05_20261010T192812_896201Z` 完成7000步，得分0.15、
+success_rate0，四路解码、周期120Hz及错误扫描通过。四路0/3500/6999/7000帧已查看：
+末段试管斜躺在架顶，仍在工作区可见；烧杯保持桌上，日志加热为0、未浸水，没有反应
+成功误判。抽帧不能证明全程无穿透，也不代表已正确落座。
+
 银镜首条坏例 `five_item_bad_09_20261010T172035_172141Z` 约2077步出现GPU
 articulation solver错误，随后CUDA700。没有完整结果，不记零分；待重采许可不免除
 此崩溃的修复。后续银镜队列停止，ConvertAsset生产者正在独立复现与接触隔离诊断。
@@ -163,3 +168,55 @@ metric-only提交为 `9d85d222e213d34bda43e8834266e4fff401ce56`，仅允许目�
 另有独立metric补丁和两份各10文件的单示范LeRobot归档；生产/验证脚本与core补丁不在
 归档内。所有tar成员哈希、gzip完整解压流/CRC/长度与归档SHA通过。
 候选状态仍为 `CANDIDATE_NOT_FINAL_QUALIFIED`，不以打包成功替代剩余原版坏例验收。
+
+## 后续新增失败：候选仍不具备最终交付资格
+
+水浴 `five_item_bad_06_20261010T195420_029770Z` 在约3177动作发生PhysX
+mArtiSolveBlockPartitionFunction/artiPropagateImpulses2 CUDA700，随后Curobo FK才报告
+非法访存。没有完整结果，不记零分，也不把FK堆栈当作根因。非银镜队列自动停止，
+等待中的银镜队列随后退出，尚未在远端运行fluid-only候选。GPU/原服务进程/8087清理
+已复核。证据为本run的 `invalid_attempt.json` 和 `cleanup_verified.json`。
+
+生产者对银镜文档mixed_17采用正确unseen_scene_7与mixed_17 metadata，原6922条动作
+完整回放无CUDA，但没有真正回架。全程pose结合原finger convexHull几何复核发现
+最大6.42mm穿入，超过1mm持续20动作步；这是原输入几何，不宣称重建PhysX cooked形状。
+早期接触聚合报告仅存最小值，不能据此称“瞬时”；另一次前700动作逐contact补录未
+重现深穿入，输入哈希一致而接触后轨迹分离，不能把补录时间线套回原运行。
+
+独立120mm自由落管600步夹具未稳定落座，保留FAIL；另一个对准同c05槽、距支撑面
+5mm释放的600步动态夹具通过末120步位置/倾角/速度/径向条件。后者仅证明受控放置
+后的支撑可行，不能覆盖120mm失败，也不是完整成功示范。
+
+生产者正在制作少量开放管壁的刚体接触代理，液体细壳继续单独处理；两任务需分别
+获得新资格。五类归档字节检查仍有效，但状态现为
+`CANDIDATE_WITH_UNRESOLVED_WATERBATH_PHYSICS`，不能作为最终合格交付。
+
+后续rigid_proxy_v2诊断候选使用264个开放管壁刚体单元，PBD细壳保留；新形状对
+两个粒子系统单独过滤。单刚体两个shape的Cube和convexHull最小SDK夹具分别证明：
+仅指定shape被过滤，同刚体未过滤shape仍支撑粒子。不能仅凭静态filteredPairs字段
+推断此语义。原700动作前缀的finger/可见玻璃重叠已低于0.1mm；质量、COM、惯量、
+可见网格和粒子参数不改。v1因底部近似偏差拒绝交付，v2仍待完整资格。
+
+独立原版诊断目录为工作根 `proxy_validation_runtime`，HEAD仍为metric-only9d85d222，
+新增producer层SHA为 `dea5a36018ea6a5b276ea5206e78d8a6c2fe57e3cc9865285cd43451cae5e943`。
+按生产者明确的 `[proxy, fluid-only, original]` 组合40个两任务场景，原始scene.usd不改，
+两粒子系统目标、264代理、质量/COM/惯量与依赖闭包静态通过。B/main没有随诊断修改。
+`diagnostic_proxy_v2_task12_bad06_20261010T203742_592427Z` 正用原core/原动作/7000上限
+重跑先前水浴崩溃例，目前仍在执行，不标通过；证据 `evidence/proxy_v2_diagnostic_integration.json`。
+
+D中的水浴bad06诊断随后完整完成7000步，score0.15/success_rate0，四路解码、
+周期native120与物理错误扫描通过，实现者已看四路0/3500/6999/7000帧。最终试管
+横放架顶，未记为正确落座；离水后加热停止在21.183秒。旧失败也找到了客户端3177帧
+左/总览/右三路拼接部分视频，完整解码该文件并查看关键帧；它不是完整四路回合结果，
+最后可见画面正在回架，之后观测报错。见 `audits/client_partial_bad06/audit.json`。
+
+但同v2在生产者直接读D的完整silver mixed17尝试中，331动作后再现CUDA700。
+属性/关系/API/child顺序、脚本SHA及observer选项与此前通过前缀一致；微小warmup
+差异后轨迹分离，不能从前缀通过推出全程稳健。杯体/杯沿仍为SDF，倒液嘴原为
+convexHull，生产者继续定位；不以FK堆栈或某个SDF作为已证实根因。原版远端
+`diagnostic_proxy_v2_silver_bad17` 另行启动对照，D/B/main输入保持各自冻结。
+
+原版远端 `diagnostic_proxy_v2_silver_bad17_20261010T210755_996785Z` 也在约270动作
+失败，首错PhysX mArtiSolveBlockPartitionFunction/artiPropagateImpulses2 CUDA700，随后
+FK报错。没有完整结果，不记分。原版未加载生产者的额外contact事件observer，因此
+该observer不是必要触发条件。v2依旧未取得最终资格；水浴单条完成不抵消此失败。
