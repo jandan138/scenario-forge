@@ -220,3 +220,17 @@ convexHull，生产者继续定位；不以FK堆栈或某个SDF作为已证实�
 失败，首错PhysX mArtiSolveBlockPartitionFunction/artiPropagateImpulses2 CUDA700，随后
 FK报错。没有完整结果，不记分。原版未加载生产者的额外contact事件observer，因此
 该observer不是必要触发条件。v2依旧未取得最终资格；水浴单条完成不抵消此失败。
+
+用户再次确认水浴首轮允许注明“待重采”，先交资产修复与真实坏例结果。此范围已写入
+`evidence/first_round_pending_demonstrations.json`，不豁免资产有效性或运行时崩溃。
+
+随后生产者的新烧杯96单元代理（`c9bb470e5a3ae4f999480d3f0db6aa19127987037d0026be61ca252a72fb450f`）
+与264试管代理组合，在完整接触读取的700动作前缀中于275动作再次FAIL_ENGINE。
+首错仍为mArtiSolveBlockPartitionFunction，随后CUDA700；两容器启用碰撞均已无SDF，
+因而不能把替换烧杯SDF称为已解决问题。碰壁读数最高236，未达到8192容量，
+粒子有效标记仍为true也不能证明引擎健康。证据为生产者输出
+`silver_bad17_diagnostic/recovery_bath_proxy_v1_prefix700/report.json`。
+
+新的 `bath_proxy_validation_runtime` 仅准备原版core与旧v2载荷副本，尚未集成该失败层、
+未启动远端回放。B/main与原D保持冻结。继续以保留真实碰撞及碰壁加热门控为前提，
+诊断SDK详细接触读取与事件读取的差异；不交付禁用采样或伪造零接触的探针。
