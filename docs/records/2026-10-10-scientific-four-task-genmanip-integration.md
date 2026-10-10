@@ -2,6 +2,10 @@
 
 状态：实施中，尚未完成首轮全部坏例验收。本文不将中间候选宣称为交付合格。
 
+后续交付边界更正：本文记录的 GenManip core/hooks 和工具提交已隔离为实验分支，
+不属于交付内容；其成功结果不能直接证明五项受限交付可运行。最新边界、原版服务验收
+及待重采决定见[五项交付验收记录](2026-10-11-scientific-five-item-acceptance.md)。
+
 朱子厚负责的飞书 section4 修复，消费者交付先限定在
 `/mnt/data/zhuzihou/GenManip-Sim`，不修改陈建同的资产、动作、结果目录。
 任务为09称量、10滴定、12斐林及文档18对应的`task_z4_silver_mirror_reaction`。
