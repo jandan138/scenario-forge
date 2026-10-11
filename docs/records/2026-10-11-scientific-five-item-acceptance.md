@@ -1,6 +1,89 @@
 # 科学实验修复：五项交付边界与原版验收
 
-状态：按用户确认的两批方案实施。第一批仅称量/滴定，归档与独立安装静态检查已完成，远端原版安装回放进行中；第二批水浴/银镜仍未合格。以下后续诊断保留历史证据，不能以中途 PASS 替代当前资格。运行时间以各 receipt 的 UTC 为准。
+状态：第一批未发布。滴定独立安装成功；称量授权慢倒示范因预热阶段左夹指异常得0.3，尚不能评估慢倒效果，也未重生训练数据。第二批口沿分区v2已通过限定生产者资格及两个原版短窗口，14条完整坏例仍待跑。运行时间以各receipt的UTC为准。
+
+
+## 15:44 UTC：授权慢倒未通过，改查预热阶段
+
+用户明确允许验证只将原动作1760:2160放慢两倍的候选，成功后重新生成称量LeRobot。
+原3054动作变为3454动作，增加400/120=3.333333秒；仍原生120Hz/4000步，
+原轨迹、坏例及插值映射保留。只重采样动作，旧观测没有拼成新训练数据。
+
+四个初始驱动目标与metadata初始位置对齐的完整原动作对照
+`five_item_task09_sdk_graph_drive_reset_full_20261011T141129_981911Z`
+为4000/0.7/sr0：夹爪初态正常，四颗进入瓶中，grain02（0.591217g）从舟嘴侧面落出。
+末瓶在秤盘，LCD3.97g与实际四颗总质量相符。四路视频解码及人工抽帧已完成。
+
+授权慢倒 `five_item_task09_sdk_graph_slow_pour_20261011T150721_595714Z`
+却为4000/0.3/sr0。其动作前左第二指再次到0.044m，因此仅补四个目标值不是可靠修复，
+不能用这次结果判定慢倒有效或无效，更不能导出成功训练集。输入根
+`batch1_reset_candidate_runtime`保留41份metadata候选和训练001新动作；尚未放行。
+
+随后两次仅reset诊断使用原4000步配置、空独立缓存和原core/robot，没有策略动作：
+`task09_reset_only_control_20261011T153226_435371Z`初态正常；
+`task09_reset_only_observer_20261011T154133_169804Z`复现异常。
+后者只读USD观察显示fl_joint8在native120/180/240/299分别约1.537/12.561/40.861/44mm，
+但SDK与USD目标始终1.372776mm；fl_joint7约1.368mm，右侧两指正常。
+DOF名明确fl7/fl8索引23/24，fr7/fr8为21/22。并非用最后四维顺序猜手臂。
+
+ConvertAsset只读审计确认原joint8没有DriveAPI，裸stiffness=1e7/damping=0不能视为
+有效驱动；4.1支持当前prismatic mimic/rotX命名。SDK get_gains在stopped/no-view
+回退时可能ApplyDriveAPI，但尚未证实此次执行。下一只读诊断记录原始apiSchemas、
+生命周期和直接physics tensor getter；不调用会写USD的get_gains，不修改机器人。
+只读审计receipt SHA4263206114672572d1f4bd7129fc166170a6bc7c3b38d91c41f4641a95f41c29，
+生产者记录b9dd79c。所有观察器只用于诊断，不进入交付。
+
+## 第二批口沿分区v2：限定资格通过，完整坏例待跑
+
+v2保留原始Physx API metadata，原生解析无SDF退化凸包。下部闭合SDF与24个顶部
+凸片组成25个rigid边界，473个代理仍仅用于PBD；视觉、质量、COM、惯量和液量不变。
+桌子为原8顶点6面长方体的等形凸包，不叠额外支撑。
+`recovery_rim_partition_v2_scoped_qualification.json` SHA
+b07f2ce3c6dd39788e32eb584e192b3c4674a0e6ceb561d2955487ef713fcace：
+9组掉落/放架/strict/两任务冷启动、提起、加热门禁通过；drop最深0.084532mm，
+strict实际双指最大0.106537/0.118587mm，rigid未命中PBD-only形状。
+保留cold/rack/strict的faceIndex警告；strict杯倾斜时两步PBD无效，不宣称任意姿态保液。
+
+消费者`rim_v2_candidate_runtime`内40入口闭包、原脚本/机器人/质量及API元数据检查通过。
+无观察器的原版短窗口为
+`diagnostic_proxy_rim_v2_bad11_20261011T144148_953286Z`（1800/.15/sr0）和
+`diagnostic_proxy_rim_v2_bad08_20261011T145101_000521Z`（3200/.15/sr0），
+均client0/native120/四视频完整解码，无关键引擎错误或SDF降级。
+亲看四相机：bad11末管倾靠杯内、手返回架；bad08末回架处有遮挡，未认证归槽成功。
+两短窗口不能代替14条最终7000步坏例；此前所有其他候选的结果只保留历史范围。
+
+规范无需变更：本次补充特定运行证据与失败原因，不形成通用关节/碰撞参数，
+不改Scenario Forge包契约。遵循ASSET-001/002/003及STATE-003、VAL-001/003/004/005。
+
+## 独立安装暴露的称量初始化差异（13:44 UTC）
+
+滴定 `five_item_task10_controller_reset_batch1_20261011T132202_837290Z` 完整原版回放
+1582步、score1/sr1，四视频解码与人工抽帧通过，保留深色台面/反射/遮挡WARN。
+称量 `five_item_task09_sdk_graph_batch1_20261011T133148_410130Z` 却运行4000步、
+score0.3/sr0。四视频已完整解码并亲看：固体洒到桌上，末瓶未放回秤盘，LCD为−49.73g。
+前三阶段通过，转移/完成阶段失败；不能发布原两任务包。
+
+新回放第0条观测的左第二夹指为0.044m，旧成功回放为0.00137282m；其余机械臂初态
+仅极小浮点差异。新旧都记录 early readback 在 playing=False 时执行，不能继续把
+这一日志当成初始化可靠性的充分证据。输入/原core哈希未变。缓存网格点数和边界相同，
+暂未证明原因；不将缓存与结果相关性直接宣布为因果。
+
+`task09_init_probe_runtime` 只把动作上限缩为1，保留300预热、原robot/控制器/客户端，
+复用新安装已生成的缓存；run `diagnostic_proxy_task09_init_cached_20261011T135340_155721Z`
+的两条观测四个夹指回到旧成功初态。此短对照仅用于初始化，绝不是4000步成功验收。
+下一步用独立空缓存目录和同预算对照；候选只通过原始 task data 属性恢复接口，
+把四个既有夹指 drive 的初始目标与已有 metadata 初始关节位置对齐，不改力/刚度/限位、
+不回写后续动作。该候选尚未验证，也未进入归档。
+
+已将归档 `BUILD_STATUS.json`/README 与 CURRENT_STATUS 改为
+`NOT_RELEASED_TASK09_CLEAN_INSTALL_FAILED`，没有生成 RELEASE_MANIFEST。
+旧 LeRobot/成功回放保留其原证据，不据此覆盖本次失败。
+
+第二批口沿分区 v1 的 drop/rack 数值曾通过，但 strict 预热弹出，进一步发现生产者复制
+`GetAppliedSchemas()` 时漏掉未注册 Physx API token，原生将 LowerSDF 退化为凸包。
+因此撤回 v1 对“预期 SDF 分区方案”的资格，保留原报告；v2 仅补全 API metadata，
+必须重新过原生解析、drop/rack/机器人门禁。生产者错误及修正由同一实现者记录，
+未修改 GenManip 或降低1mm阈值。规范仍无需变更，适用 VAL-001/003/004 的证据范围约束。
 
 ## 两批交付与第一批独立安装（13:22 UTC 起）
 
