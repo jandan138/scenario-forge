@@ -503,3 +503,37 @@ cleanup_verified.json保留。SDK700通过不预测原core全程资格，该候�
 加原容器0.8mm形成17.8mm接触裕量，覆盖该限定跨越；rest/PBD/heater/质量不改。
 该值不是通用物理默认，不应用于已冻结称量/滴定。原SDF face-index警告20699条
 仍保留，需另限解释。依据生产者 angular_impact_audit.json；新结果待验证。
+
+
+原杯SDF+hybrid617/noCCD/table17mm随后通过50mm落碰482tick：管0.08448mm、
+杯0.00138mm，能量/库存/无弹飞通过、rest位置正常，无引擎错。strict300+700
+也通过，native总1002（前置2+实际预热300+动作700），每动作1tick、1/120；
+保留前置计数差异，不改称1001。新table17层SHA
+389448dcceb26936113782cf9b245066c7a895f4a86bd143bdb4414c81c1353a。
+新隔离root准备中，仍须原core复验；上述资格不继承被拒绝floor8的未完成检查。
+
+
+`table17_validation_runtime` 的40入口静态617/260/144、table17、两body CCDfalse、
+scriptSHA/质量COMI/闭包通过，1320输入文件冻结。原core首例
+`five_item_bad_17_table17_20261011T005347_628509Z` 已启动，588核心blob一致；
+独立几何审计700动作指尖最大0.12234/0.16376mm、无>1mm帧，contact1000/1000
+同帧匹配。生产者clean6层组合见 recovery_table17_composition_receipt.json。
+最终各任务保液/门控和5mm受控落座仍在验证，不能以受控落座冒充成功回架示范。
+
+
+最终table17两任务各自cold1202/lift2042均PASS，逐步outside0、数量不变；两实际任务
+gate各1562tick/16条件PASS。受控5mm c05落座600动作/602native通过，末座高
+0.01955mm、倾角1.849°、径向裕量0.50459mm、vz0.0001206m/s，逐步液体outside0。
+真实成功回架示范仍待重采，旧120mm自由回架FAIL不覆盖；门控夹具未观测到自然睡眠，
+仅按逐字/fixture哈希一致继承counter专门2346tick测试的1902睡眠接触帧逻辑资格。
+完整生产者receipt为 recovery_table17_final_qualification.json，consumer核对10组
+报告SHA、组合SHA和1320冻结文件后，于工作根 evidence/table17_badcase_gate.json
+放行后续13条**原版测试**，仍delivery_qualified=false。
+
+首例five_item_bad_17_table17_20261011T005347_628509Z完整7000步、score0.15/sr0，
+client0、四视频完整解码、native120与worker错误扫描通过。实现者亲看四路
+0/3500/6999/7000：中途夹管入/近水浴，末管在架孔处倾斜；未见抽样大洒出或消失，
+相机有裁切遮挡，不能据此证明所有帧亚毫米无穿入或座深正确。PBD有效、累计加热0，
+阻断原因为bath_off_center；保留真实坏例失败。该银镜原仪器OFF静态字样仍可见，
+未套用仅task10要求的显示修改。清理核实本次4PID退出、GPU0MiB、8087释放。
+后续队列从bad06/unseen_background_8开始；全部18条最终字节验收尚未完成。
