@@ -537,3 +537,22 @@ client0、四视频完整解码、native120与worker错误扫描通过。实现�
 阻断原因为bath_off_center；保留真实坏例失败。该银镜原仪器OFF静态字样仍可见，
 未套用仅task10要求的显示修改。清理核实本次4PID退出、GPU0MiB、8087释放。
 后续队列从bad06/unseen_background_8开始；全部18条最终字节验收尚未完成。
+
+
+第二个最终候选原版坏例 `five_item_bad_06_table17_20261011T012625_608331Z`
+完整7000步、score0.15/sr0/client0，native120与4视频完整解码通过、worker物理错0。
+实现者亲看四路0/3500/6999/7000：试管中末段横放架顶、未正确插入；未见抽样大洒出
+或消失，裁切/遮挡仍WARN。不证明全部帧亚毫米无穿入。native4800/5400/6000/6600
+快照加热均21.241667774505913秒，sample_not_in_water、加热false、PBDvalid true，
+离水后停止累计。当前继续bad04/unseen_background_3，其余最终字节坏例仍待完成。
+40入口脚本AST/编译/生产路径依赖检查通过，证据
+`evidence/embedded_script_dependency_audit_20261011T013137Z.json`，40脚本/0失败。
+
+
+随后bad04 `five_item_bad_04_table17_20261011T015236_021456Z` 与bad05
+`five_item_bad_05_table17_20261011T021836_389657Z` 均完整7000步、score0.15/sr0/client0，
+四视频完整解码/native120通过、worker物理错0。实现者各亲看四路0/3500/6999/7000：
+bad04管横放架顶并伸出架边；bad05末管在架后方倾斜、近景遮挡/裁切，不能确认座深。
+没有将任一例视为成功回架，抽帧不证明全部帧微小穿入不存在。两例离水后累计加热
+分别约16.19166751和9.67500050秒，heating=false/PBDvalid=true。当前继续bad07，
+最终候选水浴/银镜4/14条完整结果已检查，余10条含正在执行者，整包尚未交付。

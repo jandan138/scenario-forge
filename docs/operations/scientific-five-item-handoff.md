@@ -51,7 +51,8 @@ LeRobot候选沿用现有导出工具的v2.1格式。独立RGB导出工具修复
 生产机旧LeRobot与datasets4.5不兼容；隔离验证使用未修改的LeRobot0.1和datasets3.6，
 未改写原环境。导出文件中11个固定float32向量的Hugging Face描述由新`List`规范化为
 v2.1兼容的`Sequence`，所有Arrow数值和视频字节不变。称量3372帧、滴定1582帧均已
-通过未修改读取器的首/中/尾帧读取；接收训练环境版本仍待用户提供或确认沿用v2.1。
+通过未修改读取器的首/中/尾帧读取。本轮按现有v2.1格式交付；兼容性证据限于上述
+未修改读取器环境，其他接收训练环境尚未验证。
 
 标准候选目录为工作根 `lerobot/final_candidates/task09_native120_v21` 与
 `task10_native120_v21`。两者均已有首轮单示范资格记录 `QUALIFICATION.json`。
