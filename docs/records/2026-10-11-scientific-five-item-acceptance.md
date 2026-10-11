@@ -758,3 +758,24 @@ heated0/bath_off_center。10管横躺rack顶面并向左伸出，烧杯保持直
 heated4.6000002399s/sample_not_in_water/silver_nucleation。保留黑/绿背景、玻璃反射与
 腕相机裁切限制，不凭抽帧声明所有微观接触通过。当前新版本完成08/17/09/10共4/14。
 可追溯清单evidence/scene128_case_evidence_index.json，明确provisional而非最终发布。
+
+
+新反例撤销scene128放行：silver mixed20/bad11在1574step rows后CUDA失败，run
+five_item_bad_11_scene128_r1_20261011T103212_811754Z。worker1514328于10:38:43首
+mArtiSolveBlockPartitionFunction随后artiPropagateImpulses2 700；此前无明确容量溢出/cooking错。
+client1/noresult，不记任务零分。队列自动stopped_on_failure；本方另留stopfile与gate
+revocation绑定旧gate哈希。queue1464669/server1512882/client1514277/worker1514328均退出，
+10:40:46核实GPU0MiB/8087释放。四条完整坏例与九组夹具不能覆盖此新反例。
+
+源动作1568左双指由约.002148m→.044m全开，距1574记录约六步；是指令事实，不等于实际位姿。
+实现者亲看partial merged的0/300/600/1000/1300/1450/1530/1573：从架处持管移向水浴，
+1450/1530管在杯内，1573指张开且管倾斜、杯沿近接；无top视角，未证明具体穿入量。
+证据evidence/scene128_bad11_failure_frames；故应检查杯内松管接触转换，不能套用此前架顶根因。
+
+producer生成只读trace：scene层ca8187b00cebe6cfd76945e9a88f522a8daf47c90223ea7be4189e5d4d34e1ae，
+script962fb5d4c22eee601701f1fd220fa6c9f957b881fa5270624d5540094e4aa0d9，原银镜767cee前缀完整。
+包括双palm6位姿和原四finger report API，2894非report属性/关系一致。smoke303ticks
+（reset2+warmup300+1动作）8body/25DOF、15POSE/2887CONTACT，错误0；不是任务资格。
+独立bad11_trace_runtime仅此case改1800步，物理与原动作不变，588coreblobs核对。
+10:48:42启动diagnostic_proxy_bad11_trace_20261011T104842_324133Z，helper1525038，
+额外输入与smoke绑定在diagnostic_scope.json，诊断wrapper绝不进入五项交付。
