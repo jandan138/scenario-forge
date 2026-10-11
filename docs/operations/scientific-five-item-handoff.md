@@ -166,3 +166,9 @@ SHA670ebb0477ebc5888c3626fbc7239bc5f5ea56b99b6ba0f50e93e80f0a711792；仅限定�
 scene128_r1队列停止，scene128_badcase_gate_revocation.json已撤销放行，四条完整结果仅保留
 历史证据，不提升为全局合格。目前仅bad11_trace_runtime内1800动作只读接触诊断在跑，
 run见CURRENT_STATUS.json；独立robot报告包装不交付、不改共享源或GenManip核心。
+
+
+新方向仅处于短窗口验证：sdf_candidate_runtime保留完整配置，使用源GlassShell作为
+唯一tube rigid碰撞、473代理仅PBD，修正SDF比例单位。sdf_probe_runtime是共享资产
+的诊断入口，仅bad11=1800/bad08=3200，不可交付。bad11短窗口已通过并确认实际杯内
+松管，bad08正在验证；尚无新最终资格或新全量坏例放行。

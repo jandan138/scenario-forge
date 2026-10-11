@@ -779,3 +779,41 @@ script962fb5d4c22eee601701f1fd220fa6c9f957b881fa5270624d5540094e4aa0d9，原银�
 独立bad11_trace_runtime仅此case改1800步，物理与原动作不变，588coreblobs核对。
 10:48:42启动diagnostic_proxy_bad11_trace_20261011T104842_324133Z，helper1525038，
 额外输入与smoke绑定在diagnostic_scope.json，诊断wrapper绝不进入五项交付。
+
+
+bad11只读trace完成1800/.15/sr0/client0，四视频全解码/native120、DIAG错误0；
+原无observer的1574失败仍有效。实现者看四路0/900/1799/1800，末管倾斜留在beaker，
+夹爪返回rack附近；未取得无observer完整资格。cleanup核实1525038/1525060/1526427退出、
+GPU0/8087空。新trace拟合本case动作偏移415仅含servo lag的近似，不机械沿用bad08。
+native1982→1983手指实际20.34→21.57mm，至1995为35.48mm；1971..1995有finger↔beaker、
+palm↔tube、tubebottom多凸片↔bath SDF，TubeBath约2133点全非负，finger7仅12负点、
+最深9.21µm，palmTube300点非负。说明进入了松管接触链，但不能以成功轨迹覆盖失败。
+
+下一生产者候选只读检查：源GlassShell38146V/76288F，所有边2面、方向冲突/退化面0、
+Euler2、正玻璃体积8.07575mL；原SDF512/subgrid6/16bit仅disabled。
+4.1 schema中sdfMargin与sdfNarrowBandThickness为mesh对角线比例：旧.00035各约53.4µm，
+不是.35mm；对角线.152643m、512网格距约.292969mm。拟按实际schema默认.01/.01，
+各对应1.52643mm（约5.21格）；contactOffset.8mm/rest0不变。恢复源单SDF作rigid边界，
+473已有代理仅给PBD碰撞、SDF过滤两PBD，禁止填内腔或改质量。此组合尚未验证，
+先strict300+700，再两个已知原core失败窗口，不直接重跑整套或沿用旧SDF资格。
+
+
+sole-SDF生产者候选已落盘：layer4f2491cf47f02f2b438e0e1822fcdb44dfa50e1381b180be1ce878d7b8bf6a90，
+只有GlassShell参与tube rigid接触，473形状仅PBD，两系统各过滤GlassShell；启用474。
+24016其余属性、mesh/mass/COM/I/粒子不变。strict300+700共1002ticks通过，raw双指
+.04037/.15737mm（>1mm均0），SDK .43826/.20161mm，双指各589动作触管；rigid report
+只命中GlassShell，PBD-only无rigid命中。Bath PBDvalid在动作275/276/279伴6.82/8.89/13.73°
+倾斜短暂false后恢复，不能因此宣称全程保液。16相关tests通过，producer提交0f9027a。
+组合receipt recovery_source_sdf_composition_receipt.json，SHAc9e0f241f01688cec6e2ed3659af0767d3ad63b01fa5b181f1e1f473aa09e734。
+
+本方full候选sdf_candidate_runtime的40入口静态闭包/质量/生产脚本/原robot校验通过，
+尚非完整动态资格。bounded sdf_probe_runtime仅复制config，assets/tasks指向full候选，
+只把bad11上限改1800、bad08改3200；不作为独立交付根，不变原动作。
+11:20:13原core diagnostic_proxy_sdf_bad11_20261011T112013_462662Z启动，11:29:00
+完整1800/.15/sr0/client0/物理错误0。四视频全解码/native120通过，实现者看0/900/1799/1800，
+末管确已释放并倾靠在杯内，左爪返回架侧；不以短前缀替代7000资格或所有接触证明。
+worker payload扫描未见SDF cooking/fallback错误。清理核实本次PID退出/GPU0/8087空。
+
+11:30:58启动第二窗口diagnostic_proxy_sdf_bad08_20261011T113058_139374Z，cap3200，
+同原robot/controller/core588blobs。待第二窗口后再决定完整保液/接触/gate资格与新版本
+全套坏例；scene128旧四条只保留历史证据，两个旧测试gate继续撤销。
