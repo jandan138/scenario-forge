@@ -1,7 +1,8 @@
 # 四项科学实验修复：受限交付操作记录
 
-当前为候选修复阶段：水浴新增CUDA失败、银镜发现深夹持几何重叠，最终交付尚未就绪。任务范围为09称量、10滴定、12斐林，以及文档18对应的银镜任务。
-最新决定及证据限制见[任务记录](../records/2026-10-11-scientific-five-item-acceptance.md)。
+当前为候选修复阶段：称量与滴定已通过限定原版回放；水浴/银镜的联合液体与机器人接触仍有CUDA失败，最终交付尚未就绪。任务范围为09称量、10滴定、12斐林，以及文档18对应的银镜任务。
+当前无原版远端评测队列运行；生产者正在验证减少试管PBD底部碰撞形状的候选。
+旧归档与名含 `final` 的实验目录都不代表最终资格。最新决定及证据限制见[任务记录](../records/2026-10-11-scientific-five-item-acceptance.md)。
 
 工作根为 `/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010`。
 其中 `baseline_runtime` 是以原版 GenManip 为底座的验收 checkout。自己的主 checkout

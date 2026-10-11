@@ -351,3 +351,84 @@ shared264独立10秒静置1202tick通过，但17秒提拉2042tick失败，试管
 生产者新底部混合候选保留264粗代理并添加353个PBD底部单元，旧3745细壳inactive；
 原生property query确认618个管collider记录，其中617新代理加1个原shape，质量/
 质心/惯量与dynamic_control一致。该query只证明解析结果，不证明保液或机器人资格。
+
+底部混合候选 `recovery_bottom_hybrid_silver_02` 随后在银镜独立冷态10秒/提拉17秒
+通过，分别1202/2042个native120 tick，两组粒子数不变且逐步outside=0，无引擎
+或post-fetch错误。query解释文件明确：管618个parsed记录包括1个disabled原
+GlassShell，617个新代理enabled；烧杯260中仍保留其原257液体细壳，不把仅针对
+试管的旧fine计数字段推广到烧杯。仍待机器人及斐林自己的资格。
+
+底部混合候选加冻结counter v2的原动作700前缀完成 `PASS_BOUNDED_ENGINE`，
+无CCD/无solver变更，仍不推广到完整机器人资格。已按生产者显式层顺序集成至
+`shared_tube_validation_runtime`，40场景质量/COM/I、617 enabled/353新底部/144粒子
+过滤目标、旧fine inactive、组过滤与依赖闭包通过；见
+`evidence/bottom_hybrid_diagnostic_integration.json`。当前旧几何原core诊断队列
+收到“bad06完整收尾后停止下一例”标记，以便下一轮验证新候选；不截断当前回合。
+
+混合候选700动作前缀的warmup计数随后核对为279个实际native tick（最初21次
+名义world.step未推进），动作0..699各自均恰好1个native tick，总计980。因此保留
+为该初始化条件下的限定结果，不称为精确300物理步预热；生产者将补严格计数测试。
+原core只读检查另显示 scene.post_initialize 会先等待相机并步进100次，随后
+env._setup_episode_layout 执行reset/recovery及配置的300次warmup；其总native计数
+还包含前置初始化，不能直接与独立SDK的1002预期值比较。核心文件未修改。
+
+严格native预热复核 `recovery_bottom_hybrid_strict300_prefix700` 完成：reset前置计数1，
+实际warmup300，随后700动作各+1tick，总1001；23次未推进调用仅发生在被动启动
+预热，无引擎错，fixture未改，实际script SHA仍767ceee5ab61805d37082dac47c738f4325011e9896222b7faad4a1957ccd174。
+逐帧0..699几何审计link7/8最大0.10695/0.09410mm，>1mm帧数0；不与279预热
+旧run合并。末段杯翻转导致pbd_valid=false，不是任务成功示范。
+
+Fehling混合候选独立冷态10秒与提拉17秒也通过，1202/2042 native ticks，
+96649/13905粒子数逐步不变、outside0。新几何下两任务门控与桌面落碰仍在验证。
+旧fine bad06原core诊断最终7000步score0.15/sr0，4视频完整解码/native120通过；
+实现者查看0/3500/6999/7000四视角，试管横放架顶未正确落座，离水后加热停在
+21.16666777秒，bath PBD_valid=true。旧队列在下一例前停止；
+`five_item_bad_17_hybrid_20261010T231056_971370Z` 已在新隔离root开始完整原core回放。
+
+原桌面50mm自由落碰在原杯SDF+管hybrid上未通过：最终有效run
+`recovery_hybrid_v2_table_drop41_03` 为482tick/0引擎错，管最大穿桌3.400mm
+（10帧>1mm，末60帧恢复），杯最大6.544mm且471/480帧>1mm，末段仍振荡。
+两者能量峰均小于初值，未见向上弹飞；18958条material-face warning保留。
+前两次仅报告numpy标量序列化失败的run按FAIL_HARNESS保留，不补造PASS。
+
+新杯96凸代理与管hybrid617组合的同夹具482tick无引擎错，消除了杯持续穿桌/
+振荡及上述material-face warning，但杯第9帧仍穿入1.708mm、管3.401mm且
+11帧>1mm，仍FAIL。下一单变量在此新几何组合上测试body CCD；旧CCD失败属于
+旧数千细壳+杯SDF组合，既不继承其失败，也不预先认证新组合。各root输入冻结。
+
+新杯凸代理+管hybrid加两bodyCCD的50mm落碰通过：482 native120 tick、0引擎错，
+管最大穿入0.08559mm，杯接近数值零，能量峰/初值0.9934/0.9951，末容器稳定，
+无World外部子步。对应 `recovery_bath_hybrid_CCD_table_drop41/report.json`。
+
+该组合按[CCD,bath新,active_v2,hybrid,tube_v2,fluid,original]静态接入
+`convex_ccd_validation_runtime` 的40入口，管617/杯354 enabled，PBD240目标，
+两bodyCCD=true，质量/COM/I与闭包通过。两新层SHA：bath
+55f8b67d4e76323a2489ede7faa4d426c165d057df1caa43517a15fbd088d5fb，CCD
+59322c1dc23e5e59e3df542700ae51caf14c8edb46423cb2c5ecfe95b9ff3d07。
+该静态root未用于原core运行：其直接读取的strict300+700本地probe于278动作
+FAIL_ENGINE，首错mArtiSolveBlockPartitionFunction/随后CUDA700。崩前PBD有效、
+wall_count266且正确停止加热，指尖>1mm帧数0；不能以落碰通过覆盖此失败。
+生产者继续同几何/CCD仅TGS→PGS的单变量对照，尚未认定解决。
+
+
+PGS单变量对照仍于618动作/native921发生CUDA700，未采用。恢复TGS并仅采用
+speculative CCD（两body sweepCCD=false、speculative=true）的50mm落碰通过：
+482 native tick，管0.08423mm、杯0.00289mm；机器人前缀先于134动作出现明确
+粒子接触容量溢出（需求4373758，配置4194304）。仅将容量增至8388608后，仍于
+289动作/native592发生mArtiSolveBlockPartitionFunction/CUDA700；没有先报容量
+不足。因此容量调整没有证明解决articulation错误，三条失败分支均不推广。
+
+`speculative_validation_runtime` 已静态整合40入口并修改71份水浴/银镜YAML的
+GpuMaxParticleContacts至8388608；去除此键后YAML语义一致。证据为
+`evidence/speculative_capacity_8m.json` 与 `speculative_diagnostic_integration.json`。
+该root仅诊断，未运行原core、未成为交付；最新生产者试验只减少试管PBD底部角向
+分段32→16（353→177形状），质量/COM/I、可见网格、粒子与刚体代理不变，资格待验证。
+用户再次确认水浴“允许注明待重采，先交第一轮”；这不改变资产有效性门槛。
+规范无需变更：以上为未获联合资格的具体物理配置，不构成通用推荐。
+
+
+验收索引更新为工作根 `evidence/current_bad_case_acceptance_v2.json`，按receipt的
+runtime_root查找视频审计，显式选择冻结称量/滴定的4条坏例并复核记录输入SHA。
+当前18条要求中4条通过该证据检查，8条曾有完整历史结果；后者不等于最终资产资格。
+本方独立索引工具验证了未选择、输入变更、invalid_attempt均不计入，以及完整零分
+结果可以计入坏例证据；它不属于接收方运行依赖，不自动发布资产。
