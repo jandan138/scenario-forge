@@ -4,6 +4,20 @@
 
 
 
+## 慢倒完整结果与图像复核（18:11 UTC 后）
+
+`task09_default_offsets_full_20261011T175508_482868Z` 最终 4000 步、score=0.5、sr=0、
+client0；完整 server/worker 物理错误为 0，原生 120 Hz，四视频完整解码通过。
+本次原版运行完成，任务失败，不导出成功 LeRobot、不推广为称量交付。
+实现者另亲看 left/top 的 1760/1960/2160/2360/2560/4000 与 overlook 的
+0/2000/3454/4000：2560 时两粒在瓶内、三粒留舟，末瓶回到秤盘，舟内仍有残留。
+与 metric 中仅 grain03/04 入瓶一致；最终全量称重门槛未通过，不靠降低门槛放行。
+原视频及审查 sheet 在候选根 `saved/repair_20261010/audits/<run_id>/`；原结果在
+候选根 `saved/eval_results/scientific_experiments/<run_id>/scientific_experiments/`
+`task_09_solid_weighing/repair_training_001/000/`。owned PID 全退出、GPU 0 MiB、8087
+已释放，见工作根 `evidence/task09_default_offsets_cleanup.json`。
+当前状态文件已先存快照再清理过时 running/qualified 字段；已封包滴定保持不变。
+
 <a id="full-engine-log-coverage"></a>
 ## 完整引擎日志复核与后续候选（17:49 UTC 起）
 
