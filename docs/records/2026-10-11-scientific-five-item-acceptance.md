@@ -432,3 +432,24 @@ runtime_root查找视频审计，显式选择冻结称量/滴定的4条坏例并
 当前18条要求中4条通过该证据检查，8条曾有完整历史结果；后者不等于最终资产资格。
 本方独立索引工具验证了未选择、输入变更、invalid_attempt均不计入，以及完整零分
 结果可以计入坏例证据；它不属于接收方运行依赖，不自动发布资产。
+
+
+PGS失败分支补充几何审计：0..617动作的link7/8实际最大穿入分别5.758mm
+（542）/9.768mm（315），不能把CUDA较晚解释为接触改善。speculative8m分支
+0..288动作实际最大穿入0.2209/0.1041mm、无>1mm帧，却仍在289发生CUDA；
+当前证据不支持把所有引擎失败统一归因为深夹持。
+
+bottom16银镜冷态夹具通过1202 native120 tick、两液数量不变/outside0；该夹具
+禁用任务graph，script SHA e0a311…对应只读物理检查代码，不是任务counter。
+任务counter必须在机器人与门控夹具内独立核验767ceee…实际inputs:script。
+
+
+bottom16提拉2042 tick通过，但strict300+700仅完成329动作即FAIL_ENGINE，native631，
+首mArtiSolveBlockPartitionFunction/随后CUDA700；不接入原版评测root。两任务底部
+delta虽同字节03aeacf28168f94f05bdd141b9fa9e2fc60fff51e483ad0086ee97799ef991c1，
+仍未完成斐林自身保液，也未获联合机器人资格。
+过滤核查排除了一个候选原因：原core机器人实际位于/World/_scene/lift2，18个
+启用robot collider均属于RigidScene、均不属于Supplement；试管底部177和杯257
+则相反。历史四个全凸分支的真实contact header未出现PBD-only形状，详见生产者
+recovery_pbd_only_robot_filter_static_audit.json 与 recovery_pbd_only_native_contact_audit.json。
+下一结构调查针对杯底多块共面代理带来的冗余接触，尚无根因结论。
