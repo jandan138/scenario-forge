@@ -153,3 +153,9 @@ evidence/scene128_badcase_gate.json只放行剩余13条原版坏例，不是最�
 若引擎错误或结果不完整即停止，旧table17测试放行已撤销，不复用。
 生产者receipt为ConvertAsset输出silver_bad17_diagnostic/recovery_scene128_scoped_qualification.json，
 SHA670ebb0477ebc5888c3626fbc7239bc5f5ea56b99b6ba0f50e93e80f0a711792；仅限定姿态/动作资格。
+
+
+队列续跑更新：bad17曾出现PBDinvalid，经原版前段视频确认杯被动作碰倒、从开口大量
+洒液；正确停止加热，按真实坏例保留，没有据此改资产。旧队列在17后暂停的记录保留，
+同冻结版以scene128_r1继续余12例9,10,11,12,13,14,15,16,6,4,5,7。
+当前状态改查evidence/scene128_r1_queue_state.json；两条已完成的新版本结果为08和17。

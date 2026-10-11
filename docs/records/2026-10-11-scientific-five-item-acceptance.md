@@ -728,3 +728,22 @@ runtime cwd进程退出，GPU0/8087空；receipt/audit/cleanup均保存。
 06:34:54仅放行剩余13条测试队列（PID1367681）。gate=evidence/scene128_badcase_gate.json，
 原core顺序17,9,10,11,12,13,14,15,16,6,4,5,7。仍需全队列及最终闭包/完整四任务归档，
 未推广为最终交付，不改jiantong目录。规范无需变更：以上只支持具体运行时和限定任务动作。
+
+
+scene128 bad17（silver mixed17）完成7000/.15/sr0/client0，无引擎错误，四视频全解码/
+native120通过。曾因native600 PBDtrue→1200false而暂停后续队列待核查；无效时液面
+是repair_water_profile兜底值，不能把.930→.867当63mm跌桌测量。local strict700全程
+PBDtrue/杯最高约25.7°后恢复，不足以解释原版实际轨迹，未据此盲改参数。
+
+实现者新增亲看三视角（overlook/top/left）0/100/200/300/400/500/600/700/800/900/
+1000/1200原版帧：frame300碰撞后偏斜，frame400杯已明显侧倒、液体从开口洒出；
+500..900液体流散至heater/table；中/末杯持续侧倒在heater后侧。另亲看四相机
+0/3500/6999/7000。与PBDinvalid、heated0相符，归为动作导致倾倒洒液的真实坏例，
+没有这轮直立管底穿出证据；图片抽查不等于所有微观碰撞均已证明正确。
+证据evidence/scene128_bad17_early_frames及scene128_bad17_liquid_triage.json；
+producer记录b4a7900同步，仅更新文档，无物理改动。
+
+旧scene128队列在17后按owner stop结束；清理确认原queue/server/client退出、GPU0/8087空。
+09:34:54沿同冻结版本启动scene128_r1余12例（PID1464669），顺序9,10,11,12,13,14,
+15,16,6,4,5,7，状态evidence/scene128_r1_queue_state.json；旧stop记录保留。
+当前新版本已完成08/17两例，不能把剩余待跑项目写成已验收；最终交付仍未发布。
