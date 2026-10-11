@@ -1,8 +1,47 @@
 # 科学实验修复：五项交付边界与原版验收
 
-状态：滴定单独包已发布到朱子厚自己的GenManip目录，原版独立安装1582步满分、原生120Hz及四视频/LeRobot验收完成。称量初始化仍未修复；水浴/银镜rim v2完整坏例引擎错误，测试放行已撤销。其余任务继续，未向建通目录写入。运行时间以receipt的UTC为准。
+状态：滴定单独包已发布到朱子厚自己的GenManip目录，原版独立安装1582步满分、原生120Hz及四视频/LeRobot验收完成。称量新候选两次初始化正常，但慢倒完整回放仅0.5分，尚未交付；水浴/银镜rim v2完整坏例引擎错误，测试放行已撤销。其余任务继续，未向建通目录写入。运行时间以receipt的UTC为准。
 
 
+
+<a id="full-engine-log-coverage"></a>
+## 完整引擎日志复核与后续候选（17:49 UTC 起）
+
+此前自动检查只读 worker 日志及运行时错误回调，漏掉服务原始 stdout 中的初始化错误。
+Chassis-only 称量候选虽 worker 无错，server 有 8 条非法 contact/rest offset 写入错误；
+原建通称量独立 reset 对照另有 4 条非根 articulation link 速度写入错误，共 12 条。
+因此不能将旧 worker-only PASS 解读为整个引擎运行无错。新增制作区工具
+`five_item_tools/audit_full_engine_logs.py` 同时检查完整 server/worker 日志及碰撞降级，
+另写报告，保留原报告；工具不进入接收方安装内容。
+
+已对封包滴定成功和原坏例的完整 server 日志补查：各 0 条错误、0 条碰撞降级。
+旁路报告为 `evidence/task10_released_full_server_log_scan.json`，绑定两个原日志 SHA；
+已封包的 task10 文件、归档和哈希均未修改。此次同步 VAL-001 与操作说明，明确日志
+覆盖范围；不新增通用求解器、碰撞或摩擦参数，也不改变 Scenario Forge 包契约。
+
+称量控制实验保留：关闭称量控制器仍可出现左从动指 44 mm；只移除 RightTare/Pan 的
+额外 SDK registry 项亦出现 44 mm，不能将任一项称为独立修复。原机器人单独及加入天平
+的局部夹具未复现，不能据此推翻原版运行反例。原建通两次 reset 未复现 44 mm，但有上述
+12 条错误，也不能称引擎健康。观察器、临时 mimic 重解析等诊断均不进入交付。
+
+新 `task09_default_offsets_candidate_runtime` 在 Chassis-only 候选上，仅取消 training001
+YAML 中机器人 contactOffset=0.05、restOffset=0.001 的运行中覆盖，沿用机器人原有自动值。
+实际 USD 关节、秤盘、按钮、质量、摩擦与控制器保持；metadata 保留四个 drive 初始目标，
+删除两个多余 registry 占位。两次独立 reset（175047、175308）完整 server/worker 错误为 0，
+夹指一致，距 metadata 最大偏差 45.5 nm；这只是两次启动证据，不宣称所有初始化可靠。
+全程慢倒示范 `task09_default_offsets_full_20261011T175508_482868Z` 使用用户已批准的
+3454 帧动作、原版客户端、原生 120 Hz/4000 步；worker 最终报告 0.5 分，未成功，
+正在编码/复核视频；不导出新成功数据，不据此推广或追加动作修改。
+训练 YAML 当前仅改一份，未推广到全部入口，也没有称量交付资格。
+
+水浴/银镜：提高明确溢出的容量后仍出现 CUDA700；PGS 对照
+`diagnostic_proxy_rim_v2_pgs_bad11_20261011T165536_668751Z` 在约 2150 动作出现
+mSolveBlockPartitionFunction 错误并按首错停止，无完整结果。两方案均不能交付。
+容量候选只保存 1514 行，发生在源动作 1568 松手之前；原容量溢出在 1400–1500 间，
+先于 1510–1550 附近 heater 大运动，不能倒置时序归因。生产者控制脚本审计未发现
+正常运动期间回写粒子或刚体位姿；不以未证实的“跟随瞬移”解释故障。
+另核对 producer probe.py:248，static/dynamic friction=2.5、max/multiply、ImprovePatchFriction
+与 native YAML 一致；排除“夹具没设置相同摩擦”这一源码差异假设，未据此新增实验。
 
 ## 16:42 UTC：滴定单独包正式交付
 

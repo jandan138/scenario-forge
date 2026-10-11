@@ -13,6 +13,10 @@
 引擎报错后返回的有限旧位姿不证明仿真继续运行；验收需核对引擎健康和记录完整性。
 依据：[task09 粉末瓶 r2 的错误与停滞诊断](../records/2026-09-10-task09-powder-bottle-r2.md)。
 
+使用服务进程、worker 或运行时错误回调时，引擎健康检查须覆盖启动、初始化和执行阶段的
+原始日志；只检查 worker 或回调注册后的消息，不能声明整个运行无引擎错误。
+记录实际检查的日志及遗漏范围。依据：[科学实验五项交付的完整日志复核](../records/2026-10-11-scientific-five-item-acceptance.md#full-engine-log-coverage)。
+
 依据：[资产准则](asset-intake.md)、[固定基座记录](../records/2026-09-04-fixed-base-articulated-instance-v2-and-oven-handoffs.md)、
 [水浴证据边界](../records/2026-09-08-fehlings-water-bath-r2-sedimentation.md)。
 
@@ -111,3 +115,4 @@ OSS 归档保持追加且不可变，使用项目拥有的 `artifact-history-v1/
 
 运行次数、保留率、碰撞容差等具体阈值由任务/接口及其证据定义，本页不建立一套替代所有专项标准的统一数值。
 2026-09-08 汇集验证准则，迁入 Artifact Policy 的文件/保留政策；原路径保留导航与使用说明。
+2026-10-11：VAL-001 明确服务启动及初始化原始日志的覆盖范围；不改变物理参数或历史包字节。

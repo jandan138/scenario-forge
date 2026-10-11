@@ -1,5 +1,13 @@
 # 四项科学实验修复：受限交付操作记录
 
+
+当前验收补充：完整 server stdout 与 worker 日志都必须检查，含回调注册前的启动和
+初始化；参见 VAL-001 与任务记录 `full-engine-log-coverage`。旧 worker-only PASS
+不代表全程无错。滴定封包两次运行追加全日志复核均 0 错误、0 碰撞降级，封包字节不变。
+称量 default_offsets 候选两次 reset 正常且完整日志无错，批准的慢倒全程 worker 报告 0.5 分，视频正在收尾；
+只有 full score=1/sr=1、原生120、全日志、四视频与标准 reader 通过才生成成功交付数据。
+其训练入口尚未推广，不能直接复制候选根。水浴/银镜容量和 PGS 完整对照均失败，仍未放行。
+
 已交付（16:42 UTC）：task10单独包位于
 `/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/delivery_releases/task10_standalone_r1_20261011T162354Z/`。
 状态RELEASED_TASK10_ONLY，安装说明见包内README；仅安装五类内容，标准原版回放1582步满分，
