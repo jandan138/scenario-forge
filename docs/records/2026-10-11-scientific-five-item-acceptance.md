@@ -600,3 +600,26 @@ DIAG_ERROR0；末有效native3332，每tick1/120。末管/指速度仍小，不�
 本次4PID退出、GPU0MiB/8087释放已核实；未将观测层写入交付或原机器人源。
 详情为工作根 evidence/mixed5_trace_integration.json、mixed5_trace_log_index.json，
 以及run内diagnostic_scope.json / invalid_attempt.json / cleanup_verified.json。
+
+
+原版trace归因：末31个有效native tick中，管-架接触集中于Cube_015静态三角网格与
+53个rigid底部shape，峰371点/tick、最深SDK separation约-0.2008mm，主要法向Z；
+PBD-only shape命中仍0。故不能沿用独立SDK的40°/2.162mm姿态来解释原版。
+SDK/native按实际左臂关节对齐得到native_index-SDK_action=415，关节差极小，但
+首次观测到管位置差>1mm时已约15.23mm，末差41.23mm，表明抓取后物体状态分歧。
+原版证据优先；生产者评估局部冗余底部接触的最小合并，须保持源边界与内腔，尚无新
+物理候选。详见producer recovery_bad08_native_trace_analysis 下rack_attribution.json
+及SDK_native_alignment.json，均不提升为全局根因定论。
+
+
+新增 solidcap 候选仅重新划分管底真实实心玻璃：在内腔最低点以下0.1µm处切分，
+48个底块的下部合成49顶点凸帽，其余上部仍保留。未把凹内腔用凸包填平；
+源边界、质量/COM/惯量、粒子与动作不变。整体tube collider为618（原617），
+不是全局减shape方案。生产者482tick落桌、602tick受限回架夹具通过；这不替代原core。
+原core独立诊断 `diagnostic_proxy_mixed5_solidcap_trace_20261011T044321_529017Z`
+运行于solidcap_trace_runtime，traceV2记录精确负/非负separation点数；机器人只读
+report wrapper仍仅供诊断，588个原core受保护blob核对一致。当前尚未获得完整结果。
+生产者路径为silver_bad17_diagnostic/recovery_bad08_solidcap_composition_receipt.json；
+本方evidence/solidcap_trace_integration.json及run内diagnostic_scope.json绑定新增输入。
+用户再次确认水浴首轮允许待重采；该限制不代表允许把引擎崩溃归为正常坏例。
+规范无需变更：本次为特定资产/运行时的局部候选，未形成可推广物理默认值。
