@@ -46,9 +46,9 @@ metric提交为 `9d85d222e213d34bda43e8834266e4fff401ce56`，父提交为原版
 观测；训练数据来自实际物理状态捕获与对应离线渲染。原生评测视频编码30fps，查看
 动作时以帧号定位；LeRobot候选按真实捕获频率标为120fps，不混用两种播放时间。
 
-LeRobot候选沿用现有导出工具的v2.1格式。独立RGB导出工具修复BGR/RGB顺序，最终
+用户已确认LeRobot沿用v2.1格式，并注明验证环境。独立RGB导出工具修复BGR/RGB顺序，最终
 数据集不导入或调用该工具。旧的非RGB候选已标记 `NOT_QUALIFIED`，不作为交付。
-生产机旧LeRobot与datasets4.5不兼容；隔离验证使用未修改的LeRobot0.1和datasets3.6，
+生产机旧LeRobot与datasets4.5不兼容；隔离验证使用未修改的LeRobot0.1、datasets3.6、torch2.10、av16.1及pyav，
 未改写原环境。导出文件中11个固定float32向量的Hugging Face描述由新`List`规范化为
 v2.1兼容的`Sequence`，所有Arrow数值和视频字节不变。称量3372帧、滴定1582帧均已
 通过未修改读取器的首/中/尾帧读取。本轮按现有v2.1格式交付；兼容性证据限于上述
@@ -133,3 +133,13 @@ Fehling lift有1粒底部越界，producer夹具队列已停止。故solidcap同
 及每任务20个入口；完整性测试见evidence/inventory_completeness_guard_test.json。
 20261011T053555Z草稿来自局部runtime，已标INVALID_PARTIAL_RUNTIME_NOT_DELIVERY_INVENTORY，
 没有打包。最终使用合格两任务覆盖到保留09/10冻结内容的完整基线后再生成清单。
+
+
+PBD作者128试验有场景上限限制：当前pbd128_validation_runtime的YAML Min/Max64，
+不能称有效128。该原core单例已主动停止并保留invalid_attempt，生产者局部PASS不能
+解释为128次求解已生效。后续需scene上限与实际个体请求一同核对，禁止据此发布gate。
+
+用户已确认首轮水浴/银镜保持原7000步，称量保持4000步；重采时再调整时间预算。
+120Hz下7000步=58.333秒，部分场景仅加热约59–60秒，未计抓取/观察/回架，
+因此首轮坏例保持同预算对照，不能把所有任务未成功都归因于策略。决定与来源见
+工作根evidence/first_round_time_budget_user_decision.json及waterbath_time_budget_review.json。

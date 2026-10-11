@@ -678,3 +678,32 @@ five_item_bad_08_pbd128_20261011T053302_157711Z，588受保护blob不变。
 inventory新增存在性与20入口检查，archive builder在创建目录前强制四任务三类离线树完整。
 用完整历史清单、无效局部清单、伪标DRAFT的局部清单三个对照验证，结果均符合预期，
 未建立新归档。此工具仅本方制作辅助，最终无接收方依赖；操作说明同步完整基线来源。
+
+
+关键资格纠正（05:45）：schema文档说明scene maxPositionIterationCount对particles等
+对象设上限；此前probe与native YAML场景Min/Max均64。因此作者Sample128属性不能
+等同有效128迭代，前述cold/lift PASS只记录该实际组合，不证明128收敛改善。
+两处native YAML（generation/evaluation）仍Max64已确认。05:45:07主动SIGINT本次
+helper1321116，由其finally清理本次client/server；保存INVALID_FOR_EFFECTIVE_PBD128_COMPARISON，
+不把停止后的缺结果记0分。原solidcap64已完成的7000结果保留。
+producer核对rigid/Articulation与Bath个体请求，后续若采用Sample128必须同步sceneMax128，
+min64/World120Hz不变，并重新绑定probe、actualgate和native配置。没有整批放行gate。
+
+
+用户追加确认：LeRobot沿用v2.1并注明已验证隔离环境（LeRobot0.1/datasets3.6/
+torch2.10/av16.1，pyav）；不再悬置格式选择。水浴/银镜首轮保持7000步，重采再调
+完整时间预算；称量4000不变。58.333秒对部分59–60秒单加热需求不足的限制随交付保留，
+不改阶段权重、原动作或上限来制造首轮成功。
+
+
+短SDK上限查询补证：各reset2+3tick，scene64/64时DynamicControl Articulation属性64，
+scene64/128时属性128，原USD/loader请求均128；三独立刚体DC属性均64，28robot link
+属性16由Articulation控制，不能当独立每帧循环数。getter不是内部实际迭代循环遥测。
+因此不加入任何robot setter/USD隐藏控制来强求单变量；下一合法候选为保留原机器人
+请求128，并让Sample128与sceneMax128/min64一致，明确是组合改动。
+
+scene128_validation_runtime由pbd128 root克隆：只改两任务71份YAML中
+MaxPositionIterationCount64→128（generation/evaluation），递归语义比较其他字段相同，
+1254个冻结非YAML输入哈希一致；原goal/7000steps/120Hz/robot/core不变。
+receipt为evidence/scene128_validation_integration.json，尚未原core运行，待正确上限
+producer lift。旧author128/sceneMax64本次停止已核实3PID及runtime cwd进程退出、GPU0/8087空。
