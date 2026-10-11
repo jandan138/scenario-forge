@@ -1,6 +1,6 @@
 # 四项科学实验修复：受限交付操作记录
 
-当前为候选修复阶段：称量与滴定已通过限定原版回放；水浴/银镜的联合液体与机器人接触仍有CUDA失败，最终交付尚未就绪。任务范围为09称量、10滴定、12斐林，以及文档18对应的银镜任务。
+当前为候选验收阶段：称量与滴定已通过限定原版回放；水浴/银镜的scene128新候选已通过九组限定专项检查及首条完整原版坏例，剩余13条正在评测，最终交付尚未就绪。任务范围为09称量、10滴定、12斐林，以及文档18对应的银镜任务。
 当前table17候选在五条完整原版回放后，于第六条斐林mixed5回架阶段出现CUDA失败；队列已停止并清理，生产者恢复针对性诊断。
 旧归档与名含 `final` 的实验目录都不代表最终资格。最新决定及证据限制见[任务记录](../records/2026-10-11-scientific-five-item-acceptance.md)。
 
@@ -143,3 +143,13 @@ PBD作者128试验有场景上限限制：当前pbd128_validation_runtime的YAML
 120Hz下7000步=58.333秒，部分场景仅加热约59–60秒，未计抓取/观察/回架，
 因此首轮坏例保持同预算对照，不能把所有任务未成功都归因于策略。决定与来源见
 工作根evidence/first_round_time_budget_user_decision.json及waterbath_time_budget_review.json。
+
+
+最新测试队列：scene128_validation_runtime固定1325个输入（含原robot仅用于验证），
+evidence/scene128_badcase_gate.json只放行剩余13条原版坏例，不是最终交付。
+首条bad08为five_item_bad_08_scene128_20261011T060030_512029Z，7000/.15/sr0/client0，
+四视频解码/native120/人工抽帧完成。末管水平落在架旁桌面，失败归槽如实记录。
+队列状态为evidence/scene128_queue_state.json，顺序17,9,10,11,12,13,14,15,16,6,4,5,7；
+若引擎错误或结果不完整即停止，旧table17测试放行已撤销，不复用。
+生产者receipt为ConvertAsset输出silver_bad17_diagnostic/recovery_scene128_scoped_qualification.json，
+SHA670ebb0477ebc5888c3626fbc7239bc5f5ea56b99b6ba0f50e93e80f0a711792；仅限定姿态/动作资格。

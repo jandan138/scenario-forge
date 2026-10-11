@@ -707,3 +707,24 @@ MaxPositionIterationCount64→128（generation/evaluation），递归语义比�
 1254个冻结非YAML输入哈希一致；原goal/7000steps/120Hz/robot/core不变。
 receipt为evidence/scene128_validation_integration.json，尚未原core运行，待正确上限
 producer lift。旧author128/sceneMax64本次停止已核实3PID及runtime cwd进程退出、GPU0/8087空。
+
+
+scene128九组生产者资格齐：两cold1202、两lift2042、两实际gate1562/16项、
+50mm原桌drop482、5mm受限c05回架602、strict300warmup+700动作共1002native。
+后者双指raw最大穿入.10709/.11204mm，>1mm均0，实际同时接触588动作；SDK深度
+.12768/.15776mm。drop最大tube .09832mm/bath .06664mm；rack末gap .02946mm、
+tilt1.7807°、径向余量+.54695mm、outside0。原始64上限报告不继承物理资格，
+仅同字节counter lifecycle逻辑可复用。producer23测试PASS，提交8309755/bbd0727，GPU已空。
+资格receipt SHA670ebb0477ebc5888c3626fbc7239bc5f5ea56b99b6ba0f50e93e80f0a711792，
+bounded_producer_qualified=true，delivery_qualified=false；受限drop/rack不等于任意投掷/成功示范。
+
+新原core bad08 full7000完成06:31:04，score.15/sr0/client0、错误0；四视频全解码、
+native120检查通过。实现者亲看0/3500/6999/7000：末管水平落在架子与加热器旁桌面，
+不是归槽；终态内容遮挡，不能凭图宣称无洒漏。native7200遥测PBD_valid=true、有效
+加热17.266667567s，sample_not_in_water停止累计。helper1339235/server1339295/client1340663及
+runtime cwd进程退出，GPU0/8087空；receipt/audit/cleanup均保存。
+
+核对producer九报告、71配置、全部物理层与首条结果/四视频/人工抽帧/1325冻结输入后，
+06:34:54仅放行剩余13条测试队列（PID1367681）。gate=evidence/scene128_badcase_gate.json，
+原core顺序17,9,10,11,12,13,14,15,16,6,4,5,7。仍需全队列及最终闭包/完整四任务归档，
+未推广为最终交付，不改jiantong目录。规范无需变更：以上只支持具体运行时和限定任务动作。
