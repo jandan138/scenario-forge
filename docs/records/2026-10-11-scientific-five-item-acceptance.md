@@ -556,3 +556,23 @@ bad04管横放架顶并伸出架边；bad05末管在架后方倾斜、近景遮�
 没有将任一例视为成功回架，抽帧不证明全部帧微小穿入不存在。两例离水后累计加热
 分别约16.19166751和9.67500050秒，heating=false/PBDvalid=true。当前继续bad07，
 最终候选水浴/银镜4/14条完整结果已检查，余10条含正在执行者，整包尚未交付。
+
+
+第五条最终候选坏例bad07 `five_item_bad_07_table17_20261011T024411_914867Z`
+完整7000/.15/sr0/client0，四decode/native120/worker健康通过，四路关键帧已亲看：
+末管向架后方伸出、被架体遮挡，不能确认正确座深；无抽样大洒出，视觉WARN。
+曾在native2400实际启用加热，末6600/7200离水后均16.166667509824038秒，yellowing，
+加热false/PBDvalid true。不是成功示范。
+
+第六条bad08 `five_item_bad_08_table17_20261011T031012_762703Z`（task12 mixed5）
+在2916条记录后FAIL_ENGINE：worker1230193于2026-10-11T03:19:50Z首mArtiSolveBlockPartitionFunction，
+随后CUDA700。client1，无完整result，不能记0分。队列自动stopped_on_failure；另设
+stop标记及 `evidence/table17_badcase_gate_revocation.json` 保留原测试放行记录并撤销
+后续放行。核实旧queue/server/client/worker退出、GPU0MiB、8087释放，无额外kill。
+五个完整通过的局部坏例不能掩盖此反例，table17仍不具备最终交付资格。
+
+实现者亲看partial merged视频2600/2800/2870/2900/2914：先在浴杯处夹管，随后移向
+架子，最后夹爪下降到架顶附近，管被双指遮挡；本次触发位于回架阶段，不能套用此前
+杯内耦合结论。生产者恢复task12 mixed5复现，原动作附近未见巨大joint-target跳变；
+只在独立诊断fixture增加finger接触报告遥测，不改变机器人源文件、驱动或碰撞，也
+不把诊断观测层当成交付。截图见 `evidence/mixed5_native_failure_frames`。
