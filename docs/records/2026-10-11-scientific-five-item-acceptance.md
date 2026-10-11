@@ -576,3 +576,27 @@ stop标记及 `evidence/table17_badcase_gate_revocation.json` 保留原测试放
 杯内耦合结论。生产者恢复task12 mixed5复现，原动作附近未见巨大joint-target跳变；
 只在独立诊断fixture增加finger接触报告遥测，不改变机器人源文件、驱动或碰撞，也
 不把诊断观测层当成交付。截图见 `evidence/mixed5_native_failure_frames`。
+
+
+针对bad08的独立SDK前3200动作通过（native3502/error0），未重现原core失败，因此
+不撤销原core反例。指令邻域joint-target最大单步变化约0.01221、抓指未在2915附近
+突变；原rack实际为19个启用collision prim（15852顶点Mesh、approximation=none，
+加18槽底Cylinder），残留SDF属性不等于当前SDF碰撞；首错前无明确PhysX cooking或
+容量overflow。生产者将生成仅只读遥测的原core诊断USD：任务脚本追加位姿/接触记录，
+finger报告API在独立robot wrapper中预声明，避免原create_robot对场景预声明lift2报
+already exists。不修改共享robot源文件、驱动、碰撞、质量或GenManip核心；新root明确
+instrumented diagnostic，包装层不会交付，也不算原机器人字节的最终验收。
+
+
+原core只读观测层静态整合至mixed5_trace_runtime：场景无预声明lift2、原task脚本完整
+前缀保留，诊断脚本SHA f54df3f46a91c7f93a96113193987fe4e67255e30a26d8b1beaac94d9f4f01c9。
+独立robot入口只附加四finger ContactReportAPI，2894非report属性/关系与源一致，
+共享源未写；仅临时YAML cap7000→3200。smoke为接口验证，不算task成功。
+
+`diagnostic_proxy_mixed5_trace_20261011T035548_754705Z` 在2918记录后重现原core
+CUDA700（04:05:22，原无trace2916），client1无result。884POSE/58562CONTACT、
+DIAG_ERROR0；末有效native3332，每tick1/120。末管/指速度仍小，不能直接归因于先
+发生高速弹飞。原版观测和SDK近似存在姿态差异，生产者按实际contact shape解析。
+本次4PID退出、GPU0MiB/8087释放已核实；未将观测层写入交付或原机器人源。
+详情为工作根 evidence/mixed5_trace_integration.json、mixed5_trace_log_index.json，
+以及run内diagnostic_scope.json / invalid_attempt.json / cleanup_verified.json。
