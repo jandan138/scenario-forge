@@ -1,7 +1,100 @@
 # 科学实验修复：五项交付边界与原版验收
 
-状态：第一批未发布。滴定独立安装成功；称量授权慢倒示范因预热阶段左夹指异常得0.3，尚不能评估慢倒效果，也未重生训练数据。第二批口沿分区v2已通过限定生产者资格及两个原版短窗口，14条完整坏例仍待跑。运行时间以各receipt的UTC为准。
+状态：滴定单独包已发布到朱子厚自己的GenManip目录，原版独立安装1582步满分、原生120Hz及四视频/LeRobot验收完成。称量初始化仍未修复；水浴/银镜rim v2完整坏例引擎错误，测试放行已撤销。其余任务继续，未向建通目录写入。运行时间以receipt的UTC为准。
 
+
+
+## 16:42 UTC：滴定单独包正式交付
+
+`delivery_releases/task10_standalone_r1_20261011T162354Z/`现为RELEASED_TASK10_ONLY，
+RELEASE_MANIFEST SHA10dfabecc0709d8647e18b9512a59f3c31c02ac0f6578543350b08ecef64159e。
+仅五类安装内容：离线YAML/USD/task data、2个指定metric文件的提交补丁、LeRobot v2.1。
+metric提交38425dc6eb18fba6560184745acf27fe91241e10，原GenManip core/SDK/机器人源不变。
+新原版客户端回放`five_item_task10_controller_reset_standalone_20261011T162925_436423Z`
+完成1582/1/sr1/client0；588个运行保护文件一致，原生120Hz、完整worker日志无物理错误。
+四视频全部完整解码，实现者亲看0/791/1581/1582：阀操作、末瓶浅粉紫、上管近无色、ON显示；
+保留黑台面低对比、玻璃反射、遮挡和腕视角裁切WARN，不宣称20环境全部策略通过。
+本次所有PID退出、GPU0MiB、8087释放的cleanup_verified随包保存。
+
+归档及安装SHA/CRC、20USD依赖闭包/内嵌脚本依赖、41配置动作读取、1477保护文件检查通过。
+复用逐字节匹配输入的task10原坏例2000/.2/sr0及其四路视频；该坏例使用独立测试客户端
+逐帧提交原记录，正常示范用原版LMDB客户端，测试工具不交付也不作接收方运行依赖。
+LeRobot保持1条1582帧、120fps、4RGB，原标准reader在lerobot0.1.0/datasets3.6.0/
+torch2.10.0/av16.1.0环境读取通过；不重用失败称量观测、不包含其他任务数据。
+
+发布目录含README/INVENTORY/STATIC_INSTALL_AUDIT/CONFIG_DATA_AUDIT/RELEASE_MANIFEST、
+SHA256SUMS及成功/坏例原生视频。外部工具仅在five_item_tools制作区，离线包无辅助.py/.sh。
+旧task09_task10_r1归档继续NOT_RELEASED，不追认、不覆盖。其余三项按用户决定继续。
+规范无需变更：遵循ASSET-002、VAL-001/002/003/004/005，发布的是特定任务/版本/已测范围，
+不新增通用物理参数或Scenario Forge接口；本记录与操作说明同步。
+
+## 16:30 UTC：滴定单独交付准备；第二批完整运行失败
+
+用户明确选择“先单独交付滴定，其余继续（推荐）”，只改交付先后，不减少任务。
+单独包`delivery_releases/task10_standalone_r1_20261011T162354Z`含51个YAML、693个USD/依赖、
+287个task data文件、2个metric文件及LeRobot v2.1；从原基线新建
+`task10_standalone_receiver_runtime`，只安装该归档和metric提交38425dc6，再只读复制
+接收仓库已有公共前置资产。20个闭包、41个配置/动作检查、1477个保护文件及
+`git apply --check`通过；归档成员SHA/gzip CRC/安装后文件SHA通过。
+原生回放`five_item_task10_controller_reset_standalone_20261011T162925_436423Z`进行中；
+还没有RELEASE_MANIFEST。其他任务候选不进入该包，辅助工具不作运行依赖。
+
+第二批首条完整bad11（16:03:52 run）在native1800后报告collisionStackSize与
+maxParticleContacts溢出并丢弃接触，分别最大要求100638440字节、51451716条。
+原始YAML粒子接触容量8388608。root中止owned进程并保留1771行steps.jsonl与partial
+merged视频，未产生有效完整结果。亲看1500/1550/1600/1700：管与杯相接，随后heater
+被弹起及液体团块飞散；不能仅凭最终缓存错误就断定几何/接触已经可靠。
+
+仅扩大两项缓存的新候选`rim_v2_capacity_runtime`在71个YAML中设置
+GpuMaxParticleContacts=67108864、GpuCollisionStackSize=134217728，其余解码字段、
+USD与动作不变，120Hz/7000保持。一次启动因诊断根的子目录符号链接违反现有输入
+边界而在GPU前拒绝；保留失败记录，原样物化资产后重试，未放宽guard。
+`five_item_bad_11_rim_v2_capacity_materialized_20261011T161652_088193Z`确认两设置生效，
+仍在16:23:25以GPU artiPropagateVelocity700/artiSolve/artiPropagateImpulses2崩溃，
+client1/noresult；首错前没有新的容量溢出。故缓存增容不是完整修复，不能继续发放14例gate。
+撤销文件为`evidence/rim_v2_full_badcase_gate_revocation.json`。
+
+只读对照三run的重叠动作完全相同，机器人state在0–1150步相同；初始并非称量式夹爪异常。
+后续接触处分歧仍待细化。容量失败只记录到source1513，早于1568松指命令，
+不能把此前“松管后故障”推断套到这次失败。生产者继续有界只读分析，暂不再参数扫描。
+
+称量额外证据：isolated early一次/late两次均300步正常、无接触/物理错误；另一次
+queue.py遮蔽标准库导致启动失败，共4进程内收口。三次轨迹哈希一致，但省略camera、
+Curobo、100步prelayout及finger预处理，不能外推到原场景。报告SHA
+641e9055fa0a41e3dd876cbe376e767e6c005cd8140ea3436a12ad3b0928ead8，producer记录ee418c0。
+原生`task09_reset_initial_contacts_20261011T162524_194664Z`只加四指contact report观察，
+client0、初态正常、未报告指接触；未覆盖故障样本，不算修复。这些诊断均不交付。
+规范无需变更：仅更新具体任务证据、失败边界和交付顺序；源码/包/API契约不变。
+
+## 16:04 UTC：同字节初始化反例与完整坏例队列
+
+`task09_reset_only_observer_v2_20261011T155123_692872Z`冷缓存初始化正常，
+同内容再启动`task09_reset_only_observer_v2_repeat_20261011T155400_689181Z`复现fl8漂移。
+两者receipt记录输入SHA逐项相同；均client0。各观测阶段原始mimic API/引用/gearing
+保留，物理后端fr7/fr8/fl7/fl8刚度为1000/0/1000/0，阻尼100/0/100/0。
+失败样本也无新DriveAPI，故“get_gains激活裸高刚度”的假设在此失败样本不成立。
+冷正常、暖异常也排除了“仅缺冷缓存”的解释。比较证据
+`evidence/task09_same_bytes_mimic_failure_comparison.json`。
+
+随后限定拓扑诊断`task09_reset_mimic_reparse_20261011T160038_136232Z`在native180
+移除fl8 mimic API、182原样Apply；不写位置/速度/drive，不重新初始化view，右侧不动。
+Remove/Apply返回True、authored参数与关系一致，client0/无getter错误；但介入前本来正常，
+两tick移除窗口也未看到明确自由漂移，不能证明backend确实处理了重解析，更不能称修复。
+该诊断根及其观察器绝不进入交付。生产者另做脱离实验资产的本地原Lift2初始化顺序对照，
+限制为early/late各两独立进程；未调整机器人参数，不把局部结果直接外推到完整任务。
+
+第二批1637个验证输入已冻结，`evidence/rim_v2_full_badcase_gate.json`
+SHA5ffe0878cd4e419cd66458932467093f6b7af72c3e52ca2ccf8af9e861eef251。
+16:03:52远程启动完整14条原坏例队列，首条
+`five_item_bad_11_rim_v2_full_20261011T160352_450143Z`，完整7000步；
+队列PID1767782，状态`evidence/rim_v2_full_badcase_queue.json`。
+这是测试放行，尚未完成最终验收；遇引擎错误、SDF降级、输入变动或缺失结果停止。
+每条四视频与人工抽帧仍必须完成，不能因短窗口通过就签发交付资格。
+
+首个授权慢倒失败回放的四路0/2000/3999/4000现已亲看：初始左指不对称，舟及固体
+仍留在桌面，末瓶回秤盘但为空、LCD0.00g；中间瓶离盘LCD−49.73g。此失败不是漏一颗，
+是未完成装料，不能判断慢倒效果。记录为FAIL_TASK_TRANSFER，保留反射、遮挡和抽帧范围。
+规范仍无需变更；上述只补充任务特定诊断证据及测试执行状态。
 
 ## 15:44 UTC：授权慢倒未通过，改查预热阶段
 

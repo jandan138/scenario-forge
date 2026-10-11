@@ -1,11 +1,27 @@
 # 四项科学实验修复：受限交付操作记录
 
+已交付（16:42 UTC）：task10单独包位于
+`/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/delivery_releases/task10_standalone_r1_20261011T162354Z/`。
+状态RELEASED_TASK10_ONLY，安装说明见包内README；仅安装五类内容，标准原版回放1582步满分，
+原生120Hz，四视频和LeRobot v2.1验收完成。metric提交38425dc6eb18fba6560184745acf27fe91241e10。
+建通目录未写入，生产/测试脚本不安装。称量及水浴/银镜继续，其他旧候选的通过/失败只保留
+对应历史范围；尤其rim v2完整坏例引擎失败，不得将旧测试gate或局部PASS用于交付。
+
+
+最新状态（16:30 UTC）：用户选择滴定先单独交付，其余继续。task10_standalone_r1归档
+及独立安装静态检查完成，最后原版正例运行中，发布以RELEASE_MANIFEST为准。
+rim v2完整bad11先遇接触缓存溢出；只改两项YAML缓存后仍CUDA700，14例测试gate已撤销。
+称量仍缺稳定初始化及新成功示范，诊断脚本/观察器不进入任何交付。以下旧状态为历史过程。
+
+
 当前状态（15:44 UTC）：两批均未发布。task10已独立安装成功；task09授权慢倒示范因
 动作前左夹指异常得0.3，尚无新成功数据。四初始驱动目标候选不足以稳定重置，正在
 原core/原robot的短reset诊断中；只读观察器及生产工具不得交付。`task09_task10_r1`
 仍为NOT_RELEASED，不能用旧成功证据封包。
 第二批rim_v2_candidate_runtime已通过限定生产者资格与bad11=1800/bad08=3200两短窗口，
-完整14条7000步坏例仍待运行。此段为当前状态，下文保留历史过程，旧gate不可复用。
+完整14条7000步坏例于16:03:52启动，首条bad11；状态查rim_v2_full_badcase_queue.json。
+同字节夹爪正常/异常对照均未见DriveAPI意外添加，重解析试验不构成修复证据。
+此段为当前状态，下文保留历史过程，旧gate不可复用。
 详见同日验收记录15:44节和工作根CURRENT_STATUS.json。
 
 
