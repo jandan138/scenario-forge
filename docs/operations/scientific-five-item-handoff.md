@@ -1,7 +1,7 @@
 # 四项科学实验修复：受限交付操作记录
 
 当前为候选修复阶段：称量与滴定已通过限定原版回放；水浴/银镜的联合液体与机器人接触仍有CUDA失败，最终交付尚未就绪。任务范围为09称量、10滴定、12斐林，以及文档18对应的银镜任务。
-当前无原版远端评测队列运行；生产者正在验证减少试管PBD底部碰撞形状的候选。
+当前floor8/noCCD/table9mm候选虽本地前缀通过，原版完整回放仍CUDA失败；远端已清理，本地回原杯SDF结构验证桌面修复。
 旧归档与名含 `final` 的实验目录都不代表最终资格。最新决定及证据限制见[任务记录](../records/2026-10-11-scientific-five-item-acceptance.md)。
 
 工作根为 `/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010`。
@@ -74,11 +74,16 @@ v2.1兼容的`Sequence`，所有Arrow数值和视频字节不变。称量3372帧
 成最终版本验收。使用工作根 `evidence/current_bad_case_acceptance_v2.json` 查阅
 明确选择的证据；旧的非版本绑定汇总不作为交付依据。
 
-水浴/银镜当前阻塞于真实液体、自由容器和机器人共同接触的稳定性。旧fine、混合底部、
-凸杯代理、sweep CCD、speculative CCD、容量8m以及减少底部分段的试验均保留原报告；
-部分保液或落碰夹具通过，但仍有机器人CUDA失败。最新bottom16候选静置1202 tick、
-提拉2042 tick均不漏，机器人在329动作失败，未集成至原版评测root。生产者继续检查
-杯底冗余接触结构。当前远端GPU空闲，没有运行评测队列。
+水浴/银镜此前多个连续碰撞候选在机器人共同接触时出现CUDA失败，全部保留。
+最新floor8/noCCD/table9mm组合已通过50mm落桌、严格300物理步预热后的700动作前缀、
+指尖几何与同帧接触计数核对。只给原桌面9mm接触裕量，不增加支撑板；两容器连续
+碰撞关闭，容器/加热器/PBD碰撞裕量、restOffset、质量与动作不变。
+
+新隔离root为 `floor8_margin_validation_runtime`，40入口静态检查通过并冻结1324个
+输入文件。首例 `five_item_bad_17_floor8margin_20261011T003522_829407Z` 在286记录后CUDA失败，
+无完整结果，已清理；该候选拒绝交付，余下13例未启动。下一回到曾原core7000完成的
+原杯SDF+hybrid617/noCCD结构，仅增加table9mm，仍须重新验证。最新运行状态查工作根
+`CURRENT_STATUS.json`。
 
 本方各个 `*_validation_runtime` 都是有版本区分的隔离诊断checkout；目录中的
 `final`、`shared`、`speculative` 等词不是资格标记。`baseline_runtime` 和本人主checkout

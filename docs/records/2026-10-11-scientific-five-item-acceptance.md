@@ -453,3 +453,53 @@ delta虽同字节03aeacf28168f94f05bdd141b9fa9e2fc60fff51e483ad0086ee97799ef991c
 则相反。历史四个全凸分支的真实contact header未出现PBD-only形状，详见生产者
 recovery_pbd_only_robot_filter_static_audit.json 与 recovery_pbd_only_native_contact_audit.json。
 下一结构调查针对杯底多块共面代理带来的冗余接触，尚无根因结论。
+
+
+杯底floor32→8合并候选复用源坐标，体积相对差1.47e-8；源float缝点使每hull38
+顶点，仍低于该GPU凸包限制。两任务delta同SHA
+fdf4cf0a663bff6405a3ab37177bfe017795e5c8ef4df85f9296d6e438ca541d。
+该候选以tube617/speculative/TGS/8m为基准，未叠bottom16；杯330 enabled、
+粒子filter216。50mm落碰482tick通过，管最大0.12784mm、杯0.000325mm，
+库存/能量/无弹飞通过；strict机器人仅279动作/native581即FAIL_ENGINE。
+因此floor冗余减少未消除CUDA，不推广。生产者将比较连续碰撞路径与普通提前接触
+裕量的影响；这只是调查方向，尚无根因结论或参数资格。
+
+
+以floor8为基准关闭两body sweep/speculative CCD，仅原桌面既有collider设置9mm
+contactOffset（restOffset不变）后，50mm落碰482tick通过：管0.1991mm、杯0.00613mm，
+无能量增益/弹飞/库存异常。9mm来自此前单步8.19mm跨越的限定证据，原桌自动offset
+运行时数值未知，不宣传通用默认。容器0.8mm、加热盘及PBD专用offset均未变。
+该组合strict300+700也通过：初始1+300+700=1001原生tick，无零推进动作或引擎错。
+raw指尖最大0.10619/0.07513mm、>1mm为0；1000帧当步contact与控制器计数匹配，
+脚本仍767ceee…；不把前缀提升为全程成功。
+
+新 `floor8_margin_validation_runtime` 原core9d的40入口静态整合通过：tube617、
+bath330、每PBD过滤216、table9mm、两body CCDfalse、质量COMI不变、闭包完整。
+强层顺序[table_margin_no_ccd,floor8,bath_new,active_v2,hybrid,tube_v2,fluid,original]，
+无旧CCD或bottom16层；生产者完整receipt为
+`silver_bad17_diagnostic/recovery_floor8_margin_composition_receipt.json`。
+见工作根 `evidence/floor8_margin_diagnostic_integration.json` 与
+`floor8margin_frozen_inputs.json`。首个完整原版回放
+`five_item_bad_17_floor8margin_20261011T003522_829407Z` 已启动，588受保护blob相同；
+两任务各自最终保液/加热门控、该完整回放及其余坏例仍待通过，不是最终交付资格。
+
+
+上述floor8margin原core首例实际FAIL_ENGINE：286条step记录后，worker1102706于
+2026-10-11T00:37:48Z出现mArtiSolveBlockPartitionFunction/CUDA700，client_exit1，
+无result_info。helper于00:37:54自行清理；随后独立核实本次4PID均退出、GPU0MiB、
+8087释放。没有发送额外终止信号，不把缺失结果记0分；invalid_attempt.json和
+cleanup_verified.json保留。SDK700通过不预测原core全程资格，该候选已拒绝，
+其余13例未启动。下一回到曾原core7000完成的原杯SDF+hybrid617/noCCD，仅加table9mm，
+先验证drop。更新验收索引仍为4条明确选定/18要求，8条有历史完整结果。
+
+
+被拒绝floor8margin的silver提拉自然收尾2042tick，Sample最大出界1粒、Bath0、
+数量不变，无引擎错；原1mm判据保持，记录为FAIL，不因停止后续资格而丢弃此结果。
+
+回原杯SDF+hybrid617/noCCD、仅table9mm的落碰482tick无引擎错，烧杯最大穿入
+约0.00111mm，已无持续穿入；试管仍3.040mm，仅218/219帧>1mm。逐顶点核查定位
+到倾倒上沿旋转：217→218同点+11.980→-3.040mm，全可见网格最大单步下移
+15.124mm，角速约12.3→13rad/s，不能仅以COM竖直速度估算。下一仅table17mm，
+加原容器0.8mm形成17.8mm接触裕量，覆盖该限定跨越；rest/PBD/heater/质量不改。
+该值不是通用物理默认，不应用于已冻结称量/滴定。原SDF face-index警告20699条
+仍保留，需另限解释。依据生产者 angular_impact_audit.json；新结果待验证。
