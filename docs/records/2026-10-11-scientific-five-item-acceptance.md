@@ -1,6 +1,49 @@
 # 科学实验修复：五项交付边界与原版验收
 
-状态：实施中，尚未交付。延续 2026-10-10 启动的修复任务；运行时间以各 receipt 的 UTC 为准。
+状态：按用户确认的两批方案实施。第一批仅称量/滴定，归档与独立安装静态检查已完成，远端原版安装回放进行中；第二批水浴/银镜仍未合格。以下后续诊断保留历史证据，不能以中途 PASS 替代当前资格。运行时间以各 receipt 的 UTC 为准。
+
+## 两批交付与第一批独立安装（13:22 UTC 起）
+
+用户授权先交 task09/task10，再继续 task12/银镜。五类接收路径、原版 core、
+Isaac 4.1 原生 120 Hz、称量 4000 步及水浴/银镜首轮 7000 步约束保持。
+缺成功示范的豁免仅针对第二批重采，不豁免资产接触有效性或引擎错误。
+
+第一批工作根仍为 `/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010`：
+
+- 归档：`delivery_releases/task09_task10_r1_20261011T131822Z/`。
+- 独立安装：`batch1_receiver_runtime`，从原版 `0e99ea01` 新建 worktree，
+  仅应用三个 metric 文件提交 `7900236d09f18472f370569936a9389298368230`，
+  再从已校验的压缩包解压三类离线文件。未复制实验 runtime 或其 mesh cache。
+- `offline_overlay.tar.gz` 包含 102 个 YAML、1413 个 USD/依赖文件、410 个 task data 文件；
+  每任务 20 个场景入口。两份 LeRobot v2.1 各一条成功示范，3372/1582 帧。
+- 原接收仓库的 303 个机器人/公共材质前置资产只读复制到隔离安装，全部与既有测试底座
+  哈希一致。它们属于接收仓库既有依赖，不加入新增离线交付范围。
+- 归档所有成员 SHA、gzip CRC/长度、安装后文件哈希通过。40 个 USD 依赖闭包和内嵌
+  Python AST/外部路径检查通过；1426 个保护基线文件与原始 Git blob 一致。
+  对建通仓库执行 metric `git apply --check` 通过，仅只读检查。
+- 七条冻结回放输入与新安装核对：最早称量成功回放的两个 metric 曾经 Black 格式化，
+  字节不同但 Python AST 完全相同，单独保留前后 SHA；其余绑定输入逐字节一致。
+  不将这两个格式差异写成“所有输入字节完全相同”。独立安装还会完整重跑两条成功示范。
+
+构建身份为 `evidence/batch1_build_identity.json`；安装审计为归档目录
+`STATIC_INSTALL_AUDIT.json`；远端队列为 `evidence/batch1_install_queue.json`。
+四任务的旧 metric 提交 `9d85d222` 和旧完整候选包不用于第一批。
+原始四任务 inventory 完整性约束未放宽；独立两任务 builder 明确限定这两项。
+
+第二批新定位：源 SDF 管与三角网格台面组合的 482 步掉落检查出现 341 帧穿透，
+最深 12.460 mm。生产者核实原桌碰撞体就是精确闭合长方体，只将其近似改为凸包，
+没有加 slab、改顶高/尺寸或叠加碰撞体。持续深穿、能量异常及 46113 条面材质警告消失，
+但仍有一帧口沿穿入 1.995 mm。再仅开启管体 speculative CCD 后仍有一帧
+1.072748 mm，超过固定 1 mm 门槛，保留 FAIL，不运行后续资格队列、不交付。
+两份生产者 receipt 位于 ConvertAsset 的
+`outputs/sciben_waterbath_120hz_20261010/silver_bad17_diagnostic/` 下
+`recovery_source_sdf_table_convex_diagnostic/diagnostic_receipt.json`（SHA `a5907c88…`）与
+`recovery_source_sdf_convex_table_speculative/diagnostic_receipt.json`（SHA `981d57fa…`）。
+原 SDF 完整 bad11 已完成 7000 步、引擎未报错，但不能覆盖掉落夹具 FAIL。
+
+规范无需变更：本次是 ASSET-002/003、VAL-001/002/003/004/005 范围内的分批打包、
+最终内容绑定及特定接触诊断，不形成通用碰撞参数或新 core/package/API 契约。
+操作说明同步更新；原始资产、坏例和未通过候选均保留。
 
 用户明确限定最终交给陈建同的内容：task config YAML、USD/assets、task data、
 scientific_experiments metric 代码、LeRobot 数据集。生产、测试、转换辅助脚本允许保留在

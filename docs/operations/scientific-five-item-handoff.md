@@ -1,10 +1,17 @@
 # 四项科学实验修复：受限交付操作记录
 
-当前再次处于候选修复阶段：称量与滴定已通过限定原版回放；水浴/银镜scene128虽通过九组限定专项检查和四条完整坏例，但银镜mixed20在1574记录后CUDA崩溃，测试放行已撤销，最终交付尚未就绪。任务范围为09称量、10滴定、12斐林，以及文档18对应的银镜任务。
-当前table17候选在五条完整原版回放后，于第六条斐林mixed5回架阶段出现CUDA失败；队列已停止并清理，生产者恢复针对性诊断。
+当前按用户确认分两批：第一批 task09 称量与 task10 滴定已生成独立归档，通过安装静态检查，正在远程 4090 原版环境复跑两条成功示范；第二批 task12 斐林与文档18银镜继续修复。第二批最新单帧穿透 1.072748 mm 仍超过既定 1 mm 门槛，保持不合格。此前 table17、scene128 和 sole-SDF 的中途通过不构成最终交付资格。
 旧归档与名含 `final` 的实验目录都不代表最终资格。最新决定及证据限制见[任务记录](../records/2026-10-11-scientific-five-item-acceptance.md)。
 
 工作根为 `/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010`。
+第一批唯一构建身份看 `evidence/batch1_build_identity.json`，归档位于
+`delivery_releases/task09_task10_r1_20261011T131822Z`。在该目录最终发布状态完成前，
+`BUILD_STATUS.json` 仅代表构建/安装进度。独立验证目录 `batch1_receiver_runtime` 从
+归档安装，没有复制实验 mesh cache；完整运行仍使用原始服务与原始 LMDB 客户端。
+第一批 metric 为 `7900236d09f18472f370569936a9389298368230`，仅称量、滴定及公共
+`repair_checks.py` 三个文件。不能使用下文历史四任务 patch 代替这个子集。
+
+以下主 checkout 与四任务候选描述用于追溯历史，不能整目录发给接收方。
 其中 `baseline_runtime` 是以原版 GenManip 为底座的验收 checkout。自己的主 checkout
 已切至 `delivery/scientific-five-items-20261011`，同样为原版core加允许的metric提交，
 并同步四任务当前候选；3172个候选文件哈希与验收目录一致。588个非允许范围的原版
