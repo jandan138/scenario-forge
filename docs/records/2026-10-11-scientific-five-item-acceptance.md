@@ -639,3 +639,42 @@ Bath0，inventory不变，native120无error）。首违例750、管局部z=-1.40
 f866c4cf1e433190db17c71ca35eaec4b844711ef1a05d20785c01114492e664，位于producer
 silver_bad17_diagnostic/recovery_solidcap_fehling_lift41/report.json。
 夹具队列自动停止，未放行新整批gate。原core短程无崩溃不能覆盖保液失败。
+
+
+新增paired只读lift排查：旧table17 PASS2042/outside0，新solidcap FAIL2042，
+同实际container位姿逐步严格一致；新粒子9152于native734..2042连续1309tick越界。
+local z732=1.012266mm、733=.546336mm、734=-1.399815mm，与薄Floor进入下半后
+被纠正到下表面的解释相容，但无PBD法向遥测，标为推断而非已证实根因。
+原Floor0..1.1mm，新realglass cap0...9999mm；候选sharedcap只禁用Floor并从两PBD
+filter中取消cap（145→144），其余352环片不动。层SHA
+2f812934b2a8e7ca230bc7119b24a8c0c4cddac93df5a944bf7d2703dd650327。
+静态40entry成立，但sharedcap lift也FAIL，首次492、局部z=-.781596mm。
+因此sharedcap_validation_runtime未启动原core资格或整批gate，不可交付。
+下一单变量由producer评估solidcap原几何上的Sample PBD位置迭代64→128；
+Bath、rigid及World原生120Hz不变，尚无验证结论。内部求解迭代不等于新增World子步。
+
+
+原solidcap/PBD64完整bad08完成7000/score.15/sr0/client0，全部worker无引擎错误，
+四视频全解码/native120通过。实现者亲看0/3500/6999/7000：末试管斜搭架顶并向
+前右侧伸出、绿色样液在低端，不是正常归槽。清理核实helper1294170/server1294193/
+client1295567与该runtime cwd进程全部退出，GPU0MiB/8087空。仍因独立liftFAIL保留
+为未合格候选历史，不据此交付。
+
+Sample128单变量lift完整PASS2042/outside0/error0，wall241.151s包含启动/收尾，
+report SHA dd6fdd79a2b7f18783b51f7e5f8c4878e416fefce94666c576852c3bfd6b6022。
+层SHA08e109418a6215a6d60dc0586d9d11f3a2a36a7d93898b72db340cf744c857aa，
+仅Sample PBD solverPositionIterationCount64→128；Bath/rigid/Worlddt不变。
+新pbd128_validation_runtime从solidcap原Floor组合，明确不包含已失败sharedcap。
+尚待其余生产者资格与新字节完整原core坏例，不能将单个lift PASS写成最终通过。
+
+
+PBD128原core fullbad08于05:33:02启动，run
+five_item_bad_08_pbd128_20261011T053302_157711Z，588受保护blob不变。
+40入口与40脚本静态审计通过。初次消费检查误用了带physxParticleSystem前缀的属性名，
+实际schema为solverPositionIterationCount；仅修正本方检查后逐场景确认Sample128/Bath64，
+未改生产者物理字节。任务资产迭代仍需新原core完整结果与producer资格。
+
+本方打包检查发现局部runtime没有09/10资产和taskdata；其草稿清单已标INVALID且未归档。
+inventory新增存在性与20入口检查，archive builder在创建目录前强制四任务三类离线树完整。
+用完整历史清单、无效局部清单、伪标DRAFT的局部清单三个对照验证，结果均符合预期，
+未建立新归档。此工具仅本方制作辅助，最终无接收方依赖；操作说明同步完整基线来源。

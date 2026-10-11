@@ -126,3 +126,10 @@ USD依赖扫描与MDL字面资源检查需分开解释：80个入口的USD依赖
 solidcap短诊断3200完成无引擎错误，原robot完整7000 bad08另行运行；但是新cap
 Fehling lift有1粒底部越界，producer夹具队列已停止。故solidcap同样尚不可交付，
 不能从短诊断成功或静态40入口通过推断保液资格。当前没有新整批测试放行gate。
+
+
+隔离的水浴/银镜runtime只含这两项资产与taskdata，虽然Git配置树含其他任务，
+不能直接作为四任务完整交付根。inventory与archive builder均检查四任务三类离线树
+及每任务20个入口；完整性测试见evidence/inventory_completeness_guard_test.json。
+20261011T053555Z草稿来自局部runtime，已标INVALID_PARTIAL_RUNTIME_NOT_DELIVERY_INVENTORY，
+没有打包。最终使用合格两任务覆盖到保留09/10冻结内容的完整基线后再生成清单。
