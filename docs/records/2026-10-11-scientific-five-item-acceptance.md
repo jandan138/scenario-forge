@@ -747,3 +747,14 @@ producer记录b4a7900同步，仅更新文档，无物理改动。
 09:34:54沿同冻结版本启动scene128_r1余12例（PID1464669），顺序9,10,11,12,13,14,
 15,16,6,4,5,7，状态evidence/scene128_r1_queue_state.json；旧stop记录保留。
 当前新版本已完成08/17两例，不能把剩余待跑项目写成已验收；最终交付仍未发布。
+
+
+scene128_r1已追加两条完整银镜坏例：bad09 mixed1
+five_item_bad_09_scene128_r1_20261011T093459_506283Z、bad10 mixed18
+five_item_bad_10_scene128_r1_20261011T100336_292547Z，均7000/.15/sr0/client0，
+四视频全解码、native120及worker错误检查通过。实现者分别亲看四路0/3500/6999/7000：
+09烧杯仍在heater，透明管在rack/heater附近遮挡，未确认归槽；终native7200 PBDtrue，
+heated0/bath_off_center。10管横躺rack顶面并向左伸出，烧杯保持直立；终PBDtrue，
+heated4.6000002399s/sample_not_in_water/silver_nucleation。保留黑/绿背景、玻璃反射与
+腕相机裁切限制，不凭抽帧声明所有微观接触通过。当前新版本完成08/17/09/10共4/14。
+可追溯清单evidence/scene128_case_evidence_index.json，明确provisional而非最终发布。
