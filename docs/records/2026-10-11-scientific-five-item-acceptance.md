@@ -623,3 +623,19 @@ report wrapper仍仅供诊断，588个原core受保护blob核对一致。当前�
 本方evidence/solidcap_trace_integration.json及run内diagnostic_scope.json绑定新增输入。
 用户再次确认水浴首轮允许待重采；该限制不代表允许把引擎崩溃归为正常坏例。
 规范无需变更：本次为特定资产/运行时的局部候选，未形成可推广物理默认值。
+
+
+solidcap短诊断完成3200动作，score=.15/sr0/client0，worker物理/诊断错误0；四视频
+完整解码与native120检查通过，实现者抽看0/1600/3199/3200，末管在夹爪与架子附近
+倾斜、样液绿色，未认定正常落座。旧故障31tick窗口接触峰371→262，总10920→7764，
+但旧负点只有233–2260界限，新精确862，不能声称负点总数下降或单一根因已证实。
+只读observer不进入新solidcap_validation_runtime；40入口闭包/40脚本检查通过，原
+robot SHA dbdc4f695d7c3e760b99a369e092b1dd0d20e9fee7cca6c5fca9ba46fb1033df。
+原7000配置完整bad08于04:58启动，run five_item_bad_08_solidcap_20261011T045813_143650Z。
+
+新cap资格仍未通过：Fehling cold1202 PASS，但lift2042 FAIL（Sample最大outside1，
+Bath0，inventory不变，native120无error）。首违例750、管局部z=-1.40005mm、近轴心，
+不是已证实的管口溢出；生产者继续定位。lift report SHA
+f866c4cf1e433190db17c71ca35eaec4b844711ef1a05d20785c01114492e664，位于producer
+silver_bad17_diagnostic/recovery_solidcap_fehling_lift41/report.json。
+夹具队列自动停止，未放行新整批gate。原core短程无崩溃不能覆盖保液失败。

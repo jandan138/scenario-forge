@@ -122,3 +122,7 @@ USD依赖扫描与MDL字面资源检查需分开解释：80个入口的USD依赖
 运行ID见CURRENT_STATUS.json。其3200动作上限与robot report wrapper只用于定位，
 不得进入五项最终覆盖包或冒充原机器人完整7000步验收。旧table17 gate保持撤销。
 水浴与银镜首轮都允许注明成功示范/训练数据待重采；仍分别保留资产资格与坏例证据。
+
+solidcap短诊断3200完成无引擎错误，原robot完整7000 bad08另行运行；但是新cap
+Fehling lift有1粒底部越界，producer夹具队列已停止。故solidcap同样尚不可交付，
+不能从短诊断成功或静态40入口通过推断保液资格。当前没有新整批测试放行gate。
