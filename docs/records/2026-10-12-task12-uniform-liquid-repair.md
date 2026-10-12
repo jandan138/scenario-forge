@@ -87,6 +87,9 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 
 无仪表冷态对照同样通过，完整日志error级错误和碰撞降级为0，仍有同签名faceIndex警告。原失败版本也存在该警告，因此不归因于测量接口。协调器最初额外要求零警告而停止的记录保留；审查报告`rack_warning_control.json`明确为带既有警告的夹具通过，不是无警告引擎声明，不比较不同工作负载警告率，也不豁免任何CUDA/物理错误。
 
+新的完整mixed5回放为`task12_rack_support_mixed5_20261012T172552_148914Z`，状态见`native_rack_support_run.json`，不得用已停止的历史协调器状态替代它。
+候选离线包`delivery_candidate_20261012T172900Z`的701个成员经过完整归档哈希核验，已向原始base应用允许的metric补丁并从归档安装到`receiver_archive_install_20261012T172900Z`，所有安装文件哈希一致。生产者hook PATH修复后Black通过，未跳过hook；配置索引JSON不在允许的YAML交付范围中，已排除。候选明确未发布，仍待完整运行、最终反应/重置视频和人工画面审查，不包含成功训练集。
+
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 
 ## 规范同步
