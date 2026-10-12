@@ -1,6 +1,6 @@
 # task12：均匀变色真液体水浴修复
 
-状态：首例完整7000步坏例运行、实际变色/重置视频和三类守卫通过，仍未交付；首例0.15分仍为失败策略。离线归档独立安装通过，其余四例原生验证进行中。任务当前状态以外部工作根的报告为准。
+状态：资产视频、重置和守卫通过；旧64MiB版本首例完整运行通过，但另例发生碰撞缓存溢出，不能交付。新128MiB YAML版本已独立安装，五例重新验证中。任务当前状态以外部工作根的报告为准。
 
 ## 已确认的目标
 
@@ -109,6 +109,14 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 新的测试专用夹具用World FixedJoint约束仍属dynamic actor的烧杯，试管kinematic行程26.2→27.0mm，并记录真实位姿/接触。1082步中负例起末接触数16/17，保持一秒heated_seconds均为7.31666704826057，证明真实持续碰壁时不累计；液体有效、浸入有效、无物理错误。该夹具不用于自由运动资格，未进入交付USD。
 `guard_qualifications.json`核对四类夹具、归档安装全文件哈希及运行舞台中不存在FixtureBathClamp，controller只导入现有SDK/stdlib/numpy，无外部生产工具依赖。原协调器失败记录保留，剩余四例由`run_remaining_native_cases.py`执行，最新状态`remaining_native_cases.json`。
 20场景几何一致性另补全数值数组dtype/shape/bytes哈希，`rack_geometry_identity_all20_numeric.json`通过；不比较父级摆放，也不代替动态评测。
+
+## 碰撞缓存不足与容量版本
+
+独立归档安装版本的`unseen_background_3`在约2430步报`PxGpuDynamicsMemoryConfig::collisionStackSize buffer overflow`，要求至少78645720；日志明确说明contacts dropped。队列首错停止，无完成结果验收，不当作低分坏例。证据`stack64_overflow_failure_audit.json`及原`native_case_04_run.json`。
+目标Isaac4.1的generatedSchema默认`physxScene:gpuCollisionStackSize=67108864`；原版`setup_physics_scene`通过Get/Create字段反射设置配置，已有`GpuCollisionStackSize`接口，不需修改源码。
+新隔离`receiver_stack128_runtime`只在51个YAML的102个示范/评测块增加`GpuCollisionStackSize:134217728`（128MiB），保留原120Hz、7000步、求解器、几何、质量和动作。逐块删除新增字段后与原配置语义相同，652个非配置交付文件字节相同；`stack128_receiver_prepared.json`和`stack128_scope_reuse.json`保留实际差异。
+新归档`delivery_candidate_20261012T190127Z`已向原始base独立安装到`receiver_archive_install_20261012T190127Z`；真实worker日志已记录`[OK] GetGpuCollisionStackSizeAttr().Set(134217728)`。
+旧64MiB视频/夹具只复用相同USD的资产、材质及逻辑范围，不能当作128MiB运行通过。由`run_stack128_qualification.py`按4/8/5/6/7顺序重新跑全部五例；首条完整审查通过才放行后续。状态`stack128_native_cases.json`，新报告前缀`native_stack128_`，原失败与旧PASS均保留。未出现新五例完成结果前，不发布或声称缓存问题已解决。
 
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 
