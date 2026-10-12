@@ -1,6 +1,6 @@
 # task12：均匀变色真液体水浴修复
 
-状态：新候选已通过首例完整7000步坏例的运行验收，仍为0.15分失败策略；尚未交付。离线归档独立安装通过，最终变色/重置视频、守卫及其余四例验证进行中。任务当前状态以外部工作根的报告为准。
+状态：首例完整7000步坏例运行、实际变色/重置视频和三类守卫通过，仍未交付；首例0.15分仍为失败策略。离线归档独立安装通过，其余四例原生验证进行中。任务当前状态以外部工作根的报告为准。
 
 ## 已确认的目标
 
@@ -99,6 +99,16 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 这只证明新候选下本条记录完成了规定回放，未确定重复支撑是CUDA唯一根因，不推广任意动作稳定。
 
 已放行`tools/run_qualified_continuation.py`：在从离线归档安装出的原版接收方运行实际反应/重置及倾斜、偏心、碰壁夹具，再完整验证其余四条原始7000帧坏例；首错停止，最终人工审查与发布仍独立。20个场景的架子局部几何、碰撞参数、子变换和语义孔位指纹一致，`rack_geometry_identity_all20.json`；不把该静态一致性当作20场景动态通过。
+
+## 已安装版本的视频和守卫
+
+`fixtures/final_normal_20261012T180639Z`完成4926个120Hz原生步，原加热曲线在约41.021218秒到达终态；视频1251帧、30fps、41.7秒，全解码通过。实现者亲看初始、30秒、终态和重置图：样液能隔水看清，整体蓝色到橙砖红并变浑浊，无固定色层或独立固体沉淀，重置图恢复蓝色。视频及边界审查见`final_normal_video_audit.json`，试管为明确kinematic夹具，不能充当机器人成功示范。
+重置首物理步heated_seconds=0；随后120个render-only刷新不增加native步，但读回了一个已发生的native事件对应的8.33ms加热。旧工具字段“no added physics or heat time”过宽，已在派生审查中明确更正，不改写原报告。新增实际compute函数回归：同native index调用120次不增加加热，下一个index仅消费一个tick，10项测试通过；具体回调先后未作直接仪表测量，不把该观察推广为所有渲染器延迟规则。
+
+原倾斜、偏心夹具分别1322和842个120Hz步通过。首次wall夹具1082步无引擎错误，但末尾接触数0、加热继续，未实现持续碰壁条件，队列按规则停止；保留失败原件，不称作guard失效或已修复。
+新的测试专用夹具用World FixedJoint约束仍属dynamic actor的烧杯，试管kinematic行程26.2→27.0mm，并记录真实位姿/接触。1082步中负例起末接触数16/17，保持一秒heated_seconds均为7.31666704826057，证明真实持续碰壁时不累计；液体有效、浸入有效、无物理错误。该夹具不用于自由运动资格，未进入交付USD。
+`guard_qualifications.json`核对四类夹具、归档安装全文件哈希及运行舞台中不存在FixtureBathClamp，controller只导入现有SDK/stdlib/numpy，无外部生产工具依赖。原协调器失败记录保留，剩余四例由`run_remaining_native_cases.py`执行，最新状态`remaining_native_cases.json`。
+20场景几何一致性另补全数值数组dtype/shape/bytes哈希，`rack_geometry_identity_all20_numeric.json`通过；不比较父级摆放，也不代替动态评测。
 
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 

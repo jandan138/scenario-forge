@@ -14,7 +14,7 @@
 |---|---|---|
 | task10滴定 | 已发布到本人目录；原版120Hz/1582步满分及v2.1数据已验证；旧/新各3次未复现历史弹飞，因果未证实 | `W/delivery_releases/task10_standalone_r1_20261011T162354Z/README.md` |
 | task09称量 | 新规则原版机器人1.0，运行内容已封存；600条LeRobot持续生产，未完整交付 | `W/task09_recapture_600_20261012/CURRENT_STATUS.json`及[操作说明](task09-recapture-dataset.md) |
-| task12水浴 | 独立mixed5末段引擎错误，未交付；重置/浴液投影呈现修正已落实，新碰撞候选尚未准入 | `W/task12_liquid_color_20261012/CURRENT_STATUS.json`及[操作说明](task12-uniform-liquid-repair.md) |
+| task12水浴 | 新候选完整mixed5运行、实际变色/重置及三类守卫通过；归档独立安装通过，剩余四例验证中，未交付 | `W/task12_liquid_color_20261012/CURRENT_STATUS.json`及[操作说明](task12-uniform-liquid-repair.md) |
 | task_z4银镜 | 完整bad11引擎失败；加容量、PGS均未解决；成功示范允许待重采 | 同上及 `W/evidence/rim_v2_pgs_diagnostic_run.json` |
 
 本次停靠证据SHA见[小型索引](../records/2026-10-12-scientific-repair-checkpoint.evidence.json)。
@@ -50,7 +50,7 @@
 
 1. 核对本页、阶段记录、CURRENT_STATUS与证据SHA；检查远程GPU/8087占用。补证收尾已确认本次进程全部退出；最终状态看配对回归comparison_summary/final_cleanup，恢复时重新检查。
 2. 称量按[新数采制作说明](task09-recapture-dataset.md)检查持续生产队列；原版机器人成功及新验收口径见[新记录](../records/2026-10-12-task09-readout-range-acceptance.md)。旧慢倒失败保留历史资格，不重跑它或停止现有600条生产。
-3. 水浴/银镜先定位一个完整失败例的触发条件。局部夹具PASS保留限定范围，不再立即放行整批队列。每个新试验写一个假设、预期观测与停止条件。
+3. 水浴按最新独立队列完成剩余四例、人工画面审查及phase1发布；银镜继续定位完整失败触发。局部资格只保留限定范围，每个新试验记录假设、预期观测和停止条件。
 4. 新版本完成原版120Hz、完整日志、任务结果、四视频审查，再进行受影响坏例、成功数据和独立安装。新版本单独封包，不覆盖滴定。
 
 用户已接受的约束不重复征求：称量4000步，水浴/银镜首轮7000步；后两项成功示范/训练待重采。

@@ -32,6 +32,10 @@
 首例已完成7000步、0.15分，完整日志无引擎错误、四视频全解码及受保护源码检查通过；真实失败是加热不足且末帧试管斜躺在架上，不能当成功示范。`first_rack_native_visual_review.json`只放行坏例运行范围，总体视觉WARN。
 后续由`run_qualified_continuation.py`串行执行已安装版本的normal/tilt/offcenter/wall夹具与badcase4/5/6/7；状态在`qualified_continuation.json`。任何失败停止，无自动READY或发布。最终仍需人工检查新视频与其余坏例画面。
 
+该协调器实际停在旧wall夹具未维持接触：接触数0，不能当wall guard失败或通过。原normal视频及tilt/offcenter通过。修订wall夹具只在测试内夹住dynamic烧杯并实测16–17接触点、保持一秒不加热；交付文件哈希复核一致，未包含夹具。完整资格汇总读`guard_qualifications.json`。
+最新剩余四例队列已切换`run_remaining_native_cases.py`，状态读`remaining_native_cases.json`；旧协调器的STOPPED状态为历史失败证据，不能覆盖当前运行状态。新native验收日志/四视频仍逐项检查，所有人工审查完成后才运行受门禁保护的`finalize_phase1_release.py`，只生成本人目录的phase1发布头。
+最终无机器人原视频见`final_normal_video_audit.json`，已亲看蓝色→整体橙砖红→重置蓝色且全解码。120帧刷新不增加native步；一个待处理native事件的8.33ms读回已注明，不把render-only当新物理时间。原装饰OFF字样保留，不用它判断实际任务加热状态。
+
 真实反应视频的重置画面曾误报PASS，人工检查已撤销。最新演示工具增加暂停物理后的120帧渲染刷新和样液区域颜色占比检查；必须在最终接收方版本重新录制，确认刷新期间物理步不增加。数值重置通过不等于摄像头第一帧恢复。
 
 ## 安装兼容与交付
