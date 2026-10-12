@@ -7,6 +7,7 @@
 
 当前最新队列是`stack128_native_cases.json`/`run_stack128_qualification.py`。旧`remaining_native_cases.json`在unseen_background3约2430步因64MiB碰撞栈不足停下，接触已被丢弃，不得放行或重跑旧配置。
 新51个YAML/102块只增加GpuCollisionStackSize=134217728，已重新归档并独立安装；原版loader实际设置新值的日志必须进入每例验收。五例全部在新版本重验，报告`native_stack128_<case>.json`；首条人工审查marker为`first_stack128_visual_review.json`。旧视频/守卫仅以相同USD范围复用，不能充当新容量运行证据。
+新容量首条background3已完整通过当前回放运行验收、0.15分失败，人工审查放行，正在继续mixed5。通用视频audit可选runtime JSON缺失时clock字段为False；task12实际频率由内嵌native回调摘要和逐异常dt触发日志独立验收，不把缺失文件当测得错误频率，也不跳过实际时钟检查。
 
 先读R/CURRENT_STATUS.json、evidence/first_native.json及对应baseline_runs/receipt.json，再检查远程GPU与8087占用。
 称量600条在另一台机器上运行，勿停止或重复启动其producer。水浴只使用10.150.162.223的单4090。

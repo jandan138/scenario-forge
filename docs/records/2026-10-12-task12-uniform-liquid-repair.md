@@ -118,6 +118,10 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 新归档`delivery_candidate_20261012T190127Z`已向原始base独立安装到`receiver_archive_install_20261012T190127Z`；真实worker日志已记录`[OK] GetGpuCollisionStackSizeAttr().Set(134217728)`。
 旧64MiB视频/夹具只复用相同USD的资产、材质及逻辑范围，不能当作128MiB运行通过。由`run_stack128_qualification.py`按4/8/5/6/7顺序重新跑全部五例；首条完整审查通过才放行后续。状态`stack128_native_cases.json`，新报告前缀`native_stack128_`，原失败与旧PASS均保留。未出现新五例完成结果前，不发布或声称缓存问题已解决。
 
+首条新容量`task12_stack128_bad04_20261012T190242_868247Z`已完整7000步、0.15分；7000帧原始目标全匹配，未保持额外末帧，实际loader容量134217728，完整日志error/碰撞降级0、四路视频各7001帧全解码、588个保护代码未变。7001条手臂记录最大单帧变化约0.126769rad，无灾难关节突变。
+亲看四路0/3500/6999/7000审查图及overlook/左腕2430帧：原溢出位置附近左手持管在架上方，终态试管斜躺在架上且部分有色样液已流出；仍非正确插孔或成功任务。视觉WARN但当前坏例运行健康检查通过，`first_stack128_visual_review.json`已放行下一条mixed5。原64MiB异常保留，不把一条新运行扩大为所有历史CUDA错误根治。
+当前动作协议每个120Hz物理步应用一帧记录目标，原记录完整权威采样时序/协议标志缺失，不声称原时间轴或新闭环策略等价；分数只评价本次目标回放。task12时钟证据来自内嵌SDK物理回调：每600步摘要，任何非120Hz或非有限dt立即输出错误计数；通用视频审查中的可选runtime JSON缺失标志不是实际频率失败，使用task12独立日志审查。
+
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 
 ## 规范同步
