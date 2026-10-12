@@ -70,8 +70,17 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 
 对应SDK的本地generatedSchema表明`shrinkWrap`默认为False，并提供将凸包顶点投回原始图形网格表面的选项。
 第二个独立诊断仅启用该选项，保留其余凸分解默认值；输出位于`task12_lower_decomposition_shrinkwrap_20261012`。
-先与原SDF的同项实测比较，再做严格内腔、两次冷启动及两次规定升降测试。未通过前，不运行其整批原生回放、不把“仍有开口”当作完整几何保真，也不放宽任务指标或发布候选。
-调度状态为`evidence/shrinkwrap_qualification.json`，该PASS即使出现也只代表明确的资产夹具范围，最终仍需完整原版机器人运行。
+该候选在SDK初始化时发生GPU Narrowphase/CUDA700错误，未完成有效内腔测量。保留失败日志及本次进程组清理记录，不继续调整凸分解参数，也未安装到接收方版本。状态为`evidence/shrinkwrap_qualification.json`。
+
+## 重置画面与架底支撑诊断
+
+`normal_visible_20261012T161040Z`的真实反应在6940个120Hz物理步内无引擎错误，能看到蓝色到暖色的均匀变化；但重置后8步的截图仍残留终态红色。原自动门槛把玻璃蓝色反光误当作样液恢复，人工检查已撤销视觉PASS，报告原件另存，不可作为交付视频。
+后续暂停物理的诊断观察到：材质已恢复蓝色后，继续绘制多帧，摄像头图像才逐渐恢复。证据只能说明渲染输出有历史收敛过程，未定位到某个具体渲染算法。
+演示工具现以重置后的首步检查数值，再暂停物理、绘制120帧后检查样液区域颜色占比，确认绘制未增加物理步；最终版本仍须重新录制。不能承诺重置首个像素立即更新。
+
+原试管架`Cube_015`三角网格和18个补充圆柱支撑同时启用。实测18个架孔各65条射线，共1170点：原网格承托面均覆盖补充支撑片上方，表面高差约0–4.29mm。使用实际hit.position比较，不能把raycast的膨胀distance误当表面高度。
+生产者新候选`task12_rack_seat_single_support_20261012`仅关闭这18片补充支撑，保留原架网格、试管SDF、所有粒子及液体参数。组合前后逐属性/关系比较确认仅18个collisionEnabled改变；这不是CUDA根因证明。
+资格顺序为实际动态落座接触、两次冷启动和两次规定升降保液，再在新的隔离接收方目录完整回放mixed5，最后验证其余四例。任一步失败均保留证据且不交付。外部调度见`evidence/rack_qualification.json`，不需要接收方安装辅助脚本。
 
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 

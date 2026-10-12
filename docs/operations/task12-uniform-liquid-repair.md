@@ -21,7 +21,11 @@
 重置材质修正和浴液投影修正已写入20个场景入口；原静态报告的旧wrapper哈希须在最终验收前刷新。
 当前真实反应视频见`normal_visible_process.json`；`shadow_diagnosis_process.json`等是强制颜色/暂停物理的诊断，不能当作反应视频。
 
-默认凸分解候选因内腔偏差未通过，不得安装。第二个shrinkWrap诊断由`tools/run_shrinkwrap_qualification.py`调度，先等真实反应与源SDF测量，再核对内腔及冷态/升降夹具；任一失败停止，完整原生资格仍单独建立。
+默认凸分解候选因内腔偏差未通过，shrinkWrap候选初始化触发GPU错误，两者均不得安装或继续原队列。
+当前生产者候选只关闭18片冗余架底支撑，保留完整原架三角网格。`tools/run_rack_qualification.py`串行执行两次冷态及两次升降，由`run_sdk_owned.py`在首错/超时清理本次进程组。冷态额外检查原网格实际接触和末秒落座稳定，液体仍逐原生步检查粒数和1mm内腔门槛。
+只有`rack_qualification.json`为`PASS_BOUNDED_ASSET_GATES_NATIVE_REPLAY_REQUIRED`时，才能运行`prepare_rack_receiver.py`创建`receiver_rack_support_runtime`，之后用`run_rack_native.py`完整回放mixed5。原失败目录不覆盖。
+
+真实反应视频的重置画面曾误报PASS，人工检查已撤销。最新演示工具增加暂停物理后的120帧渲染刷新和样液区域颜色占比检查；必须在最终接收方版本重新录制，确认刷新期间物理步不增加。数值重置通过不等于摄像头第一帧恢复。
 
 ## 安装兼容与交付
 
