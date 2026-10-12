@@ -17,6 +17,11 @@
 原始日志；只检查 worker 或回调注册后的消息，不能声明整个运行无引擎错误。
 记录实际检查的日志及遗漏范围。依据：[科学实验五项交付的完整日志复核](../records/2026-10-11-scientific-five-item-acceptance.md#full-engine-log-coverage)。
 
+“未发现错误级日志”不等于“没有警告”或“任务成功”。报告分别保留错误、警告及碰撞降级的
+检查范围与结果；警告的影响未确认时，不推断其无害或必然导致任务失败。
+基础设施检查的 PASS 不代替成功示范或数据导出资格。
+依据：[科学实验阶段收尾](../records/2026-10-12-scientific-repair-checkpoint.md)。
+
 依据：[资产准则](asset-intake.md)、[固定基座记录](../records/2026-09-04-fixed-base-articulated-instance-v2-and-oven-handoffs.md)、
 [水浴证据边界](../records/2026-09-08-fehlings-water-bath-r2-sedimentation.md)。
 
@@ -116,3 +121,4 @@ OSS 归档保持追加且不可变，使用项目拥有的 `artifact-history-v1/
 运行次数、保留率、碰撞容差等具体阈值由任务/接口及其证据定义，本页不建立一套替代所有专项标准的统一数值。
 2026-09-08 汇集验证准则，迁入 Artifact Policy 的文件/保留政策；原路径保留导航与使用说明。
 2026-10-11：VAL-001 明确服务启动及初始化原始日志的覆盖范围；不改变物理参数或历史包字节。
+2026-10-12：VAL-001 澄清错误、警告与任务成功的区别；不新增物理默认或额外审批。

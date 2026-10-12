@@ -1,0 +1,95 @@
+{
+  "checkpoint": "2026-10-12 midway closeout; not all-task completion",
+  "created_utc": "2026-10-12T03:26:39.967286+00:00",
+  "scope": "Read-only existence and SHA256 verification of listed evidence files; no new simulation or archive-payload revalidation",
+  "work_root": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010",
+  "remote_readonly_check": {
+    "gpu_uuid": "GPU-00b557f8-7023-cd17-db83-b7b002691cb8",
+    "memory_mib": 0,
+    "utilization_percent": 0,
+    "localhost_8087_connect_ex": 111,
+    "note": "ss unavailable; socket check used instead; no process killed"
+  },
+  "evidence": [
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/delivery_releases/task10_standalone_r1_20261011T162354Z/RELEASE_MANIFEST.json",
+      "bytes": 8063,
+      "sha256": "10dfabecc0709d8647e18b9512a59f3c31c02ac0f6578543350b08ecef64159e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/delivery_releases/task10_standalone_r1_20261011T162354Z/SHA256SUMS",
+      "bytes": 3183,
+      "sha256": "69f1df5af4d6369a99642d827c440b0e6555913cb221971e616c0ff9b30773a5"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/delivery_releases/task10_standalone_r1_20261011T162354Z/README.md",
+      "bytes": 3303,
+      "sha256": "c8f8f1d76465f1ae8589e2ee476b659e7e14e864ff6ef40242c371d7f05536e6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/delivery_releases/task10_standalone_r1_20261011T162354Z/STATIC_INSTALL_AUDIT.json",
+      "bytes": 30254,
+      "sha256": "ffc42ee84420a7c5767dc43e3ef4e9414f61afe551eb4a11b369ba35e5b29ac1"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/delivery_releases/task10_standalone_r1_20261011T162354Z/CONFIG_DATA_AUDIT.json",
+      "bytes": 14504,
+      "sha256": "3b24ef21e406de41af97e5794abb37dde20e4951ef9a95781f1f0b949439eca1"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/task10_released_full_server_log_scan.json",
+      "bytes": 571,
+      "sha256": "d79ab9ac59198efba68a15c4623ca01f9b0832fa686875d31459b472fa8ad50c"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/task09_default_offsets_summary.json",
+      "bytes": 54325,
+      "sha256": "fb378eac58895811fefbc952cdd039e5100452e900c823f8a3b6a1d8c6dbba93"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/task09_default_offsets_identity.json",
+      "bytes": 16472,
+      "sha256": "53f389188320349a740d7266d71895b6b7c1ecc12bcc86988508f26f7961e823"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/task09_default_offsets_action_audit.json",
+      "bytes": 829,
+      "sha256": "11570b25c2727c6e32e108137f5df484769b5aab87f058b0beda93c4cdbc2414"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/task09_default_offsets_cleanup.json",
+      "bytes": 412,
+      "sha256": "19468d218df5e886242d60bdd8abeef50405c1dd7b64f5dc3add21fbf1a069b8"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/rim_v2_full_badcase_gate_revocation.json",
+      "bytes": 824,
+      "sha256": "9026ae2bdf398e0bbecab8116111aa7657de65ddc54800bea9797aa1a3698b4f"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/rim_v2_pgs_diagnostic_run.json",
+      "bytes": 635,
+      "sha256": "f4add56dc8149f2b8921bfc9b8419cd7d610ee0e4831d48fcf3727bc7006c5d6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/rim_v2_robot_friction_source_comparison.json",
+      "bytes": 1484,
+      "sha256": "b0034134a56ba3c6d70d4f463d343a604f259d9eded07d4bd5caee6c4b662554"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/first_round_time_budget_user_decision.json",
+      "bytes": 630,
+      "sha256": "797f50318cbe146374373bd8ab5387a72aee3672860fe20bdf9e6d3ffb07cd2e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/waterbath_time_budget_review.json",
+      "bytes": 14859,
+      "sha256": "bed5cca7ef676c93de91d7c6638026679920894491016754bb97e49b68f321ea"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/evidence/timebase_reconstruction.json",
+      "bytes": 1122,
+      "sha256": "050b0ab86d40f52318bd812ef537b9c47cd1e6572b2b594c5d03c16659504b17"
+    }
+  ]
+}
