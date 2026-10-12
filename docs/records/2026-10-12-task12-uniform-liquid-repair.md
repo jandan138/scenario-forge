@@ -82,6 +82,9 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 生产者新候选`task12_rack_seat_single_support_20261012`仅关闭这18片补充支撑，保留原架网格、试管SDF、所有粒子及液体参数。组合前后逐属性/关系比较确认仅18个collisionEnabled改变；这不是CUDA根因证明。
 资格顺序为实际动态落座接触、两次冷启动和两次规定升降保液，再在新的隔离接收方目录完整回放mixed5，最后验证其余四例。任一步失败均保留证据且不交付。外部调度见`evidence/rack_qualification.json`，不需要接收方安装辅助脚本。
 
+该候选两次冷态和两次升降夹具已通过：1202/1202/2042/2042个120Hz原生步，两处液体每步粒数一致、内腔容差下越界为0，无物理错误。冷态原网格接触存在，末段位置稳定；按原正式回架predicate检查保存位姿，两次均正确插孔，倾斜约2.14°/2.21°。
+接触数据缓存上限128且观测达到127，所以只使用接触存在证据，不把它当作完整接触数量认证。冷态大量faceIndex警告另作无仪表对照；未完成该对照及完整原生回放前，不宣布候选解决了CUDA错误。推进状态在`evidence/rack_native_coordinator.json`。
+
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 
 ## 规范同步
