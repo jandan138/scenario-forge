@@ -1,0 +1,162 @@
+{
+  "status": "COMPLETED_OLD_FAILURE_NOT_REPRODUCED",
+  "created_utc": "2026-10-12T05:12:30.313514+00:00",
+  "root": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012",
+  "runs": [
+    {
+      "case": "old1",
+      "run_id": "regression_task10_bad03_old1_20261012T035926_554770Z",
+      "steps": 2000,
+      "score": 0.2,
+      "success_rate": 0,
+      "physics_error_lines": 0,
+      "warnings": 71,
+      "audit": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/old_runtime/saved/repair_20261010/audits/regression_task10_bad03_old1_20261012T035926_554770Z/regression_audit.json",
+      "audit_sha256": "2ef926ac2f370ae3e88a81a9af6bc25db75c291cb9dc1c4e600355823e36e930",
+      "manual_review": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/old_runtime/saved/repair_20261010/audits/regression_task10_bad03_old1_20261012T035926_554770Z/manual_review.json",
+      "manual_review_sha256": "ecd84d905e6f114062988614b31d76f2638bfe5fcd5439d856a495af62a6bd6f"
+    },
+    {
+      "case": "new1",
+      "run_id": "regression_task10_bad03_new1_20261012T040826_561243Z",
+      "steps": 2000,
+      "score": 0.2,
+      "success_rate": 0,
+      "physics_error_lines": 0,
+      "warnings": 94,
+      "audit": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/new_runtime/saved/repair_20261010/audits/regression_task10_bad03_new1_20261012T040826_561243Z/regression_audit.json",
+      "audit_sha256": "28ad2f25aa0ce2764e3b2d1d4de13b200c0e1608b7a74df7d62b2a72c8430324",
+      "manual_review": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/new_runtime/saved/repair_20261010/audits/regression_task10_bad03_new1_20261012T040826_561243Z/manual_review.json",
+      "manual_review_sha256": "6504ed1a548cfb6bb0fb30c35fc91e492afffac7b7fa40de3aeca226eed996f9"
+    },
+    {
+      "case": "old2",
+      "run_id": "regression_task10_bad03_old2_20261012T042130_484236Z",
+      "steps": 2000,
+      "score": 0.2,
+      "success_rate": 0,
+      "physics_error_lines": 0,
+      "warnings": 71,
+      "audit": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/old_runtime/saved/repair_20261010/audits/regression_task10_bad03_old2_20261012T042130_484236Z/regression_audit.json",
+      "audit_sha256": "e7fbeec6226c00e3c1c2e343d363182459af0e1fb53f29631efaae74959da243",
+      "manual_review": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/old_runtime/saved/repair_20261010/audits/regression_task10_bad03_old2_20261012T042130_484236Z/manual_review.json",
+      "manual_review_sha256": "a7702b13556ff4971ec3f41013dc21e426db8feecd95dc080fe0c3a74bcd4e1a"
+    },
+    {
+      "case": "new2",
+      "run_id": "regression_task10_bad03_new2_20261012T043029_184037Z",
+      "steps": 2000,
+      "score": 0.2,
+      "success_rate": 0,
+      "physics_error_lines": 0,
+      "warnings": 95,
+      "audit": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/new_runtime/saved/repair_20261010/audits/regression_task10_bad03_new2_20261012T043029_184037Z/regression_audit.json",
+      "audit_sha256": "10bc59696fce5756a8e10efbb5f464cff3055f9f091ba24018eab938864297ad",
+      "manual_review": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/new_runtime/saved/repair_20261010/audits/regression_task10_bad03_new2_20261012T043029_184037Z/manual_review.json",
+      "manual_review_sha256": "d457f7210dc9918af33e5874815a25a227370af805cd6a8ae598254fee952474"
+    },
+    {
+      "case": "old3",
+      "run_id": "regression_task10_bad03_old3_20261012T044243_082748Z",
+      "steps": 2000,
+      "score": 0.2,
+      "success_rate": 0,
+      "physics_error_lines": 0,
+      "warnings": 71,
+      "audit": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/old_runtime/saved/repair_20261010/audits/regression_task10_bad03_old3_20261012T044243_082748Z/regression_audit.json",
+      "audit_sha256": "a1e2f834633fc3c511c5d42338f194f403d06cfdf72928893350cb78adc85e30",
+      "manual_review": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/old_runtime/saved/repair_20261010/audits/regression_task10_bad03_old3_20261012T044243_082748Z/manual_review.json",
+      "manual_review_sha256": "b206d31065cde9ac9813eccd0e707dd2cb0d72dec248b21114b902c6d8ac924f"
+    },
+    {
+      "case": "new3",
+      "run_id": "regression_task10_bad03_new3_20261012T045141_247667Z",
+      "steps": 2000,
+      "score": 0.2,
+      "success_rate": 0,
+      "physics_error_lines": 0,
+      "warnings": 94,
+      "audit": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/new_runtime/saved/repair_20261010/audits/regression_task10_bad03_new3_20261012T045141_247667Z/regression_audit.json",
+      "audit_sha256": "76673feaf8c1dc8725b4c2c9d564ac4b61f7d533384217ebb547a9c606560bbc",
+      "manual_review": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/new_runtime/saved/repair_20261010/audits/regression_task10_bad03_new3_20261012T045141_247667Z/manual_review.json",
+      "manual_review_sha256": "c82e81d0eea92f8bbfcdbf7fac467ad8a4ca7470cf68b7168ab00525d1bb6c3d"
+    }
+  ],
+  "files": [
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/comparison_summary.json",
+      "bytes": 34732,
+      "sha256": "e8677618cbc02f41c682f416f1298051c712404b15c0805c117e9200255493a3"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/identity.json",
+      "bytes": 2346,
+      "sha256": "a3eb06ed4a2a14a3801bb92f112ecc56408f66e9c9c93d2f36fe8692b6b203c2"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/preflight.json",
+      "bytes": 76537,
+      "sha256": "783c5f347c2516805da0d94e55a545ae3d6411cd5bafd22631b00a84148361a7"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/queue.json",
+      "bytes": 10851,
+      "sha256": "d89992ed39ebe96cc3598a1899b80caff221fdefb1d4ddbd73418a477c1f8565"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/queue_launch.json",
+      "bytes": 1177,
+      "sha256": "199ef0bfd62fca0bc6ecb32aa2a3b06d8552c49f2e717ca0a2912ac2650c09f0"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/historical_run_context.json",
+      "bytes": 1893,
+      "sha256": "94ebf2b27436a77542d57ffaf1344b02f53fb4dfd0aed233f9cd94fa47189ab4"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/historical_worker_case_excerpt.txt",
+      "bytes": 12992,
+      "sha256": "ffbf84cd70278a9728c6f21aee8bf1305287fc6056aaa420a26bf246b4d9a9e5"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/historical_initial_state_comparison.json",
+      "bytes": 1809,
+      "sha256": "1b899112b83cb4306a9570beacbc1b53c292de5e049cfe02ffd09c8972f77434"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/audit_reporting_clarification.json",
+      "bytes": 641,
+      "sha256": "a2195573fd21b6c8006ec9709b36e54afa03cf13fc66d186565a3729af807e29"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/completed_warning_categories.json",
+      "bytes": 56104,
+      "sha256": "618d2f19d1db97f4359c43aa35d00859c4e7c151782a24f0e801dcae86544371"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/final_instruction_check.json",
+      "bytes": 1160,
+      "sha256": "b23ff386cdf6c769663e285d7e92058f5678f68929ece9d058e451fa2dcdbcc3"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/final_cleanup.json",
+      "bytes": 808,
+      "sha256": "e96a7014d7562a92852184467b8cfcdd2cb8d0fce60cebe7db5fb76ccb2e614d"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/final_integrity.json",
+      "bytes": 400,
+      "sha256": "751c7f3cdb7aaadd976e6976cb453363d6918fa980f4eb50143c857e50798b33"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/released_package_checksum_check.log",
+      "bytes": 1261,
+      "sha256": "a3497c187b4ff7d9b869a7f2a0d47a28b34e2170759c601a1edfab0c8c986b65"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/regressions/task10_bad03_20261012/README.md",
+      "bytes": 6231,
+      "sha256": "494a0717c2d3f80548d9cd1ad1e42a1e7c550a7c604e79d9fa96f24c169586c6"
+    }
+  ]
+}

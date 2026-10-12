@@ -1,6 +1,8 @@
 # 科学实验修复：当前交接入口
 
-更新：2026-10-12 中途收尾。**仅滴定已交付，另外三项未完成；当前没有本任务评测队列运行。**
+更新：2026-10-12，**滴定坏例配对补证已完成：重建旧包3次、新包3次均2000步未弹飞，修复因果仍未证实。**
+原滴定封包保持不变，其余三任务未完成，当前没有本任务评测进程。
+完整结果、原日志纠正及视频入口见[滴定配对回归](../records/2026-10-12-task10-badcase-paired-regression.md)。
 先读本页，再读[阶段记录与踩坑台账](../records/2026-10-12-scientific-repair-checkpoint.md)。
 [旧验收流水](../records/2026-10-11-scientific-five-item-acceptance.md)仅用于追溯，旧“当前/正在运行”不代表最新状态。
 
@@ -10,7 +12,7 @@
 
 | 任务 | 当前状态 | 继续入口 |
 |---|---|---|
-| task10滴定 | 已发布到本人目录；原版120Hz/1582步满分，坏例及v2.1数据已验证 | `W/delivery_releases/task10_standalone_r1_20261011T162354Z/README.md` |
+| task10滴定 | 已发布到本人目录；原版120Hz/1582步满分及v2.1数据已验证；旧/新各3次未复现历史弹飞，因果未证实 | `W/delivery_releases/task10_standalone_r1_20261011T162354Z/README.md` |
 | task09称量 | 未发布；两次reset正常，完整4000/.5/sr0，两粒入瓶、三粒留舟 | `W/evidence/task09_default_offsets_summary.json` |
 | task12水浴 | 当前物理版本未获完整资格；成功示范允许待重采 | `W/evidence/rim_v2_full_badcase_gate_revocation.json` |
 | task_z4银镜 | 完整bad11引擎失败；加容量、PGS均未解决；成功示范允许待重采 | 同上及 `W/evidence/rim_v2_pgs_diagnostic_run.json` |
@@ -46,7 +48,7 @@
 
 ## 恢复工作时的顺序
 
-1. 核对本页、阶段记录、CURRENT_STATUS与证据SHA；检查远程GPU/8087占用。当前只读检查为空闲，恢复时应重新检查。
+1. 核对本页、阶段记录、CURRENT_STATUS与证据SHA；检查远程GPU/8087占用。补证收尾已确认本次进程全部退出；最终状态看配对回归comparison_summary/final_cleanup，恢复时重新检查。
 2. 称量从三粒留舟的已存视频/动作开始；同一慢倒方案已失败，不再原样重复，也不据此导出新成功数据。只有training001使用最新初始化候选，不直接推广全部入口。
 3. 水浴/银镜先定位一个完整失败例的触发条件。局部夹具PASS保留限定范围，不再立即放行整批队列。每个新试验写一个假设、预期观测与停止条件。
 4. 新版本完成原版120Hz、完整日志、任务结果、四视频审查，再进行受影响坏例、成功数据和独立安装。新版本单独封包，不覆盖滴定。
