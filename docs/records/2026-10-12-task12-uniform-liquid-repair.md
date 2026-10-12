@@ -85,6 +85,8 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 该候选两次冷态和两次升降夹具已通过：1202/1202/2042/2042个120Hz原生步，两处液体每步粒数一致、内腔容差下越界为0，无物理错误。冷态原网格接触存在，末段位置稳定；按原正式回架predicate检查保存位姿，两次均正确插孔，倾斜约2.14°/2.21°。
 接触数据缓存上限128且观测达到127，所以只使用接触存在证据，不把它当作完整接触数量认证。冷态大量faceIndex警告另作无仪表对照；未完成该对照及完整原生回放前，不宣布候选解决了CUDA错误。推进状态在`evidence/rack_native_coordinator.json`。
 
+无仪表冷态对照同样通过，完整日志error级错误和碰撞降级为0，仍有同签名faceIndex警告。原失败版本也存在该警告，因此不归因于测量接口。协调器最初额外要求零警告而停止的记录保留；审查报告`rack_warning_control.json`明确为带既有警告的夹具通过，不是无警告引擎声明，不比较不同工作负载警告率，也不豁免任何CUDA/物理错误。
+
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 
 ## 规范同步
