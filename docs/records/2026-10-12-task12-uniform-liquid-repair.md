@@ -90,6 +90,16 @@ metric提交`2962218e`只涉及task12 metric及已有`repair_checks.py`，Black�
 新的完整mixed5回放为`task12_rack_support_mixed5_20261012T172552_148914Z`，状态见`native_rack_support_run.json`，不得用已停止的历史协调器状态替代它。
 候选离线包`delivery_candidate_20261012T172900Z`的701个成员经过完整归档哈希核验，已向原始base应用允许的metric补丁并从归档安装到`receiver_archive_install_20261012T172900Z`，所有安装文件哈希一致。生产者hook PATH修复后Black通过，未跳过hook；配置索引JSON不在允许的YAML交付范围中，已排除。候选明确未发布，仍待完整运行、最终反应/重置视频和人工画面审查，不包含成功训练集。
 
+## 首个完整新候选结果
+
+该mixed5已完成7000步，score=0.15、success_rate=0。原6542帧目标逐项一致，后458帧保持末目标；完整server/worker日志error级错误及碰撞降级0，原生时钟全部120Hz，四路视频各7001帧并完整解码通过，588个受保护代码文件原样。证据`evidence/native_mixed_5.json`。
+7001条机器人记录均有限，手臂单帧变化最大约0.144961rad，未出现旧失败那种几十弧度突变。原生ee_pose采用每臂位置3项加姿态4项的嵌套结构；首次审查脚本错误地直接转成规则矩阵，修正仅读取方式后通过，失败审查日志及记录保留，原生结果与输入未改写或重跑。
+
+实现者亲看overlook/top的0/3500/6400/6480/6494/6541/7000帧及左右腕审查图：机器人留在桌边、左手末段撤回；末帧试管斜躺在架上，没有正确插孔，仍是真实坏例。右腕视角未覆盖目标、top主要显示烧杯，所以视觉总体WARN，只放行这条坏例的无灾难状态巨跳检查，不认证操作成功或完整反应画面。证据`first_rack_native_visual_review.json`，非独立盲审，也非逐帧碰撞认证。
+这只证明新候选下本条记录完成了规定回放，未确定重复支撑是CUDA唯一根因，不推广任意动作稳定。
+
+已放行`tools/run_qualified_continuation.py`：在从离线归档安装出的原版接收方运行实际反应/重置及倾斜、偏心、碰壁夹具，再完整验证其余四条原始7000帧坏例；首错停止，最终人工审查与发布仍独立。20个场景的架子局部几何、碰撞参数、子变换和语义孔位指纹一致，`rack_geometry_identity_all20.json`；不把该静态一致性当作20场景动态通过。
+
 本轮Scenario Forge `make check`通过：1255 passed、1 skipped，lint和Phase10.x通过；日志在`evidence/scenario_forge_make_check.log`。此检查不增加水浴物理资格。
 
 ## 规范同步

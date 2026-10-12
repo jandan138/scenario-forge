@@ -29,6 +29,9 @@
 `build_candidate_install.py`制作候选而不发布：仅三棵离线树和两个metric补丁，YAML目录中的原索引JSON不交付，排除lock.mdb和mesh_data缓存。701个离线成员逐项哈希核验后，向原始base创建新worktree并从归档安装。安装哈希通过仍不等于运行通过，来源和目标在`rack_candidate_install_identity.json`。
 生产者Git hook依赖已有cpu_tools工具在命令PATH；本次缺失PATH已修复并实际通过Black，没有跳过hook，也不给接收方新增该工具依赖。
 
+首例已完成7000步、0.15分，完整日志无引擎错误、四视频全解码及受保护源码检查通过；真实失败是加热不足且末帧试管斜躺在架上，不能当成功示范。`first_rack_native_visual_review.json`只放行坏例运行范围，总体视觉WARN。
+后续由`run_qualified_continuation.py`串行执行已安装版本的normal/tilt/offcenter/wall夹具与badcase4/5/6/7；状态在`qualified_continuation.json`。任何失败停止，无自动READY或发布。最终仍需人工检查新视频与其余坏例画面。
+
 真实反应视频的重置画面曾误报PASS，人工检查已撤销。最新演示工具增加暂停物理后的120帧渲染刷新和样液区域颜色占比检查；必须在最终接收方版本重新录制，确认刷新期间物理步不增加。数值重置通过不等于摄像头第一帧恢复。
 
 ## 安装兼容与交付
