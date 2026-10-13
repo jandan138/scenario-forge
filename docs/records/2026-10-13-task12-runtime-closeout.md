@@ -123,3 +123,33 @@ YAML/metric沿用；仅USD和task data产生本轮新差异。新归档703个离
 首例`task12_recheck_coarse2320_a_bad08_20261013T024413_499989Z`已启动，尚待完整结果。
 后续工具`run_coarse_after_first.py`必须等首例完整及人工画面审查，再执行安装版normal/tilt/offcenter/wall，
 wall沿用明确测试专用夹持；然后第二次mixed5及其余四个文档坏例。每次首错即停，不自动发布。
+
+
+## 最终规则版本与夹具排障（04:24 UTC 更新）
+
+用户已明确接受350.1mL包络及中央液面约高7mm，要求保持已有PBD设置继续。
+此前粗粒子v1首例`task12_recheck_coarse2320_a_bad08_20261013T024413_499989Z`
+完整7000步、0.15分/success0，无引擎错误；它不是最终规则版本的完整验收。
+
+发现本轮把渲染isosurface的8mm距离误填到触水判定补偿中：实际控制器用粒子高度q99.5加补偿，
+8mm会预测104.978mm，实际中央网格97–98mm。先运行真实嵌入函数的失败回归，恢复原1.2mm后
+估计98.178mm并通过；20场景仅`repair:waterbath_config.bath_surface_distance`这一字段变化。
+物理/材质/初态不变的比较允许复用冷态和升降证据，最终任务运行仍须重做。
+最终归档独立安装为`receiver_archive_install_20261013T031857Z`，703个离线成员、两个metric项，
+20闭包/51配置通过。依据`coarse_surface_rule_fix.json`和`surface_estimate_installed_pass.json`。
+
+最终版normal夹具最初把试管预放入已生成水粒子中，形成126颗直接重叠，导致PBD有效性守卫拒绝加热。
+改为测试脚本从水面上方缓慢下降6秒，未在Play后回写粒子，液体有效、浴液0越界、全反应/重置数值通过。
+41份正式task data的试管均在烧杯外（XY最短间隔0.2112m），该初始重叠不属于交付初态。
+证据`normal_fixture_initial_overlap.json`、`initial_layout_no_tube_bath_overlap.json`。
+
+但人工查看新夹具发现玻璃外壳画面停在初始上方，实际物理试管和液体已在杯内。
+即使USD根变换与DC物理位姿相差小于3e-8m，仍不能据数值宣布视频合格。
+PhysX Fabric扩展原本关闭，关闭对照未解决；暂未唯一定位原因，也未证明正式动态任务受同样影响。
+当前只在独立辅助脚本核对显示时间码、渲染delegate及非碰撞玻璃的重新注册/不透明材质对照。
+这些是诊断，不修改接收方USD、GenManip核心、SDK或机器人。错误画面视频不交付。
+
+`coarse_final_v2_queue.json`已因首个夹具失败停止；不要原样重启，也不要把旧版normal/guard报告
+写成最终版通过。下一步先通过短画面对齐，再做最终版反应/守卫、同版本mixed5两次及另四例。
+规范无需变更：上述是本任务夹具及字段误用修正，按MAT-002和VAL-001/003保留失败与视觉边界。
+称量600条持续在独立机器渲染，04:18 UTC已完成212条；未停止或改动其生产版本。
