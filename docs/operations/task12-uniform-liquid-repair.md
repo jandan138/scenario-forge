@@ -9,10 +9,11 @@
 用户已明确接受约7mm的水面差异，保持当前PBD。恢复触水规则原1.2mm补偿后，最终四项归档
 独立安装到`receiver_archive_install_20261013T031857Z`；真实控制器回归和静态闭包通过。
 旧粗粒子v1完整mixed5已通过运行检查，但不替代最终v2。当前先处理无机器人夹具的玻璃画面不同步：
-物理插入、液体保留和反应数值通过，玻璃仍显示在上方，视频不合格。诊断仅在辅助脚本，接收方文件未改。
-状态见`CURRENT_STATUS.json`与`render_sync_diagnostic_process.json`；`coarse_final_v2_queue.json`
-是首夹具失败的停止记录，不要直接重启旧的预放入水中夹具。后续短画面对齐通过，再完成安装版
-反应/重置/守卫、两次mixed5及另四例；尚未发布。
+物理插入、液体保留和反应数值通过；原透明材质重绑定后的短图已对齐，旧悬空视频不合格。
+该刷新仅在辅助夹具，接收方文件未改，正式动态回放仍须独立核对。
+状态见`CURRENT_STATUS.json`与`inserted_final_fixture_queue.json`（完整normal后顺序跑三个guard）；
+`coarse_final_v2_queue.json`是旧首夹具失败的停止记录，不要重启。后续完成完整视频人工审查、
+两次mixed5及另四例；尚未发布。
 称量600条LeRobot继续生产；暂缓的仅是水浴训练集。
 四项文件存在不代表完整运行合格，接收方仍只能依赖YAML、USD、task data及metric。
 详细收尾和故障记录见[本轮记录](../records/2026-10-13-task12-runtime-closeout.md)。
