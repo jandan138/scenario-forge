@@ -1,5 +1,18 @@
 # task12 均匀变色真液体：验证与恢复
 
+## 2026-10-13 当前执行状态（优先于下方历史流水）
+
+旧128MiB mixed5曾约3060步GPU求解失败，本轮同字节复查完整7000步/.15且无引擎错；
+旧失败保留，不能因一次完成认定修复。按用户新指示优先复用标准SDF烧杯及已有粗粒子配方，
+去掉257块额外浴液边界，浴液96649→2320粒、样液13905不变。
+当前2320候选已通过三冷态/一升降；闭合渲染包络350.11mL，目标349.095mL，水面高约7.4mm已记录。
+已从四项归档独立安装到`receiver_archive_install_20261013T024107Z`；完整机器人首例正在执行。
+状态见`evidence/recheck_coarse2320_a_case_08_run.json`和`coarse_final_queue.json`，不是旧stack128队列。
+后续依次完成首例画面审查、安装版反应/重置/守卫、第二次mixed5及另四例；尚未发布。
+称量600条LeRobot继续生产；暂缓的仅是水浴训练集。
+四项文件存在不代表完整运行合格，接收方仍只能依赖YAML、USD、task data及metric。
+详细收尾和故障记录见[本轮记录](../records/2026-10-13-task12-runtime-closeout.md)。
+
 工作根R：`/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012`。
 决定及资格边界见[日期记录](../records/2026-10-12-task12-uniform-liquid-repair.md)。本页不为Scenario Forge添加runner或SDK核心层。
 

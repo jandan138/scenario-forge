@@ -14,7 +14,7 @@
 |---|---|---|
 | task10滴定 | 已发布到本人目录；原版120Hz/1582步满分及v2.1数据已验证；旧/新各3次未复现历史弹飞，因果未证实 | `W/delivery_releases/task10_standalone_r1_20261011T162354Z/README.md` |
 | task09称量 | 新规则原版机器人1.0，运行内容已封存；600条LeRobot持续生产，未完整交付 | `W/task09_recapture_600_20261012/CURRENT_STATUS.json`及[操作说明](task09-recapture-dataset.md) |
-| task12水浴 | 资产视频/守卫通过；旧64MiB容量在另一例溢出，新128MiB YAML版本独立安装后五例重验中，未交付 | `W/task12_liquid_color_20261012/CURRENT_STATUS.json`及[操作说明](task12-uniform-liquid-repair.md) |
+| task12水浴 | 按用户指示简化为标准SDF烧杯、2320浴液粒子；三冷态/升降和350.11mL包络复核通过，四项归档已独立安装，完整机器人回归中；未交付 | `W/task12_liquid_color_20261012/CURRENT_STATUS.json`及[操作说明](task12-uniform-liquid-repair.md) |
 | task_z4银镜 | 完整bad11引擎失败；加容量、PGS均未解决；成功示范允许待重采 | 同上及 `W/evidence/rim_v2_pgs_diagnostic_run.json` |
 
 本次停靠证据SHA见[小型索引](../records/2026-10-12-scientific-repair-checkpoint.evidence.json)。
@@ -50,7 +50,7 @@
 
 1. 核对本页、阶段记录、CURRENT_STATUS与证据SHA；检查远程GPU/8087占用。补证收尾已确认本次进程全部退出；最终状态看配对回归comparison_summary/final_cleanup，恢复时重新检查。
 2. 称量按[新数采制作说明](task09-recapture-dataset.md)检查持续生产队列；原版机器人成功及新验收口径见[新记录](../records/2026-10-12-task09-readout-range-acceptance.md)。旧慢倒失败保留历史资格，不重跑它或停止现有600条生产。
-3. 水浴按最新独立队列完成剩余四例、人工画面审查及phase1发布；银镜继续定位完整失败触发。局部资格只保留限定范围，每个新试验记录假设、预期观测和停止条件。
+3. 水浴先按[本轮记录](../records/2026-10-13-task12-runtime-closeout.md)定位mixed5 GPU故障，最终候选完成独立重复和五例回归后再发布；不要直接恢复已失败队列。水浴LeRobot本轮暂缓，称量600条继续渲染。局部资格只保留限定范围，每个新试验记录假设、预期观测和停止条件。
 4. 新版本完成原版120Hz、完整日志、任务结果、四视频审查，再进行受影响坏例、成功数据和独立安装。新版本单独封包，不覆盖滴定。
 
 用户已接受的约束不重复征求：称量4000步，水浴/银镜首轮7000步；后两项成功示范/训练待重采。
@@ -65,7 +65,7 @@
 - 完整server及worker的启动/初始化/执行错误、警告、碰撞降级，不能只看回调。
 - 旧称量慢倒运行PhysX错误行0但有大量faceIndex警告；保留其原范围，不用它解释新版本。各次运行的错误、警告与任务结果分别核对。
 - 新称量接受时字段快照为4.01g；原生末帧LCD数码清晰度有限，不把数值快照当成人工读图，也不宣称读数波动已修复。
-- 评测MP4的30fps编码与120Hz物理采样不同；LeRobot视频120fps。新动作不能配重复的旧观察充当新采数据。
+- 评测MP4的30fps编码与120Hz物理采样不同；称量600条v2.1按现有工具导出15FPS时间轴，原数采频率未确认，不能将其写成120FPS。新动作不能配重复的旧观察充当新采数据。
 - 引擎异常/noresult与正常回放任务失败分开；不通过改目标、质量作弊或降低计分门槛制造成功。
 
 ## 停靠验证
