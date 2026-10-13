@@ -14,7 +14,7 @@
 |---|---|---|
 | task10滴定 | 已发布到本人目录；原版120Hz/1582步满分及v2.1数据已验证；旧/新各3次未复现历史弹飞，因果未证实 | `W/delivery_releases/task10_standalone_r1_20261011T162354Z/README.md` |
 | task09称量 | 新规则原版机器人1.0，运行内容已封存；600条LeRobot持续生产，未完整交付 | `W/task09_recapture_600_20261012/CURRENT_STATUS.json`及[操作说明](task09-recapture-dataset.md) |
-| task12水浴 | 按用户指示简化为标准SDF烧杯、2320浴液粒子；三冷态/升降和350.11mL包络复核通过，用户接受约7mm液面差异；最终规则版完整变色/重置及三项守卫通过；原版无辅助刷新mixed5首例完整通过运行及限定移动画面检查，第二次mixed5和其余四例续跑中；未交付 | `W/task12_liquid_color_20261012/CURRENT_STATUS.json`及[操作说明](task12-uniform-liquid-repair.md) |
+| task12水浴 | 按用户指示简化为标准SDF烧杯、2320浴液粒子；三冷态/升降和350.11mL包络复核通过，用户接受约7mm液面差异；最终规则版完整变色/重置及三项守卫通过；原版无辅助刷新mixed5首例完整通过运行及限定移动画面检查，坏例队列续跑，新增19组旧满分回归门槛；未交付 | `W/task12_liquid_color_20261012/CURRENT_STATUS.json`及[操作说明](task12-uniform-liquid-repair.md) |
 | task_z4银镜 | 完整bad11引擎失败；加容量、PGS均未解决；成功示范允许待重采 | 同上及 `W/evidence/rim_v2_pgs_diagnostic_run.json` |
 
 本次停靠证据SHA见[小型索引](../records/2026-10-12-scientific-repair-checkpoint.evidence.json)。
