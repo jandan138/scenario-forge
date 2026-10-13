@@ -8,12 +8,11 @@
 当前2320候选已通过三冷态/一升降；闭合渲染包络350.11mL，目标349.095mL，水面高约7.4mm已记录。
 用户已明确接受约7mm的水面差异，保持当前PBD。恢复触水规则原1.2mm补偿后，最终四项归档
 独立安装到`receiver_archive_install_20261013T031857Z`；真实控制器回归和静态闭包通过。
-旧粗粒子v1完整mixed5已通过运行检查，但不替代最终v2。当前先处理无机器人夹具的玻璃画面不同步：
-物理插入、液体保留和反应数值通过；原透明材质重绑定后的短图已对齐，旧悬空视频不合格。
-该刷新仅在辅助夹具，接收方文件未改，正式动态回放仍须独立核对。
-状态见`CURRENT_STATUS.json`与`inserted_final_fixture_queue.json`（完整normal后顺序跑三个guard）；
-`coarse_final_v2_queue.json`是旧首夹具失败的停止记录，不要重启。后续完成完整视频人工审查、
-两次mixed5及另四例；尚未发布。
+旧粗粒子v1完整mixed5已通过运行检查，但不替代最终v2。完整normal/tilt/offcenter/wall已通过，43.7秒变色/重置视频已人工抽查与全解码；
+测试夹具在录制前刷新原玻璃材质，不能据此替代原版运动显示验证。
+当前`coarse_final_v2_resume_queue.json`等待首条最终版mixed5及实际移动玻璃人工审查，再继续第二次mixed5
+和另四例；首条状态`recheck_coarse2320_v2_a_case_08_run.json`。原版运行不加该刷新。
+旧`coarse_final_v2_queue.json`是夹具失败的历史记录，不要重启或覆盖。尚未发布。
 称量600条LeRobot继续生产；暂缓的仅是水浴训练集。
 四项文件存在不代表完整运行合格，接收方仍只能依赖YAML、USD、task data及metric。
 详细收尾和故障记录见[本轮记录](../records/2026-10-13-task12-runtime-closeout.md)。

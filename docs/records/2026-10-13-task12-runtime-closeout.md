@@ -171,3 +171,21 @@ Default/0/当前显示时间码的USD变换一致且无时间样本。禁用Glas
 后台`inserted_final_fixture_queue.json`等待完整normal报告后顺序执行tilt/offcenter/wall，首错停止，
 不自动发布或提升原生资格。完整视频人工检查和六次最终原生回放仍待做。
 最终安装版真实控制器十项测试通过，日志`coarse_v2_contract_tests.log`；它不代替渲染/原生验收。
+
+
+## 最终版功能通过与原版回放启动（05:05 UTC）
+
+完整normal及tilt/offcenter/wall已完成，状态`inserted_final_fixture_queue.json`。
+normal在原生120Hz下总6127步，本次随机反应终点约43.004秒有效加热；演示1311帧/30fps/43.7秒。
+已人工看初始、10秒、25秒、终点与重置图片：蓝→绿→黄橙→橙红→蓝，玻璃在杯内正确包住样液。
+完整视频解码通过；不是逐帧物理认证，也不把这次43秒写成所有配置的固定时长。
+三个负例分别由倾斜、偏心、实际贴壁11接触点触发停止计时，液体有效；四份完整SDK日志均无引擎error或碰撞降级，
+警告分别42/34/31/34条。`coarse_normal_visual_review.json`与`inserted_final_fixture_acceptance.json`绑定输出。
+
+用户确认保持当前外观，优先证明同事原版程序无需测试刷新步骤。已启动最终安装版
+`task12_recheck_coarse2320_v2_a_bad08_20261013T050511_085099Z`，原始mixed5目标逐帧回放，
+不增加材质刷新，不修改核心或机器人；原生120Hz/7000步。其运行/视觉尚未完成。
+续跑协调器`coarse_final_v2_resume_queue.json`必须等本条完整验收及实际移动玻璃人工审查，
+才执行第二次mixed5与四个文档坏例。旧`coarse_final_v2_queue.json`保持失败历史，不覆盖。
+最终封包工具已改用续跑队列，并要求首条原版玻璃审查；演示中的测试刷新在说明和manifest中明示，
+没有生成release或READY。规范无需变更，继续按VAL-001/003区分演示和原版执行证据。
