@@ -10,8 +10,9 @@
 独立安装到`receiver_archive_install_20261013T031857Z`；真实控制器回归和静态闭包通过。
 旧粗粒子v1完整mixed5已通过运行检查，但不替代最终v2。完整normal/tilt/offcenter/wall已通过，43.7秒变色/重置视频已人工抽查与全解码；
 测试夹具在录制前刷新原玻璃材质，不能据此替代原版运动显示验证。
-当前`coarse_final_v2_resume_queue.json`等待首条最终版mixed5及实际移动玻璃人工审查，再继续第二次mixed5
-和另四例；首条状态`recheck_coarse2320_v2_a_case_08_run.json`。原版运行不加该刷新。
+首条最终版mixed5已完整7000步/.15，无引擎error；四视频全解码，四路各20帧审查未见移动玻璃悬空，
+保留飞溅/横倒/遮挡WARN。原版运行未加材质刷新。`coarse_final_v2_resume_queue.json`当前执行第二次mixed5
+及另四例；首条结果`recheck_coarse2320_v2_a_mixed_5.json`，审查`coarse_v2_first_visual_review.json`。
 旧`coarse_final_v2_queue.json`是夹具失败的历史记录，不要重启或覆盖。尚未发布。
 称量600条LeRobot继续生产；暂缓的仅是水浴训练集。
 四项文件存在不代表完整运行合格，接收方仍只能依赖YAML、USD、task data及metric。
