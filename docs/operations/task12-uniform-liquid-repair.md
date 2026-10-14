@@ -85,6 +85,11 @@ metric共享repair_checks与已交滴定、称量相同。未安装共享文件�
 
 ## 2026-10-14 回归诊断恢复顺序
 
+**最新进度：旧版三个代表已校准通过。** 先读`original_success_gate.json`，再看当前实际运行的
+`calibrated_new_timing_pair_queue.json`（evidence下），它使用已校准的执行方式对比冻结新液体包与时间候选。
+完整复核见[校准后新版验证记录](../records/2026-10-15-task12-calibrated-new-liquid-validation.md)。
+下列旧版排障队列保留作历史依据，不应重新启动旧的统一absolute/单步回放。
+
 **最新决定覆盖下列旧自动串行顺序：先通过建通原版成功复现，才继续新版物理调参。**
 当前聚焦回架的入口为`pristine_rack_observer_h00_b_run.json`、`rack_prefix_diagnostic_queue.json`
 与`rack_segment_diagnostic_queue.json`（均在evidence下）。先核对观察器完整中立性，再执行
