@@ -44,7 +44,7 @@
 新容量首条background3已完整通过当前回放运行验收、0.15分失败，人工审查放行，正在继续mixed5。通用视频audit可选runtime JSON缺失时clock字段为False；task12实际频率由内嵌native回调摘要和逐异常dt触发日志独立验收，不把缺失文件当测得错误频率，也不跳过实际时钟检查。
 
 先读R/CURRENT_STATUS.json、evidence/first_native.json及对应baseline_runs/receipt.json，再检查远程GPU与8087占用。
-称量600条在另一台机器上运行，勿停止或重复启动其producer。水浴只使用10.150.162.223的单4090。
+称量600条在另一台机器上运行，勿停止或重复启动其producer。水浴当前使用10.150.163.77:22的单4090（公网备用919）；旧10.150.162.223为历史入口。
 独立运行工具在R/tools；接收方只依赖允许的YAML、USD、task data与scientific metric。
 
 ## 验证与停止
@@ -82,3 +82,18 @@ metric共享repair_checks与已交滴定、称量相同。未安装共享文件�
 两种补丁及只读检查在R/evidence，正式交付时复制到独立发布目录。
 最终包须含20场景入口、离线相对路径、补丁、安装说明、哈希及实际证据；无GenManip核心、SDK、机器人或生产脚本安装需求。
 缺成功机器人示范/LeRobot如实标为待重采；引擎错误不可作为正常坏例放行。
+
+## 2026-10-14 回归诊断恢复顺序
+
+当前状态以R/CURRENT_STATUS.json与下列队列为准，前文早期队列只作历史排障依据：
+
+1. `clock_diagnostics_20261014T023450Z/queue.json`：三个旧/新计时配对。
+2. 同目录`original_config_control_queue.json`：当前可获取旧配置控制；不冒充历史精确快照。
+3. `evidence/original_rigid_offsets_bounded_queue.json`：刚体偏移诊断的限定冷态/升降测试。
+4. `evidence/timing_v2_trial_queue.json`：证据门禁后作者统一0.5时间版本，三条原动作隔离回放。
+5. `evidence/contact_logic_fixture_queue.json`：另一个只改接触判断的诊断overlay，正常/碰壁/倾斜/偏心夹具。
+
+上述队列串行使用单GPU，任一前置失败不得绕过门禁继续启动后续。接触候选没有合入时间候选或正式交付；
+不能把不同候选的局部通过拼成一个版本的完整资格。暂定0.1mm接触容差仍需距离边界和休眠验证。
+旧计数与被动事件部分不一致，未对齐步不得据此消除碰壁限制。最终仍需相同版本原动作完整成功及回归。
+详细测量、未解决问题和证据索引见[当日记录](../records/2026-10-14-task12-clock-and-grasp-regression.md)。
