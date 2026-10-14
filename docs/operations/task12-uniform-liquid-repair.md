@@ -91,6 +91,9 @@ metric共享repair_checks与已交滴定、称量相同。未安装共享文件�
 有证据的底座分段模式对照；这些推断不是原请求实录。详见[旧版回架记录](../records/2026-10-14-task12-old-rack-reproduction.md)。
 prefix_mode_h00_a已首次1分，后续读`old_success_verification_queue.json`和`complete_mode_mapping_queue.json`。
 初始270帧状态精确对齐但后续仍有差异，不能用一次1分直接解锁原版校准；需独立重复、live插架位姿与剩余语义核验。
+这两个旧队列随后因验收脚本直接比较不同成功长度而停止；现已重新核验两次成功及live位姿通过。
+最新入口是`old_success_verification_reaudit.json`、`old_prefix_success_visual_acceptance.json`和
+`complete_mode_mapping_resume_queue.json`，不要把旧队列的STOPPED当作新的任务失败。
 先读`evidence/original_success_gate.json`和`evidence/pristine_original_h00_a_run.json`。
 后续时间/接触队列已停止，禁止直接重启绕过前置；旧phase1发布器已停用。
 最终标准为同一修复版19组各两次成功，不能沿用“缺成功示范待重采”的旧水浴交付口径。
