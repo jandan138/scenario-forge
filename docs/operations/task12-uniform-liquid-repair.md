@@ -94,6 +94,9 @@ prefix_mode_h00_a已首次1分，后续读`old_success_verification_queue.json`�
 这两个旧队列随后因验收脚本直接比较不同成功长度而停止；现已重新核验两次成功及live位姿通过。
 最新入口是`old_success_verification_reaudit.json`、`old_prefix_success_visual_acceptance.json`和
 `complete_mode_mapping_resume_queue.json`，不要把旧队列的STOPPED当作新的任务失败。
+完整模式mixed5现已两次5902步成功，已执行5903观察帧与原机器人记录完全一致并完成同帧目视核对。
+当前执行入口转为`remaining_original_representatives_queue.json`，原版gate仍等待另外两条代表；
+证据见`mixed5_complete_mapping_acceptance.json`及`pi05_original_transport_evidence.json`。
 先读`evidence/original_success_gate.json`和`evidence/pristine_original_h00_a_run.json`。
 后续时间/接触队列已停止，禁止直接重启绕过前置；旧phase1发布器已停用。
 最终标准为同一修复版19组各两次成功，不能沿用“缺成功示范待重采”的旧水浴交付口径。

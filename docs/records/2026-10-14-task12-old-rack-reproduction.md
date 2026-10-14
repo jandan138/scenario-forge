@@ -110,3 +110,23 @@ USD/live位置差0，方向差小于.000001度。同帧6022的B/观察器俯视�
 complete_mode_mapping_resume_queue.json已恢复完整分段映射核验；旧failed队列不改写。
 原版gate记录两次已验证成功，但状态仍BLOCKED_COMPLETE_MODE_MAPPING_AND_OTHER_REPRESENTATIVES，
 等待完整控制语义和其他旧版代表差异解决。新版资产调参及发布未解锁。
+
+## 完整分段模式两次成功，继续另外两条旧版代表
+
+segment_mode_h00_a/b均在5902步由原评测器成功结束，score=1/success_rate=1。
+两次5903个观察帧的手臂、夹爪、底座与原记录逐元素一致，最大绝对差和RMS均0；两次之间也完全相同。
+同帧5902的两次overlook及历史overlook已目视核对，夹爪和试管位置一致，试管底部落在架孔位置、夹爪打开。
+`mixed5_complete_mapping_acceptance.json`记录旧mixed5范围通过，不再停留在未复核状态。
+历史在6542步结束，本次5902步正常结束；最后640帧未执行，不宣称全6542帧或原HTTP/render请求精确还原。
+此前1.07°live数值属于prefix-only版本，不移植为完整模式的角度测量。
+
+原版gate更新为BLOCKED_OTHER_ORIGINAL_REPRESENTATIVES，mixed5两次资格改引用完整模式结果。
+其余两条的原worker日志已按目标SceneConfig到下一个SceneConfig切片核对：每100步通常3–4次subframes调用，
+3162/3722步的末块分别执行12/2，与30步分块一致；原动作底座全部0，原Pi0客户端默认相对底座。
+不是把mixed5的chunk8和混合模式直接套到其他模型。
+`pi05_original_transport_evidence.json`保留原日志哈希、目标区间、时间配置、末块及模式依据。
+query具体值仍无原始请求实录，使用已有API默认lite/subframes2，须以实际状态复现确认。
+
+`remaining_original_representatives_queue.json`已启动，先catalog15，再13；原包全部任务文件不变。
+任务低分保留后继续另一独立诊断，基础设施或物理错误首错停止；两例结束仍需画面/状态复查。
+不自动解锁新版物理调参，也不沿用之前未校准执行语义的19次退分作为已证明的资产退化原因。
