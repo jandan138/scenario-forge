@@ -85,6 +85,12 @@ metric共享repair_checks与已交滴定、称量相同。未安装共享文件�
 
 ## 2026-10-14 回归诊断恢复顺序
 
+**最新决定覆盖下列旧自动串行顺序：先通过建通原版成功复现，才继续新版物理调参。**
+先读`evidence/original_success_gate.json`和`evidence/pristine_original_h00_a_run.json`。
+后续时间/接触队列已停止，禁止直接重启绕过前置；旧phase1发布器已停用。
+最终标准为同一修复版19组各两次成功，不能沿用“缺成功示范待重采”的旧水浴交付口径。
+来源、当前差异和辅助门禁见[原版校准记录](../records/2026-10-14-task12-original-baseline-calibration.md)。
+
 当前状态以R/CURRENT_STATUS.json与下列队列为准，前文早期队列只作历史排障依据：
 
 1. `clock_diagnostics_20261014T023450Z/queue.json`：三个旧/新计时配对。
