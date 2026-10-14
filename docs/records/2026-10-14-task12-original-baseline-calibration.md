@@ -53,3 +53,27 @@ progress .945942，无引擎错误。它与共用新版YAML的旧侧得分相同
 涉及STATE-001/002/007及VAL-001/002/003/004。通用规范无需变更：本次是任务验收强化、
 原版来源与复现诊断，没有改变核心package/schema/API。同步operations恢复顺序；未执行完整make check，
 此前仓库测试基线不能冒充此次重新运行。
+
+## 原执行方式的新增证据
+
+找到建通原始worker日志`logs/sft14260926_t12_m05/worker/`，明确记录120Hz配置、
+`Episode done in chunk. executed=8`及最终1分。每100步的phase报告通常有12–13次subframes调用。
+现有原版API的step_chunk默认lite、subframes=2、render_suffix=2；此前辅助回放实际始终调用client.step，
+没有使用分块和额外渲染。日志尚不能恢复每个请求的精确块边界和显式query值，不能把默认值冒充原请求实录。
+证据`evidence/original_transport_log_audit.json`，包含原日志哈希与相关行。
+
+另确认meta_record仅保存arm_action/base_motion，未保存base_is_rel。mixed5的4850–4939帧，
+原底座在x约0.1065m保持，命令却接近零；原回放统一base_is_rel=False会回到原点。
+明确移动段表现为绝对目标，而保持段提示相对/保持语义，不能对全段统一解释。
+19条筛查中仅mixed5出现该特定“离原点、近零命令、位置保持”证据；没有检出不代表其余控制模式已确认。
+`recorded_base_semantics_audit.json`保留逐条源哈希、帧号与限制。目前未猜测或应用逐帧模式转换。
+较早的夹爪分歧发生在该明显底座分歧之前，底座问题不能解释全部掉分。
+
+无观察器原包先继续完成，随后original_calibration_queue只在成功后继续独立重复与其他代表；
+未成功则保留结果并停止该链，进入诊断，不靠重复抽取成功。
+另排一个**只改传输**的chunk8/default-subframes2原包诊断，在上述旧包链结束且未复现时才运行，
+场景和底座absolute模式不变，用于分离额外渲染影响，不能直接称精确历史复现。
+状态`evidence/original_transport_probe_queue.json`；八帧顺序、原动作模式、末帧保持及分块调用的限定检查通过。
+
+此前2倍计时结论只适用于单步对照，不能推广为原分块评测的精确倍率。
+0.5时间候选继续未资格化，须在原执行方式校准后复核统一反应时长，不按退分结果拟合倍率。
