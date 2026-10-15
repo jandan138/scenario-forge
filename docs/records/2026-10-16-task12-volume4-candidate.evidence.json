@@ -1,0 +1,68 @@
+{
+  "generated_utc": "2026-10-15T21:30:42.020061+00:00",
+  "scope": "Single1200step catalog13 diagnostics, not full-task or repeatability qualification.",
+  "rows": [
+    {
+      "variant": "sample_water_viscosity_prefix",
+      "minimum_sample_retained_fraction": 0.8793239841783531,
+      "grip_frame300_mm": 17.789587973546226,
+      "matched_observations": 1201,
+      "alignment_max_error": 0.0,
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_water_viscosity_prefix_h13_a_analysis_pose.json",
+      "sha256": "ae6a8aa48a32c2aa5b775f6f6b6cced0fc774e3bc702f032eeff6da1fcc04d5f",
+      "release_qualified": false
+    },
+    {
+      "variant": "sample_coarse125_prefix",
+      "minimum_sample_retained_fraction": 0.9401799894123875,
+      "grip_frame300_mm": 9.054410376157081,
+      "matched_observations": 1201,
+      "alignment_max_error": 0.0,
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_coarse125_prefix_h13_a_analysis_pose.json",
+      "sha256": "e26b42220f7064e90611a8eb95ce8ba4f8490c715cd52810b89c8334fa323385",
+      "release_qualified": false
+    },
+    {
+      "variant": "sample_coarse125_depen1_prefix",
+      "minimum_sample_retained_fraction": 0.9507676019057703,
+      "grip_frame300_mm": 5.630280552903796,
+      "matched_observations": 1201,
+      "alignment_max_error": 0.0,
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_coarse125_depen1_prefix_h13_a_analysis_pose.json",
+      "sha256": "4de06b2db8eabb98a096ca0aa093b8001e441cf27665587e1acc6a08e2ceebe4",
+      "release_qualified": false
+    },
+    {
+      "variant": "sample_compact_seed_prefix",
+      "minimum_sample_retained_fraction": 0.9523557437797776,
+      "grip_frame300_mm": 7.984457587811132,
+      "matched_observations": 1201,
+      "alignment_max_error": 0.0,
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_compact_seed_prefix_h13_a_analysis_pose.json",
+      "sha256": "e751026963f3899aefe98c13e85b32e8c4d428699503cce18e74df25634da419",
+      "release_qualified": false
+    },
+    {
+      "variant": "sample_velocity4_prefix",
+      "minimum_sample_retained_fraction": 0.9449444150344097,
+      "grip_frame300_mm": 5.871402712809018,
+      "matched_observations": 1201,
+      "alignment_max_error": 0.0,
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_velocity4_prefix_h13_a_analysis_pose.json",
+      "sha256": "fe7f74f38ba068f7408cb26d0a858f31f03d6311e3f60337aa661c248ba9fa8b",
+      "release_qualified": false
+    },
+    {
+      "variant": "sample_volume4_prefix",
+      "minimum_sample_retained_fraction": 0.9837486457204767,
+      "grip_frame300_mm": 7.945882913287596,
+      "matched_observations": 1201,
+      "alignment_max_error": 0.0,
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_volume4_prefix_h13_a_analysis_pose.json",
+      "sha256": "90d99020bb11d6680d3a67a69a223230246ffeb3a4ee9f89c79550e2c452e1ff",
+      "release_qualified": false
+    }
+  ],
+  "current_full_identity": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_volume4_full_identity.json",
+  "current_full_run": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_volume4_full_h13_a_run.json"
+}

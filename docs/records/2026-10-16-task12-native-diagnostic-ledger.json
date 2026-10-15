@@ -1,0 +1,248 @@
+{
+  "generated_utc": "2026-10-15T21:07:27.986654+00:00",
+  "scope": "Catalog13 diagnostics only. Planned partial runs do not test full task success; terminal0.15 is not a full-failure score. No variant is release qualified. Full/partial/aborted scopes must remain distinct.",
+  "remaining_release_requirements": [
+    "stable full color/return and>=95percent retention without persistent loss",
+    "same final version19source records x2 cold starts",
+    "normal camera/full visual checks",
+    "clean receiver install of four allowed categories; no helper/core dependency"
+  ],
+  "rows": [
+    {
+      "variant": "native_observer_prefix_v2",
+      "change": "Initial clean candidate with read-only observer",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_observer_prefix_v2_h13_a_run.json",
+      "record_sha256": "c91839a993ceb0cb688dc4a3596fc20db25568bd3bbd2c55e4d18968a29b7de7",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 2.590871900320053,
+        "steps": 300,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_observer_prefix_v2_h13_a_analysis_pose.json",
+      "analysis_sha256": "fb89cf6e1204c141fe42cdf1458990d82a950f98246304d0b15a642ea6b08d84",
+      "minimum_retained": 0.968212873067242,
+      "matched_observations": 301,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 11.000471147214762
+    },
+    {
+      "variant": "old_tube_contact_prefix",
+      "change": "Restore old tube solid contact bundle",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_tube_contact_prefix_h13_a_run.json",
+      "record_sha256": "0928c1060bdc7554cfe2c1e983cc13065be14bc127df38768c6abd77a7ea1426",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 3.2168332611521087,
+        "steps": 300,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_tube_contact_prefix_h13_a_analysis_pose.json",
+      "analysis_sha256": "912e2a089651e553ba5f325922669f0680ee7208559017f8f4c89a6b99647096",
+      "minimum_retained": 0.9618122977346278,
+      "matched_observations": 301,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 8.477099094587667
+    },
+    {
+      "variant": "old_bundle_solver_prefix",
+      "change": "Global position iteration bounds1/255",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_solver_prefix_h13_a_run.json",
+      "record_sha256": "c7ee5b4c2da3cfa608f5371635f8e86ac5f6e3ff30f3355497069b8c607a526f",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 3.4576072295506797,
+        "steps": 300,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_solver_prefix_h13_a_analysis_pose.json",
+      "analysis_sha256": "3fc506a39ea3ffd5104278eecb56f42d2dac19f3e4c56a13c223da34fad0b6ae",
+      "minimum_retained": 0.9608054656598346,
+      "matched_observations": 301,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 3.5867837493774783
+    },
+    {
+      "variant": "old_bundle_ccd_prefix",
+      "change": "GlobalCCD False; not adopted",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_ccd_prefix_h13_a_run.json",
+      "record_sha256": "5a85cc468a44aa5dc8b95ca58d4cf7b2305465fd8f61a27d0b40d78bec131cea",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 3.585913230975469,
+        "steps": 300,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_ccd_prefix_h13_a_analysis_pose.json",
+      "analysis_sha256": "d70ec1ba9eba289fa2df2a3383ca51e9773f7a1170774f9b6aaa6c8552056b7c",
+      "minimum_retained": 0.961596548004315,
+      "matched_observations": 301,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 5.216221450187058
+    },
+    {
+      "variant": "old_bundle_solver_full",
+      "change": "Full run of solver bundle; retention/return fail",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_solver_full_h13_a_run.json",
+      "record_sha256": "5eb6f2315b803eca939d8bc526986470a7297f2a3e3a55c6cc4b202a08d9c76c",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.85,
+        "policy_avg_inference_time_ms": 1.17522410516228,
+        "steps": 7000,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_solver_full_h13_a_analysis_pose.json",
+      "analysis_sha256": "73fe348248766a5c479d6e6d68310aad4fed146750258cf3fbf630241b79c5ad",
+      "minimum_retained": 0.6063286587558432,
+      "matched_observations": 7001,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 14.169780143307579
+    },
+    {
+      "variant": "native_loss_observer_v4",
+      "change": "Read-only diagnostics observerv5, fine particles",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_loss_observer_v4_h13_a_run.json",
+      "record_sha256": "b49de5d1cce2c7fc5617dcbedb96a84d1e9b34f5e5616719c90da853794a3857",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 1.7070407203088205,
+        "steps": 1200,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_loss_observer_v4_h13_a_analysis_pose.json",
+      "analysis_sha256": "3ba0ad77625d00bb02f093cc63cfa72c3bbfac3d6332ce502bfa697bc4e25ab9",
+      "minimum_retained": 0.8742898238043869,
+      "matched_observations": 1201,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 5.597023339987972
+    },
+    {
+      "variant": "sample_water_viscosity_prefix",
+      "change": "Only sample viscosity1.7e-6; insufficient",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_water_viscosity_prefix_h13_a_run.json",
+      "record_sha256": "8a743d8294800b1e41aeed9ae4f5aebb0b04dc2972694bbf8fe03e79fa2dcf8a",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 1.8477883841842413,
+        "steps": 1200,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_water_viscosity_prefix_h13_a_analysis_pose.json",
+      "analysis_sha256": "ae6a8aa48a32c2aa5b775f6f6b6cced0fc774e3bc702f032eeff6da1fcc04d5f",
+      "minimum_retained": 0.8793239841783531,
+      "matched_observations": 1201,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 17.789587973546226
+    },
+    {
+      "variant": "sample_coarse125_prefix",
+      "change": "Sample resolution group,1889particles",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_coarse125_prefix_h13_a_run.json",
+      "record_sha256": "7f754a8683ef27140fd5bcba7a7856deed8cd8d159a77481c98cc584712f0a4f",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 1.6637604186932247,
+        "steps": 1200,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_coarse125_prefix_h13_a_analysis_pose.json",
+      "analysis_sha256": "e26b42220f7064e90611a8eb95ce8ba4f8490c715cd52810b89c8334fa323385",
+      "minimum_retained": 0.9401799894123875,
+      "matched_observations": 1201,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 9.054410376157081
+    },
+    {
+      "variant": "sample_coarse125_depen1_prefix",
+      "change": "Only maxDepenetrationVelocity2->1",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_coarse125_depen1_prefix_h13_a_run.json",
+      "record_sha256": "a48a9a0280148d058025c59497d3503cc5d9043f11ace5644bcf9042dc6dac7a",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 1.7444006415704887,
+        "steps": 1200,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_coarse125_depen1_prefix_h13_a_analysis_pose.json",
+      "analysis_sha256": "4de06b2db8eabb98a096ca0aa093b8001e441cf27665587e1acc6a08e2ceebe4",
+      "minimum_retained": 0.9507676019057703,
+      "matched_observations": 1201,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 5.630280552903796
+    },
+    {
+      "variant": "sample_coarse125_depen1_full",
+      "change": "Full scope; aborted on retention violation",
+      "run_status": "STOPPED_UNQUALIFIED",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_coarse125_depen1_full_h13_a_run.json",
+      "record_sha256": "6a027adbc82e44f985f5f931d65d2bfbebe94a5c9b568cff76979f0b26db30c8",
+      "release_qualified": false,
+      "retention_abort_evidence": {
+        "samples": [
+          {
+            "observer_step": 1613,
+            "retained_fraction": 0.949708840656432,
+            "heated_seconds": 7.691667067818344
+          },
+          {
+            "observer_step": 1614,
+            "retained_fraction": 0.949708840656432,
+            "heated_seconds": 7.700000401586294
+          },
+          {
+            "observer_step": 1615,
+            "retained_fraction": 0.949708840656432,
+            "heated_seconds": 7.708333735354245
+          }
+        ],
+        "scope": "Live heating-phase retention diagnostic; not full native task result. Final alignment unavailable on abort."
+      }
+    },
+    {
+      "variant": "sample_compact_seed_prefix",
+      "change": "Only pre-action compacted initial positions; insufficient",
+      "run_status": "COMPLETE_REVIEW_PENDING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_compact_seed_prefix_h13_a_run.json",
+      "record_sha256": "dc96164cca2421576fa368800e36c1e81f7af33a2e9c1f88d2044b930c426ad7",
+      "release_qualified": false,
+      "native_result": {
+        "score": 0.15,
+        "policy_avg_inference_time_ms": 1.6503508295863867,
+        "steps": 1200,
+        "success_rate": 0
+      },
+      "analysis": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_compact_seed_prefix_h13_a_analysis_pose.json",
+      "analysis_sha256": "e751026963f3899aefe98c13e85b32e8c4d428699503cce18e74df25634da419",
+      "minimum_retained": 0.9523557437797776,
+      "matched_observations": 1201,
+      "alignment_error": 0.0,
+      "grip_frame300_mm": 7.984457587811132
+    },
+    {
+      "variant": "sample_velocity4_prefix",
+      "change": "Only evaluation min velocity iterations4; running",
+      "run_status": "RUNNING",
+      "record": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_velocity4_prefix_h13_a_run.json",
+      "record_sha256": "83be6057d0b83a64bbc762e87a2449782b26a93afc45d0d7d49ae88c04d4adc4",
+      "release_qualified": false
+    }
+  ]
+}
