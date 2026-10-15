@@ -118,3 +118,5 @@ SDK自动offset基准仍失败（9838越界，第5步）。恢复原完整GlassS
 原完整SDF的margin/narrowBand均0.00035，SDK schema明确这些为相对包围盒对角线的无量纲比例，
 默认0.01；不能按0.35mm解释。当前测试现有producer完整GlassShell设置（margin/band0.01、
 contact0.8mm/rest0），保留完整SDF、3m/s、标准offset和16迭代的短测。尚未合格，不归因单一参数。
+
+生产者标准SDF设置短测也失败（13758越界，第5步）。当前短测批次全部结束、GPU已由各自owned runner释放，无高速度保液修复合格。下一步需进一步隔离无约束流体内部求解与容器接触，不继续把静止低速结果提升为机器人运动资格。完整账本sample_stability_diagnostic_ledger.json。

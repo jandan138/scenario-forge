@@ -79,6 +79,10 @@
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_alone_20261015T061726Z/report.json",
       "sha256": "9176b9e3ed6c638256a77ecea9a8554b4b65a12bb74d40db286e6a58c86d861a"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_sdf_producer_20261015T062217Z/report.json",
+      "sha256": "f04da9e6c9ba2f07b5613c539588afd05a669ae2115d27742be19a3ef0016f56"
     }
   ],
   "runtime_qualification": "PENDING"
