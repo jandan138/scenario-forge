@@ -1,0 +1,49 @@
+{
+  "status": "DIAGNOSTIC_PROGRESS_NOT_DELIVERABLE",
+  "root": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012",
+  "artifacts": [
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/calibrated_new_timing_repeat_queue.json",
+      "sha256": "5755163c7cba7ebe3b7666b780125f1d16d38eda95d88aed676e8611ce1c5610"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/calibrated_ab_robot_comparison_20261015.json",
+      "sha256": "f02ab32ec32e3ed3baecb82029e56f549696accb6d4a8e1dd194588484aef337"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/new_b_visual/review.json",
+      "sha256": "11ec7fec4d518d640198b343d8240aebd7070ea1aaca8fcb6f19ef5fa609156c"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/new_b_visual/release/review.json",
+      "sha256": "9a079526ec39dbbc15d7a25bbb88d0fae9160eaeb186752163b7b5cb8ec61af3"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/timing_pair_static_case13.json",
+      "sha256": "2cc7060f5e8d346cca9c7ac0a4589f21c5ea3832317c4f423976ab33cfbc97e6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/new_liquid_observer_identity.json",
+      "sha256": "3740d316a42faa4b4b1429d86e4f0478c6ce8b3922161184f8707877432737a3"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/new_liquid_rack_observer_preparation.json",
+      "sha256": "ceb11b81c95060ffda7977548f47b645cb801987483862f1b128359b2273e525"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/new_liquid_rack_observer_fragment.py",
+      "sha256": "eb6662493a16630de0727bb399772724894340978bfae7ced6756ce658ae2e39"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_new_liquid_observer_case.py",
+      "sha256": "c61130851c87116d27d2875191e902945edbed07f5fd1463faacdd9310f8ef20"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/audit_timing_pair_static.py",
+      "sha256": "40f95f446b5cb6b32cca93131af743bde6d03a588d60c0c8b57b1eb96a55453e"
+    }
+  ],
+  "active_queue": "evidence/calibrated_new_timing_samehost_c_queue.json",
+  "active_queue_hash_omitted": "Mutable during running; use process and logs for live state",
+  "rules": "VAL-001/002/003/008; STATE-002; no general standards change"
+}
