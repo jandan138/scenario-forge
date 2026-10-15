@@ -142,3 +142,17 @@ contactOffset0.01m/restOffset0.001m。静态case13组合对比恰50个标量差�
 20个场景已生成独立副本。原动作、120Hz/7000及评分保持，metric只读追加仍限定诊断副本。
 证据rigid_offsets_native_identity.json、rigid_offsets_native_static_audit.json、rigid_offsets_h13_a_run.json。
 即使此分支拿到1分，也不得越过未完成的保液交付门槛。
+
+回架静态配置复核另发现：两版均TGS/120Hz、相同机器人摩擦预处理和300步warmup，但新YAML显式全局position迭代64–128，旧YAML未设置（远端SDK schema默认1–255）。这仅是配置/默认值证据，旧运行实际生效值尚待抓取；不得直接归因。证据old_new_solver_config_audit.json、remote_scene_solver_defaults.json。当前接触参数对照继续运行，不叠加更改全局迭代。
+
+
+旧contact/rest对照已执行7000步，引擎结束日志0.5；截至5277帧回架检查仍无true，试管倾角约16.31度、
+架子局部底部z约0.0578m，未落到底部。显色仅约0.614，不能将恢复旧contact/rest作为完成修复。
+完整编码/审计收尾仍在进行。
+
+下一单项对照仅将试管enableSpeculativeCCD由true恢复旧版默认false；正常碰撞仍启用，
+粒子参数及其CCD、contact/rest、质量、几何、动作、评分均保留基线。
+静态case13组合只有这一个属性差异；41份初始metadata无该属性覆盖。
+独立副本spec_off_native_identity.json，静态检查spec_off_static_audit.json，
+spec_off_after_offsets_queue.json等待现有运行完整结束后串行启动（supervisor158308）。
+此分支保液仍未合格，不把可能出现的任务1分直接升级为交付资格。

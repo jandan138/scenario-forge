@@ -135,6 +135,22 @@
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/rigid_offsets_native_static_audit.json",
       "sha256": "6c310d59a29e8b6895b748797ee6b492e53aba5e9791e43c4ff1cb186fe70c21"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/spec_off_native_identity.json",
+      "sha256": "db02c78d200356405c2c8ec928b390e2ccda7a94ea9e4f83e7e1b438bb0f46b0"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/spec_off_static_audit.json",
+      "sha256": "15c02be605a27b1804bce21edcc726d81d860c9a9e30c32b8f0029feaed1d7a1"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_new_solver_config_audit.json",
+      "sha256": "4ef3139afd83e9a8d25fd93d165838c4636a9e0d82eb5c78a55df66df85c24c6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/remote_scene_solver_defaults.json",
+      "sha256": "dcdf89bae9ae056a26ea3f2af0f47ba87f5f9e3f4da50fc5466364ed6536aaab"
     }
   ],
   "runtime_qualification": "PENDING"
