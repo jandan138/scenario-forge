@@ -83,6 +83,58 @@
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_sdf_producer_20261015T062217Z/report.json",
       "sha256": "f04da9e6c9ba2f07b5613c539588afd05a669ae2115d27742be19a3ef0016f56"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_free_contact_on_20261015T062802Z/report.json",
+      "sha256": "d1e22d5b1332d91d7c4e9e9424109f224e07396cdb282dc4a80577b141366bcd"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_free_contact_off_20261015T062802Z/report.json",
+      "sha256": "18c83bb8cab302660b168f46af32912fabe11a791dff943c65af0bfac068f679"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_kin_g1_20261015T063104Z/report.json",
+      "sha256": "ad4e7d239ec6925c71ff5419d3ceb2582573b60046368d84c72bcd3c3aef9431"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_dyn_g0_20261015T063104Z/report.json",
+      "sha256": "a89fdb5e846e19fc816d3950f524809047671f7f89fd81bca4697d1e2cfa91ac"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_single_particle_speed1_20261015T063709Z/report.json",
+      "sha256": "5f309e7f47d3dc8740bbb9bdb2eca5e6eedee44d7317f939bbbf78bd2130543c"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_single_particle_speed3_20261015T063709Z/report.json",
+      "sha256": "b45601e25239e702c6fd26bb9bdaf70eba455f66d4f34e68530c6fbd971d6d28"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_margin_speed1_20261015T064137Z/report.json",
+      "sha256": "ed8b61c1722529499a12887cf50e5b61eb073342ed58cccafdd154ece6649e68"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_margin_speed3_20261015T064137Z/report.json",
+      "sha256": "66ffc176711104e53ccd69afe32f1e1c3a9d9d252062045274ef6bba5a72d67a"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_full_margin_original_20261015T064430Z/report.json",
+      "sha256": "d127c3aadcefbf250f2d2366d0fa188ae51ce1f96705cda6c873d4241996b3d4"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_full_margin_standard_20261015T064430Z/report.json",
+      "sha256": "0c94316c947908fd1be381c95ff9aa4698830945aad5f59d4ac94a3d5de422fa"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_original_margin16_20261015T065820Z/report.json",
+      "sha256": "308ec20a3f2c183da458098872bd1d3400a4829f48809705e02cf04fdc2620a6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/rigid_offsets_native_identity.json",
+      "sha256": "874c249b1144eef99d8ffbb66a2d0642bf050803d3aa7c86786e708694feb34e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/rigid_offsets_native_static_audit.json",
+      "sha256": "6c310d59a29e8b6895b748797ee6b492e53aba5e9791e43c4ff1cb186fe70c21"
     }
   ],
   "runtime_qualification": "PENDING"
