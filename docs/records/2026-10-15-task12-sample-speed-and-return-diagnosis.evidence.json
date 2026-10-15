@@ -1,0 +1,25 @@
+{
+  "artifacts": [
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/new_liquid_pose_h13_a_pose_summary.json",
+      "sha256": "749b18b0d1a5407b83e70995f26105ab367282440e8798661d1697bcef1f8581"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_velocity_limit_diagnosis.json",
+      "sha256": "3a3761f7fd6429acd8e22c0505ace429d82a70ad09d58a47da52045f4bb1cc06"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_speed3_identity.json",
+      "sha256": "6929ef2e8480e5b1c97a80f9a16739a95bd1d833fc0939d281a63d335aff6444"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_speed3_static_audit.json",
+      "sha256": "d5db1987ca6fc9cae7d0d5ba959056d5bed4622d728849b5569d9fc2d38791ea"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_case13_pose_identity.json",
+      "sha256": "e37a009c1bc4a22663dd0e32bfa662cac86b1c78d6e18b047e1a89875ec04383"
+    }
+  ],
+  "runtime_qualification": "PENDING"
+}
