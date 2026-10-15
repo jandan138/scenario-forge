@@ -158,3 +158,9 @@ spec_off_after_offsets_queue.json等待现有运行完整结束后串行启动�
 此分支保液仍未合格，不把可能出现的任务1分直接升级为交付资格。
 
 contact/rest对照现已完整落盘：7000步0.5、sr0，帧对齐/视频/动作审计完成。只读记录中tube_touches_beaker阻断从基线28帧增加至1358帧，加热最多15.4s（基线22.5177s），回架仍未通过。此记录不单独证明实际穿透或接触为假；rigid_offsets_heat_return_comparison.json保存范围。SpeculativeCCD单项对照已启动，继续保持其他基线不变。
+
+## 大接触范围候选的首次越界方向复核
+
+`evidence/sample_margin_failure_direction.json` 对三组已完成静置短测重新分类：原配方128迭代、第9步首次越界z=152–158mm；原配方16迭代、第15步z=155mm；SDK自动偏移16迭代、第100步z=152mm。试管口约150mm，首批粒子位于口部上方，不能仅凭这些失败称为侧壁穿漏或机器人运动过快。后续终态有粒子落在管外/管底以下，但终态位置不能重建完整逃逸路径。下一轮液体短测应优先隔离初始点位/初始速度与稳定化过程，不再把单纯继续增大侧壁偏移作为首选。保留13905粒和8g；尚未实施新稳定化配方，也未宣布保液通过。
+
+据首次越界方向准备两组初始化对照（尚未运行）：以 `sample_original_margin16_20261015T065820Z` 为共同来源，A仅清零初始速度，B在A基础上恢复既有生产者规则点位。保持13905颗、8g、粒子配方、3m/s上限、0.03m接触范围及16迭代。身份见 `evidence/sample_initial_conditions_identity.json`；`sample_initial_conditions_queue.json` 等待 wall/solver 串行队列完成后再运行每组5秒静置，前置异常即停止。它们是个人诊断夹具，不是正式候选或交付闭包。构建时修正了本地括号和Vec3f数组转换错误，失败草稿未启动GPU。

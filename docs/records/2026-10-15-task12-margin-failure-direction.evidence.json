@@ -1,0 +1,9 @@
+{
+  "scope": "Offline classification of existing fixture first violations; no new GPU test",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_margin_failure_direction.json": "827f387ef2eeec72640759ab747d861ae5cc461cd79a44e2dfed79eedaf9f481",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_initial_conditions_identity.json": "846174ac624577058267cf58f8a855f37d472d0b2347b32dfa61e1af65b5deaf",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/prepare_sample_initial_conditions.py": "9d9379c23f98676cb807629eb907f6ed3839d88ba4e6b1868c87354b900c637c",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_sample_initial_conditions.py": "1872d504f000520741f4d97f4b8a59d34d5ff25d3311b4f61241466f7681a788"
+  }
+}
