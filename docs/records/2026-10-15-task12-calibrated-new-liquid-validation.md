@@ -41,3 +41,14 @@ mixed5使用chunk8和完整分段模式；两条Pi05代表使用chunk30、原零
 
 规范依据STATE-001/002/007、VAL-001/002/003/004；通用规范无需变更，本次是任务级执行语义校准和隔离验证。
 核心package/schema/API未变，不引入仓库episode runner。同步operations，未声称重新执行全仓库make check。
+
+## 新实例恢复与重复对照
+
+用户停止旧远端后提供10.150.163.175:22（公网123.57.187.96:900）。公钥重新授权后连接成功，
+hostname为dsw-529861-6cb4cb97bf-vdwmr，GPU为GPU-b9f30517-2560-4f0b-9a9b-275b89c9000e。
+Isaac版本4.1.0-rc.7+4.1.14801.71533b68.gl，客户端依赖和共享工作区可用，8087与GPU空闲。
+身份保留在remote_restored_20261015.json，不再重试停止的旧地址。
+
+calibrated_new_timing_repeat_queue.json已经启动，分别执行calibrated_frozen_h13_b、calibrated_timing_h13_b。
+仍只重复原A/B版本，不改倍率、物理参数或评分。新实例/GPU与首轮不同，因此跨机器差异本身
+不能证明同机不稳定；必要时在新实例继续同版本重复，分离主机变化与版本效应。
