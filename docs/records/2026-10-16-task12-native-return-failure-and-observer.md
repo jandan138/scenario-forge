@@ -37,3 +37,31 @@ CCD隔离候选静态差异审核通过并已启动（supervisor2279871）；报
 保液按原生记录对齐后的动作窗口复核：solver组合起始98.9069%，第300步96.0805%，外部粒子从152增至545；窗口内532次退出事件均由v3分类为mouth_compatible。初始化阶段不与动作阶段混计；重复进出会产生多次事件，因此事件数不等于最终损失粒子数。当前下降不是全部来自初始化，仍需完整逐步保液及喷射/持续失液视频审查。`evidence/prefix_retention_phase_comparison.json` 保存三组阶段对比；该分类不能代替视觉验收或全程无穿壁证明。
 
 小型诊断结果及哈希归档于[抓持前缀证据](2026-10-16-task12-grasp-prefix-evidence.json)。初始USD样液局部z范围1.90–43.50mm，管口150mm；这是静态初态检查，不说明运行液面高度。不得未经运行证据把损失直接归因于装满。
+
+CCD对照完成，301观察对齐误差0，第300步抓持偏差5.216mm（CCD开启组合3.587mm），短测最低保液96.1597%。不采用CCD关闭，保留单次结果的有限范围。接下来对旧试管碰撞+迭代1/255+全局CCD开启的组合跑完整7000步上限，不再改物理、动作或评分；诊断USD保留逐步观察器以同时审查保液与回架。此前短测不能证明完整操作成功。此完整运行沿用已解释的90分钟有界墙钟预算（不是物理时长/步数修改），不重复触发已证明过短的45分钟中止。
+
+主实现者（非独立审查）抽看solver前缀左腕与overlook的0/50/100/150/200/250/300帧，共14帧：可见夹取和移向烧杯，未见明显宏观喷流；左腕运输阶段裁切管底，俯视样液较小且被夹指遮挡，蓝管架反射干扰判断。因此判WARN，不能证明连续无喷射或完整液柱可见。记录 `evidence/solver_prefix_visual_review.json`，原图保留于外部evidence目录。
+
+在完整回放等待期间，从19条已定位的原始worker日志严格截取对应SceneConfig到done的片段：index3–7共5条OpenWAM终止行属于single-step路径，其余14条属于chunk路径。保存行号与片段哈希于[原终止接口证据](2026-10-16-task12-terminal-dispatch-evidence.json)。终止接口不证明整段请求边界或底座标志；其余16条旧包校准仍待执行，不能统一套用Pi05 chunk30。此次只读日志分析不占仿真GPU，不改正在运行的版本。
+
+完整solver组合仍在执行时，实时观察在有效加热0.875s后首次低于95%（observer794，94.9874%），到observer828为94.6854%，连续34个加热观察低于线。保存 `evidence/old_bundle_solver_full_h13_a_live_observation.json`；最终meta对齐未完成，不沿用前缀warmup长度虚构动作帧号。保持本次完整回放不中途调参，以同时取得变色/回架结果；当前实时证据已不支持交付合格。
+
+进一步静态核对独立夹具与当前完整诊断的Sample/Bath系统、粒子属性和物理材质（排除位置/速度/extent数组），未发现数值差异，报告 `evidence/fixture_vs_native_fluid_attributes.json`；不含运行时覆盖、几何/碰撞关系和全局solver，因此不称环境等价。实时observer800–899中试管平移速度中位0.0156m/s，保液94.9371%降至93.9374%；900–974中位0.0198m/s，继续降至93.0241%。这些窗口尚未最终meta对齐，但足以提示不能只解释为高速搬运瞬间损失。保留 `evidence/solver_full_live_loss_vs_motion.json`；动态耦合/场景接触尚待隔离，未更改本次运行。
+
+追加排查（仍不改正在运行的场景）：用旧记录前101个机器人观察匹配新trace，最大误差1.788e-7，定位observer414为动作frame0；这是共同前缀初步定位，最终仍须全量新meta对齐。500–899窗口的新旧试管平移速度/有限差分加速度量级相近，未支持新版显著额外抖动假设，见 `evidence/solver_full_live_old_new_motion.json`。使用原机器人mesh凸包和live link位姿抽样管腔，150/300/600/900帧未见样本点处于夹指凸包内；夹指最低局部z约114–117mm，初始液柱顶43.5mm。报告 `evidence/solver_full_finger_cavity_sample.json`；不含烹制偏移和连续几何证明，因此不据此关闭机器人液体碰撞。
+
+黏度调研：现有task10材质作者viscosity=0；远端Isaac4.1 particleUtils水预设使用1.7e-6/(metersPerUnit³)。[官方Schema说明](https://docs.omniverse.nvidia.com/kit/docs/omni_usd_schema_physics/latest/physxschema/class_physx_schema_physx_p_b_d_material_a_p_i.html)列为非负无量纲参数，[PhysX5.3接口](https://nvidia-omniverse.github.io/PhysX/physx/5.3.0/_api_build/class_px_p_b_d_material.html)说明其用途，但均不能证明本任务增加黏度可修复。未将任意黏度改值混入当前对照，未新增通用推荐。
+
+只读observer v4已准备，新增每120步样液点/速度压缩快照与分位数，第500步通过tensor getters读实际fluid/solid rest及particle contact offsets。已编译并在远端SDK源码确认接口存在，尚未嵌入场景或执行；不得把准备状态标为运行通过。身份 `evidence/observer_v4_preparation.json`。当前完整回放仍用冻结v3，未更改。
+
+原生失液observer v4已封入独立1200步诊断工作树，静态审计确认相对solver前缀仅num_steps300→1200及observer脚本变化，物理参数、关系、原动作和metric不变。运行队列 `evidence/loss_observer_after_full_queue.json` 只在当前owned完整回放正常完成审计且进程退出后启动；自身预检仍要求GPU/端口空闲。前置报错、句柄提前丢失或等待超时均停止队列，不自动重启当前任务。身份和审计分别 `native_loss_observer_v4_identity.json`、`native_loss_observer_v4_static_audit.json`。此时仅准备完成，尚未获得v4运行证据。
+
+过滤接口查证：远端Isaac4.1 `/isaac-sim/extsPhysics/omni.physx.tests/omni/physxtests/tests/PhysxParticleAPI.py` 的 `test_particleSystem_pair_filter`（约877–910行）在粒子系统应用FilteredPairsAPI并指定地面碰撞prim，断言粒子随后穿过被过滤地面。它证明当前系统端写法有同SDK测试用例依据；本次未执行该测试，也未由静态平面推广为动态试管SDF过滤成功。当前单粒子/动态容器过滤效果仍未独立实测，不能因schema存在宣称没有双重液体碰撞。
+
+首次执行前补充观察器v5：为避免遗漏World默认初始化的重力/单位差异，先核实旧等待队列确实尚未启动下一轮，再仅停止等待器2297008。完整回放2287108/worker未动。准备工作树仅更新observer脚本，新增第500步场景重力/单位及PBD材质属性读取；旧身份另存 `native_loss_observer_v4_identity_before_runtime_scene_readback.json`，当前身份注明observer_revision=v5-before-first-execution并刷新SHA。静态审计再次通过，未执行过的v4准备不冒充运行结果。新等待队列 `loss_observer_after_full_queue_v2.json`（PID2301628）恢复相同前置条件，下一运行标签仍native_loss_observer_v4以维持已有队列工具路径，实际observer版本以身份文件为准。
+
+完整回放的控制器在observer3392首次color_progress=1，累计有效加热22.5177s，但当时样液仅保留74.6638%。事件已单独保存 `evidence/solver_full_color_complete_live.json`，视频和最终meta对齐仍待完成；不能将该事件记成任务成功或视觉通过。回架尚待本轮后续执行。
+
+回架后实时几何检查：observer4487，试管相对架原点z=52.708mm，最近槽底z=23.4mm，高出29.308mm；倾角此前约14.1°。用未修改tube_in_slot纯函数检查live相对矩阵为False。记录 `evidence/solver_full_live_return_geometry.json`；尚未取得最终视频和在线分数，因此只声明该时刻未落座，不提前写最终score。保液该时刻68.9392%，本版仍不能交付。
+
+后续分析脚本 `tools/analyze_native_loss_observer_v4.py` 已准备并编译：仅接受已完成审计的诊断，先按机器人状态精确对齐，再验证粒子快照shape/有限值、记录哈希，并要求运行时场景和tensor参数记录齐全。尚未执行；缺失任一读回不得标作诊断完成。新观察器不进入接收方运行依赖。
