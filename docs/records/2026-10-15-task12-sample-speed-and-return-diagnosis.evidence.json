@@ -10,15 +10,75 @@
     },
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_speed3_identity.json",
-      "sha256": "6929ef2e8480e5b1c97a80f9a16739a95bd1d833fc0939d281a63d335aff6444"
+      "sha256": "d38cbccbdc3d3cac80b6e5992644c1794cdcdc0a6f5dc861e79311e388c155e3"
     },
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/sample_speed3_static_audit.json",
-      "sha256": "d5db1987ca6fc9cae7d0d5ba959056d5bed4622d728849b5569d9fc2d38791ea"
+      "sha256": "ced7425164a4f3a7998b1b9a7b77dd32b9aa3e1fa4d45455e16d230e1d837672"
     },
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_case13_pose_identity.json",
       "sha256": "e37a009c1bc4a22663dd0e32bfa662cac86b1c78d6e18b047e1a89875ec04383"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_case13_pose_a_analysis.json",
+      "sha256": "b09500fd16c8ff0858ab76773d0c0c64870abe15ad7b134ce8ea6c1451fd9a03"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_case13_pose_a_pose_summary.json",
+      "sha256": "29a405208c12e2d07d30aa5f4b75b511276882079ca2aa4c6fe6e07138b552a3"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_new_completed_pose_comparison.json",
+      "sha256": "ce4b7c7cbb275140aae94a0ec895f5708e1f7002d2510c821695d331dffaa941"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_cold_control_20261015T053353Z_r1/report.json",
+      "sha256": "a0a7c08a3d7a30bb6d5e95dcbf5435446dec07692bf63270f19c509ba0e2c2ff"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_cold_speed3_20261015T053353Z_r1/report.json",
+      "sha256": "2624331b45ec7748041bde6e807cf3682ecee78f3ce71923da4a1e55764ea1da"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_regular_seed3_20261015T054103Z/report.json",
+      "sha256": "421332483a3e03c0d17ca820748f0c3a90f6b72f81211de88fbf4d6e1cfe5f40"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_matched_rest_20261015T055105Z/report.json",
+      "sha256": "e83e38dcafb709102dd081def4304b55f4dec951a20928d69566eb43afad7e9e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_filter_on_20261015T054659Z/report.json",
+      "sha256": "0203f69e65a97efdb5279d392248dc39ffb31f13a48b26de2ef18cfd9fe18268"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_filter_off_20261015T054659Z/report.json",
+      "sha256": "7aab91ad662067978677db505e250d0781300af571c74056a3297dc243411b99"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_depen02_20261015T055442Z/report.json",
+      "sha256": "deeb27abf691852df256ac38ff6028e0c9a0f3952be719f68f8cfe537ddb5277"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_no_self_20261015T055735Z/report.json",
+      "sha256": "25475fbd3556683c6b0b7aca59a88e804da9077020ec09a430458be13c0fc3e4"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_iter16_20261015T060142Z/report.json",
+      "sha256": "611f03f6f12892dfeed0a02c85409ca5a9113db57789269eaa179d05537a0f3d"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_auto_offsets_20261015T060607Z/report.json",
+      "sha256": "96b53faab50e87835ee6b4ba765d43ae55309636c89f3cdaebc9f69831cd7a69"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_single_sdf_20261015T061112Z/report.json",
+      "sha256": "7293aca540f53ade316d2bd16ec8fa8ebc0e51d95565273940514cf93f193f9d"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/sample_alone_20261015T061726Z/report.json",
+      "sha256": "9176b9e3ed6c638256a77ecea9a8554b4b65a12bb74d40db286e6a58c86d861a"
     }
   ],
   "runtime_qualification": "PENDING"

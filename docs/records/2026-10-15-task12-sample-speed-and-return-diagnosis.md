@@ -52,3 +52,69 @@ meta_record机器人关节的逐帧对齐误差为0（offset=0）。试管USD与
 外部工具未进入Scenario Forge核心包；GenManip核心、机器人代码、同事目录均未修改。
 交付仍限YAML、USD/依赖、task data、scientific metric；水浴LeRobot暂不做。
 最终旧成功19组各两次、坏例、实际保液/显色/回架及独立安装门槛保持。
+
+
+## 旧版位姿对照已完成，速度候选运行中
+
+旧版pose_a在3722步恢复1分、success_rate1，全部3723观察帧的关节/夹爪/底座与原记录误差0。
+观察trace与本次meta_record逐帧精确对齐，最终倾角1.069633度。
+将旧版实际最终姿态代入未修改的新版tube_in_slot几何谓词，结果为true；新版原时间候选最终为false，
+倾角24.182381度。因此这条有效旧示范不需要靠降低新评分标准才能接受。
+证据：evidence/old_case13_pose_a_analysis.json、old_case13_pose_a_pose_summary.json、
+old_new_completed_pose_comparison.json。
+
+1000帧尚未回架时，新旧试管相对夹爪位置已相差约7.5mm；到3580帧差异减小，但插入后新版底部
+停在更高位置，3660帧旧/新架子局部z约0.03433/0.06325m；3680旧版已满足几何落座，新版仍未落座。
+不能把这些位姿差异直接归因于单个碰撞参数或仅归因于架子，继续以单参数因果验证推进。
+
+速度候选已由队列自动启动。另核对41份初始metadata均没有SampleSystem/maxVelocity覆盖项；
+诊断增加每20步读取实际system上限、粒子速度和回读开关，以核实运行时确实生效。
+这些额外读取只在独立诊断metric中，正式候选metric不变；当前尚无速度候选运行结论。
+
+
+## 速度单参数候选失败，转静止初始化隔离
+
+3m/s在运行时确实生效，粒子速度读数达到约3m/s，updateParticlesToUsd为true。
+但动作100帧（提管前）只剩602/13905粒子中心在内腔，最小局部高度约-9.44m；
+到500帧仅420个在内腔。故单独放开速度上限不可接受，已按失效诊断提前停止，
+不能计作完整7000步结果。记录：evidence/sample_speed3_early_rejection.json。
+监督器随后记录的Traceback来自此次有意中断，需与此前已存在的液体失效区分；不能据此称引擎先崩溃。
+
+开始两个5秒无机器人静止对照（原0.2与3m/s），定位是否基础容器/种子在放宽速度后就失效。
+首轮漏了既有probe.usda入口，未加载Stage即失败；已原样补入该入口、验证组合后的上限数值，
+以新输出编号_r1重试，原失败日志保留。当前队列evidence/sample_cold_pair_retry_queue.json，
+源与修复说明evidence/sample_cold_pair_retry_identity.json。此为诊断入口修复，无资产参数变化。
+
+
+## 短时隔离结果与未解决项
+
+原0.2m/s静止5秒无越界；3m/s从第一步越界，最大13004/13905越界。
+按原producer seed_profile恢复0.8mm规则排列、同数量/质量并清零初速度后仍第一步失败（最大13017）。
+SDK4.1自带ParticlePostProcessingDemo.py使用spacing=2*fluidRestOffset；把0.516mm改为匹配0.8mm排列的0.4mm后，
+首个越界延到第6步，但仍最大11123越界，不合格。不能由初态近邻距离小就独立断言它是根因。
+
+静态凸包检查473个保液代理，规则初态没有粒子中心在代理凸包内部；这是静态几何检查，不证明cooking或接触间距有效。
+固定试管、两秒静止，对比启用/关闭25个名义上已被粒子过滤的刚体面，均从第一步失败（12398/12344越界），
+关闭这些面并未解决问题；不是可交付修复，也未证明所有过滤的完整行为。
+
+接下来在原初态上，仅把maxDepenetrationVelocity从2调到0.2，保持总速度3，区分碰撞纠正与正常移动限速。
+诊断账本evidence/sample_stability_diagnostic_ledger.json，当前尚无高速度保液合格候选。
+保液是与回架并列的未完成交付门槛；过程分0.85不证明样液仍留在管内。
+
+
+后续短测：maxDepenetrationVelocity0.2未消除失稳（最大13061越界，第1步开始）；
+固定试管关闭sample selfCollision后仅72越界（第9步），但该设置不具备正常流体资格，不能交付。
+匹配间距候选的particle solver128->16后最大6270越界（第5步），改善但仍失败。
+远端SDK schema默认particle solver16；当前追加SDK自动offset基准以排查手工offset组合，尚无结论。
+SDK4.1 particleUtils确认MassAPI设置的是整个粒子集合质量（helper将per-particle mass乘以数量），
+没有把0.008kg改成“每粒质量”；保留8g总量，未按未经证实的质量假设改动。
+
+
+SDK自动offset基准仍失败（9838越界，第5步）。恢复原完整GlassShell SDF并关闭498个proxy/partition
+也失败（13548越界，第3步）；此诊断使用旧SDF contact/rest和采样参数，不能代表所有SDF设置。
+仅保留样液系统仍第一步失败（12902越界），Tensor读取solid/fluid/particle offsets为0.28/0.516/0.68mm，
+与USD一致；没有发现仅由Bath系统存在或文件属性未生效导致的解释。
+
+原完整SDF的margin/narrowBand均0.00035，SDK schema明确这些为相对包围盒对角线的无量纲比例，
+默认0.01；不能按0.35mm解释。当前测试现有producer完整GlassShell设置（margin/band0.01、
+contact0.8mm/rest0），保留完整SDF、3m/s、标准offset和16迭代的短测。尚未合格，不归因单一参数。
