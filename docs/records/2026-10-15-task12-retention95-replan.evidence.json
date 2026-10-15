@@ -1,0 +1,13 @@
+{
+  "scope": "Accepted plan, CPU checks and completed whole-shell failure; cold runtime qualification pending",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/retention95_checks.py": "7b7fbe78ab197342797a0679c75f87fac43c4ef3add19d9a6b889d6429a77f0d",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/test_retention95_checks.py": "730f659fff73ecd7b86df412282cc12af05046497f5547f84fed231a5c3a3615",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/probe_task12_retention95.py": "633116c37ba703339e45a53fa9ce8ef116d73037e5fd0076188b77010bcad8e3",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_retention95_cold.py": "06b42eb799ccfeac9537df91323468e9e8c4f5181359ae7ea7080409b7769032",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_cold_identity.json": "1c6c1bcd2f72074620ff17339be9835974a7bba2ac51c1334a6267f1f4af1b64",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/whole_shell_h13_a_run.json": "9f43109d70fe57f4c4d819b061bc331f3d30076c73e122fa304385183485c84d",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/whole_shell_h13_a_pose_summary.json": "61c790ff03cf547ff7059da1e37b5d41daf3f3eeb7b5383e3a170f2757a43ab8",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_case13_tube_motion_targets.json": "40b19aa5b0c2ed28f85012999e4016033e0ab357a91cd3de06969706991fa0ba"
+  }
+}
