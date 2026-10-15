@@ -156,3 +156,5 @@ contactOffset0.01m/restOffset0.001m。静态case13组合对比恰50个标量差�
 独立副本spec_off_native_identity.json，静态检查spec_off_static_audit.json，
 spec_off_after_offsets_queue.json等待现有运行完整结束后串行启动（supervisor158308）。
 此分支保液仍未合格，不把可能出现的任务1分直接升级为交付资格。
+
+contact/rest对照现已完整落盘：7000步0.5、sr0，帧对齐/视频/动作审计完成。只读记录中tube_touches_beaker阻断从基线28帧增加至1358帧，加热最多15.4s（基线22.5177s），回架仍未通过。此记录不单独证明实际穿透或接触为假；rigid_offsets_heat_return_comparison.json保存范围。SpeculativeCCD单项对照已启动，继续保持其他基线不变。

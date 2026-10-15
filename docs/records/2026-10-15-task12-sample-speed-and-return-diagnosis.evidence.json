@@ -151,6 +151,14 @@
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/remote_scene_solver_defaults.json",
       "sha256": "dcdf89bae9ae056a26ea3f2af0f47ba87f5f9e3f4da50fc5466364ed6536aaab"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/rigid_offsets_heat_return_comparison.json",
+      "sha256": "776196727f5a78186dad3aec1405e1851283e8a46cf9eebaef6674610542f3f1"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/rigid_offsets_h13_a_pose_summary.json",
+      "sha256": "2f2ec8e3a58e2005077e8fd9dd760a4895f2afb0fce4a9ebd46b057c3793f943"
     }
   ],
   "runtime_qualification": "PENDING"
