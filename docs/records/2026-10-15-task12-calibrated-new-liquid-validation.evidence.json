@@ -41,6 +41,30 @@
     {
       "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/audit_timing_pair_static.py",
       "sha256": "40f95f446b5cb6b32cca93131af743bde6d03a588d60c0c8b57b1eb96a55453e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/all19_transport_inventory.json",
+      "sha256": "20a9aaa073d5172013c9a41b844135b274b41cdcce50e835e9d249bfd558cddd"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/all19_transport_log_candidates.json",
+      "sha256": "cbc2e164bf8da06bd6c84a2b7022d2642ff1fc83bb841c3cac1a4b0c1d6dc29c"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/samehost_frozen_bc_robot_comparison.json",
+      "sha256": "803e42fe5afa82dfb4fb1b6388fffa122922e07dd366c598fdbcd5e66d921d1b"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/analyze_new_liquid_pose.py",
+      "sha256": "b0bb14c2213e23ab4c80e57befc98b41eb504d0f7416b34c5e10f971eb0cc435"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/continue_after_samehost_c.py",
+      "sha256": "6df393bbbd1c9e43d87bd7b3f35bf6f84640564e340483a29c7314fa5967b831"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_new_rack_authored_collider_comparison.json",
+      "sha256": "e63df524d90b68682b91d0b05a1cc8940d1f8f09830fc045720f2d0cb2ca1462"
     }
   ],
   "active_queue": "evidence/calibrated_new_timing_samehost_c_queue.json",

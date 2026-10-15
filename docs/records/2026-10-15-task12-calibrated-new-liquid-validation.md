@@ -89,3 +89,32 @@ R/evidence/calibrated_ab_robot_comparison_20261015.json（各源meta_record绑�
 独立诊断副本已创建于/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/diagnostic_new_liquid_observer_20261015T040420Z，核对711个复制文件哈希、588个非允许改动目录内的基线文件原字节。仅task12 metric追加只读观察，原候选未改；tools/run_new_liquid_observer_case.py限定catalog13并使用校准chunk30客户端。尚未启动GPU诊断，等待现有同机对照结束。
 
 诊断追加每20物理步读取一次SampleParticles中心的腔体内数量、试管局部质心与高度分位，用于核对杯内橙色残留疑点。读取USD Points需先验证与live同步，不能直接充当保液合格标准；没有写入粒子。变换/腔体统计及NaN拒绝2项测试通过，原计数中性1项仍通过，独立副本metric哈希已刷新，尚未运行。
+
+最终批量验收的执行来源盘点：all19_transport_inventory.json保留19条原记录哈希和底座值；all19_transport_log_candidates.json现已逐条找到唯一case/步数匹配的原worker日志段，并与原result_info结束时间差小于1秒核对。3条GPT的渲染调用密度约12–14/100步，11条Pi/其他记录约3–4/100步，5条OpenWAM使用非chunk结束日志且无该subframes统计。此为来源证据，不把推断的chunk8/30或单步直接认证为所有轨迹的原请求，也不把3条校准扩大到19条。
+
+
+## 同机冻结B/C完整比较与后续诊断队列
+
+冻结C正式完成7000步0.15，运行/视频与动作审计通过；时间C已启动。
+R/evidence/samehost_frozen_bc_robot_comparison.json对两次7001个观察帧比较：
+关节首次非零差异105帧、最大0.008226335rad，首次超过0.001rad为3568帧；
+夹爪首次非零差异105帧、最大0.00599455m，首次超过0.001m为3597帧；
+底座最大1.6191e-5（混合坐标单位，不能概括为全部米）。
+两次均0.15并不表示状态重现。该证据已排除“只有版本变化才产生物理运动差异”的假设；
+不证明求解器、PBD、初始化或某一接触参数是根因。回架阶段误差放大需live试管相对夹爪轨迹定位。
+
+自动衔接进程59286（R/evidence/after_samehost_c_launch.json）等待已有进程44263完成两条对照，
+核对两次B/C后才启动独立只读诊断pose_h13_a；GPU任务严格串行。
+队列R/evidence/after_samehost_c_queue.json，入口R/tools/continue_after_samehost_c.py。
+诊断副本仍是临时排障，正式metric SHA256 319cabad2c3c88a21cf9c5ff7a022f7b4450d8c0b17f4f83cc41596abe7fcddc，
+冻结和时间候选相同，均无_rack_snapshot追加。
+R/tools/analyze_new_liquid_pose.py准备在诊断完成后从记录关节状态核对trace帧对齐，
+汇总相对位姿/实际metric检查结果，不自动按记录帧号假定对齐或判定因果。
+
+
+旧/新case13架子静态检查保留于R/evidence/old_new_rack_authored_collider_comparison.json：
+两者架子世界变换相同，旧包启用字段含Cube_015 SDF及18个slot底部Cylinder；
+新包仅Cube_015静态三角网格（approximation=none），相应底托取消。
+旧底托示例radius0.00979、height0.0026（局部米，父scale1.1），world中心z0.77931。
+这只是编写属性差异，不证明其实际接触、cooking、过滤和回架因果；不能仅凭这个表恢复额外支撑。
+先等live轨迹判断偏移是否在接触架子之前发生。
