@@ -1,0 +1,14 @@
+{
+  "scope": "Completed cold numeric checks and input preparation; motion/visual/table runtime qualification pending",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_cold_queue.json": "4f9f3290d8b3d4c16c33bef1ddb61181a7894f38f48819d62eb093ca07df124e",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_recorded_motion_identity.json": "90165069cc54b1dcec31c3614366f2fcf1f8ad6d66b4a8058bc605adb3bd0d1d",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_case13_tube_motion_targets.json": "40b19aa5b0c2ed28f85012999e4016033e0ab357a91cd3de06969706991fa0ba",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/table2mm_factorial_identity.json": "53946c76a637a05727be171dbc5c3e96eee575c29a0b3a7f1336c358555b2faf",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/table2mm_static_audit.json": "b3135191f27a7d3e5e5184f3d949df3a82565c695677ff0f1fcf87832c1cd042",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/recorded_tube_motion.py": "48347662ee0ec411ce9708a945a4c29ef24a50e6e9701d7bd9b3a3c5e55eb25b",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/test_recorded_tube_motion.py": "89312ee1f7f81813e10cb2392e9a4f35eccc4130b2fa46abe3c3e121082fa403",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/probe_task12_recorded_motion95.py": "a88324922cd599946ed04ab3708b110c99af2de2e0c0d92e665e5f9b88755f22",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/prepare_table2mm_factorial.py": "70723e668c57d95c66d228d54113c7c3b160bc1ba10eb0b146e658a759d21113"
+  }
+}

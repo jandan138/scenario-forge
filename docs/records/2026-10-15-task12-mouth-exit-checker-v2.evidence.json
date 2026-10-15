@@ -1,0 +1,13 @@
+{
+  "scope": "Original full-motion failure retained, v2 CPU tests pass, v2 runtime pending",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/retention95_checks_v2.py": "7fd1c364b661e08d2676e6c14980ae93d01155d4f6ab3681c7b6f3fea532ca92",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/test_retention95_checks_v2.py": "011366ef54f8b57380ae671feff09959c4d0f5602e6da1ce1d4406c7397a7609",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/probe_task12_recorded_motion95_v2.py": "c6783e46257543b1b74c464f74f6388b6b218694556f9806e8785415884a2cce",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_v2_red.log": "0ceb06caf5b87c58619ce91c51ad75b5b7d6622270712c143aeb4382c0f8bb47",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_v2_green.log": "c6b9b1f09add0403cc07e90bfdf272129b1ddfa2f8f7675ea8218862f2516371",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_motion_v2_identity.json": "2b086efb514699021d571420b82b900a0691804d6f0e5d5a44271628a7a382d2",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_recorded_motion_20261015T113953Z/report.json": "42192e4bdddfd9f6da4916a20535b9f09313221ebe3f1836ab774f01eb401935",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_recorded_motion_20261015T113953Z/first_exit_events.json": "54c4a3ba6a66b19cd57312ba7fdd1912c0b7d788d668dfa84c9f39664297966b"
+  }
+}
