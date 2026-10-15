@@ -23,3 +23,13 @@
 显示同步压力视频完成，显示/live位置误差为0；每步保留率最低98.0223%。原v2报告留有2条未确定回落事件，保留原FAIL；同一v3几何规则复核384次已记录退出均与口部退出兼容。两路完整视频解码通过，主实现者按render-visual-reviewer清单查看131个时间采样裁切及原尺寸关键帧：提起/返回有管内晃动，持管时可辨认蓝色样液柱，抽查未见宏观口部喷流或持续排液。总览裁切、初帧跟随构图、管架遮挡及玻璃反射保留WARN；这是主实现者审查，不是独立第三方或逐帧证明，也不验证反应显色。
 
 机器可读门槛 `evidence/retention95_motion_visual_gate.json` 仅放行首条原生诊断，绑定候选identity哈希；评审 `evidence/retention95_sync_motion_review.json`。`receiver_retention95_h13_a` 使用干净metric、原case13动作和校准协议，不含metric观察器。该次回放的保液、实际显色、回架、重复性及最终独立安装仍需后续证据，不能把压力测试结论扩大到机器人。
+
+首轮原版四路渲染明显慢于独立夹具，已持续推进到约2970步，近期约0.577秒/步；未修改当前动作、物理频率、渲染或监控时限。辅助工具另准备显式壁钟预算版本（默认仍2700秒、最大7200秒、server ready单独限制600秒），尚未使用。AST检查server/client Popen调用与原辅助器完全一致，仅供后续根据实测时长设置有界等待，不代表改善性能或增加物理步数。见 `evidence/explicit_wall_clock_helper_static_audit.json`。
+
+速度/接触范围的静态估算：旧成功轨迹包围整根试管的角点最高速度约1.760m/s；该值不约束内部液体晃动。对473个液体碰撞代理做点到AABB接近性估计，30mm约522万潜在对，18mm仍约502万，仅少约4%，且不是真实PhysX接触数。因此暂不以该估算为由下调速度或接触范围，保留当前已验证参数。证据 `particle_speed_contact_budget_geometry.json` 与 `particle_contact_range_workload_estimate.json`。
+
+首轮h13_a达到辅助器45分钟墙钟上限后结束：客户端日志已完成4740步，原3722帧动作之后进入保持阶段，未生成完整原生结果/视频，不能作为任务零分或合格结果。原记录保留为INCOMPLETE_WALL_CLOCK_LIMIT。清理已确认旧PID/GPU退出。此上限源于[回放技能](/root/.codex/skills/running-genmanip-ssh-replay/SKILL.md)的“单次尝试以45分钟为排障上限”；针对持续正常步进但总耗时超过该默认的已授权完整评测，后续独立辅助器改为显式、有界等待，不改仿真或交付内容。
+
+h13_b已用同一候选、相同动作和协议启动，外部墙钟上限5400秒；7000步、120Hz、渲染和评分均保持。只扩大现实等待窗口以容纳完整记录与编码，保留首错停止，不无限重试。新helper未修改正在运行的旧脚本。
+
+同时只读核对了同事当前仓库的loader、worker pool、evaluator utils三个关键核心文件，与候选完全一致；候选genmanip/core和genmanip/utils相对0e99也无Git差异。不同HEAD不等于修改核心，完整独立安装仍未验证。比较见 `receiver_colleague_critical_core_comparison.json`。

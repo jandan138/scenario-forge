@@ -9,6 +9,13 @@
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/prepare_receiver_retention95.py": "51d1ab843102fb6769ceaa3512ecb052c11a630bd46cd549e1b603244c012c11",
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_motion_visual_gate.json": "36bb14288386d6169d7cecfa1722966d73d66e053949545cfaff5da6532757d3",
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_sync_motion_review.json": "c29e669777bcffd3c6e56857fa2c92addc255d844068959a15417a911140d35f",
-    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_receiver_retention95_native.py": "43c6cf16e79e1054c5ada2a8753e4f68f6a6b34ea0950691767a98a693ea1acd"
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_receiver_retention95_native.py": "43c6cf16e79e1054c5ada2a8753e4f68f6a6b34ea0950691767a98a693ea1acd",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/explicit_wall_clock_helper_static_audit.json": "b2aa425bbb956222f44bca543017bf8ca2fecca95e9847c6ab4843198fffb316",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/particle_speed_contact_budget_geometry.json": "2075ef6609c1c19a3501db541e2405b03397fed2de2be8bb535b21f0d31f7ad3",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/particle_contact_range_workload_estimate.json": "fd5470a48da9d61fbe2f540d456998f8183bae49a5835c6cd3105320219bbaa7",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_baseline_pi05_calibration_bounded.py": "4cf931ffcce25c175043e461f6dfc607eabb29384ab270301f5f02711832ab47",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_h13_a_timeout_review.json": "47c724fe6d82d38bf6858372594f3418887caacf5e881abd632049dbcf8778d6",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_colleague_critical_core_comparison.json": "e27029d52940e370b3a8fd88d66b1524707e21d0018f36708ff5aa0c454bbc6a",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_receiver_retention95_native_bounded.py": "5fee3bfdafe46b9d176bad43e010b9f26ffd3310b05f26370e902cdc74386cdd"
   }
 }
