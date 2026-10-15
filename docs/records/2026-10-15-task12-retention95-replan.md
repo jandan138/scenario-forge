@@ -15,3 +15,5 @@
 碰撞警告尚未定因：官方 [PxShape说明](https://nvidia-omniverse.github.io/PhysX/physx/5.2.1/_build/physx/latest/class_px_shape.html)指出，三角网格/高度场使用未定义面索引查询材质时会警告并返回NULL；这不等于已证明我们的警告无影响。须结合Isaac4.1实际碰撞对象和结果继续核对。样液与浴水PBD材质绑定已读到density1000、friction0.1，其余粘性/表面张力等为0；这些绑定本身不构成运行资格。
 
 已准备旧成功case13的3722帧试管相对位姿输入，源trace与record同帧精确对齐，保存源哈希，位姿换算回原坐标后误差<1e-12。按120Hz目标序列计算峰值平移速度约1.724m/s、角速度7.241rad/s。此输入将重定位到夹具初始位姿，不继承旧场景接触几何资格，也不修改机器人动作；文件 `evidence/old_case13_tube_motion_targets.json`。运动压力测试尚未启动。
+
+迁移前静态审计：对seen_scene_1接收方时间候选与压力测试资产进行比较，试管499个碰撞体的启用状态、近似方式、点位及contact/rest参数完全一致；容器仍authored为动态刚体，样液仍启用fluid/selfCollision、质量8g。压力夹具使用正常9.81m/s²重力；运动时仅在外部夹具将试管设为kinematic，不能迁移此驱动到接收方。样液主要差异为maxVelocity、迭代数、PBD offsets与初始点位。见 `evidence/retention95_receiver_transfer_audit.json`；尚未应用到新接收方包，不构成运行重置或原动作资格。

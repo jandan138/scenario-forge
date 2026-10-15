@@ -1,5 +1,5 @@
 {
-  "scope": "Original full-motion failure retained, v2 CPU tests pass, v2 runtime pending",
+  "scope": "v2 motion numeric PASS, final preview visually inconclusive; video and robot qualification pending",
   "files_sha256": {
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/retention95_checks_v2.py": "7fd1c364b661e08d2676e6c14980ae93d01155d4f6ab3681c7b6f3fea532ca92",
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/test_retention95_checks_v2.py": "011366ef54f8b57380ae671feff09959c4d0f5602e6da1ce1d4406c7397a7609",
@@ -8,6 +8,12 @@
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_v2_green.log": "c6b9b1f09add0403cc07e90bfdf272129b1ddfa2f8f7675ea8218862f2516371",
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_motion_v2_identity.json": "2b086efb514699021d571420b82b900a0691804d6f0e5d5a44271628a7a382d2",
     "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_recorded_motion_20261015T113953Z/report.json": "42192e4bdddfd9f6da4916a20535b9f09313221ebe3f1836ab774f01eb401935",
-    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_recorded_motion_20261015T113953Z/first_exit_events.json": "54c4a3ba6a66b19cd57312ba7fdd1912c0b7d788d668dfa84c9f39664297966b"
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_recorded_motion_20261015T113953Z/first_exit_events.json": "54c4a3ba6a66b19cd57312ba7fdd1912c0b7d788d668dfa84c9f39664297966b",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/probe_task12_motion_video95.py": "ffb0f2f3876037a5c4010c15a3fba64e130a757932c2020c8f76f9814063e7eb",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_motion_v2_20261015T122418Z/report.json": "df5eb7d4a6f56ba8cb346e650d62db3cf80651c149d8bff167918fe8760f011e",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_motion_v2_20261015T122418Z/first_exit_events.json": "c0f5bf453984480e87a898435a6209ed39812b06b9c24f005a8a2cddd3dde9af",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_motion_v2_20261015T122418Z/preview.png": "00e39145e5f566f2503b3b9c7fe4beba1307243efd1728e7c74f5e322e133c48",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_motion_video_identity.json": "17d4869c96cff106b92a10f3dd11675cdcaf8e6e70414003f0b285059d97f1e8",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_retention95_video_queue.py": "6896443f3e5bb134aabcbb8976df0f87bdf192c8a21111e95df9828938173c15"
   }
 }

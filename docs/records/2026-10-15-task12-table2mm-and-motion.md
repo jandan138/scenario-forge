@@ -9,3 +9,21 @@
 已生成四个桌面诊断资产，均继承同一液体配置，未启动GPU短测：A原配置，B仅contactOffset17→2mm，C仅可见与碰撞桌面一起下移2mm，D同时修改。restOffset保持原意见；原桌面就是8顶点box Mesh/convexHull，不增加重复碰撞体。A/B顶面世界z=0.755m，C/D=0.753m。四个组合场景逐属性检查只出现0/1/1/2项预期差异。身份 `evidence/table2mm_factorial_identity.json`，静态审计 `evidence/table2mm_static_audit.json`。它们引用个人诊断来源，不是独立安装交付包。
 
 后续：先检查运动测试最早失液事件与实际目标读回，安排正常机位视觉审查；再按计划运行桌面短测、核对实际参数与支撑、警告变化。只有可复现改善且不破坏旧成功动作的桌面版本才保留；无收益保持原桌面。单GPU串行，不覆盖历史结果或修改当前运行输入。
+
+后续已准备桌面运行时支撑诊断及串行队列：等待motion-v2完整退出、无物理/读回错误后，再按A/B/C/D各5秒运行。记录运行时USD schema解析的contact/rest、桌面顶面、试管/烧杯/加热器/管架位置变化与可见包围盒间距、材质面索引警告计数；静态对象明确标为静态，不冒称live刚体。此短测不验证机器人底座/抓持，不用包围盒代替真实接触穿透证明。任一基础设施错误停止队列，不重启已运行任务。准备身份 `evidence/table2mm_support_preparation.json`，状态 `evidence/table2mm_support_queue.json`。
+
+合包前已检查41份task metadata的initial_prim_attributes：未发现粒子或canonical初态覆盖键；仅为静态键检查，仍需对最终新包做实际reset回归。记录见 `evidence/liquid_seed_metadata_static_audit.json`。
+
+A组运行时读到restOffset=-inf（自动计算标记），不是已证实的有效零值；四组继续保持原意见，不把contact与rest混为一谈。A组5秒静态支撑及数值保液通过，材质面索引警告仍大量出现。它可能涉及接触数据读取路径，但目前尚未通过有/无接触读取的同条件实验确认，不能据此认定警告无害或归因桌面。四组完整比较仍待收齐。
+
+B组（仅contact17→2mm）5秒静态支撑与数值保液通过，但材质面索引警告51048条，A组49161条，未见消除警告的收益。仍不能从单次计数差异推断物理因果。
+
+为定位警告，新增同A资产、同5秒的无接触观测对照：只移除外部RigidContactView创建与get_contact_data读取，保留物理场景、PBD及位姿/保液观测。报告接触次数明确为不可用，不能把未测量的0当作无接触。身份 `evidence/no_contact_observer_identity.json`。此对照不作为资产修复或支撑力资格。
+
+调整了等待中的队列：只停止确认仍在等待的旧video调度器，不停止GPU任务。新的 `observer_then_video_queue.json` 在四组桌面短测完成后先跑无接触观测对照，再跑原定过程视频；原 `retention95_motion_video_queue.json` 已标记取消等待并被替换。远端默认python命令不可用导致首次调度准备失败，改用固定client解释器后完成；未启动错误的GPU测试，失败日志保留。
+
+## 四组桌面短测收齐
+
+A/B/C/D均完成5秒静态支撑及保液数值检查，最低样液保留率依次约99.9928%、99.9784%、99.9640%、99.9784%。材质面索引警告分别49161/51048/48640/52728，未见2mm配置消除警告。C/D留下约2mm静态管架可见包围盒间隙。当前保持原桌面A，不采纳B/C/D；单次微小粒数差不作统计因果结论，静置短测也不排除机器人接触场景中的其它收益。若后续原动作失败明确涉及桌面，再针对该机制重开对照。完整比较 `evidence/table2mm_completed_comparison.json`。无接触观测诊断已串行启动。
+
+无接触观测对照已完成：同A物理资产、5秒、602原生步，保液数值PASS，样液最低99.9712%。移除外部RigidContactView及接触数据读取后仍有54151条材质面索引警告（A为49161），因此该观测代码并非警告出现的必要条件。两次微小粒子差异不作为精确非干扰证明；警告仍未定位到具体碰撞体，也未证明无害。对照 `evidence/contact_observer_warning_comparison.json`。原计划过程视频已串行启动。

@@ -1,0 +1,14 @@
+{
+  "scope": "Static candidate and source mapping only; native robot and visual qualifications pending",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_candidate_identity.json": "ef12c9c9055be9e19b0ee0eabadd62b729c572ee41d46d3d43d61a5f6c56980a",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_static_audit.json": "594e1f84c3ce5b28abf5010e1f5f9bb6a9c0aeb03dbef27c460183bf2b1a7c8c",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_scene_semantics.json": "dd6cc4eba1a458847bbc6539a29db3c0918c844039552627c66d07923619789a",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_contract.log": "eaf37d68e53bca2134f376f588e2c762a25c38b3a1a04ddb9a2e4932b4e54e88",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/particle_initial_states_mapping_audit.json": "60280fe3bf4a1db5d157230248b3744be38e11175d085d4b6d502baeaa456a0c",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/prepare_receiver_retention95.py": "51d1ab843102fb6769ceaa3512ecb052c11a630bd46cd549e1b603244c012c11",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_motion_visual_gate.json": "36bb14288386d6169d7cecfa1722966d73d66e053949545cfaff5da6532757d3",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_sync_motion_review.json": "c29e669777bcffd3c6e56857fa2c92addc255d844068959a15417a911140d35f",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_receiver_retention95_native.py": "43c6cf16e79e1054c5ada2a8753e4f68f6a6b34ea0950691767a98a693ea1acd"
+  }
+}

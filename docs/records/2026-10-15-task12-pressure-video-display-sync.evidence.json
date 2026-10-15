@@ -1,0 +1,17 @@
+{
+  "scope": "Observed display mismatch; corrected diagnostic static checks pass, runtime rerender pending",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_motion_video_20261015T124806Z/report.json": "9ba58f77f90f5a5dcf43129a1d8da66be50ff425135b92721f398e06d5654a9a",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_motion_video_20261015T124806Z/first_exit_events.json": "30b192c115bf333c9e99acb22ae20f1d251b4f741b4dad82f9cbf651eed9f01d",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/fixtures/retention95_motion_video_20261015T124806Z/video_timestamps.json": "ff2dfca1ad86b33066318cf386b38a7ba7e19ddc8b96c3387c9bc090260569b5",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/motion_video_review_frames/mapping.json": "f221b1b0775845bf8e3c455d791607f59ad2b2541f3ea2e111eafd29dce7cb3d",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_video_sync_identity.json": "d6a273bbd665d420801b219699ad3131975758168e0506630fd02e7872eae6e1",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/motion_video_display_sync_static.json": "470fd5926b100dd86d06b48aee13cc71f9b5684001cda22b8fa32c8f66135a21",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/probe_task12_motion_video95_sync.py": "410a4514755b4c5667fc6685571775bb4dcd87cc7ad2f72732a18b493d36a1de",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/motion_video_unresolved_segment_geometry.json": "7441042f057791b7479e96c56f3d3648a7b359b20be04ca84dcd2e0b7857a816",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/motion_video_exit_geometric_review_v3.json": "7fbb6bd4427bc493324ceb3c0f5a391485bc75d0746b15288b67d90f4ae83707",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/retention95_v3_tests.log": "cf8d3a2572a7898fcf32a4c2dd1445509b3d59e66061853243c4627f80695068",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/retention95_checks_v3.py": "528a14e036b331f1f83d97fac67ba82e0d38932e49ec9f9b6cb0b2767c4eeae7",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/test_retention95_checks_v3.py": "6f7b47a40f2bd5c500d1f747e0b613b32d9835db239a9203f4e432b3ce120b70"
+  }
+}

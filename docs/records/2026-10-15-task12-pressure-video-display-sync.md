@@ -1,0 +1,15 @@
+# 水浴压力视频：显示网格与kinematic物理位姿同步
+
+带过程视频的压力测试完成4924个native步骤，最低样液保留率98.3603%，有1条wall_or_unresolved退出，原report保留FAIL。该事件step1691、粒子576此前在step1684越过真实管口，之后从口外向下；尚需独立几何复核，未直接改判。两路视频完整解码通过，但不能作为视觉验收通过。
+
+主实现者抽查video frame300/345/423/1200，发现移动阶段玻璃显示网格仍留在初始架位，而液体随实时物理容器移动。外部压力夹具用tensor kinematic targets驱动刚体，保液计算使用live dynamic-control位姿；渲染读取的原USD显示变换没有同步。该问题限于本kinematic诊断显示路径，不据此声称正常动态机器人场景也有相同问题。数字留存记录保留其原范围，不用失配视频断言液体穿壁。
+
+准备并启动显示同步重录：在运行中的诊断session创建仅用于显示的Visual副本，移除副本全部Physics/Physx API，隐藏原显示，按实时刚体姿态更新显示副本的父Xform。原刚体、碰撞体、粒子、目标轨迹和V2检查器保持；不保存源USD，不进入接收方资产。静态守卫确认collision及rigid-body API路径集合不变，原显示隐藏、副本可见。运行时还记录显示与live位置误差及原USD/live差异，超过1µm显示误差记异常。
+
+身份：`evidence/retention95_video_sync_identity.json`；静态检查：`evidence/motion_video_display_sync_static.json`；新脚本：`tools/probe_task12_motion_video95_sync.py`。均位于个人task12_liquid_color_20261012目录。新一轮尚未完成，原视频、报告及截图保持。原逐秒NPZ中的容器matrix来自USD，因此不能将kinematic诊断的该字段误作live位姿；保液报告及最终local_points使用dynamic-control。
+
+适用STATE-002、VAL-002/008。规范无需变更：现有规则已要求live状态和显示证据范围一致，此处修复外部诊断工具而非改变评分或物理边界。独立接收方候选已静态准备，等待运动/视觉验收，不启动机器人资格回放。
+
+对旧视频唯一未确定事件的独立几何复核：GlassShell全部顶点被半径10.0000004mm、最高z=150.000006mm的圆柱包围；记录中心线段下降到管口以下的部分，最小半径10.916852mm，比包围圆柱大0.916852mm。因此该记录中心线段在玻璃之外，支持先越口后在外侧回落；不证明粒子球半径/烹制接触距离或帧间曲线，也不免除视觉审查。
+
+新增外部v3分类函数，只有已有真实越口记录、且下落段在实际玻璃外包圆柱之外时，才将该类回落归为mouth-compatible；缺几何、缺越口记录、穿过包围体仍保留未确定。10项回归测试通过。对该次已保存320次退出事件做独立后处理，均与管口退出兼容，原report仍保留FAIL；结果与边界见 `evidence/motion_video_exit_geometric_review_v3.json`。当前重录仍使用冻结v2脚本，不中途修改输入。

@@ -130,3 +130,7 @@ prefix_mode_h00_a已首次1分，后续读`old_success_verification_queue.json`�
 桌面2mm与运动压力测试进展见[执行记录](../records/2026-10-15-task12-table2mm-and-motion.md)：两次静置已数值通过；3722帧旧位姿压力测试已启动，四个桌面单变量/组合资产仅静态审计通过。桌面2mm尚非交付设置。
 
 运动压力测试首轮保留率超过95%，但管口分类存在未确定事件。重测使用独立检查器v2，旧FAIL不覆盖；原因和回归测试见[管口分类修正](../records/2026-10-15-task12-mouth-exit-checker-v2.md)。不得把计数用的1mm容差当作实际管口高度，也不得忽略粒子重入后的再次侧壁退出。
+
+接入新液体初态时，必须同时检查USD points/canonical和task data的`initial_particle_states`，不能只检查`initial_prim_attributes`。原版loader会恢复粒子点并清零速度；按每份初始容器布局映射后，验证其余metadata与原动作不变。当前独立候选仅静态通过，见[候选与初态审计更正](../records/2026-10-15-task12-retention95-receiver-candidate.md)。
+
+kinematic位姿压力夹具要分别核对live物理位姿与显示网格；不能假定tensor targets自动更新USD显示变换。当前仅在外部诊断session用无物理API的显示副本跟随live位姿，原碰撞体不动，见[压力视频显示同步](../records/2026-10-15-task12-pressure-video-display-sync.md)。该记录也包含管口外回落的独立几何复核；旧FAIL报告不覆盖。
