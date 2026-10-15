@@ -134,3 +134,7 @@ prefix_mode_h00_a已首次1分，后续读`old_success_verification_queue.json`�
 接入新液体初态时，必须同时检查USD points/canonical和task data的`initial_particle_states`，不能只检查`initial_prim_attributes`。原版loader会恢复粒子点并清零速度；按每份初始容器布局映射后，验证其余metadata与原动作不变。当前独立候选仅静态通过，见[候选与初态审计更正](../records/2026-10-15-task12-retention95-receiver-candidate.md)。
 
 kinematic位姿压力夹具要分别核对live物理位姿与显示网格；不能假定tensor targets自动更新USD显示变换。当前仅在外部诊断session用无物理API的显示副本跟随live位姿，原碰撞体不动，见[压力视频显示同步](../records/2026-10-15-task12-pressure-video-display-sync.md)。该记录也包含管口外回落的独立几何复核；旧FAIL报告不覆盖。
+
+完整原生h13_b为0.85分且实际回架翻倒；当前转入只读USD观察器的前300步抓持诊断，生产7000步和metric保持。短测不能当完整成功/坏例，详见[完整失败与短诊断记录](../records/2026-10-16-task12-native-return-failure-and-observer.md)。19条来源有重名case，验收按来源哈希计数，不按case名去重。
+
+短诊断已定位到拿起阶段的夹持相对位姿差异；恢复旧试管碰撞组合仅改善初始摆放，尚未恢复抓持。下一组只恢复evaluation位置迭代范围1/255，保留全局CCD与液体设置；结果按上述记录追加，勿将短测0.15当完整任务结果。

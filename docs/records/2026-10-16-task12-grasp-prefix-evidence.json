@@ -1,0 +1,467 @@
+{
+  "scope": "Task12 prefix diagnosis; not release qualification",
+  "reports": [
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_solver_prefix_h13_a_analysis_pose.json",
+      "sha256": "3fc506a39ea3ffd5104278eecb56f42d2dac19f3e4c56a13c223da34fad0b6ae",
+      "content": {
+        "status": "ALIGNED_PREFIX_DIAGNOSTIC_NOT_FULL_TASK",
+        "runtime": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/diagnostic_old_bundle_solver_prefix_20261015T180626Z",
+        "trace_sha256": "cb5018bfa6aaf19d17fc22840a85d62fecf5185213ffdafdea5eb1dcc246a143",
+        "metric_score": 0.15,
+        "steps": 300,
+        "alignment_max_error": 0.0,
+        "alignment_offset_in_valid_pose_rows": 401,
+        "matched_observations": 301,
+        "model_frame0_observer_step": 414,
+        "phase_samples": [
+          {
+            "frame": 1,
+            "observer_step": 415,
+            "tube_grip_new_m": [
+              0.23535876935379507,
+              0.1272617962150311,
+              -0.0750579132070992
+            ],
+            "tube_grip_old_m": [
+              0.23534616313440815,
+              0.1272940350223936,
+              -0.07504607565603212
+            ],
+            "grip_relative_difference_mm": 0.036583945695528905,
+            "sample_retained_fraction": 0.9890686803308163,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.0,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "sample_not_in_water",
+              "runtime_error": ""
+            }
+          },
+          {
+            "frame": 50,
+            "observer_step": 464,
+            "tube_grip_new_m": [
+              0.20136548108619545,
+              0.004084997583970573,
+              -0.1765701736107974
+            ],
+            "tube_grip_old_m": [
+              0.20136902721785668,
+              0.0041187924038582945,
+              -0.17655663177727862
+            ],
+            "grip_relative_difference_mm": 0.03657931322554952,
+            "sample_retained_fraction": 0.9867673498741459,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.0,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "sample_not_in_water",
+              "runtime_error": ""
+            }
+          },
+          {
+            "frame": 100,
+            "observer_step": 514,
+            "tube_grip_new_m": [
+              0.16823987147139943,
+              -0.0025998811557769175,
+              -0.1331934015344961
+            ],
+            "tube_grip_old_m": [
+              0.16824278788462296,
+              -0.002565803188397505,
+              -0.13318042661845125
+            ],
+            "grip_relative_difference_mm": 0.036580893553515105,
+            "sample_retained_fraction": 0.9855447680690399,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.0,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "sample_not_in_water",
+              "runtime_error": ""
+            }
+          },
+          {
+            "frame": 150,
+            "observer_step": 564,
+            "tube_grip_new_m": [
+              0.16860088284764976,
+              0.0025335932546293183,
+              -0.1328196447285095
+            ],
+            "tube_grip_old_m": [
+              0.16986284321117898,
+              0.0012771923229279,
+              -0.136974940897839
+            ],
+            "grip_relative_difference_mm": 4.520793460792405,
+            "sample_retained_fraction": 0.9839626033800791,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.0,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "sample_not_in_water",
+              "runtime_error": ""
+            }
+          },
+          {
+            "frame": 200,
+            "observer_step": 614,
+            "tube_grip_new_m": [
+              0.16061219672308416,
+              -0.001127891692411627,
+              -0.13454014344628518
+            ],
+            "tube_grip_old_m": [
+              0.1608716591911969,
+              -0.0005127457389741393,
+              -0.13810833117218516
+            ],
+            "grip_relative_difference_mm": 3.6301086710528288,
+            "sample_retained_fraction": 0.9745415318230852,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.0,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "sample_not_in_water",
+              "runtime_error": ""
+            }
+          },
+          {
+            "frame": 250,
+            "observer_step": 664,
+            "tube_grip_new_m": [
+              0.1588518160064777,
+              -0.0009472721802960479,
+              -0.13470386630409703
+            ],
+            "tube_grip_old_m": [
+              0.15911605227167624,
+              -0.0008326376918480813,
+              -0.1382781214372908
+            ],
+            "grip_relative_difference_mm": 3.5858418296056715,
+            "sample_retained_fraction": 0.9671341244156778,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.0,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "sample_not_in_water",
+              "runtime_error": ""
+            }
+          },
+          {
+            "frame": 280,
+            "observer_step": 694,
+            "tube_grip_new_m": [
+              0.1590326482878454,
+              -0.0009504023010947563,
+              -0.13468822537262293
+            ],
+            "tube_grip_old_m": [
+              0.15953075857990498,
+              -0.000866151990591284,
+              -0.1382355713539553
+            ],
+            "grip_relative_difference_mm": 3.583137659810269,
+            "sample_retained_fraction": 0.9623876303487954,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.06666667014360428,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "heating",
+              "runtime_error": ""
+            }
+          },
+          {
+            "frame": 300,
+            "observer_step": 714,
+            "tube_grip_new_m": [
+              0.15907091797485556,
+              -0.0009521934076171593,
+              -0.13468525703027634
+            ],
+            "tube_grip_old_m": [
+              0.15964663827242914,
+              -0.0008506562549693293,
+              -0.13822407802184858
+            ],
+            "grip_relative_difference_mm": 3.5867837493774783,
+            "sample_retained_fraction": 0.9608054656598346,
+            "bath_deep_inside_tube": 0,
+            "reaction": {
+              "heated_seconds": 0.23333334550261497,
+              "color_progress": 0.0,
+              "pbd_valid": true,
+              "heating_block_reason": "heating",
+              "runtime_error": ""
+            }
+          }
+        ],
+        "sample_min_retained_fraction_during_episode": 0.9608054656598346,
+        "bath_max_deep_inside_tube": 0,
+        "contact_pairs": [
+          {
+            "colliders": [
+              "/World/_scene/lift2/lift2/lift2/fl/link7/mesh",
+              "/World/_scene/obj_sample_tube/Visual/GlassShell"
+            ],
+            "reports": 210
+          },
+          {
+            "colliders": [
+              "/World/_scene/lift2/lift2/lift2/fl/link8/mesh",
+              "/World/_scene/obj_sample_tube/Visual/GlassShell"
+            ],
+            "reports": 205
+          },
+          {
+            "colliders": [
+              "/World/_scene/obj_sample_tube/Visual/GlassShell",
+              "/World/_scene/obj_tube_rack/Cube_015"
+            ],
+            "reports": 148
+          },
+          {
+            "colliders": [
+              "/World/_scene/obj_sample_tube/Visual/GlassShell",
+              "/World/_scene/obj_beaker/Visual/Source/Rolled_Rim/Torus"
+            ],
+            "reports": 36
+          },
+          {
+            "colliders": [
+              "/World/_scene/obj_sample_tube/Visual/GlassShell",
+              "/World/_scene/obj_beaker/Visual/Source/Beaker_Hollow_Body/Beaker_Hollow_Body_Mesh"
+            ],
+            "reports": 36
+          }
+        ],
+        "runtime_rack_rigid_flags": [
+          false,
+          false,
+          false
+        ],
+        "limitations": [
+          "Only original first300 actions; not color/return or delivery qualification.",
+          "Contact report availability does not alone establish force or causal penetration.",
+          "Observer noninterference needs comparison; source clean full run remains failure evidence."
+        ]
+      }
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/grasp_prefix_comparison_20261016.json",
+      "sha256": "2cb61ff1722d3df41b11ec9653020ed91681c6544927021e0a226a20be905ba5",
+      "content": {
+        "status": "PREFIX_ONLY_NOT_QUALIFICATION",
+        "rows": [
+          {
+            "variant": "native_observer_prefix_v2",
+            "report_sha256": "fb89cf6e1204c141fe42cdf1458990d82a950f98246304d0b15a642ea6b08d84",
+            "frame300_grip_difference_mm": 11.000471147214762,
+            "minimum_sample_retention": 0.968212873067242,
+            "alignment_max_error": 0.0
+          },
+          {
+            "variant": "old_tube_contact_prefix",
+            "report_sha256": "912e2a089651e553ba5f325922669f0680ee7208559017f8f4c89a6b99647096",
+            "frame300_grip_difference_mm": 8.477099094587667,
+            "minimum_sample_retention": 0.9618122977346278,
+            "alignment_max_error": 0.0
+          },
+          {
+            "variant": "old_bundle_solver_prefix",
+            "report_sha256": "3fc506a39ea3ffd5104278eecb56f42d2dac19f3e4c56a13c223da34fad0b6ae",
+            "frame300_grip_difference_mm": 3.5867837493774783,
+            "minimum_sample_retention": 0.9608054656598346,
+            "alignment_max_error": 0.0
+          }
+        ],
+        "decision": "Test remaining global CCD difference in isolated prefix before full native replay. Do not infer full-task retention from prefix.",
+        "limitations": [
+          "One run per variant, no statistical repeatability conclusion.",
+          "Comparison covers300actions, not final insertion."
+        ]
+      }
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/prefix_retention_phase_comparison.json",
+      "sha256": "2903a63292838e4bf54235898ebb882679a638b272b3d20e3b383eabefd848e7",
+      "content": {
+        "native_observer_prefix_v2": {
+          "start_observer": 414,
+          "retained_at_start": 0.9865516001438331,
+          "minimum_episode": 0.968212873067242,
+          "exit_classes_during_episode": {
+            "mouth_compatible": 344
+          },
+          "mouth_exit_z_range_m": [
+            0.15006477241000993,
+            0.1603393526780419
+          ],
+          "by_frame": [
+            {
+              "frame": 0,
+              "outside": 187
+            },
+            {
+              "frame": 50,
+              "outside": 228
+            },
+            {
+              "frame": 100,
+              "outside": 254
+            },
+            {
+              "frame": 150,
+              "outside": 291
+            },
+            {
+              "frame": 200,
+              "outside": 351
+            },
+            {
+              "frame": 250,
+              "outside": 381
+            },
+            {
+              "frame": 300,
+              "outside": 442
+            }
+          ]
+        },
+        "old_tube_contact_prefix": {
+          "start_observer": 414,
+          "retained_at_start": 0.9864796835670622,
+          "minimum_episode": 0.9618122977346278,
+          "exit_classes_during_episode": {
+            "mouth_compatible": 462
+          },
+          "mouth_exit_z_range_m": [
+            0.15008038621135333,
+            0.16519620598594598
+          ],
+          "by_frame": [
+            {
+              "frame": 0,
+              "outside": 188
+            },
+            {
+              "frame": 50,
+              "outside": 214
+            },
+            {
+              "frame": 100,
+              "outside": 238
+            },
+            {
+              "frame": 150,
+              "outside": 255
+            },
+            {
+              "frame": 200,
+              "outside": 391
+            },
+            {
+              "frame": 250,
+              "outside": 474
+            },
+            {
+              "frame": 300,
+              "outside": 531
+            }
+          ]
+        },
+        "old_bundle_solver_prefix": {
+          "start_observer": 414,
+          "retained_at_start": 0.9890686803308163,
+          "minimum_episode": 0.9608054656598346,
+          "exit_classes_during_episode": {
+            "mouth_compatible": 532
+          },
+          "mouth_exit_z_range_m": [
+            0.14981471166400673,
+            0.16844236531368983
+          ],
+          "by_frame": [
+            {
+              "frame": 0,
+              "outside": 152
+            },
+            {
+              "frame": 50,
+              "outside": 184
+            },
+            {
+              "frame": 100,
+              "outside": 201
+            },
+            {
+              "frame": 150,
+              "outside": 223
+            },
+            {
+              "frame": 200,
+              "outside": 354
+            },
+            {
+              "frame": 250,
+              "outside": 457
+            },
+            {
+              "frame": 300,
+              "outside": 545
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_solver_prefix_static_audit.json",
+      "sha256": "ab3ca62f80e0c7ef15319bcd0d2f0544388e52d57737dc1e224e588dd46f2ccf",
+      "content": {
+        "status": "PASS_TARGETED_STATIC_DIFFERENCE",
+        "yaml_changes": {
+          "MinPositionIterationCount": [
+            64,
+            1
+          ],
+          "MaxPositionIterationCount": [
+            128,
+            255
+          ]
+        },
+        "usd_changes": [
+          "/World/_scene/obj_sample_tube/ReactionRuntime/FehlingsGraph/ValidationObserver.inputs:script"
+        ],
+        "note": "Observer trace output path changed; physical attributes and relations unchanged from old tube contact bundle."
+      }
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/old_bundle_ccd_prefix_static_audit.json",
+      "sha256": "a2e2d368468ca342ebe8d12f80eb7d712ff559d3723a6f7bc85d73e62c4b1597",
+      "content": {
+        "status": "PASS_TARGETED_STATIC_DIFFERENCE",
+        "yaml_changes": {
+          "evaluation_EnableCCD": [
+            true,
+            false
+          ]
+        },
+        "usd_changes": [
+          "/World/_scene/obj_sample_tube/ReactionRuntime/FehlingsGraph/ValidationObserver.inputs:script"
+        ]
+      }
+    }
+  ]
+}
