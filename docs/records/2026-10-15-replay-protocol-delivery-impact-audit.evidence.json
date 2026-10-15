@@ -1,0 +1,10 @@
+{
+  "audit_path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/replay_contract_audit_20261015/audit.json",
+  "audit_sha256": "06e7c14981827a3afdd908b422396257a15efb9accd6d08a38b01387b5f8fd73",
+  "scope": "Read-only target artifact/client/provenance audit; no runtime files changed",
+  "evidence_file_count": 16,
+  "release_artifact_count": 3,
+  "task09_runtime_archive_verified": true,
+  "checks_path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/replay_contract_audit_20261015/checks.json",
+  "checks_sha256": "92f5751bc0f37711efdab1ff4919b5fbc06fd346e3ecc64af74728c9b686a47e"
+}
