@@ -1,0 +1,15 @@
+{
+  "scope": "CPU contract verified; GPU replay pending; not delivery qualification",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/wall_policy_native_identity.json": "7b54a5dbdccfdb565d633d37ca3228bc7c8eec0e1238fff30d743bec234b41e6",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/wall_policy_red.log": "fb1d9da2b73673a38e4a4e612a5e670a57781cfcce70d6efda66713bdb3bc35d",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/wall_policy_green.log": "c20e6f1d1d64b92895ea77ce113104e3c10256191f54620ecb540e90d680a9e8",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/test_task12_wall_policy.py": "3abf33b704e7cc90eea282536bf9c2bb909855ba6e81a90d9e5c2e1b879ee264",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/prepare_wall_policy_native.py": "6b3fecbd89d79d95f53caac148776fa9d9a843003fa121a5513bc6927d48cb87",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_wall_policy_native.py": "cea7157cc95ada35c49fde78e932506a2eb76acb39704a9075d72100b054e7b9",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/wall_and_solver_semantic_audit.json": "62e6ec032ddb1f213b076997c1b708de76cdf9d703b3ae403c7d079d0831a791",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/queue_wall_then_solver.py": "be78d3600014630ffc8a87afec97bf3b5dc6a3f131739a388edae35a0e0203e5",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/analyze_wall_policy_pose.py": "5fec2399c38b59433005e2501349966a5a949dc3edb280be6da7ad74716b5203",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/analyze_solver_limits_pose.py": "8a5b7767dc6e6bb791e71f287d530a806a82c33bbb04a88ae5f74b2adaa95b41"
+  }
+}
