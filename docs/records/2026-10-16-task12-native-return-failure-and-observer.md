@@ -185,3 +185,23 @@ v10启动边界300步完成并精确对齐（frame0=414）：首动作局部粒�
 下一单变量对照sample_minpos128_prefix仅将YAML场景MinPositionIterationCount1→128，MaxPosition255、dt1/120、923颗粒子及其solver16、材质/容器/动作/metric保持。目的是检验迭代下限对首动作突变的敏感性；机器人请求128次不能证明内部实际岛迭代切换，明确仍是假设。不把提高下限等同于提高物理Hz或新增子步。300步诊断不构成回架/保液交付资格。接口参数背景见[PhysX PBD迭代API](https://nvidia-omniverse.github.io/PhysX/physx/5.1.2/_build/physx/latest/class_px_p_b_d_particle_system.html)，最终以目标4.1运行读回/行为为准。
 
 minpos128静态审计通过：USD只读observer路径变化，YAML唯一物理配置差异MinPositionIterationCount1→128，300步cap不变。远端supervisor2509503已启动；未声明通过，待运行时读取实际场景值并比较边界运动/抓持。
+
+MinPosition128对照300步已完成，301观察精确对齐，原动作及视频解码审计通过，运行时min128/max255、dt1/120确认。预动作observer200–350局部位移率中位数0.22676m/s，原配置0.01302m/s；414/415为0.23868/0.23565m/s，不再首步突增而是启动前已持续较大运动。该提高下限方案暂不采用；仅300步保液99.4583%不能抵消运动/完整任务未验证，第300步抓持偏差5.90659mm。evidence/minpos128_boundary_comparison.json。
+
+下一组从原min1/max255边界基线仅将MaxPositionIterationCount255→16，保留min1，不从min128版本继续叠改。粒子solver16/count923、材质、碰撞、动作、metric与120Hz均不变；单变量静态检查通过，supervisor2514354已启动。检验迭代上限敏感性，同时必须检查机器人抓持精度，不能把降低求解精度默认当成可交付修复。sample_maxpos16_prefix_static_audit.json。
+
+MaxPosition16对照300步完成：301观察精确对齐、原动作一致、四视频完整解码通过，运行时min1/max16、dt1/120确认。414/415局部位移率中位数0.013645/0.013829m/s，原max255为0.011588/0.375342；正式动作段最低保液100%，包含初始化则99.1333%，两者不可混写。第300步抓持偏差18.0737mm（原边界基线5.9294mm），为明确风险。三组对照见position_iteration_three_way_comparison.json；暂不宣布回架修复或通用solver默认。下一轮保持max16物理，仅恢复7000步cap完整验证；不能因抓持偏差较大直接替代完整终态验证，也不能因短测保液100%宣布合格。
+
+MaxPosition16完整范围候选静态审计通过，只改cap300→7000与只读observer路径；远端supervisor2519311已启动，保液提前结束机制保留。任务成功、持续保液和重复性仍待验证，short100%不提升为full PASS。
+
+max16短测普通top_camera抽查0/200/300帧：300帧可见试管底部蓝色样液，隔透明烧杯可辨认；0/200帧试管不在该近景裁切范围，不能解释为液体消失。热板OFF字样仍待视觉状态修正。primary implementer非独立审查，范围仅3帧，不构成全程无喷射或完整显色；evidence/maxpos16_short_visual_review.json。
+
+为区分低迭代对抓持的影响，准备旧假液体场景MaxPosition16、300步对照，尚未运行。首次准备脚本错误假设YAML显式给出迭代字段，在写配置前失败；已查本机SDK schema默认min1/max255，再生成新的独立候选。失败草稿保留，不启动、不交付；当前真实液体完整回放未受影响。
+
+MaxPosition16完整范围回放首次取得原生score1.0、success_rate1，3762步自然终止；3763观察精确对齐、原动作一致、四视频完整解码通过。正式episode最低保液99.67497%，初始观察总段最低99.13326%；终态倾角0.329度、架局部原点z=0.024409m。正常top机位抽查蓝/青→绿→黄→橙可见，overlook终帧夹爪已撤回。仅单次代表来源13，绝非全19/重复或交付资格。
+
+关键未通过项：episode共有3次退出，frame180粒子305和frame3465粒子652为侧壁方向退出，frame3473粒子742从管口退出。后续快照确认前两颗超出外壁：305在observer600半径0.103m，652在observer3960半径0.414m，不能当作仅容差越界。正式任务1分/保液99.67%不满足“无穿壁”，完整物理验收仍FAIL。两次退出时试管原点速度1.057/1.421m/s，包围盒角点1.071/1.430m/s，当前样液maxDepenetrationVelocity=1m/s；相关性不能单独证明限速根因。证据sample_maxpos16_full_episode_exits.json、maxpos16_side_exit_motion.json和maxpos16_full_visual_review.json。OFF显示也仍待修正。
+
+下一完整范围候选仅将样液maxDepenetrationVelocity1→2m/s，总maxVelocity仍3，保持maxPosition16、923粒子、原动作、反应逻辑和metric；用同一完整动作检验能否消除两处侧壁退出。此前旧高迭代组合depen2表现不佳不能直接推广到当前稳定低迭代组合。不进行已准备的旧假液体max16对照，先解决真实液体剩余物理缺陷；旧对照只保留为未运行工具。
+
+低迭代/depen2完整诊断静态审计通过，supervisor2530841已启动。首次满分与未通过边界单独汇总在[首次原生成功及侧壁缺口](2026-10-16-task12-first-native-success-with-side-exit-gaps.md)，避免只看到1分而漏掉穿壁失败。
