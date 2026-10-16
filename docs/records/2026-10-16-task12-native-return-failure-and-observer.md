@@ -129,3 +129,37 @@ MinVelocityIterationCount=4对照已完成1200步，1201观察精确对齐、实
 准备旧场景A/B以隔离管架合同差异，均无真实样液，仅作诊断：A保持旧场景物理，新增只读pose/rack属性观察器及300步cap；B仅关闭原18个补充Cylinder、将Cube015 approximation从sdf改none、contactOffset0.1→0.5mm，模拟修复版管架。旧试管、求解器、原动作、metric和其他场景属性保持。A/B分别通过静态差异检查，未往metric追加观察代码。
 
 A已完成并通过原动作/视频审计，301观察精确对齐；全部300个动作后试管及link6世界位置相对既有旧成功pose轨迹最大差均0，运行时管架启用19个碰撞体。`evidence/old_rack_control_prefix_h13_a_pose_analysis.json`。这验证该旧场景前缀的观察方法；不推广为含真实液体时的非干扰证明。B已启动（supervisor2401538），尚无效果结论。
+
+管架分组对照完成：旧控制A第300步抓持差约0；新approx/contact+关18支撑的B为6.328mm；仅关18支撑C为5.185mm；仅改主网格approx/contact且保留支撑D为6.282mm。均为301观察精确对齐的旧无真实样液前缀。`evidence/old_rack_ablation_summary.json`保存哈希与范围；不能推广为所有真实液体回架的单一根因。补查发现实际修复版还移除了Cube015的PhysxSDFMeshCollisionAPI，B/D未移除该API，因此它们隔离的是属性组而非穷尽全部元数据变化。
+
+随后在真实4mL版本恢复完整旧管架物理，包括SDF API/approx/contact及18支撑；静态逐项对照与旧作者配置一致，GPU运行正常。1200步最低保液98.6999%，但第300步抓持偏差16.027mm，恢复旧管架不足以恢复真实液体下的抓持。`sample_volume4_oldrack_prefix_static_audit.json`和`sample_volume4_oldrack_prefix_h13_a_analysis_pose.json`。没有把旧假液体对照提升为真实液体资格。
+
+刚体参数控制old_body_properties_prefix已完成：只读DynamicControl查询不改变旧参考前300步轨迹。实际试管mass0.018008921kg、惯量/COM匹配作者值，刚体请求迭代16/1，机器人关节系统128/4；运行时旧版也补充PhysxRigidBodyAPI并有sleepThreshold0。因此静态API缺失不能独立解释新旧差异。该getter记录的是actor请求值，不是GPU岛内最终迭代次数的直接测量。接口依据[Isaac4.1 Dynamic Control](https://docs.isaacsim.omniverse.nvidia.com/4.1.0/py/source/extensions/omni.isaac.dynamic_control/docs/index.html)。
+
+仅将SampleParticles.particleEnabled=False的300步机械隔离在初始化（尚无动作）触发NpPBDParticleSystem::removeParticleBuffer“buffer was not added”错误；首错停止，无抓持结论。保留sample_off_oldrack_prefix_h13_a_run.json。改为新的sample_absent_oldrack_prefix：将样液粒子/系统Prim均inactive，并移除仅该case的SampleParticles初态恢复项，浴水及其他物理保持。静态审计已通过并启动（supervisor2439082）；这是诊断性无样液物理场景，绝非可交付候选。观察器显式记录Prim active状态，避免仅看particleEnabled属性误判。
+
+扭转摩擦和流体边界密度仅进行了接口调研，未混入当前场景。后者未发现USD暴露字段；扭转摩擦有接触patch适用限制，接触报告中的20–24个点不等于已知patch锚点数，暂不凭该计数选择参数。
+
+样液系统inactive诊断已正常完成300步：301观察精确对齐，运行时样液粒子/系统均inactive；第300步抓持差仍9.114mm。实际试管/烧杯质量、惯量和16/1请求迭代与旧控制一致，机器人128/4一致。该结果不能把全部偏差归为样液重量；浴水及新场景其他设置仍存在，不构成液体关闭的交付路线。
+
+继续静态核对发现烧杯3个原启用碰撞面从旧自动contact/rest改成显式0.8mm/0，几何/相关SDF API相同。新只读控制old_shape_offsets_prefix用Tensor getter读取实际碰撞形状间距，并保持旧前300步轨迹不变：旧烧杯3个contact offsets为1.547600/1.362500/1.362500mm，rest均0；试管单个shape为10mm/1mm。它们是实际getter结果，不把默认自动值猜成固定20mm。
+
+真实4mL+旧管架候选sample_volume4_oldbeaker_prefix现仅将这3个烧杯碰撞面的contact/rest设回SDK自动值(-inf)，其他物理/动作/metric不变；静态审计通过，已启动（PID见CURRENT_STATUS）。观察器同时读取实际接触间距、刚体属性和粒子数据，必须核对运行时回到旧值后再解释结果。尚未解决抓持，仍不可交付。
+
+恢复烧杯自动间距短测已完成：1201观察精确对齐，最低保液97.8332%，第300步抓持差1.645mm（此前真实4mL+旧管架为16.027mm）。普通顶部机位frame1000可辨认样液。仅一次短测，不能据此判定稳定修复；当前同物理版本完整7000步上限诊断已启动，静态差异只包括cap及observer输出路径。新的guard记录实际阶段与回架姿态，并明确作用于“开始加热之后”，包含回架；4个分支测试通过。
+
+实际形状读回还有一个待验证点：旧烧杯shape_count3，新烧杯shape_count260，包含3个原形状及257个collisionEnabled=False的辅助形状；当前原3个接触间距已匹配旧值。被登记为shape不证明仍参与碰撞，不将其直接解释为重复物理碰撞或私自移除正在运行的几何。后续如需清理，必须独立验证开关语义和行为。
+
+恢复烧杯自动间距的完整范围诊断已停止、不合格：observer3886首次保液94.9079%，随后连续两步94.7996%；试管约4.6度，阶段为提离烧杯，累计有效加热22.518秒。检查停止前native3700–3886，7个退出事件均与穿过真实管口一致；该窗口未发现穿底/穿壁类退出。试管原点最高速度1.637m/s，包围盒角点1.686m/s，不能据此将失液归于超过3m/s上限。无完整任务分数或最终meta对齐，证据evidence/oldbeaker_full_withdrawal_abort_review.json。实际进程已退出且GPU空闲。
+
+下一单变量诊断sample_surface_tension_prefix保持4mL/4g、923粒子、旧管架及烧杯自动接触间距，只将SamplePhysics.surfaceTension从0改为0.0074。这是本机Isaac4.1 particleUtils.AddPBDMaterialWater在metersPerUnit=1时的表面张力分量，不是采用完整水预设；黏度、cohesion和其他物理均不变。先1200步原动作短测，若有改善再检查倾倒流动及完整回架，不能靠液体凝住取得保留率。retention95_checks_v3.observe已检查非有限坐标和粒子shape；无需为本实验修改观察算法。遵循MAT-001/003、VAL-001/002/003/008，本次只是未合格任务诊断，尚无可推广的通用规则变化，规范与设计契约无需修改。
+
+表面张力候选静态审计通过：全Prim/原API/关系一致，物理属性只有surfaceTension变化，另一差异为只读observer输出路径；相对资产路径相同且已解析文件内容哈希相同。SampleSystem物理材质绑定为SamplePhysics。另测NaN、Inf及粒子数量变化均被既有统计拒绝，正常输入通过。证据sample_surface_tension_prefix_static_audit.json。远端已启动supervisor2480016，进程存活已核对；当前仅1200步诊断，未取得运行结果。
+
+并行只读语义审计发现4mL候选仍保留fehlings:sample_height_m=0.043780562m，按当前管腔积分对应约8.06484mL；4mL正确名义高度为0.023563689m。该属性被FlowController.compute直接传入bath_contact，并非无用标签。提取现有纯几何函数的边界检查显示：竖直深浸/竖直离水两例结果相同，而倒置且仅旧上段触水时旧高度误判contact=True。该检查为合成几何，不声称测量了原动作计时偏差，也不将其解释为最新直立提管失液根因。当前运行字节不动，后续独立候选必须修正高度并复核计时/重置。证据evidence/sample_volume_height_semantics_audit.json，工具audit_sample_height_semantics.py。依据STATE-001/002、MAT-003，不改变规则或放宽成功条件。
+
+液柱高度独立修正工具已准备但未执行：sample_fill_height.py按分段圆台积分反算名义体积，圆柱/圆锥解析解与6类无效输入共8项检查通过（sample_fill_height_tests.json）。prepare_sample_height_prefix.py要求显式源identity，新建私有候选，仅改sample_height_m，保留颗粒、材质、动作及metric；等待当前表面张力结果后选择源版本，不修改活动实验。已有该case task_data未发现同名高度/体积覆盖项；原生重置一致性仍待运行验证。
+
+表面张力0.0074短测已完成，1201观察与meta精确对齐、原动作一致、四视频完整解码通过：最低保液98.0498%（0张力97.8332%，差2颗粒子），frame300抓持偏差7.062mm（基线1.645mm）。单次微小保液差异不足以证明稳定收益，暂不采用；不是证明所有表面张力设置无效。evidence/surface_tension_paired_diagnostic.json。下一组从0张力oldbeaker基线仅修正4mL名义高度，并恢复7000步上限进行完整范围诊断；observerv8只读增加每步height/volume字段，便于确认重置后实际读值。保液门槛提前停止规则仍保留，未完成不得声明完整分数。
+
+高度修正版sample_height_full静态审计通过：与0张力基线相比仅名义height和只读observer变化，YAML仅1200→7000，其余任务文件哈希及关系保持。远端已启动supervisor2487057；此为完整范围诊断，不提前声称完整分数、显色、回架或95%资格。identity与static_audit位于evidence/sample_height_full_*。
