@@ -24,3 +24,7 @@
 外部证据根：`/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence`。本轮身份/运行/逐帧分析分别为`sample_maxpos16_full_identity.json`、`sample_maxpos16_full_h13_a_run.json`、`sample_maxpos16_full_h13_a_analysis_pose.json`；退出事件`sample_maxpos16_full_episode_exits.json`；视觉范围`maxpos16_full_visual_review.json`；下一候选`sample_maxpos16_depen2_full_identity.json`。完整过程见[原生诊断记录](2026-10-16-task12-native-return-failure-and-observer.md)。
 
 规范依据：MAT-001/003、STATE-001/002、VAL-001/002/003/004/008及维护流程。此单来源结果仍有明确物理缺陷，未建立通用solver默认规则，不修改规范或包/API设计契约；操作说明已同步。
+
+后续更新：上述depen2完整范围诊断已失败停止，未有效加热，烧杯偏移约32mm，试管最终接近横倒，已观察保液92.96%；没有完整评分。该参数暂不采用。现转入300步PBD自身迭代16→128对照，原场景上限255保持。首次1分及两次侧壁退出的历史证据保持不变，当前仍不可交付；最新执行状态以CURRENT_STATUS和实际进程为准。
+
+后续更新（二）：两套PBD自身迭代128未改善较大的粒子相对运动，暂不采用。场景位置迭代上限32的300步短测正式保液100%、抓持偏差1.94mm，现已启动同参数7000步上限完整诊断；尚无完整结果。该候选与本文首次1分的上限16版本不同，证据不能混用。

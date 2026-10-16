@@ -205,3 +205,21 @@ MaxPosition16完整范围回放首次取得原生score1.0、success_rate1，3762
 下一完整范围候选仅将样液maxDepenetrationVelocity1→2m/s，总maxVelocity仍3，保持maxPosition16、923粒子、原动作、反应逻辑和metric；用同一完整动作检验能否消除两处侧壁退出。此前旧高迭代组合depen2表现不佳不能直接推广到当前稳定低迭代组合。不进行已准备的旧假液体max16对照，先解决真实液体剩余物理缺陷；旧对照只保留为未运行工具。
 
 低迭代/depen2完整诊断静态审计通过，supervisor2530841已启动。首次满分与未通过边界单独汇总在[首次原生成功及侧壁缺口](2026-10-16-task12-first-native-success-with-side-exit-gaps.md)，避免只看到1分而漏掉穿壁失败。
+
+maxPosition16/depen2完整范围诊断不合格，已仅向owned helper2530957发送SIGINT并确认服务/worker/GPU清理。未开始有效加热（先tilted_bath_or_heater，后bath_off_center）；烧杯相对初始化横移约32.22mm；回架后试管倾角约89.58度，observer5218时已观察最低保液92.9577%。此为主动停止的诊断，不能编造完整原生分数。原guard以heated_seconds>0.1启用，因此本次未加热时没有触发；外部人工停止依据是已执行动作且保液跌破95%。manual_stop.json及maxpos16_depen2_failed_motion_review.json保存停止前证据与范围。
+
+相同max16/depen1物理的短测与完整运行第300步抓持偏差分别18.07/6.52mm，说明单次差异不可全部归因于新参数；depen2本次暂估45.9mm须与未完成meta限制一起报告。纠正速度2单项暂不采用。下一300步对照从原global min1/max255、粒子16的边界基线出发，将Sample与Bath两套粒子solverPositionIterationCount同时16→128，保留机器人请求迭代与原上限，不改粒子数923/2320、几何、材质、动作、metric或Hz。它检验液体迭代配置能否稳定原机器人执行条件，不宣称已证明内部迭代匹配机制。
+
+同时准备纯视觉ON标签overlay（未应用活动场景）：复用ConvertAsset现有author_on_label函数，经临时规范路径适配后复制生成文字Mesh属性；未重实现转换或改外部生产者源码。display_on_visual_candidate/manifest.json绑定源文件/生产者SHA，静态验证仅文字points/topology/normals/extent/sharp_face变化，物理API/属性/关系不变。静态ON表示热板开启，不代替样液浸入/加热判定；实际渲染待验，不能提前标视觉PASS。
+
+particle128静态审计通过，场景只改两套粒子系统迭代属性及只读observer路径；YAML、刚体、材质、动作和metric保持。远端supervisor2539125已启动，尚无运行改善结论。
+
+particle128两相迭代对照已完成300步，301观察精确对齐、原动作和视频解码审计通过，运行时两系统均128且场景上限255确认。预动作局部位移率中位数0.227888m/s，仍较大；正式短段保液99.2416%、frame300抓持偏差4.8814mm。不采用为改善方案，不能把“匹配机器人请求128”视为有效修复。particle128_comparison_summary.json保存实际字段。
+
+下一候选从原边界基线仅改场景MaxPositionIterationCount255→32，液体solver16、纠正速度1、923/2320粒子及原动作保持；这是在16液体稳定但抓持有变动、128/255粒子运动较大的实测之间检验中间值，不预先宣称平衡点或根因。300步短对照先验行为，不能替代完整流程。
+
+MaxPosition32候选静态检查通过，只有YAML上限255→32和只读observer路径变化，supervisor2544289已启动。仍为未合格诊断，未改交付头。
+
+MaxPosition32短测完成：301观察精确对齐、原动作一致、四视频完整解码通过。正式episode最低保液100%，frame300抓持偏差1.93969mm；首步局部位移率中位数0.06470m/s，至observer500回落0.01118m/s，未持续高运动。对比max16短测18.0737mm、原max255边界短测5.9294mm，此单次较好，但同参数冷启动有变动，不能声称稳定优势。maxpos32_prefix_comparison.json。下一完整范围候选只恢复cap300→7000，保持MaxPosition32、PBD16、depen1及所有物理/动作/metric，必须覆盖此前两处侧壁退出与最终回架；未加入ON视觉overlay。
+
+MaxPosition32完整候选静态校验通过，只恢复300→7000cap及observer路径，supervisor2549809已启动。候选参数未混入ON文字overlay，仍待完整运动/无穿壁与重复验证。
