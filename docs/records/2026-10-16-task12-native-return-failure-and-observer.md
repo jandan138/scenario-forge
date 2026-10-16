@@ -163,3 +163,25 @@ A已完成并通过原动作/视频审计，301观察精确对齐；全部300个
 表面张力0.0074短测已完成，1201观察与meta精确对齐、原动作一致、四视频完整解码通过：最低保液98.0498%（0张力97.8332%，差2颗粒子），frame300抓持偏差7.062mm（基线1.645mm）。单次微小保液差异不足以证明稳定收益，暂不采用；不是证明所有表面张力设置无效。evidence/surface_tension_paired_diagnostic.json。下一组从0张力oldbeaker基线仅修正4mL名义高度，并恢复7000步上限进行完整范围诊断；observerv8只读增加每步height/volume字段，便于确认重置后实际读值。保液门槛提前停止规则仍保留，未完成不得声明完整分数。
 
 高度修正版sample_height_full静态审计通过：与0张力基线相比仅名义height和只读observer变化，YAML仅1200→7000，其余任务文件哈希及关系保持。远端已启动supervisor2487057；此为完整范围诊断，不提前声称完整分数、显色、回架或95%资格。identity与static_audit位于evidence/sample_height_full_*。
+
+高度修正版初始化运行读回已确认height=0.0235636886m、nominal volume=4mL，当前观察未被旧task data覆盖。样本数与最后observer编号见evidence/sample_height_full_initial_runtime_check.json；只覆盖本次初始化，不当作跨回合重置或完整动作通过。完整范围回放仍运行，尚无最终结果。
+
+为后续判别静置速度读回与真实相对运动，新增私有particle_displacement_check.py及未部署observerv9：逐粒相同ID的相邻世界/容器局部位置除物理dt，分别与USD世界速度比较，明确区间平均位移率不等于瞬时速度。纯移动容器、流体相对运动、读回不一致3个控制和dt/shape/NaN3类异常检查通过，evidence/particle_displacement_check_tests.json。仅准备，当前height_full继续v8，不改活动实验；不能把预热USD速度中位约0.18m/s直接宣称为已证实物理抖动。
+
+高度修正完整范围诊断已STOPPED_UNQUALIFIED：observer5007首次94.9079%，5008/5009为94.7996%，显色逻辑1.0、有效加热22.517677s。停止前倾角14.985度；相对旧成功终态，试管世界位置高31.320mm、横向约11mm，不能视作回架成功。无完整原生分数/最终meta对齐；已核实owned进程与GPU释放。证据sample_height_full_abort_review.json。计数包含初始化observer15的17个wall_or_unresolved事件，不将其自动认定为episode穿壁；其余退出分类保留原始记录。
+
+加热保持窗口observer1500–2600的包围盒角点逐步位移速度最高0.09663m/s，退出事件时最高0.04040m/s，仍发生管口退出；该段不支持单纯归因于机器人速度超过3m/s。报告sample_height_full_hold_interim_review.json只覆盖该窗口且无最终meta对齐，不是全轨迹瞬时速度上界。下一候选只换v9位置差分观察器、1200步cap，不改物理或反应逻辑，先验证USD速度读回与连续位置变化的关系。
+
+v9位置差分候选静态检查通过：场景唯一属性变化为只读observer脚本，YAML7000→1200，物理/反应/原动作/metric保持；sample_motion_readback_prefix_static_audit.json。远端supervisor2497027已启动，尚无运行读回结论。
+
+v9位置差分1200步回放完成：1201观察精确对齐、frame0=observer414，最低保液98.1582%、frame300抓持偏差2.128mm，原动作及四视频解码审计通过。预动作observer200–350的局部位移率每步中位数的中位数0.013124m/s；native800–1200段为0.223488m/s。observer415（首动作）局部中位位移率0.365393m/s，前一步0.013948m/s，试管世界位置相同；400/500的已记录USD碰撞/刚体/粒子属性一致。证据sample_motion_readback_prefix_h13_a_motion_summary.json和sample_motion_start_boundary.json。尚未证明动作setter、初态恢复、求解器或原始/显示位置通道中的哪项导致；不继续仅凭该相关性改黏度。
+
+新的300步startup-boundary候选只读v10补查400/414/415/500的compiled形状/刚体/粒子/场景属性，以及simulationPoints与points差值和额外快照；物理、反应、动作、metric不改。当前只是准备，需完成静态审计和运行。
+
+v10候选静态审计通过，仅observer脚本与1200→300诊断cap变化。远端supervisor2503908已启动，保留完整原动作前缀；结果待核对。尚未获得首动作突变根因或新的交付资格。
+
+v10启动边界300步完成并精确对齐（frame0=414）：首动作局部粒子位移率中位数0.37534m/s，前一步0.01159m/s，再次出现突变。400/414/415/500的compiled刚体/shape offsets、粒子offsets及场景/材质USD属性一致；runtime_colliders到500仅刚体velocity/angularVelocity运动读回不同，不是设置变更。simulationPoints与points有差异，但本机SDK schema及PhysxParticleSmoothingAPI.py说明该字段涉及平滑位置与物理位置读回设置；当前关闭smoothing，不把存在的simulationPoints自动视作实时物理真值。evidence/sample_start_boundary_prefix_h13_a_boundary_analysis.json。
+
+下一单变量对照sample_minpos128_prefix仅将YAML场景MinPositionIterationCount1→128，MaxPosition255、dt1/120、923颗粒子及其solver16、材质/容器/动作/metric保持。目的是检验迭代下限对首动作突变的敏感性；机器人请求128次不能证明内部实际岛迭代切换，明确仍是假设。不把提高下限等同于提高物理Hz或新增子步。300步诊断不构成回架/保液交付资格。接口参数背景见[PhysX PBD迭代API](https://nvidia-omniverse.github.io/PhysX/physx/5.1.2/_build/physx/latest/class_px_p_b_d_particle_system.html)，最终以目标4.1运行读回/行为为准。
+
+minpos128静态审计通过：USD只读observer路径变化，YAML唯一物理配置差异MinPositionIterationCount1→128，300步cap不变。远端supervisor2509503已启动；未声明通过，待运行时读取实际场景值并比较边界运动/抓持。
