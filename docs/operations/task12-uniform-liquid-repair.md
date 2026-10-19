@@ -206,3 +206,5 @@ MaxPosition16短测有明确变化：首动作相对运动突变未出现，正�
 第一轮 `contact_correlation2_a_20261018T194329_035108Z` 原生完成7000步，得分0.85、成功率0。监督器重复的原始 `[ERROR]` 字符串检查误把框架包装的 tqdm 进度条判为异常。移除这条重复检查，继续使用经过7项测试的严格日志分类器，并保留配置生效、动作、时钟和视频审计。没有修改GenManip或重新仿真A轮。恢复监督PID126500，权威状态改为 `/tmp/task12_correlation2_20261018/queue_resume_logfix.json`；原停止记录保留。A轮复核后继续B/C，当前仍不具备交付资格。
 
 当前阶段进度：A轮0.85分且横倒，B轮1分且目视插入架孔，C轮继续；不得选择B轮覆盖A轮来声称稳定。后续一次性等待进程130284将于当前监督器正常完成后运行两个私有300步摩擦锚点诊断；权威等待记录在 `/tmp/task12_anchor_inspection_20261018/chain.json`。该短测不验证完整回架或保液，也不进入交付包。
+
+自动续接已启用：当前权威队列 `/tmp/task12_relative_auto_20261019/queue.json`，共享 `relative_acceptance_20261019/queue_status.json`。按已批准的 `ready_jobs.json`自动执行，先索引15/0共8次；其余16组待核查后追加。普通任务失败继续，基础设施异常明确停止。恢复命令为在本轮授权4090上使用client Python运行个人repair/tools下 `run_relative_auto_queue.py`；完成项跳过，未解决的中断尝试必须先检查收尾结果，不能删除记录强制重跑。画面复核与仿真接续分离，不自动批准交付。
