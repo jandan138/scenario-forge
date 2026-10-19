@@ -208,3 +208,5 @@ MaxPosition16短测有明确变化：首动作相对运动突变未出现，正�
 当前阶段进度：A轮0.85分且横倒，B轮1分且目视插入架孔，C轮继续；不得选择B轮覆盖A轮来声称稳定。后续一次性等待进程130284将于当前监督器正常完成后运行两个私有300步摩擦锚点诊断；权威等待记录在 `/tmp/task12_anchor_inspection_20261018/chain.json`。该短测不验证完整回架或保液，也不进入交付包。
 
 自动续接已启用：当前权威队列 `/tmp/task12_relative_auto_20261019/queue.json`，共享 `relative_acceptance_20261019/queue_status.json`。按已批准的 `ready_jobs.json`自动执行，先索引15/0共8次；其余16组待核查后追加。普通任务失败继续，基础设施异常明确停止。恢复命令为在本轮授权4090上使用client Python运行个人repair/tools下 `run_relative_auto_queue.py`；完成项跳过，未解决的中断尝试必须先检查收尾结果，不能删除记录强制重跑。画面复核与仿真接续分离，不自动批准交付。
+
+2026-10-19接入完成：ready_jobs已追加剩余64次，现共72条自动任务，加来源13已执行/待复核的4个槽位，总计76。remaining_protocol_pending为空。队列已自动从等待转为h08_old_0运行。原“16组待核查”仅为历史状态。mixed5早期偏差已定位到约800帧的入杯/加热姿态，参见relative_acceptance_20261019/mixed5_onset_review；先完成冻结版本对照，不边跑边改USD。21项辅助工具测试通过。
