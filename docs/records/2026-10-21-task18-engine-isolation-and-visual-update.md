@@ -74,6 +74,12 @@ v5 第一轮 `silver_v5_g3_0_mixed_3_20261020T172304_998275Z` 已正常结束：
 
 20场景内嵌脚本的制作侧路径检查未发现 `/cpfs`、`/mnt/data`、`/shared` 或自行追加模块路径；模块依赖见 `evidence/v5_script_dependency_audit.json`。这不能替代后续接收运行验收。
 
+## 独立 metric 交付文件暂存
+
+在个人隔离接收仓库生成提交 `f0dedfb29b2561e7f92bc4371fdcae43af555acd`，父提交为建通基线 `9490df9a3710bbcea97cd2470adc364a13883914`，只修改 `genmanip/extensions/metrics/scientific_experiments/task_z4_silver_mirror_reaction.py`。已有工作区文件字节未因此改变；后续接收验证将记录此提交。
+
+`provisional_v5/code/` 中 bundle 和 mbox 是同一改动的两种选择，均标记 PROVISIONAL。已在建通仓库执行只读 `git bundle verify` 与 `git apply --check`，两项通过；没有应用补丁、切换建通分支或安装离线包。回执和文件哈希见 `evidence/metric_commit_preparation.json`。仍需完成运行资格，不能把“补丁能应用”当成可交付。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
