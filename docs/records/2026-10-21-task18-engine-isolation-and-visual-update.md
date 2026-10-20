@@ -142,6 +142,16 @@ contactOffset=0.015m在native3293仍触发保护：同时41颗超出参考范围
 
 GPU1已启动 `silver_v5_refined_beaker10` 原动作完整回放，初期已正常步进、保液比例1。静态证明不能代替完整运行。证据：`evidence/refined_beaker10_trial_identity.json`、`evidence/refined_beaker10_trial_queue.json`；工具全部留在外部实验根，不进入Scenario Forge核心层或接收运行依赖。
 
+## 细分网格仍越界，转向杯体接触动力学对照
+
+10mm细分网格在native3293仍出现41颗范围外粒子，其中37颗低于参考杯底；native3720尚有46颗在范围外。故没有将它提升为最终资产，也没有用其静态几何通过覆盖运行失败。
+
+下一组回到原始v5几何与液体设置，仅分别调整烧杯刚体属性：GPU0将 `physxRigidBody:maxDepenetrationVelocity` 设为0.1m/s，GPU2开启 `physxRigidBody:enableSpeculativeCCD`。前者限制求解器为分离重叠而引入的修正速度，不是全局运动限速；后者是杯体的预测接触，与此前浴水粒子CCD不同。保持动态刚体，不固定、不转kinematic，不改变机器人、粒子参数、动作、时间或评分。额外只读记录杯体线速度和角速度。
+
+参数定义核对远端Isaac4.1 schema并保存于 `evidence/native41_rigid_body_schema.txt`。逐属性检查确认每组只有一个物理字段改变，另一个脚本差异仅为速度记录。身份和队列：`evidence/beaker_dynamics_trials_identity.json`、`evidence/beaker_dynamics_trials_queue.json`。两组已启动，尚无修复结论。
+
+同时排查质量解释：远端 `particleUtils.py` 将单粒质量乘粒子数后写入 `PhysicsMassAPI.mass`；现有浴水约0.349095kg是总质量，样液总质量约0.004kg，烧杯0.18kg。逐粒自定义记录与总量相符，未发现“将总质量误作每粒质量”的证据，未修改质量。见 `evidence/particle_mass_authoring_audit.json`；这不是独立的运行时测力校准。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
