@@ -152,6 +152,16 @@ GPU1已启动 `silver_v5_refined_beaker10` 原动作完整回放，初期已正�
 
 同时排查质量解释：远端 `particleUtils.py` 将单粒质量乘粒子数后写入 `PhysicsMassAPI.mass`；现有浴水约0.349095kg是总质量，样液总质量约0.004kg，烧杯0.18kg。逐粒自定义记录与总量相符，未发现“将总质量误作每粒质量”的证据，未修改质量。见 `evidence/particle_mass_authoring_audit.json`；这不是独立的运行时测力校准。
 
+## 刚体参数未通过；发现并封闭杯底微小贯通孔
+
+maxDepenetrationVelocity=0.1试验在关键接触附近发生CUDA非法内存访问，client_exit=1且无完整result，不能因回执error字段为空而认为无错误。日志摘录见 `evidence/beaker_depen01_engine_failure.json`。烧杯speculativeCCD试验在native3294仍有30颗低于参考杯底，native3480仍有28颗，亦不能放行。
+
+进一步检查原杯身拓扑，底面中心有两圈各128个顶点、半径约1e-7m的环，之间由128个面连接，形成贯穿3mm杯底的极细轴向通道。原网格作为玻璃实体是封闭且绕序一致的，但这不等于容器底部没有通道：原三角网格Euler特征为0。
+
+新增独立几何试验将两圈分别合并为对应高度的中心点，去掉退化的轴向面，保留底面三角扇。修复后仍封闭、绕序一致，Euler特征为2；三角形由1536降到1024，边界不变，体积增量约9.4e-17m³。只替换统一SDF碰撞，原外观网格保留；不叠加先前失败的细分、提速或刚体参数改动。该孔对运行失败的因果作用尚未证明。
+
+GPU3启动原动作完整回放。身份与队列为 `evidence/sealed_beaker_trial_identity.json`、`evidence/sealed_beaker_trial_queue.json`。本次静态发现属于现有MAT-003开口／封口语义检查范围，暂不新增通用参数规则；不会据此静默重写已交付的水浴或其他历史包。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
