@@ -92,6 +92,14 @@ v5 第一轮 `silver_v5_g3_0_mixed_3_20261020T172304_998275Z` 已正常结束：
 
 参数含义核对 [NVIDIA PhysxParticleSystem 文档](https://docs.omniverse.nvidia.com/kit/docs/omni_usd_schema_physics/latest/physxschema/class_physx_schema_physx_particle_system.html)：maxVelocity限制粒子速度，enableCCD用于帮助减少粒子穿透。文档支持试验方向，不保证该Isaac4.1场景的修复结果；本任务具体取值不提升为通用规范。
 
+## 提速试验退化并提前终止
+
+maxVelocity=1.0 单参数试验明显退化：native120 时包含率约0.861，native600时约0.367，1468颗处于参考杯底以下，记录的粒子世界Z最低约−2.938m。已经不是边界少量误差。仅终止该试验拥有的客户端进程组，由原生 helper 完成服务清理；client_exit=-15、服务已退出。保留 `evidence/bath_vmax1_rejection.json`、原始日志及 `bath_vmax1_observer_rows.json`，不把它记为完整7000步失败分数，不提升至候选。
+
+只开启CCD的一组仍在运行，早期记录全部包含，未得出最终结论。追加其对应 mixed_3 场景的无机器人受控显色／重置验证，沿用该场景原始反应时间；GPU3在原有回放释放锁后自动启动，入口 `tools/run_controlled_bath_ccd.py`。该无机器人夹具及粒子观察代码仍仅属于诊断，不随正式包交付。
+
+v5关键 mixed_3 的第二轮已完成，两个回放均为7000步、0.15分、无引擎报错，四路视频均完成解码。该重复结果单独保留；由于浴水杯底越界尚待解决，不能据此恢复正式验收入队。当前对照快照入口为 `evidence/bath_motion_comparison_snapshot.json`，其中周期最小值是所记录样本范围，越界累计次数不等于独立粒子数量。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
