@@ -208,6 +208,14 @@ GPU1开始干净v6的mixed_3完整回放及复跑，GPU2开始干净v6无机器�
 
 身份与队列：`evidence/v6_room_floor_trial_identity.json`、`evidence/v6_room_floor_trial_queue.json`。该测试不是重启已失败作业，也没有修改GenManip关闭默认地面的源码。
 
+## 地板对照完整结束，启动干净v7验证
+
+地板碰撞对照完整执行7000步、0.15分，未报引擎错误。动作逐项一致性、四路视频完整解码及Reset complete之后的粒子范围检查保存于 `evidence/room_floor_full_numeric_review.json`：浴水记录中全部留在杯内，离管样液被地板承接，记录坐标保持有限且不再持续下落。单次完成不构成CUDA内部根因证明。
+
+干净v7以v6为基线，只给20场景增加与可见地板齐平的静态Cube碰撞；没有带入诊断读出、粒子钳制、等值面关闭或缓冲增大。静态逐属性／关系／API比较确认，已有prim数据全部不变，每场景仅新增PhysicsRoomFloor。20场景闭包、哈希、120Hz/7000及原时间配置通过，9项规则、12项实际metric场景检查及接触观察器独立性测试通过。见 `evidence/candidate_v7_identity.json`、`evidence/static_candidate_v7.json`、`evidence/v7_floor_contract.json`。
+
+GPU0开始曾失败的mixed_20完整回放与复跑，GPU2并行无机器人银镜／重置验证；首条完整回放结束后自动衔接其余8条文档坏例。入口 `evidence/v7_schedule.json`、`evidence/v7_coordinator.json`。所有图像审核、接收端验收、备份安装和发布仍未完成；v7未发布READY。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
