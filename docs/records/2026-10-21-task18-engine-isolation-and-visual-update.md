@@ -116,6 +116,14 @@ contactOffset=0.015m在native3293仍触发保护：同时41颗超出参考范围
 
 读取并保存了远端实际Isaac4.1 `PhysxParticleSystem` schema片段至 `evidence/native41_particle_system_schema.txt`，确认该版本的contactOffset/restOffset定义及合法关系。不能仅凭不同版本网页缺少某个方法名认定资产参数无效；本轮接触距离对照确实只改变了受支持的contactOffset。
 
+## 杯体位置一致，但仍单独核对粒子读取阶段
+
+位置一致性诊断此次在native2317出现无效状态，两种杯体位姿计算的包含率同为0.968966，位移差为0，局部最低Z约−0.00691m。该回放中杯体后来移离加热器，不能把它当作前几轮完全相同的接触轨迹。见 `evidence/liquid_pose_coherence_snapshot.json`。
+
+这份比较只证明所查杯体位姿一致，不能单独证明粒子写回时机与杯体相同。因此新增同一场景内的只读 `post-Kit-update` 粒子／杯体观察器，保留原 compute 阶段日志以便同轮比较，不改变实际物理或评分。已在GPU0启动，身份与队列为 `evidence/post_update_observer_identity.json`、`evidence/post_update_observer_queue.json`。
+
+观察器早期记录到SDK初始化中的零物理位姿及较大采样间隔：这些启动瞬态不作为动作阶段的漏液证据，也不把累计的初始化越界计数当成实际丢失粒子数。正式动作阶段已出现native720、step_gap=1、杯体位置一致且全部包含的记录；仍需继续覆盖碰撞阶段。判断会区分采样阶段与时间间隔，不凭事件API名称直接宣布物理同步。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
