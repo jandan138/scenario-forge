@@ -290,3 +290,33 @@ v7无机器人演示已完成并审核12个阶段画面，84秒／2520帧视频�
 - 只读mixed17诊断早期采样出现不同接触结果：native720/780/840烧杯倾角约30.8/41.1/125.6°，900约140.4°后浴水保留率显著下降，粒子坐标仍有限。顺序支持翻杯洒水解释，不能把低保留率直接写成杯底穿漏；完整视频和时序核对尚待完成。部分数据保存`evidence/v7_m17_telemetry_partial.json`。观测副本不替代无观测候选或接收失败的证据。
 
 - mixed15完整7000步/0.15分的四机位16帧已复核：机器人/管架/烧杯未出现所查画面中的整体弹飞，烧杯初期在加热器上移动，后期试管反复位于架孔及夹爪附近并倾斜，不能据离散帧认证稳定插入或全部接触正确。证据`v7_reviews/mixed15/report.json`。候选九条坏例已有七条完整结果（mixed20另有重复），剩mixed10/11；接收CUDA失败仍独立阻塞交付。
+
+### 后续单参数容量试验（未采用）
+
+在等待当前诊断收尾期间准备 `mixed17_v7_subgrids40000`：仅BathSystem/SampleSystem的`physxParticleIsosurface:maxSubgrids`从10000改40000，逐属性/关系/API检查确认其余不变，不附观察器，不改粒子物理/材质场/反应/评分/动作。v6旧容量实验因原配置也通过而因果不明，此次针对真实接收失败的mixed17，仅作为仍待验证的假设。`evidence/v7_m17_subgrids_identity.json`保存字节身份，监督PID205324等待GPU1 mixed10结束后自动运行。不会据单次通过认定根因或解除接收失败门禁。
+
+- 普通无hook mixed17诊断 `silver_v7_diag_plain_headless_mixed17_20261020T225940_425605Z` 完整7000步/0.15分、client0，四视频完整解码及动作一致性核对完成。终态日志仅一条事先明确的headlessGLInterop启动消息，未有其他匹配错误。四机位16帧可见烧杯早期翻离加热器、周围液体水洼，机器人留在桌边，试管后期回到架边；与候选物体轨迹不同，不证明hook导致此前CUDA。证据 `v7_plain_headless_mixed17_log_review.json`、`v7_reviews/plain_headless_mixed17/report.json`。正式接收失败仍未解决。
+
+- mixed10 `silver_v7_g1_2_mixed_10_20261020T230313_533718Z` 完整7000步/0.15分，动作一致性及四机位16帧复核完成：试管最终横落架前桌面，烧杯留在加热器上，所查帧未见整体弹飞，非任务成功或逐帧无穿透证明。`v7_reviews/mixed10/report.json`。候选九条已完成八条（尚余mixed11）；GPU1已自动接续40000稀疏网格容量试验，未采用为交付版本。
+
+### 40000容量试验失败，继续拆分后处理
+
+`silver_v7_m17_subgrids40000_20261020T232721_692247Z` 客户端已确认390步后触发同类`sg_SparseGridClearDensity`CUDA700，client1、无有效结果。receipt.error为空不能当通过，完整日志已另存；`evidence/v7_subgrids_rejection.json`明确否决此单参数修复，不继续盲增容量。先前接收失败同样在390条已确认动作之后发生，不能把确认步数当精确首错物理步。
+
+准备两个独立单开关诊断：`mixed17_v7_anisooff`仅关闭两系统粒子各向异性后处理，保留液体表面；`mixed17_v7_isooff`仅关闭两系统表面生成，用于定位且永不交付。均保留粒子物理/动作/反应/metric；外观可能变化。GPU1 anisooff PID213041；GPU0 isooff监督PID217819等待前者首次reset后自动启动。未更改正式candidate_v7或receiver_v7。
+
+- 只读位姿/粒子诊断完整7000步/0.15分结束，共207个采样，native0..7380，粒子坐标采样均有限；浴水翻杯后保留率降至0，样液最低约0.000673m，浴水最低约0.759961m。烧杯最大倾角140.37°。这些是离散采样且物体轨迹与干净候选不同，不能据此认证全部帧无漏液或解释被遮挡的另一运行。完整数值/原始行见`v7_m17_telemetry_complete.json`、`v7_m17_telemetry_rows.json`；四视频已解码，抽帧准备完成，目视待做。Anisooff已超过630条确认动作，isooff已启动；都尚未终态。
+
+- 只读诊断四机位各16帧目视完成：烧杯早期翻倒、液体水洼可见，试管留在翻杯区域桌面，后期机器人空夹爪去架子。画面与翻杯数值方向一致，但此运行没有实际后段持管插架，不能解决另一干净回放的遮挡接触判读。`v7_reviews/mixed17_telemetry/report.json`及complete报告已明确范围。
+
+### 发现本机schema范围违规：浴水表面距离与网格间距
+
+重新核对远端Isaac4.1本机 `omni.usd.schema.physx/plugins/PhysxSchema/resources/schema.usda`，surfaceDistance须满足 `[0,2.5*gridSpacing)`；原文及文件哈希存`native_isosurface_distance_schema.json`。v7全部20场景浴水distance0.008m、spacing0.00291m，上限0.007275m，超出文档范围；样液均在范围内（`v7_isosurface_range_audit.json`）。这是已确认authoring问题，尚未证明是CUDA根因。
+
+独立试验`mixed17_v7_gridspacing33`仅改BathSystem网格间距为0.0033m，保留表面距离8mm、PBD动力学、粒子数、透明度、反应和评分/动作，静态对比唯一该属性变化且两组均满足范围。网格分辨率变化需目视验证；未推广到20场景或正式包。GPU2诊断PID225911已启动。该数值是本任务候选，不提升为通用默认；规范无需变更，验证后再更新交付资格。
+
+- mixed11完整7000步/0.5分，四机位16帧复核完成：长时间持管在浴区，后期向架子移动，终态试管位置未能从所查帧确定；不据暗背景/透明遮挡宣布接触合格。分数包括50%反应门槛，无完整成功。至此v7九例+mixed20复跑共10条完整结果，汇总`v7_candidate_regression_complete.json`，不是交付PASS；接收CUDA700及已确认参数范围违规仍阻塞。
+- GPU3空闲后启动3.3mm网格候选的84秒无机器人银镜/重置对照，监督PID231245，输出`controlled_gridspacing33`，保留原反应时长/受控轨迹；仍待运行和目视结果。
+
+- `silver_v7_m17_gridspacing33`也在390条已确认动作后CUDA700，client1无有效结果。合法范围修正是必要authoring纠正，不能称为充分稳定性修复；日志另存`v7_gridspacing33_failure_logs`，结论`v7_gridspacing33_failure.json`。不撤销/覆盖原失败。
+- 新独立组合`mixed17_v7_validgrid_anisooff`仅Bath网格3.3mm+两系统anisotropy关闭，isosurface保持开启；静态diff为这三属性，PBD动力学/轨迹/反应/metric不变。GPU2 PID232905启动，未作为正式候选或交付。GPU0/1的两个单开关对照继续，GPU3范围修正受控演示继续。
