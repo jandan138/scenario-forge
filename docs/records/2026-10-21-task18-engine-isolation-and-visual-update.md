@@ -40,6 +40,18 @@ v5 仅对不变的材质／可见性值省略重复 USD 写入，Float32 值先�
 
 当前状态入口：实验根 `CURRENT_STATUS.json`。上述队列启动不等于验证通过。
 
+## 接收端准备与原版补充对照
+
+再次读取飞书文档，revision 6888 的 Task18 修复项未变。除原目标外显式核对了背景容器碰撞：v5 解包后的 20 场景均有 5 个背景物件、每场景 27 个启用且有效的碰撞形状。见 `evidence/v5_background_collisions.json`；结构存在不代表动态接触已经认证。
+
+`receiver_v5` 从建通 HEAD `9490df9a3710bbcea97cd2470adc364a13883914` 重新克隆，实际解压 `provisional_v5/task18_offline_PROVISIONAL.zip` 中 562 个离线文件，仅另放入 1 个指定 metric 文件。全部哈希与候选一致；公共 `repair_checks.py` 与接收基线相同，未覆盖。制作脚本未复制进接收目录，已有机器人／公共材质继续引用接收基线。
+
+这是个人目录中的隔离验证，不是安装；归档旁有 `NOT_READY`。见 `evidence/receiver_v5_preparation.json`。
+
+接收端自动队列已准备并等待候选九条坏例及关键重复回放、受控演示数值通过，之后分四卡执行 20 配置初始化、视频解码和 80 张图提取。画面审核、代表完整回放及最终安装仍须后续完成，初始化协调器不发布 READY。
+
+另外启动 GPU1 的原版 mixed_3 同动作完整回放，补充此前只覆盖 mixed_17/mixed_20 的原版校准范围。见 `evidence/original_mixed3_baseline_queue.json`；运行完成前不作结论。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
