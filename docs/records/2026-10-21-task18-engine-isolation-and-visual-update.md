@@ -80,6 +80,18 @@ v5 第一轮 `silver_v5_g3_0_mixed_3_20261020T172304_998275Z` 已正常结束：
 
 `provisional_v5/code/` 中 bundle 和 mbox 是同一改动的两种选择，均标记 PROVISIONAL。已在建通仓库执行只读 `git bundle verify` 与 `git apply --check`，两项通过；没有应用补丁、切换建通分支或安装离线包。回执和文件哈希见 `evidence/metric_commit_preparation.json`。仍需完成运行资格，不能把“补丁能应用”当成可交付。
 
+## 浴水杯底越界已复现，批量入队暂停
+
+私有粒子观察器在 native_index=3293 记录同时28颗位于参考杯底以下，包含率0.987931；累计30次由内到外的转换分类为 `below_floor`，不能把30次直接解释为30颗独立粒子。此前2640/3240的周期记录仍为全部包含。触发时杯体原点高度约0.83159m，先前约0.826m，伴随短暂倾斜；后续部分粒子仍在杯外。这不是“全部水漏光”，但也不能按杯口正常溅出放行。正在完成该诊断全程，参考轮结果不保证每次完全相同。
+
+已写入 `evidence/v5_global_stop.json` 暂停批量坏例和接收初始化的新入队，现有第二次关键回放及液体诊断继续正常收尾。暂停原因是液体物理证据，不是把低分当失败，也不是新增引擎报错。v5演示和metric局部检查仍保留其原有范围，不能覆盖这次机器人接触条件。
+
+原浴水配置 maxVelocity≈0.3m/s、粒子CCD关闭；粒子平滑明确关闭。杯体活动碰撞仍为原SDF主体／杯沿等，旧 `WaterbathCollision/Floor` 的碰撞为关闭状态，不能误把它的偏移参数当作当前活动杯底。没有为本次试验启用旧碰撞代理。
+
+新增两项单参数试验，静态逐属性对照确认每项仅改变一个属性：GPU0最大速度1.0m/s，GPU1开启粒子CCD，均保留诊断日志、120Hz、7000步、原动作和评分。身份与运行入口为 `evidence/bath_motion_trials_identity.json` 和 `evidence/bath_motion_trials_queue.json`。这些仍是私有诊断，不进入交付，尚不能认定限速就是原因。
+
+参数含义核对 [NVIDIA PhysxParticleSystem 文档](https://docs.omniverse.nvidia.com/kit/docs/omni_usd_schema_physics/latest/physxschema/class_physx_schema_physx_particle_system.html)：maxVelocity限制粒子速度，enableCCD用于帮助减少粒子穿透。文档支持试验方向，不保证该Isaac4.1场景的修复结果；本任务具体取值不提升为通用规范。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
