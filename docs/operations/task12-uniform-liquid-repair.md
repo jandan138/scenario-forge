@@ -1,3 +1,5 @@
+> 2026-10-20正式交付：`task12_real_liquid_r1`已生成READY，接收40/40冷启动、160图复核及3条完整回放完成（1/0.85/0.15）；本轮不更新LeRobot，已同步飞书。入口与限制见[收尾记录](../records/2026-10-20-task12-delivery-closeout.md)。下文为历史阶段过程。
+
 > 2026-10-20安装进度：Task12已备份并安装建通目录，状态`INSTALLED_ACCEPTANCE_PENDING`；40配置冷启动及3条完整回放自动续接中。尚无READY，飞书尚未标记交付完成。详见[交付记录](../records/2026-10-20-task12-final-delivery-preparation.md)。
 
 # task12 均匀变色真液体：验证与恢复
