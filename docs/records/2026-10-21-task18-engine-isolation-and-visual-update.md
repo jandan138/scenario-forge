@@ -108,6 +108,14 @@ CCD组跨过原事件阶段后也出现越界：native3293包含率0.987931，27
 
 下一项单参数对照只把浴水 `contactOffset` 从引擎自动值设为0.015m；保持 `restOffset=0.005m`、粒子间距、粒子数、maxVelocity≈0.3m/s、CCD关闭及其余参数不变。改的是粒子与非粒子物体的接触检测距离，不是液体粒径或体积。静态逐属性对照确认仅此一个差异，GPU2启动原动作完整回放与相同的粒子观察记录。见 `evidence/bath_contact15_trial_identity.json`、`evidence/bath_contact15_trial_queue.json`。效果尚未验证，不作通过声明。
 
+## 接触距离对照未解决，追加位置一致性诊断
+
+contactOffset=0.015m在native3293仍触发保护：同时41颗超出参考范围（32颗在杯底以下、9颗径向越界），包含率0.982328；native3840仍有39颗在范围外。该参数不能关闭问题，保留本次回放收尾产物，不继续叠加未经隔离的参数。
+
+另在GPU3启动只读位置一致性诊断：同一次计算内比较 dynamic-control 杯体位姿与自动写回USD的杯体位姿，并分别计算相同粒子的包含比例／局部Z范围。未修改物理参数、实际守卫、动作或评分。早期native480两者一致，但必须继续覆盖问题阶段，不能把早期一致推广到发生碰撞时。身份与队列见 `evidence/liquid_pose_coherence_identity.json`、`evidence/liquid_pose_coherence_queue.json`。
+
+读取并保存了远端实际Isaac4.1 `PhysxParticleSystem` schema片段至 `evidence/native41_particle_system_schema.txt`，确认该版本的contactOffset/restOffset定义及合法关系。不能仅凭不同版本网页缺少某个方法名认定资产参数无效；本轮接触距离对照确实只改变了受支持的contactOffset。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
