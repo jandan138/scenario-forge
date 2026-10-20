@@ -162,6 +162,20 @@ maxDepenetrationVelocity=0.1试验在关键接触附近发生CUDA非法内存访
 
 GPU3启动原动作完整回放。身份与队列为 `evidence/sealed_beaker_trial_identity.json`、`evidence/sealed_beaker_trial_queue.json`。本次静态发现属于现有MAT-003开口／封口语义检查范围，暂不新增通用参数规则；不会据此静默重写已交付的水浴或其他历史包。
 
+## 封孔未解决；统一凸分块杯身获得首个完整保液结果
+
+封孔版本仍在native3293出现60颗范围外粒子（50颗杯底、10颗径向），后续仍有漏失。该微孔是几何事实，但未证明是本次故障根因，未将封孔试验当作修复通过。
+
+改用已有凸分块表示作独立碰撞路径对照：关闭原杯身SDF碰撞，启用256个凸壁块及1个凸底面；底面半径扩到原外底轮廓37.27mm，高度仍0–3mm。保留原杯沿SDF与壶嘴碰撞。将烧杯分块从Supplement成员及RigidScene排除列表中移除，使全部烧杯碰撞同时服务固体和液体。共259个启用形状，外观不变，没有独立液体保液层；这是32边分块近似，不宣称与SDF几何逐点等价。见 `evidence/convex_body_trial_identity.json`。
+
+`silver_v5_convex_body_20261020T194319_968247Z` 已完成7000步、0.15分、无引擎错误；7000条手臂（含夹爪）和底座动作逐项与源记录相同，四路视频完整解码。按Reset complete分隔后，compute及post-update记录的最小包含率均为1.0，动作阶段新增越界事件为0。证据：`evidence/convex_body_phase_analysis.json`、`evidence/convex_body_full_numeric_review.json`。录像仍需目视复核；单案例诊断通过不等于全任务或任意动作资格。
+
+从正常v5资产重新构建干净v6的20场景，应用相同碰撞调整，未包含私有观察器。静态检查确认259个活动烧杯形状、257个隐藏凸杯身形状、正确的碰撞组成员关系；所有反应逻辑与v5逐字相同。与诊断mixed_3的全部属性／关系比较仅inputs:script不同（诊断读出移除）。9项规则测试、12项实际metric场景检查、接触观察器独立性测试以及20场景闭包／时长／120Hz7000／哈希通过。见 `evidence/v6_static_test_summary.json`、`evidence/v6_collision_contract.json`。
+
+GPU1开始干净v6的mixed_3完整回放及复跑，GPU2开始干净v6无机器人银镜／保液／重置演示；协调器在首条完整回放通过后自动衔接其余8条文档坏例，复跑并行继续，异常阻止新入队。见 `evidence/v6_schedule.json`、`evidence/v6_coordinator.json`。未恢复旧v5队列，未发布READY，也未安装建通目录。
+
+已向用户异步确认少量粒子漏失是否属于首轮阻塞范围；回答前继续原严格边界，不因问题已提出而放宽要求。本次新候选仍在追求不发生已测杯底越界。
+
 ## 收尾门槛与规范同步
 
 引擎异常仍是交付阻塞项。还需最终版本九条坏例复核、20 配置接收端初始化／80 张图、代表完整回放、离线三目录与 metric 提交、备份安装、READY 和飞书同步。不更新 LeRobot，不要求旧动作全部成功，不以修改动作、缩短时长或放宽评分制造通过。
