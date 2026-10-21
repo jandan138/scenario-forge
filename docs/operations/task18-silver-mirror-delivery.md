@@ -2,6 +2,8 @@
 
 状态：2026-10-21，候选验证中，未安装、未发布 READY。本页提供继续工作与验收的入口，不替代运行证据。
 
+接收分支规则更新：建通目录现固定保持 `feature/scientific_experiments`，当前基线5bd48129。后续代码提交使用 `zhuzihou <zhuzihou@pjlab.org.cn>`，历史交付保留，见[分支与署名整理记录](../records/2026-10-21-genmanip-branch-author-reconciliation.md)。下文v8安装脚本是历史草案，其切换delivery分支的方式已停用；正式交付须基于当前原分支重新准备metric提交和安装回执。冻结实验副本仍使用其原有基线，不回写改动。
+
 本任务遵守[场景规范入口](../standards/README.md)和[验证与交付](../standards/validation-and-delivery.md)，特别是 VAL-002 的证据分类及 VAL-008 的回放协议。诊断过程见[当日记录](../records/2026-10-21-task18-engine-isolation-and-visual-update.md)。
 
 ## 身份与范围
