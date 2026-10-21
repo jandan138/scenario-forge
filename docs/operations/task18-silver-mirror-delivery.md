@@ -1,5 +1,7 @@
 # Task18 银镜修复与交付操作说明
 
+最新配置交付（2026-10-21）：在同事 rebase 后的 `cc2b38e1` 上追加 `f67879b5`，称量40、水浴50、银镜20个既有交付 YAML 已进入 Git 并正常推送。银镜配置不再只存在于未提交工作区；USD/task data 仍离线交付。34项局部测试及三个代表冷启动通过，原问题限制不变。见[配置补交记录](../records/2026-10-21-genmanip-delivered-config-submission.md)。以下历史段落的提交号与安装状态按当时版本理解。
+
 提交历史最新说明（2026-10-21）：本地修复已按用户要求汇总为两个节点并正常推送Gitee。`feature/scientific_experiments` 当前为efe5d08a，银镜metric包含在第一个汇总提交109c809e中；安装时的f6ec55ae通过[新旧提交映射](../records/2026-10-21-genmanip-two-commit-remote-integration.md)追溯。最终文件树、已安装资产和未提交配置保持原样，既有物理/碰撞限制不因历史整理而关闭。以下安装记录中的“未push”和f6ec55ae是当时状态。
 
 状态：2026-10-21，银镜代码已本地提交并安装建通目录，问题未全部关闭，未push、无全部验收完成READY。当前安装回执入口为 `/mnt/data/zhuzihou/GenManip-Sim/saved/deliveries/scientific_experiments/task18_silver_mirror_install_20261021/README.md`，见[本地安装记录](../records/2026-10-21-task18-receiver-local-install.md)。阶段评估包eval_r1及其原校验和保持不变，见[评估交付记录](../records/2026-10-21-task18-evaluation-delivery-r1.md)。
