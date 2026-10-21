@@ -8,6 +8,8 @@
 
 ## 身份与范围
 
+当前阶段：冻结B原样验证，权威队列为制作根下 `evidence/qualification_B/coordinator.json`；配对对照已经结束。用户明确选择保留液面参数范围问题待决，不在本阶段安装或发布READY。验证包为 `provisional_B`，接收副本为 `receiver_B`，详见[冻结B验证记录](../records/2026-10-21-task18-frozen-B-qualification.md)。
+
 飞书 Task18 对应 `task_z4_silver_mirror_reaction`。当前制作根为
 `/cpfs/user/zhuzihou/dev/task18-fehling-baseline-20261021`；从其中 `evidence/diagnostic_queue_r2.json`、`evidence/A_identity.json`、`evidence/paired_jobs_r2.json` 定位菲林基准与最小迁移对照，见[新阶段记录](../records/2026-10-21-task18-fehling-baseline-reset.md)。旧制作根 `task18-silver-delivery-20261020` 及其 v8 为历史实验，接收端失败后未获交付资格。状态文件须结合实际进程、日志及产物核实，不能单凭 RUNNING 字样重启或判断运行完成。
 
