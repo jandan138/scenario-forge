@@ -320,3 +320,43 @@ v7无机器人演示已完成并审核12个阶段画面，84秒／2520帧视频�
 
 - `silver_v7_m17_gridspacing33`也在390条已确认动作后CUDA700，client1无有效结果。合法范围修正是必要authoring纠正，不能称为充分稳定性修复；日志另存`v7_gridspacing33_failure_logs`，结论`v7_gridspacing33_failure.json`。不撤销/覆盖原失败。
 - 新独立组合`mixed17_v7_validgrid_anisooff`仅Bath网格3.3mm+两系统anisotropy关闭，isosurface保持开启；静态diff为这三属性，PBD动力学/轨迹/反应/metric不变。GPU2 PID232905启动，未作为正式候选或交付。GPU0/1的两个单开关对照继续，GPU3范围修正受控演示继续。
+
+- 准备20场景实验`candidate_v8`（尚未采用/运行合格）：仅浴水网格3.3mm+两系统anisotropy关闭，表面开启，逐场属性/关系/API对比确认仅3属性不同，563文件哈希冻结，v7源哈希未变。构建完成后9项规则、12项实际metric方法测试通过；不等于GPU或动态插架合格。组合受控演示监督PID239501已排在GPU3前一演示后，仍待结果。
+
+- 仅grid3.3mm受控演示84秒/2520帧完整解码，12阶段已目视：透明初态、沉积、银镜、提离保留及清晰重置可见。progress峰值1/末0，样液保留1，浴水最低约0.997845，仅杯口上方波动且末帧全部返回。`controlled_gridspacing33_review.json`为规定无机器人范围通过，不抵消其机器人CUDA失败。组合受控演示已自动开始，尚未完成。
+
+- 实验v8的20场景/20配置资源闭包、原生PhysX标签、粒子数、120Hz/7000与原反应时间、冻结文件哈希复核通过，并新增每场两系统surfaceDistance范围和isosurface开启/anisotropy关闭断言；`static_candidate_v8.json`仅静态资格。
+- anisooff与isooff两对照均完整7000步/0.15分、client0，末尾server/client/worker日志无匹配错误，`v7_postprocess_terminal_comparison.json`保存终态。原配置也曾通过，故不证明单一根因；isooff永不交付，anisooff单项仍有原浴水参数范围问题，需看组合试验及重复验证。
+
+### 组合受控渲染灰屏，停止无效运行并保留证据
+
+`controlled_validgrid_anisooff`在实际输出0/30/57帧目视均为灰屏、无场景可见；约10分钟仅84帧。确认仍存活且同一自有进程组后，SIGTERM仅停止PGID239501的受控演示，未动GPU2机器人回放。`controlled_validgrid_anisooff_blank_rejection.json`保存原因和帧数，原report的RUNNING保留为中断证据，不伪记完成。此异常尚未归因相机/初始化或表面生成；实验candidate_v8改为受控渲染失败待诊断，不进入正式验收。
+
+- 灰屏短诊断`render_inspection_combo`完成，3次render画面仍灰；相机矩阵有效，浴水/样液生成网格3686/2394顶点且坐标有限、空间范围约厘米至分米，当前数据不支持“网格坐标爆炸”解释。继续同进程显示隔离`render_visibility_isolation` PID246005，依次显示全部/隐藏全部液体/仅隐藏原始粒子/仅隐藏生成面；仅内存visibility诊断，不保存USD，不改动力学。正式v8仍未获资格。
+
+- `render_visibility_isolation`在同进程内显示全部/隐藏全部液体/仅隐藏粒子/仅隐藏生成面均保持灰屏；已亲看全部液体隐藏帧，当前不支持“液面遮挡相机”解释（仍有渲染刷新限制）。不进一步据此改PBD。GPU3启动此前可见的gridspacing33基线同一短探针并记录RenderProduct相机绑定，PID247636，用于区分演示渲染初始化与新参数问题。
+
+- 灰屏基线对照`render_inspection_gridbaseline`同一短探针正常出图，RenderProduct绑定`/World/ProbeCamera`。进一步`render_xforms_combo`与`render_xforms_baseline`均完成，2034个USD world矩阵逐项比较无>1e-6差异、相机绑定一致；`render_xform_comparison.json`。这排除了已观测USD变换差异，仍不能证明GPU侧渲染状态正确；不再把灰屏归因通用初始化慢。新组合保持待诊断。
+
+- 组合机器人回放已最终7000步/0.15分、client0，四MP4完整解码、动作一致性检查完成，原生俯视首帧目视正常；完整抽帧准备完成待目视。不能据此解除无机器人演示灰屏。渲染相机参数随1e-5m位移更新且与USD一致，恢复原矩阵仍灰，`render_camera_refresh_combo`。
+- `render_occlusion_combo`深度全部有限、约0.04335..0.04819m，实例ID均0未映射；静态USD几何在估计命中点附近的包围盒候选为空（只作broadphase，不作GPU射线证明）。进一步同进程临时给所有Gprim加语义标签并读分割，PID255086；不保存资产或改变物理。
+
+- `render_semantic_occlusion_combo`加全Gprim标签并启用semantic annotator后RGB正常，深度约0.544..5.363m，可见多物体标签；不是定位到真实4.5cm遮挡。标签与annotator为同时改变，尚无单因素因果。仅root visibility隐藏/恢复（0新增物理步）仍灰屏，`render_scene_refresh_combo`。继续仅semantic annotator、不作者任何标签的隔离试验PID266322。
+- GPU0启动完整实验candidate_v8的mixed17连续两次重点回归，监督PID257380；新增终态完整日志扫描，原动作不改，有引擎错误停止剩余队列。该试验与灰屏诊断并行，不代表解除渲染/交付门禁。
+
+- 灰屏单因素隔离：无标签仅semantic annotator仍灰；只加Gprim标签、仍仅RGB输出则正常可见（`render_labels_only_combo/render_2.png`已目视）。相机/visibility刷新均未奏效，内部渲染根因不冒称确定。源USD哈希核对未变，汇总`render_initialization_isolation_summary.json`。只在制作侧受控工具中加入已验证的内存语义初始化，不保存资产、不改粒子/刚体/评分；完整84秒新演示`controlled_validgrid_anisooff_tagged`PID268928已启动，仍需动态银镜/重置验证。
+
+- 新带内存语义初始化的组合演示第300帧已目视正常，浸入及早期沉积可见；仍待完整银镜/重置。受控源unseen7场景字节哈希与candidate_v8对应场景相同。
+- v8重点mixed17两次已在GPU0运行；剩余GPU1 mixed20两次、GPU2 mixed3/1/18、GPU3 mixed4/15/10/11队列及协调器已准备，监督PID270804。首条mixed17完成且完整受控review=CONTROLLED_SCOPE_PASS才放行其他三路；不触碰旧失败门禁。`v8_qualification_checklist.json`保留接收20/80、完整接收回放、安装等未完成项。
+
+- 完整candidate_v8首条mixed177000步/0.15分终态日志检查通过，四机位各16帧已复核：翻杯、水洼、机器人留桌边、后期持管回架方向；末态试管被架局部遮挡，不认证全部接触/稳定插入。第二条已自动接续。
+- `provisional_v8`离线ZIP562文件+原metric f0dedfb提交实际解压到独立`receiver_v8`，563哈希一致、修复桥接模块沿用基线，没有复制producer工具；建通原目录未改。接收coordinator/full/plain监督PID277204/277205/277206已排队且受候选/受控门禁约束。普通服务验证仅明确allowlist此前已实测的headlessGLInterop缺窗口消息并保留在回执，其他错误不豁免，不使用worker hook或改核心。
+
+### v8受控银镜与重置完成，进入后续回归
+
+`controlled_validgrid_anisooff_tagged`84秒2520帧完整解码，12阶段已目视正常；progress峰值1、末0，native dt约1/120、10082步（含预热），render-only刷新0物理步。样液保留1；浴水最低约0.986207，6393次记录的边界转换均为开口径向内、杯口上方，末帧外部ID为空；不推广为任意动作无洒水。源场景哈希与v8 unseen7逐字节一致，内存语义标签不写回资产。日志只有SimulationApp导入弃用告警中的Traceback字样，无实际引擎错误。`controlled_validgrid_anisooff_tagged_review.json`写入CONTROLLED_SCOPE_PASS，释放剩余回归前置门禁；不代表正式整包验收。
+
+- v8四GPU回归现均已实际启动：GPU0第二条mixed17，GPU1 mixed20，GPU2 mixed3，GPU3 mixed4；协调器REGRESSION_RUNNING。
+- 制作侧`install_receiver_v8_guarded.py`已准备，默认仅只读预检；实际执行必须匹配最终验收证据哈希、发布清单、原接收Git状态、严格三目录离线成员与metric提交范围，逐目录备份和事务回执，安装后仍不写READY。只读预检确认B仍9490df9a/Task12分支，现有称量/水浴改动保留，gate/最终manifest缺失且未写接收端。其余任务保护包含规范task_09_solid_weighing、task10、task12的未跟踪运行文件，缓存除外。脚本实际安装路径尚未运行；不能把预检称为安装测试通过。
+
+- 补充[Task18交付操作说明](../operations/task18-silver-mirror-delivery.md)及科学实验交接入口路由，记录运行/成功/视觉证据区别、终态日志复扫、无机器人灰屏初始化的限定经验、只安装四类运行内容及保护回退流程。规范无需新增通用规则：参数和渲染处理均为本任务/本机验证范围，引用既有VAL-002/VAL-008；历史包及历史失败不改写。

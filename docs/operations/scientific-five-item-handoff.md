@@ -1,3 +1,5 @@
+> 2026-10-21：Task18银镜正在独立制作根验证，尚未安装或发布READY；本轮不更新银镜LeRobot。当前入口与证据边界见[银镜交付操作说明](task18-silver-mirror-delivery.md)，不要使用下方旧银镜阶段状态判断当前进程。
+
 > 2026-10-20：Task12真液体水浴r1已安装发布，READY与证据在 `/mnt/data/chenjiantong/scientific_experiments_data/releases/task12_real_liquid_r1/`。接收仓库当前分支 `delivery/task12-real-liquid-r1`（9490df9a），称量既有内容保持；本轮不更新水浴LeRobot。验收范围与限制见[水浴收尾](../records/2026-10-20-task12-delivery-closeout.md)。
 
 # 科学实验修复：当前交接入口
