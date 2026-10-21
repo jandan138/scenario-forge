@@ -1,5 +1,7 @@
 # Task18 银镜修复与交付操作说明
 
+提交历史最新说明（2026-10-21）：本地修复已按用户要求汇总为两个节点并正常推送Gitee。`feature/scientific_experiments` 当前为efe5d08a，银镜metric包含在第一个汇总提交109c809e中；安装时的f6ec55ae通过[新旧提交映射](../records/2026-10-21-genmanip-two-commit-remote-integration.md)追溯。最终文件树、已安装资产和未提交配置保持原样，既有物理/碰撞限制不因历史整理而关闭。以下安装记录中的“未push”和f6ec55ae是当时状态。
+
 状态：2026-10-21，银镜代码已本地提交并安装建通目录，问题未全部关闭，未push、无全部验收完成READY。当前安装回执入口为 `/mnt/data/zhuzihou/GenManip-Sim/saved/deliveries/scientific_experiments/task18_silver_mirror_install_20261021/README.md`，见[本地安装记录](../records/2026-10-21-task18-receiver-local-install.md)。阶段评估包eval_r1及其原校验和保持不变，见[评估交付记录](../records/2026-10-21-task18-evaluation-delivery-r1.md)。
 
 接收分支规则：保留 `feature/scientific_experiments`。用户后续批准保留Task04并接入银镜；外部操作先将Task04的a7084a99合回feature，本次再快进加入银镜f6ec55ae。署名为 `zhuzihou <zhuzihou@pjlab.org.cn>`。原集成分支和既有修改保留。下文v8安装脚本为历史草案，切换delivery分支方式已停用；当前安装脚本和回执在task18-receiver-install-20261021。冻结实验副本不回写改动。
