@@ -1,14 +1,14 @@
 # Task18 银镜修复与交付操作说明
 
-状态：2026-10-21，阶段评估包已交付，问题未全部关闭；未安装建通目录、未发布正式验收READY。入口为 `/mnt/data/zhuzihou/GenManip-Sim/saved/deliveries/scientific_experiments/task18_silver_mirror_eval_r1/README.md`，详见[阶段评估交付记录](../records/2026-10-21-task18-evaluation-delivery-r1.md)。
+状态：2026-10-21，银镜代码已本地提交并安装建通目录，问题未全部关闭，未push、无全部验收完成READY。当前安装回执入口为 `/mnt/data/zhuzihou/GenManip-Sim/saved/deliveries/scientific_experiments/task18_silver_mirror_install_20261021/README.md`，见[本地安装记录](../records/2026-10-21-task18-receiver-local-install.md)。阶段评估包eval_r1及其原校验和保持不变，见[评估交付记录](../records/2026-10-21-task18-evaluation-delivery-r1.md)。
 
-接收分支规则：此前已恢复 `feature/scientific_experiments` 至5bd48129，见[分支与署名整理记录](../records/2026-10-21-genmanip-branch-author-reconciliation.md)。之后外部操作切至 `integrate/lixinyu-task04-13-z2` 并新增a7084a99；本阶段交付明确不覆盖、不切回、不合并该工作目录。代码材料使用 `zhuzihou <zhuzihou@pjlab.org.cn>` 署名。下文v8安装脚本是历史草案，其切换delivery分支的方式已停用；若以后正式安装，须重新核对当时的接收分支和提交。冻结实验副本不回写改动。
+接收分支规则：保留 `feature/scientific_experiments`。用户后续批准保留Task04并接入银镜；外部操作先将Task04的a7084a99合回feature，本次再快进加入银镜f6ec55ae。署名为 `zhuzihou <zhuzihou@pjlab.org.cn>`。原集成分支和既有修改保留。下文v8安装脚本为历史草案，切换delivery分支方式已停用；当前安装脚本和回执在task18-receiver-install-20261021。冻结实验副本不回写改动。
 
 本任务遵守[场景规范入口](../standards/README.md)和[验证与交付](../standards/validation-and-delivery.md)，特别是 VAL-002 的证据分类及 VAL-008 的回放协议。诊断过程见[当日记录](../records/2026-10-21-task18-engine-isolation-and-visual-update.md)。
 
 ## 身份与范围
 
-当前阶段：冻结B原样验证的自动队列已结束，用户选择带未关闭项交阶段评估包。`provisional_B`保留为历史验证材料，`receiver_B`是独立验证副本；当前交付以页首eval_r1入口为准。液面参数范围、碰撞/穿透和机器人回架问题仍保留限制。验证过程见[冻结B验证记录](../records/2026-10-21-task18-frozen-B-qualification.md)。
+当前阶段：冻结B原样验证的自动队列已结束，阶段包随后按用户批准安装至建通原分支。`provisional_B`保留为历史验证材料，`receiver_B`是独立验证副本；代码与资产身份以页首安装回执及eval_r1 MANIFEST对应关系为准。液面参数范围、碰撞/穿透和机器人回架问题仍保留限制。验证过程见[冻结B验证记录](../records/2026-10-21-task18-frozen-B-qualification.md)。
 
 飞书 Task18 对应 `task_z4_silver_mirror_reaction`。当前制作根为
 `/cpfs/user/zhuzihou/dev/task18-fehling-baseline-20261021`；从其中 `evidence/diagnostic_queue_r2.json`、`evidence/A_identity.json`、`evidence/paired_jobs_r2.json` 定位菲林基准与最小迁移对照，见[新阶段记录](../records/2026-10-21-task18-fehling-baseline-reset.md)。旧制作根 `task18-silver-delivery-20261020` 及其 v8 为历史实验，接收端失败后未获交付资格。状态文件须结合实际进程、日志及产物核实，不能单凭 RUNNING 字样重启或判断运行完成。
