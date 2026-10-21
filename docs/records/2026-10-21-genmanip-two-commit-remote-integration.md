@@ -2,6 +2,8 @@
 
 状态：正常推送成功，已回读远端确认，未强推。目标分支为 `feature/scientific_experiments`。
 
+后续：用户决定停用 Task13b，已追加清理提交 `8f989c1a`；见 [Task13b 清理记录](2026-10-21-genmanip-task13b-retirement.md)。本文保留此前两个汇总提交的历史事实。
+
 ## 最终历史
 
 ```text
