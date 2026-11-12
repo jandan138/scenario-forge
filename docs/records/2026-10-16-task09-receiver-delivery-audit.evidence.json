@@ -1,0 +1,30 @@
+{
+  "status": "BLOCKED_STANDARD_RENDER_INPUT_INCOMPLETE",
+  "scope": "remote CPU input audit, not GPU render or deployment",
+  "files": [
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/delivery_audit_20261016/pipeline_inputs.json",
+      "sha256": "58b6720e393aa21da8aa9acc17f2d8b1ca425e6b4a8239e7cf59ae8a7472addc",
+      "bytes": 4740
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/delivery_audit_20261016/tools/check_pipeline_inputs.py",
+      "sha256": "1238f01e1d9282cdff8c99ae2c89f963f55ee692ab1b7ceac1fa516a6f755073",
+      "bytes": 5706
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/delivery_audit_20261016/STATUS.json",
+      "sha256": "f962ba4ee965ab477e866a32ceb770d9dbc39b0adfd864277a3597a710c73c2f",
+      "bytes": 441
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/delivery_audit_20261016/make-check.log",
+      "sha256": "ccbbd097cee8754c0e666c5f427a6210d9269b9c694d997e8c3135f90073026d",
+      "bytes": 5825
+    }
+  ],
+  "repository_check": {
+    "command": "make check",
+    "exit_code": 0
+  }
+}

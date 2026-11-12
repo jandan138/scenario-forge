@@ -1,0 +1,119 @@
+{
+  "publication_receipt": "/cpfs/user/zhuzihou/dev/task09-oss-publication-20261019/OSS_PUBLICATION_READY.json",
+  "receipt_sha256": "972c720b398e7b33990a35b22f9ece9d243cb42848686f211afe7a1fb6437494",
+  "source_ready_preserved": true,
+  "datasets": {
+    "300": {
+      "episodes": 300,
+      "files": 1504,
+      "bytes": 16801579096,
+      "uri": "oss://pjlab-bjpai-sim/chenjiantong/scientific_experiments_data/lerobot_dataset/task_09_solid_weighing_300",
+      "sampled_episodes": [
+        0,
+        150,
+        299
+      ],
+      "downloaded_sample_files": 316
+    },
+    "500": {
+      "episodes": 500,
+      "files": 2504,
+      "bytes": 25849335937,
+      "uri": "oss://pjlab-bjpai-sim/chenjiantong/scientific_experiments_data/lerobot_dataset/task_09_solid_weighing_500",
+      "sampled_episodes": [
+        0,
+        250,
+        499
+      ],
+      "downloaded_sample_files": 516
+    }
+  },
+  "feishu": {
+    "status": "PASS",
+    "block_id": "IMUYdEePXouuoYxoAyfcF9fNnvg",
+    "before_revision": 6815,
+    "concurrent_revision": 6816,
+    "after_revision": 6817,
+    "concurrent_change": "An empty paragraph XHTqdgMiQovmggx6tJdclIRdnhh was added before our write; preserved.",
+    "non_target_table_unchanged_by_our_write": true,
+    "verification": "Revision6816 to6817 changes only requested task09 progress text"
+  },
+  "verification": {
+    "300": {
+      "objects": {
+        "status": "PASS",
+        "files": 1504,
+        "bytes": 16801579096,
+        "md5_files": 1504,
+        "sha256_download_fallback": []
+      },
+      "reader": {
+        "status": "PASS",
+        "dataset": "task_09_solid_weighing_300",
+        "source": "downloaded from final OSS prefix",
+        "root": "/cpfs/user/zhuzihou/dev/task09-oss-publication-20261019/readback/task_09_solid_weighing_300",
+        "episodes": 300,
+        "frames": 691220,
+        "selected_frames": 7140,
+        "all_parquet_frame_counts_verified": true,
+        "selected_episodes": [
+          0,
+          150,
+          299
+        ],
+        "sample_positions": 9,
+        "camera_reads": 36,
+        "dataloader_batches": 3,
+        "num_workers": 0,
+        "host": "dsw-536365-78bdb944c8-q99ff",
+        "versions": {
+          "lerobot": "0.1.0",
+          "datasets": "3.6.0",
+          "av": "16.1.0",
+          "torch": "2.10.0",
+          "pyarrow": "23.0.0"
+        },
+        "scope": "representative OSS consumer readback; full file transfer hashes verified separately; existing full video/semantic acceptance reused",
+        "time": 1792392491.9425864
+      }
+    },
+    "500": {
+      "objects": {
+        "status": "PASS",
+        "files": 2504,
+        "bytes": 25849335937,
+        "md5_files": 2504,
+        "sha256_download_fallback": []
+      },
+      "reader": {
+        "status": "PASS",
+        "dataset": "task_09_solid_weighing_500",
+        "source": "downloaded from final OSS prefix",
+        "root": "/cpfs/user/zhuzihou/dev/task09-oss-publication-20261019/readback/task_09_solid_weighing_500",
+        "episodes": 500,
+        "frames": 1062420,
+        "selected_frames": 5838,
+        "all_parquet_frame_counts_verified": true,
+        "selected_episodes": [
+          0,
+          250,
+          499
+        ],
+        "sample_positions": 9,
+        "camera_reads": 36,
+        "dataloader_batches": 3,
+        "num_workers": 0,
+        "host": "dsw-536365-78bdb944c8-q99ff",
+        "versions": {
+          "lerobot": "0.1.0",
+          "datasets": "3.6.0",
+          "av": "16.1.0",
+          "torch": "2.10.0",
+          "pyarrow": "23.0.0"
+        },
+        "scope": "representative OSS consumer readback; full file transfer hashes verified separately; existing full video/semantic acceptance reused",
+        "time": 1792392494.7604518
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "time": 1792234854.33524,
+  "status": "RESUMED_NEW_WRITABLE_TREE",
+  "completed": 446,
+  "live_state": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/multi/COORDINATOR.json",
+  "new_root": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3",
+  "source_code_identity_preserved": true,
+  "files": [
+    {
+      "path": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/multi/storage-migration.json",
+      "sha256": "61c4801885f7b7aa7abf1ef1ed1e856ede545ab8265040104b07f0046b781a1d"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/multi/storage-recovery-snapshot.json",
+      "sha256": "dab75328dc32d6e7486e4288c2d426fa7f1324617bd7e5cba1e9a3a1e55d983e"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/tools/supervise_multi.sh",
+      "sha256": "af1f1bf043e9348b15af0046b83fa5548a9d85d013e5e3c0f402b137b375be3a"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/evidence/rendered-numeric-105-9.json",
+      "sha256": "b5c4ea4154475aba0341a90fc48c2c741ebe25fc357dcfd2f458c45abb6d65b9"
+    }
+  ],
+  "rendered_datasets_copied": false,
+  "new_storage_numeric_probe": {
+    "source": 105,
+    "background": 9,
+    "status": "PASS",
+    "frames": 1484
+  }
+}

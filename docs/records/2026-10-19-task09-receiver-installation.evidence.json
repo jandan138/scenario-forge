@@ -1,0 +1,93 @@
+{
+  "release": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3",
+  "repository": "/mnt/data/chenjiantong/GenManip-Sim",
+  "branch": "delivery/task09-standard-v3-final",
+  "head": "82cabca55427cb199565584f20746e6862f2394d",
+  "feishu_revision": 6732,
+  "ready": {
+    "status": "READY",
+    "completed": 1792383460.1105423,
+    "manifest_sha256": "5a816ade0ef52908f68ca77a483bc8adc967fca61e117bf62a1e226f1ca3c924",
+    "archives": [
+      {
+        "path": "archives/task09_standard_v3_train300.zip",
+        "sha256": "c3619d29635ccde636eb25f2b1d1e5d0fdb807670ac2ff80bffe166ce16feb20",
+        "bytes": 16804368748
+      },
+      {
+        "path": "archives/task09_standard_v3_train500.zip",
+        "sha256": "4b631acadb7c3f2ae21bc3037383a0e1d170c5a5228f806158e4e57c9b713efd",
+        "bytes": 25852567106
+      },
+      {
+        "path": "archives/task09_standard_v3_runtime.zip",
+        "sha256": "591959fcde20ffa8df682c65307fd2a4b1c1cac555c49385ae8a2881fcd1231b",
+        "bytes": 830762706
+      }
+    ],
+    "scope": "300/500 training datasets and independent-case evaluation task delivery; no model training",
+    "receiver_repository": "/mnt/data/chenjiantong/GenManip-Sim",
+    "commit": "82cabca55427cb199565584f20746e6862f2394d",
+    "initializations": 40,
+    "stock_replays": 4,
+    "model_training_tested": false,
+    "continuous_scene_switching_qualified": false
+  },
+  "files": {
+    "READY.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/READY.json",
+      "sha256": "d8f4069c9cd3bcff34f2ca58608d5cbf652568c18d293e858b476febb4227af6",
+      "bytes": 1066
+    },
+    "MANIFEST.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/MANIFEST.json",
+      "sha256": "5a816ade0ef52908f68ca77a483bc8adc967fca61e117bf62a1e226f1ca3c924",
+      "bytes": 1439994
+    },
+    "README.md": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/README.md",
+      "sha256": "d676ec7ccdb8ce2b07620b8e6b3925cef6dfcdb0c3bac60e74309e1f4dd60cbd",
+      "bytes": 7564
+    },
+    "split_manifest.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/split_manifest.json",
+      "sha256": "51da8f5e1131229fb13f2cab6acab846942e79951ead01b4900bd5aec0d24cff",
+      "bytes": 105293
+    },
+    "evidence/receiver-acceptance.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/evidence/receiver-acceptance.json",
+      "sha256": "9b8b403255125daaa8c969c5d48d22f3ab38aee61ff53833f2fb27cf2fdc5410",
+      "bytes": 48069
+    },
+    "evidence/receiver-reader-300.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/evidence/receiver-reader-300.json",
+      "sha256": "d5b2932822d83cb4e413f064b189c7529480c1010eb374cbccd19f57ae5c9e87",
+      "bytes": 6533
+    },
+    "evidence/receiver-reader-500.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/evidence/receiver-reader-500.json",
+      "sha256": "14a040911a1c10a00b71b2fbd9ccffee256265940e751727ceba05835c18a5de",
+      "bytes": 6540
+    },
+    "evidence/visual-review.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/evidence/visual-review.json",
+      "sha256": "8535a81cd0d7fc5007c2063bbac3f44053873c6ddd5596eb1db02c80ae1df798",
+      "bytes": 9631
+    },
+    "evidence/process-cleanup.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/evidence/process-cleanup.json",
+      "sha256": "ab3a048d1217f54a4479f7edc4c899fb11c85fcf932c704601365e08eb5bfd98",
+      "bytes": 583
+    },
+    "evidence/postwarm-envelope.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/evidence/postwarm-envelope.json",
+      "sha256": "98cd1f1049babb8f410acd87524521efb45987cc9b5a625ecdae0f1f3b46a889",
+      "bytes": 88967
+    },
+    "evidence/code-checks.json": {
+      "path": "/mnt/data/chenjiantong/scientific_experiments_data/releases/task09_standard_v3/evidence/code-checks.json",
+      "sha256": "91afa5f082bedc40c53ff3d00da29aeb91667a8d5d2decdd16c321a87348df3b",
+      "bytes": 212
+    }
+  }
+}

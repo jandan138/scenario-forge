@@ -1,0 +1,73 @@
+{
+  "recorded_at": 1792334513.8218653,
+  "state_snapshot": {
+    "status": "EXPORTING",
+    "hostname": "dsw-536365-78bdb944c8-q99ff",
+    "pid": 779584,
+    "process_group": 779584,
+    "started": 1792334033.7756805,
+    "root": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/export_recovery/datasets/genmanip2lerobot/task_09_solid_weighing_500",
+    "source": "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/exports/genmanip2lerobot/task_09_solid_weighing_500",
+    "total": 500,
+    "updated": 1792334499.1677392,
+    "completed": 357,
+    "prefix_episodes": 354,
+    "current_source": "s003_b10",
+    "episode_started": 1792334427.9026601,
+    "frames": 760608
+  },
+  "make_check": {
+    "exit_code": 0,
+    "pytest": "1255 passed, 1 skipped"
+  },
+  "files": {
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/export_recovery/PREFIX_SNAPSHOT.json": {
+      "sha256": "227b29f75def8db2c3f220366e8fda4b577e3efd9747a7118ddd2f0e53d012a0",
+      "bytes": 348189
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/export_recovery/integration-test.json": {
+      "sha256": "b8e202a8536cfd125f3ce8d536e7f197e43a3f0129d0f5f20c91bb658223e21d",
+      "bytes": 311
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/export_recovery/FIRST_RESUMED_EPISODE.json": {
+      "sha256": "e7856d4ebd9287cbed1d5683ce1c1d872c22a4a761e34600dd409b765f676613",
+      "bytes": 254
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/export_recovery/ORDER.json": {
+      "sha256": "0768fa08618c987676fcd64db7698c20446aadeb146c1003c40853a76a00d943",
+      "bytes": 7003
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/export_recovery/source-map-500.json": {
+      "sha256": "08a2fd00c6633b983ba5db3f79647fb013bea0326b3c505055f14419fe187a08",
+      "bytes": 138938
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/export_recovery/make-check.log": {
+      "sha256": "58b4948a036524d1937f08e5a5e8bd9b6a2eed03f76e282fe409d5eb13690793",
+      "bytes": 5825
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/tools/export_recovery_common.py": {
+      "sha256": "4fd1db6d7814974b6b46148e2f4794e21fc1f95d539bf252b377d3f4b6c5e9bd",
+      "bytes": 1808
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/tools/test_export_recovery.py": {
+      "sha256": "d7bd88e27fcd5b9c0abe1fa1f5d0f37f90aa44b0e7dd3ac143cd6f8a557eb684",
+      "bytes": 925
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/tools/test_export_resume_integration.py": {
+      "sha256": "34c4a6a99b9981f306527ff78727e4b8a8a318feff612935a3b1004298c46578",
+      "bytes": 3329
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/tools/prepare_export_recovery.py": {
+      "sha256": "e018a68d112de21b8516f75f6d3f2f21ef45e2047fed581a68f3ffa3108bf2a6",
+      "bytes": 4967
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/tools/resume_export500.py": {
+      "sha256": "e113ff0dab8bef9c8ed9a512aaefdc6ec0b7cb44b639d217c0af9ad5a8c80c6f",
+      "bytes": 8401
+    },
+    "/cpfs/user/zhuzihou/dev/task09-storage-recovery-20261017/task09_recapture_600_20261012/standard_v3/tools/supervise_export500.sh": {
+      "sha256": "0e0ed4e1af823c0b3755ef90a7c01f5f1fd2f395724150db7d286b04a90ec707",
+      "bytes": 1048
+    }
+  }
+}

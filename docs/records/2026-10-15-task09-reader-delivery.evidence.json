@@ -1,0 +1,22 @@
+{
+  "status": "READY_FIVE_CATEGORY_HANDOFF",
+  "scope": "Standard LeRobot reader on specified remote host; no model training or new physics qualification",
+  "evidence": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/evidence/delivery600_integrity_20261015.json": "370e633872fd1bd91c617b351ea26f616507f3433f4bce79da17f99e94d4a0bf",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/evidence/delivery600_archive_20261015.json": "2bbb8607856447846a5814edf6f0660338a6d777ab16a342248236bde91b6f62",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/evidence/delivery600_runtime_recheck_20261015.json": "984711835e5be8d4c70fe1b4ba0947b5496d19e8543a1e8e49f18b4736221934",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/handoff_readout_range_v1/evidence/portable_reader600_20261015.json": "41b593ca5910b32f84ee41927ae27a4407024f7080b284d9770537ed67f321ae",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/evidence/delivery600_example_20261015.json": "fcbb0110dd362eab9a27dec1f8eb2fc184ee9e78f1c32bb221c0a76c4f9c0f99",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/handoff_readout_range_v1/READY.json": "701cfc0c11e5a86a97bc170b1f356140eef08f2a04953c1120df9c903fc4684b",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/handoff_readout_range_v1/MANIFEST.json": "a403ccca46f39c53a22e23ecc84606dcf9d7eb32a6099027d9c1b03e39f1222c",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/handoff_readout_range_v1/LEROBOT_FILES.json": "1c1a6af7010ce8d863a32fa16360bc9940fd4ba721243cee1e3078ca43202847",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/evidence/delivery600_repo_check_20261015.json": "751d1dc916d3af983dd0248d8be83ef04a781c827d0234d1e15312f99958526b"
+  },
+  "producer_tools": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/tools/audit_delivery600.py": "ea46dcbd7dbd2c4271e23ae83f8dc072eee4de006030539a027a5438acad0ee1",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/tools/check_portable_reader600.py": "d1b85ec0033868f6ea35b1be4ea4ec26012daa120b9293473033848e62b7894c",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/tools/test_delivery_contract.py": "d6abbdf096119b3c2458d7a2a8121f9c2d55fab675714e53ab24cb8bfbbaf38a",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/tools/package_reader_delivery600.py": "d445d52cf133815d702366ebce5a0c5614cdef8c452acb84e8a5d10d12c88ce8",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/tools/finish_reader_delivery600.py": "e649438aa81b51edbad36c0109e698fe9193d313d4cb4d91971d1cadc801cba3"
+  }
+}

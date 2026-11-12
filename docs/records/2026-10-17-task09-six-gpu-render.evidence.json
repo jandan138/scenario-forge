@@ -1,0 +1,329 @@
+{
+  "date": "2026-10-17",
+  "status": "SIX_GPU_RENDERING_QUALIFIED",
+  "snapshot_completed": 291,
+  "total_render_episodes": 500,
+  "active_gpu_lanes": 6,
+  "live_state": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/COORDINATOR.json",
+  "coordinator_pid": 1218725,
+  "receiver_installed": false,
+  "validation": {
+    "new_pilot_frames": 9976,
+    "decoded_images": 39904,
+    "image_comparisons": 80,
+    "maximum_mean_rgb_error_255": 1.2682411024305555,
+    "external_tests": 41,
+    "repository_tests": "1255 passed, 1 skipped; make check exit 0"
+  },
+  "scope": "GPU/environment qualification and live six-lane production; full datasets, installation and final receiver verification remain pending",
+  "files": [
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/dual/PILOT_ACCEPTED.json",
+      "sha256": "30c1ea68a2654f014c4fc80f0db1a18724881f71d56173995a2754fe746897b9"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/glinterop-probe.json",
+      "sha256": "d1f4df5655d22784a1352db872f92d3b655f0e19adafe2f093f77cd63ba33972"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/glinterop-probe.log",
+      "sha256": "e9958d709cb853e1744077250a0776a848ce3c65d603ec5453a060c12152ed97"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/headless-fix.json",
+      "sha256": "e54a27b06c4842106e9f400a6bdbe2bd527fc243c17eeefb93d758a5dfaeea76"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/external-tests.log",
+      "sha256": "189bd55e92586eebba4cc1b2ea878a6a61b67b9e92243f7905825ec6f05a85d2"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/job.json",
+      "sha256": "3dcc60a240c589ff1cde58a1e0d8b40c29c276ece061ac9c03b7475d5b75af72"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/WORKER.json",
+      "sha256": "9072139e263354577ec7d4e5cc4efd65b15501c9ae173169ac1622289b609176"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/VALIDATED.json",
+      "sha256": "ea0024b8a983c02293cbca39d19fe9756226dde4687031fac3e61305ff02b065"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/cache_receipt.json",
+      "sha256": "2aeb68397e36fc2b2d14832732efdcfd747944f513055aba2b770ed843ab46ea"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/gpu_samples.json",
+      "sha256": "8ebdc65cd23bb3c3aa0f8c28cda295f6242047ade0d8a359e2eb7b87854702b3"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/gpu_render_phase.json",
+      "sha256": "2c726ef421571171f2c4bae3b903b888bc24ca8d9b26bdb3df4c768aec85914f"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/image-comparison.json",
+      "sha256": "e2a117906f19afd21cf3b5a993ce2dde5b55b036f397bbecc4ae9d177628cad8"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/visual-review.json",
+      "sha256": "859970f8f69ba01e4536146972b7e04eb5d8cb67a5eab13b46ba55d1583f4948"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad0_pilot_v2_20261017T045716Z/evidence/rendered-numeric-3-1.json",
+      "sha256": "50cb8b7449cc201630d50923bd85de09921691bd06d22b22fd8f75495383a104"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/job.json",
+      "sha256": "e5ee6848e77be0bba12f463f8b75aa11e3430b9eafc3adf267fe9ee72ef58360"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/WORKER.json",
+      "sha256": "b0ca5de59c5b18fdc8ce5d1fcc859edb08b41b2f9b90f2c23e135f3f32afeca0"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/VALIDATED.json",
+      "sha256": "6b0f0860df2e3a955b076d2550b7dc9c2be50d985713f7cffa2baadfab2fa9a2"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/cache_receipt.json",
+      "sha256": "9a28401da28b619e56bbc85d144d2aea80040b092c00b74cfca0e4ad063b85c1"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/gpu_samples.json",
+      "sha256": "95c5d61a191c33e26ef34b8bb2755f0c6ec4160f186dedaf8c11be94d39928ee"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/gpu_render_phase.json",
+      "sha256": "c33704e1256a941336c5747e974190c21587cac90a46d9a270399680b465cc18"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/image-comparison.json",
+      "sha256": "8b20c659d7c3726a76492505a97521c319bf046d7631eaa5b376a0048be5a247"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/visual-review.json",
+      "sha256": "c56fa882cf3a116cff7816725c69325424c54631aa04432d39b223d3bf7e38fe"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad1_pilot_v2_retry_20261017T050223Z/evidence/rendered-numeric-3-1.json",
+      "sha256": "d50b0cbe6f3ef68cb259f8765b5d58d8af329da589ed4b678f6476c52e2feb9f"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/job.json",
+      "sha256": "8de7d1001eb86066258de83869036f5509a01351ccdae884cbccf6cb3a5f280e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/WORKER.json",
+      "sha256": "1db11c45611a90bd2537f451ad3cacd5465aba359326faf53b00bdf9ac53115f"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/VALIDATED.json",
+      "sha256": "f95b102d65bd1d12e4b2e5d5df6a602371cc832628789dc45694012273f5f4d4"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/cache_receipt.json",
+      "sha256": "61d414553062a17167b0a0e5ba88604d5eeea73f3d0872442f05bc80761d35f0"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/gpu_samples.json",
+      "sha256": "6b355cd6cac1190c5d663409ff57751696a438382bcaa208a3ad407c2777aec6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/gpu_render_phase.json",
+      "sha256": "b0ffc9841905b271ac08f96c5b131a6bdbd580188751b51328d0d47d17223f2a"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/image-comparison.json",
+      "sha256": "2dccd9586360e82db468e8d05ae9e0b68c382d67999ceef563f2dad4c70b961e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/visual-review.json",
+      "sha256": "251c4ec3fe1b1d038a405f2076b6bd0934278a41efa8ef50e5516370883947bc"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad2_pilot_v2_20261017T045716Z/evidence/rendered-numeric-3-1.json",
+      "sha256": "d81be0639309269a1d34bf731872bab3532802fdb129a11ec3dd02a7b6a4ae9a"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/job.json",
+      "sha256": "df0e9dc6c4e49e498d426327081db94d8861e7570ffb76bc5060141cbb0cb54d"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/WORKER.json",
+      "sha256": "4f53a8a6eb79be3aa389e863f8ec10bc7cf641eae7ed8812ceaaa3c7dc25a751"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/VALIDATED.json",
+      "sha256": "e489ba3d8a3455c3ef397de609d3078231b7be240dcaac5cfd3801ea40cb75c6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/cache_receipt.json",
+      "sha256": "9380ba33238ce9d90b4bcbfac07967c0f9a0c82b27d639b3f25c135cfb458707"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/gpu_samples.json",
+      "sha256": "11f3a01e0e0abe73806a55d5fd5d6c5685d795649b39043139ba683b1f594f75"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/gpu_render_phase.json",
+      "sha256": "4e80fe8c9068b7525b78af614006113f469f7f639b666342cc64ca3b3adca4ea"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/image-comparison.json",
+      "sha256": "a821829bb8b19b417011924a3a8da9397e4a54129b17a5ed33d56f3558aba4a4"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/visual-review.json",
+      "sha256": "1a8553f8d21e779e9e0b1be42b4ff11ce7b29eabb18d273f7667e9a046137f6e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/quad3_pilot_v2_20261017T045716Z/evidence/rendered-numeric-3-1.json",
+      "sha256": "194bc8639c36240eba4165733404eb28bd4dba8ddc89a0e573fade9870bf74c9"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/dual/runs/g048_old_20261017T032734Z_27e5c9/VALIDATED.json",
+      "sha256": "a6029aab406cf5fd9b0af4c274d5dd26561c2a0d88e072561efa13f05f17dec6"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/dual/runs/g049_new_20261017T032734Z_ddb406/VALIDATED.json",
+      "sha256": "9624a54ff0c7a401fea56d1c2d52f4f892eb2074283a44db2326c95ffeee4e72"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_render_bootstrap_v2.py",
+      "sha256": "657836a9724b5c83d1c1e3db1a49e80ca1f74187a9c3604051c79aa936e0b172"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_worker_v3.py",
+      "sha256": "7b2093ada79dc611a6683b802e4cd918af4a6941f1a00d31684e0c77299e5480"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_startup.py",
+      "sha256": "b12eb4ead57ffe55f35aaa9c459b42d3c76ce28a97cea31d5a5e68c72d945b92"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_resources.py",
+      "sha256": "9de64971dbe28c59e6eca7a740cef646985d9cdec30e955557bfa381a1e0ec8e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/PILOTS_ACCEPTED.json",
+      "sha256": "22d4d644f74ba0a380a7d45e8ab2160e5f4fe0971e275a6297ef16ce9207bbb4"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/PILOTS.json",
+      "sha256": "33a34c0fcb39acbd503e89f7b768d9e4ba468aa04f09fe7d7b36bbde5600c07b"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/PILOTS-with-glinterop-errors.json",
+      "sha256": "88d5cb7f257ab9474855b158879b91d4518bcc9ecc62808d17862a263b164cf2"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/PILOTS-v2-before-quad1-retry.json",
+      "sha256": "b5ac28ac1c4e065879052a9823966ecb10b7963cf263efddc40544d189fdadac"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/startup-retry.log",
+      "sha256": "0e4b97f126613939cd55aa366a7027cb90c3948a51917c68f93e2097c3eb45c5"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/migration/ADOPTED.json",
+      "sha256": "fb77a607eb8c767378dda4dc6b801e4a25e894a5fadc1b815689633210e56f3f"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/migration/frozen.json",
+      "sha256": "05f65c9db57a24edd906aa89bf0cae12d4f89532959d1573d2bfcb92c91b0154"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/production-code-preserved.json",
+      "sha256": "ec18a5cf676fb33f94fa3070ba62d671e2927dc7bf6ecbe9b399f6d0ffba0824"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/gpu-concurrent-snapshot.json",
+      "sha256": "687e00c4748860d3b0fda31125e7513bbb1473897205b835b06291fe3e07c5d8"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/checkpoint-six-running.json",
+      "sha256": "7fadec423ae244ff5537dd5c8babd04f2fc7a4a6fcd7a50a4074332338381f7f"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/concurrency-audit.json",
+      "sha256": "051f4e28d03824a83a48d1b9146bc29ae1707386d1f3dae3b7a3004933c0526c"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/groups.json",
+      "sha256": "39e21491b1916895991a2c6b45ab9a8e6cf00b12ee76d3e025e0dbfa61d23ff5"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/make-check.log",
+      "sha256": "e26d0ac2e76d7d78e5328039913fa293a359dbbd66908c6238b93daceea30c5b"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_adopt.py",
+      "sha256": "03874d00b45d748a1a5e1d8ab62121830cafc75f1f4547e5335124cd20caba20"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_coordinator.py",
+      "sha256": "941f6cf77193794a3de9301d99598a662165b6bb7e1d4f53d885672296395bd1"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_glinterop_probe.py",
+      "sha256": "1a019f4b9b8ae190b5138b3d8cee65ba536d7fe994494540e5b67a7a746ddcd3"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_render_bootstrap.py",
+      "sha256": "13aafaf79507bb5611fa584688ad48cc6942a2ac1efa92410833c6dcd533af9e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_retry_startup.py",
+      "sha256": "09530cf784b3b591f9bb99d68005cb561690f289d15de79972a927f65fabdd48"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_status.py",
+      "sha256": "7c4930c3a8bd679c9520f02a9f2fbeed8d635526a3b98bc2d508669b6f7d746e"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_worker.py",
+      "sha256": "61b6694a5b8ea6b8411b1b3642624f1500aa87f0682f5f321ee2458dca58855f"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/multi_worker_v2.py",
+      "sha256": "5981c5c631988c0e1106c55a3696e20334c0dac7a57ee9892391d6525de2cd40"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/test_multi_coordinator.py",
+      "sha256": "d8f3c07b620ce6bd62fdcf1c80fef1e431e3c84355ca4f27863540992926ee08"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/test_multi_resources.py",
+      "sha256": "4eff2d458d056d2c5aecb822bdb659ffb39559933e784f30ec3acedaefca2116"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/tools/test_multi_startup.py",
+      "sha256": "30a423bbbdb33c9f56b31b62de7668751ba4b78fd02e8ea15f4ef40ea4557623"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/g060_old_20261017T051728Z_5cb915/job.json",
+      "sha256": "47822fe75808fc8f9030a0f5665721420387cacd1a2f12131d906e2250f90777"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/g061_new_20261017T051728Z_4602a7/job.json",
+      "sha256": "a9c765cc2a9f07706f0b8dbb006ab0a72941f3017330cb8a553abec981ced84b"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/g062_quad0_20261017T051728Z_4d2146/job.json",
+      "sha256": "219941a3f1e6fdcbaab7aa871b733c207e9df013ae9b7496e72aacf3f75da901"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/g063_quad1_20261017T051728Z_045801/job.json",
+      "sha256": "f2272b888e8c6092e773c9bca7228c5b6ecddde400bef4291e4557795e5ed500"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/g064_quad2_20261017T051728Z_09bd34/job.json",
+      "sha256": "fdaad4a54b9307ba5fcb517a96239210e7c741ca19192e25bad80075a1f5b0e1"
+    },
+    {
+      "path": "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task09_recapture_600_20261012/standard_v3/multi/runs/g065_quad3_20261017T051729Z_b667fd/job.json",
+      "sha256": "e3c8ac4b21fdff50ab1d2dd11302e248e4a28764911f97936ab889b650c75eee"
+    }
+  ]
+}
