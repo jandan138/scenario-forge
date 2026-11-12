@@ -1,0 +1,100 @@
+{
+  "document_url": "https://aicarrier.feishu.cn/wiki/Og5Hw2fGGi8pIyk0SpBcrkGCnjf",
+  "verification": {
+    "status": "PASS",
+    "document_id": "Ad41dB1IxobdSfxIk1ucUTgSnCd",
+    "before_revision": 6732,
+    "after_revision": 6733,
+    "text_blocks_updated": 37,
+    "issues": 33,
+    "by_task": {
+      "task_09": {
+        "issues": 11,
+        "struck": 9,
+        "open": 2
+      },
+      "task_10": {
+        "issues": 6,
+        "struck": 4,
+        "open": 2
+      },
+      "task_12": {
+        "issues": 8,
+        "struck": 4,
+        "open": 4
+      },
+      "task_18": {
+        "issues": 8,
+        "struck": 0,
+        "open": 8
+      }
+    },
+    "protected_table_content_unchanged": true,
+    "comment_anchors_preserved": 1,
+    "block_ids_and_child_lists_preserved": true,
+    "before_sha256": "0bd0fed1ebf07614e5779f5ca32bfb42f2c5fe777727840b5aef3e9912e698ad",
+    "after_sha256": "89f56096ca69cc6e747803c765257150766b549fcc3810f1508b910881a30d1c",
+    "original_inline_colors_and_links_preserved": true,
+    "newly_struck": 8,
+    "strikes_removed": 2
+  },
+  "work_root": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019",
+  "files": {
+    "before.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/before.json",
+      "sha256": "3173af0c2f0f90bdd6e566d6b6f2eb58f17cf8a5bab285f9a98fc47d44195bb2"
+    },
+    "before.xml": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/before.xml",
+      "sha256": "0bd0fed1ebf07614e5779f5ca32bfb42f2c5fe777727840b5aef3e9912e698ad"
+    },
+    "raw-before.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/raw-before.json",
+      "sha256": "db4a0b07dd4e878234ec810f71001711e3dfa67ed140be7426460872da93c38c"
+    },
+    "changes.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/changes.json",
+      "sha256": "17d6893ba80885305d26cdea5bc950baf34fa0b7d33355dce9afd422b7222a9a"
+    },
+    "request.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/request.json",
+      "sha256": "5776665768b830f432be3a7566556286cd5af181d2c0bb0d2d33477838f8c41c"
+    },
+    "write-params.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/write-params.json",
+      "sha256": "482b380e02761f4a63741aa6ca956839cebaf2b11dc740bb82c78fe012fe825c"
+    },
+    "write-result.stdout": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/write-result.stdout",
+      "sha256": "e6540dccbc12263dc1e604d6358cc78b937bc3d3b930194bfb73fff55b637cd1"
+    },
+    "after.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/after.json",
+      "sha256": "70459c61f9ce3dc7d76e6fa12f2e83d8c107d98a85ec4ae1fa7942a8895a35fb"
+    },
+    "after.xml": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/after.xml",
+      "sha256": "89f56096ca69cc6e747803c765257150766b549fcc3810f1508b910881a30d1c"
+    },
+    "verification.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/verification.json",
+      "sha256": "aef7e51e8bad5878d427bbbc4d29cd957df7cb4f463ab666104dcbc6136c29ca"
+    },
+    "rollback-request.json": {
+      "path": "/cpfs/user/zhuzihou/dev/feishu-issue-update-20261019/rollback-request.json",
+      "sha256": "f4e408773c95cd0b7ea493b5d075fcb21bddf457e6ec9e8753471f5febcbd0a5"
+    }
+  },
+  "source_records": {
+    "docs/records/2026-10-19-task09-receiver-installation.md": "e7b72d20cd9c497802b84fb079788763e927d170790b3645bd969a06cef7b5b2",
+    "docs/records/2026-10-08-task09-supported-solid-weighing.md": "e9593602fdd9ad00ca9ddb77a410b6c4bf1abb72e8612be4d3c31efc0e787f3e",
+    "docs/records/2026-10-12-task09-recapture-dataset.md": "27ec93d9caf9fcc6d5274c545e43f44b2ac705ab087a3f170016d62c7472693e",
+    "docs/records/2026-10-11-scientific-five-item-acceptance.md": "86d3140f6b2cac74d80f7d6a093f71e48e54a5388f23326349bf587536d809cd",
+    "docs/records/2026-10-12-task10-badcase-paired-regression.md": "d3c5b2b9a370bc064f44cf9aa34ec2139717cda24a147f7ab98e84bc863d5afb",
+    "docs/records/2026-10-10-scientific-four-task-genmanip-integration.md": "3ac212d119aa40618662cc86fa9b9d9b93ea4d3515163ff6f8f667c8f2a9898a",
+    "docs/records/2026-10-12-task12-uniform-liquid-repair.md": "953b2157e6b0c43497f46b3dbf0fc141697ce2c6aeeb08a4cdfde0fcf380f31c",
+    "docs/records/2026-10-15-task12-wall-heating-policy.md": "dfbaf5f707ee7a0677a7fd7757ffe01d7fc08353d3927ced444dd1980d15aacc",
+    "docs/records/2026-10-19-task12-relative-acceptance.md": "fbed64327a56f5419df316193783351b4f67d400236806fa4f4263626b8b50ed",
+    "docs/records/2026-10-12-scientific-repair-checkpoint.md": "7f21deb3c223d533e8ec0c2832f3c5a9df26b846bf7b95cfc8e39faec279a45a"
+  }
+}

@@ -33,3 +33,7 @@
 h13_b已用同一候选、相同动作和协议启动，外部墙钟上限5400秒；7000步、120Hz、渲染和评分均保持。只扩大现实等待窗口以容纳完整记录与编码，保留首错停止，不无限重试。新helper未修改正在运行的旧脚本。
 
 同时只读核对了同事当前仓库的loader、worker pool、evaluator utils三个关键核心文件，与候选完全一致；候选genmanip/core和genmanip/utils相对0e99也无Git差异。不同HEAD不等于修改核心，完整独立安装仍未验证。比较见 `receiver_colleague_critical_core_comparison.json`。
+
+对同事当前工作树进行了更广的只读边界比较：候选Git跟踪文件中，排除允许的scientific task config/metric目录及submodule后，共588份文件与同事逐字节（symlink比较目标）一致，无差异。证据 `evidence/receiver_peer_protected_files_comparison.json`。这只证明该时刻受保护文件的一致性，不证明资产闭包、依赖版本或任务运行成功，独立安装门槛仍保留。
+
+20个候选场景的USD依赖检查通过：UsdUtils报告的依赖均为本任务资产目录内的实文件，无未解析或越界依赖；20段嵌入脚本AST编译及私有路径/辅助工具导入检查也通过。范围仍是静态依赖与已知导入检查，不作为任意动态代码证明或新的独立安装运行资格。证据 `receiver_retention95_dependency_closure.json` 及原有审计工具的时间戳报告（见证据索引）。

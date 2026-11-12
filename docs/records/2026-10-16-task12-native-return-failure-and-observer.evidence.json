@@ -1,0 +1,15 @@
+{
+  "scope": "Full native failure retained; private diagnostic observer first attempt rejected, corrected attempt pending",
+  "files_sha256": {
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_h13_b_run.json": "5fd7c047f6ff0526a7f652115e959ba5c0770410bd9df00cb6244fbe18c37e6b",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_h13_b_analysis.json": "7817c68bb3b8df245e322e28ffd4710a926d7786ed0522fff4a7858a6cd11fef",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/receiver_retention95_h13_b_visual_review.json": "b749ee12025879b2eb18ffb1ea603004afb484369a82cbfa5e6820a6544e5403",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_observer_prefix_identity.json": "1e4a7bdbb42a63e0665f101f2c0e64474980c4d9c40a282bdf3ea7b1e4b6dcb1",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_observer_prefix_static_audit.json": "cf6f89920264e409e812f78dd5875ec07e3976c169518d8109d7261e570ac2fe",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_observer_prefix_h13_a_run.json": "e7d6a78a0b1866d72037d8edcfda5e41df36a8bc09450536ec5fe240173d951b",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/evidence/native_observer_prefix_v2_identity.json": "1635e6ca46358f2bb2b9ffd927e7333088b09275722135facb5a22fc8cdc01bc",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/native_readonly_observer_body.py": "f8eeab96aa689b6e8a2ff7cfdaaa4e45fe9b7f9efecd588df4aaa791dd1373d8",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/prepare_native_observer_prefix_v2.py": "0757daceb3556120ca925f0cd8ef86148bbca6959a85637b811a32f3049be0f5",
+    "/mnt/data/zhuzihou/GenManip-Sim/saved/repair_20261010/task12_liquid_color_20261012/tools/run_native_observer_prefix_v2.py": "f42e3dd620ac21c5f98ea20971dde4d9e367bbb5373860f81d979e7c48fb5bfc"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-29T14:33:29.415724+00:00",
+  "scope": "External T1 init40 execution stopped under confirmed global physical STOP; no core or SDK change",
+  "summary": {
+    "at": "2026-10-29T14:33:29.415724+00:00",
+    "status": "FINAL_HOLD",
+    "accepted": 21,
+    "planned": 40,
+    "attempted": 22,
+    "native_original_entry_init_accepted": 20,
+    "stock_source_stage_init_accepted": 1,
+    "stopped_inflight_unaccepted": 1,
+    "never_started": 18,
+    "no_further_GPU_dispatch": true,
+    "T1_delivery_READY": false,
+    "accepted_review_image_numeric_postgate_identity_rechecked": true,
+    "final_summary": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/FINAL_INIT40_HOLD_SUMMARY.json"
+  },
+  "evidence": [
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/FINAL_INIT40_HOLD_SUMMARY.json",
+      "sha256": "b7931e6ac7376f9f6932c6ea7c6394f082ef3308e274752de944ad5bd11dd6d9"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/STOP_race_order22_unaccepted.json",
+      "sha256": "05dafc1e602bb0dd59a2810c479f968bb9b9e1687daee01664e65183d5f6bdb9"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/final_HOLD_gpu2_closure.json",
+      "sha256": "734329b4df0cfe1b993d8762764a6685dd1156f2c6aea15b2eb7d313c2a8ff5c"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/final_freeze_and_local_dispatcher_closure.json",
+      "sha256": "4f802dcbed4a8c87b32a690c2b9c3dbe9ce3bfbe3a5317a400dab51222d4a030"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/GPU2_RELEASED_UNDER_GLOBAL_STOP.json",
+      "sha256": "3d747965914ac5d9d62a5237e4a71c2bdf4b7e20177bbc18026197764089bde5"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/FINAL_REVIEW_IDENTITIES.json",
+      "sha256": "dbab861eeaab1e38765ebb9b3ab70cd0a329815a28e5e4bfda2670fe1aaafe68"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/global_barrier_registry_proposal_v1/registry.json",
+      "sha256": "c245fa782586781623b5b1b01889079c672ed2198948dd18c388a12b9eefb4f1"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/global_barrier_registry_proposal_v1/check_registry.py",
+      "sha256": "e4ca7e90f7970b879c66eadc7e3598fd20fc99b74b19820cc03b83a490cdc460"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/global_barrier_registry_proposal_v1/actual_three_owner_cpu_readback_v2.json",
+      "sha256": "3e4f4fb95eae80580752bcca55c51d6e9f9672e4a20331e37de8b64cdc78917e"
+    },
+    {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/tube_band05_guard_iso33_v1/init40_execution_report29_v1/global_barrier_registry_proposal_v1/cpu_tests_v2.log",
+      "sha256": "f6b8830072e702908392df509539763f9698492a6213120a65daa1dd9cc77dd4"
+    }
+  ],
+  "standards_change": "None: task-local scheduling defect and unintegrated CPU proposal, not a new validated runtime/package contract",
+  "general_make_check_rerun": false
+}

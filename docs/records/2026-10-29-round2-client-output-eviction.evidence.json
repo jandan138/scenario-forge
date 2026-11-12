@@ -1,0 +1,103 @@
+{
+  "at": "2026-10-29T09:17:27.319728+00:00",
+  "status": "PASS_CLOSED_CLIENT_AND_OBSERVER_ARCHIVE_EVICTION",
+  "new_client_original": {
+    "logical_deleted": 8613965377,
+    "allocated_unlinked": 8616353792,
+    "files_deleted": 580
+  },
+  "new_observer_original": {
+    "logical_deleted": 1148818266,
+    "allocated_unlinked": 1150316032,
+    "files_deleted": 491
+  },
+  "new_original_total": {
+    "logical_deleted": 9762783643,
+    "allocated_unlinked": 9766669824,
+    "files_deleted": 1071
+  },
+  "old_original_source_batch_excluded": {
+    "logical_deleted": 63507049057,
+    "allocated_unlinked": 64989290496,
+    "files_deleted": 254747
+  },
+  "combined_original_source_explicit_sum": {
+    "logical_deleted": 73269832700,
+    "allocated_unlinked": 74755960320,
+    "files_deleted": 255818
+  },
+  "snapshot_copy_deletions_separate": {
+    "logical_deleted": 1150684088,
+    "allocated_unlinked": 1181969920,
+    "files_deleted": 501
+  },
+  "archive_receipts_original_byte_checked": 799,
+  "GPU_actions": 0,
+  "Git_released_bytes": 0,
+  "rules": [
+    "VAL-003",
+    "VAL-005",
+    "VAL-006",
+    "VAL-008"
+  ],
+  "standards_baseline_commit": "4f1b6a69c711773119fd5870c47e8093a1d105b7",
+  "artifacts": {
+    "final_storage_audit.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/final_storage_audit.json",
+      "bytes": 7538,
+      "sha256": "66032c7b07bf81b59351d16f560d3598bd2dcccc2eb52dc347b98417e1f8a104"
+    },
+    "client_final_audit.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/client_final_audit.json",
+      "bytes": 1025,
+      "sha256": "e072b75709092de43da2f2ca5934753c930f1915341739b3713a4bbd74b4e96e"
+    },
+    "observer_final_audit.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/observer_final_audit.json",
+      "bytes": 5380,
+      "sha256": "f1352a1c4afdc8c3939626fe1d98a7c35be3de4e406edb604a3d778414c66d37"
+    },
+    "actual_restore_client_steps_evidence.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/actual_restore_client_steps_evidence.json",
+      "bytes": 1327,
+      "sha256": "2277c22d252838f976268533917c3dc99be83d6af41d6b7a1338dc347b632164"
+    },
+    "head_and_input_overlap_check.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/head_and_input_overlap_check.json",
+      "bytes": 6374,
+      "sha256": "37873373aa271ffd365d481d4277abec0469ea619a96e4db8b6dc2ef51000f61"
+    },
+    "observer_head_input_overlap_check.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/observer_head_input_overlap_check.json",
+      "bytes": 53,
+      "sha256": "953dcc16aa6252c64f158fd86738bd4c807465ff1b7013c57cd4dd367f8221d5"
+    },
+    "remaining_unadmitted_outputs.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/remaining_unadmitted_outputs.json",
+      "bytes": 21832,
+      "sha256": "47f82af33f4988eac0ae0aa7485386cee3d2f1e36bd7b0fabba00332b02ebe0a"
+    },
+    "execution_v8_tool_binding.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/execution_v8_tool_binding.json",
+      "bytes": 1441,
+      "sha256": "0a70803829d177b4a3e10beb3201097ff85471cd4535fbf0e46429b5aea0c7ea"
+    },
+    "tombstone_index.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/tombstone_index.json",
+      "bytes": 1942,
+      "sha256": "7891c2a45c938d5b8cc788941ab4067db9f8fa46f87bf6f4261d724c3bb731aa"
+    },
+    "global_original_deleted_path_overlap.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/global_original_deleted_path_overlap.json",
+      "bytes": 199053,
+      "sha256": "9929dba768d3de8ec3fa1d24a7cc266489cb547c3e4ce255e2292e80c3702532"
+    },
+    "unverified_failed_staging_retained.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/client_output_closure_20261029/acceptance_snapshots/20261029T091727Z/unverified_failed_staging_retained.json",
+      "bytes": 1510,
+      "sha256": "df4debeae95e4948ec1ad7c4208395180e6bb34452508d6d24d08c8bb3a38d8d"
+    }
+  },
+  "source_registry": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/local_eviction_registry.json",
+  "not_all_parent_tree_covered": true
+}

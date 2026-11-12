@@ -1,0 +1,48 @@
+{
+  "recorded_utc": "2026-10-28T19:52:18.596066+00:00",
+  "scope": "Actual external task12/task18 evidence archive handoff; no scientific qualification",
+  "rules": [
+    "VAL-003",
+    "VAL-005",
+    "VAL-006",
+    "VAL-008"
+  ],
+  "standards_change": "规范无需变更：追加式私有证据归档修复，不改变核心API、场景物理/反应/指标或任务资格。operations和datedrecord同步。",
+  "transition": {
+    "old_worker_pid": 522735,
+    "new_worker_pid": 1123356,
+    "signal": "SIGTERM only after repeat exactidentity/quietboundary; no forcedkill",
+    "at": "2026-10-28T19:39:22.470632+00:00",
+    "record": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/native_sequence_v2_preparation_20261029/handoff_20261028T1930/handoff_state.json",
+    "sha256": "aa7e834540c98b665b21f745780add8542f3a93e81d22d52cca95a1952247250"
+  },
+  "reviewed_tool": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/native_sequence_v2_preparation_20261029/tools/archive_round_v2.py",
+  "reviewed_tool_sha256": "28b1164d0d20bcf4d1d4419e9d1277680798863a2e28e38637b8c7d9e1fc0809",
+  "single_worker_lock": "/tmp/scenario-forge-scientific-archive-20261028/worker.lock",
+  "bandwidth": "16M; restore observed atmost1projectrclone",
+  "old_receipts_preserved": 58,
+  "new_sequence_units_verified": 3,
+  "native_segments_in_new_units": 8,
+  "verified_units_at_snapshot": 61,
+  "unresolved_failures_at_snapshot": 0,
+  "holds_at_snapshot": 12,
+  "operation_acceptance": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/native_sequence_v2_preparation_20261029/handoff_20261028T1930/operation_acceptance.json",
+  "operation_acceptance_sha256": "21850530b63aea9f9cbfa7e48ea79699f786aa0e096d342949a4d583606132b9",
+  "restore": {
+    "evidence": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/native_sequence_v2_preparation_20261029/handoff_20261028T1930/real_restore_native_cross/restore_evidence.json",
+    "evidence_sha256": "60b1484f40eb0509b06177582494dca4cf550788c57d4a3ce08a78032db6baab",
+    "unit_id": "native-seq-v2-ae05d72ac610888284ad",
+    "archive_sha256": "54729273ff41b2ef1295c5edb4dcc181cbe28cc659b7255e505b25a00364b34f",
+    "restored_files": 211,
+    "all_files_match_original_source_sha": true,
+    "includes_front_segment_result_and_four_videos": true,
+    "includes_worker_raw_logs": true
+  },
+  "failures_preserved": "Raw original worker final log retains5955 Source membership changed@19:22:54 andf53@19:31:25. They only resolved after real latergeneration upload/fullreadback/source-stability checks. Firstsupervisor pidfdAPI failure occurred before anysignal and is retained.",
+  "no_source_deletion": true,
+  "no_old_receipt_overwrite": true,
+  "GPU_actions": 0,
+  "C1": "REJECTED; rawfailed native scores preserved",
+  "batch39": "HOLD",
+  "validation": "18archiveCPUtests; actual3dryruns+uploads/fullreadbacks; actual211-fileOSSrestore/sourceSHA; gitdiffcheck. ExistingmakecheckPASS retained; no thirdcheck."
+}

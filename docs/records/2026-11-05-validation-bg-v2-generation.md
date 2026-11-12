@@ -37,3 +37,21 @@ R1曝光偏高，R2俯视取景裁切，R3修正；旧候选保持。生产者�
 GenManip新增轻量catalog及选择器测试，40项unit通过。Scenario Forge分配器/元信息适配器的4项测试和完整make check通过（1259 passed、1 skipped）。元信息相关处理置于adapters/ebench，generation层仅负责分配。冻结982个运行输入文件；原生136例检查将绑定各例输入哈希。
 
 五套r5各一例完成原生reset和短步进，初态overview图由实现者复核，未见黑屏或明显缺资产；不是独立审查或完整任务成功证明。全部136例原生检查和最终PR仍待完成。当前临时分支feature/validation-bg-v2-20261105，目标feature/pioneer，旧validation和建通目录未覆盖。
+
+## 批量原生检查启动
+
+GenManip临时分支feature/validation-bg-v2-20261105已有候选提交020ee136（222个新文件）；其父提交是最新pioneer基线7939a4c8。新增catalog和选择器回归检查后40项unit通过。Scenario Forge生成工具与记录本地提交176b03b；未推送Scenario Forge仓库其他改动。
+
+五套r5代表性画面已复核，保留固定机位只看得到地面/部分柜体的限制。136例批量检查在10.150.168.71 GPU0启动，绑定982个输入文件，复用5例完全相同输入的canary；普通案例20步，滴定/水浴/银镜320步以覆盖原生状态采样。每例独立运行ID与端口；仅对明确CUDA/端口临时故障冷重试一次，其他失败记账并继续，不计为通过。状态见external_artifacts/validation_bg_v2_20261105/native_batch_status.json。最终全例画面复核、交付安装及feature/pioneer PR尚未完成。
+
+## 四卡迁移
+
+按用户指示迁到10.150.164.127（Isaac4.1、4×4090）。仅停止旧主机本任务等待队列，原8例保留，未触碰scibench-test-repair作业。新主机默认客户端未正确处理异步reset；两次迁移尝试日志保留，随后显式绑定旧主机实际使用的共享genmanip_client源码，未安装或修改Conda环境。四卡首例均完成原生reset及短步进，初态overview由实现者查看，GPU UUID和进程映射核对通过。
+
+每卡独立进程/端口/缓存/日志，Ray配置CPU16与object_store比例0.02（实际每路约8GiB）。每卡状态独立写入，由汇总器按任务ID去重；截至迁移确认累计12/136例完成，后续四卡续跑。详细回执FOUR_GPU_MIGRATION.json，统一进度仍为native_batch_status.json。
+
+## 2026-11-06 单卡续跑
+
+四卡主机在74例完成后失联，用户指定恢复到10.150.168.71。已确认Isaac4.1、GPU0空闲及共享目录完整；单卡控制器取得原四个shard锁后启动，保留74例并将原超时task07案例重新纳入。恢复后该超时案例已通过，截至本次核对累计89/136、当前失败0。旧失败和断线状态独立保留，不删除历史记录。
+
+当前权威入口为external_artifacts/validation_bg_v2_20261105/ACTIVE_EXECUTION.json，状态single_resume_status.json同步发布到native_batch_status.json，避免读取旧的四卡RUNNING快照。当前进程继续执行，尚未完成全例视觉复核或PR交付。

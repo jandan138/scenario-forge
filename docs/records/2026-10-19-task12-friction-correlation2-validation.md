@@ -1,6 +1,6 @@
 # 水浴2mm摩擦接触点合并距离验证
 
-状态：A轮0.85分、回架失败；B轮1分、显色与回架选帧复核通过；C轮运行中。水浴仍NOT_RELEASED，2mm候选尚未证明稳定性。当前监督PID126500，权威队列为远端 `/tmp/task12_correlation2_20261018/queue_resume_logfix.json`；运行状态必须结合实际进程复查。
+状态：三次完整冷启动全部完成并复核，结果0.85／1／1；A横倒失败，B/C显色和回架选帧通过。不满足三次均成功门槛，2mm候选不采用为稳定修复，水浴仍NOT_RELEASED。私有接触诊断已启动，监督PID139845，权威状态 `/tmp/task12_anchor_inspection_20261018/queue.json`。
 
 ## 假设和冻结边界
 
@@ -38,3 +38,7 @@ A轮主代理已实际查看原生top/overlook选帧：1000帧蓝色、2000帧�
 B轮原生worker于2026-10-18 20:25:44 UTC报告 `Goal reached consistently`、3782步、info1.0；此时正式result_info和视频仍在保存，暂记 `contact_correlation2_b_native_pending.json`，不是完整验收。与A轮失败并存，候选仍未通过稳定性要求。
 
 B轮正式结果为score1/success_rate1/3782步；主代理查看蓝/黄/橙显色选帧和回架选帧，并补查原分辨率末帧。左腕机位可见试管穿入架孔，松爪后手已离开，未呈A轮横倒状态。证据 `contact_correlation2_b_visual_review.json` 与 `contact_correlation2_b_terminal_views/`。该轮通过不消除A轮失败，仍不可宣称稳定交付。
+
+C轮原生worker于2026-10-18 20:38:54 UTC报告成功，3782步、info1.0；正式输出/视觉审核仍待保存完成，临时证据 `contact_correlation2_c_native_pending.json`。A失败、B成功、C原生成功，仍不满足三次均成功的门槛，不据2/3样本声称总体成功率改善。后续接触诊断等待链仍活跃。
+
+完整结论见 `contact_correlation2_final_review.json`：三个原生结果、原动作/时钟/视频审计、归档、三份目视审核均绑定；C额外腕部终帧存于 `contact_correlation2_c_terminal_views/`。三轮都保留，未追加重复来筛选成功。新私有诊断已自动接续，保留真实物理条件，仅增加接触报告读取并限制300步，不能代替最终完整回架验收。

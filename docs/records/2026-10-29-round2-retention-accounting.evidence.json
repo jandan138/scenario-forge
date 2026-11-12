@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-29T10:10:57.769370+00:00",
+  "status": "PASS_FINAL_AUTHORIZED_REMAINDER_CLEANUP_AND_ACCOUNTING",
+  "immutable807tarbaseline": {
+    "accounting": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/immutable_20261029T094703Z/accounting.json",
+    "accounting_sha256": "e335b7275e92211de97c95f0c52668493cdd201b26b498ddf744d8b677e5ef20",
+    "unique_rows": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/immutable_20261029T094703Z/unique_tar_deletions.jsonl",
+    "unique_rows_sha256": "7fda2ea4b875549caa63e43657d6afbe61818cf5ebc1355f11ce0c92cfebfafe"
+  },
+  "additional_original_payload_deleted_bytes": 13919265,
+  "original_source_payload_logical_deleted_total": 73283751965,
+  "unique_tar_paths": 807,
+  "unique_tar_logical_deleted_total": 73096680693,
+  "source_plus_unique_tar_total": 146380432658,
+  "frozen_raw_copies_separate": 1150684088,
+  "all_recorded_unlinks_including_frozen_copies": 147531116746,
+  "artifacts": {
+    "accounting_latest.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/accounting_latest.json",
+      "bytes": 2943,
+      "sha256": "f8ed6473cbd588c94ff2f34b4cb68847a0043eabb64e3159ff7198f4625b3ba4"
+    },
+    "final_small_jsonl_eviction_result.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/final_small_jsonl_eviction_result.json",
+      "bytes": 309,
+      "sha256": "5696371c6c225db9b9ab22ab78f39e05a423ef2e294f40d1e2df7edc2fef18ca"
+    },
+    "final_86_member_decisions.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/final_86_member_decisions.json",
+      "bytes": 129707,
+      "sha256": "ba30d4f5f359c566ab4277e2fc910031184e84e51bd6fdf8a7c1424fc03841b8"
+    },
+    "worker_health.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/worker_health.json",
+      "bytes": 2014,
+      "sha256": "af7038fc36dfb75c78277511ae8002223c4e981b30f5dfe7353f002a0d1413dd"
+    },
+    "source_vs_unique_tar_overlap.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/source_vs_unique_tar_overlap.json",
+      "bytes": 323,
+      "sha256": "8e59000a7d64fb0feb40d9eebea6f02729218da0f69d7b7287ce82cc36dbd480"
+    },
+    "remaining_verified_membership_summary.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/remaining_verified_membership_summary.json",
+      "bytes": 736,
+      "sha256": "0c1b0fafb6a39e21ce1c33b0aea5b82cf92abda5bb8c8dda4d78e4e7e11efdd4"
+    },
+    "tmp_mount_scope.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/tmp_mount_scope.json",
+      "bytes": 954,
+      "sha256": "59573dc38f18bfb433eb2e3c16441938b59ff383af5c32bfe4de0e28d5b5353a"
+    },
+    "tmp_current_payload_inventory.json": {
+      "path": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/accounting_reconciliation_20261029/final_snapshots/20261029T101057Z/tmp_current_payload_inventory.json",
+      "bytes": 5311,
+      "sha256": "db0082894b286293247d029f5330ab85b26cc983ac0a38a87bc2f3e0be06135c"
+    }
+  },
+  "restore_registry": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/local_eviction_registry.json",
+  "restore_entrypoint": "/cpfs/user/zhuzihou/dev/scientific-round2-repair-20261026/bath/repair_20261028/archive_oss/local_eviction/source_payload_20261029/restore_any_evicted.py",
+  "remaining_raw_stat_bytes": 1324967448,
+  "failed_unverified_tar_retained_bytes": 4718032122,
+  "scope": "Unique path logical unlink accounting across filesystems, notnetquotarecovery/shareddfdelta. NoGPU/T1/input/SDK/Git/READY/ledger mutation."
+}
