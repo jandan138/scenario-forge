@@ -10,6 +10,9 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
+from tests.paper_publication import skip_unless_paper_published
+
+skip_unless_paper_published()
 
 HERE = Path(__file__).resolve().parents[1] / (
     "paper/venues/iclr2027/figures/lab2sim/fig1_iterations/my-try"

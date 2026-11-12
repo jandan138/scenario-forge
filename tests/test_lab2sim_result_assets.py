@@ -4,6 +4,8 @@ from pathlib import Path
 
 from PIL import Image
 
+from tests.paper_publication import paper_test
+
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPOSER_PATH = ROOT / "paper/venues/iclr2027/figures/lab2sim/compose_galleries.py"
@@ -17,6 +19,7 @@ def load_composer():
     return module
 
 
+@paper_test
 def test_result_asset_inventory_covers_every_composer_input():
     import scripts.prepare_lab2sim_result_assets as staging
 
@@ -49,6 +52,7 @@ def test_result_asset_transform_applies_crop_and_global_brightness():
     assert result.getpixel((0, 0)) == result.getpixel((79, 59))
 
 
+@paper_test
 def test_result_staging_manifest_matches_figure_provenance():
     figure_root = ROOT / "paper/venues/iclr2027/figures/lab2sim"
     manifest = json.loads((figure_root / "source/fig23-assets.json").read_text())
@@ -70,6 +74,7 @@ def test_result_staging_manifest_matches_figure_provenance():
     assert "app_lift2_runtime.png" in recorded
 
 
+@paper_test
 def test_fig3_provenance_binds_admission_evidence_per_usd_row():
     figure_root = ROOT / "paper/venues/iclr2027/figures/lab2sim"
     provenance = json.loads((figure_root / "provenance.json").read_text())

@@ -4,6 +4,8 @@ from pathlib import Path
 from PIL import Image
 import pytest
 
+from tests.paper_publication import paper_test
+
 
 def test_powder_hud_crop_is_clean_sixteen_by_nine():
     from scripts.prepare_lab2sim_fig1_assets import transform_image
@@ -100,6 +102,7 @@ def test_prepare_rejects_asset_hash_mismatch(tmp_path, monkeypatch):
         staging.prepare(tmp_path, tmp_path / "out")
 
 
+@paper_test
 def test_staging_manifest_matches_figure_provenance():
     repo = Path(__file__).resolve().parents[1]
     figure_root = repo / "paper/venues/iclr2027/figures/lab2sim"

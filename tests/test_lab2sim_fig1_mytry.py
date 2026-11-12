@@ -7,6 +7,10 @@ from xml.etree import ElementTree as ET
 
 from PIL import Image
 
+from tests.paper_publication import skip_unless_paper_published
+
+skip_unless_paper_published()
+
 
 MODULE_PATH = (
     Path(__file__).resolve().parents[1]

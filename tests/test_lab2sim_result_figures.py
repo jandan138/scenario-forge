@@ -3,6 +3,9 @@ from pathlib import Path
 
 from PIL import Image
 
+from tests.paper_publication import skip_unless_paper_published
+
+skip_unless_paper_published()
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = (
