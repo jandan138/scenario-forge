@@ -34,6 +34,7 @@ SOURCE_DEFAULT = Path(
     "/cpfs/shared/simulation/chenjiantong/scene_usds/scientific_experiments"
 )
 OUT_DEFAULT = _ROOT / "outputs" / "scientific_experiments_colleague_final_20260920"
+OUT_ZERO_SHOT = _ROOT / "outputs" / "scientific_experiments_colleague_zero_shot_20260924"
 LICENSE = "internal-colleague-reviewed-20260920"
 RESOLVER = "scenario-forge/colleague-flattened-inventory-v1"
 DOMAIN = "scientific_workbench"
@@ -52,6 +53,24 @@ SKIP_WORLD_NAMES = {
     "Render",
     "Environment",
 }
+# Authored crate metadata. Kept inside the original scene.usd bytes; not split
+# into identity USD.
+METADATA_PRIM_NAMES = {
+    "MixingGraph",
+    "MixingSettings",
+    "Task15Glass",
+    "Task15GlassFoot",
+    "CopperCrystalLooks",
+    "CopperSulfateExperiment",
+    "PhysicsMaterials",
+    "Graphs",
+    "LiquidSource",
+    "HeatingStatus",
+}
+# Geometric prims that also carry custom metadata (userDocBrief). They stay in
+# the composed crate and are not CopySpec'd into identity USD.
+NON_SPLIT_PRIM_NAMES = {"asset_01", "asset_03"}
+SKIP_WORLD_NAMES = SKIP_WORLD_NAMES | METADATA_PRIM_NAMES | NON_SPLIT_PRIM_NAMES
 SKIP_PREFIXES = ("obj_grain_",)
 RECURSE_GROUPS = {"background_object"}
 # Rooms are 440–456 meshes. Ordinary glassware stays under this and gets CopySpec.
@@ -250,6 +269,80 @@ TASK_SPECS: dict[str, dict[str, Any]] = {
     },
 }
 
+ZERO_SHOT_TASKS = (
+    "task_z1_remove_beaker_pour_shake",
+    "task_z2_key_steps_in_mof",
+    "task_z3_boat_pour_stir",
+    "task_z4_silver_mirror_reaction",
+    "task_z5_fixed_weight_weighing",
+    "task_z6_evaporative_crystallization_prep",
+)
+
+TASK_SPECS.update(
+    {
+        "task_z1_remove_beaker_pour_shake": {
+            "mode": "stub",
+            "title_zh": "取出烧杯、倾倒并振荡",
+            "instruction": "取出烧杯、倾倒并振荡。语义待正式目录补全。",
+            "primary_objects": [
+                "obj_sample_beaker",
+                "obj_sample_conical_flask",
+                "obj_graduated_cylinder",
+            ],
+        },
+        "task_z2_key_steps_in_mof": {
+            "mode": "stub",
+            "title_zh": "MOF 关键步骤",
+            "instruction": "完成 MOF 制备中的关键步骤。语义待正式目录补全。",
+            "primary_objects": [
+                "obj_funnel",
+                "obj_graduated_cylinder",
+                "obj_conical_flask",
+                "obj_magnetic_stirrer",
+            ],
+        },
+        "task_z3_boat_pour_stir": {
+            "mode": "stub",
+            "title_zh": "称量舟倾倒与搅拌",
+            "instruction": "使用称量舟倾倒并搅拌。语义待正式目录补全。不移植既有 boat_pour_stir 谓词。",
+            "primary_objects": [
+                "obj_weighing_boat",
+                "obj_beaker",
+                "obj_glass_rod",
+                "obj_analytical_balance",
+            ],
+        },
+        "task_z4_silver_mirror_reaction": {
+            "mode": "stub",
+            "title_zh": "银镜反应",
+            "instruction": "完成银镜反应场景中的操作。语义待正式目录补全。",
+            "primary_objects": ["obj_beaker", "obj_sample_tube", "obj_tube_rack", "obj_magnetic_stirrer"],
+        },
+        "task_z5_fixed_weight_weighing": {
+            "mode": "stub",
+            "title_zh": "定质量称量",
+            "instruction": "按固定目标质量完成固体称量。语义待正式目录补全。不移植 task_14 谓词。",
+            "primary_objects": [
+                "obj_analytical_balance",
+                "obj_powder_bottle",
+                "obj_sampling_spoon",
+                "obj_weighing_boat",
+            ],
+        },
+        "task_z6_evaporative_crystallization_prep": {
+            "mode": "stub",
+            "title_zh": "蒸发结晶准备",
+            "instruction": "完成蒸发结晶前的准备操作。语义待正式目录补全。",
+            "primary_objects": [
+                "obj_alcohol_lamp_body",
+                "obj_evaporating_dish_deep",
+                "obj_beaker",
+                "obj_stand",
+            ],
+        },
+    }
+)
+
 
 @dataclass
 class PrimHit:
@@ -339,6 +432,33 @@ def _should_skip_name(name: str) -> bool:
     return any(name.startswith(prefix) for prefix in SKIP_PREFIXES)
 
 
+def admits_identity(name: str) -> bool:
+    """Unique-asset names only. Metadata and non-split prims stay in the crate."""
+    if _should_skip_name(name):
+        return False
+    return name.startswith("obj_") or name in {"table", "Room"}
+
+
+def _skipped_helpers(task: str) -> dict[str, Any]:
+    grain_note = (
+        "World-level powder grains are recipe instances, not admitted identities."
+        if task in {"task_09_solid_weighing", "task_14_fixed_weight_weighing"}
+        else "none_observed_at_world_root"
+    )
+    payload: dict[str, Any] = {"obj_grain_*": grain_note}
+    if task in ZERO_SHOT_TASKS:
+        payload["metadata_prims"] = (
+            "Authored graphs, settings, materials, and status prims stay inside "
+            "the original scene.usd bytes and are not admitted as identities: "
+            + ", ".join(sorted(METADATA_PRIM_NAMES))
+        )
+        payload["non_split_prims"] = (
+            "asset_01 and asset_03 remain in the composed crate with their "
+            "userDocBrief metadata. They are not CopySpec'd into identity USD."
+        )
+    return payload
+
+
 def _role_for(name: str) -> tuple[str, str]:
     if name == "Room":
         return "environment", "usd_scene"
@@ -407,9 +527,7 @@ def _iter_candidate_prims(stage: Any) -> Iterable[Any]:
                     continue
                 yield descendant
             continue
-        if _should_skip_name(name):
-            continue
-        if name.startswith("obj_") or name in {"table", "Room"}:
+        if admits_identity(name):
             yield child
 
 
@@ -550,11 +668,12 @@ def inventory_source(
     cache_path: Path | None = None,
     hits: list[PrimHit] | None = None,
     uniques: dict[str, UniqueAsset] | None = None,
+    tasks: Iterable[str] | None = None,
 ) -> tuple[list[PrimHit], dict[str, UniqueAsset]]:
     hits = list(hits or [])
     uniques = dict(uniques or {})
     seen_scenes = {f"{hit.task}/{hit.variant}" for hit in hits}
-    for task in TASKS:
+    for task in tuple(tasks) if tasks is not None else TASKS:
         task_dir = source_root / task
         for scene_dir in _variant_dirs(task_dir):
             usd = scene_dir / "scene.usd"
@@ -632,11 +751,13 @@ def export_unique_assets(
                 shutil.rmtree(child)
 
 
-def collect_subusd_blobs(source_root: Path, blob_root: Path) -> dict[str, str]:
+def collect_subusd_blobs(
+    source_root: Path, blob_root: Path, tasks: Iterable[str] | None = None
+) -> dict[str, str]:
     """Map content sha256 -> blob path name."""
     blobs: dict[str, str] = {}
     roots: list[Path] = []
-    for task in TASKS:
+    for task in tuple(tasks) if tasks is not None else TASKS:
         task_dir = source_root / task
         if (task_dir / "SubUSDs").is_dir():
             roots.append(task_dir / "SubUSDs")
@@ -1045,13 +1166,7 @@ def assemble_package(
             "source_head": TASK_SPECS[task].get("source_head"),
             "variant_count": len(splits),
             "unique_object_assets": used_ids,
-            "skipped_helpers": {
-                "obj_grain_*": (
-                    "World-level powder grains are recipe instances, not admitted identities."
-                    if task in {"task_09_solid_weighing", "task_14_fixed_weight_weighing"}
-                    else "none_observed_at_world_root"
-                )
-            },
+            "skipped_helpers": _skipped_helpers(task),
         },
     )
     return pkg
@@ -1064,7 +1179,10 @@ def write_batch_docs(
     uniques: dict[str, UniqueAsset],
     hits: list[PrimHit],
     check_results: list[dict[str, Any]],
+    tasks: Iterable[str] | None = None,
+    batch: str = "colleague-final",
 ) -> None:
+    selected = tuple(tasks) if tasks is not None else TASKS
     inventory = []
     for asset in sorted(uniques.values(), key=lambda item: item.asset_id):
         inventory.append(
@@ -1122,23 +1240,33 @@ def write_batch_docs(
                 "semantics_mode": TASK_SPECS[task]["mode"],
                 "variants": 20,
             }
-            for task in TASKS
+            for task in selected
         ],
     }
     _write_yaml(out_root / "catalog.yaml", catalog)
+    if batch == "zero-shot":
+        heading = "# Scientific experiments colleague zero-shot 20260924"
+        summary = (
+            "Colleague zero-shot flattened scenes packaged as "
+            f"{len(selected)} v0.2 fat family packages."
+        )
+    else:
+        heading = "# Scientific experiments colleague final 20260920"
+        summary = "Colleague-reviewed flattened scenes packaged as 14 v0.2 fat family packages."
     lines = [
-        "# Scientific experiments colleague final 20260920",
+        heading,
         "",
-        "Colleague-reviewed flattened scenes packaged as 14 v0.2 fat family packages.",
+        summary,
         "Unique `obj_*` / table / Room identities are deduplicated by geometry fingerprint.",
         "Scene entry is the original composed crate under `assets/composed/`.",
+        "Authored crate metadata is not rewritten.",
         "",
         "Validation level: `asset_locked` only.",
         "",
         "| Task | Mode | Package |",
         "|---|---|---|",
     ]
-    for task in TASKS:
+    for task in selected:
         lines.append(
             f"| `{task}` | {TASK_SPECS[task]['mode']} | `packages/{task}` |"
         )
@@ -1161,14 +1289,21 @@ def write_batch_docs(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=SOURCE_DEFAULT)
-    parser.add_argument("--out", type=Path, default=OUT_DEFAULT)
+    parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--tasks", nargs="*", default=None)
+    parser.add_argument(
+        "--batch",
+        choices=("colleague-final", "zero-shot"),
+        default="colleague-final",
+    )
     args = parser.parse_args()
     source_root = args.source.resolve()
-    out_root = args.out.resolve()
+    batch_tasks = ZERO_SHOT_TASKS if args.batch == "zero-shot" else TASKS
+    default_out = OUT_ZERO_SHOT if args.batch == "zero-shot" else OUT_DEFAULT
+    out_root = (args.out or default_out).resolve()
     out_root.mkdir(parents=True, exist_ok=True)
-    selected = tuple(args.tasks) if args.tasks else TASKS
-    unknown = [task for task in selected if task not in TASKS]
+    selected = tuple(args.tasks) if args.tasks else batch_tasks
+    unknown = [task for task in selected if task not in batch_tasks]
     if unknown:
         raise SystemExit(f"unknown tasks: {unknown}")
 
@@ -1181,14 +1316,14 @@ def main() -> int:
         print(f"loaded inventory cache ({len(hits)} hits)", flush=True)
     expected = {
         f"{task}/{_variant_key(scene_dir)}"
-        for task in TASKS
+        for task in batch_tasks
         for scene_dir in _variant_dirs(source_root / task)
     }
     cached = {f"{hit.task}/{hit.variant}" for hit in hits}
     if cached != expected:
         print(f"inventory resume {len(cached)}/{len(expected)} scenes", flush=True)
         hits, _ignored = inventory_source(
-            source_root, cache_path=cache_path, hits=hits
+            source_root, cache_path=cache_path, hits=hits, tasks=batch_tasks
         )
     uniques = rebuild_uniques_from_hits(hits, source_root) if hits else {}
     fingerprints = [asset.fingerprint for asset in uniques.values()]
@@ -1198,7 +1333,7 @@ def main() -> int:
 
     export_unique_assets(uniques, out_root / "admitted_assets")
     blob_root = out_root / "admitted_assets" / "subusd_blobs"
-    collect_subusd_blobs(source_root, blob_root)
+    collect_subusd_blobs(source_root, blob_root, tasks=batch_tasks)
 
     check_results = []
     for task in selected:
@@ -1228,6 +1363,8 @@ def main() -> int:
         uniques=uniques,
         hits=hits,
         check_results=check_results,
+        tasks=selected,
+        batch=args.batch,
     )
     failed = [item for item in check_results if not item["ok"]]
     if failed:
