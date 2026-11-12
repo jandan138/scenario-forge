@@ -60,6 +60,10 @@ validation and delivery. The [maintenance workflow](docs/standards/maintenance.m
 requires the implementer to synchronize applicable rules after validation.
 Core package/schema/API contracts remain in the design documents below.
 
+For GenManip scientific-task production and handoff, see the
+[task delivery guide](docs/operations/genmanip-task-delivery.md) and its
+[fillable acceptance checklist](docs/operations/templates/genmanip-task-delivery-checklist.md).
+
 ## Roadmap
 
 The v0.1 package format remains readable as a bootstrap format. The v0.2 package
