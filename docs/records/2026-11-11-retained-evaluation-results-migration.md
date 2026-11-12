@@ -1,0 +1,29 @@
+# Retained evaluation results: supplemental private migration
+
+Status: running inventory/copy workflow; not yet a verified delivery.
+
+The user approved result-only copying, without switching running jobs, stopping producers, deleting old data, or publishing to Hugging Face. Capacity is the user-confirmed 5 TB CPFS allocation; the cluster-wide df total is not treated as this directory's quota. The operational budget guard is 4.5 TB including existing contents, incoming copies and partial files.
+
+Frozen selection: 836 existing source directories, comprising pi05 14, OpenWAM 4, InternW0 6, InternVLA 18 and sfwn1108 agent runs 794. logs and eval_results paths are counted separately. Add logs/default and the sibling sci_bench_analyse project: 838 migration items. No initial target-path collisions or symlinked selection roots were found. Existing target assets, tasks, training staging and independence-audit evidence are retained.
+
+Source: `/mnt/data/chenjiantong/GenManip-Sim` plus its sci_bench_analyse sibling. Target: `/cpfs/shared/wet_op_bench/GenManip-Sim` with the same result/log hierarchy, plus `/cpfs/shared/wet_op_bench/sci_bench_analyse`. Private operational state/scripts: `/cpfs/shared/wet_op_bench/_operations/results_20261111`. Controller script copies: `external_artifacts/wet_op_results_20261111/`.
+
+The supervisor freezes a manifest, inventories sizes, checks capacity, rsyncs to a per-item incoming directory, waits at least 10 minutes for stability, verifies full source/target SHA-256 and inventory equality, compares parsed result_info JSON and summaries, then installs each new directory within the target mount. No --delete is used. Existing conflicting targets are not overwritten. Source changes cause incrementals and another stability/hash pass; final source re-inventory catches changes after earlier per-item verification. Unresolved link/data conflicts remain explicitly pending review.
+
+VERIFIED_AS_OF means a stable copy matched the source at the recorded verification time. It does not certify that another host cannot write to the producer directory in the future. A permanently closed producer is not inferred from the absence of a local process. Active sources are revisited at 30-minute intervals; copy/verification errors are retained by item while independent items continue.
+
+The analysis phase preserves original historical configs and reports. Separate migrated configs are emitted only when old input paths are fully mapped. A new migration-check config references only retained result directories on new CPFS, selecting one available run per category for report generation. Stable JSON parity is checked for every selected result directory. One available MP4 per category is decoded. The final receipt distinguishes byte-level snapshot correctness from experiment completeness.
+
+Not included: colleague-listed obsolete result batches, collected_files_20261016, salvage/backups, or another copy of the training dataset. All remain at source; no deletion is scheduled. Previously incomplete independent-runtime acceptance is a separate task and is not declared complete by this migration.
+
+Rules: VAL-002/003/005/006 and the standards maintenance workflow. No general rule or package/API change; this applies existing immutable-source, hash and evidence-scope guidance. Scripts compiled successfully before launch. Final counts, measured sizes, throughput, active items and conflicts are recorded in status.json, manifest.json, hashes_*.jsonl and analysis_receipt.json rather than inferred from the colleague's approximate totals.
+
+## Analysis compatibility diagnosis and finalization
+
+The 838 directory snapshots (1,573,295,793,759 payload bytes) passed inventory and SHA-256 checks. The post-copy analysis failed because retained task07 results include six metric leaves, whereas the original analysis catalog only maps five. The failing source and destination result JSONs are byte-identical. The task initialization goal and metric implementation identify the additional leaf as `tubes_insert_symmetric`: both tubes must be seated and occupy symmetric rotor positions.
+
+The target-only analysis reader now accepts explicitly catalogued structural variants and rejects unknown or ambiguous shapes. The original cluster_map.json and raw results remain unchanged. A separate migration_v2 catalog retains the original five-leaf mapping and adds the verified sixth leaf as alignment (`align`); the two insertion leaves are already mapped separately, so no third insertion is invented. This is an explicit analysis-taxonomy extension, not a change to recorded success/score. Original target reader/config module copies are retained under `_operations/results_20261111/analysis_fix` with before/after hashes in status.json. No source modules or simulator metrics were modified.
+
+Four new regression cases passed (legacy five-leaf behavior, six-leaf alignment contribution, unknown shape rejection and ambiguous shape rejection). All 33 existing analysis tests passed. All 12,134 retained result_info records passed structural/skill-tree validation with no incompatibilities. The representative report includes 2,721 episodes across five selected runs and uses only new-CPFS result paths; agent sample coverage is explicitly partial. One MP4 per category decoded successfully. These checks establish copy/readability/analysis compatibility, not producer-job completeness or cross-version benchmark comparability.
+
+Final queue state: VERIFIED_AS_OF_SOURCE_RETAINED. Snapshot verification timestamps remain preserved; this status does not claim source directories cannot change after those times. Original analysis failure is retained as previous_analysis_error. The migration_v2 configuration is the verified entrypoint; historical configs remain historical and may reference excluded runs.

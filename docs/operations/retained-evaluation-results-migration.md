@@ -1,0 +1,13 @@
+# Supplemental result migration operations
+
+Connect via `ssh genmanip-2gpu`. Read `/cpfs/shared/wet_op_bench/_operations/results_20261111/status.json` and `driver.log` for actual state. The frozen source/target/category list is `manifest.json`. See [the task record](../records/2026-11-11-retained-evaluation-results-migration.md) for authorized scope.
+
+The queue progresses through INVENTORY, COPYING, WAITING_STABILITY, VERIFYING, optional FOLLOWING_ACTIVE_SOURCES, and analysis validation. VERIFIED_AS_OF_SOURCE_RETAINED is the final stable-snapshot state; PARTIAL_NEEDS_REVIEW or FAILED_REQUIRES_REVIEW is not success. It never certifies permanent producer shutdown.
+
+Do not delete source data or target independence-audit evidence. Do not run a broad rsync --delete against the result roots. Incoming copies remain below `_incoming/results_20261111`; target directories are installed only after verification. A locked supervisor prevents simultaneous queue instances. After resolving a failure, rerun migrate_results.py from the private operations directory; verified unchanged source items are skipped, and partial transfers resume. Inspect same-name target conflicts rather than forcing overwrite.
+
+Each hashes_<index>.jsonl binds a directory's copied payload. verified_inventory_<index>.json supports subsequent source-change checks. Changed live files are recopied and rehashed; stable batches can finish while active batches remain pending. A verification time is not an assertion that the producing job can never append data again.
+
+Analysis validation runs validate_analysis.py after every item has a verified copy. It creates separate migrated configuration files and migration_check_20261111.json, preserving original historical configurations. Use the new configuration for new-CPFS analysis; original configs may still refer to excluded historical results. Read analysis_receipt.json and analysis_validation.log for actual outcome. A generated report does not change historical experiment success claims.
+
+The verified analysis entrypoint after compatibility repair is `sci_bench_analyse/migration_v2/migration_check_20261111.json`. Its sibling catalog explicitly supports task07's original five metrics and the sixth symmetric-placement metric. Original cluster_map.json is unchanged. Reader changes and their originals are recorded under the private operations `analysis_fix` directory. Unknown structures still fail; do not truncate result arrays or silently pad mappings. The report is a migration-readability check across selected runs, not a matched-protocol model ranking. Raw scores and result files remain unchanged.
