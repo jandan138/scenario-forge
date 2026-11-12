@@ -28,7 +28,10 @@
 重采样或重建控制语义须保留原记录、映射和证据，规则见[VAL-008](validation-and-delivery.md#val-008)。
 
 依据：[滴定策略与测试](../../tests/test_titration_r15.py)、
-[水浴运行验证](../../scripts/validate_fehlings_water_bath.py)。
+[水浴运行验证](../../scripts/validate_fehlings_water_bath.py)、
+[Isaac 4.1 蓝瓶原生步与图计时对照](../records/2026-10-26-scientific-round2-root-cause-preparation.md)。
+后者在该回放配置中测得原版与候选均有图逻辑累计时间约为原生物理时间两倍的现象；
+不把该倍数推广为其他图或运行时的常数，也不以固定除二代替原生步去重。
 
 <a id="state-003"></a>
 ### STATE-003 — 重置必须覆盖逻辑与呈现

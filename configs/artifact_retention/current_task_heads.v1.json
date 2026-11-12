@@ -184,6 +184,30 @@
       "revision": "r1",
       "status": "current_candidate",
       "variant_key": "isaac45_vr"
+    },
+    {
+      "artifact_family": "solid_sample_weighing",
+      "handoff_zip": "handoff/scientific_workbench_solid_weighing_task09_r1.zip",
+      "output_root": "outputs/task09_solid_weighing_r1_20261008",
+      "revision": "task09_r1",
+      "status": "current_delivery",
+      "variant_key": "supported_mass_inventory_dual_runtime"
+    },
+    {
+      "artifact_family": "traditional_acid_base_titration",
+      "handoff_zip": "handoff/scientific_workbench_titration_task10_real_liquid_120hz_r2.zip",
+      "output_root": "outputs/task10_real_liquid_120hz_r2_20261010",
+      "revision": "task10_real_liquid_120hz_r2",
+      "status": "current_delivery",
+      "variant_key": "task10_real_liquid_dual_runtime"
+    },
+    {
+      "artifact_family": "traditional_acid_base_titration",
+      "handoff_zip": "handoff/scientific_workbench_titration_task10_real_liquid_vr_120hz_r2.zip",
+      "output_root": "outputs/task10_real_liquid_120hz_r2_20261010/vr",
+      "revision": "task10_real_liquid_vr_120hz_r2",
+      "status": "current_delivery",
+      "variant_key": "vr_isaac45_real_liquid"
     }
   ],
   "schema_version": "scenario-forge-current-task-heads/v1",

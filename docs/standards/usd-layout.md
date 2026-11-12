@@ -12,6 +12,13 @@
 overlay 顺序按 [overlay 接口](../design/scene-asset-overlays.md)。不得根据渲染大小猜测单位或局部补缩放来掩盖来源不明。
 场景导出的 `/World` 约定不能强加到所有源资产的 defaultPrim 上。
 
+新建场景入口或对照 overlay 时，须核对最终打开的 stage 的单位、upAxis、defaultPrim、
+timeCodesPerSecond、framesPerSecond、时间范围及相关根层自定义设置，不能只比较 Prim 属性，
+也不能假定 subLayers 会提供新入口所需的根层元数据。声明“仅改显示”的对照应保持这些行为设置；
+有意转换则单独声明和验证。此要求不强制所有资产采用同一个 defaultPrim。
+
+依据：[第二轮诊断中的入口元数据检查](../records/2026-10-26-scientific-round2-root-cause-preparation.md)。
+
 <a id="usd-002"></a>
 ### USD-002 — 可迁移引用与有效路径
 
@@ -94,6 +101,17 @@ Isaac Sim 4.1 在 `EnableGPUDynamics=false` 时不会把带 `physics:approximati
 
 依据：[斐林 r4 CPU 接触碰撞](../records/2026-09-11-fehlings-r4-cpu-contact-colliders.md)。
 
+<a id="usd-009"></a>
+### USD-009 — 证据相机核对目标与裁剪范围
+
+新增或修改证据相机时，核对组合 stage 的单位、相机世界变换、近远裁剪范围，以及目标在相机空间中的位置。
+实际必要帧须看见待检查对象；非空图片不能替代这个检查。目标被裁掉时先修正诊断相机，不能据背景可见宣布对象视觉通过。
+近远裁剪值按场景尺度和用途声明，本条不建立通用数值默认。
+
+依据：[水浴／银镜集成中的相机复核](../records/2026-10-29-task12-task18-integration-progress.md)：
+Isaac 4.1 的该米制证据 stage 中，未显式设置的 near=1 将距相机约0.817米的烧杯裁掉；
+仅将私有证据相机改为0.01／100后，原场景装置在实际渲染中恢复可见，不修改资产或物理。
+
 ## 已知限制与变更记录
 
 不同导出配置的灯光、物理设置和随机化数值可能不同；上面的 r10.1 数值不推广到所有场景。
@@ -120,3 +138,5 @@ Isaac Sim 4.1 在 `EnableGPUDynamics=false` 时不会把带 `physics:approximati
 不能仅凭选项宣称舞台完全等价。已生成旧包不自动改写。
 该路径在 adapter 内惰性使用 OpenUSD，不改变纯包依赖或旧任务产物。
 依据：[舞台元数据记录](../records/2026-09-13-ebench-source-stage-metadata.md)。
+
+2026-10-29：新增USD-009，按组合stage单位和实际目标检查证据相机裁剪；源于Isaac4.1库存初始化对照，不设通用near/far参数，不改历史资产。

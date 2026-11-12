@@ -12,7 +12,7 @@
 |---|---|---|
 | 生成关节/复杂资产(生产者角色) | [资产生成](asset-generation.md) | 证据分级、规格书契约、静态门禁、阶段签认 |
 | 选资产、接入外部工具 | [资产接入](asset-intake.md) | 谁负责生产与修复、资格与哈希、可继承的能力 |
-| 组装场景、摆放与导出 | [USD 场景组织](usd-layout.md) | 导出配置、根路径、变换、引用、VR 物化与放置 |
+| 组装场景、摆放与导出 | [USD 场景组织](usd-layout.md) | 导出配置、根路径、变换、引用、VR 物化与放置、证据相机裁剪 |
 | 使用带关节的设备 | [Articulation](articulation.md) | 固定基座 v2、刚体与关节、VR 注册、随机化 |
 | 制作假液体或改变外观 | [材质与液体](materials-and-liquids.md) | Shader 属性、连续变色、几何分层、物理边界 |
 | 编写操作与反应逻辑 | [交互与状态](task-state.md) | 状态、仿真时间、成功、重置与遥测 |
@@ -63,6 +63,8 @@
 | [斐林水浴 r9](../records/2026-09-14-fehlings-r9-front-bath.md) | 正视隔杯、贴壁薄壳+液面环；试管留在水里的 MP4 | 液面下数毫米浅插当深浸、真实流体/传热、改假水总量 |
 | [斐林水浴 r10](../records/2026-09-16-fehlings-r10-deep-immerse.md) | fill=0.8 竖直插到接近杯底，8 mL 顶低于液面 | 整根 150 mm 没入 87 mm 水柱、水下颜色已看清、改假水总量 |
 | [受力称量 r1](../records/2026-09-09-solid-weighing-force-r1.md) | 两个 runtime 的受力读数、去皮、测量条件与已验证的可搬动天平 | 任意自由基座资格、机器人舀取或完整策略成功 |
+| [task_09 五颗固体称量](../records/2026-10-08-task09-supported-solid-weighing.md) | Isaac 4.1/4.5、120 Hz 的承托质量累加、去皮、五颗完成及逐物理步几何运动验证 | 独立受力计量、原始引擎速度等同几何速度、机器人舀取、通用睡眠与接触间距默认 |
+| [task_09 称量 VR 数采入口](../records/2026-10-09-task09-solid-weighing-vr.md) | 在既有称量场景上叠加现代湿化学房间与直接打开穹顶光，并给出 VR 对象注册 | 头显加载、数采成功、固定基座 v2、改写干净主场景或已有称量资格 |
 | [刚体粉末称重 r1](../records/2026-09-09-rigid-powder-force-weighing-r1.md) | Isaac 4.5 规定工具轨迹下的颗粒转移、秤盘接触力及机身单粒干扰回归 | 黏聚粉末物性、毫克级精度、动态抓持或实时性能 |
 | [粉末瓶 r5.1 120 Hz 限速](../records/2026-09-14-task09-powder-bottle-r5.1-velocity-cap.md) | 本任务 120 Hz 下 0.15 m/s 线速度上限仍不能恢复 10–12 mm 床深 | 全仓库粉末默认 vmax、把限速当成 120 Hz 床深修复 |
 | [粉末瓶 r5.2 120 Hz 重固化](../records/2026-09-15-task09-powder-bottle-r5.2-120hz.md) | 本任务 120 Hz 下加大粉粒/内托偏移并重固化可恢复近满瓶与可舀 | 全仓库粉末默认 contact/restOffset、替换 r4 交付资格 |
@@ -77,6 +79,9 @@
 | [固体称量 1 g 过程分](../records/2026-09-16-solid-sample-weighing-1g-package.md) | 本任务以去皮后终帧 LCD `1.00 g` 为最大过程分（0.35），场景 USD 用 r5.7 | 把 LCD 1.00 g 写成全仓库仪器成功默认、替换 r4 交付头 |
 | [粉末瓶 r6.0 PBD 干粉起步](../records/2026-09-17-task09-powder-bottle-r6.0-pbd-start.md) | 本任务用 `fluid=False`、自碰 1.04 mm rest、墙碰 0.7 mm、`gravityScale` 1 替换刚体粒；scoop 先按区域粒数计质量 | 液体 PBD 配方、斐林水浴、刚体秤盘接触力资格、替换 r4/r5.7 交付 |
 | [固体称量 r6.0 a54 VR 候选](../records/2026-09-17-solid-sample-weighing-r6.0-a54-vr.md) | 本任务把 a54 3125 粒干 PBD 编成 v0.2 数采包，过程分仍是终帧 LCD `1.00 g`；包级是 `asset_locked` | 把 a54 写成近满合格或 `scene_fixture_verified`、替换 r4/r5.7 交付、放宽全仓库 LCD |
+| [task_10 真液体滴定](../records/2026-10-09-task10-real-liquid.md) | Isaac 4.1/4.5、240 Hz 的规定无机器人轨迹、逐步保液、真实落液接收计量、连续显色及重置 | 解析阀道/毛细流、物理搅拌、机器人操作、任意姿态防漏或通用求解器参数 |
+| [task_10 真液体 VR](../records/2026-10-09-task10-real-liquid-vr.md) | Isaac 4.5 直接打开/VR 挂载、局部 XY ±1 cm 的粒子同步与采集重置；晃瓶后静置2秒再回移的受限轨迹 | 头显实采、晃瓶后立即回移、任意连续手部运动、非单位挂载或改写旧任务资格 |
+| [task_10 真液体 120 Hz r2](../records/2026-10-10-task10-real-liquid-120hz.md) | Isaac 4.1/4.5 原生 120 Hz、64 迭代的规定无机器人轨迹；4.5 VR 挂载、±1 cm 平移和采集重置；逐步保液、计量与连续显色 | 隐含 240 Hz 子步、任意快速手部运动、头显实采、实时帧率或通用碰撞偏移默认 |
 | [液体接入契约](../design/liquid-autofill-contract.md) | 指定生产者和运行时的液体资格与闭包 | 视觉假液体自动获得真实液体能力 |
 
 [早期假液体原型](../records/2026-08-16-visual-static-liquid-prototype.md) 的“仅背景”描述是该原型当时的范围；
