@@ -212,3 +212,69 @@ def test_generated_environment_intake_v2_requires_passing_support_review(
             asset_id="scientific_environment_code_room_example4_v1",
             delivery_root=tmp_path,
         )
+
+
+def test_generated_environment_intake_native_scenario_forge_producer(
+    tmp_path: Path,
+) -> None:
+    _write_delivery(tmp_path)
+    exporter_script = tmp_path / "provenance" / "export_room_source_v2.py"
+    exporter_script.write_text("print('export v2')\n", encoding="utf-8")
+
+    manifest_path = tmp_path / "source_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    del manifest["code_as_room"]
+    manifest["run_id"] = "kitchen_coffee_bar_v2"
+    manifest["producer"] = {
+        "repo": "scenario-forge",
+        "commit": "1a2b3c4d5e6f",
+        "exporter": "skills/agentic-scene-factory/scripts/export_room_source_v2.py",
+    }
+    manifest["assets"]["provenance_build_script"] = {
+        "path": "provenance/export_room_source_v2.py",
+        "sha256": _digest(exporter_script),
+    }
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    intake = build_generated_environment_intake(
+        asset_id="out_of_domain_env_kitchen_coffee_bar_v2",
+        delivery_root=tmp_path,
+    ).to_mapping()
+
+    assert intake["producer"]["repo"] == "scenario-forge"
+    assert intake["producer"]["revision"] == "1a2b3c4d5e6f"
+    assert (
+        intake["producer"]["exporter"]
+        == "skills/agentic-scene-factory/scripts/export_room_source_v2.py"
+    )
+    assert (
+        intake["attribution"][0]
+        == "Scenario Forge internalized room exporter; internal use only."
+    )
+    assert (
+        intake["provenance"]["source_uri"]
+        == "generated-environment://scenario-forge/1a2b3c4d5e6f/kitchen_coffee_bar_v2"
+    )
+
+
+def test_generated_environment_intake_rejects_unknown_producer_repo(
+    tmp_path: Path,
+) -> None:
+    _write_delivery(tmp_path)
+    manifest_path = tmp_path / "source_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    del manifest["code_as_room"]
+    manifest["producer"] = {
+        "repo": "unknown-repo",
+        "commit": "1a2b3c4d5e6f",
+    }
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="producer"):
+        build_generated_environment_intake(
+            asset_id="out_of_domain_env_kitchen_coffee_bar_v2",
+            delivery_root=tmp_path,
+        )

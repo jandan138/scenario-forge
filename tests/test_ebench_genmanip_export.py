@@ -1022,9 +1022,11 @@ def test_articulated_object_exports_native_genmanip_articulation_contract(
         "obj1_uid": "obj_graduated_cylinder_03",
         "status": [
             [
-                [-0.05, 0.05],
-                [-100_000_000.0, 100_000_000.0],
-                [-100_000_000.0, 100_000_000.0],
+                [
+                    [-0.05, 0.05],
+                    [-100_000_000.0, 100_000_000.0],
+                    [-100_000_000.0, 100_000_000.0],
+                ]
             ]
         ],
         "not_set_mass": True,

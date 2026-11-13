@@ -46,12 +46,38 @@ class GeneratedEnvironmentIntake:
     support_sidecar_sha256: str | None = None
     support_relation_count: int | None = None
     support_removed_decoration_count: int | None = None
+    producer_repo: str = "Code-as-Room"
+    producer_exporter: str | None = None
 
     def to_mapping(self) -> dict[str, object]:
+        if self.producer_repo == "scenario-forge":
+            uri_scheme_repo = "scenario-forge"
+            attribution_lead = (
+                "Scenario Forge internalized room exporter; internal use only."
+            )
+        else:
+            uri_scheme_repo = "code-as-room"
+            attribution_lead = (
+                "Code-as-Room generated environment; internal use only."
+            )
         source_uri = (
-            "generated-environment://code-as-room/"
+            f"generated-environment://{uri_scheme_repo}/"
             f"{self.producer_revision}/{self.run_id}"
         )
+        producer_mapping: dict[str, object] = {
+            "repo": self.producer_repo,
+            "revision": self.producer_revision,
+            "run_id": self.run_id,
+            "source_schema_version": (
+                "room-source-v2"
+                if self.support_sidecar_sha256 is not None
+                else "room-source-v1"
+            ),
+            "manifest_sha256": self.producer_manifest_sha256,
+        }
+        if self.producer_exporter is not None:
+            producer_mapping["exporter"] = self.producer_exporter
+
         result: dict[str, object] = {
             "schema_version": GENERATED_ENVIRONMENT_INTAKE_SCHEMA_VERSION,
             "asset_id": self.asset_id,
@@ -59,23 +85,13 @@ class GeneratedEnvironmentIntake:
             "license": "LicenseRef-Internal-Generated",
             "redistributable": False,
             "attribution": [
-                "Code-as-Room generated environment; internal use only.",
+                attribution_lead,
                 (
                     "Source delivery declared closure SHA-256: "
                     f"{self.declared_closure_sha256}."
                 ),
             ],
-            "producer": {
-                "repo": "Code-as-Room",
-                "revision": self.producer_revision,
-                "run_id": self.run_id,
-                "source_schema_version": (
-                    "room-source-v2"
-                    if self.support_sidecar_sha256 is not None
-                    else "room-source-v1"
-                ),
-                "manifest_sha256": self.producer_manifest_sha256,
-            },
+            "producer": producer_mapping,
             "source": {
                 "usd": self.source_usd_relative_path,
                 "usd_sha256": self.source_usd_sha256,
@@ -130,10 +146,37 @@ def build_generated_environment_intake(
     if producer_schema not in _PRODUCER_SCHEMA_VERSIONS:
         raise ValueError("generated room source manifest schema is unsupported")
     run_id = _required_string(manifest, "run_id", "source manifest")
-    producer = _required_mapping(manifest, "code_as_room", "source manifest")
-    revision = _required_string(producer, "commit", "source manifest.code_as_room")
-    if re.fullmatch(r"[0-9a-f]{7,40}", revision) is None:
-        raise ValueError("source manifest Code-as-Room commit must be a Git hash")
+    producer_exporter: str | None = None
+    if manifest.get("producer") is not None:
+        producer = _required_mapping(manifest, "producer", "source manifest")
+        producer_repo = _required_string(
+            producer, "repo", "source manifest.producer"
+        )
+        if producer_repo not in {"scenario-forge", "Code-as-Room"}:
+            raise ValueError(
+                f"source manifest producer repo is unsupported: {producer_repo!r}"
+            )
+        revision = _required_string(
+            producer, "commit", "source manifest.producer"
+        )
+        if re.fullmatch(r"[0-9a-f]{7,40}", revision) is None:
+            raise ValueError("source manifest producer commit must be a Git hash")
+        if producer.get("exporter") is not None:
+            producer_exporter = _safe_relative_path(
+                _required_string(
+                    producer, "exporter", "source manifest.producer"
+                )
+            )
+    else:
+        producer_repo = "Code-as-Room"
+        producer = _required_mapping(manifest, "code_as_room", "source manifest")
+        revision = _required_string(
+            producer, "commit", "source manifest.code_as_room"
+        )
+        if re.fullmatch(r"[0-9a-f]{7,40}", revision) is None:
+            raise ValueError(
+                "source manifest Code-as-Room commit must be a Git hash"
+            )
 
     assets = _required_mapping(manifest, "assets", "source manifest")
     declared = _declared_assets(assets)
@@ -311,6 +354,8 @@ def build_generated_environment_intake(
         support_sidecar_sha256=support_sidecar_sha256,
         support_relation_count=support_relation_count,
         support_removed_decoration_count=support_removed_count,
+        producer_repo=producer_repo,
+        producer_exporter=producer_exporter,
     )
 
 

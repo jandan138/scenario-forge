@@ -2007,7 +2007,10 @@ def _articulation_joint_state_metric(
     return {
         "type": _GENMANIP_RELATIONSHIP,
         "obj1_uid": object_id,
-        "status": [candidate],
+        # GenManip's check_subgoal_finished_articulation compares each status
+        # entry against ArticulationView.get_joints_state().positions.tolist(),
+        # which has shape (1, num_dofs) for a single articulation instance.
+        "status": [[candidate]],
     }
 
 

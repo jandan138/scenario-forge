@@ -62,6 +62,9 @@ _MAX_ROOT_TILT_DEG = 10.0
 _TABLETOP_XY_TOLERANCE_M = 0.01
 _TABLETOP_SUPPORT_TOLERANCE_M = 0.01
 _SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
+_COMPLETE_WALL_ROOT_NAME = re.compile(
+    r"^(?:wall(?:_|(?:north|south|east|west|side)(?:$|[_0-9]))|arch_wall_(?:north|south|east|west)(?:$|[_0-9]))"
+)
 
 
 class GenManipPreviewError(ValueError):
@@ -1483,7 +1486,9 @@ def _validate_room_survey_view(
     if not corner and hidden_paths:
         raise GenManipPreviewError(f"preview room-survey view {view_name} cannot hide room prims")
     for path in hidden_paths:
-        if "/room/" not in path or not Path(path).name.lower().startswith("wall_"):
+        if "/room/" not in path or not _COMPLETE_WALL_ROOT_NAME.match(
+            Path(path).name.lower()
+        ):
             raise GenManipPreviewError(
                 f"preview room-survey view {view_name} hidden path is not a complete wall root"
             )

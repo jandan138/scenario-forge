@@ -19,7 +19,15 @@ from scenario_forge.adapters.ebench import (
     export_genmanip_collected_package,
 )
 from scenario_forge.adapters.real2sim import Real2SimImportError, import_real2sim_result
+from scenario_forge.generation.layout.constraints import (
+    LayoutConstraintError,
+    load_layout_constraints,
+)
 from scenario_forge.generation.layout.layout_planner import LayoutPlanError, plan_layout_artifacts
+from scenario_forge.generation.layout.relational_solver import (
+    RelationalLayoutSpecError,
+    solve_relational_tabletop_layout,
+)
 from scenario_forge.generation.cousins.cousin_generator import (
     CousinGenerationError,
     generate_cousin_packages,
@@ -290,6 +298,27 @@ def build_parser() -> argparse.ArgumentParser:
     )
     layout_plan_parser.add_argument("--package", required=True, help="Package directory")
     layout_plan_parser.add_argument("--difficulty", default="easy", help="Difficulty profile")
+
+    layout_solve_rel_parser = layout_subparsers.add_parser(
+        "solve-relational",
+        help="Solve relational and multi-DOF sweep-aware tabletop poses",
+    )
+    layout_solve_rel_parser.add_argument(
+        "--spec", required=True, help="Path to relational-layout-spec/v0.1 YAML"
+    )
+    layout_solve_rel_parser.add_argument(
+        "--domain-pack",
+        default=None,
+        help="Optional domain pack directory (or layout_constraints.yaml path)",
+    )
+    layout_solve_rel_parser.add_argument(
+        "--out", required=True, help="Output path for relational-layout-result/v0.1 YAML"
+    )
+    layout_solve_rel_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit with code 2 when layout status is not 'solved'",
+    )
 
     real2sim_parser = subparsers.add_parser("real2sim", help="Real-to-sim import commands")
     real2sim_subparsers = real2sim_parser.add_subparsers(dest="real2sim_command", required=True)
@@ -1051,6 +1080,38 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Layout artifacts written: {result.package_root}")
         for artifact in result.artifacts:
             print(artifact)
+        return 0
+
+    if args.command == "layout" and args.layout_command == "solve-relational":
+        spec_path = Path(args.spec)
+        out_path = Path(args.out)
+        if not spec_path.exists():
+            print(f"Relational layout spec not found: {spec_path}")
+            return 1
+        try:
+            raw_spec = yaml.safe_load(spec_path.read_text(encoding="utf-8"))
+            domain_constraints = None
+            if args.domain_pack is not None:
+                pack_target = Path(args.domain_pack)
+                pack_dir = pack_target.parent if pack_target.is_file() else pack_target
+                domain_constraints = load_layout_constraints(pack_dir)
+            rel_result = solve_relational_tabletop_layout(
+                raw_spec,
+                domain_constraints=domain_constraints,
+            )
+        except (OSError, yaml.YAMLError, LayoutConstraintError, RelationalLayoutSpecError) as exc:
+            print(exc)
+            return 1
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(
+            yaml.safe_dump(rel_result.to_mapping(), sort_keys=False),
+            encoding="utf-8",
+        )
+        print(f"Relational layout solved ({rel_result.status}): {out_path}")
+        for conflict in rel_result.conflicts:
+            print(f"  [{conflict.conflict_type}] {conflict.message}")
+        if args.strict and rel_result.status != "solved":
+            return 2
         return 0
 
     if args.command == "real2sim" and args.real2sim_command == "import":

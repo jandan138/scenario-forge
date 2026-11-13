@@ -973,3 +973,86 @@ def _load_yaml(path: Path) -> dict[str, object]:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     assert isinstance(data, dict)
     return data
+
+
+def test_room_survey_accepts_code_as_room_v2_camelcase_wall_roots_and_rejects_furniture(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(_build_package(tmp_path)).output_dir
+    manifest_path = collected_package / "package_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["source_assets"][0]["upstream_package"] = {
+        "metadata": {"producer_asset_role": "visual_static_environment"}
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    write_genmanip_preview_request(collected_package)
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    evidence_dir = _write_passing_evidence(collected_package, request)
+
+    render_manifest_path = evidence_dir / "render_manifest.json"
+    render_manifest = json.loads(render_manifest_path.read_text(encoding="utf-8"))
+    render_manifest["views"]["room_corner_a"]["temporary_hidden_prim_paths"] = [
+        "/World/test/room/WallNorth",
+        "/World/test/room/WallSide_1",
+    ]
+    render_manifest["views"]["room_corner_b"]["temporary_hidden_prim_paths"] = [
+        "/World/test/room/WallSouth_0",
+        "/World/test/room/WallSouth_1",
+        "/World/test/room/WallSide_0",
+    ]
+    render_manifest_path.write_text(
+        json.dumps(render_manifest, indent=2) + "\n", encoding="utf-8"
+    )
+
+    result = validate_genmanip_preview_evidence(collected_package)
+    assert result.status == "passed"
+
+    render_manifest["views"]["room_corner_a"]["temporary_hidden_prim_paths"] = [
+        "/World/test/room/WallShelf_0",
+    ]
+    render_manifest_path.write_text(
+        json.dumps(render_manifest, indent=2) + "\n", encoding="utf-8"
+    )
+    with pytest.raises(GenManipPreviewError, match="not a complete wall root"):
+        validate_genmanip_preview_evidence(collected_package)
+
+
+def test_room_survey_accepts_arch_wall_cardinal_roots_and_rejects_wall_outlets(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(_build_package(tmp_path)).output_dir
+    manifest_path = collected_package / "package_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["source_assets"][0]["upstream_package"] = {
+        "metadata": {"producer_asset_role": "visual_static_environment"}
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    write_genmanip_preview_request(collected_package)
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    evidence_dir = _write_passing_evidence(collected_package, request)
+
+    render_manifest_path = evidence_dir / "render_manifest.json"
+    render_manifest = json.loads(render_manifest_path.read_text(encoding="utf-8"))
+    render_manifest["views"]["room_corner_a"]["temporary_hidden_prim_paths"] = [
+        "/World/test/room/Arch_Shell_Root/Arch_Wall_West_South",
+        "/World/test/room/Arch_Shell_Root/Arch_Wall_North",
+    ]
+    render_manifest["views"]["room_corner_b"]["temporary_hidden_prim_paths"] = [
+        "/World/test/room/Arch_Shell_Root/Arch_Wall_South_WestReturn",
+        "/World/test/room/Arch_Shell_Root/Arch_Wall_East_Center",
+    ]
+    render_manifest_path.write_text(
+        json.dumps(render_manifest, indent=2) + "\n", encoding="utf-8"
+    )
+
+    result = validate_genmanip_preview_evidence(collected_package)
+    assert result.status == "passed"
+
+    render_manifest["views"]["room_corner_a"]["temporary_hidden_prim_paths"] = [
+        "/World/test/room/Arch_Wall_Outlets_Sconces",
+    ]
+    render_manifest_path.write_text(
+        json.dumps(render_manifest, indent=2) + "\n", encoding="utf-8"
+    )
+    with pytest.raises(GenManipPreviewError, match="not a complete wall root"):
+        validate_genmanip_preview_evidence(collected_package)

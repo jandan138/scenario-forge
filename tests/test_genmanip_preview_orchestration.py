@@ -856,3 +856,53 @@ def _call_name(function: ast.expr) -> str:
         prefix = _call_name(function.value)
         return f"{prefix}.{function.attr}" if prefix else function.attr
     return ""
+
+
+def test_renderer_ceiling_door_occluders_and_interior_fill_helpers() -> None:
+    module = _load_isaac_renderer_module()
+    import numpy as np
+
+    for ceiling_name in (
+        "Arch_Coffered_Ceiling",
+        "Ceiling_Grid_Slab",
+        "Ceiling_TBar_MainRunner_1",
+        "Ceiling_LED_Troffer_1",
+        "Ceiling_HEPA_Diffuser_1",
+        "Arch_Ceiling_Slab",
+        "Arch_Ceiling_Baffle_1",
+        "Arch_HVAC_Diffuser_East",
+        "Arch_Pendant_East_Body",
+    ):
+        assert module._is_ceiling_occluder_name(ceiling_name), ceiling_name
+    for non_ceiling in ("Wall_North", "Arch_Wall_North", "NorthBar_Counter", "Floor_Slab"):
+        assert not module._is_ceiling_occluder_name(non_ceiling), non_ceiling
+
+    for door_leaf_name in (
+        "Door_0_VisionGlass",
+        "Door_1_StileOut",
+        "Door_ExteriorDaylight",
+        "Airlock_Double_Doors_leaf_left",
+        "Airlock_Double_Doors_window_right_glass",
+        "Arch_DoorLeaf_Left_Glass",
+        "Arch_DoorPull_Left_In",
+        "Arch_Sidelight_Glass_L",
+    ):
+        assert module._is_entrance_door_leaf_name(door_leaf_name), door_leaf_name
+    for non_leaf in (
+        "Door_Jamb_Left",
+        "Airlock_Double_Doors_jamb_left",
+        "Arch_Door_Jamb_L",
+        "NorthBar_Cabinet_Left_door_0",
+        "N_Credenza_C_Door_L",
+        "West_MSD_Dry_Cabinet_1_door_upper_left_glass",
+    ):
+        assert not module._is_entrance_door_leaf_name(non_leaf), non_leaf
+
+    room_bounds = (np.asarray([-4.2, -4.2, 0.0]), np.asarray([4.2, 4.2, 3.2]))
+    rig = module._interior_fill_light_specs(room_bounds)
+    assert len(rig) == 4
+    for _, pos, intensity, _, _ in rig:
+        assert -4.0 < pos[0] < 4.0
+        assert -4.0 < pos[1] < 4.0
+        assert 2.0 <= pos[2] < 3.0
+        assert intensity > 5000.0
