@@ -25,8 +25,8 @@ Produce a self-contained, reopenable USD asset with explicit units/orientation, 
 1. Classify the input as a Hunyuan mesh, an existing mesh, or an existing USD.
 2. Read [hunyuan-isaac-workflow.md](references/hunyuan-isaac-workflow.md) for generation, repair, scale/orientation, and USD authoring decisions.
 3. Read [articulation-physics.md](references/articulation-physics.md) for the single-root topology, joint drives, collision proxies, variants, and exception policy.
-4. Read [validation-and-acceptance.md](references/validation-and-acceptance.md) before claiming physics or interaction success.
-5. Run `scripts/check_articulation_usd.py` in Isaac Kit Python for the static contract. Use Isaac Sim 4.5 for runtime acceptance; report Isaac 4.1 as static-only unless a runtime is actually available.
+4. Read [validation-and-acceptance.md](references/validation-and-acceptance.md) and [ika-grade-acceptance-and-visual-critic.md](references/ika-grade-acceptance-and-visual-critic.md) before claiming physics or visual acceptance (`GEN-008`: `G1..G8 + G9a + G9b`).
+5. Run `scripts/check_articulation_usd.py` in Isaac Kit Python for the static contract (`G1`), use `scripts/cad_usd_kit.py` for CAD-grade procedural USD/PBR/vector-UI authoring, and `scripts/blender_usd_studio_render.py` for Cycles `AgX` 4-view studio sheets (`G9a`/`G9b` inputs). Use Isaac Sim 4.5 for runtime acceptance; report Isaac 4.1 explicitly when used for runtime verification.
 6. Read [oven125-legacy-case-study.md](references/oven125-legacy-case-study.md) only when comparing with the historical oven implementation. It is evidence and a migration reference, not the new topology default.
 
 ## Source route fallback (local amendment 2026-09-17)

@@ -16,6 +16,7 @@ import importlib.util
 import json
 import math
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -458,6 +459,25 @@ def _render_initial_scene(
             np.maximum(room_bounds[1], workcell_bounds[1]),
         )
         wall_records = _room_wall_records(room_prim, room_bounds, bbox_cache, np)
+        ceiling_prims = (
+            _room_ceiling_prims(room_prim) if room_isolation_supported else []
+        )
+        entrance_door_prims = (
+            _room_entrance_door_prims(room_prim) if room_isolation_supported else []
+        )
+        interior_lights: list[tuple[Any, float]] = []
+        if room_isolation_supported:
+            for lname, lpos, lintensity, lradius, lrgb in _interior_fill_light_specs(
+                room_bounds
+            ):
+                slight = UsdLux.SphereLight.Define(
+                    stage, f"/World/ScenarioForgeInitialPreview_{lname}"
+                )
+                slight.CreateIntensityAttr(0.0)
+                slight.CreateRadiusAttr(float(lradius))
+                slight.CreateColorAttr(Gf.Vec3f(*lrgb))
+                slight.AddTranslateOp().Set(Gf.Vec3d(*lpos))
+                interior_lights.append((slight, float(lintensity)))
 
         camera_records: dict[str, dict[str, Any]] = {}
         for view_name in view_names:
@@ -582,6 +602,7 @@ def _render_initial_scene(
             if not room_isolation_supported:
                 room_visibility_attr.Set(UsdGeom.Tokens.inherited)
                 visibility_mode = "producer_entrypoint_scene_inherited"
+                preview_light.GetIntensityAttr().Set(750.0)
             elif view_name in {"workspace_closeup", "task_object_closeup"}:
                 room_visibility_attr.Set(
                     _preview_room_visibility_token(
@@ -591,6 +612,9 @@ def _render_initial_scene(
                     )
                 )
                 visibility_mode = "scene_room_invisible_workspace_isolation"
+                preview_light.GetIntensityAttr().Set(750.0)
+                for slight, _ in interior_lights:
+                    slight.GetIntensityAttr().Set(0.0)
             else:
                 room_visibility_attr.Set(
                     _preview_room_visibility_token(
@@ -603,6 +627,40 @@ def _render_initial_scene(
                 view_request = _as_mapping(
                     request_views.get(view_name), f"render request view {view_name}"
                 )
+                cutaway_ceiling = (
+                    view_name in {"room_topdown", "room_corner_a", "room_corner_b"}
+                )
+                if cutaway_ceiling:
+                    preview_light.GetIntensityAttr().Set(750.0)
+                    for slight, base_intensity in interior_lights:
+                        slight.GetIntensityAttr().Set(0.25 * base_intensity)
+                    for ceiling_prim in ceiling_prims:
+                        visibility_attr = UsdGeom.Imageable(
+                            ceiling_prim
+                        ).GetVisibilityAttr()
+                        original_wall_visibility.append(
+                            (
+                                visibility_attr,
+                                visibility_attr.Get() or UsdGeom.Tokens.inherited,
+                            )
+                        )
+                        visibility_attr.Set(UsdGeom.Tokens.invisible)
+                else:
+                    preview_light.GetIntensityAttr().Set(1100.0)
+                    for slight, base_intensity in interior_lights:
+                        slight.GetIntensityAttr().Set(base_intensity)
+                if view_name == "room_entrance_eye_level":
+                    for door_prim in entrance_door_prims:
+                        visibility_attr = UsdGeom.Imageable(
+                            door_prim
+                        ).GetVisibilityAttr()
+                        original_wall_visibility.append(
+                            (
+                                visibility_attr,
+                                visibility_attr.Get() or UsdGeom.Tokens.inherited,
+                            )
+                        )
+                        visibility_attr.Set(UsdGeom.Tokens.invisible)
                 if view_request.get("cutaway_policy") == "nearest_complete_room_wall_roots":
                     reviewed_hidden = view_request.get(
                         "reviewed_temporary_hidden_prim_paths"
@@ -999,6 +1057,82 @@ def _fit_projected_camera(
     raise RuntimeError("automatic room camera could not frame its required bounds")
 
 
+_COMPLETE_WALL_ROOT_NAME = re.compile(
+    r"^(?:wall(?:_|(?:north|south|east|west|side)(?:$|[_0-9]))|arch_wall_(?:north|south|east|west)(?:$|[_0-9]))"
+)
+_CEILING_OCCLUDER_NAME = re.compile(
+    r"^(?:arch_)?(?:coffered_)?ceiling(?:$|_)|^(?:arch_)?(?:soffit|troffer|tgrid|skylight|roof|hvac_diffuser|pendant)(?:$|_)"
+)
+_ENTRANCE_DOOR_LEAF_NAME = re.compile(
+    r"^(?:arch_doorleaf|arch_doorpull|arch_sidelight_glass|airlock_double_doors_(?:leaf|window|push_bar|closer)|door_[0-9]+_|door_exteriordaylight|(?:entrance_)?door_(?:leaf|panel))"
+)
+
+
+def _is_ceiling_occluder_name(name: str) -> bool:
+    return bool(_CEILING_OCCLUDER_NAME.match(name.lower()))
+
+
+def _is_entrance_door_leaf_name(name: str) -> bool:
+    return bool(_ENTRANCE_DOOR_LEAF_NAME.match(name.lower()))
+
+
+def _prim_has_mesh_without_lights(prim: Any) -> bool:
+    has_mesh = False
+    stack = [prim]
+    while stack:
+        current = stack.pop()
+        type_name = str(current.GetTypeName())
+        if "Light" in type_name:
+            return False
+        if type_name == "Mesh":
+            has_mesh = True
+        stack.extend(current.GetChildren())
+    return has_mesh
+
+
+def _matching_room_xforms(room_prim: Any, predicate: Any) -> list[Any]:
+    room_path = str(room_prim.GetPath()).rstrip("/") + "/"
+    matched: list[Any] = []
+    for prim in room_prim.GetStage().Traverse():
+        if not str(prim.GetPath()).startswith(room_path):
+            continue
+        if str(prim.GetTypeName()) != "Xform":
+            continue
+        if not predicate(prim.GetName()):
+            continue
+        if predicate(prim.GetParent().GetName()):
+            continue
+        if _prim_has_mesh_without_lights(prim):
+            matched.append(prim)
+    return matched
+
+
+def _room_ceiling_prims(room_prim: Any) -> list[Any]:
+    return _matching_room_xforms(room_prim, _is_ceiling_occluder_name)
+
+
+def _room_entrance_door_prims(room_prim: Any) -> list[Any]:
+    return _matching_room_xforms(room_prim, _is_entrance_door_leaf_name)
+
+
+def _interior_fill_light_specs(
+    room_bounds: tuple[Any, Any],
+) -> tuple[tuple[str, tuple[float, float, float], float, float, tuple[float, float, float]], ...]:
+    lower, upper = room_bounds
+    cx = float(lower[0] + upper[0]) / 2.0
+    cy = float(lower[1] + upper[1]) / 2.0
+    dx = max(float(upper[0] - lower[0]), 2.0)
+    dy = max(float(upper[1] - lower[1]), 2.0)
+    z_fill = min(float(upper[2]) - 0.45, float(lower[2]) + 2.70)
+    z_fill = max(z_fill, float(lower[2]) + 2.0)
+    return (
+        ("KeyFrontRight", (cx + 0.10 * dx, cy - 0.14 * dy, z_fill), 11500.0, 0.50, (1.0, 0.98, 0.95)),
+        ("FillFrontLeft", (cx - 0.11 * dx, cy - 0.13 * dy, z_fill), 8500.0, 0.55, (0.96, 0.98, 1.0)),
+        ("WashRearLeft", (cx - 0.20 * dx, cy + 0.25 * dy, z_fill), 16500.0, 0.65, (1.0, 0.98, 0.95)),
+        ("WashRearRight", (cx + 0.20 * dx, cy + 0.25 * dy, z_fill), 16500.0, 0.65, (1.0, 0.98, 0.95)),
+    )
+
+
 def _room_wall_records(room_prim: Any, room_bounds: tuple[Any, Any], bbox_cache: Any, np: Any) -> list[dict[str, Any]]:
     lower, upper = room_bounds
     extent = upper - lower
@@ -1008,12 +1142,12 @@ def _room_wall_records(room_prim: Any, room_bounds: tuple[Any, Any], bbox_cache:
         if not str(prim.GetPath()).startswith(room_path):
             continue
         name = prim.GetName().lower()
-        if not name.startswith("wall_"):
+        if not _COMPLETE_WALL_ROOT_NAME.match(name):
             continue
         if str(prim.GetTypeName()) != "Xform":
             continue
         parent_name = prim.GetParent().GetName().lower()
-        if parent_name.startswith("wall_"):
+        if _COMPLETE_WALL_ROOT_NAME.match(parent_name):
             continue
         aligned = bbox_cache.ComputeWorldBound(prim).ComputeAlignedRange()
         wall_lower = np.asarray(aligned.GetMin(), dtype=float)

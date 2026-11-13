@@ -38,3 +38,19 @@ wholesale skill update.
   Hunyuan3D is unavailable, allow Blender-only procedural modeling driven by
   the frozen asset spec, with additional iteration rounds
   (`SKILL.md`, `references/hunyuan-isaac-workflow.md`).
+- 2026-11-13 `hunyuan-isaac-articulation-assets` & `agentic-scene-factory`:
+  codify `GEN-008` (`G1..G8 + G9a + G9b`) IKA-grade hero acceptance and
+  independent blind-review visual critic loop; promote reusable CAD OpenUSD
+  and Cycles `AgX` 4-view studio rendering helpers into
+  `skills/hunyuan-isaac-articulation-assets/scripts/{cad_usd_kit.py,blender_usd_studio_render.py}`
+  with portable Blender binary discovery (`SKILL.md`,
+  `references/ika-grade-acceptance-and-visual-critic.md`,
+  `skills/agentic-scene-factory/SKILL.md`).
+- 2026-11-13 `agentic-scene-factory`: internalize native Scenario Forge
+  `room-source-v2` exporter (`scripts/export_room_source_v2.py`), deterministic
+  6-view Cycles `AgX` room gate (`scripts/verify_and_render_room_pack.py`),
+  cross-host blind visual critic harness
+  (`scripts/run_independent_visual_critic.py`, `.claude/agents/visual-critic.md`),
+  and Real-to-Sim 1:1 Texture Twin & reprojection CLIs
+  (`scripts/{build_texture_twin_ledger,verify_texture_patch_pairs,render_reprojection_comparison}.py`,
+  `references/internalized-room-exporter-and-critic.md`).
