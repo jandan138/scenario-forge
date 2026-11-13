@@ -1,5 +1,7 @@
 # task09 新数采数据制作与恢复
 
+2026-11-13 存储退役：旧制作和恢复目录正在按用户要求清理，不能再按下文历史命令重启队列。正式 OSS train300/train500 保留；当前状态入口仍为 `/cpfs/user/zhuzihou/dev/task09-current.json`，其中发布回执已迁至保留的小型记录。范围、恢复方法及尚未完成的归档验收见[存储退役记录](../records/2026-11-13-genmanip-storage-retirement.md)。
+
 2026-10-19 OSS补充交付已完成：标准目标下 `task_09_solid_weighing_300/`、`task_09_solid_weighing_500/` 共4008个对象全量MD5校验及SSH代表回读通过；本地READY保持原范围，OSS回执见[发布记录](../records/2026-10-19-task09-oss-publication.md)。
 
 通用方法见[单任务制作与交付指南](genmanip-task-delivery.md)，新任务可复制[交付与验收清单](templates/genmanip-task-delivery-checklist.md)。本页保留具体任务的阶段记录；判断当前产物时，以最新交付入口及其验收范围为准。

@@ -57,13 +57,23 @@ task success.
 ## Isaac 4.1 initial-scene preview
 
 ```bash
+SF_GENMANIP_SOURCE=/cpfs/shared/simulation/zhuzihou/dev/GenManip
+SF_GENMANIP_REVISION=1e6061fa89344b4149b32423e0e82b71df20c5f3
+SF_GENMANIP_PREVIEW_ROOT="$(mktemp -d /tmp/scenario-forge-genmanip-preview.XXXXXX)"
+git -c core.hooksPath=/dev/null -C "$SF_GENMANIP_SOURCE" worktree add --detach "$SF_GENMANIP_PREVIEW_ROOT" "$SF_GENMANIP_REVISION"
+
 PYTHONPATH=src python scripts/generate_scientific_workbench_tube_prototypes.py \
   --bindings <accepted-five-asset-bindings.yaml> \
   --prototype all \
   --out <output-root> \
   --isaac-python /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python \
-  --genmanip-root /cpfs/user/zhuzihou/dev/worktrees/genmanip-runtime-contract-20260714
+  --genmanip-root "$SF_GENMANIP_PREVIEW_ROOT"
+
+git -C "$SF_GENMANIP_SOURCE" worktree remove "$SF_GENMANIP_PREVIEW_ROOT"
 ```
+
+The persistent July checkout was retired during the [storage cleanup](../records/2026-11-13-genmanip-storage-retirement.md).
+This temporary checkout preserves its exact revision and integration helper, without retaining another long-lived source copy.
 
 Review each image at:
 

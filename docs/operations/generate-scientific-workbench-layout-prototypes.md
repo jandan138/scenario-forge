@@ -28,6 +28,10 @@ PYTHONPATH=src python scripts/generate_scientific_workbench_layout_prototypes.py
 Produce the final two-layer 1080p visual evidence:
 
 ```bash
+SF_GENMANIP_SOURCE=/cpfs/shared/simulation/zhuzihou/dev/GenManip
+SF_GENMANIP_REVISION=1e6061fa89344b4149b32423e0e82b71df20c5f3
+SF_GENMANIP_PREVIEW_ROOT="$(mktemp -d /tmp/scenario-forge-genmanip-preview.XXXXXX)"
+git -c core.hooksPath=/dev/null -C "$SF_GENMANIP_SOURCE" worktree add --detach "$SF_GENMANIP_PREVIEW_ROOT" "$SF_GENMANIP_REVISION"
 export CUROBO_SRC=/cpfs/user/zhuzihou/dev/scenario-forge-runtime-evidence/scientific_workbench_bimanual_pour/frozen-curobo-20260718-run019-src
 
 PYTHONPATH="src:$CUROBO_SRC" python scripts/generate_scientific_workbench_layout_prototypes.py \
@@ -37,8 +41,13 @@ PYTHONPATH="src:$CUROBO_SRC" python scripts/generate_scientific_workbench_layout
   --render \
   --isaac-python /cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python \
   --render-runtime-preview \
-  --genmanip-root /cpfs/user/zhuzihou/dev/worktrees/genmanip-runtime-contract-20260714
+  --genmanip-root "$SF_GENMANIP_PREVIEW_ROOT"
+
+git -C "$SF_GENMANIP_SOURCE" worktree remove "$SF_GENMANIP_PREVIEW_ROOT"
 ```
+
+The persistent July checkout was retired during the [storage cleanup](../records/2026-11-13-genmanip-storage-retirement.md).
+The same pinned integration source is reconstructed temporarily from the retained shared repository; this does not upgrade the runtime qualification.
 
 `readiness.yaml` at the output root records completed and blocked rows. Every
 completed package has:
