@@ -1,0 +1,175 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  real2sim_open_office_bay_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/room/packages/real2sim_open_office_bay_v1/facade/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/room/packages/real2sim_open_office_bay_v1/package
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/room/packages/real2sim_open_office_bay_v1/package/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+    attribution:
+      - "Scenario Forge internalized room exporter (room-source-v2, real2sim_open_office_bay_v1); internal use only."
+
+  Real2SimBunchStandingDesk:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/source/real2sim_bunch_standing_desk/source.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/real2sim_bunch_standing_desk
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/real2sim_bunch_standing_desk/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+    attribution:
+      - "Real-to-Sim standing desk (1500x750x750 mm, warm oak top + Bunch decal + C10-F037 QR sticker) grounded in workstation photo."
+
+  DesktopDualDrawerRiserRig:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/hero_rig/assets/facades/desktop-dual-drawer-riser-rig/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/hero_rig/assets/packages/desktop-dual-drawer-riser-rig
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/hero_rig/assets/packages/desktop-dual-drawer-riser-rig/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /World/DesktopDualDrawerRiserRig
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+    attribution:
+      - "IKA-grade CAD procedural OpenUSD articulated hero rig (3 DOFs: dual 5-wall drawers + 15.6-inch Acer gaming laptop lid) grounded in workstation photo."
+
+  ChocoPiePack:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/chocopie_pack/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/chocopie_pack
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/chocopie_pack/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /World/ChocoPiePack
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  BlueBallpointPen:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/blue_ballpoint_pen/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/blue_ballpoint_pen
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/blue_ballpoint_pen/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /World/BlueBallpointPen
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  GlassWaterMug:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/glass_water_mug/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/glass_water_mug
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/glass_water_mug/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /World/GlassWaterMug
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  SpriteBottle500ml:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/sprite_bottle_500ml/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/sprite_bottle_500ml
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/sprite_bottle_500ml/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /World/SpriteBottle500ml
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  PhilipsMonitor27Landscape:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/philips_monitor_27_landscape/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/philips_monitor_27_landscape
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/philips_monitor_27_landscape/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  PhilipsMonitor27Portrait:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/philips_monitor_27_portrait/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/philips_monitor_27_portrait
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/philips_monitor_27_portrait/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  MechKeyboard98:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/mech_keyboard_98/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/mech_keyboard_98
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/mech_keyboard_98/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  HoneycombWhiteMouse:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/honeycomb_white_mouse/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/honeycomb_white_mouse
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/honeycomb_white_mouse/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  BlueTissuePack:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/blue_tissue_pack/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/blue_tissue_pack
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/blue_tissue_pack/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  EnjoyPaperCup:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/enjoy_paper_cup/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/enjoy_paper_cup
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/enjoy_paper_cup/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  LeftClutterDockGroup:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/facades/left_clutter_dock_group/facade.usda
+    package_dir: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/left_clutter_dock_group
+    manifest_path: ../../external_artifacts/real2sim_office_desk_20261113/desk_and_props/packages/left_clutter_dock_group/evidence/manifest.json
+    producer_revision: "20261113_real2sim_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false

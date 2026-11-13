@@ -72,6 +72,12 @@ v2 验证应拒绝根缺失/禁用、非 identity `Instance`、缺失或 kinemat
 关节类型、限制、度/弧度转换、命名状态及范围内的重置值。静态结构通过后，仍需对应目标运行时的运动/重置证据。
 只检查 USD 文件或注册列表不能宣布关节交互合格。
 
+对于复杂多自由度铰接主设备（适用 [GEN-008](asset-generation.md#gen-008) 的资产）：
+- 每个刚体 link 须通过 `AddAppliedSchema` 显式挂载 `PhysxRigidBodyAPI`，根节点须显式挂载 `PhysxArticulationAPI`，确保重开后 PhysX 驱动与阻尼参数不退化；
+- USD `Joints` scope 下的关节 prim 声明顺序必须与 PhysX BFS 拓扑深度顺序一致（所有 depth-1 直连基座的关节在前，depth-2 及更深层的串联子关节——例如复合编码器的 `SelectDialJoint`——置于所有 depth-1 关节之后），防止运行时 DOF 索引与期望契约错位。
+
+依据：[GEN-008](asset-generation.md#gen-008)、[来源绑定接口](../design/scenario-source-bindings.md)。
+
 ## 推荐做法
 
 <a id="art-006"></a>
@@ -87,3 +93,4 @@ v2 验证应拒绝根缺失/禁用、非 identity `Instance`、缺失或 kinemat
 滴定 r1.6 验证了其自身设备和材质行为，但不能拿来证明所有固定基座 v2 布局。
 
 变更记录：2026-09-08 将原设计文档中的制作规则迁到本页，明确固定基座范围，保留原设计路径用于解释与导航。
+2026-11-13：在 `ART-005` 下补充 `GEN-008` 复杂铰接主设备的显式 `PhysxRigidBodyAPI`/`PhysxArticulationAPI` 挂载与 USD `Joints` BFS 深度序交叉引用。

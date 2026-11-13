@@ -1,0 +1,290 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/electronics_qa_station/layout_constraints.yaml
+source_bindings: configs/source_bindings/out_of_domain_hero_r3_20261113.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 202
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.10
+  robot_xy: [0.0, -1.02]
+  objects:
+    - id: ingun_fixture
+      role: articulated_fixture
+      footprint_xy_m: [0.320, 0.515]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, 0.025]
+      robot_side_exception: "515mm deep INGUN MA 2111 test fixture spans benchtop centerline to preserve >=100mm front and rear table edge margins."
+      kinematic_clearance_volumes:
+        - id: clamp_lever_swing
+          joint: clamp_lever
+          local_xy_bounds_m:
+            x: [0.160, 0.235]
+            y: [-0.250, 0.060]
+    - id: esd_tray
+      role: source_container
+      footprint_xy_m: [0.164, 0.134]
+      region: left
+      facing: robot
+      yaw_offset_deg: 90.0
+      support_z_offset_m: 0.002
+      support_top_offset_z_m: 0.0065
+    - id: pcba_carrier_board
+      role: target_workpiece
+      footprint_xy_m: [0.102, 0.082]
+      region: left
+      facing: robot
+      yaw_offset_deg: 90.0
+      stacked_on: esd_tray
+      stack_xy_offset_m: [0.0, 0.0]
+    - id: bench_multimeter
+      role: context_prop
+      footprint_xy_m: [0.150, 0.216]
+      region: right
+      facing: robot
+      support_z_offset_m: 0.002
+      robot_side_exception: "Context multimeter placed on right side clear of clamp_lever_swing corridor."
+  relations:
+    - subject: esd_tray
+      predicate: left_of
+      reference: ingun_fixture
+    - subject: bench_multimeter
+      predicate: right_of
+      reference: ingun_fixture
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: electronics_qa_ingun_probe_lock
+  domain: electronics_qa_station
+  task_family: precision_fixture_insertion_and_lock
+  instruction: "从左侧防静电周转托盘中拾取待测 80 通道 PCBA 载板，旋转 90° 对准并平放入针床测试治具中央 G10 金色弹簧探针四导轨定位巢内；随后合下烟灰亚克力透视压针上盖，压下跨双侧红色 U 型龙门偏心锁紧手柄完成机械锁止，再将前面板安全护栏测试拨杆拨至探针激活档位，最后按下绿色自复位 TEST START 启动按键触发在线针床测试。"
+  max_steps: 2600
+  seed: "202"
+  scene:
+    asset_id: out_of_domain_env_smt_qa_workshop_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: standard_table
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    ingun_fixture:
+      asset_id: IngunMA2111Fixture
+      source_prim_path: /World/IngunMA2111Fixture
+      role: articulated_fixture
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        pcba_nest:
+          xyz: [0.0, -0.040, 0.128]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    esd_tray:
+      asset_id: ESDTray
+      source_prim_path: /World/ESDTray
+      role: source_container
+    pcba_carrier_board:
+      asset_id: PCBACarrierBoard
+      source_prim_path: /World/PCBACarrierBoard
+      role: target_workpiece
+    bench_multimeter:
+      asset_id: BenchMultimeter
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: electronics_qa_station_standard_v1
+        group_id: bench_instrumentation
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -1.02, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, lift, align, insert, flip, press, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [close, press, lock, release]
+  steps:
+    - id: seat_pcba_in_nest
+      skill: insert
+      actors: [left_arm]
+      parameters:
+        object: pcba_carrier_board
+        source: esd_tray
+        target: ingun_fixture
+        target_frame: ingun_fixture.pcba_nest
+    - id: close_pressure_hood
+      skill: close_articulated_part
+      actors: [right_arm]
+      depends_on: [seat_pcba_in_nest]
+      parameters:
+        object: ingun_fixture
+        joint: pressure_hood
+        target_state: closed
+    - id: lock_clamp_lever
+      skill: close_articulated_part
+      actors: [right_arm]
+      depends_on: [close_pressure_hood]
+      parameters:
+        object: ingun_fixture
+        joint: clamp_lever
+        target_state: locked
+    - id: activate_mode_toggle
+      skill: adjust_articulated_part
+      actors: [left_arm]
+      depends_on: [lock_clamp_lever]
+      parameters:
+        object: ingun_fixture
+        joint: mode_toggle
+        target_state: probe_active
+    - id: press_test_start
+      skill: adjust_articulated_part
+      actors: [right_arm]
+      depends_on: [activate_mode_toggle]
+      parameters:
+        object: ingun_fixture
+        joint: test_start_button
+        target_state: pressed
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "Out-of-domain 5-stage CAD PCBA test fixture operation contract (r2); validates precision 4-rail 80-pin nest seating and 4-DOF hood/U-gantry-clamp/toggle/start-button sequence without claiming autonomous policy execution."
+    predicates:
+      - id: pcba_seated_in_nest
+        type: relative_pose_reached
+        sequence_index: 0
+        parameters:
+          object: pcba_carrier_board
+          relative_to: ingun_fixture
+          xyz_range:
+            x: [-0.012, 0.012]
+            y: [-0.052, -0.028]
+            z: [0.122, 0.140]
+          axis_alignment:
+            relative_to_part: pressure_hood
+            object_axis: x
+            target_axis: x
+            comparison: "<="
+            threshold_deg: 10.0
+      - id: pressure_hood_closed
+        type: articulation_joint_state_reached
+        sequence_index: 1
+        parameters:
+          object: ingun_fixture
+          joint: pressure_hood
+          state: closed
+      - id: clamp_lever_locked
+        type: articulation_joint_state_reached
+        sequence_index: 2
+        parameters:
+          object: ingun_fixture
+          joint: clamp_lever
+          state: locked
+      - id: mode_toggle_probe_active
+        type: articulation_joint_state_reached
+        sequence_index: 3
+        parameters:
+          object: ingun_fixture
+          joint: mode_toggle
+          state: probe_active
+      - id: test_start_button_pressed
+        type: articulation_joint_state_reached
+        sequence_index: 4
+        parameters:
+          object: ingun_fixture
+          joint: test_start_button
+          state: pressed
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_pcba_aligned
+          weight: 0.28
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: pcba_carrier_board
+              relative_to: ingun_fixture
+              xyz_range:
+                x: [-0.012, 0.012]
+                y: [-0.052, -0.028]
+                z: [0.122, 0.140]
+          source_ref:
+            step_id: seat_pcba_in_nest
+        - id: stage1_hood_closed
+          weight: 0.20
+          active: true
+          requires: [stage0_pcba_aligned]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: ingun_fixture
+              joint: pressure_hood
+              state: closed
+          source_ref:
+            step_id: close_pressure_hood
+        - id: stage2_lever_locked
+          weight: 0.20
+          active: true
+          requires: [stage1_hood_closed]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: ingun_fixture
+              joint: clamp_lever
+              state: locked
+          source_ref:
+            step_id: lock_clamp_lever
+        - id: stage3_probe_enabled
+          weight: 0.16
+          active: true
+          requires: [stage2_lever_locked]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: ingun_fixture
+              joint: mode_toggle
+              state: probe_active
+          source_ref:
+            step_id: activate_mode_toggle
+        - id: stage4_test_started
+          weight: 0.16
+          active: true
+          requires: [stage3_probe_enabled]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: ingun_fixture
+              joint: test_start_button
+              state: pressed
+          source_ref:
+            step_id: press_test_start

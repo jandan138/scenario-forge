@@ -95,6 +95,51 @@
 
 高概率失败模式:`<list, from experience or skill references>`
 
+### 9.1 声明式 IKA-Grade 门禁配置(Declarative G1..G9b Acceptance Config, GEN-008)
+
+适用 `GEN-008` 的铰接主设备必须在本节或独立 YAML/JSON 规格文件中声明驱动 `scripts/verify_ika_grade_hero_acceptance.py --spec-config <path>` 的确定性验收参数（`G1..G8 + G9a + G9b`）：
+
+```yaml
+schema_version: ika-grade-hero-spec/v1.0
+slug: <kebab-case-slug>
+evidence_slug: <kebab-case-evidence-slug>
+asset_id: <AssetId>
+expected_wdh_m: [0.0, 0.0, 0.0]
+envelope_tol_m: 0.0025
+closed_joint_targets_rad_or_m:
+  <JointName>: 0.0
+control_links: [<ButtonOrDialLink>, ...]
+min_control_gap_m: 0.003
+spring_buttons:
+  <SpringJointName>: -0.0020
+composite_knob: null  # or {press_joint, press_target_m, rot_joint, rot_target_rad}
+force_smoke:
+  joint: <JointName>
+  link: <LinkName>
+  force_world_xyz: [0.0, 0.0, 0.0]
+  force_pos_world_xyz: [0.0, 0.0, 0.0]
+  expected_sign: 1
+  min_travel: 0.025
+load_tests: []        # 600-frame cavity/surface load-bearing specs (G7)
+rail_transport_test: null  # loaded rail/tunnel transport spec (G8), or null
+rtx_camera:
+  eye: [0.6, -0.8, 0.5]
+  target: [0.0, 0.0, 0.2]
+g9a_appearance:
+  primary_mesh_keywords: [shell, housing, plinth, lid, hood, cassette, tray, dial, rotor]
+  min_material_classes: 3
+  ui_representation: uv_texture  # uv_texture | vector_3d | none
+  min_texture_std: 8.0
+  min_ui_vector_meshes: 3
+  min_cycles_png_bytes: 40000
+  min_rtx_mean_luma: 14.0
+  min_rtx_std_luma: 10.0
+g9b_visual_critic:
+  min_dimension_score: 8.0
+  max_repair_rounds: 3
+  require_distinct_critic_agent: true
+```
+
 ## 10. 交付与命名规范(Delivery conventions)
 
 - 文件命名:`<convention>`

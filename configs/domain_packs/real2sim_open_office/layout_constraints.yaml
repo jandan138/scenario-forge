@@ -1,0 +1,27 @@
+schema_version: layout-constraints/v0.2
+workspace:
+  x_range_m: [-0.75, 0.75]
+  y_range_m: [-0.375, 0.375]
+  z_m: 0.750
+tabletop_placement:
+  policy_id: real2sim_open_office.robot_facing_tabletop.v1
+  support_surface_prim_path: /World/table/__aan_static_support_proxy
+  min_edge_clearance_m: 0.05
+  support_height_tolerance_m: 0.02
+  exception_metadata_key: tabletop_placement_exception
+difficulty_profiles:
+  easy:
+    clutter_level: low
+    target_distance_range_m: [0.16, 0.30]
+    occlusion: none
+    distractor_count: 2
+  medium:
+    clutter_level: medium
+    target_distance_range_m: [0.20, 0.45]
+    occlusion: partial
+    distractor_count: 5
+  hard:
+    clutter_level: high
+    target_distance_range_m: [0.22, 0.60]
+    occlusion: partial
+    distractor_count: 7

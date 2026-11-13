@@ -1,0 +1,207 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  out_of_domain_env_kitchen_coffee_bar_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/kitchen_coffee_bar_v1/facade/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/kitchen_coffee_bar_v1/package
+    manifest_path: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/kitchen_coffee_bar_v1/package/evidence/manifest.json
+    producer_revision: "20261112"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+    attribution:
+      - "Code-as-Room generated environment (d1861861b34229d79595058a1e5ded6c2a0e4270); internal use only."
+
+  out_of_domain_env_smt_qa_workshop_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/smt_qa_workshop_v1/facade/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/smt_qa_workshop_v1/package
+    manifest_path: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/smt_qa_workshop_v1/package/evidence/manifest.json
+    producer_revision: "20261112"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+    attribution:
+      - "Code-as-Room generated environment (d1861861b34229d79595058a1e5ded6c2a0e4270); internal use only."
+
+  out_of_domain_env_office_print_studio_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/office_print_studio_v1/facade/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/office_print_studio_v1/package
+    manifest_path: ../../external_artifacts/out_of_domain_factory_20261112/rooms/packages/office_print_studio_v1/package/evidence/manifest.json
+    producer_revision: "20261112"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+    attribution:
+      - "Code-as-Room generated environment (d1861861b34229d79595058a1e5ded6c2a0e4270); internal use only."
+
+  standard_table:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../../ConvertAsset/outputs/scientific_workbench_standard_table_20260819/source.usda
+    package_dir: ../../../ConvertAsset/outputs/scientific_workbench_standard_table_20260819/package
+    manifest_path: ../../../ConvertAsset/outputs/scientific_workbench_standard_table_20260819/package/evidence/manifest.json
+    producer_revision: "20260819"
+    expected_scope_prims:
+      - /World/table
+    license: LicenseRef-Internal-LabUtopia-Derived
+    redistributable: false
+    attribution:
+      - "ConvertAsset qualified static_support_object table (2000x800x755 mm)."
+
+  NespressoCreatistaPlus:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/nespresso-creatista-plus-bne800/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/nespresso-creatista-plus-bne800
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/nespresso-creatista-plus-bne800/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/NespressoCreatistaPlus
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+    attribution:
+      - "IKA-grade CAD procedural OpenUSD asset (r2, 7 DOFs) grounded in Breville/Nespresso Creatista Plus (BNE800) specifications."
+
+  IngunMA2111Fixture:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/ingun-ma-2111-pcba-fixture/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/ingun-ma-2111-pcba-fixture
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/ingun-ma-2111-pcba-fixture/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/IngunMA2111Fixture
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+    attribution:
+      - "IKA-grade CAD procedural OpenUSD asset (r2, 6 DOFs, 80 gold pogo-pins) grounded in INGUN MA 2111 (Item 31730) datasheet."
+
+  BrotherMFCL2820DW:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/brother-mfc-l2820dw-printer/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/brother-mfc-l2820dw-printer
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/brother-mfc-l2820dw-printer/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/BrotherMFCL2820DW
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+    attribution:
+      - "IKA-grade CAD procedural OpenUSD asset (r2, 7 DOFs, ADF + C-bay + LCD console) grounded in Brother MFC-L2820DW specification."
+
+  EspressoCup:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/espresso_cup/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/espresso_cup
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/espresso_cup/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/EspressoCup
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  CoffeeCapsule:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/coffee_capsule/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/coffee_capsule
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/coffee_capsule/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/CoffeeCapsule
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  PCBACarrierBoard:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/pcba_carrier_board/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/pcba_carrier_board
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/pcba_carrier_board/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/PCBACarrierBoard
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  ESDTray:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/esd_tray/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/esd_tray
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/esd_tray/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/ESDTray
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  A5MediaPack:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/a5_media_pack/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/a5_media_pack
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/a5_media_pack/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/A5MediaPack
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  CalibrationSheet:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/calibration_sheet/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/calibration_sheet
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/calibration_sheet/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/CalibrationSheet
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  MilkPitcher:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/milk_pitcher/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/milk_pitcher
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/milk_pitcher/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  BenchMultimeter:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/bench_multimeter/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/bench_multimeter
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/bench_multimeter/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  OfficePenOrganizer:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/office_pen_organizer/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/office_pen_organizer
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/office_pen_organizer/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false

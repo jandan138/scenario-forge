@@ -1,15 +1,20 @@
 # Intake a Generated Blender Environment
 
-This workflow turns one Code-as-Room source delivery into selectable visual
-backgrounds for an ordinary eBench task package. Scenario Forge remains the
-portable compiler: it does not run Blender, rewrite USD/MDL, or add background
-physics.
+This workflow turns one `room-source-v2` producer delivery (exported via the
+self-contained `skills/agentic-scene-factory/scripts/export_room_source_v2.py`
+toolchain under [GEN-009](../standards/asset-generation.md#gen-009), or a
+legacy Code-as-Room source delivery) into selectable visual backgrounds for an
+ordinary eBench task package. Scenario Forge remains the portable compiler: its
+core layers do not run Blender, rewrite USD/MDL, or add background physics.
 
 ## Ownership
 
-- Code-as-Room owns `room.blend`, the Z-up metric `room_source.usdc`, relative
-  textures, semantic Zone roots, source evidence, `source_manifest.json`, and
-  the hash-bound `support_relations.json` inventory for non-floor decorations.
+- The room producer (`skills/agentic-scene-factory/scripts/export_room_source_v2.py`
+  inside this repository with zero external `Code-as-Room` checkout dependency,
+  or legacy Code-as-Room for historical deliveries) owns `room.blend`, the Z-up
+  metric `room_source.usdc`, relative textures, semantic Zone roots, source
+  evidence, `source_manifest.json`, and the hash-bound `support_relations.json`
+  inventory for non-floor decorations.
 - ConvertAsset owns the `/World` consumer facade, dependency closure, Isaac
   4.1 admission, an independent geometry audit of every declared support
   relation, and source-bound workspace-zone clearance profiles.

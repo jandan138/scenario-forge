@@ -1,0 +1,271 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/modern_office_print_hub/layout_constraints.yaml
+source_bindings: configs/source_bindings/out_of_domain_hero_20261112.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 303
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.10
+  robot_xy: [0.0, -1.02]
+  objects:
+    - id: brother_printer
+      role: articulated_appliance
+      footprint_xy_m: [0.412, 0.399]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, 0.090]
+      robot_side_exception: "399mm deep Brother MFC-L2820DW plus 180mm front paper cassette pullout requires +90mm Y placement so both pulled-out cassette (-0.292m) and rear chassis (+0.2895m) maintain >=100mm table edge clearance."
+      kinematic_clearance_volumes:
+        - id: paper_cassette_pullout
+          joint: paper_cassette
+          local_xy_bounds_m:
+            x: [-0.145, 0.145]
+            y: [-0.382, -0.1995]
+    - id: a5_media_pack
+      role: consumable_media
+      footprint_xy_m: [0.160, 0.120]
+      region: left
+      facing: robot
+      yaw_offset_deg: 90.0
+      support_z_offset_m: 0.002
+    - id: calibration_sheet
+      role: calibration_target
+      footprint_xy_m: [0.184, 0.134]
+      region: right
+      facing: robot
+      yaw_offset_deg: 90.0
+      support_z_offset_m: 0.002
+    - id: office_pen_organizer
+      role: context_prop
+      footprint_xy_m: [0.105, 0.105]
+      region: far_context
+      facing: robot
+      support_z_offset_m: 0.002
+  relations:
+    - subject: a5_media_pack
+      predicate: left_of
+      reference: brother_printer
+    - subject: calibration_sheet
+      predicate: right_of
+      reference: brother_printer
+    - subject: office_pen_organizer
+      predicate: right_of
+      reference: brother_printer
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: modern_office_brother_calibrate
+  domain: modern_office_print_hub
+  task_family: orthogonal_drawer_and_lid_servicing
+  instruction: "拾取左侧 A5 打印纸介质包并平整装入底部已拉出的进纸抽屉凹槽内，随后将进纸抽屉平稳推回机身闭合；再拾取右侧光学标定测试卡对准平铺在扫描仪玻璃稿台上，最后合下顶部扫描仪上盖。"
+  max_steps: 2400
+  seed: "303"
+  scene:
+    asset_id: out_of_domain_env_office_print_studio_v1
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: standard_table
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    brother_printer:
+      asset_id: BrotherMFCL2820DW
+      source_prim_path: /World/BrotherMFCL2820DW
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        platen_center:
+          xyz: [0.0, 0.0, 0.282]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    a5_media_pack:
+      asset_id: A5MediaPack
+      source_prim_path: /World/A5MediaPack
+      role: consumable_media
+    calibration_sheet:
+      asset_id: CalibrationSheet
+      source_prim_path: /World/CalibrationSheet
+      role: calibration_target
+    office_pen_organizer:
+      asset_id: OfficePenOrganizer
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: modern_office_print_hub_standard_v1
+        group_id: desk_stationery
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -1.02, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, lift, insert, push, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, lift, align, place, close, release]
+  steps:
+    - id: load_media_into_cassette
+      skill: insert
+      actors: [left_arm]
+      parameters:
+        object: a5_media_pack
+        target: brother_printer
+    - id: push_cassette_closed
+      skill: close_articulated_part
+      actors: [left_arm]
+      depends_on: [load_media_into_cassette]
+      parameters:
+        object: brother_printer
+        joint: paper_cassette
+        target_state: closed
+    - id: place_sheet_on_platen
+      skill: place
+      actors: [right_arm]
+      depends_on: [push_cassette_closed]
+      parameters:
+        object: calibration_sheet
+        target: brother_printer
+        target_frame: brother_printer.platen_center
+    - id: close_scanner_lid
+      skill: close_articulated_part
+      actors: [right_arm]
+      depends_on: [place_sheet_on_platen]
+      parameters:
+        object: brother_printer
+        joint: scanner_lid
+        target_state: closed
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "Out-of-domain 4-stage multifunction printer servicing contract; validates non-convex paper cassette loading, prismatic drawer closure with hollow chassis clearance, platen alignment, and scanner lid closure without claiming autonomous policy execution."
+    predicates:
+      - id: media_loaded_in_open_cassette
+        type: relative_pose_reached
+        sequence_index: 0
+        parameters:
+          object: a5_media_pack
+          relative_to: brother_printer
+          xyz_range:
+            x: [-0.025, 0.025]
+            y: [-0.285, -0.235]
+            z: [0.008, 0.026]
+          axis_alignment:
+            relative_to_part: paper_cassette
+            object_axis: x
+            target_axis: x
+            comparison: "<="
+            threshold_deg: 10.0
+      - id: paper_cassette_closed
+        type: articulation_joint_state_reached
+        sequence_index: 1
+        parameters:
+          object: brother_printer
+          joint: paper_cassette
+          state: closed
+      - id: calibration_sheet_on_platen
+        type: relative_pose_reached
+        sequence_index: 2
+        parameters:
+          object: calibration_sheet
+          relative_to: brother_printer
+          xyz_range:
+            x: [-0.025, 0.025]
+            y: [-0.035, 0.015]
+            z: [0.276, 0.292]
+          axis_alignment:
+            relative_to_part: paper_cassette
+            object_axis: x
+            target_axis: x
+            comparison: "<="
+            threshold_deg: 10.0
+      - id: scanner_lid_closed
+        type: articulation_joint_state_reached
+        sequence_index: 3
+        parameters:
+          object: brother_printer
+          joint: scanner_lid
+          state: closed
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_media_loaded
+          weight: 0.30
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: a5_media_pack
+              relative_to: brother_printer
+              xyz_range:
+                x: [-0.025, 0.025]
+                y: [-0.285, -0.235]
+                z: [0.008, 0.026]
+          source_ref:
+            step_id: load_media_into_cassette
+        - id: stage1_cassette_closed
+          weight: 0.25
+          active: true
+          requires: [stage0_media_loaded]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: brother_printer
+              joint: paper_cassette
+              state: closed
+          source_ref:
+            step_id: push_cassette_closed
+        - id: stage2_sheet_aligned
+          weight: 0.25
+          active: true
+          requires: [stage1_cassette_closed]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: calibration_sheet
+              relative_to: brother_printer
+              xyz_range:
+                x: [-0.025, 0.025]
+                y: [-0.035, 0.015]
+                z: [0.276, 0.292]
+          source_ref:
+            step_id: place_sheet_on_platen
+        - id: stage3_lid_closed
+          weight: 0.20
+          active: true
+          requires: [stage2_sheet_aligned]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: brother_printer
+              joint: scanner_lid
+              state: closed
+          source_ref:
+            step_id: close_scanner_lid

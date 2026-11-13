@@ -10,7 +10,7 @@
 
 | 制作阶段 | 正式规则 | 阅读重点 |
 |---|---|---|
-| 生成关节/复杂资产(生产者角色) | [资产生成](asset-generation.md) | 证据分级、规格书契约、静态门禁、阶段签认 |
+| 生成关节/复杂资产(生产者角色) | [资产生成](asset-generation.md) | 证据分级、规格书契约、静态门禁、阶段签认、GEN-008 十项门禁、GEN-009 落地支撑台面与内化房间、GEN-010 单图 Real-to-Sim 账本与重投影门禁 |
 | 选资产、接入外部工具 | [资产接入](asset-intake.md) | 谁负责生产与修复、资格与哈希、可继承的能力 |
 | 组装场景、摆放与导出 | [USD 场景组织](usd-layout.md) | 导出配置、根路径、变换、引用、VR 物化与放置、证据相机裁剪 |
 | 使用带关节的设备 | [Articulation](articulation.md) | 固定基座 v2、刚体与关节、VR 注册、随机化 |
@@ -106,3 +106,5 @@
 2026-09-15：粉末瓶 r5.8 线阻尼、r5.9 sleep 均不能压 GPU PGS 静止蠕动；r5.10 用 validator 在 0.5–18 s 回写位姿后插入前速度 0、15 s 漂移 0.90 mm，舀取约 245 粒 / 0.53 g。位姿冻结不升为通用粉粒 kinematic/sleep 默认，当前交付仍为 r4。
 2026-09-16：补充斐林 r10 案例行；隔杯验收时样液须在水面下，不把杯底间隙提升为默认。
 2026-09-17：新增[资产生成](asset-generation.md)主题（GEN-001..007）与阅读地图行；规则重申已有硬边界与 skill 契约，已验证案例表不增加行。
+2026-11-13：在[资产生成](asset-generation.md)新增强制规则 `GEN-008`（IKA-Grade `G1..G8 + G9a + G9b` 验收门禁），并同步 [Articulation](articulation.md#art-005)、规格书模板与生成操作指南。
+2026-11-13：在[资产生成](asset-generation.md)新增强制规则 `GEN-009`（落地结构支撑台面与自包含 `room-source-v2` 房间导出）与 `GEN-010`（单图 Real-to-Sim 空间解算、1:1 材质贴图账本与同机位重投影门禁），同步 [环境准入操作指南](../operations/intake-generated-blender-environment.md) 与 [r4 及 Real-to-Sim 记录](../records/2026-11-13-internalized-room-r4-tables-and-real2sim.md)。
