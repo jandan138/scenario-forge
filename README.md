@@ -30,6 +30,18 @@ ConvertAsset
        thumbnails, normalized asset packages
 ```
 
+## Real-to-Sim & Agentic Scene Factory
+
+Want to reconstruct an interactive OpenUSD workspace and articulated hero assets from a
+real photograph/video (`Real-to-Sim`), or synthesize new themed rooms and multi-DOF
+appliances with a coding agent (`Claude Code`, `Codex`, `Cursor`, `OpenCode`, or
+`Antigravity`)?
+
+- **[Real-to-Sim & Scene Factory Quickstart (中文上手指南 + 复制即用 Prompt)](docs/operations/real2sim-and-scene-factory-quickstart.md)** — 5-minute standalone setup (`pip install -e ".[dev,usd]"` + `Blender 4.4+`, no Isaac Sim required for asset/room authoring), method overview, and copy-paste agent prompts.
+- **[Agentic Scene Factory Skill](skills/agentic-scene-factory/SKILL.md)** — Single-photo/video metric pose grounding (`spatial_pose_grounding`), 1:1 LAB-locked texture twin ledger (`GEN-010`), internalized `room-source-v2` Blender room exporter (`GEN-009`), and cross-host independent blind visual critic.
+- **[Articulated CAD OpenUSD Asset Skill](skills/hunyuan-isaac-articulation-assets/SKILL.md)** — Parametric SimReady multi-DOF drawers, hinged lids, non-convex cavities, vector UI panels (`cad_usd_kit.py`), and `GEN-008` acceptance gates (`--static-only` or full Isaac Sim 10-gate).
+- **[Architecture & Design Reference](docs/design/agentic-out-of-domain-scene-factory.md)** — End-to-end architecture for `Agent-as-Room`, relational layout solving, and `Real-to-Sim` digital twins.
+
 ## Package Shape
 
 Starter packages now use the v0.2 product layout:
@@ -218,6 +230,8 @@ configs/         default schema and adapter configuration
 examples/        small packages and commands that run without heavy dependencies
 docs/            design, operations, records, and reference material
 scripts/         lightweight project maintenance commands
+skills/          portable agent skills for Real-to-Sim, room-source-v2, and CAD OpenUSD assets
+.claude/         isolated subagent definitions (e.g., independent visual-critic)
 tests/           unit and contract tests
 ```
 

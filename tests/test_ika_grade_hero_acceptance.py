@@ -495,3 +495,251 @@ def Xform "AssetRoot" {
     assert len(meta["appearance_meta"]["visual_meshes"]) == 1
     assert meta["appearance_meta"]["visual_meshes"][0]["name"] == "MainShell"
     assert meta["appearance_meta"]["texture_files"] == ["textures/ui.png"]
+
+
+def test_resolve_isaac_python_respects_explicit_and_env_override(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mod = _load_acceptance_module()
+    fake_env_py = tmp_path / "env_isaac_python"
+    fake_env_py.write_text("#!/bin/sh\n", encoding="utf-8")
+    fake_arg_py = tmp_path / "arg_isaac_python"
+    fake_arg_py.write_text("#!/bin/sh\n", encoding="utf-8")
+
+    monkeypatch.setenv("ISAAC_PYTHON", str(fake_env_py))
+    assert mod.resolve_isaac_python(None) == fake_env_py
+    assert mod.resolve_isaac_python(fake_arg_py) == fake_arg_py
+
+
+def test_static_only_acceptance_runs_with_usd_core_without_isaac_sim(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    mod = _load_acceptance_module()
+    cad_spec = importlib.util.spec_from_file_location(
+        "cad_usd_kit",
+        REPO_ROOT / "skills/hunyuan-isaac-articulation-assets/scripts/cad_usd_kit.py",
+    )
+    assert cad_spec is not None and cad_spec.loader is not None
+    cad = importlib.util.module_from_spec(cad_spec)
+    cad_spec.loader.exec_module(cad)
+
+    slug = "mini-riser-hero"
+    factory_root = tmp_path / "factory"
+    evidence_root = tmp_path / "evidence"
+    critique_dir = tmp_path / "critiques"
+    critique_dir.mkdir(parents=True)
+
+    usd_path = factory_root / "assets" / "source" / slug / "asset.usda"
+    stage = cad.new_cad_stage(usd_path, "AssetRoot")
+    from pxr import UsdGeom as _UsdGeom
+
+    _UsdGeom.Scope.Define(stage, "/AssetRoot/Materials")
+    _UsdGeom.Xform.Define(stage, "/AssetRoot/Links")
+    _UsdGeom.Xform.Define(stage, "/AssetRoot/Joints")
+
+    mats = {
+        "PolymerBody": cad.make_pbr_material(
+            stage, "/AssetRoot/Materials/PolymerBody", (0.92, 0.92, 0.90), metallic=0.04, roughness=0.48
+        ),
+        "BrushedTrim": cad.make_pbr_material(
+            stage, "/AssetRoot/Materials/BrushedTrim", (0.72, 0.74, 0.77), metallic=0.88, roughness=0.24
+        ),
+        "StatusLED": cad.make_pbr_material(
+            stage,
+            "/AssetRoot/Materials/StatusLED",
+            (0.10, 0.85, 0.55),
+            metallic=0.0,
+            roughness=0.15,
+            emissive=(0.15, 0.90, 0.55),
+        ),
+        **{
+            f"AuxMat{i}": cad.make_pbr_material(
+                stage, f"/AssetRoot/Materials/AuxMat{i}", (0.4, 0.4, 0.45), metallic=0.2, roughness=0.5
+            )
+            for i in range(6)
+        },
+    }
+    cad.make_rigid_link(
+        stage, "/AssetRoot/Links/Base", pos=(0.0, 0.0, 0.0), mass_kg=2.4, approx_dims=(0.30, 0.20, 0.12)
+    )
+    cad.add_chamfered_box_mesh(
+        stage,
+        "/AssetRoot/Links/Base/Visual/MainShell",
+        center=(0.0, 0.0, 0.06),
+        dims_xyz=(0.30, 0.20, 0.12),
+        mat=mats["PolymerBody"],
+        chamfer=0.004,
+    )
+    for idx, label in enumerate(("POWER", "READY", "CYCLE")):
+        cad.add_panel_text_mesh(
+            stage,
+            f"/AssetRoot/Links/Base/Visual/Legend{idx}",
+            text=label,
+            mat=mats["StatusLED"],
+            char_height=0.008,
+            pos=(-0.06 + idx * 0.06, -0.098, 0.09),
+        )
+    cad.add_collider_box(
+        stage, "/AssetRoot/Links/Base/Collision/BaseCol", center=(0.0, 0.0, 0.059), dims_xyz=(0.29, 0.19, 0.118)
+    )
+
+    cad.make_rigid_link(
+        stage, "/AssetRoot/Links/BtnA", pos=(-0.03, -0.094, 0.06), mass_kg=0.03, approx_dims=(0.016, 0.010, 0.012)
+    )
+    cad.add_chamfered_box_mesh(
+        stage,
+        "/AssetRoot/Links/BtnA/Visual/CapA",
+        center=(0.0, 0.0, 0.0),
+        dims_xyz=(0.016, 0.010, 0.012),
+        mat=mats["BrushedTrim"],
+        chamfer=0.0015,
+    )
+    cad.add_collider_box(
+        stage, "/AssetRoot/Links/BtnA/Collision/ColA", center=(0.0, 0.0, 0.0), dims_xyz=(0.014, 0.008, 0.010)
+    )
+
+    cad.make_rigid_link(
+        stage, "/AssetRoot/Links/BtnB", pos=(0.03, -0.094, 0.06), mass_kg=0.03, approx_dims=(0.016, 0.010, 0.012)
+    )
+    cad.add_chamfered_box_mesh(
+        stage,
+        "/AssetRoot/Links/BtnB/Visual/CapB",
+        center=(0.0, 0.0, 0.0),
+        dims_xyz=(0.016, 0.010, 0.012),
+        mat=mats["BrushedTrim"],
+        chamfer=0.0015,
+    )
+    cad.add_collider_box(
+        stage, "/AssetRoot/Links/BtnB/Collision/ColB", center=(0.0, 0.0, 0.0), dims_xyz=(0.014, 0.008, 0.010)
+    )
+
+    # Pad deterministic chamfered vent louvers inside envelope so CAD richness floor (>=60 visual prims, >=150KB USDA) is met
+    for i in range(60):
+        cad.add_chamfered_box_mesh(
+            stage,
+            f"/AssetRoot/Links/Base/Visual/VentFin{i}",
+            center=(-0.11 + (i % 12) * 0.018, -0.04 + (i // 12) * 0.018, 0.114),
+            dims_xyz=(0.010, 0.004, 0.004),
+            mat=mats["BrushedTrim"],
+            chamfer=0.0005,
+        )
+
+    cad.add_base_to_world_joint(stage, "/AssetRoot/Joints/BaseToWorld", "/AssetRoot/Links/Base")
+    cad.add_prismatic_joint(
+        stage,
+        "/AssetRoot/Joints/BtnAJoint",
+        "/AssetRoot/Links/Base",
+        "/AssetRoot/Links/BtnA",
+        pivot_in_parent=(-0.03, -0.094, 0.06),
+        axis="Y",
+        lower_m=0.0,
+        upper_m=0.003,
+        reset_m=0.0,
+        damping=2.0,
+    )
+    cad.add_prismatic_joint(
+        stage,
+        "/AssetRoot/Joints/BtnBJoint",
+        "/AssetRoot/Links/Base",
+        "/AssetRoot/Links/BtnB",
+        pivot_in_parent=(0.03, -0.094, 0.06),
+        axis="Y",
+        lower_m=0.0,
+        upper_m=0.003,
+        reset_m=0.0,
+        damping=2.0,
+    )
+    stage.GetRootLayer().Save()
+
+    ev_dir = evidence_root / slug
+    png_hashes = _make_studio_4view(ev_dir, uniform=False)
+    usd_sha = "sha256:" + sha256(usd_path.read_bytes()).hexdigest()
+
+    critique_report = {
+        "schema_version": "ika-grade-visual-critique/v1.0",
+        "slug": slug,
+        "asset_id": "MiniRiserHero",
+        "round": 1,
+        "author_agent": "cad-author",
+        "critic_agent": "independent-critic",
+        "verdict": "PASS",
+        "min_dimension_threshold": 8.0,
+        "dimensions": {
+            "silhouette_and_proportion": 8.8,
+            "secondary_mechanism_craft": 8.6,
+            "pbr_material_hierarchy": 8.7,
+            "ui_silkscreen_legibility": 8.5,
+            "artifact_free_integrity": 9.0,
+        },
+        "source_usd": {"path": str(usd_path), "sha256": usd_sha},
+        "reviewed_renders": [
+            {"role": k, "path": str(ev_dir / k), "sha256": v}
+            for k, v in png_hashes.items()
+        ],
+        "evidence_pack": {
+            "manufacturer_evidence_paths": ["datasheet.json"],
+            "frozen_spec_path": "spec.md",
+            "positive_anchor_paths": ["pos.png"],
+            "negative_anchor_paths": ["neg.png"],
+        },
+        "findings": ["Clean CAD chamfering and legible silkscreen."],
+    }
+    (critique_dir / f"{slug}_visual_critique_report.json").write_text(
+        json.dumps(critique_report, indent=2), encoding="utf-8"
+    )
+
+    spec_yaml = tmp_path / "mini_riser_spec.yaml"
+    spec_yaml.write_text(
+        f"""
+schema_version: ika-grade-hero-spec/v1.0
+slug: {slug}
+evidence_slug: {slug}
+asset_id: MiniRiserHero
+expected_wdh_m: [0.300, 0.200, 0.120]
+envelope_tol_m: 0.005
+min_control_gap_m: 0.010
+closed_joint_targets_rad_or_m:
+  BtnAJoint: 0.0
+  BtnBJoint: 0.0
+control_links: [BtnA, BtnB]
+spring_buttons: {{}}
+composite_knob: null
+force_smoke:
+  joint: BtnAJoint
+  link: BtnA
+  force_world_xyz: [0.0, 5.0, 0.0]
+  force_pos_world_xyz: [-0.03, -0.094, 0.06]
+  expected_sign: 1
+  min_travel: 0.001
+load_tests: []
+rail_transport_test: null
+rtx_camera:
+  eye: [0.4, -0.5, 0.3]
+  target: [0.0, 0.0, 0.06]
+g9a_appearance:
+  ui_representation: vector_3d
+  min_cycles_png_bytes: 1000
+g9b_visual_critic:
+  min_dimension_score: 8.0
+""",
+        encoding="utf-8",
+    )
+
+    # Point ISAAC_PYTHON to a non-existent path to prove static_only never invokes Isaac Sim
+    monkeypatch.setenv("ISAAC_PYTHON", str(tmp_path / "missing_isaac_python"))
+    summary = mod.run_9_gate_acceptance(
+        factory_root=factory_root,
+        evidence_root=evidence_root,
+        spec_config=spec_yaml,
+        critique_dir=critique_dir,
+        static_only=True,
+    )
+    assert summary["overall_status"] == "PASS_STATIC_ONLY"
+    assert summary["passed_gates"] == 5
+    assert summary["total_gates"] == 5
+    hero_rep = summary["heroes"][0]
+    assert hero_rep["implementationStatus"] == "PASS_STATIC_ONLY"
+    assert hero_rep["evidenceSeparation"]["static_contract"] == "PASS"
+    assert hero_rep["evidenceSeparation"]["reopen_and_bounds"] == "PASS"
+    assert hero_rep["evidenceSeparation"]["visual_acceptance"] == "PASS"
+    assert hero_rep["evidenceSeparation"]["physics_smoke"] == "NOT_RUN_STATIC_ONLY"

@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 import json
 import math
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -51,6 +52,135 @@ ISAAC41_PYTHON = Path(
     "/cpfs/shared/simulation/zhuzihou/dev/conda-managed/envs/"
     "embodied-eval-os-sim-isaacsim41-genmanip-py310/bin/python3.10"
 )
+
+
+def resolve_isaac_python(explicit: Path | None = None) -> Path:
+    """Resolve the Isaac Sim Python executable from CLI arg, ISAAC_PYTHON env, or host defaults."""
+    candidates: list[Path] = []
+    if explicit is not None:
+        candidates.append(Path(explicit))
+    env_py = os.environ.get("ISAAC_PYTHON", "").strip()
+    if env_py:
+        candidates.append(Path(env_py))
+    candidates.extend((ISAAC41_PYTHON, ISAAC_KIT_PYTHON))
+    for cand in candidates:
+        if cand.is_file():
+            return cand
+    raise FileNotFoundError(
+        "Isaac Sim Python executable not found. Set ISAAC_PYTHON=/path/to/isaac/python "
+        "or pass --static-only to run standalone OpenUSD + Blender Cycles verification."
+    )
+
+
+def _resolve_usd_python() -> str:
+    """Return a Python interpreter with `pxr` (`usd-core`) available."""
+    env_usd_py = os.environ.get("SCENARIO_FORGE_PYTHON", "").strip()
+    for cand in (env_usd_py, sys.executable, str(ISAAC_KIT_PYTHON)):
+        if not cand or not Path(cand).is_file():
+            continue
+        probe = subprocess.run(
+            [cand, "-c", "import pxr"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if probe.returncode == 0:
+            return cand
+    return sys.executable
+
+
+def _inspect_stage_static_usd_core(usd_path: Path, hspec: Mapping[str, Any]) -> dict[str, Any]:
+    """Compute counts, closed visual bounds, and control AABBs via pure `usd-core` (`pxr`)."""
+    from pxr import Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
+
+    stage = Usd.Stage.Open(str(usd_path))
+    if stage is None:
+        raise RuntimeError(f"Failed to open USD stage: {usd_path}")
+
+    bbox_cache = UsdGeom.BBoxCache(
+        Usd.TimeCode.Default(),
+        [UsdGeom.Tokens.default_, UsdGeom.Tokens.render],
+        useExtentsHint=False,
+    )
+    root_prim = stage.GetPrimAtPath("/AssetRoot")
+    if not root_prim.IsValid():
+        raise RuntimeError(f"Missing /AssetRoot prim in {usd_path}")
+
+    root_range = bbox_cache.ComputeWorldBound(root_prim).ComputeAlignedRange()
+    mn, mx = root_range.GetMin(), root_range.GetMax()
+    closed_visual_bounds = {
+        "min": [float(mn[0]), float(mn[1]), float(mn[2])],
+        "max": [float(mx[0]), float(mx[1]), float(mx[2])],
+    }
+
+    control_rest_aabbs: dict[str, tuple[tuple[float, float, float], tuple[float, float, float]]] = {}
+    for link_name in hspec.get("control_links", ()):
+        lprim = stage.GetPrimAtPath(f"/AssetRoot/Links/{link_name}")
+        if lprim.IsValid():
+            cr = bbox_cache.ComputeWorldBound(lprim).ComputeAlignedRange()
+            cmn, cmx = cr.GetMin(), cr.GetMax()
+            control_rest_aabbs[str(link_name)] = (
+                (float(cmn[0]), float(cmn[1]), float(cmn[2])),
+                (float(cmx[0]), float(cmx[1]), float(cmx[2])),
+            )
+
+    links = 0
+    revolute = 0
+    prismatic = 0
+    fixed = 0
+    colliders = 0
+    visual_prims = 0
+    meshes = 0
+    materials = 0
+    bad_asset_paths: list[str] = []
+
+    for prim in stage.Traverse():
+        pstr = str(prim.GetPath())
+        if prim.HasAPI(UsdPhysics.RigidBodyAPI):
+            links += 1
+        if prim.IsA(UsdPhysics.RevoluteJoint):
+            revolute += 1
+        elif prim.IsA(UsdPhysics.PrismaticJoint):
+            prismatic += 1
+        elif prim.IsA(UsdPhysics.FixedJoint):
+            fixed += 1
+        if prim.HasAPI(UsdPhysics.CollisionAPI):
+            colliders += 1
+        if prim.IsA(UsdShade.Material):
+            materials += 1
+        if "/Visual/" in pstr and prim.IsA(UsdGeom.Gprim):
+            purpose = UsdGeom.Imageable(prim).ComputePurpose()
+            if purpose != UsdGeom.Tokens.guide:
+                visual_prims += 1
+                if prim.IsA(UsdGeom.Mesh):
+                    meshes += 1
+
+        for attr in prim.GetAttributes():
+            val = attr.Get()
+            if isinstance(val, Sdf.AssetPath) and val.path:
+                raw_ap = str(val.path)
+                if raw_ap.startswith("/") or "/cpfs/" in raw_ap:
+                    bad_asset_paths.append(raw_ap)
+                elif not (usd_path.parent / raw_ap).is_file():
+                    bad_asset_paths.append(raw_ap)
+
+    return {
+        "counts": {
+            "links": links,
+            "revolute": revolute,
+            "prismatic": prismatic,
+            "fixed": fixed,
+            "colliders": colliders,
+            "visual_prims": visual_prims,
+            "meshes": meshes,
+            "materials": materials,
+            "usd_size_bytes": usd_path.stat().st_size,
+        },
+        "closed_visual_bounds": closed_visual_bounds,
+        "control_rest_aabbs": control_rest_aabbs,
+        "bad_asset_paths": bad_asset_paths,
+        "g9_rtx_render": {},
+    }
 
 REQUIRED_CRITIQUE_DIMENSIONS = (
     "silhouette_and_proportion",
@@ -348,6 +478,7 @@ def evaluate_g9a_objective_appearance(
     rtx_info: Mapping[str, Any],
     g9a_config: Mapping[str, Any] | None = None,
     usd_dir: Path | None = None,
+    require_rtx: bool = True,
 ) -> dict[str, Any]:
     """Evaluate `GEN-008` `G9a` automated objective appearance floor."""
     cfg = dict(g9a_config or {})
@@ -465,9 +596,20 @@ def evaluate_g9a_objective_appearance(
 
     rtx_mean = float(rtx_info.get("mean_luma", 0.0))
     rtx_std = float(rtx_info.get("std_luma", 0.0))
-    rtx_ok = (min_rtx_mean <= rtx_mean <= 245.0) and (rtx_std >= min_rtx_std)
-
-    passed = non_box_ok and materials_ok and ui_ok and cycles_ok and rtx_ok
+    if require_rtx:
+        rtx_ok: bool | None = (min_rtx_mean <= rtx_mean <= 245.0) and (rtx_std >= min_rtx_std)
+        passed = non_box_ok and materials_ok and ui_ok and cycles_ok and bool(rtx_ok)
+        rtx_block: dict[str, Any] = {
+            "passed": bool(rtx_ok),
+            "mean_luma": round(rtx_mean, 2),
+            "std_luma": round(rtx_std, 2),
+        }
+    else:
+        passed = non_box_ok and materials_ok and ui_ok and cycles_ok
+        rtx_block = {
+            "passed": None,
+            "status": "NOT_RUN_STATIC_ONLY",
+        }
     return {
         "passed": passed,
         "primary_mesh_count": len(primary_meshes),
@@ -476,11 +618,7 @@ def evaluate_g9a_objective_appearance(
         "material_class_count": len(mat_classes),
         "ui_check": {"passed": ui_ok, **ui_details},
         "cycles_4view": {"passed": cycles_ok, "views": studio_checks},
-        "isaac_rtx": {
-            "passed": rtx_ok,
-            "mean_luma": round(rtx_mean, 2),
-            "std_luma": round(rtx_std, 2),
-        },
+        "isaac_rtx": rtx_block,
     }
 
 
@@ -600,6 +738,7 @@ def build_ika_grade_asset_report(
     gates: Sequence[Mapping[str, Any]],
     source_usd_sha256: str = "",
     exceptions: Sequence[str] = (),
+    static_only: bool = False,
 ) -> dict[str, Any]:
     all_pass = all(bool(g.get("passed")) for g in gates)
     has_g9_split = any(
@@ -615,10 +754,16 @@ def build_ika_grade_asset_report(
     ]
     physics_ok = bool(physics_gates) and all(bool(g.get("passed")) for g in physics_gates)
     visual_ok = bool(visual_gates) and all(bool(g.get("passed")) for g in visual_gates)
+    if static_only:
+        physics_status = "NOT_RUN_STATIC_ONLY"
+        impl_status = "PASS_STATIC_ONLY" if all_pass else "FAIL"
+    else:
+        physics_status = "PASS" if (physics_ok if has_g9_split else all_pass) else "FAIL"
+        impl_status = "PASS" if all_pass else "FAIL"
     evidence_sep: dict[str, str] = {
         "static_contract": "PASS" if gates and gates[0].get("passed") else "FAIL",
         "reopen_and_bounds": "PASS" if len(gates) > 1 and gates[1].get("passed") else "FAIL",
-        "physics_smoke": "PASS" if (physics_ok if has_g9_split else all_pass) else "FAIL",
+        "physics_smoke": physics_status,
         "robot_integration": "NOT_TESTED_DELEGATED_TO_ASTRA",
     }
     if has_g9_split:
@@ -635,7 +780,7 @@ def build_ika_grade_asset_report(
         "assetRoot": "/AssetRoot",
         "mode": "fixed",
         "articulationRoot": articulation_root,
-        "implementationStatus": "PASS" if all_pass else "FAIL",
+        "implementationStatus": impl_status,
         "isaacRuntime": isaac_runtime,
         "staticAudit": "PASS" if gates and gates[0].get("passed") else "FAIL",
         "sourceUsdSha256": source_usd_sha256,
@@ -1478,6 +1623,8 @@ def run_9_gate_acceptance(
     spec_config: Path | Sequence[Path] | None = None,
     critique_dir: Path | None = None,
     out_summary: Path | None = None,
+    static_only: bool = False,
+    isaac_python: Path | None = None,
 ) -> dict[str, Any]:
     hero_specs = load_hero_acceptance_specs(spec_config)
     source_root = factory_root / "assets" / "source"
@@ -1486,6 +1633,7 @@ def run_9_gate_acceptance(
     resolved_critique_dir = critique_dir or (REPO_ROOT / DEFAULT_CRITIQUE_DIR)
     summary_path = out_summary or (accept_dir / "ika_acceptance_summary.json")
     summary_path.parent.mkdir(parents=True, exist_ok=True)
+    usd_python = _resolve_usd_python()
 
     # 1. Run G1 static contract on each hero via check_articulation_usd.py
     static_reports: dict[str, dict[str, Any]] = {}
@@ -1495,7 +1643,7 @@ def run_9_gate_acceptance(
         out_static = accept_dir / f"{slug}_static_gate.json"
         proc = subprocess.run(
             [
-                str(ISAAC_KIT_PYTHON),
+                usd_python,
                 str(CHECK_ART_SCRIPT),
                 "--usd",
                 str(usd_file),
@@ -1516,38 +1664,50 @@ def run_9_gate_acceptance(
             )
         static_reports[slug] = json.loads(out_static.read_text(encoding="utf-8"))
 
-    # 2. Run single headless Isaac Sim 4.1 batch session for G2..G9 across all heroes
-    worker_cfg = accept_dir / "_runtime_worker_cfg.json"
-    worker_py = accept_dir / "_runtime_worker.py"
-    worker_out = accept_dir / "_runtime_worker_results.json"
-    worker_out.unlink(missing_ok=True)
-    worker_cfg.write_text(
-        json.dumps(
-            {
-                "source_root": str(source_root.resolve()),
-                "evidence_root": str(evidence_root.resolve()),
-                "rtx_probe_dir": str((summary_path.parent / "rtx_probe_renders").resolve()),
-                "heroes": hero_specs,
+    # 2. Either inspect via pure `usd-core` (`--static-only`) or run headless Isaac Sim 4.1 batch session
+    if static_only:
+        rt_all: dict[str, Any] = {
+            "kit_version": "static_only_usd_core",
+            "heroes": {
+                hspec["slug"]: _inspect_stage_static_usd_core(
+                    source_root / hspec["slug"] / "asset.usda", hspec
+                )
+                for hspec in hero_specs
             },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-    worker_py.write_text(_ISAAC_RUNTIME_WORKER, encoding="utf-8")
+        }
+    else:
+        resolved_isaac_py = resolve_isaac_python(isaac_python)
+        worker_cfg = accept_dir / "_runtime_worker_cfg.json"
+        worker_py = accept_dir / "_runtime_worker.py"
+        worker_out = accept_dir / "_runtime_worker_results.json"
+        worker_out.unlink(missing_ok=True)
+        worker_cfg.write_text(
+            json.dumps(
+                {
+                    "source_root": str(source_root.resolve()),
+                    "evidence_root": str(evidence_root.resolve()),
+                    "rtx_probe_dir": str((summary_path.parent / "rtx_probe_renders").resolve()),
+                    "heroes": hero_specs,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        worker_py.write_text(_ISAAC_RUNTIME_WORKER, encoding="utf-8")
 
-    proc = subprocess.run(
-        [str(ISAAC41_PYTHON), str(worker_py), str(worker_cfg), str(worker_out)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if proc.returncode != 0 or not worker_out.is_file():
-        sys.stderr.write(proc.stdout[-4000:] + "\n" + proc.stderr[-4000:] + "\n")
-        raise RuntimeError(f"Isaac 4.1 runtime acceptance worker failed (rc={proc.returncode})")
+        proc = subprocess.run(
+            [str(resolved_isaac_py), str(worker_py), str(worker_cfg), str(worker_out)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0 or not worker_out.is_file():
+            sys.stderr.write(proc.stdout[-4000:] + "\n" + proc.stderr[-4000:] + "\n")
+            raise RuntimeError(f"Isaac 4.1 runtime acceptance worker failed (rc={proc.returncode})")
 
-    rt_all = json.loads(worker_out.read_text(encoding="utf-8"))
-    worker_cfg.unlink(missing_ok=True)
-    worker_py.unlink(missing_ok=True)
+        rt_all = json.loads(worker_out.read_text(encoding="utf-8"))
+        worker_cfg.unlink(missing_ok=True)
+        worker_py.unlink(missing_ok=True)
 
     hero_reports: list[dict[str, Any]] = []
     for hspec in hero_specs:
@@ -1595,44 +1755,71 @@ def run_9_gate_acceptance(
         )
         g3_ok = clr_eval["passed"]
 
-        # Gate 4: Isaac 4.1 single articulation discovery & 120-frame zero drift
-        g4 = rrep["g4_init"]
-        g4_ok = (
-            g4["dof_count"] == len(hspec["closed_joint_targets_rad_or_m"])
-            and g4["base_drift_120_mm"] <= 0.02
-            and g4["max_joint_drift_120"] <= 0.01
-        )
-
-        # Gate 5: All-DOF travel + spring return + composite knob + zero ignored friction
-        g5 = rrep["g5_motion"]
-        g5_ok = (
-            all(x["passed"] for x in g5["dof_sweeps"])
-            and all(x["passed"] for x in g5["spring_buttons"])
-            and bool(g5["composite_knob"]["passed"])
-            and len(rrep["ignored_friction_attrs"]) == 0
-        )
-
-        # Gate 6: Direct handle/drawer force smoke
-        g6 = rrep["g6_force_smoke"]
-        g6_ok = bool(g6["passed"])
-
-        # Gate 7: 600-frame gravity load-bearing stability
-        g7 = rrep["g7_load_600_frames"]
-        g7_ok = len(g7) > 0 and all(x["passed"] for x in g7)
-
-        # Gate 8: Loaded rail extraction & tunnel transport
-        g8 = rrep["g8_rail_transport"]
-        g8_ok = bool(g8["passed"])
+        # Gate 4..8: Isaac Sim 4.1 runtime gates (skipped cleanly when static_only=True)
+        runtime_gates: list[dict[str, Any]] = []
+        if not static_only:
+            g4 = rrep["g4_init"]
+            g4_ok = (
+                g4["dof_count"] == len(hspec["closed_joint_targets_rad_or_m"])
+                and g4["base_drift_120_mm"] <= 0.02
+                and g4["max_joint_drift_120"] <= 0.01
+            )
+            g5 = rrep["g5_motion"]
+            g5_ok = (
+                all(x["passed"] for x in g5["dof_sweeps"])
+                and all(x["passed"] for x in g5["spring_buttons"])
+                and bool(g5["composite_knob"]["passed"])
+                and len(rrep["ignored_friction_attrs"]) == 0
+            )
+            g6 = rrep["g6_force_smoke"]
+            g6_ok = bool(g6["passed"])
+            g7 = rrep["g7_load_600_frames"]
+            g7_ok = len(g7) > 0 and all(x["passed"] for x in g7)
+            g8 = rrep["g8_rail_transport"]
+            g8_ok = bool(g8["passed"])
+            runtime_gates = [
+                {
+                    "id": "G4_isaac_discovery_and_120_settle",
+                    "category": "runtime",
+                    "passed": g4_ok,
+                    "details": g4,
+                },
+                {
+                    "id": "G5_all_dof_spring_and_composite_knob",
+                    "category": "runtime",
+                    "passed": g5_ok,
+                    "details": g5,
+                },
+                {
+                    "id": "G6_direct_force_handle_drawer_smoke",
+                    "category": "runtime_physics_smoke",
+                    "passed": g6_ok,
+                    "details": g6,
+                },
+                {
+                    "id": "G7_600_frame_cavity_load_bearing",
+                    "category": "runtime_physics_smoke",
+                    "passed": g7_ok,
+                    "details": g7,
+                },
+                {
+                    "id": "G8_loaded_rail_tunnel_transport",
+                    "category": "runtime_physics_smoke",
+                    "passed": g8_ok,
+                    "details": g8,
+                },
+            ]
 
         # Gate 9a: Automated Objective Appearance Floor
         ev_dir = evidence_root / hspec["evidence_slug"]
-        rtx_info = rrep["g9_rtx_render"]
+        rtx_info = rrep.get("g9_rtx_render") or {}
         g9a_eval = evaluate_g9a_objective_appearance(
             appearance_meta=usda_meta["appearance_meta"],
             studio_dir=ev_dir,
             rtx_info=rtx_info,
             g9a_config=hspec.get("g9a_appearance"),
             usd_dir=usd_file.parent,
+            require_rtx=not static_only,
         )
 
         # Gate 9b: Independent Blind-Review Visual Critic Loop
@@ -1674,36 +1861,7 @@ def run_9_gate_acceptance(
                 "passed": g3_ok,
                 "details": clr_eval,
             },
-            {
-                "id": "G4_isaac_discovery_and_120_settle",
-                "category": "runtime",
-                "passed": g4_ok,
-                "details": g4,
-            },
-            {
-                "id": "G5_all_dof_spring_and_composite_knob",
-                "category": "runtime",
-                "passed": g5_ok,
-                "details": g5,
-            },
-            {
-                "id": "G6_direct_force_handle_drawer_smoke",
-                "category": "runtime_physics_smoke",
-                "passed": g6_ok,
-                "details": g6,
-            },
-            {
-                "id": "G7_600_frame_cavity_load_bearing",
-                "category": "runtime_physics_smoke",
-                "passed": g7_ok,
-                "details": g7,
-            },
-            {
-                "id": "G8_loaded_rail_tunnel_transport",
-                "category": "runtime_physics_smoke",
-                "passed": g8_ok,
-                "details": g8,
-            },
+            *runtime_gates,
             {
                 "id": "G9a_objective_appearance_floor",
                 "category": "visual_objective",
@@ -1726,19 +1884,21 @@ def run_9_gate_acceptance(
             counts=counts,
             gates=gates,
             source_usd_sha256=usd_sha,
+            static_only=static_only,
         )
         out_rep_path = summary_path.parent / f"{slug}_ika_acceptance_report.json"
         out_rep_path.write_text(json.dumps(asset_rep, indent=2) + "\n", encoding="utf-8")
         hero_reports.append(asset_rep)
 
-    overall_pass = all(r["implementationStatus"] == "PASS" for r in hero_reports)
+    expected_pass_token = "PASS_STATIC_ONLY" if static_only else "PASS"
+    overall_pass = all(r["implementationStatus"] == expected_pass_token for r in hero_reports)
     total_gates = sum(len(r["checks"]) for r in hero_reports)
     passed_gates = sum(
         sum(1 for g in r["checks"] if g.get("passed")) for r in hero_reports
     )
     summary = {
         "schema_version": "ika-grade-hero-acceptance-summary/v2.0",
-        "overall_status": "PASS" if overall_pass else "FAIL",
+        "overall_status": expected_pass_token if overall_pass else "FAIL",
         "passed_gates": passed_gates,
         "total_gates": total_gates,
         "isaac_runtime": str(rt_all["kit_version"]),
@@ -1779,6 +1939,17 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional output path for acceptance summary JSON.",
     )
+    ap.add_argument(
+        "--isaac-python",
+        type=Path,
+        default=None,
+        help="Optional path to Isaac Sim Python executable (overrides ISAAC_PYTHON env).",
+    )
+    ap.add_argument(
+        "--static-only",
+        action="store_true",
+        help="Run standalone OpenUSD + Blender Cycles verification (G1..G3, G9a, G9b) without Isaac Sim.",
+    )
     return ap
 
 
@@ -1805,6 +1976,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         spec_config=spec_cfgs,
         critique_dir=cdir,
         out_summary=out_sum,
+        static_only=bool(args.static_only),
+        isaac_python=args.isaac_python,
     )
     print(
         f"IKA-Grade 10-Gate Acceptance: {summary['overall_status']} "
