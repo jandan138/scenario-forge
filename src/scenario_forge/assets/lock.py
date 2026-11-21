@@ -311,7 +311,7 @@ def _scan_usd_references(package_root: Path, path: Path) -> tuple[str, ...]:
             resolved = (path.parent / reference).resolve()
             package_root_resolved = package_root.resolve()
             if resolved == package_root_resolved or package_root_resolved in resolved.parents:
-                references.append(str(resolved.relative_to(package_root_resolved)))
+                references.append(resolved.relative_to(package_root_resolved).as_posix())
             else:
                 references.append(reference)
     return tuple(references)

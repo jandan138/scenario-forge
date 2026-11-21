@@ -10,6 +10,7 @@ build/
 dist/
 
 # Generated simulator or scenario artifacts.
+MUJOCO_LOG.TXT
 outputs/
 reports/
 external_artifacts/*
