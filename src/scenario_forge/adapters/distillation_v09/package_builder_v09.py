@@ -335,31 +335,76 @@ def build_distillation_v09_package(
     UsdShade.MaterialBindingAPI.Apply(floor_p.GetPrim()).Bind(mat_floor)
     UsdPhysics.CollisionAPI.Apply(floor_p.GetPrim()).CreateCollisionEnabledAttr(True)
 
+    # Realistic Chemistry Lab Gooseneck Cold-Water Faucet (right: blue valve + brass barb nozzle @ x=+0.390, y=-0.245, z=0.855)
+    mat_brass_tap = _pbr("LabBrassBarb", (0.80, 0.64, 0.24), 0.22, 0.88)
+    mat_pp_sink = _pbr("LabDarkPPSink", (0.12, 0.14, 0.17), 0.48, 0.04)
+    mat_sil_mat = _pbr("LabAntiRollSiliconeMat", (0.14, 0.34, 0.56), 0.68, 0.00)
+
+    tap_base = UsdGeom.Cylinder.Define(stage, "/World/Environment/WaterTapBaseFlange")
+    tap_base.CreateRadiusAttr(0.022)
+    tap_base.CreateHeightAttr(0.012)
+    UsdGeom.Xformable(tap_base).AddTranslateOp().Set(Gf.Vec3d(0.425, -0.245, 0.756))
+    UsdShade.MaterialBindingAPI.Apply(tap_base.GetPrim()).Bind(mat_chrome)
+
     tap_col = UsdGeom.Cylinder.Define(stage, "/World/Environment/WaterTapRiser")
-    tap_col.CreateRadiusAttr(0.009)
-    tap_col.CreateHeightAttr(0.145)
-    UsdGeom.Xformable(tap_col).AddTranslateOp().Set(Gf.Vec3d(0.425, -0.185, 0.8225))
+    tap_col.CreateRadiusAttr(0.010)
+    tap_col.CreateHeightAttr(0.155)
+    UsdGeom.Xformable(tap_col).AddTranslateOp().Set(Gf.Vec3d(0.425, -0.245, 0.8275))
     UsdShade.MaterialBindingAPI.Apply(tap_col.GetPrim()).Bind(mat_chrome)
 
+    tap_valve = UsdGeom.Cube.Define(stage, "/World/Environment/WaterTapBlueColdValve")
+    tap_valve.CreateSizeAttr(1.0)
+    tvxf = UsdGeom.Xformable(tap_valve)
+    tvxf.AddTranslateOp().Set(Gf.Vec3d(0.448, -0.245, 0.805))
+    tvxf.AddScaleOp().Set(Gf.Vec3f(0.036, 0.012, 0.012))
+    UsdShade.MaterialBindingAPI.Apply(tap_valve.GetPrim()).Bind(mech_mats["enamel_blue"])
+
     tap_arm = UsdGeom.Cylinder.Define(stage, "/World/Environment/WaterTapArm")
-    tap_arm.CreateRadiusAttr(0.006)
-    tap_arm.CreateHeightAttr(0.042)
+    tap_arm.CreateRadiusAttr(0.007)
+    tap_arm.CreateHeightAttr(0.044)
     taxf = UsdGeom.Xformable(tap_arm)
-    taxf.AddTranslateOp().Set(Gf.Vec3d(0.406, -0.185, 0.888))
+    taxf.AddTranslateOp().Set(Gf.Vec3d(0.406, -0.245, 0.896))
     taxf.AddOrientOp(UsdGeom.XformOp.PrecisionDouble).Set(Gf.Quatd(0.7071068, 0.0, 0.7071068, 0.0))
     UsdShade.MaterialBindingAPI.Apply(tap_arm.GetPrim()).Bind(mat_chrome)
 
     tap_noz = UsdGeom.Cylinder.Define(stage, "/World/Environment/WaterTapNozzle")
-    tap_noz.CreateRadiusAttr(0.0046)
-    tap_noz.CreateHeightAttr(0.036)
-    UsdGeom.Xformable(tap_noz).AddTranslateOp().Set(Gf.Vec3d(0.390, -0.185, 0.872))
-    UsdShade.MaterialBindingAPI.Apply(tap_noz.GetPrim()).Bind(mat_chrome)
+    tap_noz.CreateRadiusAttr(0.0048)
+    tap_noz.CreateHeightAttr(0.044)
+    UsdGeom.Xformable(tap_noz).AddTranslateOp().Set(Gf.Vec3d(0.390, -0.245, 0.874))
+    UsdShade.MaterialBindingAPI.Apply(tap_noz.GetPrim()).Bind(mat_brass_tap)
+
+    # Embedded Black PP Lab Cup Sink (left: drains outlet hose cleanly into recessed basin @ x=-0.390, y=-0.245, 30mm clear of bath!)
+    sink_rim = UsdGeom.Cube.Define(stage, "/World/Environment/LabPPDrainSinkRim")
+    sink_rim.CreateSizeAttr(1.0)
+    srxf = UsdGeom.Xformable(sink_rim)
+    srxf.AddTranslateOp().Set(Gf.Vec3d(-0.390, -0.245, 0.754))
+    srxf.AddScaleOp().Set(Gf.Vec3f(0.115, 0.095, 0.008))
+    UsdShade.MaterialBindingAPI.Apply(sink_rim.GetPrim()).Bind(mat_pp_sink)
 
     drain = UsdGeom.Cylinder.Define(stage, "/World/Environment/SinkDrainCup")
-    drain.CreateRadiusAttr(0.020)
-    drain.CreateHeightAttr(0.055)
-    UsdGeom.Xformable(drain).AddTranslateOp().Set(Gf.Vec3d(-0.390, -0.185, 0.7775))
-    UsdShade.MaterialBindingAPI.Apply(drain.GetPrim()).Bind(mat_chrome)
+    drain.CreateRadiusAttr(0.032)
+    drain.CreateHeightAttr(0.022)
+    UsdGeom.Xformable(drain).AddTranslateOp().Set(Gf.Vec3d(-0.390, -0.245, 0.761))
+    UsdShade.MaterialBindingAPI.Apply(drain.GetPrim()).Bind(mat_pp_sink)
+
+    strainer = UsdGeom.Cylinder.Define(stage, "/World/Environment/SinkDrainStrainer")
+    strainer.CreateRadiusAttr(0.015)
+    strainer.CreateHeightAttr(0.003)
+    UsdGeom.Xformable(strainer).AddTranslateOp().Set(Gf.Vec3d(-0.390, -0.245, 0.772))
+    UsdShade.MaterialBindingAPI.Apply(strainer.GetPrim()).Bind(mat_chrome)
+
+    # Standardized Organic-Lab Anti-Roll Silicone Staging Mats (non-colliding 1.6 mm pads framing glassware zones)
+    for mname, mpos, mscale in (
+        ("StagingMat_LeftGlassware", (-0.415, -0.075, 0.7508), (0.24, 0.22, 0.0016)),
+        ("StagingMat_CenterCondenser", (0.020, -0.105, 0.7508), (0.28, 0.10, 0.0016)),
+        ("StagingMat_RightReceiverReagent", (0.395, -0.045, 0.7508), (0.24, 0.20, 0.0016)),
+    ):
+        sm = UsdGeom.Cube.Define(stage, f"/World/Environment/{mname}")
+        sm.CreateSizeAttr(1.0)
+        sxf = UsdGeom.Xformable(sm)
+        sxf.AddTranslateOp().Set(Gf.Vec3d(*mpos))
+        sxf.AddScaleOp().Set(Gf.Vec3f(*mscale))
+        UsdShade.MaterialBindingAPI.Apply(sm.GetPrim()).Bind(mat_sil_mat)
 
     # Studio Lighting
     UsdGeom.Scope.Define(stage, "/World/Lights")
