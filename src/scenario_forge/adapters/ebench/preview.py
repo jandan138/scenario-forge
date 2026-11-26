@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import yaml
 
@@ -1135,7 +1135,13 @@ def _validate_runtime_geometry(
             ("warmup_start", warmup_start),
             ("post_warmup", post_warmup),
         ):
-            expected_sorted = sorted(expected_extent_by_sample[sample_name])
+            raw_expected_extent = expected_extent_by_sample[sample_name]
+            expected_for_sample = (
+                _rotated_aabb_extent(raw_expected_extent, sample["root_pose"][1])
+                if qualified_extents is None
+                else raw_expected_extent
+            )
+            expected_sorted = sorted(expected_for_sample)
             actual_sorted = sorted(sample["world_bound"][2])
             if sample_name == "post_warmup" and qualified_extents is None:
                 relative_errors = [
@@ -1411,6 +1417,23 @@ def _rotate_wxyz(
         vx + w * tx + (y * tz - z * ty),
         vy + w * ty + (z * tx - x * tz),
         vz + w * tz + (x * ty - y * tx),
+    )
+
+
+def _rotated_aabb_extent(
+    extent: Sequence[float],
+    quaternion: tuple[float, float, float, float],
+) -> tuple[float, float, float]:
+    """Project an unrotated axis-aligned extent box into a world-aligned extent via wxyz."""
+
+    ex, ey, ez = float(extent[0]), float(extent[1]), float(extent[2])
+    ax = _rotate_wxyz((ex, 0.0, 0.0), quaternion)
+    ay = _rotate_wxyz((0.0, ey, 0.0), quaternion)
+    az = _rotate_wxyz((0.0, 0.0, ez), quaternion)
+    return (
+        abs(ax[0]) + abs(ay[0]) + abs(az[0]),
+        abs(ax[1]) + abs(ay[1]) + abs(az[1]),
+        abs(ax[2]) + abs(ay[2]) + abs(az[2]),
     )
 
 

@@ -261,6 +261,121 @@ Current indexed external artifacts:
   `5fad71a7a453d7067775cc782c0db710d52cb2ebb2d907486183d982feab2509`).
   Indexed in `docs/records/2026-11-13-internalized-room-r4-tables-and-real2sim.md`.
 
+- `ce_op_home_v2_20261118/clutter_props` contains 16 rigid kitchen and bedroom
+  props with package-local textures. The [builder](ce_op_home_v2_20261118/builders/build_home_clutter_props.py)
+  runs under `/isaac-sim/python.sh`. Its `--verify` flag reopens the source layers.
+  Every measured visual and collision envelope begins at zero metres. The
+  [build summary](ce_op_home_v2_20261118/clutter_props/source_build_summary.json)
+  records the bounds, mass properties and hashes of the final sources and textures.
+  Its SHA-256 is `ab0e30a202d76eb38c9996876b89e6c058417c78bf0ed3cc51ea80a60d4fee3b`.
+  The [Cycles studio sheet](ce_op_home_v2_20261118/evidence/clutter_props_studio.jpg)
+  shows each source. All 16 settled on a flat collider after release from 25 mm
+  in Isaac Sim 4.5, over 240 steps at 120 Hz.
+  [PhysX run log](ce_op_home_v2_20261118/evidence/clutter_props_settle.log)
+
+- `ce_op_home_v2_20261118/hero_printer/source` contains the AURA OFFICE M280,
+  optical calibration card and walnut inbox. Its [source checksum manifest](ce_op_home_v2_20261118/hero_printer/source.sha256)
+  covers all 31 files and has SHA-256 `85dee9abc06d7ad8a2c028a1d8cc3e9883cb9e30b0f61e69d3015c29f3aaec58`.
+  The fixed-base report has SHA-256 `968b81ee76123a16d4e1377683ad71c43d53872211e2fdc5136042ba37374792`.
+  The two inspection views have combined PNG SHA-256 `b1f4839de4feef3ad5bf6e954c1062cc559412c04ba29b17274b602041effbb1`.
+  [Build record and verification scope](../docs/records/2026-11-19-aura-duplex-laser-mfp-v2.md)
+
+- The AURA creator workstation, backup drive and mouse live under
+  [hero_workstation/source](ce_op_home_v2_20261118/hero_workstation/source).
+  The workstation source and textures have SHA-256
+  `b96d7a0df5e55191498e45e5b20b18f34b0832f64ec7f4d39c63ea49bb14da8b`.
+  The dated record gives the workpiece hashes, rebuild command and verification scope.
+  [2026-11-19 workstation record](../docs/records/2026-11-19-aura-creator-workstation-v2.md)
+
+- The Home v2 study and living-room builders add two room sources, two tables
+  and sixteen rigid household props under `ce_op_home_v2_20261118`. The
+  source checks, six Cycles views and byte-identical standalone rebuild are
+  recorded in the [validation report](ce_op_home_v2_20261118/evidence/study_living_v2/validation.json)
+  (SHA-256 `15c6ca7a7732baa82bad0522a64e29bc42e25f49e8e89333d81b08a566a6701b`).
+  [Task record and previews](../docs/records/2026-11-19-home-v2-study-and-living-sources.md)
+
+- The AURA KITCHEN CS-24 oven and ceramic baking cocotte live under
+  [hero_steam_oven/source](ce_op_home_v2_20261118/hero_steam_oven/source).
+  Their source-and-texture SHA-256 digests are
+  `cd59791339eb08959d863ce74d0e8a1e70662486cc48ee03813f66c7ab282bc0` and
+  `0983fcf3b0a426578fd2e2c9f03ed6c9874db6d25cd24b6849137c2cbc4df6b8`, respectively.
+  The fixed-base report has SHA-256 `f1880299ad6a639a33278be4b4dd8490b2cf7aa71033e897b7bd5795d4238ff9`.
+  [Round-1 visual comparison](ce_op_home_v2_20261118/hero_steam_oven/round1_polish/comparison.png) ·
+  [Standalone rack sweep](ce_op_home_v2_20261118/hero_steam_oven/round1_polish/rack_sweep.json)
+  [Build record, inspection views and verification scope](../docs/records/2026-11-19-aura-convection-steam-oven-v2.md)
+
+- The AURA PRO TB-DOCK 12-IN-1, NVMe cartridge and SD card holder share a
+  [source directory](ce_op_home_v2_20261118/hero_tb_dock/source). The dock source
+  and its textures have SHA-256 `d9b5f28935f48ad8b5de4735c70b73dc9f9fefcb9c1e17bb35cbb09147b60cee`.
+  The source-check report has SHA-256 `289758fb6827aabb38ef7452f255308c1ddef144eff2d779ac3b8f4bd400d3fc`
+  and the fixed-base report has SHA-256 `59f533a08bd85343a3013a5144a28d2becbca7b75637e4cb29bb9eb4c7ca97c5`.
+  The dated record includes the workpiece digests, inspection sheet and verification scope.
+  [2026-11-19 storage dock record](../docs/records/2026-11-19-aura-pro-tb-dock-v2.md)
+
+- The AURA DESK privacy riser hub, presenter pen and compact mouse live under
+  [hero_riser_hub/source](ce_op_home_v2_20261118/hero_riser_hub/source).
+  The hub source and its textures have SHA-256
+  `6b51e6165c1c542f63c225c177bfcc2d402c686e171cd6b76d34b6bf45829416`.
+  The fixed-base report has SHA-256 `e52a7b723f6667acde05df3ea60de5ba916d00bf4d2354d36ed26ea1cadba0c2`.
+  The closed and open inspection PNGs, concatenated in that order, have SHA-256
+  `ea5e73e19e678c7ff8d2e62b70debdfa38740674f16c639fdc40611d369a8b1d`.
+  The dated record includes both workpiece hashes and the display verification.
+  [Build record](../docs/records/2026-11-19-aura-smart-riser-hub-v2.md)
+
+- The AURA BOOK laptop stand, magnetic PD plug and HDMI adapter live under
+  [hero_laptop_stand/source](ce_op_home_v2_20261118/hero_laptop_stand/source).
+  The [offline verification report](ce_op_home_v2_20261118/hero_laptop_stand/verification.json)
+  records the three source-and-texture hashes and has SHA-256
+  `6515f53a4330f1511003fae4e58a2daa12fb8851cbcd2e83ac21a5cfd18f4070`.
+  The fixed-base report has SHA-256 `977419f019d7e185d09bc685c381e099b8bfa4471b8d22da714847f358b76e79`.
+  [Build record and inspection views](../docs/records/2026-11-19-aura-laptop-docking-stand-v2.md)
+
+- The AURA POWER VOLTGUARD 240W station and its grounded plug live under
+  [hero_power_station/source](ce_op_home_v2_20261118/hero_power_station/source).
+  Their source bundles, including local material dependencies, have SHA-256
+  `a2b92d20219245a1de1de460c6e33b9267e3ffc546cdd71845666c017742286c` and
+  `2955a8e0ce1d1b255a04b8dc96fc9d35d32f6df9d2fa07764a2c9b5a9f821115`.
+  The [reopen report](ce_op_home_v2_20261118/hero_power_station/verification.json)
+  has SHA-256 `73f0306aff6b5df78379c7d3c7efc144503e6f72aa7950c4fca22508cce4152a`.
+  The fixed-base report and static inspection image have SHA-256
+  `ef7f9e06058c4385622933c41c85a3855b096c297f7e78bcce5b547db191dcdb` and
+  `9130560e4a1b4048ce9f6739b92eb5d8b687ba6f424dd1f09be4f17e01c986c9`, respectively.
+  The [Round 1 visual review](ce_op_home_v2_20261118/hero_power_station/round1_polish/visual_review.json)
+  records the comparison image hashes and has SHA-256
+  `b4cb5329ef724102da1363535d332280f62486f4ba14ce4f6d59bd42cdb10059`.
+  [Build record and inspection views](../docs/records/2026-11-19-aura-power-station-v2.md)
+
+- The AURA SOUND · STUDIO ONE speaker lives under
+  [hero_speaker/source](ce_op_home_v2_20261118/hero_speaker/source/aura-acoustic-tube-speaker-v2).
+  The USD source and its 14 textures have SHA-256
+  `0549a7c462c88598308e2ba2c0181e72bd02093e68b88434d323cebdd3633501`.
+  The fixed-base report has SHA-256 `f11ed69deb5948b468520ee7b11abe3edb30e83f59389b774858036906b4c91d`.
+  The offline display strip and matched collar comparison have SHA-256
+  `4c855d0b664edf5421d411e9aaeaf3f99072c52f73f379eddea667827ee461ec` and
+  `7286a7889d7f1517aeef38dd93912062db7f9320cb987c28659312fa023695f5`, respectively.
+  [Build record and inspection views](../docs/records/2026-11-19-aura-acoustic-tube-speaker-v2.md)
+
+- The AURA AIR · HYDROPURE H6, bedside pour carafe and aroma tablet are independently
+  referenceable sources. Their source-and-texture SHA-256 digests are
+  `ce95fe39fd115374beb7ada8634833a8e388262ad18f1aa4ed5b78ee614ca18c`,
+  `826dcb108e04979948e72f443ee8b375e0e5cec919994a1c22b8082024f88e7a` and
+  `831134b72974c3032c41f9f1a6a92efa6595d970cabd30988fc5e2609be83e26`.
+  The repaired fixed-base and standalone dynamics reports have SHA-256
+  `064515650195ba36efee5664f717fc88294adb55d09687484a30d6863962019c` and
+  `2f243ef9d5e497bb6bcc90cc318dc27ce5e27e1ddf53dede5b8517706573b535`.
+  The state and mechanism sheets have SHA-256
+  `c5d9ecab32b7eef372d5889224ef8072af651ff6596bbf86cb9808fd61c69076` and
+  `39faedc3b8af45d1d600baf313b15b988ce06f70ef4cc266e5a38fe6da6ff80e`.
+  [Sources](ce_op_home_v2_20261118/hero_humidifier/source) · [Round‑1 repair and inspection views](../docs/records/2026-11-19-aura-humidifier-v2-round-1.md)
+
+- The AURA VISION · LASER G4 projector and its 18 textures have bundle SHA-256
+  `ece4ec11782a8285836f0651f66065d49eb3dd62f05061fdf04257b793a21808`.
+  The standalone verification report has SHA-256
+  `3d63f20897d5af0cd4c7b8a81f17eed9f39e0a3c05be2d1350bfce742d808ed4` and the fixed-base report
+  has SHA-256 `a4d724bd6223ae3ce71db1416d6e5be5db7ad939ad42f1699a3bf84e51d0e99b`.
+  [Projector source](ce_op_home_v2_20261118/hero_projector/source/aura-cinema-gimbal-projector-v2/asset.usda) ·
+  [Build record and inspection views](../docs/records/2026-11-19-aura-cinema-gimbal-projector-v2.md)
+
 ## Historical output archive
 
 The [round-two archive and build-input index](archive-index-round2-20260905.json)

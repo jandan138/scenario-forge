@@ -2048,3 +2048,44 @@ def test_v06_export_transports_generic_success_and_rubric_as_unevaluated(
     Draft202012Validator(
         json.loads(_RUNTIME_CONTRACT_V06_SCHEMA.read_text(encoding="utf-8"))
     ).validate(contract)
+
+
+def test_genmanip_export_can_include_lift2_wrist_cameras(tmp_path: Path) -> None:
+    package_root = _build_package(tmp_path)
+
+    default_out = export_genmanip_collected_package(
+        package_root,
+        tmp_path / "collected_default",
+    ).output_dir
+    default_cams = yaml.safe_load(
+        (default_out / "cameras" / "fixed_camera_lift2.yml").read_text(encoding="utf-8")
+    )
+    assert set(default_cams) == {"overlook_camera"}
+
+    three_cam_out = export_genmanip_collected_package(
+        package_root,
+        tmp_path / "collected_three_cam",
+        include_wrist_cameras=True,
+    ).output_dir
+    camera_config = yaml.safe_load(
+        (three_cam_out / "cameras" / "fixed_camera_lift2.yml").read_text(encoding="utf-8")
+    )
+    assert set(camera_config) == {"overlook_camera", "left_camera", "right_camera"}
+    assert camera_config["overlook_camera"]["prim_path"] == (
+        "/lift2/lift2/lift2/base_link/Camera_overlook"
+    )
+    assert camera_config["overlook_camera"]["resolution"] == [1280, 720]
+    for cam_key, link_prefix in (
+        ("left_camera", "/lift2/lift2/lift2/fl/link6/Camera"),
+        ("right_camera", "/lift2/lift2/lift2/fr/link6/Camera"),
+    ):
+        cam = camera_config[cam_key]
+        assert cam["exists"] is True
+        assert cam["name"] == cam_key
+        assert cam["prim_path"] == link_prefix
+        assert cam["resolution"] == [640, 480]
+        assert cam["camera_params"] == [433.89, 433.38, 322.79, 243.14]
+        assert cam["position"] == [0.07, 0.01, 0.08]
+        assert cam["orientation"] == [0.62, 0.33, -0.33, -0.62]
+        assert cam["camera_axes"] == "usd"
+

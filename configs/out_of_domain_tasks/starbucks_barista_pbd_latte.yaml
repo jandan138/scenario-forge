@@ -1,0 +1,831 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/starbucks_barista_pbd/layout_constraints.yaml
+source_bindings: configs/source_bindings/starbucks_barista_pbd_20261125.yaml
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 2026
+  table:
+    x_range_m:
+    - -0.8
+    - 0.8
+    y_range_m:
+    - -0.43
+    - 0.43
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.05
+  robot_xy:
+  - 0.0
+  - -0.96
+  min_object_clearance_m: 0.02
+  objects:
+  - id: mastrena_ii
+    role: articulated_appliance
+    footprint_xy_m:
+    - 0.365
+    - 0.472
+    region: center
+    facing: robot
+    fixed_xy_m:
+    - 0.0
+    - 0.075
+    robot_side_exception: Commercial Thermoplan Mastrena II spans counter center to
+      leave clear Lift2 dual-arm front workspace.
+  - id: starbucks_hot_cup
+    role: target_container
+    footprint_xy_m:
+    - 0.092
+    - 0.092
+    region: left
+    facing: robot
+    fixed_xy_m:
+    - -0.26
+    - -0.25
+    support_z_offset_m: 0.001
+  - id: stainless_milk_pitcher
+    role: manipulated_object
+    footprint_xy_m:
+    - 0.134
+    - 0.092
+    region: right
+    facing: robot
+    fixed_xy_m:
+    - 0.28
+    - -0.21
+    support_z_offset_m: 0.001
+  - id: pickup_serve_tray
+    role: target_region
+    footprint_xy_m:
+    - 0.21
+    - 0.17
+    region: left
+    facing: robot
+    fixed_xy_m:
+    - -0.47
+    - -0.22
+    support_z_offset_m: 0.001
+  - id: syrup_bottle_vanilla
+    role: context_prop
+    footprint_xy_m:
+    - 0.084
+    - 0.084
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - 0.34
+    - 0.25
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: syrup_bottle_caramel
+    role: context_prop
+    footprint_xy_m:
+    - 0.084
+    - 0.084
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - 0.46
+    - 0.24
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: syrup_bottle_hazelnut
+    role: context_prop
+    footprint_xy_m:
+    - 0.084
+    - 0.084
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - 0.58
+    - 0.26
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: syrup_bottle_mocha
+    role: context_prop
+    footprint_xy_m:
+    - 0.084
+    - 0.084
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - 0.69
+    - 0.22
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: cup_stack_tower
+    role: context_prop
+    footprint_xy_m:
+    - 0.1
+    - 0.1
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - -0.67
+    - 0.24
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: lid_stack_tower
+    role: context_prop
+    footprint_xy_m:
+    - 0.106
+    - 0.106
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - -0.53
+    - 0.25
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: cup_sleeve_holder
+    role: context_prop
+    footprint_xy_m:
+    - 0.126
+    - 0.096
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - -0.36
+    - 0.25
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: receipt_printer
+    role: context_prop
+    footprint_xy_m:
+    - 0.142
+    - 0.176
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - -0.63
+    - 0.02
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: oat_milk_carton
+    role: context_prop
+    footprint_xy_m:
+    - 0.074
+    - 0.074
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - 0.52
+    - 0.04
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: whole_milk_carton
+    role: context_prop
+    footprint_xy_m:
+    - 0.074
+    - 0.074
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - 0.66
+    - 0.04
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: espresso_knock_box
+    role: context_prop
+    footprint_xy_m:
+    - 0.136
+    - 0.146
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - 0.34
+    - 0.07
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: barista_towel
+    role: context_prop
+    footprint_xy_m:
+    - 0.156
+    - 0.116
+    region: right
+    facing: robot
+    fixed_xy_m:
+    - 0.51
+    - -0.25
+    support_z_offset_m: 0.001
+  - id: straw_stirrer_caddy
+    role: context_prop
+    footprint_xy_m:
+    - 0.086
+    - 0.086
+    region: right
+    facing: robot
+    fixed_xy_m:
+    - 0.69
+    - -0.22
+    support_z_offset_m: 0.001
+  - id: cocoa_shaker
+    role: context_prop
+    footprint_xy_m:
+    - 0.06
+    - 0.06
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - -0.3
+    - 0.05
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: cinnamon_shaker
+    role: context_prop
+    footprint_xy_m:
+    - 0.06
+    - 0.06
+    region: far_context
+    facing: robot
+    fixed_xy_m:
+    - -0.42
+    - 0.06
+    support_z_offset_m: 0.001
+    robot_side_exception: Rear Starbucks bar clutter prop positioned behind operational
+      corridor.
+  - id: sugar_packet_caddy
+    role: context_prop
+    footprint_xy_m:
+    - 0.112
+    - 0.076
+    region: left
+    facing: robot
+    fixed_xy_m:
+    - -0.68
+    - -0.24
+    support_z_offset_m: 0.001
+  relations:
+  - subject: starbucks_hot_cup
+    predicate: left_of
+    reference: mastrena_ii
+  - subject: stainless_milk_pitcher
+    predicate: right_of
+    reference: mastrena_ii
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: starbucks_barista_pbd_latte
+  domain: starbucks_barista_pbd
+  task_family: commercial_espresso_and_dual_pbd_latte
+  instruction: "\u5C06\u661F\u5DF4\u514B\u70ED\u996E\u7EB8\u676F\u6B63\u7ACB\u653E\
+    \u5230 Mastrena II \u4E0D\u9508\u94A2\u7A7F\u5B54\u63A5\u6C34\u683C\u6805\u6B63\
+    \u4E0B\u65B9\uFF0C\u6309\u4E0B\u5DE6\u4FA7\u7EFF\u8272\u53CC\u4EFD\u6D53\u7F29\
+    \u8403\u53D6\u952E\u89E6\u53D1\u6D53\u7F29\u6DB2\u51FA\u676F\uFF1B\u968F\u540E\
+    \u5C06\u7EB8\u676F\u79FB\u81F3\u5427\u53F0\u64CD\u4F5C\u533A\u5E76\u6293\u8D77\
+    \u4E0D\u9508\u94A2\u62C9\u82B1\u7F38\u5411\u676F\u5185\u503E\u5012\u70ED\u725B\
+    \u5976\uFF0C\u653E\u56DE\u62C9\u82B1\u7F38\uFF0C\u6700\u540E\u5C06\u6210\u54C1\
+    \u62FF\u94C1\u7A33\u59A5\u79FB\u4EA4\u81F3\u7EFF\u767D Mobile Pickup \u51FA\u9910\
+    \u57AB\u3002"
+  max_steps: 2600
+  seed: '2026'
+  scene:
+    asset_id: starbucks_flagship_bar_v1
+    root_prim_path: /World
+    pose:
+      xyz:
+      - 0.0
+      - 0.0
+      - 0.0
+      wxyz:
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+  table:
+    id: table
+    asset_id: StarbucksBaristaCounter
+    source_prim_path: /World/table
+    pose:
+      xyz:
+      - 0.0
+      - 0.0
+      - 0.0
+      wxyz:
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+  object_bindings:
+    mastrena_ii:
+      asset_id: StarbucksMastrenaII
+      source_prim_path: /World/StarbucksMastrenaII
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz:
+          - 0.0
+          - 0.0
+          - 0.0
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+        cup_spout_target:
+          xyz:
+          - -0.035
+          - -0.215
+          - 0.042
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+        steam_wand_tip:
+          xyz:
+          - 0.105
+          - -0.245
+          - 0.145
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+    starbucks_hot_cup:
+      asset_id: StarbucksHotCup
+      source_prim_path: /World/StarbucksHotCup
+      role: target_container
+      named_frames:
+        support:
+          xyz:
+          - 0.0
+          - 0.0
+          - 0.0
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+        grasp:
+          xyz:
+          - 0.0
+          - 0.0
+          - 0.072
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+        opening:
+          xyz:
+          - 0.0
+          - 0.0
+          - 0.135
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+    stainless_milk_pitcher:
+      asset_id: StainlessMilkPitcher
+      source_prim_path: /World/StainlessMilkPitcher
+      role: manipulated_object
+      named_frames:
+        support:
+          xyz:
+          - 0.0
+          - 0.0
+          - 0.0
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+        grasp:
+          xyz:
+          - 0.055
+          - 0.0
+          - 0.062
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+        opening:
+          xyz:
+          - 0.0
+          - 0.0
+          - 0.116
+          wxyz:
+          - 1.0
+          - 0.0
+          - 0.0
+          - 0.0
+    pickup_serve_tray:
+      asset_id: PickupServeTray
+      source_prim_path: /World/PickupServeTray
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    syrup_bottle_vanilla:
+      asset_id: SyrupBottleVanilla
+      source_prim_path: /World/SyrupBottleVanilla
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    syrup_bottle_caramel:
+      asset_id: SyrupBottleCaramel
+      source_prim_path: /World/SyrupBottleCaramel
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    syrup_bottle_hazelnut:
+      asset_id: SyrupBottleHazelnut
+      source_prim_path: /World/SyrupBottleHazelnut
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    syrup_bottle_mocha:
+      asset_id: SyrupBottleMocha
+      source_prim_path: /World/SyrupBottleMocha
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    cup_stack_tower:
+      asset_id: CupStackTower
+      source_prim_path: /World/CupStackTower
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    lid_stack_tower:
+      asset_id: LidStackTower
+      source_prim_path: /World/LidStackTower
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    cup_sleeve_holder:
+      asset_id: CupSleeveHolder
+      source_prim_path: /World/CupSleeveHolder
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    receipt_printer:
+      asset_id: ReceiptPrinter
+      source_prim_path: /World/ReceiptPrinter
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    oat_milk_carton:
+      asset_id: OatMilkCarton
+      source_prim_path: /World/OatMilkCarton
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    whole_milk_carton:
+      asset_id: WholeMilkCarton
+      source_prim_path: /World/WholeMilkCarton
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    espresso_knock_box:
+      asset_id: EspressoKnockBox
+      source_prim_path: /World/EspressoKnockBox
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    barista_towel:
+      asset_id: BaristaTowel
+      source_prim_path: /World/BaristaTowel
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    straw_stirrer_caddy:
+      asset_id: StrawStirrerCaddy
+      source_prim_path: /World/StrawStirrerCaddy
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    cocoa_shaker:
+      asset_id: CocoaShaker
+      source_prim_path: /World/CocoaShaker
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    cinnamon_shaker:
+      asset_id: CinnamonShaker
+      source_prim_path: /World/CinnamonShaker
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+    sugar_packet_caddy:
+      asset_id: SugarPacketCaddy
+      source_prim_path: /World/SugarPacketCaddy
+      role: context_prop
+      metadata:
+        dressing_preset_id: starbucks_retail_bar_clutter_v1
+        group_id: barista_counter_props
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz:
+      - 0.0
+      - -0.96
+      - 0.0
+      wxyz:
+      - 0.7071067812
+      - 0.0
+      - 0.0
+      - 0.7071067812
+    actors:
+    - id: left_arm
+      end_effector: left
+      capabilities:
+      - grasp
+      - push
+      - lift
+      - place
+      - release
+    - id: right_arm
+      end_effector: right
+      capabilities:
+      - grasp
+      - push
+      - lift
+      - place
+      - release
+  steps:
+  - id: place_cup_on_drip_grille
+    skill: place
+    actors:
+    - left_arm
+    parameters:
+      object: starbucks_hot_cup
+      target: mastrena_ii
+      target_frame: mastrena_ii.cup_spout_target
+  - id: press_double_espresso_btn
+    skill: push
+    actors:
+    - left_arm
+    depends_on:
+    - place_cup_on_drip_grille
+    parameters:
+      object: mastrena_ii
+      joint: button_shot_double
+      target_state: pressed
+  - id: pour_milk_with_pitcher
+    skill: pour
+    actors:
+    - right_arm
+    depends_on:
+    - press_double_espresso_btn
+    parameters:
+      object: stainless_milk_pitcher
+      target: starbucks_hot_cup
+  - id: return_pitcher_to_counter
+    skill: place
+    actors:
+    - right_arm
+    depends_on:
+    - pour_milk_with_pitcher
+    parameters:
+      object: stainless_milk_pitcher
+      target: table
+  - id: serve_latte_on_pickup_tray
+    skill: place
+    actors:
+    - left_arm
+    depends_on:
+    - return_pitcher_to_counter
+    parameters:
+      object: starbucks_hot_cup
+      target: pickup_serve_tray
+  invariants: []
+  success:
+    operator: all
+    claim_scope: Starbucks Mastrena II 5-stage bimanual barista latte contract with
+      17 fully dynamic counter props and dual-phase GPU PBD liquid coupling.
+    predicates:
+    - id: cup_seated_on_drip_grille
+      type: relative_pose_reached
+      sequence_index: 0
+      parameters:
+        object: starbucks_hot_cup
+        relative_to: mastrena_ii
+        xyz_range:
+          x:
+          - -0.045
+          - 0.045
+          y:
+          - -0.175
+          - -0.088
+          z:
+          - 0.055
+          - 0.085
+        axis_alignment:
+          object_axis: z
+          target_axis: z
+          comparison: <=
+          threshold_deg: 12.0
+          relative_to_part: grounds_drawer
+    - id: brew_button_pressed
+      type: articulation_joint_state_reached
+      sequence_index: 1
+      parameters:
+        object: mastrena_ii
+        joint: button_shot_double
+        state: pressed
+    - id: pitcher_poured_over_cup
+      type: relative_pose_reached
+      sequence_index: 2
+      parameters:
+        object: stainless_milk_pitcher
+        relative_to: starbucks_hot_cup
+        xyz_range:
+          x:
+          - 0.02
+          - 0.16
+          y:
+          - -0.08
+          - 0.08
+          z:
+          - 0.1
+          - 0.28
+    - id: pitcher_returned_upright
+      type: object_at_initial_pose
+      sequence_index: 3
+      parameters:
+        object: stainless_milk_pitcher
+        axis_alignment:
+          object_axis: z
+          target_axis: z
+          comparison: <=
+          threshold_deg: 12.0
+        xyz_tolerance:
+        - 0.085
+        - 0.085
+        - 0.025
+    - id: latte_served_on_pickup_tray
+      type: relative_pose_reached
+      sequence_index: 4
+      parameters:
+        object: starbucks_hot_cup
+        relative_to: pickup_serve_tray
+        xyz_range:
+          x:
+          - -0.085
+          - 0.085
+          y:
+          - -0.075
+          - 0.075
+          z:
+          - 0.008
+          - 0.032
+        axis_alignment:
+          object_axis: z
+          target_axis: z
+          comparison: <=
+          threshold_deg: 12.0
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+      - id: stage0_cup_on_drip
+        weight: 0.2
+        active: true
+        temporal:
+          kind: instant
+        condition:
+          type: relative_pose_reached
+          parameters:
+            object: starbucks_hot_cup
+            relative_to: mastrena_ii
+            xyz_range:
+              x:
+              - -0.045
+              - 0.045
+              y:
+              - -0.175
+              - -0.088
+              z:
+              - 0.055
+              - 0.085
+        source_ref:
+          step_id: place_cup_on_drip_grille
+      - id: stage1_brew_pressed
+        weight: 0.2
+        active: true
+        requires:
+        - stage0_cup_on_drip
+        temporal:
+          kind: instant
+        condition:
+          type: articulation_joint_state_reached
+          parameters:
+            object: mastrena_ii
+            joint: button_shot_double
+            state: pressed
+        source_ref:
+          step_id: press_double_espresso_btn
+      - id: stage2_pitcher_poured
+        weight: 0.2
+        active: true
+        requires:
+        - stage1_brew_pressed
+        temporal:
+          kind: instant
+        condition:
+          type: relative_pose_reached
+          parameters:
+            object: stainless_milk_pitcher
+            relative_to: starbucks_hot_cup
+            xyz_range:
+              x:
+              - 0.02
+              - 0.16
+              y:
+              - -0.08
+              - 0.08
+              z:
+              - 0.1
+              - 0.28
+        source_ref:
+          step_id: pour_milk_with_pitcher
+      - id: stage3_pitcher_returned
+        weight: 0.2
+        active: true
+        requires:
+        - stage2_pitcher_poured
+        temporal:
+          kind: instant
+        condition:
+          type: object_at_initial_pose
+          parameters:
+            object: stainless_milk_pitcher
+            xyz_tolerance:
+            - 0.085
+            - 0.085
+            - 0.025
+        source_ref:
+          step_id: return_pitcher_to_counter
+      - id: stage4_latte_served
+        weight: 0.2
+        active: true
+        requires:
+        - stage3_pitcher_returned
+        temporal:
+          kind: terminal
+        condition:
+          type: relative_pose_reached
+          parameters:
+            object: starbucks_hot_cup
+            relative_to: pickup_serve_tray
+            xyz_range:
+              x:
+              - -0.085
+              - 0.085
+              y:
+              - -0.075
+              - 0.075
+              z:
+              - 0.008
+              - 0.032
+        source_ref:
+          step_id: serve_latte_on_pickup_tray

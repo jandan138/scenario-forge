@@ -99,6 +99,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Render 7-view previews on existing compiled/collected packages without overwriting them.",
     )
+    parser.add_argument(
+        "--include-wrist-cameras",
+        action="store_true",
+        help="Include Lift2 left_camera and right_camera entries in fixed_camera_lift2.yml.",
+    )
     return parser
 
 
@@ -257,6 +262,7 @@ def _compile_and_export_task(
     curobo_src: Path,
     skip_runtime: bool,
     render_only: bool = False,
+    include_wrist_cameras: bool = False,
 ) -> dict[str, Any]:
     resolved_task_path = (
         task_path if task_path.is_absolute() else (REPO_ROOT / task_path)
@@ -318,7 +324,11 @@ def _compile_and_export_task(
         )
 
     if not render_only:
-        export_genmanip_collected_package(package_dir, collected_dir)
+        export_genmanip_collected_package(
+            package_dir,
+            collected_dir,
+            include_wrist_cameras=include_wrist_cameras,
+        )
     elif not collected_dir.is_dir():
         raise FileNotFoundError(f"missing collected_package for --render-only: {collected_dir}")
 
@@ -380,6 +390,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             curobo_src=args.curobo_src.resolve(),
             skip_runtime=args.skip_runtime,
             render_only=args.render_only,
+            include_wrist_cameras=args.include_wrist_cameras,
         )
         summaries.append(summary)
         print(

@@ -360,6 +360,11 @@ def _render_initial_scene(
             default_config,
         )
         stage = scene.world.stage
+        robot_prefix = f"/World/{scene.uuid}/lift2"
+        for prim in stage.Traverse():
+            if str(prim.GetPath()).startswith(robot_prefix) and prim.GetName() in {"h_link5", "h_link6"}:
+                if prim.IsA(UsdGeom.Imageable):
+                    UsdGeom.Imageable(prim).GetVisibilityAttr().Set(UsdGeom.Tokens.invisible)
         bbox_cache = UsdGeom.BBoxCache(
             Usd.TimeCode.Default(),
             [UsdGeom.Tokens.default_, UsdGeom.Tokens.render],
@@ -1058,7 +1063,7 @@ def _fit_projected_camera(
 
 
 _COMPLETE_WALL_ROOT_NAME = re.compile(
-    r"^(?:wall(?:_|(?:north|south|east|west|side)(?:$|[_0-9]))|arch_wall_(?:north|south|east|west)(?:$|[_0-9]))"
+    r"^(?:wall(?:_|(?:north|south|east|west|side)(?:$|[_0-9]))|arch_wall_(?:north|south|east|west)(?:$|[_0-9])|(?:north|south|east|west)(?:_[a-z0-9]+)*_wall(?:$|[_0-9]))"
 )
 _CEILING_OCCLUDER_NAME = re.compile(
     r"^(?:arch_)?(?:coffered_)?ceiling(?:$|_)|^(?:arch_)?(?:soffit|troffer|tgrid|skylight|roof|hvac_diffuser|pendant)(?:$|_)"

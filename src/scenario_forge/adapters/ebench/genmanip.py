@@ -105,6 +105,7 @@ def export_genmanip_collected_package(
     out_dir: str | Path | None = None,
     *,
     legacy_v01_transport: bool = False,
+    include_wrist_cameras: bool = False,
 ) -> GenManipExportResult:
     """Export a compiled Scenario Forge package as a GenManip collected package.
 
@@ -378,6 +379,7 @@ def export_genmanip_collected_package(
             episode_name=seed,
             claim_scope=claim_scope,
             producer_entrypoint=producer_entrypoint,
+            include_wrist_cameras=include_wrist_cameras,
         )
         if output_dir.exists():
             shutil.rmtree(output_dir)
@@ -465,6 +467,7 @@ def _write_collected_package(
     episode_name: str,
     claim_scope: str,
     producer_entrypoint: Mapping[str, Any] | None,
+    include_wrist_cameras: bool = False,
 ) -> None:
     scene_dir = staging_dir / "assets" / "scene_usds" / "scenario_forge" / scenario_id
     scene_dir.mkdir(parents=True, exist_ok=True)
@@ -531,7 +534,10 @@ def _write_collected_package(
     with (episode_dir / "meta_info.pkl").open("wb") as handle:
         pickle.dump(canonical_episode, handle, protocol=_PICKLE_PROTOCOL)
 
-    _write_yaml(staging_dir / "cameras" / "fixed_camera_lift2.yml", _camera_config())
+    _write_yaml(
+        staging_dir / "cameras" / "fixed_camera_lift2.yml",
+        _camera_config(include_wrist_cameras=include_wrist_cameras),
+    )
 
     source_assets = [
         {
@@ -2673,8 +2679,30 @@ def _object_mappings(scenario: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     return result
 
 
-def _camera_config() -> dict[str, Any]:
+def _wrist_camera_entry(name: str, prim_path: str) -> dict[str, Any]:
     return {
+        "exists": True,
+        "frequency": 60,
+        "name": name,
+        "camera_params": [433.89, 433.38, 322.79, 243.14],
+        "position": [0.07, 0.01, 0.08],
+        "orientation": [0.62, 0.33, -0.33, -0.62],
+        "prim_path": prim_path,
+        "resolution": [640, 480],
+        "pixel_size": 3.0,
+        "f_number": 2.0,
+        "focus_distance": 0.6,
+        "with_distance": False,
+        "with_semantic": False,
+        "with_bbox2d": False,
+        "with_bbox3d": False,
+        "with_motion_vector": False,
+        "camera_axes": "usd",
+    }
+
+
+def _camera_config(*, include_wrist_cameras: bool = False) -> dict[str, Any]:
+    config: dict[str, Any] = {
         "overlook_camera": {
             "exists": True,
             "frequency": 60,
@@ -2695,6 +2723,16 @@ def _camera_config() -> dict[str, Any]:
             "camera_axes": "usd",
         }
     }
+    if include_wrist_cameras:
+        config["left_camera"] = _wrist_camera_entry(
+            "left_camera",
+            "/lift2/lift2/lift2/fl/link6/Camera",
+        )
+        config["right_camera"] = _wrist_camera_entry(
+            "right_camera",
+            "/lift2/lift2/lift2/fr/link6/Camera",
+        )
+    return config
 
 
 def _action_contract() -> dict[str, Any]:

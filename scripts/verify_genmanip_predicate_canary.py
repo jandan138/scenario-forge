@@ -1102,6 +1102,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
 
     plans = _plans_for_profile(args.profile, plan_file=plan_file)
+    if plan_file is not None:
+        loaded_plan_map = yaml.safe_load(plan_file.read_text(encoding="utf-8"))
+        if isinstance(loaded_plan_map, Mapping):
+            allowed_ids = {str(k) for k in loaded_plan_map}
+            plans = {k: v for k, v in plans.items() if k in allowed_ids}
     out_root = (
         args.out_root if args.out_root.is_absolute() else (REPO_ROOT / args.out_root)
     ).resolve()

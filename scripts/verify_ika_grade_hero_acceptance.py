@@ -865,19 +865,32 @@ def inspect_usda_appearance_and_topology(usd_path: Path) -> dict[str, Any]:
         mc_m = re.match(r'^def (Mesh|Cube) "([^"]+)"', stripped)
         if mc_m:
             ptype, name = mc_m.group(1), mc_m.group(2)
-            # Collect lines until matching closing brace at the same indent
-            block_lines = [line]
-            j = i + 1
-            seen_open = "{" in line
-            brace_depth = line.count("{") - line.count("}")
+            # Track header `(...)` separately so `customData = { ... }` does not close the Mesh body early
+            block_lines: list[str] = []
+            j = i
+            paren_depth = 0
+            seen_open = False
+            brace_depth = 0
             while j < n_lines:
                 bl = lines[j]
                 block_lines.append(bl)
-                if "{" in bl:
-                    seen_open = True
-                brace_depth += bl.count("{") - bl.count("}")
-                if seen_open and brace_depth <= 0:
-                    break
+                if seen_open:
+                    brace_depth += bl.count("{") - bl.count("}")
+                    if brace_depth <= 0:
+                        break
+                else:
+                    for ch in bl:
+                        if ch == "(":
+                            paren_depth += 1
+                        elif ch == ")":
+                            paren_depth = max(0, paren_depth - 1)
+                        elif paren_depth <= 0 and ch == "{":
+                            seen_open = True
+                            brace_depth += 1
+                        elif seen_open and ch == "}":
+                            brace_depth -= 1
+                    if seen_open and brace_depth <= 0:
+                        break
                 j += 1
             body = "\n".join(block_lines)
             in_collision = any(pname == "Collision" for _, pname in prim_stack)
@@ -895,7 +908,7 @@ def inspect_usda_appearance_and_topology(usd_path: Path) -> dict[str, Any]:
                 else:
                     fvc = re.search(r"int\[\] faceVertexCounts = \[([^\]]+)\]", body)
                     pts = re.search(r"point3f\[\] points = \[([^\]]+)\]", body)
-                    nrm = re.search(r"normal3f\[\] normals = \[([^\]]+)\]", body)
+                    nrm = re.search(r"normal3f\[\] (?:primvars:)?normals = \[([^\]]+)\]", body)
                     nf = len(fvc.group(1).split(",")) if fvc else 0
                     nv = pts.group(1).count("(") if pts else 0
                     nn = len(set(re.findall(r"\([^)]+\)", nrm.group(1)))) if nrm else 0
@@ -1293,10 +1306,14 @@ for hspec in cfg["heroes"]:
     closed_vmin, closed_vmax = compute_prim_visual_aabb(stage, "/World/Hero/Links")
 
     dof_sweep_records = []
+    pre_targets_map = hspec.get("dof_sweep_pre_targets") or {}
     for idx, jn in enumerate(dof_names):
         low = float(dof_limits["lower"][idx])
         high = float(dof_limits["upper"][idx])
         q_test = q_closed.copy()
+        for pre_jn, pre_val in (pre_targets_map.get(jn) or {}).items():
+            if pre_jn in dof_names:
+                q_test[dof_names.index(pre_jn)] = float(pre_val)
         q_test[idx] = low
         art.set_joint_positions(q_test)
         for _ in range(8):

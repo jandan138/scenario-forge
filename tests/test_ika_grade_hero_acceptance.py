@@ -743,3 +743,79 @@ g9b_visual_critic:
     assert hero_rep["evidenceSeparation"]["reopen_and_bounds"] == "PASS"
     assert hero_rep["evidenceSeparation"]["visual_acceptance"] == "PASS"
     assert hero_rep["evidenceSeparation"]["physics_smoke"] == "NOT_RUN_STATIC_ONLY"
+
+
+def test_inspect_usda_handles_customdata_braces_in_prim_header(tmp_path: Path) -> None:
+    mod = _load_acceptance_module()
+    usda = tmp_path / "customdata_mesh.usda"
+    usda.write_text(
+        """#usda 1.0
+def Xform "AssetRoot" {
+    def Xform "Links" {
+        def Xform "Base" {
+            def Xform "Visual" {
+                def Mesh "ChamferedHousing" (
+                    prepend apiSchemas = ["MaterialBindingAPI"]
+                    customData = {
+                        dictionary ceop = {
+                            string uvProjection = "world_triplanar"
+                        }
+                    }
+                )
+                {
+                    int[] faceVertexCounts = [4, 3, 3, 4, 3, 3, 4, 3, 3, 4]
+                    normal3f[] normals = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1), (0.7, 0.7, 0), (-0.7, 0.7, 0)]
+                    point3f[] points = [(0,0,0), (1,0,0), (1,1,0), (0,1,0), (0,0,1), (1,0,1), (1,1,1), (0,1,1), (0.5,0.5,0), (0.5,0.5,1)]
+                }
+            }
+        }
+    }
+}
+""",
+        encoding="utf-8",
+    )
+    meta = mod.inspect_usda_appearance_and_topology(usda)
+    meshes = meta["appearance_meta"]["visual_meshes"]
+    assert len(meshes) == 1
+    assert meshes[0]["name"] == "ChamferedHousing"
+    assert meshes[0]["vertices"] == 10
+    assert meshes[0]["faces"] == 10
+    assert meshes[0]["unique_normals"] == 8
+
+
+def test_dof_sweep_pre_targets_supported_in_spec_and_worker(tmp_path: Path) -> None:
+    mod = _load_acceptance_module()
+    assert "dof_sweep_pre_targets" in mod._ISAAC_RUNTIME_WORKER
+    spec_yaml = tmp_path / "hero.yaml"
+    spec_yaml.write_text(
+        """schema_version: ika-grade-hero-spec/v1.0
+slug: test-hero
+evidence_slug: test-hero
+asset_id: TestHero
+expected_wdh_m: [0.4, 0.4, 0.3]
+closed_joint_targets_rad_or_m:
+  DoorHingeJoint: 0.0
+  RackSlideJoint: 0.0
+dof_sweep_pre_targets:
+  RackSlideJoint:
+    DoorHingeJoint: -1.40
+control_links: [DoorHinge, RackSlide]
+spring_buttons: {}
+force_smoke:
+  joint: DoorHingeJoint
+  link: DoorHinge
+  force_world_xyz: [0.0, -10.0, 0.0]
+  force_pos_world_xyz: [0.0, -0.2, 0.1]
+  expected_sign: -1
+  min_travel: 0.1
+load_tests: []
+rail_transport_test: null
+rtx_camera:
+  eye: [0.5, -0.6, 0.4]
+  target: [0.0, 0.0, 0.1]
+""",
+        encoding="utf-8",
+    )
+    loaded = mod.load_hero_acceptance_specs(spec_yaml)
+    assert len(loaded) == 1
+    assert loaded[0]["dof_sweep_pre_targets"] == {"RackSlideJoint": {"DoorHingeJoint": -1.40}}

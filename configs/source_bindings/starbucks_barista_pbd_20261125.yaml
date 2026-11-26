@@ -1,0 +1,244 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  starbucks_flagship_bar_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/starbucks_flagship_bar_v1/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/starbucks_flagship_bar_v1
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/starbucks_flagship_bar_v1/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r5
+    expected_scope_prims:
+    - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+  StarbucksBaristaCounter:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/StarbucksBaristaCounter/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StarbucksBaristaCounter
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StarbucksBaristaCounter/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r1
+    expected_scope_prims:
+    - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  StarbucksMastrenaII:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/StarbucksMastrenaII/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StarbucksMastrenaII
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StarbucksMastrenaII/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r3
+    expected_scope_prims:
+    - /World/StarbucksMastrenaII
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  StarbucksHotCup:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/StarbucksHotCup/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StarbucksHotCup
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StarbucksHotCup/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/StarbucksHotCup
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  StainlessMilkPitcher:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/StainlessMilkPitcher/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StainlessMilkPitcher
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StainlessMilkPitcher/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/StainlessMilkPitcher
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  PickupServeTray:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/PickupServeTray/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/PickupServeTray
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/PickupServeTray/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/PickupServeTray
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SyrupBottleVanilla:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/SyrupBottleVanilla/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleVanilla
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleVanilla/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/SyrupBottleVanilla
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SyrupBottleCaramel:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/SyrupBottleCaramel/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleCaramel
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleCaramel/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/SyrupBottleCaramel
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SyrupBottleHazelnut:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/SyrupBottleHazelnut/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleHazelnut
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleHazelnut/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/SyrupBottleHazelnut
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SyrupBottleMocha:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/SyrupBottleMocha/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleMocha
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SyrupBottleMocha/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/SyrupBottleMocha
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CupStackTower:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/CupStackTower/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CupStackTower
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CupStackTower/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/CupStackTower
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  LidStackTower:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/LidStackTower/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/LidStackTower
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/LidStackTower/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/LidStackTower
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CupSleeveHolder:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/CupSleeveHolder/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CupSleeveHolder
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CupSleeveHolder/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/CupSleeveHolder
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  ReceiptPrinter:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/ReceiptPrinter/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/ReceiptPrinter
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/ReceiptPrinter/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/ReceiptPrinter
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  OatMilkCarton:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/OatMilkCarton/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/OatMilkCarton
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/OatMilkCarton/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/OatMilkCarton
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WholeMilkCarton:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/WholeMilkCarton/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/WholeMilkCarton
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/WholeMilkCarton/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/WholeMilkCarton
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  EspressoKnockBox:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/EspressoKnockBox/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/EspressoKnockBox
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/EspressoKnockBox/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/EspressoKnockBox
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  BaristaTowel:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/BaristaTowel/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/BaristaTowel
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/BaristaTowel/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/BaristaTowel
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  StrawStirrerCaddy:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/StrawStirrerCaddy/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StrawStirrerCaddy
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/StrawStirrerCaddy/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/StrawStirrerCaddy
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CocoaShaker:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/CocoaShaker/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CocoaShaker
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CocoaShaker/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/CocoaShaker
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CinnamonShaker:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/CinnamonShaker/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CinnamonShaker
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/CinnamonShaker/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/CinnamonShaker
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SugarPacketCaddy:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/facades/SugarPacketCaddy/facade.usda
+    package_dir: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SugarPacketCaddy
+    manifest_path: ../../external_artifacts/starbucks_barista_pbd_20261125/admitted_packages/packages/SugarPacketCaddy/evidence/manifest.json
+    producer_revision: 20261125_starbucks_r2
+    expected_scope_prims:
+    - /World/SugarPacketCaddy
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false

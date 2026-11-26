@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from hashlib import sha256
+import math
 from pathlib import Path
 import struct
 from types import SimpleNamespace
@@ -432,6 +433,45 @@ def test_preview_geometry_gate_allows_rotated_post_warmup_aabb_without_profile(
         "max": [c + extent / 2.0 for c, extent in zip(center, rotated_extent, strict=True)],
     }
     post["extent_m"] = rotated_extent
+
+    gate = _validate_runtime_geometry(request, manifest)
+
+    assert gate["task_objects"][runtime_id]["extent_comparison_by_sample"] == {
+        "warmup_start": "sorted_axis_extents",
+        "post_warmup": "longest_aabb_axis_rotation_tolerant",
+    }
+
+
+def test_preview_geometry_gate_allows_oblique_yaw_rigid_object_aabb(
+    tmp_path: Path,
+) -> None:
+    collected_package = export_genmanip_collected_package(
+        _build_qualified_object_package(tmp_path)
+    ).output_dir
+    request = _load_yaml(collected_package / "evidence" / "render_request.yaml")
+    runtime_id = next(iter(request["expected_runtime_geometry"]))
+    request["expected_runtime_geometry"][runtime_id].pop("qualified_extent_m_by_sample", None)
+    evidence_dir = _write_passing_evidence(collected_package, request)
+    manifest = json.loads((evidence_dir / "render_manifest.json").read_text(encoding="utf-8"))
+
+    ex, ey, ez = request["expected_runtime_geometry"][runtime_id]["extent_m"]
+    yaw_rad = math.radians(-28.0)
+    q = [math.cos(yaw_rad / 2.0), 0.0, 0.0, math.sin(yaw_rad / 2.0)]
+    c = abs(math.cos(yaw_rad))
+    s = abs(math.sin(yaw_rad))
+    rotated_extent = [ex * c + ey * s, ex * s + ey * c, ez]
+
+    for sample_name in ("warmup_start", "post_warmup"):
+        sample = manifest["runtime_geometry"]["task_objects"][runtime_id][sample_name]
+        lower = sample["world_bound_m"]["min"]
+        upper = sample["world_bound_m"]["max"]
+        center = [(low + high) / 2.0 for low, high in zip(lower, upper, strict=True)]
+        sample["root_pose"]["wxyz"] = list(q)
+        sample["world_bound_m"] = {
+            "min": [ctr - ext / 2.0 for ctr, ext in zip(center, rotated_extent, strict=True)],
+            "max": [ctr + ext / 2.0 for ctr, ext in zip(center, rotated_extent, strict=True)],
+        }
+        sample["extent_m"] = list(rotated_extent)
 
     gate = _validate_runtime_geometry(request, manifest)
 
