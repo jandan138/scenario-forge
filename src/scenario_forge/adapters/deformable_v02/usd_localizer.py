@@ -23,7 +23,10 @@ _DEFAULT_PANDA_URDF_CANDIDATES = (
 
 def find_local_panda_urdf_dir() -> Path:
     """Locate the local Franka Panda URDF directory."""
-    for candidate in _DEFAULT_PANDA_URDF_CANDIDATES:
+    import os
+    env_dir = os.environ.get("PANDA_URDF_DIR")
+    candidates = ([Path(env_dir)] if env_dir else []) + list(_DEFAULT_PANDA_URDF_CANDIDATES) + [Path("/root/hose_v10_1_work/panda_bullet")]
+    for candidate in candidates:
         if (candidate / "panda.urdf").is_file():
             return candidate
     raise FileNotFoundError(
