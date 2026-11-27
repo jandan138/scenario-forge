@@ -1,0 +1,23 @@
+# Home v2 study and living-room sources
+
+The two builders produce two Blender rooms, two freestanding OpenUSD tables and sixteen rigid decorative props. The surface finishes, illustrations and cover typography are drawn procedurally. Each table and prop resolves its textures inside its own package. [Room and table builder](../../external_artifacts/ce_op_home_v2_20261118/builders/build_study_and_living_rooms_v2.py) · [Clutter builder](../../external_artifacts/ce_op_home_v2_20261118/builders/build_study_living_clutter_v2.py)
+
+| Set | Empty room | Table with all eight props | Individual prop views |
+| --- | --- | --- | --- |
+| Sunlit study | [Room](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/study_room.png) | [Oak desk](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/study_table.png) | [Study props](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/study_props.jpg) |
+| Living room | [Room](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/living_room.png) | [Walnut console](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/living_table.png) | [Living-room props](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/living_props.jpg) |
+
+## Source checks
+
+Both builder modules and both generated room scripts passed `py_compile`. The two room-builder modes, the clutter build and its `--verify` pass ran under `/isaac-sim/python.sh` with OpenUSD 26.5. A second build from standalone copies of the two modules in an empty directory reproduced all 101 output files byte for byte. [Validation report and hashes](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/validation.json)
+
+- **Rooms.** Blender 4.4.3 ran the repository's `export_room_source_v2.py` on both sources and rebuilt both rooms from the exported provenance scripts. The reopened rooms used external image files. All 390 study meshes and 241 living-room meshes cleared the 4.30 × 4.20 m center above the 1 mm threshold. The floor and rug share a top surface at zero. Each east window backing intercepted 3,267 test rays through the full opening, including its edges. The study support audit retained all 44 shelf volumes and both pottery pieces. The living-room cove is authored at 2900 K.
+- **Tables.** Both visual envelopes and both static slab proxies reach the 0.755 m support plane on a 2.000 × 0.800 m footprint. The study drawers occupy the outer wings. The console tambour tops reach 0.639 m at the rear of the case. With the Home v2 spawn and yaw, the Lift2 chassis and three wheels have 100.6 mm of front-to-back clearance from either table in the composed USD. The study render uses the architect lamp's authored rear placement at `(-0.72, 0.24, 0.755)` m.
+- **Props.** The verifier reopened all sixteen sources, checked each mesh shell's winding and shading normals, and measured the visual and contact geometry. Every body and collider rests at zero in its identity support frame. The masses and principal inertias are component-based estimates. Physics evidence here covers the authored USD. [Per-prop measurements](../../external_artifacts/ce_op_home_v2_20261118/clutter_props/study_living_v2_source_summary.json)
+- **Appearance.** The implementer inspected the final Cycles room views, composed table views and studio views of all sixteen props. The book titles read “STUDIO NOTES” and “LIGHT & FORM.” The Home v2 debranding scan returned zero matches across the new builders, sources and texture filenames. [Debranding report](../../external_artifacts/ce_op_home_v2_20261118/evidence/study_living_v2/debranding.json)
+
+## Repository checks and standards
+
+`make check` recorded 1,206 passing tests, 14 skips, 44 failures and 25 errors. The failures and errors involved historical scientific-workbench artifacts and ConvertAsset inputs. The portable `make ci-check` test selection passed all 1,184 executed tests. Its lint and smoke stages passed. The final whitespace check flagged a pre-existing trailing blank line in `tests/test_ebench_genmanip_export.py`.
+
+The standards baseline was `5bde2b4`. These assets exercise the existing structural-support, room-source-v2, portable-reference and source-validation contracts. Their dimensions, finishes and rigid-body estimates are specific to these interiors, so the general rules, design interfaces and operations guidance require no revisions. [GEN-009](../standards/asset-generation.md#gen-009) · [USD-002](../standards/usd-layout.md#usd-002) · [VAL-002](../standards/validation-and-delivery.md#val-002) · [VAL-003](../standards/validation-and-delivery.md#val-003)
