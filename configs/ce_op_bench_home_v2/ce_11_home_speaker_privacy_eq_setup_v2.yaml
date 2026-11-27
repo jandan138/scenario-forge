@@ -1,0 +1,459 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/ce_op_home_v2/layout_constraints.yaml
+source_bindings: configs/source_bindings/ce_op_home_v2_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 211
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.10
+  robot_xy: [0.0, -0.76]
+  objects:
+    - id: smart_speaker
+      role: articulated_appliance
+      footprint_xy_m: [0.147, 0.156]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, -0.195]
+      robot_side_exception: "Cylindrical smart tube speaker centered on walnut console for capacitive wake/source, knurled volume crown, rear acoustic bass port, and mic privacy slider."
+    - id: travertine_coasters
+      role: context_prop
+      footprint_xy_m: [0.112, 0.110]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.265, -0.165]
+      support_z_offset_m: 0.002
+    - id: amber_reed_diffuser
+      role: context_prop
+      footprint_xy_m: [0.081, 0.071]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.455, -0.165]
+      support_z_offset_m: 0.002
+    - id: brass_bowl
+      role: context_prop
+      footprint_xy_m: [0.171, 0.171]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.290, -0.160]
+      support_z_offset_m: 0.002
+    - id: ceramic_vase
+      role: context_prop
+      footprint_xy_m: [0.120, 0.095]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.505, -0.165]
+      support_z_offset_m: 0.002
+    - id: remote_caddy
+      role: context_prop
+      footprint_xy_m: [0.129, 0.177]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.265, 0.035]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Mid-left felt remote caddy clutter guard."
+    - id: tissue_box
+      role: context_prop
+      footprint_xy_m: [0.204, 0.116]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [-0.520, 0.205]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Far-left linen tissue box cover prop."
+    - id: art_monograph
+      role: context_prop
+      footprint_xy_m: [0.227, 0.279]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.350, 0.155]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Far-right coffee table art monograph prop."
+  relations:
+    - subject: travertine_coasters
+      predicate: left_of
+      reference: smart_speaker
+      min_gap_m: 0.020
+    - subject: brass_bowl
+      predicate: right_of
+      reference: smart_speaker
+      min_gap_m: 0.020
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: ce_11_home_speaker_privacy_eq_setup_v2
+  domain: ce_op_home_v2
+  task_family: bimanual_cylindrical_crown_source_port_privacy
+  instruction: "Tap the speaker top WAKE pad, toggle SOURCE to Studio Radio, rotate the outer volume crown ring clockwise, swing open the rear acoustic bass port flap, and slide the microphone privacy switch to mute while leaving living console props undisturbed."
+  max_steps: 2200
+  seed: "211"
+  scene:
+    asset_id: home_living_media_console_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: WalnutLivingMediaConsoleTable
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    smart_speaker:
+      asset_id: AuraAcousticTubeSmartSpeakerV2
+      source_prim_path: /World/AuraAcousticTubeSmartSpeakerV2
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        acoustic_port_pull:
+          xyz: [0.0, 0.080, 0.051]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        mic_privacy_slide:
+          xyz: [-0.012, 0.0764, 0.138]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        source_select_press:
+          xyz: [0.022, 0.0, 0.1945]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        volume_crown_grip:
+          xyz: [0.0731, 0.0, 0.187]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        wake_touch_press:
+          xyz: [-0.022, 0.0, 0.1945]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    travertine_coasters:
+      asset_id: TravertineCoasterSet
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_living
+        group_id: near_left_coasters
+        metric_participation: none
+    amber_reed_diffuser:
+      asset_id: AmberGlassReedDiffuser
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_living
+        group_id: near_left_diffuser
+        metric_participation: none
+    brass_bowl:
+      asset_id: SculptedBrassCenterBowl
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_living
+        group_id: near_right_bowl
+        metric_participation: none
+    ceramic_vase:
+      asset_id: RibbedCeramicBloomVase
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_living
+        group_id: near_right_vase
+        metric_participation: none
+    remote_caddy:
+      asset_id: FeltMediaRemoteCaddy
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_living
+        group_id: mid_left_caddy
+        metric_participation: none
+    tissue_box:
+      asset_id: WovenLinenTissueBox
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_living
+        group_id: rear_left_tissue
+        metric_participation: none
+    art_monograph:
+      asset_id: CoffeeTableArtMonograph
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_living
+        group_id: rear_right_book
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -0.76, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, pull, push, rotate, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, pull, push, rotate, release]
+  steps:
+    - id: press_wake_touch
+      skill: push
+      actors: [left_arm]
+      parameters:
+        object: smart_speaker
+        joint: wake_touch
+        target_state: active
+    - id: press_source_select
+      skill: push
+      actors: [right_arm]
+      depends_on: [press_wake_touch]
+      parameters:
+        object: smart_speaker
+        joint: source_select
+        target_state: active
+    - id: turn_volume_crown
+      skill: adjust_articulated_part
+      actors: [right_arm]
+      depends_on: [press_source_select]
+      parameters:
+        object: smart_speaker
+        joint: volume_crown
+        target_state: active
+    - id: open_acoustic_port
+      skill: open_articulated_part
+      actors: [right_arm]
+      depends_on: [turn_volume_crown]
+      parameters:
+        object: smart_speaker
+        joint: acoustic_port
+        target_state: active
+    - id: mute_mic_privacy
+      skill: adjust_articulated_part
+      actors: [left_arm]
+      depends_on: [open_acoustic_port]
+      parameters:
+        object: smart_speaker
+        joint: mic_privacy
+        target_state: active
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "CE-OP Bench v2 Task #11 fixed-base bimanual acoustic tube smart speaker wake, source select, volume crown dial, rear acoustic port, mic mute slider, and console clutter guard."
+    predicates:
+      - id: speaker_woken
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: smart_speaker
+          joint: wake_touch
+          state: active
+      - id: source_selected
+        type: articulation_joint_state_reached
+        sequence_index: 1
+        parameters:
+          object: smart_speaker
+          joint: source_select
+          state: active
+      - id: volume_crown_set
+        type: articulation_joint_state_reached
+        sequence_index: 2
+        parameters:
+          object: smart_speaker
+          joint: volume_crown
+          state: active
+      - id: acoustic_port_open
+        type: articulation_joint_state_reached
+        sequence_index: 3
+        parameters:
+          object: smart_speaker
+          joint: acoustic_port
+          state: active
+      - id: mic_privacy_muted
+        type: articulation_joint_state_reached
+        sequence_index: 4
+        parameters:
+          object: smart_speaker
+          joint: mic_privacy
+          state: active
+      - id: guard_coasters_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 5
+        parameters:
+          object: travertine_coasters
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_diffuser_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 6
+        parameters:
+          object: amber_reed_diffuser
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_brass_bowl_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 7
+        parameters:
+          object: brass_bowl
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_ceramic_vase_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 8
+        parameters:
+          object: ceramic_vase
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_remote_caddy_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 9
+        parameters:
+          object: remote_caddy
+          xyz_tolerance: [0.045, 0.045, 0.045]
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_wake_touch
+          weight: 0.16
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: smart_speaker
+              joint: wake_touch
+              state: active
+          source_ref:
+            step_id: press_wake_touch
+            mechanism: "U"
+        - id: stage1_source_select
+          weight: 0.18
+          active: true
+          requires: [stage0_wake_touch]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: smart_speaker
+              joint: source_select
+              state: active
+          source_ref:
+            step_id: press_source_select
+            mechanism: "U"
+        - id: stage2_volume_crown
+          weight: 0.18
+          active: true
+          requires: [stage1_source_select]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: smart_speaker
+              joint: volume_crown
+              state: active
+          source_ref:
+            step_id: turn_volume_crown
+            mechanism: "U"
+        - id: stage3_acoustic_port
+          weight: 0.20
+          active: true
+          requires: [stage2_volume_crown]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: smart_speaker
+              joint: acoustic_port
+              state: active
+          source_ref:
+            step_id: open_acoustic_port
+            mechanism: "Q"
+        - id: stage4_mic_privacy
+          weight: 0.18
+          active: true
+          requires: [stage3_acoustic_port]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: smart_speaker
+              joint: mic_privacy
+              state: active
+          source_ref:
+            step_id: mute_mic_privacy
+            mechanism: "I"
+        - id: stage5_guard_coasters
+          weight: 0.02
+          active: true
+          requires: [stage4_mic_privacy]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: travertine_coasters
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_coasters_undisturbed
+            mechanism: "G"
+        - id: stage6_guard_diffuser
+          weight: 0.02
+          active: true
+          requires: [stage5_guard_coasters]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: amber_reed_diffuser
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_diffuser_undisturbed
+            mechanism: "G"
+        - id: stage7_guard_brass_bowl
+          weight: 0.02
+          active: true
+          requires: [stage6_guard_diffuser]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: brass_bowl
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_brass_bowl_undisturbed
+            mechanism: "G"
+        - id: stage8_guard_ceramic_vase
+          weight: 0.02
+          active: true
+          requires: [stage7_guard_brass_bowl]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: ceramic_vase
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_ceramic_vase_undisturbed
+            mechanism: "G"
+        - id: stage9_guard_remote_caddy
+          weight: 0.02
+          active: true
+          requires: [stage8_guard_ceramic_vase]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: remote_caddy
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_remote_caddy_undisturbed
+            mechanism: "G"

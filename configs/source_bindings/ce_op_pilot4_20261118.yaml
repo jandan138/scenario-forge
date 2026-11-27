@@ -1,0 +1,253 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  out_of_domain_env_kitchen_coffee_bar_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/out_of_domain_factory_r4_20261113/rooms/packages/kitchen_coffee_bar_v2/facade/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r4_20261113/rooms/packages/kitchen_coffee_bar_v2/package
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r4_20261113/rooms/packages/kitchen_coffee_bar_v2/package/evidence/manifest.json
+    producer_revision: "20261113_r4"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+
+  out_of_domain_env_office_print_studio_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/out_of_domain_factory_r4_20261113/rooms/packages/office_print_studio_v2/facade/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r4_20261113/rooms/packages/office_print_studio_v2/package
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r4_20261113/rooms/packages/office_print_studio_v2/package/evidence/manifest.json
+    producer_revision: "20261113_r4"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+
+  real2sim_conference_room_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/room/packages/real2sim_conference_room_v1/facade/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/room/packages/real2sim_conference_room_v1/package
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/room/packages/real2sim_conference_room_v1/package/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+
+  CoffeeBarOakSteelTable:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r4_20261113/tables/CoffeeBarOakSteelTable/facade/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r4_20261113/tables/CoffeeBarOakSteelTable/package
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r4_20261113/tables/CoffeeBarOakSteelTable/package/evidence/manifest.json
+    producer_revision: "20261113_r4"
+    expected_scope_prims:
+      - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  OfficeBirchSteelTable:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r4_20261113/tables/OfficeBirchSteelTable/facade/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r4_20261113/tables/OfficeBirchSteelTable/package
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r4_20261113/tables/OfficeBirchSteelTable/package/evidence/manifest.json
+    producer_revision: "20261113_r4"
+    expected_scope_prims:
+      - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  ConferenceBoatOakTable:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/source/conference_boat_oak_table/source.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_boat_oak_table
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_boat_oak_table/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  NespressoCreatistaPlus:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/nespresso-creatista-plus-bne800/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/nespresso-creatista-plus-bne800
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/nespresso-creatista-plus-bne800/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/NespressoCreatistaPlus
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  ConferencePcWorkstationRig:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/hero_rig/assets/facades/conference-pc-workstation-rig/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/hero_rig/assets/packages/conference-pc-workstation-rig
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/hero_rig/assets/packages/conference-pc-workstation-rig/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World/ConferencePcWorkstationRig
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  BrotherMFCL2820DW:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/brother-mfc-l2820dw-printer/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/brother-mfc-l2820dw-printer
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/brother-mfc-l2820dw-printer/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/BrotherMFCL2820DW
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  DualCoilQiChargerRig:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/facades/dual-coil-qi-charger-rig/facade.usda
+    package_dir: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/packages/dual-coil-qi-charger-rig
+    manifest_path: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/packages/dual-coil-qi-charger-rig/evidence/manifest.json
+    producer_revision: "20261118_ce_op_pilot4"
+    expected_scope_prims:
+      - /World/DualCoilQiChargerRig
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  EspressoCup:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/espresso_cup/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/espresso_cup
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/espresso_cup/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/EspressoCup
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  CoffeeCapsule:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/coffee_capsule/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/coffee_capsule
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/coffee_capsule/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/CoffeeCapsule
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  MilkPitcher:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/milk_pitcher/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/milk_pitcher
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/milk_pitcher/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  HpWiredMouse:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/hp_wired_mouse/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/hp_wired_mouse
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/hp_wired_mouse/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World/HpWiredMouse
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  OrangeCanvasToteBag:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/orange_tote_bag/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/orange_tote_bag
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/orange_tote_bag/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  PlaidJacketBundle:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/plaid_jacket_bundle/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/plaid_jacket_bundle
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/plaid_jacket_bundle/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  ConferencePresenterRemote:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/conference_presenter_remote/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_presenter_remote
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_presenter_remote/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  CalibrationSheet:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/calibration_sheet/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/calibration_sheet
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/calibration_sheet/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /World/CalibrationSheet
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  OfficePenOrganizer:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/facades/office_pen_organizer/facade.usda
+    package_dir: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/office_pen_organizer
+    manifest_path: ../../external_artifacts/out_of_domain_factory_r2_20261113/assets/packages/office_pen_organizer/evidence/manifest.json
+    producer_revision: "20261113_r2"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  CompactQiSmartphone:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/facades/compact_qi_smartphone/facade.usda
+    package_dir: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/packages/compact_qi_smartphone
+    manifest_path: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/packages/compact_qi_smartphone/evidence/manifest.json
+    producer_revision: "20261118_ce_op_pilot4"
+    expected_scope_prims:
+      - /World/CompactQiSmartphone
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  TwsQiEarbudsCase:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/facades/tws_qi_earbuds_case/facade.usda
+    package_dir: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/packages/tws_qi_earbuds_case
+    manifest_path: ../../external_artifacts/ce_op_pilot4_20261118/qi_charger_assets/packages/tws_qi_earbuds_case/evidence/manifest.json
+    producer_revision: "20261118_ce_op_pilot4"
+    expected_scope_prims:
+      - /World/TwsQiEarbudsCase
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false

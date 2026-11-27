@@ -1,0 +1,510 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/ce_op_home_v2/layout_constraints.yaml
+source_bindings: configs/source_bindings/ce_op_home_v2_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 206
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.10
+  robot_xy: [0.0, -0.76]
+  objects:
+    - id: laptop_stand
+      role: articulated_appliance
+      footprint_xy_m: [0.380, 0.228]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, -0.145]
+      robot_side_exception: "Creator ultrabook on an articulating riser stand centered in reach lane for lid opening, left/right magnetic socket insertion, tilt lock, and confirm key."
+    - id: pd_plug
+      role: consumable_connector
+      footprint_xy_m: [0.069, 0.017]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.310, -0.145]
+      support_z_offset_m: 0.002
+    - id: hdmi_dongle
+      role: consumable_connector
+      footprint_xy_m: [0.052, 0.025]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.305, -0.145]
+      support_z_offset_m: 0.002
+    - id: pen_organizer
+      role: context_prop
+      footprint_xy_m: [0.087, 0.074]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.495, -0.165]
+      support_z_offset_m: 0.002
+    - id: sticky_note_dispenser
+      role: context_prop
+      footprint_xy_m: [0.094, 0.091]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.425, -0.010]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Left mid-desk sticky note dispenser clutter guard."
+    - id: trinket_tray
+      role: context_prop
+      footprint_xy_m: [0.118, 0.118]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.485, -0.165]
+      support_z_offset_m: 0.002
+    - id: desk_succulent
+      role: context_prop
+      footprint_xy_m: [0.090, 0.090]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.415, -0.010]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Right mid-desk succulent clutter guard."
+    - id: study_mug
+      role: context_prop
+      footprint_xy_m: [0.115, 0.083]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.625, -0.020]
+      support_z_offset_m: 0.002
+    - id: architect_lamp
+      role: context_prop
+      footprint_xy_m: [0.234, 0.132]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [-0.580, 0.195]
+      support_z_offset_m: 0.002
+    - id: photo_frame
+      role: context_prop
+      footprint_xy_m: [0.131, 0.096]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [-0.220, 0.200]
+      support_z_offset_m: 0.002
+    - id: headphone_stand
+      role: context_prop
+      footprint_xy_m: [0.184, 0.095]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.485, 0.195]
+      support_z_offset_m: 0.002
+  relations:
+    - subject: pd_plug
+      predicate: left_of
+      reference: laptop_stand
+      min_gap_m: 0.020
+    - subject: hdmi_dongle
+      predicate: right_of
+      reference: laptop_stand
+      min_gap_m: 0.020
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: ce_06_home_ultrabook_stand_connect_v2
+  domain: ce_op_home_v2
+  task_family: bimanual_connector_mating_hinged_dock
+  instruction: "Raise the laptop docking stand lid open, elevate the riser tilt lock lever, dock the magnetic USB-C PD power plug into the left port and the HDMI adapter dongle into the right port until latched, and tap the keyboard CONFIRM key while keeping surrounding desk accessories undisturbed."
+  max_steps: 2600
+  seed: "206"
+  scene:
+    asset_id: home_sunlit_study_desk_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: SunlitStudyOakDeskTable
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    laptop_stand:
+      asset_id: AuraCreatorLaptopDockingStandV2
+      source_prim_path: /World/AuraCreatorLaptopDockingStandV2
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        confirm_key:
+          xyz: [0.111, -0.072, 0.1298]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        lid_handle:
+          xyz: [0.0, -0.105, 0.1354]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        pd_socket:
+          xyz: [-0.1588, 0.043, 0.122]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        hdmi_socket:
+          xyz: [0.1588, 0.043, 0.122]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        riser_lock_handle:
+          xyz: [-0.110, -0.001, 0.093]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        power_switch:
+          xyz: [0.076, -0.106, 0.0148]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    pd_plug:
+      asset_id: MagneticPdPowerPlugV2
+      source_prim_path: /World/MagneticPdPowerPlugV2
+      role: rigid_object
+    hdmi_dongle:
+      asset_id: HdmiAdapterDongleV2
+      source_prim_path: /World/HdmiAdapterDongleV2
+      role: rigid_object
+    pen_organizer:
+      asset_id: WalnutPenOrganizerCup
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: near_left_organizer
+        metric_participation: none
+    sticky_note_dispenser:
+      asset_id: KraftStickyNoteDispenser
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: mid_left_notes
+        metric_participation: none
+    trinket_tray:
+      asset_id: BrassDeskTrinketTray
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: near_right_tray
+        metric_participation: none
+    desk_succulent:
+      asset_id: TerracottaDeskSucculent
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: mid_right_plant
+        metric_participation: none
+    study_mug:
+      asset_id: GlazedCeramicStudyMug
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: mid_left_mug
+        metric_participation: none
+    architect_lamp:
+      asset_id: BrassArchitectDeskLamp
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: rear_left_lamp
+        metric_participation: none
+    photo_frame:
+      asset_id: OakMiniPhotoFrame
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: rear_left_frame
+        metric_participation: none
+    headphone_stand:
+      asset_id: AluminumHeadphoneStandProp
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: rear_right_audio
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -0.76, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, lift, insert, place, push, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, lift, insert, place, push, release]
+  steps:
+    - id: open_laptop_lid
+      skill: open_articulated_part
+      actors: [left_arm]
+      parameters:
+        object: laptop_stand
+        joint: laptop_lid
+        target_state: active
+    - id: elevate_riser_tilt
+      skill: adjust_articulated_part
+      actors: [left_arm]
+      depends_on: [open_laptop_lid]
+      parameters:
+        object: laptop_stand
+        joint: riser_tilt_lock
+        target_state: active
+    - id: connect_pd_plug
+      skill: insert
+      actors: [left_arm]
+      depends_on: [elevate_riser_tilt]
+      parameters:
+        object: pd_plug
+        target: laptop_stand
+        target_frame: laptop_stand.pd_socket
+    - id: connect_hdmi_dongle
+      skill: insert
+      actors: [right_arm]
+      depends_on: [connect_pd_plug]
+      parameters:
+        object: hdmi_dongle
+        target: laptop_stand
+        target_frame: laptop_stand.hdmi_socket
+    - id: press_confirm_key
+      skill: push
+      actors: [right_arm]
+      depends_on: [connect_hdmi_dongle]
+      parameters:
+        object: laptop_stand
+        joint: confirm_key
+        target_state: active
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "CE-OP Bench v2 Task #06 fixed-base bimanual laptop stand tilt, magnetic PD+HDMI connector mating, confirm actuation, and desk clutter guard."
+    predicates:
+      - id: laptop_lid_opened
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: laptop_stand
+          joint: laptop_lid
+          state: active
+      - id: riser_tilted
+        type: articulation_joint_state_reached
+        sequence_index: 1
+        parameters:
+          object: laptop_stand
+          joint: riser_tilt_lock
+          state: active
+      - id: pd_plug_mated
+        type: relative_pose_reached
+        sequence_index: 2
+        parameters:
+          object: pd_plug
+          relative_to: laptop_stand
+          xyz_range:
+            x: [-0.215, -0.145]
+            y: [-0.015, 0.055]
+            z: [0.025, 0.140]
+      - id: hdmi_dongle_mated
+        type: relative_pose_reached
+        sequence_index: 3
+        parameters:
+          object: hdmi_dongle
+          relative_to: laptop_stand
+          xyz_range:
+            x: [0.145, 0.215]
+            y: [-0.015, 0.055]
+            z: [0.025, 0.140]
+      - id: confirm_key_pressed
+        type: articulation_joint_state_reached
+        sequence_index: 4
+        parameters:
+          object: laptop_stand
+          joint: confirm_key
+          state: active
+      - id: guard_pen_organizer_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 5
+        parameters:
+          object: pen_organizer
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_sticky_notes_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 6
+        parameters:
+          object: sticky_note_dispenser
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_trinket_tray_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 7
+        parameters:
+          object: trinket_tray
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_desk_succulent_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 8
+        parameters:
+          object: desk_succulent
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_study_mug_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 9
+        parameters:
+          object: study_mug
+          xyz_tolerance: [0.045, 0.045, 0.045]
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_open_laptop_lid
+          weight: 0.18
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: laptop_stand
+              joint: laptop_lid
+              state: active
+          source_ref:
+            step_id: open_laptop_lid
+            mechanism: "I"
+        - id: stage1_elevate_riser
+          weight: 0.16
+          active: true
+          requires: [stage0_open_laptop_lid]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: laptop_stand
+              joint: riser_tilt_lock
+              state: active
+          source_ref:
+            step_id: elevate_riser_tilt
+            mechanism: "I"
+        - id: stage2_connect_pd
+          weight: 0.20
+          active: true
+          requires: [stage1_elevate_riser]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: pd_plug
+              relative_to: laptop_stand
+              xyz_range:
+                x: [-0.215, -0.145]
+                y: [-0.015, 0.055]
+                z: [0.025, 0.140]
+          source_ref:
+            step_id: connect_pd_plug
+            mechanism: "I"
+        - id: stage3_connect_hdmi
+          weight: 0.20
+          active: true
+          requires: [stage2_connect_pd]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: hdmi_dongle
+              relative_to: laptop_stand
+              xyz_range:
+                x: [0.145, 0.215]
+                y: [-0.015, 0.055]
+                z: [0.025, 0.140]
+          source_ref:
+            step_id: connect_hdmi_dongle
+            mechanism: "I"
+        - id: stage4_confirm_key
+          weight: 0.16
+          active: true
+          requires: [stage3_connect_hdmi]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: laptop_stand
+              joint: confirm_key
+              state: active
+          source_ref:
+            step_id: press_confirm_key
+            mechanism: "U"
+        - id: stage5_guard_pen_organizer
+          weight: 0.02
+          active: true
+          requires: [stage4_confirm_key]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: pen_organizer
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_pen_organizer_undisturbed
+            mechanism: "G"
+        - id: stage6_guard_sticky_notes
+          weight: 0.02
+          active: true
+          requires: [stage5_guard_pen_organizer]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: sticky_note_dispenser
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_sticky_notes_undisturbed
+            mechanism: "G"
+        - id: stage7_guard_trinket_tray
+          weight: 0.02
+          active: true
+          requires: [stage6_guard_sticky_notes]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: trinket_tray
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_trinket_tray_undisturbed
+            mechanism: "G"
+        - id: stage8_guard_desk_succulent
+          weight: 0.02
+          active: true
+          requires: [stage7_guard_trinket_tray]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: desk_succulent
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_desk_succulent_undisturbed
+            mechanism: "G"
+        - id: stage9_guard_study_mug
+          weight: 0.02
+          active: true
+          requires: [stage8_guard_desk_succulent]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: study_mug
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_study_mug_undisturbed
+            mechanism: "G"

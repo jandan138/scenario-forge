@@ -1,0 +1,87 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  real2sim_conference_room_v1:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/room/packages/real2sim_conference_room_v1/facade/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/room/packages/real2sim_conference_room_v1/package
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/room/packages/real2sim_conference_room_v1/package/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+    attribution:
+      - "Scenario Forge internalized room exporter (room-source-v2, real2sim_conference_room_v1); internal use only."
+
+  ConferenceBoatOakTable:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/source/conference_boat_oak_table/source.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_boat_oak_table
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_boat_oak_table/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  ConferencePcWorkstationRig:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/hero_rig/assets/facades/conference-pc-workstation-rig/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/hero_rig/assets/packages/conference-pc-workstation-rig
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/hero_rig/assets/packages/conference-pc-workstation-rig/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World/ConferencePcWorkstationRig
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  HpWiredMouse:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/hp_wired_mouse/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/hp_wired_mouse
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/hp_wired_mouse/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /World/HpWiredMouse
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  OrangeCanvasToteBag:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/orange_tote_bag/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/orange_tote_bag
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/orange_tote_bag/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  PlaidJacketBundle:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/plaid_jacket_bundle/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/plaid_jacket_bundle
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/plaid_jacket_bundle/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+
+  ConferencePresenterRemote:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/facades/conference_presenter_remote/facade.usda
+    package_dir: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_presenter_remote
+    manifest_path: ../../external_artifacts/real2sim_conference_pc_20261118/desk_and_props/packages/conference_presenter_remote/evidence/manifest.json
+    producer_revision: "20261118_real2sim_conf_r1"
+    expected_scope_prims:
+      - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false

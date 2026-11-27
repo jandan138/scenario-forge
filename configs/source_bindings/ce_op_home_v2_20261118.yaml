@@ -1,0 +1,805 @@
+schema_version: scenario-source-bindings/v0.5
+bindings:
+  home_cozy_bedroom_nightstand_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_cozy_bedroom_nightstand_v2/facade/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_cozy_bedroom_nightstand_v2/package
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_cozy_bedroom_nightstand_v2/package/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+  home_living_media_console_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_living_media_console_v2/facade/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_living_media_console_v2/package
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_living_media_console_v2/package/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+  home_sunlit_study_desk_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_sunlit_study_desk_v2/facade/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_sunlit_study_desk_v2/package
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_sunlit_study_desk_v2/package/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+  home_warm_kitchen_island_v2:
+    resolver: convert_asset_package
+    usage: visual_static_environment
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_warm_kitchen_island_v2/facade/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_warm_kitchen_island_v2/package
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/packages/home_warm_kitchen_island_v2/package/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World
+    license: LicenseRef-Internal-Generated
+    redistributable: false
+  SunlitStudyOakDeskTable:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/source/sunlit_study_oak_desk_table/source.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/sunlit_study_oak_desk_table
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/sunlit_study_oak_desk_table/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WalnutBedroomWideDresserTable:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/source/walnut_bedroom_dresser_table/source.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/walnut_bedroom_dresser_table
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/walnut_bedroom_dresser_table/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WalnutLivingMediaConsoleTable:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/source/walnut_living_media_console_table/source.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/walnut_living_media_console_table
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/walnut_living_media_console_table/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WarmKitchenButcherBlockIsland:
+    resolver: convert_asset_package
+    usage: static_support_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/source/warm_kitchen_island_table/source.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/warm_kitchen_island_table
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/rooms/tables/packages/warm_kitchen_island_table/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/table
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AluminumBackupDriveV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aluminum_backup_drive_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aluminum_backup_drive_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aluminum_backup_drive_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AluminumBackupDriveV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AromaTabletPuckV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aroma_tablet_puck_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aroma_tablet_puck_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aroma_tablet_puck_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AromaTabletPuckV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraAcousticTubeSmartSpeakerV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-acoustic-tube-speaker-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-acoustic-tube-speaker-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-acoustic-tube-speaker-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraAcousticTubeSmartSpeakerV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraCinemaGimbalProjectorV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-cinema-gimbal-projector-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-cinema-gimbal-projector-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-cinema-gimbal-projector-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraCinemaGimbalProjectorV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraConvectionSteamOvenV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-convection-steam-oven-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-convection-steam-oven-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-convection-steam-oven-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraConvectionSteamOvenV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraCreatorLaptopDockingStandV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-creator-laptop-docking-stand-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-creator-laptop-docking-stand-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-creator-laptop-docking-stand-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraCreatorLaptopDockingStandV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraCreatorWorkstationSuiteV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-creator-workstation-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-creator-workstation-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-creator-workstation-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraCreatorWorkstationSuiteV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraDuplexScanLaserMfpV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-duplex-laser-mfp-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-duplex-laser-mfp-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-duplex-laser-mfp-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraDuplexScanLaserMfpV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraGaNDesktopPowerStationV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-gan-power-station-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-gan-power-station-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-gan-power-station-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraGaNDesktopPowerStationV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraPrecisionGooseneckKettleDockV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-precision-gooseneck-kettle-dock-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-precision-gooseneck-kettle-dock-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-precision-gooseneck-kettle-dock-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraPrecisionGooseneckKettleDockV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraSmartMonitorRiserHubV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-smart-monitor-riser-hub-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-smart-monitor-riser-hub-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-smart-monitor-riser-hub-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraSmartMonitorRiserHubV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraThunderboltRaidDockV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-thunderbolt-raid-dock-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-thunderbolt-raid-dock-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-thunderbolt-raid-dock-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraThunderboltRaidDockV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AuraUltrasonicWarmMistHumidifierV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/aura-ultrasonic-humidifier-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-ultrasonic-humidifier-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/aura-ultrasonic-humidifier-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/AuraUltrasonicWarmMistHumidifierV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  BedsidePourCarafeV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/bedside_pour_carafe_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/bedside_pour_carafe_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/bedside_pour_carafe_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/BedsidePourCarafeV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CalibrationTargetSheetV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/calibration_target_sheet_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/calibration_target_sheet_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/calibration_target_sheet_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/CalibrationTargetSheetV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CeramicBakingCocotteV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/ceramic_baking_cocotte_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/ceramic_baking_cocotte_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/ceramic_baking_cocotte_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/CeramicBakingCocotteV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CoffeeCapsule:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/coffee_capsule/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/coffee_capsule
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/coffee_capsule/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/CoffeeCapsule
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CompactDeskMouseV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/compact_desk_mouse_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/compact_desk_mouse_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/compact_desk_mouse_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/CompactDeskMouseV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CompactWirelessSmartphoneV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/compact_wireless_smartphone_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/compact_wireless_smartphone_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/compact_wireless_smartphone_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/CompactWirelessSmartphoneV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  ErgonomicWirelessMouseV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/ergonomic_wireless_mouse_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/ergonomic_wireless_mouse_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/ergonomic_wireless_mouse_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/ErgonomicWirelessMouseV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  EspressoCupV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/espresso_cup_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/espresso_cup_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/espresso_cup_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/EspressoCupV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  GaNThreePinPlugV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/gan_three_pin_plug_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/gan_three_pin_plug_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/gan_three_pin_plug_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/GaNThreePinPlugV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  GooseneckKettleVesselV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/gooseneck_kettle_vessel_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/gooseneck_kettle_vessel_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/gooseneck_kettle_vessel_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/GooseneckKettleVesselV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  HdmiAdapterDongleV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/hdmi_adapter_dongle_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/hdmi_adapter_dongle_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/hdmi_adapter_dongle_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/HdmiAdapterDongleV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  HomeBaristaEspressoCenterV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/home-barista-espresso-center-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/home-barista-espresso-center-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/home-barista-espresso-center-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/HomeBaristaEspressoCenterV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  InfuserLidV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/infuser_lid_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/infuser_lid_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/infuser_lid_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/InfuserLidV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  MagneticPdPowerPlugV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/magnetic_pd_power_plug_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/magnetic_pd_power_plug_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/magnetic_pd_power_plug_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/MagneticPdPowerPlugV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  NvmeSsdCartridgeV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/nvme_ssd_cartridge_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/nvme_ssd_cartridge_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/nvme_ssd_cartridge_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/NvmeSsdCartridgeV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SdMediaCardHolderV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/sd_media_card_holder_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/sd_media_card_holder_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/sd_media_card_holder_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/SdMediaCardHolderV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SmartDualWirelessUvDockV2:
+    resolver: convert_asset_package
+    usage: articulated_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/smart-dual-wireless-uv-dock-v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/smart-dual-wireless-uv-dock-v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/smart-dual-wireless-uv-dock-v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/SmartDualWirelessUvDockV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  TwsEarbudsChargingCaseV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/tws_earbuds_charging_case_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/tws_earbuds_charging_case_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/tws_earbuds_charging_case_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/TwsEarbudsChargingCaseV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WalnutDocumentTrayV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/walnut_document_tray_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/walnut_document_tray_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/walnut_document_tray_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/WalnutDocumentTrayV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WirelessPresenterPenV2:
+    resolver: convert_asset_package
+    usage: rigid_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/assets/facades/wireless_presenter_pen_v2/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/wireless_presenter_pen_v2
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/assets/packages/wireless_presenter_pen_v2/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /World/WirelessPresenterPenV2
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AmberGlassReedDiffuser:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/amber_reed_diffuser/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/amber_reed_diffuser
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/amber_reed_diffuser/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AmberScentedCandle:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/amber_scented_candle/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/amber_scented_candle
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/amber_scented_candle/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  BedsideNovelBook:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/bedside_novel_book/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/bedside_novel_book
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/bedside_novel_book/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  BedsideWaterCarafe:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/bedside_water_carafe/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/bedside_water_carafe
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/bedside_water_carafe/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  BerryJamJar:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/berry_jam_jar/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/berry_jam_jar
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/berry_jam_jar/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  BrassArchitectDeskLamp:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/brass_architect_lamp/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/brass_architect_lamp
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/brass_architect_lamp/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  BrassDeskTrinketTray:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/brass_paperweight_tray/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/brass_paperweight_tray
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/brass_paperweight_tray/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CapsuleWireHolder:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/capsule_wire_holder/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/capsule_wire_holder
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/capsule_wire_holder/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CeramicSugarJar:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/ceramic_sugar_jar/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/ceramic_sugar_jar
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/ceramic_sugar_jar/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CoffeeTableArtMonograph:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/coffee_table_art_monograph/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/coffee_table_art_monograph
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/coffee_table_art_monograph/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CorkCoasterStack:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/cork_coaster_stack/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/cork_coaster_stack
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/cork_coaster_stack/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  CroissantBreakfastPlate:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/croissant_plate/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/croissant_plate
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/croissant_plate/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  FeltMediaRemoteCaddy:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/felt_remote_caddy/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/felt_remote_caddy
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/felt_remote_caddy/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  GlazedCeramicStudyMug:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/glazed_study_mug/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/glazed_study_mug
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/glazed_study_mug/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  HandCreamTube:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/hand_cream_tube/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/hand_cream_tube
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/hand_cream_tube/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  HardcoverCookbook:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/hardcover_cookbook/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/hardcover_cookbook
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/hardcover_cookbook/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  AluminumHeadphoneStandProp:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/headphone_stand_prop/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/headphone_stand_prop
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/headphone_stand_prop/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  KitchenTowelRoll:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/kitchen_towel_roll/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/kitchen_towel_roll
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/kitchen_towel_roll/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  KraftStickyNoteDispenser:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/kraft_note_cube/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/kraft_note_cube
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/kraft_note_cube/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  LinenSketchNotebook:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/linen_sketch_notebook/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/linen_sketch_notebook
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/linen_sketch_notebook/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  MinimalAlarmClock:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/minimal_alarm_clock/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/minimal_alarm_clock
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/minimal_alarm_clock/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  OakMiniPhotoFrame:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/oak_mini_photo_frame/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/oak_mini_photo_frame
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/oak_mini_photo_frame/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  RibbedCeramicBloomVase:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/ribbed_ceramic_vase/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/ribbed_ceramic_vase
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/ribbed_ceramic_vase/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  RosemaryPotPlant:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/rosemary_pot_plant/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/rosemary_pot_plant
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/rosemary_pot_plant/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  SculptedBrassCenterBowl:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/sculpted_brass_bowl/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/sculpted_brass_bowl
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/sculpted_brass_bowl/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  TerracottaDeskSucculent:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/terracotta_desk_succulent/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/terracotta_desk_succulent
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/terracotta_desk_succulent/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  TortoiseshellEyeglasses:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/tortoiseshell_eyeglasses/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/tortoiseshell_eyeglasses
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/tortoiseshell_eyeglasses/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  TravertineCoasterSet:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/travertine_coaster_set/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/travertine_coaster_set
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/travertine_coaster_set/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WalnutPenOrganizerCup:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/walnut_pen_cup/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/walnut_pen_cup
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/walnut_pen_cup/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WalnutValetTray:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/walnut_valet_tray/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/walnut_valet_tray
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/walnut_valet_tray/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WarmBedsideLamp:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/warm_bedside_lamp/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/warm_bedside_lamp
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/warm_bedside_lamp/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false
+  WovenLinenTissueBox:
+    resolver: convert_asset_package
+    usage: dynamic_context_object
+    source_usd: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/facades/woven_tissue_cover/facade.usda
+    package_dir: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/woven_tissue_cover
+    manifest_path: ../../external_artifacts/ce_op_home_v2_20261118/clutter_props/packages/woven_tissue_cover/evidence/manifest.json
+    producer_revision: 20261118_home_v2
+    expected_scope_prims:
+    - /root
+    license: LicenseRef-Team-Owned-Procedural
+    redistributable: false

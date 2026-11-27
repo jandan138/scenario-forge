@@ -1,0 +1,575 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/ce_op_home_v2/layout_constraints.yaml
+source_bindings: configs/source_bindings/ce_op_home_v2_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 201
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.10
+  robot_xy: [0.0, -0.76]
+  objects:
+    - id: espresso_center
+      role: articulated_appliance
+      footprint_xy_m: [0.175, 0.395]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, -0.080]
+      robot_side_exception: "Fixed-base bimanual kitchen workspace anchor so top power key, extended drip tray, capsule chute, brew lever, and front encoder dial all remain reachable."
+      kinematic_clearance_volumes:
+        - id: drip_tray_pullout
+          joint: drip_tray
+          local_xy_bounds_m:
+            x: [-0.090, 0.090]
+            y: [-0.248, -0.197]
+    - id: espresso_cup
+      role: target_container
+      footprint_xy_m: [0.084, 0.066]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.220, -0.225]
+      support_z_offset_m: 0.002
+    - id: coffee_capsule
+      role: consumable_capsule
+      footprint_xy_m: [0.042, 0.042]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.200, -0.225]
+      support_z_offset_m: 0.002
+    - id: cork_coaster_stack
+      role: context_prop
+      footprint_xy_m: [0.096, 0.096]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.410, -0.205]
+      support_z_offset_m: 0.002
+    - id: ceramic_sugar_jar
+      role: context_prop
+      footprint_xy_m: [0.082, 0.082]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.265, -0.020]
+      support_z_offset_m: 0.002
+    - id: capsule_wire_holder
+      role: context_prop
+      footprint_xy_m: [0.110, 0.110]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.270, -0.025]
+      support_z_offset_m: 0.002
+    - id: berry_jam_jar
+      role: context_prop
+      footprint_xy_m: [0.072, 0.072]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.395, -0.205]
+      support_z_offset_m: 0.002
+    - id: croissant_plate
+      role: context_prop
+      footprint_xy_m: [0.165, 0.165]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.490, 0.035]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Breakfast croissant plate positioned on left lived-in kitchen island counter beside near-field manipulation corridor."
+    - id: rosemary_pot_plant
+      role: context_prop
+      footprint_xy_m: [0.098, 0.098]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [-0.275, 0.185]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Rear kitchen herb pot prop."
+    - id: hardcover_cookbook
+      role: context_prop
+      footprint_xy_m: [0.175, 0.235]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.470, 0.135]
+      yaw_offset_deg: -14.0
+      support_z_offset_m: 0.002
+      robot_side_exception: "Rear angled recipe book on right kitchen island zone."
+    - id: kitchen_towel_roll
+      role: context_prop
+      footprint_xy_m: [0.118, 0.118]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.730, 0.145]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Rear right kitchen paper towel holder prop."
+  relations:
+    - subject: espresso_cup
+      predicate: left_of
+      reference: espresso_center
+      min_gap_m: 0.020
+    - subject: coffee_capsule
+      predicate: right_of
+      reference: espresso_center
+      min_gap_m: 0.020
+    - subject: cork_coaster_stack
+      predicate: left_of
+      reference: espresso_cup
+      min_gap_m: 0.020
+    - subject: berry_jam_jar
+      predicate: right_of
+      reference: coffee_capsule
+      min_gap_m: 0.020
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: ce_01_home_espresso_brew_v2
+  domain: ce_op_home_v2
+  task_family: multi_dof_home_appliance_operation
+  instruction: "Press the espresso machine power key to wake the OLED screen, pull out the stainless drip tray, weave past the kitchen clutter to place the espresso cup under the spout, load the aluminum capsule into the chute, close the brew lever interlock, rotate the selector dial clockwise to the Espresso setting, and press the center dial button to extract coffee while leaving all surrounding kitchenware undisturbed."
+  max_steps: 2600
+  seed: "201"
+  scene:
+    asset_id: home_warm_kitchen_island_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: WarmKitchenButcherBlockIsland
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    espresso_center:
+      asset_id: HomeBaristaEspressoCenterV2
+      source_prim_path: /World/HomeBaristaEspressoCenterV2
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        capsule_chute:
+          xyz: [0.0, -0.1095, 0.256]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        cup_spout_target:
+          xyz: [0.0, -0.192, 0.036]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    espresso_cup:
+      asset_id: EspressoCupV2
+      source_prim_path: /World/EspressoCupV2
+      role: target_container
+    coffee_capsule:
+      asset_id: CoffeeCapsule
+      source_prim_path: /World/CoffeeCapsule
+      role: consumable_capsule
+    cork_coaster_stack:
+      asset_id: CorkCoasterStack
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: near_left_counterware
+        metric_participation: none
+    ceramic_sugar_jar:
+      asset_id: CeramicSugarJar
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: near_left_coffee_caddy
+        metric_participation: none
+    capsule_wire_holder:
+      asset_id: CapsuleWireHolder
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: near_right_coffee_caddy
+        metric_participation: none
+    berry_jam_jar:
+      asset_id: BerryJamJar
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: near_right_breakfast
+        metric_participation: none
+    croissant_plate:
+      asset_id: CroissantBreakfastPlate
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: near_left_breakfast
+        metric_participation: none
+    rosemary_pot_plant:
+      asset_id: RosemaryPotPlant
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: rear_kitchen_decor
+        metric_participation: none
+    hardcover_cookbook:
+      asset_id: HardcoverCookbook
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: rear_kitchen_reading
+        metric_participation: none
+    kitchen_towel_roll:
+      asset_id: KitchenTowelRoll
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_kitchen
+        group_id: rear_kitchen_utility
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -0.76, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, pull, lift, place, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, push, insert, close, rotate, press, release]
+  steps:
+    - id: press_power_wake
+      skill: push
+      actors: [right_arm]
+      parameters:
+        object: espresso_center
+        joint: button_drink
+        target_state: pressed
+    - id: extend_drip_tray
+      skill: open_articulated_part
+      actors: [left_arm]
+      depends_on: [press_power_wake]
+      parameters:
+        object: espresso_center
+        joint: drip_tray
+        target_state: extended
+    - id: place_espresso_cup
+      skill: place
+      actors: [left_arm]
+      depends_on: [extend_drip_tray]
+      parameters:
+        object: espresso_cup
+        target: espresso_center
+        target_frame: espresso_center.cup_spout_target
+    - id: drop_coffee_capsule
+      skill: insert
+      actors: [right_arm]
+      depends_on: [place_espresso_cup]
+      parameters:
+        object: coffee_capsule
+        target: espresso_center
+        target_frame: espresso_center.capsule_chute
+    - id: close_brew_lever
+      skill: close_articulated_part
+      actors: [right_arm]
+      depends_on: [drop_coffee_capsule]
+      parameters:
+        object: espresso_center
+        joint: brew_lever
+        target_state: closed_locked
+    - id: turn_select_dial
+      skill: adjust_articulated_part
+      actors: [right_arm]
+      depends_on: [close_brew_lever]
+      parameters:
+        object: espresso_center
+        joint: select_dial
+        target_state: espresso_selected
+    - id: press_dial_confirm
+      skill: adjust_articulated_part
+      actors: [right_arm]
+      depends_on: [turn_select_dial]
+      parameters:
+        object: espresso_center
+        joint: dial_press
+        target_state: pressed
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "CE-OP Bench v2 Task #01 fixed-base dual-arm reactive espresso brewing in lived-in kitchen with near-field clutter integrity."
+    predicates:
+      - id: power_wake_pressed
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: espresso_center
+          joint: button_drink
+          state: pressed
+      - id: drip_tray_extended
+        type: articulation_joint_state_reached
+        sequence_index: 1
+        parameters:
+          object: espresso_center
+          joint: drip_tray
+          state: extended
+      - id: cup_placed_on_drip_tray
+        type: relative_pose_reached
+        sequence_index: 2
+        parameters:
+          object: espresso_cup
+          relative_to: espresso_center
+          xyz_range:
+            x: [-0.025, 0.025]
+            y: [-0.215, -0.168]
+            z: [0.028, 0.050]
+          axis_alignment:
+            relative_to_part: drip_tray
+            object_axis: z
+            target_axis: z
+            comparison: "<="
+            threshold_deg: 12.0
+      - id: capsule_loaded_in_chute
+        type: relative_pose_reached
+        sequence_index: 3
+        parameters:
+          object: coffee_capsule
+          relative_to: espresso_center
+          xyz_range:
+            x: [-0.016, 0.016]
+            y: [-0.125, -0.093]
+            z: [0.246, 0.270]
+          axis_alignment:
+            relative_to_part: drip_tray
+            object_axis: z
+            target_axis: z
+            comparison: "<="
+            threshold_deg: 25.0
+      - id: brew_lever_closed_locked
+        type: articulation_joint_state_reached
+        sequence_index: 4
+        parameters:
+          object: espresso_center
+          joint: brew_lever
+          state: closed_locked
+      - id: select_dial_espresso
+        type: articulation_joint_state_reached
+        sequence_index: 5
+        parameters:
+          object: espresso_center
+          joint: select_dial
+          state: espresso_selected
+      - id: dial_press_confirmed
+        type: articulation_joint_state_reached
+        sequence_index: 6
+        parameters:
+          object: espresso_center
+          joint: dial_press
+          state: pressed
+      - id: guard_cork_coaster_stack_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 7
+        parameters:
+          object: cork_coaster_stack
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_ceramic_sugar_jar_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 8
+        parameters:
+          object: ceramic_sugar_jar
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_capsule_wire_holder_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 9
+        parameters:
+          object: capsule_wire_holder
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_berry_jam_jar_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 10
+        parameters:
+          object: berry_jam_jar
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_croissant_plate_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 11
+        parameters:
+          object: croissant_plate
+          xyz_tolerance: [0.045, 0.045, 0.045]
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_power_wake
+          weight: 0.10
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: espresso_center
+              joint: button_drink
+              state: pressed
+          source_ref:
+            step_id: press_power_wake
+        - id: stage1_tray_extended
+          weight: 0.14
+          active: true
+          requires: [stage0_power_wake]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: espresso_center
+              joint: drip_tray
+              state: extended
+          source_ref:
+            step_id: extend_drip_tray
+        - id: stage2_cup_seated
+          weight: 0.16
+          active: true
+          requires: [stage1_tray_extended]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: espresso_cup
+              relative_to: espresso_center
+              xyz_range:
+                x: [-0.025, 0.025]
+                y: [-0.215, -0.168]
+                z: [0.028, 0.050]
+          source_ref:
+            step_id: place_espresso_cup
+        - id: stage3_capsule_inserted
+          weight: 0.16
+          active: true
+          requires: [stage2_cup_seated]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: coffee_capsule
+              relative_to: espresso_center
+              xyz_range:
+                x: [-0.016, 0.016]
+                y: [-0.125, -0.093]
+                z: [0.246, 0.270]
+          source_ref:
+            step_id: drop_coffee_capsule
+        - id: stage4_lever_locked
+          weight: 0.14
+          active: true
+          requires: [stage3_capsule_inserted]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: espresso_center
+              joint: brew_lever
+              state: closed_locked
+          source_ref:
+            step_id: close_brew_lever
+        - id: stage5_dial_selected
+          weight: 0.10
+          active: true
+          requires: [stage4_lever_locked]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: espresso_center
+              joint: select_dial
+              state: espresso_selected
+          source_ref:
+            step_id: turn_select_dial
+        - id: stage6_dial_pressed
+          weight: 0.10
+          active: true
+          requires: [stage5_dial_selected]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: espresso_center
+              joint: dial_press
+              state: pressed
+          source_ref:
+            step_id: press_dial_confirm
+        - id: stage7_guard_coaster
+          weight: 0.02
+          active: true
+          requires: [stage6_dial_pressed]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: cork_coaster_stack
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_cork_coaster_stack_undisturbed
+        - id: stage8_guard_sugar_jar
+          weight: 0.02
+          active: true
+          requires: [stage7_guard_coaster]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: ceramic_sugar_jar
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_ceramic_sugar_jar_undisturbed
+        - id: stage9_guard_capsule_holder
+          weight: 0.02
+          active: true
+          requires: [stage8_guard_sugar_jar]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: capsule_wire_holder
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_capsule_wire_holder_undisturbed
+        - id: stage10_guard_jam_jar
+          weight: 0.02
+          active: true
+          requires: [stage9_guard_capsule_holder]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: berry_jam_jar
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_berry_jam_jar_undisturbed
+        - id: stage11_guard_croissant_plate
+          weight: 0.02
+          active: true
+          requires: [stage10_guard_jam_jar]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: croissant_plate
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_croissant_plate_undisturbed

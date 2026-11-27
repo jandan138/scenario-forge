@@ -1,0 +1,247 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/modern_office_print_hub/layout_constraints.yaml
+source_bindings: configs/source_bindings/ce_op_pilot4_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 303
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.015
+  robot_xy: [0.0, -0.70]
+  objects:
+    - id: brother_printer
+      role: articulated_appliance
+      footprint_xy_m: [0.412, 0.399]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, -0.015]
+      robot_side_exception: "Fixed-base placement of Brother MFC-L2820DW keeping front paper cassette, scanner platen, ADF scanner lid, and angled START button simultaneously reachable."
+      kinematic_clearance_volumes:
+        - id: paper_cassette_pullout
+          joint: paper_cassette
+          local_xy_bounds_m:
+            x: [-0.145, 0.145]
+            y: [-0.368, -0.1995]
+    - id: calibration_sheet
+      role: calibration_target
+      footprint_xy_m: [0.184, 0.134]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.335, -0.250]
+      yaw_offset_deg: 0.0
+      support_z_offset_m: 0.002
+    - id: office_pen_organizer
+      role: context_prop
+      footprint_xy_m: [0.105, 0.105]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.350, 0.160]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Background stationery organizer."
+  relations:
+    - subject: calibration_sheet
+      predicate: left_of
+      reference: brother_printer
+      min_gap_m: 0.015
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: ce_08_printer_load_and_copy_setpoint
+  domain: modern_office_print_hub
+  task_family: orthogonal_drawer_and_lid_servicing
+  instruction: "Push the extended front paper cassette tray smoothly closed into the multifunction printer body, pick up the calibration sheet by its lift bar and place it flat on the glass scanner platen, pull down and close the ADF scanner lid interlock, and press and hold the green START button on the angled console to begin copying."
+  max_steps: 2400
+  seed: "303"
+  scene:
+    asset_id: out_of_domain_env_office_print_studio_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: OfficeBirchSteelTable
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    brother_printer:
+      asset_id: BrotherMFCL2820DW
+      source_prim_path: /World/BrotherMFCL2820DW
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        platen_center:
+          xyz: [0.0, 0.0, 0.282]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    calibration_sheet:
+      asset_id: CalibrationSheet
+      source_prim_path: /World/CalibrationSheet
+      role: calibration_target
+    office_pen_organizer:
+      asset_id: OfficePenOrganizer
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: modern_office_print_hub_standard_v1
+        group_id: desk_stationery
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -0.70, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, lift, push, place, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [push, close, press]
+  steps:
+    - id: push_cassette_closed
+      skill: close_articulated_part
+      actors: [left_arm]
+      parameters:
+        object: brother_printer
+        joint: paper_cassette
+        target_state: closed
+    - id: place_sheet_on_platen
+      skill: place
+      actors: [left_arm]
+      depends_on: [push_cassette_closed]
+      parameters:
+        object: calibration_sheet
+        target: brother_printer
+        target_frame: brother_printer.platen_center
+    - id: close_scanner_lid
+      skill: close_articulated_part
+      actors: [right_arm]
+      depends_on: [place_sheet_on_platen]
+      parameters:
+        object: brother_printer
+        joint: scanner_lid
+        target_state: closed
+    - id: press_copy_start
+      skill: adjust_articulated_part
+      actors: [right_arm]
+      depends_on: [close_scanner_lid]
+      parameters:
+        object: brother_printer
+        joint: button_start
+        target_state: pressed
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "CE-OP Bench Task #08 fixed-base dual-arm multifunction printer cassette closure, platen placement, ADF lid interlock closure, and START actuation."
+    predicates:
+      - id: paper_cassette_closed
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: brother_printer
+          joint: paper_cassette
+          state: closed
+      - id: calibration_sheet_on_platen
+        type: relative_pose_reached
+        sequence_index: 1
+        parameters:
+          object: calibration_sheet
+          relative_to: brother_printer
+          xyz_range:
+            x: [-0.035, 0.035]
+            y: [-0.045, 0.035]
+            z: [0.276, 0.295]
+          axis_alignment:
+            relative_to_part: paper_cassette
+            object_axis: x
+            target_axis: x
+            comparison: "<="
+            threshold_deg: 12.0
+      - id: scanner_lid_closed
+        type: articulation_joint_state_reached
+        sequence_index: 2
+        parameters:
+          object: brother_printer
+          joint: scanner_lid
+          state: closed
+      - id: copy_start_pressed
+        type: articulation_joint_state_reached
+        sequence_index: 3
+        parameters:
+          object: brother_printer
+          joint: button_start
+          state: pressed
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_cassette_closed
+          weight: 0.25
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: brother_printer
+              joint: paper_cassette
+              state: closed
+          source_ref:
+            step_id: push_cassette_closed
+        - id: stage1_sheet_aligned
+          weight: 0.28
+          active: true
+          requires: [stage0_cassette_closed]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: calibration_sheet
+              relative_to: brother_printer
+              xyz_range:
+                x: [-0.035, 0.035]
+                y: [-0.045, 0.035]
+                z: [0.276, 0.295]
+          source_ref:
+            step_id: place_sheet_on_platen
+        - id: stage2_lid_closed
+          weight: 0.25
+          active: true
+          requires: [stage1_sheet_aligned]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: brother_printer
+              joint: scanner_lid
+              state: closed
+          source_ref:
+            step_id: close_scanner_lid
+        - id: stage3_copy_started
+          weight: 0.22
+          active: true
+          requires: [stage2_lid_closed]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: brother_printer
+              joint: button_start
+              state: pressed
+          source_ref:
+            step_id: press_copy_start

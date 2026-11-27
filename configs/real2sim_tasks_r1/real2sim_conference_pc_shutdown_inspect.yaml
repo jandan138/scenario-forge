@@ -1,0 +1,300 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/real2sim_conference_room/layout_constraints.yaml
+source_bindings: configs/source_bindings/real2sim_conference_pc_r1_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 501
+  table:
+    x_range_m: [-1.38, 1.38]
+    y_range_m: [-0.58, 0.58]
+    surface_z_m: 0.750
+    min_edge_clearance_m: 0.06
+  robot_xy: [0.0, -1.20]
+  min_object_clearance_m: 0.015
+  objects:
+    - id: conference_pc_rig
+      role: articulated_appliance
+      footprint_xy_m: [0.542, 0.398]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.300, -0.210]
+      robot_side_exception: "HKC 23.8-inch monitor + stacked Sangfor aDesk terminal + HP 104-key wired keyboard unified workstation rig matching the grounded conference workstation photo."
+    - id: hp_wired_mouse
+      role: workstation_peripheral
+      footprint_xy_m: [0.062, 0.115]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.652, -0.395]
+      yaw_offset_deg: -28.0
+      support_z_offset_m: 0.002
+    - id: orange_tote_bag
+      role: context_prop
+      footprint_xy_m: [0.240, 0.170]
+      region: left
+      facing: robot
+      fixed_xy_m: [-1.020, -0.060]
+      yaw_offset_deg: 16.0
+      support_z_offset_m: 0.002
+      robot_side_exception: "Far-left conference guest tote bag grounded from wide_conference_room.jpg."
+    - id: plaid_jacket_bundle
+      role: context_prop
+      footprint_xy_m: [0.250, 0.195]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.480, 0.160]
+      yaw_offset_deg: -15.0
+      support_z_offset_m: 0.002
+      robot_side_exception: "Far-side folded plaid jacket grounded from wide_conference_room.jpg and top-left corner of closeup_pc_workstation.jpg."
+    - id: presenter_remote
+      role: context_prop
+      footprint_xy_m: [0.115, 0.032]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.160, 0.260]
+      yaw_offset_deg: 12.0
+      support_z_offset_m: 0.002
+      robot_side_exception: "Far-side conference presenter remote grounded from wide_conference_room.jpg."
+  relations:
+    - subject: hp_wired_mouse
+      predicate: right_of
+      reference: conference_pc_rig
+      min_gap_m: 0.025
+    - subject: orange_tote_bag
+      predicate: left_of
+      reference: conference_pc_rig
+      min_gap_m: 0.025
+    - subject: plaid_jacket_bundle
+      predicate: left_of
+      reference: conference_pc_rig
+      min_gap_m: 0.025
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: real2sim_conference_pc_shutdown_inspect
+  domain: real2sim_open_office
+  task_family: workstation_shutdown_button_actuation_and_peripheral_inspection
+  instruction: "用机械臂末端手指按下HP键盘Enter确认键，依次按下桌面深信服(SANGFOR)云终端右下银色关机实体按键与HKC显示器右下边框电源按键完成会议室主机安检下电，最后拾取斜放的HP有线鼠标并摆正回键盘右侧标准工位巡检区。"
+  max_steps: 2200
+  seed: "501"
+  scene:
+    asset_id: real2sim_conference_room_v1
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: ConferenceBoatOakTable
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    conference_pc_rig:
+      asset_id: ConferencePcWorkstationRig
+      source_prim_path: /World/ConferencePcWorkstationRig
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        enter_press:
+          xyz: [0.051, -0.194, 0.0285]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        sangfor_power_press:
+          xyz: [0.056, -0.0515, 0.031]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        monitor_power_press:
+          xyz: [0.215, -0.0045, 0.103]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        mouse_parking_zone:
+          xyz: [0.285, -0.200, 0.019]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    hp_wired_mouse:
+      asset_id: HpWiredMouse
+      source_prim_path: /World/HpWiredMouse
+      role: workstation_peripheral
+    orange_tote_bag:
+      asset_id: OrangeCanvasToteBag
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: real2sim_conference_room_v1
+        group_id: conference_left_gear
+        metric_participation: none
+    plaid_jacket_bundle:
+      asset_id: PlaidJacketBundle
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: real2sim_conference_room_v1
+        group_id: conference_left_gear
+        metric_participation: none
+    presenter_remote:
+      asset_id: ConferencePresenterRemote
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: real2sim_conference_room_v1
+        group_id: conference_left_gear
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.30, -1.20, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, push, lift, place, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, push, lift, place, release]
+  steps:
+    - id: press_enter_confirm
+      skill: push
+      actors: [right_arm]
+      parameters:
+        object: conference_pc_rig
+        joint: enter_key
+        target_state: pressed
+    - id: press_sangfor_shutdown
+      skill: push
+      actors: [right_arm]
+      depends_on: [press_enter_confirm]
+      parameters:
+        object: conference_pc_rig
+        joint: sangfor_power_btn
+        target_state: pressed
+    - id: press_monitor_power_off
+      skill: push
+      actors: [right_arm]
+      depends_on: [press_sangfor_shutdown]
+      parameters:
+        object: conference_pc_rig
+        joint: monitor_power_btn
+        target_state: pressed
+    - id: align_hp_mouse_to_inspection_zone
+      skill: place
+      actors: [right_arm]
+      depends_on: [press_monitor_power_off]
+      parameters:
+        object: hp_wired_mouse
+        target: conference_pc_rig
+        target_frame: conference_pc_rig.mouse_parking_zone
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "Real-to-Sim 4-stage conference room workstation shutdown and peripheral alignment inspection contract (r1); validates Enter key actuation, Sangfor aDesk physical shutdown push-button actuation, HKC monitor bezel power push-button actuation, and angled HP optical mouse grasp-and-alignment without claiming autonomous policy execution."
+    predicates:
+      - id: enter_key_confirmed
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: conference_pc_rig
+          joint: enter_key
+          state: pressed
+      - id: sangfor_shutdown_pressed
+        type: articulation_joint_state_reached
+        sequence_index: 1
+        parameters:
+          object: conference_pc_rig
+          joint: sangfor_power_btn
+          state: pressed
+      - id: monitor_power_off_pressed
+        type: articulation_joint_state_reached
+        sequence_index: 2
+        parameters:
+          object: conference_pc_rig
+          joint: monitor_power_btn
+          state: pressed
+      - id: mouse_inspected_and_aligned
+        type: relative_pose_reached
+        sequence_index: 3
+        parameters:
+          object: hp_wired_mouse
+          relative_to: conference_pc_rig
+          xyz_range:
+            x: [0.245, 0.325]
+            y: [-0.240, -0.160]
+            z: [-0.015, 0.045]
+          axis_alignment:
+            relative_to_part: sangfor_power_btn
+            object_axis: y
+            target_axis: y
+            comparison: "<="
+            threshold_deg: 10.0
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_enter_confirmed
+          weight: 0.25
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: conference_pc_rig
+              joint: enter_key
+              state: pressed
+          source_ref:
+            step_id: press_enter_confirm
+        - id: stage1_sangfor_shutdown
+          weight: 0.25
+          active: true
+          requires: [stage0_enter_confirmed]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: conference_pc_rig
+              joint: sangfor_power_btn
+              state: pressed
+          source_ref:
+            step_id: press_sangfor_shutdown
+        - id: stage2_monitor_power_off
+          weight: 0.25
+          active: true
+          requires: [stage1_sangfor_shutdown]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: conference_pc_rig
+              joint: monitor_power_btn
+              state: pressed
+          source_ref:
+            step_id: press_monitor_power_off
+        - id: stage3_mouse_inspected_aligned
+          weight: 0.25
+          active: true
+          requires: [stage2_monitor_power_off]
+          temporal:
+            kind: terminal
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: hp_wired_mouse
+              relative_to: conference_pc_rig
+              xyz_range:
+                x: [0.245, 0.325]
+                y: [-0.240, -0.160]
+                z: [-0.015, 0.045]
+              axis_alignment:
+                relative_to_part: sangfor_power_btn
+                object_axis: y
+                target_axis: y
+                comparison: "<="
+                threshold_deg: 10.0
+          source_ref:
+            step_id: align_hp_mouse_to_inspection_zone

@@ -1,0 +1,290 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/modern_office_print_hub/layout_constraints.yaml
+source_bindings: configs/source_bindings/ce_op_pilot4_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 707
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.05
+  robot_xy: [0.0, -0.76]
+  objects:
+    - id: qi_charger_rig
+      role: articulated_appliance
+      footprint_xy_m: [0.242, 0.138]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, -0.180]
+      robot_side_exception: "Dual-coil Qi2 wireless charging dock centered near front edge for fixed-base bimanual alignment and button actuation."
+    - id: smartphone
+      role: consumable_device
+      footprint_xy_m: [0.064, 0.138]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.270, -0.220]
+      yaw_offset_deg: 15.0
+      support_z_offset_m: 0.002
+    - id: tws_earbuds_case
+      role: consumable_device
+      footprint_xy_m: [0.052, 0.046]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.270, -0.220]
+      yaw_offset_deg: -15.0
+      support_z_offset_m: 0.002
+    - id: office_pen_organizer
+      role: context_prop
+      footprint_xy_m: [0.105, 0.105]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.360, 0.160]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Background stationery organizer context prop."
+  relations:
+    - subject: smartphone
+      predicate: left_of
+      reference: qi_charger_rig
+      min_gap_m: 0.020
+    - subject: tws_earbuds_case
+      predicate: right_of
+      reference: qi_charger_rig
+      min_gap_m: 0.020
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: ce_12_qi_dual_charger_align
+  domain: modern_office_print_hub
+  task_family: bimanual_coil_alignment_and_power_actuation
+  instruction: "Press the left power push-button on the dual-coil Qi wireless charger, align the smartphone centered and straight over the left 15W Qi2 coil ring, place the earbuds charging case onto the right 5W TWS coil ring, and press the right BOOST push-button to activate dual fast charging."
+  max_steps: 2200
+  seed: "707"
+  scene:
+    asset_id: out_of_domain_env_office_print_studio_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: OfficeBirchSteelTable
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    qi_charger_rig:
+      asset_id: DualCoilQiChargerRig
+      source_prim_path: /World/DualCoilQiChargerRig
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        power_btn_press:
+          xyz: [-0.045, -0.0535, 0.0200]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        qi_boost_press:
+          xyz: [0.045, -0.0535, 0.0200]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        left_phone_coil:
+          xyz: [-0.062, 0.010, 0.0185]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        right_earbuds_coil:
+          xyz: [0.062, 0.010, 0.0185]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    smartphone:
+      asset_id: CompactQiSmartphone
+      source_prim_path: /World/CompactQiSmartphone
+      role: rigid_object
+    tws_earbuds_case:
+      asset_id: TwsQiEarbudsCase
+      source_prim_path: /World/TwsQiEarbudsCase
+      role: rigid_object
+    office_pen_organizer:
+      asset_id: OfficePenOrganizer
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: modern_office_print_hub_standard_v1
+        group_id: desk_stationery
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -0.76, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, push, lift, place, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, push, lift, place, release]
+  steps:
+    - id: press_power_on
+      skill: push
+      actors: [left_arm]
+      parameters:
+        object: qi_charger_rig
+        joint: power_btn
+        target_state: pressed
+    - id: dock_smartphone_left_coil
+      skill: place
+      actors: [left_arm]
+      depends_on: [press_power_on]
+      parameters:
+        object: smartphone
+        target: qi_charger_rig
+        target_frame: qi_charger_rig.left_phone_coil
+    - id: dock_earbuds_right_coil
+      skill: place
+      actors: [right_arm]
+      depends_on: [dock_smartphone_left_coil]
+      parameters:
+        object: tws_earbuds_case
+        target: qi_charger_rig
+        target_frame: qi_charger_rig.right_earbuds_coil
+    - id: press_qi_boost
+      skill: push
+      actors: [right_arm]
+      depends_on: [dock_earbuds_right_coil]
+      parameters:
+        object: qi_charger_rig
+        joint: qi_boost_btn
+        target_state: pressed
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "CE-OP Bench Task #12 fixed-base bimanual dual-coil wireless charging alignment and boost actuation."
+    predicates:
+      - id: charger_powered_on
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: qi_charger_rig
+          joint: power_btn
+          state: pressed
+      - id: phone_aligned_left_coil
+        type: relative_pose_reached
+        sequence_index: 1
+        parameters:
+          object: smartphone
+          relative_to: qi_charger_rig
+          xyz_range:
+            x: [-0.092, -0.032]
+            y: [-0.020, 0.040]
+            z: [0.012, 0.035]
+          axis_alignment:
+            relative_to_part: power_btn
+            object_axis: y
+            target_axis: y
+            comparison: "<="
+            threshold_deg: 12.0
+      - id: earbuds_aligned_right_coil
+        type: relative_pose_reached
+        sequence_index: 2
+        parameters:
+          object: tws_earbuds_case
+          relative_to: qi_charger_rig
+          xyz_range:
+            x: [0.032, 0.092]
+            y: [-0.020, 0.040]
+            z: [0.012, 0.040]
+          axis_alignment:
+            relative_to_part: qi_boost_btn
+            object_axis: y
+            target_axis: y
+            comparison: "<="
+            threshold_deg: 15.0
+      - id: qi_boost_activated
+        type: articulation_joint_state_reached
+        sequence_index: 3
+        parameters:
+          object: qi_charger_rig
+          joint: qi_boost_btn
+          state: pressed
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_power_on
+          weight: 0.20
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: qi_charger_rig
+              joint: power_btn
+              state: pressed
+          source_ref:
+            step_id: press_power_on
+        - id: stage1_phone_docked
+          weight: 0.30
+          active: true
+          requires: [stage0_power_on]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: smartphone
+              relative_to: qi_charger_rig
+              xyz_range:
+                x: [-0.092, -0.032]
+                y: [-0.020, 0.040]
+                z: [0.012, 0.035]
+              axis_alignment:
+                relative_to_part: power_btn
+                object_axis: y
+                target_axis: y
+                comparison: "<="
+                threshold_deg: 12.0
+          source_ref:
+            step_id: dock_smartphone_left_coil
+        - id: stage2_earbuds_docked
+          weight: 0.30
+          active: true
+          requires: [stage1_phone_docked]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: tws_earbuds_case
+              relative_to: qi_charger_rig
+              xyz_range:
+                x: [0.032, 0.092]
+                y: [-0.020, 0.040]
+                z: [0.012, 0.040]
+              axis_alignment:
+                relative_to_part: qi_boost_btn
+                object_axis: y
+                target_axis: y
+                comparison: "<="
+                threshold_deg: 15.0
+          source_ref:
+            step_id: dock_earbuds_right_coil
+        - id: stage3_boost_pressed
+          weight: 0.20
+          active: true
+          requires: [stage2_earbuds_docked]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: qi_charger_rig
+              joint: qi_boost_btn
+              state: pressed
+          source_ref:
+            step_id: press_qi_boost

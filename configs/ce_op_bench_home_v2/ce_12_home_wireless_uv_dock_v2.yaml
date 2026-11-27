@@ -1,0 +1,587 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/ce_op_home_v2/layout_constraints.yaml
+source_bindings: configs/source_bindings/ce_op_home_v2_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 808
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.10
+  robot_xy: [0.0, -0.76]
+  objects:
+    - id: wireless_uv_dock
+      role: articulated_appliance
+      footprint_xy_m: [0.268, 0.156]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, -0.180]
+      robot_side_exception: "Dual-coil 15W + UV-C 254nm wireless charging station centered in near reach zone for button actuation, alignment, and lid closing."
+    - id: smartphone
+      role: consumable_device
+      footprint_xy_m: [0.064, 0.138]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.245, -0.185]
+      yaw_offset_deg: 12.0
+      support_z_offset_m: 0.002
+    - id: tws_earbuds_case
+      role: consumable_device
+      footprint_xy_m: [0.052, 0.046]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.245, -0.195]
+      yaw_offset_deg: -12.0
+      support_z_offset_m: 0.002
+    - id: tortoiseshell_eyeglasses
+      role: context_prop
+      footprint_xy_m: [0.142, 0.145]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.455, -0.165]
+      yaw_offset_deg: 10.0
+      support_z_offset_m: 0.002
+    - id: amber_scented_candle
+      role: context_prop
+      footprint_xy_m: [0.078, 0.078]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.215, 0.000]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Mid-table bedroom nightstand candle positioned just beyond near manipulation lane."
+    - id: minimal_alarm_clock
+      role: context_prop
+      footprint_xy_m: [0.132, 0.056]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.0, 0.085]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Bedside digital alarm clock perched behind charging dock telemetry visor."
+    - id: hand_cream_tube
+      role: context_prop
+      footprint_xy_m: [0.048, 0.125]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.385, -0.175]
+      yaw_offset_deg: -15.0
+      support_z_offset_m: 0.002
+    - id: walnut_valet_tray
+      role: context_prop
+      footprint_xy_m: [0.165, 0.115]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.275, 0.035]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Right mid-table walnut valet tray prop."
+    - id: warm_bedside_lamp
+      role: context_prop
+      footprint_xy_m: [0.175, 0.175]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [-0.625, 0.155]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Rear left warm linen bedside table lamp."
+    - id: bedside_novel_book
+      role: context_prop
+      footprint_xy_m: [0.152, 0.218]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [-0.365, 0.180]
+      yaw_offset_deg: 82.0
+      support_z_offset_m: 0.002
+      robot_side_exception: "Rear left bedside hardcover novel prop."
+    - id: bedside_water_carafe
+      role: context_prop
+      footprint_xy_m: [0.092, 0.092]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.545, 0.145]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Rear right bedside glass water carafe prop."
+  relations:
+    - subject: smartphone
+      predicate: left_of
+      reference: wireless_uv_dock
+      min_gap_m: 0.020
+    - subject: tws_earbuds_case
+      predicate: right_of
+      reference: wireless_uv_dock
+      min_gap_m: 0.020
+    - subject: tortoiseshell_eyeglasses
+      predicate: left_of
+      reference: smartphone
+      min_gap_m: 0.020
+    - subject: hand_cream_tube
+      predicate: right_of
+      reference: tws_earbuds_case
+      min_gap_m: 0.020
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: ce_12_home_wireless_uv_dock_v2
+  domain: ce_op_home_v2
+  task_family: bimanual_coil_uv_sanitization_operation
+  instruction: "Press the left PWR button to wake the smart bedside charging dock, press the EJECT key to pop open the right UV-C chamber cover, dock the smartphone straight onto the left 15W inductive pad, place the earbuds case inside the open right UV-C bay, push the smoked lid closed until latched for UV sterilization, and press BOOST for 15W+5W fast charging without disturbing nearby nightstand items."
+  max_steps: 2600
+  seed: "808"
+  scene:
+    asset_id: home_cozy_bedroom_nightstand_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: WalnutBedroomWideDresserTable
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    wireless_uv_dock:
+      asset_id: SmartDualWirelessUvDockV2
+      source_prim_path: /World/SmartDualWirelessUvDockV2
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        power_btn_press:
+          xyz: [-0.068, -0.058, 0.025]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        pod_eject_press:
+          xyz: [0.0, -0.058, 0.025]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        boost_btn_press:
+          xyz: [0.068, -0.058, 0.025]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        left_phone_coil:
+          xyz: [-0.068, 0.008, 0.0205]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        right_earbuds_bay:
+          xyz: [0.068, 0.008, 0.0185]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        uv_lid_close_push:
+          xyz: [0.068, 0.032, 0.088]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    smartphone:
+      asset_id: CompactWirelessSmartphoneV2
+      source_prim_path: /World/CompactWirelessSmartphoneV2
+      role: rigid_object
+    tws_earbuds_case:
+      asset_id: TwsEarbudsChargingCaseV2
+      source_prim_path: /World/TwsEarbudsChargingCaseV2
+      role: rigid_object
+    tortoiseshell_eyeglasses:
+      asset_id: TortoiseshellEyeglasses
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: near_left_eyewear
+        metric_participation: none
+    amber_scented_candle:
+      asset_id: AmberScentedCandle
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: near_left_aroma
+        metric_participation: none
+    minimal_alarm_clock:
+      asset_id: MinimalAlarmClock
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: center_rear_clock
+        metric_participation: none
+    hand_cream_tube:
+      asset_id: HandCreamTube
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: near_right_skincare
+        metric_participation: none
+    walnut_valet_tray:
+      asset_id: WalnutValetTray
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: near_right_organizer
+        metric_participation: none
+    warm_bedside_lamp:
+      asset_id: WarmBedsideLamp
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: rear_left_lighting
+        metric_participation: none
+    bedside_novel_book:
+      asset_id: BedsideNovelBook
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: rear_left_reading
+        metric_participation: none
+    bedside_water_carafe:
+      asset_id: BedsideWaterCarafe
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_bedroom
+        group_id: rear_right_hydration
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -0.76, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, push, lift, place, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, push, lift, place, release]
+  steps:
+    - id: press_power_on
+      skill: push
+      actors: [left_arm]
+      parameters:
+        object: wireless_uv_dock
+        joint: power_btn
+        target_state: pressed
+    - id: press_pod_eject
+      skill: push
+      actors: [right_arm]
+      depends_on: [press_power_on]
+      parameters:
+        object: wireless_uv_dock
+        joint: pod_eject_btn
+        target_state: pressed
+    - id: wait_uv_lid_open
+      skill: open_articulated_part
+      actors: [right_arm]
+      depends_on: [press_pod_eject]
+      parameters:
+        object: wireless_uv_dock
+        joint: uv_pod_lid
+        target_state: open
+    - id: dock_smartphone_left_coil
+      skill: place
+      actors: [left_arm]
+      depends_on: [wait_uv_lid_open]
+      parameters:
+        object: smartphone
+        target: wireless_uv_dock
+        target_frame: wireless_uv_dock.left_phone_coil
+    - id: place_earbuds_right_uv_bay
+      skill: place
+      actors: [right_arm]
+      depends_on: [dock_smartphone_left_coil]
+      parameters:
+        object: tws_earbuds_case
+        target: wireless_uv_dock
+        target_frame: wireless_uv_dock.right_earbuds_bay
+    - id: close_uv_pod_lid
+      skill: close_articulated_part
+      actors: [right_arm]
+      depends_on: [place_earbuds_right_uv_bay]
+      parameters:
+        object: wireless_uv_dock
+        joint: uv_pod_lid
+        target_state: closed
+    - id: press_boost_charge
+      skill: push
+      actors: [right_arm]
+      depends_on: [close_uv_pod_lid]
+      parameters:
+        object: wireless_uv_dock
+        joint: boost_btn
+        target_state: pressed
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "CE-OP Bench v2 Task #12 fixed-base bimanual wireless charging and UV-C chamber operation on lived-in bedroom dresser."
+    predicates:
+      - id: dock_powered_on
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: wireless_uv_dock
+          joint: power_btn
+          state: pressed
+      - id: pod_eject_triggered
+        type: articulation_joint_state_reached
+        sequence_index: 1
+        parameters:
+          object: wireless_uv_dock
+          joint: pod_eject_btn
+          state: pressed
+      - id: uv_lid_opened
+        type: articulation_joint_state_reached
+        sequence_index: 2
+        parameters:
+          object: wireless_uv_dock
+          joint: uv_pod_lid
+          state: open
+      - id: phone_aligned_left_coil
+        type: relative_pose_reached
+        sequence_index: 3
+        parameters:
+          object: smartphone
+          relative_to: wireless_uv_dock
+          xyz_range:
+            x: [-0.090, -0.046]
+            y: [-0.014, 0.030]
+            z: [0.014, 0.030]
+          axis_alignment:
+            relative_to_part: power_btn
+            object_axis: y
+            target_axis: y
+            comparison: "<="
+            threshold_deg: 14.0
+      - id: earbuds_seated_right_uv_bay
+        type: relative_pose_reached
+        sequence_index: 4
+        parameters:
+          object: tws_earbuds_case
+          relative_to: wireless_uv_dock
+          xyz_range:
+            x: [0.046, 0.090]
+            y: [-0.014, 0.030]
+            z: [0.012, 0.034]
+          axis_alignment:
+            relative_to_part: boost_btn
+            object_axis: y
+            target_axis: y
+            comparison: "<="
+            threshold_deg: 18.0
+      - id: uv_lid_closed_latched
+        type: articulation_joint_state_reached
+        sequence_index: 5
+        parameters:
+          object: wireless_uv_dock
+          joint: uv_pod_lid
+          state: closed
+      - id: boost_activated
+        type: articulation_joint_state_reached
+        sequence_index: 6
+        parameters:
+          object: wireless_uv_dock
+          joint: boost_btn
+          state: pressed
+      - id: guard_eyeglasses_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 7
+        parameters:
+          object: tortoiseshell_eyeglasses
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_candle_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 8
+        parameters:
+          object: amber_scented_candle
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_alarm_clock_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 9
+        parameters:
+          object: minimal_alarm_clock
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_hand_cream_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 10
+        parameters:
+          object: hand_cream_tube
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_valet_tray_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 11
+        parameters:
+          object: walnut_valet_tray
+          xyz_tolerance: [0.045, 0.045, 0.045]
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_power_on
+          weight: 0.10
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: wireless_uv_dock
+              joint: power_btn
+              state: pressed
+          source_ref:
+            step_id: press_power_on
+        - id: stage1_pod_eject
+          weight: 0.10
+          active: true
+          requires: [stage0_power_on]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: wireless_uv_dock
+              joint: pod_eject_btn
+              state: pressed
+          source_ref:
+            step_id: press_pod_eject
+        - id: stage2_lid_opened
+          weight: 0.12
+          active: true
+          requires: [stage1_pod_eject]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: wireless_uv_dock
+              joint: uv_pod_lid
+              state: open
+          source_ref:
+            step_id: wait_uv_lid_open
+        - id: stage3_phone_docked
+          weight: 0.18
+          active: true
+          requires: [stage2_lid_opened]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: smartphone
+              relative_to: wireless_uv_dock
+              xyz_range:
+                x: [-0.090, -0.046]
+                y: [-0.014, 0.030]
+                z: [0.014, 0.030]
+          source_ref:
+            step_id: dock_smartphone_left_coil
+        - id: stage4_earbuds_in_bay
+          weight: 0.18
+          active: true
+          requires: [stage3_phone_docked]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: tws_earbuds_case
+              relative_to: wireless_uv_dock
+              xyz_range:
+                x: [0.046, 0.090]
+                y: [-0.014, 0.030]
+                z: [0.012, 0.034]
+          source_ref:
+            step_id: place_earbuds_right_uv_bay
+        - id: stage5_lid_latched
+          weight: 0.12
+          active: true
+          requires: [stage4_earbuds_in_bay]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: wireless_uv_dock
+              joint: uv_pod_lid
+              state: closed
+          source_ref:
+            step_id: close_uv_pod_lid
+        - id: stage6_boost_pressed
+          weight: 0.10
+          active: true
+          requires: [stage5_lid_latched]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: wireless_uv_dock
+              joint: boost_btn
+              state: pressed
+          source_ref:
+            step_id: press_boost_charge
+        - id: stage7_guard_eyeglasses
+          weight: 0.02
+          active: true
+          requires: [stage6_boost_pressed]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: tortoiseshell_eyeglasses
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_eyeglasses_undisturbed
+        - id: stage8_guard_candle
+          weight: 0.02
+          active: true
+          requires: [stage7_guard_eyeglasses]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: amber_scented_candle
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_candle_undisturbed
+        - id: stage9_guard_alarm_clock
+          weight: 0.02
+          active: true
+          requires: [stage8_guard_candle]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: minimal_alarm_clock
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_alarm_clock_undisturbed
+        - id: stage10_guard_hand_cream
+          weight: 0.02
+          active: true
+          requires: [stage9_guard_alarm_clock]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: hand_cream_tube
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_hand_cream_undisturbed
+        - id: stage11_guard_valet_tray
+          weight: 0.02
+          active: true
+          requires: [stage10_guard_hand_cream]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: walnut_valet_tray
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_valet_tray_undisturbed

@@ -1,0 +1,576 @@
+schema_version: out-of-domain-task-bundle/v0.1
+domain_pack: configs/domain_packs/ce_op_home_v2/layout_constraints.yaml
+source_bindings: configs/source_bindings/ce_op_home_v2_20261118.yaml
+
+layout_request:
+  schema_version: relational-layout-spec/v0.1
+  seed: 207
+  table:
+    x_range_m: [-1.0, 1.0]
+    y_range_m: [-0.40, 0.40]
+    surface_z_m: 0.755
+    min_edge_clearance_m: 0.10
+  robot_xy: [0.0, -0.76]
+  objects:
+    - id: monitor_riser
+      role: articulated_appliance
+      footprint_xy_m: [0.590, 0.282]
+      region: center
+      facing: robot
+      fixed_xy_m: [0.0, 0.000]
+      robot_side_exception: "Smart aluminum monitor riser hub centered in sunlit study workspace for front drawer pull, presenter pen stowing, privacy shutter slide, wireless mouse dock, brightness dial, and eco sleep press."
+      kinematic_clearance_volumes:
+        - id: drawer_pullout
+          joint: drawer_slide
+          local_xy_bounds_m:
+            x: [-0.180, 0.080]
+            y: [-0.285, -0.135]
+    - id: presenter_pen
+      role: consumable_tool
+      footprint_xy_m: [0.132, 0.016]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.415, -0.180]
+      support_z_offset_m: 0.002
+    - id: desk_mouse
+      role: consumable_peripheral
+      footprint_xy_m: [0.060, 0.094]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.385, -0.170]
+      support_z_offset_m: 0.002
+    - id: pen_organizer
+      role: context_prop
+      footprint_xy_m: [0.087, 0.074]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.580, -0.170]
+      support_z_offset_m: 0.002
+    - id: sticky_note_dispenser
+      role: context_prop
+      footprint_xy_m: [0.094, 0.091]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.415, -0.015]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Mid-left sticky note cube clutter guard."
+    - id: study_mug
+      role: context_prop
+      footprint_xy_m: [0.115, 0.083]
+      region: left
+      facing: robot
+      fixed_xy_m: [-0.600, -0.005]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Mid-left ceramic study mug clutter guard."
+    - id: trinket_tray
+      role: context_prop
+      footprint_xy_m: [0.118, 0.118]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.550, -0.165]
+      support_z_offset_m: 0.002
+    - id: desk_succulent
+      role: context_prop
+      footprint_xy_m: [0.090, 0.090]
+      region: right
+      facing: robot
+      fixed_xy_m: [0.440, -0.015]
+      support_z_offset_m: 0.002
+      robot_side_exception: "Mid-right terracotta succulent clutter guard."
+    - id: architect_lamp
+      role: context_prop
+      footprint_xy_m: [0.234, 0.132]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [-0.620, 0.205]
+      support_z_offset_m: 0.002
+    - id: photo_frame
+      role: context_prop
+      footprint_xy_m: [0.131, 0.096]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.420, 0.210]
+      support_z_offset_m: 0.002
+    - id: headphone_stand
+      role: context_prop
+      footprint_xy_m: [0.184, 0.095]
+      region: far_context
+      facing: robot
+      fixed_xy_m: [0.630, 0.205]
+      support_z_offset_m: 0.002
+  relations:
+    - subject: presenter_pen
+      predicate: left_of
+      reference: monitor_riser
+      min_gap_m: 0.020
+    - subject: desk_mouse
+      predicate: right_of
+      reference: monitor_riser
+      min_gap_m: 0.020
+
+task_draft:
+  schema_version: out-of-domain-task-draft/v0.1
+  target_schema_version: scenario-spec/v0.6
+  scenario_id: ce_07_home_monitor_riser_privacy_tidy_v2
+  domain: ce_op_home_v2
+  task_family: bimanual_drawer_stow_dock_privacy_sleep
+  instruction: "Pull open the monitor riser storage drawer, stow the wireless presenter pen inside the tray and close the drawer flush, place the compact mouse onto the right charging pad, slide the webcam privacy shutter closed, turn the brightness dial clockwise, and press the eco sleep key while leaving study accessories undisturbed."
+  max_steps: 2600
+  seed: "207"
+  scene:
+    asset_id: home_sunlit_study_desk_v2
+    root_prim_path: /World
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  table:
+    id: table
+    asset_id: SunlitStudyOakDeskTable
+    source_prim_path: /World/table
+    pose:
+      xyz: [0.0, 0.0, 0.0]
+      wxyz: [1.0, 0.0, 0.0, 0.0]
+  object_bindings:
+    monitor_riser:
+      asset_id: AuraSmartMonitorRiserHubV2
+      source_prim_path: /World/AuraSmartMonitorRiserHubV2
+      role: articulated_appliance
+      metadata:
+        articulated_pose_frame: support_plane
+      named_frames:
+        support:
+          xyz: [0.0, 0.0, 0.0]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        drawer_handle:
+          xyz: [-0.050, -0.153, 0.047]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        privacy_slider:
+          xyz: [-0.223, -0.117, 0.1493]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        mouse_charge_seat:
+          xyz: [0.227, 0.025, 0.109]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        brightness_dial:
+          xyz: [0.227, -0.087, 0.1238]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        sleep_button:
+          xyz: [0.099, -0.088, 0.1161]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+        wake_button:
+          xyz: [0.145, -0.088, 0.1161]
+          wxyz: [1.0, 0.0, 0.0, 0.0]
+    presenter_pen:
+      asset_id: WirelessPresenterPenV2
+      source_prim_path: /World/WirelessPresenterPenV2
+      role: rigid_object
+    desk_mouse:
+      asset_id: CompactDeskMouseV2
+      source_prim_path: /World/CompactDeskMouseV2
+      role: rigid_object
+    pen_organizer:
+      asset_id: WalnutPenOrganizerCup
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: near_left_organizer
+        metric_participation: none
+    sticky_note_dispenser:
+      asset_id: KraftStickyNoteDispenser
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: mid_left_notes
+        metric_participation: none
+    study_mug:
+      asset_id: GlazedCeramicStudyMug
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: mid_left_mug
+        metric_participation: none
+    trinket_tray:
+      asset_id: BrassDeskTrinketTray
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: near_right_tray
+        metric_participation: none
+    desk_succulent:
+      asset_id: TerracottaDeskSucculent
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: mid_right_plant
+        metric_participation: none
+    architect_lamp:
+      asset_id: BrassArchitectDeskLamp
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: rear_left_lamp
+        metric_participation: none
+    photo_frame:
+      asset_id: OakMiniPhotoFrame
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: rear_right_frame
+        metric_participation: none
+    headphone_stand:
+      asset_id: AluminumHeadphoneStandProp
+      source_prim_path: /root
+      role: context_prop
+      metadata:
+        dressing_preset_id: ce_op_home_v2_study
+        group_id: rear_right_audio
+        metric_participation: none
+  robot:
+    profile_ref: manip/lift2/R5a_isaac41_vr600_v1
+    spawn:
+      xyz: [0.0, -0.76, 0.31]
+      wxyz: [0.7071067812, 0.0, 0.0, 0.7071067812]
+    actors:
+      - id: left_arm
+        end_effector: left
+        capabilities: [grasp, pull, lift, place, push, release]
+      - id: right_arm
+        end_effector: right
+        capabilities: [grasp, pull, lift, place, rotate, push, release]
+  steps:
+    - id: open_riser_drawer
+      skill: open_articulated_part
+      actors: [left_arm]
+      parameters:
+        object: monitor_riser
+        joint: drawer_slide
+        target_state: active
+    - id: stow_presenter_pen
+      skill: place
+      actors: [left_arm]
+      depends_on: [open_riser_drawer]
+      parameters:
+        object: presenter_pen
+        target: monitor_riser
+    - id: close_riser_drawer
+      skill: close_articulated_part
+      actors: [left_arm]
+      depends_on: [stow_presenter_pen]
+      parameters:
+        object: monitor_riser
+        joint: drawer_slide
+        target_state: reset
+    - id: dock_desk_mouse
+      skill: place
+      actors: [right_arm]
+      depends_on: [close_riser_drawer]
+      parameters:
+        object: desk_mouse
+        target: monitor_riser
+        target_frame: monitor_riser.mouse_charge_seat
+    - id: close_webcam_privacy
+      skill: adjust_articulated_part
+      actors: [left_arm]
+      depends_on: [dock_desk_mouse]
+      parameters:
+        object: monitor_riser
+        joint: cam_privacy_slider
+        target_state: active
+    - id: dial_brightness_high
+      skill: adjust_articulated_part
+      actors: [right_arm]
+      depends_on: [close_webcam_privacy]
+      parameters:
+        object: monitor_riser
+        joint: brightness_dial
+        target_state: active
+    - id: press_sleep_button
+      skill: push
+      actors: [right_arm]
+      depends_on: [dial_brightness_high]
+      parameters:
+        object: monitor_riser
+        joint: sleep_button
+        target_state: active
+  invariants: []
+  success:
+    operator: all
+    claim_scope: "CE-OP Bench v2 Task #07 fixed-base bimanual monitor riser drawer stow, inductive mouse dock, privacy shutter, brightness dial, eco sleep press, and desk clutter guard."
+    predicates:
+      - id: drawer_opened_during_stow
+        type: articulation_joint_state_reached
+        sequence_index: 0
+        parameters:
+          object: monitor_riser
+          joint: drawer_slide
+          state: active
+      - id: pen_stowed_inside_drawer
+        type: relative_pose_reached
+        sequence_index: 1
+        parameters:
+          object: presenter_pen
+          relative_to: monitor_riser
+          xyz_range:
+            x: [-0.205, -0.045]
+            y: [-0.125, -0.005]
+            z: [0.008, 0.068]
+      - id: drawer_closed_flush
+        type: articulation_joint_state_reached
+        sequence_index: 2
+        parameters:
+          object: monitor_riser
+          joint: drawer_slide
+          state: reset
+      - id: mouse_seated_charging
+        type: relative_pose_reached
+        sequence_index: 3
+        parameters:
+          object: desk_mouse
+          relative_to: monitor_riser
+          xyz_range:
+            x: [0.185, 0.270]
+            y: [-0.025, 0.075]
+            z: [0.095, 0.145]
+      - id: cam_privacy_locked
+        type: articulation_joint_state_reached
+        sequence_index: 4
+        parameters:
+          object: monitor_riser
+          joint: cam_privacy_slider
+          state: active
+      - id: brightness_dial_high
+        type: articulation_joint_state_reached
+        sequence_index: 5
+        parameters:
+          object: monitor_riser
+          joint: brightness_dial
+          state: active
+      - id: sleep_button_pressed
+        type: articulation_joint_state_reached
+        sequence_index: 6
+        parameters:
+          object: monitor_riser
+          joint: sleep_button
+          state: active
+      - id: guard_pen_organizer_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 7
+        parameters:
+          object: pen_organizer
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_sticky_notes_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 8
+        parameters:
+          object: sticky_note_dispenser
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_study_mug_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 9
+        parameters:
+          object: study_mug
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_trinket_tray_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 10
+        parameters:
+          object: trinket_tray
+          xyz_tolerance: [0.045, 0.045, 0.045]
+      - id: guard_desk_succulent_undisturbed
+        type: object_at_initial_pose
+        sequence_index: 11
+        parameters:
+          object: desk_succulent
+          xyz_tolerance: [0.045, 0.045, 0.045]
+    progress_rubric:
+      aggregation:
+        type: weighted_progress_score
+        normalization: declared_sum
+        inactive_treatment: zero
+      items:
+        - id: stage0_open_drawer
+          weight: 0.14
+          active: true
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: monitor_riser
+              joint: drawer_slide
+              state: active
+          source_ref:
+            step_id: open_riser_drawer
+            mechanism: "Q"
+        - id: stage1_stow_pen
+          weight: 0.16
+          active: true
+          requires: [stage0_open_drawer]
+          temporal:
+            kind: instant
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: presenter_pen
+              relative_to: monitor_riser
+              xyz_range:
+                x: [-0.205, -0.045]
+                y: [-0.215, -0.005]
+                z: [0.008, 0.068]
+          source_ref:
+            step_id: stow_presenter_pen
+            mechanism: "I"
+        - id: stage2_close_drawer
+          weight: 0.14
+          active: true
+          requires: [stage1_stow_pen]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: monitor_riser
+              joint: drawer_slide
+              state: reset
+          source_ref:
+            step_id: close_riser_drawer
+            mechanism: "I"
+        - id: stage3_dock_mouse
+          weight: 0.16
+          active: true
+          requires: [stage2_close_drawer]
+          temporal:
+            kind: terminal
+          condition:
+            type: relative_pose_reached
+            parameters:
+              object: desk_mouse
+              relative_to: monitor_riser
+              xyz_range:
+                x: [0.185, 0.270]
+                y: [-0.025, 0.075]
+                z: [0.095, 0.145]
+          source_ref:
+            step_id: dock_desk_mouse
+            mechanism: "U"
+        - id: stage4_privacy_shutter
+          weight: 0.10
+          active: true
+          requires: [stage3_dock_mouse]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: monitor_riser
+              joint: cam_privacy_slider
+              state: active
+          source_ref:
+            step_id: close_webcam_privacy
+            mechanism: "I"
+        - id: stage5_brightness_dial
+          weight: 0.10
+          active: true
+          requires: [stage4_privacy_shutter]
+          temporal:
+            kind: terminal
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: monitor_riser
+              joint: brightness_dial
+              state: active
+          source_ref:
+            step_id: dial_brightness_high
+            mechanism: "U"
+        - id: stage6_sleep_button
+          weight: 0.10
+          active: true
+          requires: [stage5_brightness_dial]
+          temporal:
+            kind: instant
+          condition:
+            type: articulation_joint_state_reached
+            parameters:
+              object: monitor_riser
+              joint: sleep_button
+              state: active
+          source_ref:
+            step_id: press_sleep_button
+            mechanism: "U"
+        - id: stage7_guard_pen_organizer
+          weight: 0.02
+          active: true
+          requires: [stage6_sleep_button]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: pen_organizer
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_pen_organizer_undisturbed
+            mechanism: "G"
+        - id: stage8_guard_sticky_notes
+          weight: 0.02
+          active: true
+          requires: [stage7_guard_pen_organizer]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: sticky_note_dispenser
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_sticky_notes_undisturbed
+            mechanism: "G"
+        - id: stage9_guard_study_mug
+          weight: 0.02
+          active: true
+          requires: [stage8_guard_sticky_notes]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: study_mug
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_study_mug_undisturbed
+            mechanism: "G"
+        - id: stage10_guard_trinket_tray
+          weight: 0.02
+          active: true
+          requires: [stage9_guard_study_mug]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: trinket_tray
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_trinket_tray_undisturbed
+            mechanism: "G"
+        - id: stage11_guard_desk_succulent
+          weight: 0.02
+          active: true
+          requires: [stage10_guard_trinket_tray]
+          temporal:
+            kind: terminal
+          condition:
+            type: object_at_initial_pose
+            parameters:
+              object: desk_succulent
+              xyz_tolerance: [0.045, 0.045, 0.045]
+          source_ref:
+            predicate_id: guard_desk_succulent_undisturbed
+            mechanism: "G"
